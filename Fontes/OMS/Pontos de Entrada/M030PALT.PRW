@@ -32,7 +32,7 @@ Antonio Neves     | 26/04/2024 | Chamado 47084. Retorno da tratativa anterior de
 Lucas Borges      | 23/07/2025 | Chamado 51340. Trocado e-mail padrão para sistema@italac.com.br
 ===============================================================================================================================
 */*/
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 Static _lAltCodTab := .F.
 
@@ -46,7 +46,7 @@ Descrição-------: Ponto de entrada executado para validação após confirmação da 
 ===============================================================================================================================
 Uso-------------: Italac
 ===============================================================================================================================
-Parametros------: PARAMIXB[1] - nOpc
+Parametros------: ParamIXB[1] - nOpc
 ===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
@@ -55,14 +55,14 @@ Setor-----------: TI
 */
 User Function M030PALT()
 
-Local _aArea	 := GetArea()
-Local _nOpcao	 := PARAMIXB[1]
+Local _aArea	 := FWGetArea()
+Local _nOpcao	 := ParamIXB[1]
 Local _lRet	 	 := .T.
 Local _lMashup	 := U_ItGetMV("IT_MASHUP",.F.)
 Local _lLibMas	 := .F.
 Local _nQtdDia	 := Val(SA1->A1_I_PEREX)
 Local _nQtdiaT	 := dDataBase - SA1->A1_I_DTEXE
-Local _lExec	 := Iif(_nQtdDia > _nQtdiaT, .T., .F.)
+Local _lExec	 := IIf(_nQtdDia > _nQtdiaT, .T., .F.)
 Local _aBloqSA1
 Local _cA1_NOME    := ""
 Local _cA1_END     := ""
@@ -99,7 +99,7 @@ Begin Sequence
 				EndIf
 	            
 				If !_lLibMas
-					If (ALLTRIM(SA1->A1_I_SITRF) <> "ATIVO" .AND. ALLTRIM(SA1->A1_I_SITRF) <> "REGULAR" .AND. ALLTRIM(SA1->A1_I_SITRF) <> "APTO" .AND. ALLTRIM(SA1->A1_I_SITRF) <> "ATIVA") .Or. _lExec
+					If (AllTrim(SA1->A1_I_SITRF) <> "ATIVO" .And. AllTrim(SA1->A1_I_SITRF) <> "REGULAR" .And. AllTrim(SA1->A1_I_SITRF) <> "APTO" .And. AllTrim(SA1->A1_I_SITRF) <> "ATIVA") .Or. _lExec
 						If !(AllTrim(SA1->A1_I_NUM) $ SA1->A1_END)
 							RecLock("SA1", .F.)
 							If !Empty(SA1->A1_I_END) .And. Empty(SA1->A1_I_NUM) .And. Empty(SA1->A1_COMPLEM)
@@ -111,7 +111,7 @@ Begin Sequence
 							EndIf
 						EndIf
 						SA1->A1_I_DTEXE := dDataBase
-						SA1->(MsUnLock())
+						SA1->(MSUnLock())
 					EndIf
 				EndIf
 			EndIf
@@ -122,14 +122,14 @@ End Sequence
 
 If !Empty(SA1->A1_INSCR)
 	RecLock("SA1", .F.)
-	SA1->A1_INSCR := AllTrim(Strtran(SA1->A1_INSCR,"-",""))
-	MsUnLock()
+	SA1->A1_INSCR := AllTrim(StrTran(SA1->A1_INSCR,"-",""))
+	MSUnLock()
 EndIf
 
 If _lAltCodTab 
     SA1->(RecLock("SA1", .F.))
 	SA1->A1_TABELA := "" // Cliente alterado simples nacional = NÃO, deve limpar o codigo da tabela de preços simples nacional.
-	SA1->(MsUnLock())
+	SA1->(MSUnLock())
 
    _lAltCodTab := .F.
 EndIf 
@@ -141,10 +141,10 @@ EndIf
 //=======================================================================
 _aBloqSA1 := U_MA30RETA()
 If ValType(_aBloqSA1) == "A" .And. Len(_aBloqSA1) > 0 .And. ValType(_aBloqSA1[1]) == "L" .And. _aBloqSA1[1] // Bloqueia SA1 por Desconto Contratual = True or False
-   SA1->(RECLOCK("SA1",.F.))
+   SA1->(RecLock("SA1",.F.))
    //SA1->A1_MSBLQL  := "1" // Bloqueio por Cliente
    SA1->A1_I_BLQDC := "1"
-   SA1->(MsUnlock())
+   SA1->(MSUnLock())
    
    //==================================================================
    // Envia Workflow de bloqueio de clientes por desconto contratual.
@@ -157,58 +157,58 @@ EndIf
 SA1->(RecLock("SA1", .F.))
 
 _cA1_NOME := SA1->A1_NOME
-If !Empty(Alltrim(M->A1_NOME))
+If !Empty(AllTrim(M->A1_NOME))
 	_lRet := U_CRMA980VCP(@_cA1_NOME   ,"A1_NOME")
 	SA1->A1_NOME := _cA1_NOME
 EndIf
 
 _cA1_END := SA1->A1_END
-If _lRet .And. !Empty(Alltrim(_cA1_END))
+If _lRet .And. !Empty(AllTrim(_cA1_END))
 	_lRet := U_CRMA980VCP(@_cA1_END    ,"A1_END")
 	SA1->A1_END := _cA1_END
 EndIf
 
 _cA1_BAIRRO := SA1->A1_BAIRRO
-If _lRet .And. !Empty(Alltrim(_cA1_BAIRRO))
+If _lRet .And. !Empty(AllTrim(_cA1_BAIRRO))
 	_lRet := U_CRMA980VCP(@_cA1_BAIRRO ,"A1_BAIRRO")
 	SA1->A1_BAIRRO := _cA1_BAIRRO
 EndIf
 
 _cA1_ENDCOB := M->A1_ENDCOB
-If _lRet .And. !Empty(Alltrim(_cA1_ENDCOB))
+If _lRet .And. !Empty(AllTrim(_cA1_ENDCOB))
 	_lRet := U_CRMA980VCP(@_cA1_ENDCOB ,"A1_ENDCOB")
 	SA1->A1_ENDCOB := _cA1_ENDCOB
 EndIf
 
 _cA1_ENDREC := M->A1_ENDREC
-If _lRet .And. !Empty(Alltrim(_cA1_ENDREC))
+If _lRet .And. !Empty(AllTrim(_cA1_ENDREC))
 	_lRet := U_CRMA980VCP(@_cA1_ENDREC ,"A1_ENDREC")
 	SA1->A1_ENDREC := _cA1_ENDREC
 EndIf
 
 _cA1_ENDENT := M->A1_ENDENT
-If _lRet .And. !Empty(Alltrim(_cA1_ENDENT))
+If _lRet .And. !Empty(AllTrim(_cA1_ENDENT))
 	_lRet := U_CRMA980VCP(@_cA1_ENDENT,"A1_ENDENT")
 	SA1->A1_ENDENT := _cA1_ENDENT
 EndIf
 
 _cA1_BAIRROE := M->A1_BAIRROE
-If _lRet .And. !Empty(Alltrim(_cA1_BAIRROE))
+If _lRet .And. !Empty(AllTrim(_cA1_BAIRROE))
 	_lRet := U_CRMA980VCP(@_cA1_BAIRROE,"A1_BAIRROE")
 	SA1->A1_BAIRROE := _cA1_BAIRROE
 EndIf
 
-SA1->(MsUnLock())
+SA1->(MSUnLock())
 
 //=====================================================================
 // Para os clientes que não são dos estados "AM-RR-AP" gravar os campos
 // suframa com: A1_CALCSUF = "N" e A1_SUFRAMA = " ".
 //=====================================================================
 If ! (SA1->A1_EST $ "AM-RR-AP-AC-RO")
-   SA1->(RECLOCK("SA1",.F.))
+   SA1->(RecLock("SA1",.F.))
    SA1->A1_CALCSUF := "N"
    SA1->A1_SUFRAMA := " "
-   SA1->(MsUnlock())
+   SA1->(MSUnLock())
 EndIf
 
 //=====================================================================
@@ -216,10 +216,10 @@ EndIf
 // como consumidor final.
 //=====================================================================
 If SA1->A1_CLIFUN == "1"
-   SA1->(RECLOCK("SA1",.F.))
+   SA1->(RecLock("SA1",.F.))
    SA1->A1_TIPO    := "F"  //  Tipo = Consumidor Final
    SA1->A1_I_GRCLI := "39" //  Seguimento = Consumidor Final   
-   SA1->(MsUnlock())   
+   SA1->(MSUnLock())   
 EndIf 
 
 //=====================================================================
@@ -227,18 +227,18 @@ EndIf
 // grava o campo Grupo Tributário com "023", para obterem benefícios.
 //=====================================================================
 If SA1->A1_EST $ _cUfMVA .And. SA1->A1_SIMPNAC == "1" // 1=Sim;2=Não
-   SA1->(RECLOCK("SA1",.F.))
+   SA1->(RecLock("SA1",.F.))
    SA1->A1_GRPTRIB := _cTRIBMVA //"023" //  Motivo: estado reduz o MVA para 30% (exceção fiscal) e estamos iniciando operação de 4 Brokers que atenderão este grupo.
-   SA1->(MsUnlock())
+   SA1->(MSUnLock())
 Else 
    If AllTrim(SA1->A1_GRPTRIB) == AllTrim(_cTRIBMVA)
-	  SA1->(RECLOCK("SA1",.F.))
+	  SA1->(RecLock("SA1",.F.))
       SA1->A1_GRPTRIB := " "
-	  SA1->(MsUnlock())
+	  SA1->(MSUnLock())
    EndIf	
 EndIf 
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return(_lRet)   
 
@@ -266,7 +266,7 @@ Begin Sequence
    EndIf 
 End Sequence
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -291,7 +291,7 @@ Local _cEmail2	:= AllTrim(U_ITGETMV("IT_EMALCL2","sistema@italac.com.br"))
 Local _cEmailEnv, _cEmlLog := "" 
 
 If Empty(_cEmail1) .And. Empty(_cEmail2)
-   Return Nil 
+   Return 
 EndIf 
 
 _cEmailEnv := AllTrim(_cEmail1) + ";" + AllTrim(_cEmail2)
@@ -299,7 +299,7 @@ _cEmailEnv := AllTrim(_cEmail1) + ";" + AllTrim(_cEmail2)
 _cMsgEml := '<html>'
 _cMsgEml += '<head><title>' + _cAssunto + '</title></head>'
 _cMsgEml += '<body>'
-_cMsgEml += '<style type="text/css"><!--'
+_cMsgEml += '<style Type="text/css"><!--'
 _cMsgEml += 'table.bordasimples { border-collapse: collapse; }'
 _cMsgEml += 'table.bordasimples tr td { border:1px solid #777777; }'
 _cMsgEml += 'td.titulos	{ font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #C6E2FF; }'
@@ -352,7 +352,7 @@ _cMsgEml += '      <td class="itens" align="left" width="65%">' + UsrFullName (_
 _cMsgEml += '    </tr>'
 _cMsgEml += '    <tr>'
 _cMsgEml += '      <td class="grupos" align="left" width="35%"><b>Data da Alteração:</b></td>'
-_cMsgEml += '      <td class="itens" align="left" width="65%">' + Dtoc(Date()) +'</td>'
+_cMsgEml += '      <td class="itens" align="left" width="65%">' + DToC(Date()) +'</td>'
 _cMsgEml += '    </tr>'
 _cMsgEml += '    <tr>'
 _cMsgEml += '      <td class="grupos" align="left" width="35%"><b>Hora da Alteração:</b></td>'

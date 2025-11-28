@@ -2,36 +2,25 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Josué Danich  | 08/11/2018 | Chamado 26562. Criada rotina para diluição com desnatado
- ------------------------------------------------------------------------------------------------------------------------------                  
-Alex Wallauer | 26/09/2018 | Chamado 30687. Correcao da leitura do ultimo campo do aCols
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 11/09/2024 | Chamado 48465. Removendo warning de compilação.
+Lucas Borges  |11/09/2024| Chamado 48465. Removendo warning de compilação.
+Lucas Borges  |22/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
+Lucas Borges  |24/09/2025| Chamado 52242, 52243. Corrigida passagem do parâmetro
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-
-#Include 'Protheus.ch'
-
-#define MB_ICONHAND 16
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: EMP650
 Autor-------------: Josué /Danich Prestes
 Data da Criacao---: 27/10/2015
-===============================================================================================================================
 Descrição---------: Pe para ajustar empenhos na inclusão de op antes da tela de visualização dos empenhos - Chamado 12006
-===============================================================================================================================
 Parametros--------: _ntipo -	0 Função chamada a partir do PE padrão do Protheus
 									1 - Função chamada a partir da validação ou menu da alteração de empenho multiplo
 									2 - Função chamada a partir da validação ou menu da alteração de empenho simples
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -41,7 +30,7 @@ Local _aArea		:= FWGetArea()
 Local _oDlg1		:= nil
 Local _oPanel		:= nil
 Local _nOpc1    	:= 0
-Local _cCreme		:= U_ITGETMV( "IT_PCREME" , "08000000007;08000000033" )
+Local _cCreme		:= SuperGetMV("IT_PCREME",.F.,"08000000007;08000000033" )
 Local _lachou  	:= .F.
 Local _oBrowse 	:= nil  
 Local _nni			:= 1    
@@ -58,7 +47,7 @@ If _ntipo == 0
 	_nPosCod   	:= aScan(aheader,{|x| AllTrim(x[2])=="G1_COMP"})
 	_nPosQuant		:= aScan(aheader,{|x| AllTrim(x[2])=="D4_QUANT"})
 	_nPosGor		:= aScan(aheader,{|x| AllTrim(x[2])=="D4_I_PGOR"})
-Elseif _ntipo == 1
+ElseIf _ntipo == 1
 	_nPosCod   	:= aScan(aheader,{|x| AllTrim(x[2])=="D4_COD"})
 	_nPosQuant		:= aScan(aheader,{|x| AllTrim(x[2])=="D4_QUANT"})
 	_nPosOri		:= aScan(aheader,{|x| AllTrim(x[2])=="D4_QTDEORI"})
@@ -66,22 +55,22 @@ Elseif _ntipo == 1
 	_nPosArma 		:= aScan(aheader,{|x| AllTrim(x[2])=="D4_LOCAL"})
 	
 	//verifica se está mexendo em creme ou leite in natura, se não retorna .T.
-	_lTela := ( ( alltrim(acols[n][_nPosArma]) == '03' .or. alltrim(acols[n][_nPosArma]) == '01') .and. alltrim(posicione("SB1",1,xfilial("SB1")+ alltrim(acols[n][_nPosCod]),"B1_UM")) == "L" )
-	if !_lTela
-		return .T.
-	Endif 
-Elseif _ntipo == 2
+	_lTela := ( ( AllTrim(acols[n][_nPosArma]) == '03' .Or. AllTrim(acols[n][_nPosArma]) == '01') .And. AllTrim(Posicione("SB1",1,xFilial("SB1")+ AllTrim(acols[n][_nPosCod]),"B1_UM")) == "L" )
+	If !_lTela
+		Return .T.
+	EndIf 
+ElseIf _ntipo == 2
 	FWAlertWarning("Alteração de qtde de empenhos em OP deve ser realizada na tela de alt. empenhos multiplos","EMP65001")
 	Return .F.
-Endif
+EndIf
 
 //======================================================================================================
 // Verifica se tem produto creme com quantidade negativa na composição em registro não deletado do acols                   
 //======================================================================================================
-For _nNi := 1 to len(acols)
-	if alltrim(acols[_nNi][_nPosCod ]) $ alltrim(_cCreme) .and. acols[_nNi][_nPosQuant] < 0 .and. !(acols[_nni][len(acols[_nni])])
+For _nNi := 1 to Len(acols)
+	If AllTrim(acols[_nNi][_nPosCod ]) $ AllTrim(_cCreme) .And. acols[_nNi][_nPosQuant] < 0 .And. !(acols[_nni][Len(acols[_nni])])
 		_lachou := .T.
-	Endif
+	EndIf
 Next _nNi
 
 //===================================================================================================
@@ -92,12 +81,12 @@ If _lachou
 	//===============================================================
 	// Cria o alist para insercao dos dados selecionados. 
 	//===============================================================
-	fwMsgRun(,{||CursorWait(), CriaArq(_ntipo), CursorArrow()},"Aguarde....","Criando arquivo temporario...")
+	FWMsgRun(,{||CursorWait(), CriaArq(_ntipo), CursorArrow()},"Aguarde....","Criando arquivo temporario...")
 	
 	//===============================================================
 	// Ordena matriz do browse                           
 	//===============================================================
-	_alist := ASORT(_alist, , , { | x,y | x[9] < y[9] } ) 
+	_alist := aSort(_alist, , , { | x,y | x[9] < y[9] } ) 
 	
 	//===============================================================
 	// Cria a tela para ajuste do empenho semi automatizada                           
@@ -106,8 +95,8 @@ If _lachou
 
 	_oPanel       := TPanel():New(30,0,'',_oDlg1,, .T., .T.,, ,0,20,.T.,.T. )
 	
-	@ 0.8 ,00.8 Say OemToAnsi("OP:   " + ALLTRIM(SC2->C2_NUM) + "  /  " + ALLTRIM(SC2->C2_ITEM) + "  /  " + ALLTRIM(SC2->C2_SEQUEN)) OF _oPanel
-	@ 0.8 ,30.8 Say OemToAnsi("PRODUTO:   " + ALLTRIM(SC2->C2_PRODUTO) + "  -  " + ALLTRIM(SC2->C2_I_DESC)) OF _oPanel
+	@ 0.8 ,00.8 Say OemToAnsi("OP:   " + AllTrim(SC2->C2_NUM) + "  /  " + AllTrim(SC2->C2_ITEM) + "  /  " + AllTrim(SC2->C2_SEQUEN)) OF _oPanel
+	@ 0.8 ,30.8 Say OemToAnsi("PRODUTO:   " + AllTrim(SC2->C2_PRODUTO) + "  -  " + AllTrim(SC2->C2_I_DESC)) OF _oPanel
 
 	_oBrowse := TCBrowse():New( 030 , 003, 400, 60,,; 
 	{"Produto","Tipo","Descricao"},{40,60,140},;          
@@ -142,23 +131,23 @@ If _lachou
 	_oBrowse:bLDblClick := {|| atuacel(_aList,_oBrowse) }                                                
 	//===================================================================================================
 	
-	ACTIVATE MSDIALOG _oDlg1 ON INIT ( EnchoiceBar(_oDlg1,{||( IIF(validatud(),(_nopc1:=1,_oDlg1:End()),) ) },{|| (_nopc1 := 0,_oDlg1:End()) })  , _oPanel:Align := CONTROL_ALIGN_TOP  , _oBrowse:Align := CONTROL_ALIGN_ALLCLIENT  ) CENTERED//,,,,,,,,.F. 
+	ACTIVATE MSDIALOG _oDlg1 ON INIT ( EnchoiceBar(_oDlg1,{||( IIf(validatud(),(_nopc1:=1,_oDlg1:End()),) ) },{|| (_nopc1 := 0,_oDlg1:End()) })  , _oPanel:Align := CONTROL_ALIGN_TOP  , _oBrowse:Align := CONTROL_ALIGN_ALLCLIENT  ) CENTERED//,,,,,,,,.F. 
 	
 	//===================================================================================================
 	//Após fechar janela atualiza acols da tela de empenhos que vai abrir após este ponto de entrada     
 	//===================================================================================================
-	IF _nopc1 = 1
-		For _nni := 1 to len(acols)  
-			if !(acols[_nni][len(acols[_nni])]) //se não for registro deletado   
-				_nposlis := ascan( _alist,{|_alist|alltrim(_alist[1])== alltrim(acols[_nni][_nposcod])})
-				if _nposlis > 0
-					acols[_nni][_nposQuant] := _alist[_nposlis][5] * iif(_alist[_nposlis][9]==3,-1,1)  //se for creme manda quantidade negativa
+	If _nopc1 = 1
+		For _nni := 1 to Len(acols)  
+			If !(acols[_nni][Len(acols[_nni])]) //se não For registro deletado   
+				_nposlis := aScan( _alist,{|_alist|AllTrim(_alist[1])== AllTrim(acols[_nni][_nposcod])})
+				If _nposlis > 0
+					acols[_nni][_nposQuant] := _alist[_nposlis][5] * IIf(_alist[_nposlis][9]==3,-1,1)  //se For creme manda quantidade negativa
 					acols[_nni][_nPosGor]   := _alist[_nposlis][4] 
-					if _ntipo == 1 // vem da tela de alteração de empenho então altera também o d4_qtdeori
-						acols[_nni][_nposOri] := _alist[_nposlis][5] * iif(_alist[_nposlis][9]==3,-1,1)  //se for creme manda quantidade negativa
-					Endif	
-				Endif
-			Endif  
+					If _ntipo == 1 // vem da tela de alteração de empenho então altera também o d4_qtdeori
+						acols[_nni][_nposOri] := _alist[_nposlis][5] * IIf(_alist[_nposlis][9]==3,-1,1)  //se For creme manda quantidade negativa
+					EndIf	
+				EndIf
+			EndIf  
 		Next _nni
 		//Log de utilização
 		U_ITLOGACS()
@@ -174,11 +163,8 @@ Return .T.
 Programa----------: CriaArq
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 07/10/2015
-===============================================================================================================================
 Descrição---------: Funcao para criacao do arquivo temporario. 
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -196,11 +182,11 @@ Local _nqtcreme		:= 0
 Local _nqtnat		:= 0
 Local _nquant		:= 0
 Local _nordem		:= 0
-Local _cLint		:= U_ITGETMV( "IT_LINT" , "08000000001;08000000051;08000000028,08000000008" )
-Local _cLdes		:= U_ITGETMV( "IT_LDES" , "08000000002;08000000050" )
-Local _cLsemi		:= U_ITGETMV( "IT_LSEMI" , "08000000003;08000000055" )
-Local _cCreme		:= U_ITGETMV( "IT_PCREME" , "08000000007;08000000033" )
-Local _cnatura		:= U_ITGETMV( "IT_PNATUR" , "08000000035;08000000036;08000000004;08000000048;08000000039" )
+Local _cLint		:= SuperGetMV("IT_LINT" ,.F.,"08000000001;08000000051;08000000028,08000000008" )
+Local _cLdes		:= SuperGetMV("IT_LDES" ,.F.,"08000000002;08000000050" )
+Local _cLsemi		:= SuperGetMV("IT_LSEMI",.F.,"08000000003;08000000055" )
+Local _cCreme		:= SuperGetMV("IT_PCREME",.F.,"08000000007;08000000033" )
+Local _cnatura		:= SuperGetMV("IT_PNATUR",.F.,"08000000035;08000000036;08000000004;08000000048;08000000039" )
 Local _npgnat		:= 0										   
 Local _npgcrm		:= 0
 
@@ -209,12 +195,12 @@ If _ntipo == 0 // se veio do ponto de entrada padrão
 	_nPosQuant		:= aScan(aheader,{|x| AllTrim(x[2])=="D4_QUANT"})
 	_nPosDescr 	:= aScan(aheader,{|x| AllTrim(x[2])=="B1_DESC"})
 	_nPosArma 		:= aScan(aheader,{|x| AllTrim(x[2])=="D4_LOCAL"})
-Elseif _ntipo == 1 //se veio da tela de alteração de empenhos
+ElseIf _ntipo == 1 //se veio da tela de alteração de empenhos
 	_nPosCod   	:= aScan(aheader,{|x| AllTrim(x[2])=="D4_COD"})
 	_nPosQuant		:= aScan(aheader,{|x| AllTrim(x[2])=="D4_QUANT"})
 	_nPosArma 		:= aScan(aheader,{|x| AllTrim(x[2])=="D4_LOCAL"})
 	_nPosGor		:= aScan(aheader,{|x| AllTrim(x[2])=="D4_I_PGOR"})
-Endif
+EndIf
 
 _alist := {}
 _nqtdes := 0
@@ -222,53 +208,53 @@ _nqtdes := 0
 //=======================================================================================
 // Carrega dados do acols                           
 //=======================================================================================
-For _nni := 1 to len(acols)
-	if !( acols[_nni][len(acols[_nni])] ) .and. acols[_nni][_nPosQuant] <> 0
+For _nni := 1 to Len(acols)
+	If !( acols[_nni][Len(acols[_nni])] ) .And. acols[_nni][_nPosQuant] <> 0
 		//=======================================================================================
-		// Só carrega se for creme ou leite in natura e determina valores default                           
+		// Só carrega se For creme ou leite in natura e determina valores default                           
 		//=======================================================================================
-		if alltrim(acols[_nni][_nPosCod]) $ alltrim(_cCreme) .or. alltrim(acols[_nni][_nPosCod]) $ alltrim(_cNatura)
-			if acols[_nni][_nPosQuant] < 0 .AND. alltrim(acols[_nni][_nPosCod]) $ alltrim(_cCreme)
+		If AllTrim(acols[_nni][_nPosCod]) $ AllTrim(_cCreme) .Or. AllTrim(acols[_nni][_nPosCod]) $ AllTrim(_cNatura)
+			If acols[_nni][_nPosQuant] < 0 .And. AllTrim(acols[_nni][_nPosCod]) $ AllTrim(_cCreme)
 				_ctipo 	:= "CREME"
-				if _ntipo == 0 //veio do ponto de entrada de inclusão de op preenche com zero para forçar digitação
+				If _ntipo == 0 //veio do ponto de entrada de inclusão de op preenche com zero para forçar digitação
 					_ngord		:= 0
-				Elseif _ntipo == 1 //veio da alteração de empenho, preenche com valor atual para visualização
+				ElseIf _ntipo == 1 //veio da alteração de empenho, preenche com valor atual para visualização
 					_ngord 	:= acols[_nni][_nPosGor]
 					_npgcrm	:= _ngord
-				Endif
+				EndIf
 				_nrateio 	:= (( acols[_nni][_nPosQuant] / ( SC2->C2_QUANT + ( -1 * acols[_nni][_nPosQuant] ) ) ) * -1) * 100
 				_nqtcreme	:= acols[_nni][_nPosQuant] * -1
 				_nquant 	:= _nqtcreme
 				_nordem	:= 3
-			Elseif alltrim(acols[_nni][_nPosCod]) $ alltrim(_cNatura)
+			ElseIf AllTrim(acols[_nni][_nPosCod]) $ AllTrim(_cNatura)
 				_ctipo 	:= "LEITE IN NATURA"
-				if _ntipo == 0 //veio do ponto de entrada de inclusão de op preenche com zero para forçar digitação
+				If _ntipo == 0 //veio do ponto de entrada de inclusão de op preenche com zero para forçar digitação
 					_ngord		:= 0
-				Elseif _ntipo == 1 //veio da alteração de empenho, preenche com valor atual para visualização
+				ElseIf _ntipo == 1 //veio da alteração de empenho, preenche com valor atual para visualização
 					_ngord 	:= acols[_nni][_nPosGor]
 					_npgnat	:= _ngord
-				Endif
+				EndIf
 				_nrateio 	:= 100
 				_nquant	:= acols[_nni][_nPosQuant]
 				_nqtnat := _nquant
 				_nordem	:= 1
-			Endif
-			AADD(_alist,{alltrim(acols[_nni][_nPosCod]),_ctipo,posicione("SB1",1,xfilial("SB1")+ alltrim(acols[_nni][_nPosCod]),"B1_DESC"),_ngord,_nquant,_nrateio, " "," ",_nordem})
-		Endif
+			EndIf
+			aAdd(_alist,{AllTrim(acols[_nni][_nPosCod]),_ctipo,Posicione("SB1",1,xFilial("SB1")+ AllTrim(acols[_nni][_nPosCod]),"B1_DESC"),_ngord,_nquant,_nrateio, " "," ",_nordem})
+		EndIf
 		
 		//==============================================================================================
 		//Inclui leite desnatado e guarda valor para descontar do leite in natura
 		//==============================================================================================
-		if alltrim(acols[_nni][_nPosCod]) $ alltrim(_cLdes) 
+		If AllTrim(acols[_nni][_nPosCod]) $ AllTrim(_cLdes) 
 			_nrateio 	:= 100
 			_nquant	:= acols[_nni][_nPosQuant]
 			_nqtdes := _nquant
 			_nordem	:= 2
 			_ctipo 	:= "LEITE DESNATADO"
 			_ngord  := 0
-			AADD(_alist,{alltrim(acols[_nni][_nPosCod]),_ctipo,posicione("SB1",1,xfilial("SB1")+ alltrim(acols[_nni][_nPosCod]),"B1_DESC"),_ngord,_nquant,_nrateio, " "," ",_nordem})
-		Endif
-	Endif
+			aAdd(_alist,{AllTrim(acols[_nni][_nPosCod]),_ctipo,Posicione("SB1",1,xFilial("SB1")+ AllTrim(acols[_nni][_nPosCod]),"B1_DESC"),_ngord,_nquant,_nrateio, " "," ",_nordem})
+		EndIf
+	EndIf
 Next _nni
 
 //=======================================================================================
@@ -276,30 +262,30 @@ Next _nni
 //=======================================================================================
 
 //inclusão de op
-if _ntipo == 0
+If _ntipo == 0
 	_ngord := 3
-    _aGord:= "{"+ALLTRIM(U_ITGETMV( "IT_PERGORD" , "3.1,1.0,0.05" ))+"}"
+    _aGord:= "{"+AllTrim(SuperGetMV("IT_PERGORD",.F.,"3.1,1.0,0.05" ))+"}"
     _aGord:= &_aGord
 
-	If alltrim(SC2->C2_PRODUTO) $ _cLint //Leite integral
+	If AllTrim(SC2->C2_PRODUTO) $ _cLint //Leite integral
 		_ngord := _aGord[1]//3.1
-	Endif
+	EndIf
 
-	If alltrim(SC2->C2_PRODUTO) $ _cLsemi //Leite semidesnatado
+	If AllTrim(SC2->C2_PRODUTO) $ _cLsemi //Leite semidesnatado
 		_ngord := _aGord[2]//1.0
-	Endif
+	EndIf
 
-	If alltrim(SC2->C2_PRODUTO) $ _cLdes //Leite desnatado
+	If AllTrim(SC2->C2_PRODUTO) $ _cLdes //Leite desnatado
 		_ngord := _aGord[3]//0.05
-	Endif
+	EndIf
 
 //alteração de empenho
-Elseif _ntipo == 1
+ElseIf _ntipo == 1
 	_nratcrm 	:= _nqtcreme / _nqtnat  //rateio do creme
 	_ngord 	:= _npgnat - ( _nratcrm * _npgcrm ) //gordura do leite desmontado
-Endif
+EndIf
 
-AADD(_alist,{alltrim(SC2->C2_PRODUTO),"LEITE DESMONTADO",alltrim(SC2->C2_I_DESC),_ngord,SC2->C2_QUANT,(SC2->C2_QUANT / ( SC2->C2_QUANT + _nqtcreme )) * 100, " "," ",4})
+aAdd(_alist,{AllTrim(SC2->C2_PRODUTO),"LEITE DESMONTADO",AllTrim(SC2->C2_I_DESC),_ngord,SC2->C2_QUANT,(SC2->C2_QUANT / ( SC2->C2_QUANT + _nqtcreme )) * 100, " "," ",4})
 		
 Return
 
@@ -308,15 +294,12 @@ Return
 Programa----------: Atuacel
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 08/10/2015
-===============================================================================================================================
 Descrição---------: Funcao editar % de gordura e atualizar demais campos
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-static function atuacel(_aList,_oBrowse)
+Static Function atuacel(_aList,_oBrowse)
 
 Local _npgornat := 0 // % gordura leite natural
 Local _npgorcrm := 0 // % gordura creme
@@ -331,12 +314,12 @@ Local _nratcrm	:= 0 // rateio creme
 Local _nratpad	:= 0 // rateio leite padronizado
 Local _nratdes	:= 0 // rateio leite desnatado
 Local _nposori	:= _oBrowse:nAt //posição original no browse
-Local _nmaxcru	:= U_ITGETMV( "IT_MAXCRU" , 4 )
-Local _nmincru	:= U_ITGETMV( "IT_MINCRU" , 0.5 )
-Local _nmaxcrm	:= U_ITGETMV( "IT_MAXCRM" , 100 )
-Local _nmincrm	:= U_ITGETMV( "IT_MINCRM" , 10 )
-Local _nmaxpdr	:= U_ITGETMV( "IT_MAXPDR" , 4 )
-Local _nminpdr	:= U_ITGETMV( "IT_MINPDR" , 0.1 )
+Local _nmaxcru	:= SuperGetMV("IT_MAXCRU",.F.,4)
+Local _nmincru	:= SuperGetMV("IT_MINCRU",.F.,0.5)
+Local _nmaxcrm	:= SuperGetMV("IT_MAXCRM",.F.,100)
+Local _nmincrm	:= SuperGetMV("IT_MINCRM",.F.,10)
+Local _nmaxpdr	:= SuperGetMV("IT_MAXPDR",.F.,4)
+Local _nminpdr	:= SuperGetMV("IT_MINPDR",.F.,0.1)
 Local _nposnat	:= aScan(_aList,{|x| AllTrim(x[2])=="LEITE IN NATURA"})
 Local _nposdes	:= aScan(_aList,{|x| AllTrim(x[2])=="LEITE DESNATADO"})
 Local _nposcre	:= aScan(_aList,{|x| AllTrim(x[2])=="CREME"})
@@ -371,14 +354,14 @@ If _nposori == _nposdes  //Não edita gordura do leite desnatado, abre edição de 
 		_npgordes 		:= 	_aList[_nposdes][4]
 		_nvoldes		:=	_aList[_nposdes][5]
 		_nratdes		:=	_aList[_nposdes][6]
-	Endif
+	EndIf
 
 	_ngordisp := (_aList[_nposnat][4] * _aList[_nposnat][5])/100
 	_nleidisp := ((100-_aList[_nposnat][4]) * _aList[_nposnat][5])/100
 
 	If _nposdes > 0
 		_nleidisp += _aList[_nposdes][5]
-	Endif
+	EndIf
 
 	_ngordnec := (_aList[_npospad][4] * _aList[_npospad][5])/100
 	
@@ -387,7 +370,7 @@ If _nposori == _nposdes  //Não edita gordura do leite desnatado, abre edição de 
 		FWAlertWarning("% Rateio não pode ser negativo!","EMP65002")
 		_aList[_oBrowse:nAt][6] := _npvalor2
 		Return
-	Endif
+	EndIf
 	
 	//Valida se tem gordura suficiente para diluir no leite desnatado e pelo menos gerar o padronizado com zero de creme
 	_nleitot := _aList[_nposnat][5] + _aList[_nposdes][5]
@@ -405,7 +388,7 @@ If _nposori == _nposdes  //Não edita gordura do leite desnatado, abre edição de 
 	
 		_aList[_oBrowse:nAt][6] := _npvalor2
 		Return
-	Endif
+	EndIf
 	
 	//Recalcula volumes do leite in natura e leite desnatado
 	_nleitot := _aList[_nposnat][5] + _aList[_nposdes][5]
@@ -436,14 +419,14 @@ If _nposori == _nposdes  //Não edita gordura do leite desnatado, abre edição de 
 		_npgordes 		:= 	_aList[_nposdes][4]
 		_nvoldes		:=	_aList[_nposdes][5]
 		_nratdes		:=	_aList[_nposdes][6]
-	Endif
+	EndIf
 
 	_ngordisp := (_aList[_nposnat][4] * _aList[_nposnat][5])/100
 	_nleidisp := ((100-_aList[_nposnat][4]) * _aList[_nposnat][5])/100
 
 	If _nposdes > 0
 		_nleidisp += _aList[_nposdes][5]
-	Endif
+	EndIf
 
 	_ngordnec := (_aList[_npospad][4] * _aList[_npospad][5])/100
 		
@@ -471,14 +454,14 @@ Else
 		_npgordes 		:= 	_aList[_nposdes][4]
 		_nvoldes		:=	_aList[_nposdes][5]
 		_nratdes		:=	_aList[_nposdes][6]
-	Endif
+	EndIf
 
 	_ngordisp := (_aList[_nposnat][4] * _aList[_nposnat][5])/100
 	_nleidisp := ((100-_aList[_nposnat][4]) * _aList[_nposnat][5])/100
 
 	If _nposdes > 0
 		_nleidisp += _aList[_nposdes][5]
-	Endif
+	EndIf
 
 	_ngordnec := (_aList[_npospad][4] * _aList[_npospad][5])/100
 
@@ -487,28 +470,28 @@ Else
 		FWAlertWarning("% Gordura não pode ser negativo ou zero!","EMP65004")
 		_aList[_oBrowse:nAt][4] := _npvalori
 		Return
-	Endif
+	EndIf
 
 	//valida limites leite cru
-	If (_aList[_oBrowse:nAt][4] < _nmincru .or.  _aList[_oBrowse:nAt][4] > _nmaxcru) .and. _nposori == _nposnat
-		FWAlertWarning("% Gordura do leite cru tem que estar entre " + alltrim(str(_nmincru)) + " e " + alltrim(str(_nmaxcru)) +"!","EMP65005")
+	If (_aList[_oBrowse:nAt][4] < _nmincru .Or.  _aList[_oBrowse:nAt][4] > _nmaxcru) .And. _nposori == _nposnat
+		FWAlertWarning("% Gordura do leite cru tem que estar entre " + AllTrim(Str(_nmincru)) + " e " + AllTrim(Str(_nmaxcru)) +"!","EMP65005")
 		_aList[_oBrowse:nAt][4] := _npvalori
 		Return
-	Endif
+	EndIf
 
 	//valida limites creme
-	If (_aList[_oBrowse:nAt][4] < _nmincrm .or.  _aList[_oBrowse:nAt][4] > _nmaxcrm) .and. _nposori == _nposcre
-		FWAlertWarning("% Gordura do creme tem que estar entre " + alltrim(str(_nmincrm)) + " e " + alltrim(str(_nmaxcrm)) +"!","EMP65006")
+	If (_aList[_oBrowse:nAt][4] < _nmincrm .Or.  _aList[_oBrowse:nAt][4] > _nmaxcrm) .And. _nposori == _nposcre
+		FWAlertWarning("% Gordura do creme tem que estar entre " + AllTrim(Str(_nmincrm)) + " e " + AllTrim(Str(_nmaxcrm)) +"!","EMP65006")
 		_aList[_oBrowse:nAt][4] := _npvalori
 		Return
-	Endif
+	EndIf
 
 	//valida limites leite padronizado
-	If (_aList[_oBrowse:nAt][4] < _nminpdr .or.  _aList[_oBrowse:nAt][4] > _nmaxpdr) .and. _nposori == _npospad
-		FWAlertWarning("% Gordura do leite padronizado tem que estar entre " + alltrim(str(_nminpdr)) + " e " + alltrim(str(_nmaxpdr)) +"!","EMP65007")
+	If (_aList[_oBrowse:nAt][4] < _nminpdr .Or.  _aList[_oBrowse:nAt][4] > _nmaxpdr) .And. _nposori == _npospad
+		FWAlertWarning("% Gordura do leite padronizado tem que estar entre " + AllTrim(Str(_nminpdr)) + " e " + AllTrim(Str(_nmaxpdr)) +"!","EMP65007")
 		_aList[_oBrowse:nAt][4] := _npvalori
 		Return
-	Endif
+	EndIf
 
 	//Valida contra % gordura do leite padronizado  maior que a % de gordura no leite cru
 	If _npgorpad > _npgornat
@@ -516,7 +499,7 @@ Else
 		_oBrowse:nAt := _nposori
 		_aList[_oBrowse:nAt][4] := _npvalori
 		Return
-	Endif
+	EndIf
 
 	//Valida se tem gordura suficiente para diluir no leite desnatado e pelo menos gerar o padronizado com zero de creme
 	If _ngordisp < _ngordnec
@@ -526,9 +509,9 @@ Else
 		_oBrowse:nAt := _nposori
 		_aList[_oBrowse:nAt][4] := _npvalori
 		Return
-	Endif
+	EndIf
 
-Endif
+EndIf
 
 //faz cálculos sequenciais para atualizar as demais células
 
@@ -542,7 +525,7 @@ If _nposdes > 0
 	Else
 		_aList[_oBrowse:nAt][4] := 40
 		_nvolcreme := _ngdcreme /  (_aList[_oBrowse:nAt][4]/100)
-	Endif
+	EndIf
 	
 	_aList[_oBrowse:nAt][5] := _nvolcreme
 
@@ -568,12 +551,12 @@ If _nposdes > 0
 	_aList[_oBrowse:nAt][6] := (_nvolpad/(_nvoldes+_nvolpad))*100
 	
 	
-	//Se tem proporção desejada faz loop de aproximação até chegar na proporção desejada
+	//Se tem proporção desejada faz Loop de aproximação até chegar na proporção desejada
 	If 	_npropn > 0 
 	
 		_nnu := 1
 		
-		Do while _nnu < 20 .and. _aList[_nposnat][6] != _npropn .and. _aList[_nposdes][6] != _npropd
+		While _nnu < 20 .And. _aList[_nposnat][6] != _npropn .And. _aList[_nposdes][6] != _npropd
 	
 			_aList[_nposdes][6] := _npropd
 	
@@ -606,14 +589,14 @@ If _nposdes > 0
 				_npgordes 		:= 	_aList[_nposdes][4]
 				_nvoldes		:=	_aList[_nposdes][5]
 				_nratdes		:=	_aList[_nposdes][6]
-			Endif
+			EndIf
 
 			_ngordisp := (_aList[_nposnat][4] * _aList[_nposnat][5])/100
 			_nleidisp := ((100-_aList[_nposnat][4]) * _aList[_nposnat][5])/100
 
 			If _nposdes > 0
 				_nleidisp += _aList[_nposdes][5]
-			Endif
+			EndIf
 
 			_ngordnec := (_aList[_npospad][4] * _aList[_npospad][5])/100
 		
@@ -624,7 +607,7 @@ If _nposdes > 0
 			Else
 				_aList[_oBrowse:nAt][4] := 40
 				_nvolcreme := _ngdcreme /  (_aList[_oBrowse:nAt][4]/100)
-			Endif
+			EndIf
 	
 			_aList[_oBrowse:nAt][5] := _nvolcreme
 
@@ -651,13 +634,11 @@ If _nposdes > 0
 			
 			_nnu++
 			
-		Enddo
-	Endif
-	
+		EndDo
+	EndIf
 
 //Sem leite desnatado
 Else
-
 	_oBrowse:nAt := _nposcre //muda para linha do creme
 	_aList[_oBrowse:nAt][6] := 100 * (( _npgornat - _npgorpad ) ) / _npgorcrm  //rateio do creme
 	_nratcrm	:=	_aList[_oBrowse:nAt][6]
@@ -674,7 +655,7 @@ Else
 	_aList[_oBrowse:nAt][5] := _nvolnat + _nvoldes - _nvolpad //volume do creme
 	_nvolcrm := _aList[_oBrowse:nAt][5]
 
-Endif
+EndIf
 
 _oBrowse:DrawSelect()
 
@@ -687,24 +668,21 @@ Return
 Programa----------: Validatud
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 09/10/2015
-===============================================================================================================================
 Descrição---------: Funcao para validar todos os campos de gordura ao fechar a janela
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function Validatud()
 
-Local _lret 	:= .T.
+Local _lRet 	:= .T.
 Local _nni 	:= 1
 
-For _nni := 1 to len(_aList)
-	If _alist[_nni][4] <= 0 .and. _lRet .and. _alist[_nni][2] != "LEITE DESNATADO"
+For _nni := 1 to Len(_aList)
+	If _alist[_nni][4] <= 0 .And. _lRet .And. _alist[_nni][2] != "LEITE DESNATADO"
 		FWAlertWarning("% Gordura não pode ser negativo ou zero!","EMP65010")
 		_lRet := .F.
-	Endif
+	EndIf
 Next _nni
 
 Return _lRet

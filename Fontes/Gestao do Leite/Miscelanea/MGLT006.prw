@@ -2,30 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 11/03/2019 | Alterado layout de importação. Chamado 28400
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 06/11/2023 | Descontinuado o layout do TrackMaker e incluído do SmartQuestion. Chamado 45424
+Lucas Borges  |11/03/2019| Chamado 28400. Alterado layout de importação.
+Lucas Borges  |06/11/2023| Chamado 45424. Descontinuado o layout do TrackMaker e incluído do SmartQuestion
 ===============================================================================================================================
 */
 
-//===========================================================================
-//| Definições de Includes                                                  |
-//===========================================================================
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "FILEIO.CH"
+#Include "TOTVS.ch"
+#Include "FILEIO.CH"
 
 /*
 ===============================================================================================================================
 Programa----------: MGLT006
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 10/12/2018
-===============================================================================================================================
 Descrição---------: Rotina para importação de coordenadas geográficas para o cadastro de produtores
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -57,11 +50,8 @@ Return
 Programa----------: MGLT006P
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 10/12/2018
-===============================================================================================================================
 Descrição---------: Realiza o processamento da rotina.
-===============================================================================================================================
 Parametros--------: _oSelf
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -94,7 +84,7 @@ If (_nHandle := FOpen(MV_PAR01)) >= 0
 	SA2->( DBSetOrder(1) )
 
 	While !(_nFilePos < 0 .Or. _nFilePos >= _nTamArq)
-	    _cBuffer	:= SPACE(_nBuffer) //Aloca Buffer
+	    _cBuffer	:= Space(_nBuffer) //Aloca Buffer
 		FRead(_nHandle, _cBuffer, _nBuffer) //Lê os primeiros 100 caracteres do arquivo
 		_nPos	:= AT(_cEOL, _cBuffer) // Procura o primeiro final de linha
 		For _nX:= 1 To _nPos
@@ -103,10 +93,10 @@ If (_nHandle := FOpen(MV_PAR01)) >= 0
 		
 	    If _nPos == 0
 			MsgStop("Arquivo inconsistênte. Favor acionar o área de TI.","MGLT00601")
-			Return()
+			Return
 		EndIf	    	
 	    // Leitura dos campos e gravação dos dados na tabela
-	    _cLine := Substr(_cBuffer, 0, _nPos)
+	    _cLine := SubStr(_cBuffer, 0, _nPos)
 		_aDados:= StrTokArr(_cLine,';')
 
 		If SA2->( DBSeek( xFilial("SA2") + _aDados[1]))
@@ -118,7 +108,7 @@ If (_nHandle := FOpen(MV_PAR01)) >= 0
 				_nSQ++
 				SA2->A2_L_SMQST := 'P'
 			EndIf
-			SA2->( MsUnLock() )
+			SA2->( MSUnLock() )
 		EndIf
 		_nLidos+=_nPos+1 //Salvo até qual posição do arquivo já foi lido desde a primeira posição
 		_nFilePos:=FSeek(_nHandle, _nLidos,0) //Posiciono na próxima linha a partir do início do arquivo
@@ -131,9 +121,9 @@ If (_nHandle := FOpen(MV_PAR01)) >= 0
 	EndIf
 
 	// Fecha arquivo	
-    fClose(_nHandle)
+    FClose(_nHandle)
 Else
 	MsgAlert("O arquivo está vazio ou é inválido para análise! Verifique o arquivo e tente novamente.","MGLT00604")
-EndIF
+EndIf
 
 Return

@@ -1,48 +1,31 @@
 /*
-======================================================================================================================================================
-                                    ATUALIZACOES SOFRIDAS DESDE A CONSTRUCAO INICIAL
-======================================================================================================================================================
-   Autor      |    Data    |                                             Motivo                                            
-------------------------------------------------------------------------------------------------------------------------------------------------------
-Andre Lisboa  | 27/11/2017 | Fechado Alias "TRB" para não causar problema em outras rotinas - Chamado 22556
-------------------------------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 07/12/2018 | Nas OPs automáticas, o CC da OP Pai tem que ser o mesmo p/ todas as OP FIlhas - Chamado 27300
-------------------------------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 07/11/2019 | Correção nas OPs automáticas, o CC de cada OP Pai tem que ser o mesmo p/ todas as OP FIlhas - Chamado 31126
-------------------------------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 09/03/2019 | Correção da SELECT DO SD4 para gravar a descricao de item com mais de um lote - Chamado 34943
-======================================================================================================================================================
+===============================================================================================================================
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
+===============================================================================================================================
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
+Alex Wallauer |07/12/2018| Chamado 27300. Nas OPs automáticas, o CC da OP Pai tem que ser o mesmo p/ todas as OP FIlhas
+Alex Wallauer |07/11/2019| Chamado 31126. Correção nas OPs automáticas, o CC de cada OP Pai tem que ser o mesmo p/ todas as OP FIlhas
+Alex Wallauer |09/03/2019| Chamado 34943. Correção da SELECT DO SD4 para gravar a descricao de item com mais de um lote
+===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "RWMAKE.CH"
-#INCLUDE "TopConn.ch"
-#INCLUDE "vKey.ch"
-#Include "TBICONN.CH"
-#include "ap5mail.ch"  
-#include "Protheus.ch" 
+#Include "TopConn.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: A650PROC
 Autor-------------: Erich Buttner
 Data da Criacao---: 25/09/2013
-===============================================================================================================================
 Descricao---------: Ponto de entrada no MATA650.PRX executado apos o processamento da inclusao da Op e os pedidos de compras.  
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
+User Function A650PROC ()
 
-USER FUNCTION A650PROC ()
-
-//Local TRB := CriaTrab(Nil,.F.)
-//Local TRB1 := CriaTrab(Nil,.F.)
-LOCAL _cCentroC:=""
+Local _cCentroC:=""
 
 cSc2:= " SELECT C2_NUM cNum, C2_ITEM cIt, C2_SEQUEN cSeq FROM "+RetSqlName("SC2")
 cSc2+= " WHERE C2_I_DESC = ' ' AND C2_CC = ' ' "
@@ -56,42 +39,42 @@ cSc2:= ChangeQuery(cSc2)
 //============================================
 
 If Select("TRB") >0
-	dbSelectArea("TRB")
-	dbCloseArea()
-Endif
+	DBSelectArea("TRB")
+	DBCloseArea()
+EndIf
 
 //============================================
 // Monta Area de Trabalho executando a Query
 //============================================
 TCQUERY cSc2 New Alias "TRB"
-dbSelectArea("TRB")
+DBSelectArea("TRB")
 
-dbGoTop()
+DBGoTop()
 
-//MSGINFO("1 OP: "+SC2->C2_NUM +" CC: "+ SC2->C2_CC+" SEQ: "+SC2->C2_SEQUEN)	
+//MsgInfo("1 OP: "+SC2->C2_NUM +" CC: "+ SC2->C2_CC+" SEQ: "+SC2->C2_SEQUEN)	
 
-SC2->(DBSETORDER(1))
+SC2->(DBSetOrder(1))
 
-//MSGINFO("2 OP: "+SC2->C2_NUM +" CC: "+ SC2->C2_CC+" SEQ: "+SC2->C2_SEQUEN)	
+//MsgInfo("2 OP: "+SC2->C2_NUM +" CC: "+ SC2->C2_CC+" SEQ: "+SC2->C2_SEQUEN)	
    
-DO While TRB->(!(Eof()))
+While TRB->(!(Eof()))
 
-    If SC2->(DBSEEK(xFilial("SC2")+TRB->cNum+TRB->cIt+"001"))
+    If SC2->(DBSeek(xFilial("SC2")+TRB->cNum+TRB->cIt+"001"))
        _cCentroC:=SC2->C2_CC
-    ENDIF
+    EndIf
 	
-	If SC2->(DbSeek(xFilial("SC2")+TRB->cNum+TRB->cIt+TRB->cSeq))
+	If SC2->(DBSeek(xFilial("SC2")+TRB->cNum+TRB->cIt+TRB->cSeq))
 		SC2->(RecLock("SC2",.F.))
 		SC2->C2_I_DESC := GetAdvFVal("SB1","B1_DESC",xFilial("SB1")+SC2->C2_PRODUTO,1,"")
 		SC2->C2_CC:=_cCentroC
-        SC2->(MsUnLock())
+        SC2->(MSUnLock())
    	EndIf
 
-//     MSGINFO(" OP: "+SC2->C2_NUM +" CC: "+ SC2->C2_CC+" SEQ: "+C2_SEQUEN)	
+//     MsgInfo(" OP: "+SC2->C2_NUM +" CC: "+ SC2->C2_CC+" SEQ: "+C2_SEQUEN)	
 	
-	TRB->(DbSkip())
+	TRB->(DBSkip())
 
-ENDDO
+EndDo
 
 cSd4:= " SELECT D4.R_E_C_N_O_ RECSD4 ,D4_OP cNum, D4_COD COD, B1_DESC DESCR, D4_LOCAL ARM FROM SD4010 D4, SB1010 B1 "
 cSd4+= " WHERE D4_I_NPROD = ' '  "
@@ -107,26 +90,26 @@ cSd4:= ChangeQuery(cSd4)
 //Fecha Alias se tiver em uso
 //============================================
 If Select("TRB1") >0
-	dbSelectArea("TRB1")
-	dbCloseArea()
-Endif
+	DBSelectArea("TRB1")
+	DBCloseArea()
+EndIf
 
 //============================================
 // Monta Area de Trabalho executando a Query
 //============================================
 TCQUERY cSd4 New Alias "TRB1"
-dbSelectArea("TRB1")
+DBSelectArea("TRB1")
 
-dbGoTop()
+DBGoTop()
 
 	
-DO While TRB1->(!Eof())
+While TRB1->(!Eof())
 
-	SD4->(DBGOTO(TRB1->RECSD4))
-	SD4->(RECLOCK("SD4",.F.))
+	SD4->(DBGoTo(TRB1->RECSD4))
+	SD4->(RecLock("SD4",.F.))
 	SD4->D4_I_NPROD := TRB1->DESCR
-    SD4->(MSUNLOCK())
-	TRB1->(DBSKIP())
+    SD4->(MSUnLock())
+	TRB1->(DBSkip())
 
 EndDo
 
@@ -134,9 +117,9 @@ EndDo
 //Fecha Alias se tiver em uso
 //============================================
 If Select("TRB") >0
-	dbSelectArea("TRB")
-	dbCloseArea()
-Endif
+	DBSelectArea("TRB")
+	DBCloseArea()
+EndIf
     
 
-RETURN 
+Return 

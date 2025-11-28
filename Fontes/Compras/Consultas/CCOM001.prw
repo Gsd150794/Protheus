@@ -2,24 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Alexandre V. | 22/12/2015 | Tratativa na cláusula "ORDER BY" para remover a referência numérica. Chamado 13062
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 17/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
-------------------------------------------------------------------------------------------------------------------------------
-Jonathan      | 09/10/2020 | Remoção de bugs apontados pelo Totvs CodeAnalysis. Chamado: 34262
-==================================================================================================================================================================================
- Analista      - Programador  - Inicio   - Envio    - Chamado - Motivo da Alteração
-==================================================================================================================================================================================
-Jerry Santiago - Julio Paz    - 22/07/25 - 06/08/25 - 51464   - Correção de Error Log na Rotina Consulta Histórico de Alterações do Cadastro de Fornecedores.
-==================================================================================================================================================================================
+Lucas Borges  |17/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25
+Jonathan      |09/10/2020| Chamado: 34262. Remoção de bugs apontados pelo Totvs CodeAnalysis
+Julio Paz     |06/08/2025| Chamado 51464. Correção de Error Log na Rotina Consulta Histórico de Alterações do Cadastro de Fornecedores.
+===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes e Defines da Rotina. 
-//====================================================================================================
-#Include "Protheus.Ch"
+#Include "TOTVS.ch"
 
 #Define TITULO "Consulta Fornecedores - Log de Alterações"
 
@@ -28,15 +19,12 @@ Jerry Santiago - Julio Paz    - 22/07/25 - 06/08/25 - 51464   - Correção de Erro
 Programa----------: CCOM001
 Autor-------------: Alexandre Villar
 Data da Criacao---: 17/07/2014
-===============================================================================================================================
 Descrição---------: Consulta Histórico de Alterações do Cadastro de Fornecedores - Chamado 7772
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function CCOM001()
+User Function CCOM001
 
 Local cCodFor		:= Space( TamSX3("A2_COD")[01] )
 Local aParRet		:= { cCodFor }
@@ -48,9 +36,7 @@ Private cCadastro	:= "Consulta: Log de Alterações - Fornecedores"
 //| Verifica se a rotina foi chamada do menu ou do Cadastro de Fornecedores      |
 //================================================================================
 If FunName() <> "CCOM001"
-	
 	CCOM001HIS( SA2->( A2_COD + A2_LOJA ) )
-	
 Else
 
 	aAdd( aParamBox	, { 1 , "Selecione o Fornecedor" , cCodFor , "@!" , "" , "SA2" , "" , 50 , .T. } )
@@ -63,7 +49,7 @@ Else
 			SA2->(DBSetOrder(1))
 			If !SA2->( DBSeek( xFilial("SA2") + aParRet[01] ) )
 				Aviso( 'Atenção!' , "O código de Fornecedor informado não foi encontrado." , TITULO , 0 )
-				Return()
+				Return
 			EndIf
 			
 		EndIf
@@ -81,11 +67,8 @@ Return(.T.)
 Programa----------: CCOM001VLD
 Autor-------------: Alexandre Villar
 Data da Criacao---: 17/07/2014
-===============================================================================================================================
 Descrição---------: Validação do Cliente selecionado/informado
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -93,9 +76,7 @@ Static Function CCOM001VLD( cChvFor )
 
 Local lRet := .F.
 
-//================================================================================
 //| Verifica se o Cliente informado/selecionado existe no Cadastro (SA2)         |
-//================================================================================
 DBSelectArea("SA2")
 SA2->( DBSetOrder(1) )
 If SA2->( MSSeek( xFilial("SA2") + cChvFor ) )
@@ -112,34 +93,21 @@ Return(lRet)
 Programa----------: CCOM001HIS
 Autor-------------: Alexandre Villar
 Data da Criacao---: 17/07/2014
-===============================================================================================================================
 Descrição---------: Monta a tela detalhada do Histórico de Alterações do Cadastro do Cliente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function CCOM001HIS( cCodFor )
 
-//Local oDlg			:= Nil
-//Local oLbxTOP		:= Nil
-//Local oLbxDET		:= Nil
 Local aPosObj   	:= {}
 Local aObjects  	:= {}
 Local aSize     	:= MsAdvSize()
-//Local bMontaTOP		:= { || Processa({|lEnd| CCOM001LOG( @oLbxTOP , cCodFor ) }) }
-//Local bMontaDET		:= { || CCOM001DET( @oLbxDET , oLbxTOP:aArray[oLbxTOP:nAt][05] , oLbxTOP:aArray[oLbxTOP:nAt][02] ) }
-
 Local oBar			:= Nil
 Local aBtn 	    	:= Array(02)
 Local oBold			:= Nil
 Local oScrPanel		:= Nil
-
-
-
 Local aCabLbxTOP	:= { "Loja", "Campo" , "Descrição" , "Última Alt." } // 04
-
 Local aCabLbxDET	:= { "Data"				,; // 01
                          "Hora"				,; // 02
                          "Usuário"			,; // 03
@@ -150,10 +118,8 @@ Local aCabLbxDET	:= { "Data"				,; // 01
 
 Private	nDvPosAnt	:= 0
 Private	cCadastro	:= "["+ cCodFor +"] - " + TITULO
-
 Private oLbxTOP		:= Nil
 Private oLbxDET		:= Nil
-
 Private oDlg		:= Nil
 Private bMontaTOP	:= { || Processa({|lEnd| CCOM001LOG( @oLbxTOP , cCodFor ) }) }
 Private bMontaDET	:= { || CCOM001DET( oLbxDET , oLbxTOP:aArray[oLbxTOP:nAt][05] , oLbxTOP:aArray[oLbxTOP:nAt][02] ) }
@@ -162,7 +128,7 @@ Private _cNomeCmp   := ""
 Default cCodFor		:= ""
 
 If Empty(cCodFor)
-	Return()
+	Return
 EndIf
 
 //================================================================================
@@ -172,7 +138,7 @@ DBSelectArea("SA2")
 SA2->(DBSetOrder(1))
 If !SA2->( DBSeek( xFilial("SA2") + cCodFor ) )
 	MessageBox( "O cliente ["+ cCodFor +"] não foi encontrado." , TITULO , 0 )
-	Return()
+	Return
 EndIf
 
 //================================================================================
@@ -180,10 +146,10 @@ EndIf
 //================================================================================
 DBSelectArea("Z07")
 Z07->( DBSetOrder(1) )
-IF !Z07->( DBSeek( xFilial("Z07") + "SA2 1" + SA2->( A2_FILIAL + A2_COD + A2_LOJA ) ) )
+If !Z07->( DBSeek( xFilial("Z07") + "SA2 1" + SA2->( A2_FILIAL + A2_COD + A2_LOJA ) ) )
 	MessageBox( "O cliente ["+ cCodFor +"] não possui histórico de alterações." , TITULO , 0 )
-	Return()
-EndIF
+	Return
+EndIf
 
 aAdd( aObjects, { 100 , 025 , .T. , .F. , .T. } )
 aAdd( aObjects, { 100 , 070 , .T. , .F. } )
@@ -207,11 +173,11 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From aSize[7],00 to aSize[6],aSize[5] Of oM
 	//================================================================================
 	@ aPosObj[01][01],aPosObj[01][02] MSPANEL oScrPanel PROMPT "" SIZE aPosObj[01][03],aPosObj[01][04] OF oDlg LOWERED
 	
-	@ 004 , 004 SAY "Código:" 		SIZE 025,07 OF oScrPanel PIXEL
-	@ 012 , 004 SAY SA2->A2_COD  	SIZE 060,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
+	@ 004 , 004 Say "Código:" 		SIZE 025,07 OF oScrPanel PIXEL
+	@ 012 , 004 Say SA2->A2_COD  	SIZE 060,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
 	
-	@ 004 , 030 SAY "Nome:" 		SIZE 025,07 OF oScrPanel PIXEL
-	@ 012 , 030 SAY SA2->A2_NOME 	SIZE 165,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
+	@ 004 , 030 Say "Nome:" 		SIZE 025,07 OF oScrPanel PIXEL
+	@ 012 , 030 Say SA2->A2_NOME 	SIZE 165,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
 	
 	//================================================================================
 	//| Monta o resumo das alterações do cadastro                                    |
@@ -259,18 +225,15 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From aSize[7],00 to aSize[6],aSize[5] Of oM
 	
 ACTIVATE MSDIALOG oDlg CENTERED
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: CCOM001LOG
 Autor-------------: Alexandre Villar
 Data da Criacao---: 17/07/2014
-===============================================================================================================================
 Descrição---------: Monta estrutura do Log de Alterações do Cliente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -298,7 +261,7 @@ _cQuery += " WHERE "
 _cQuery += " 		SA2.D_E_L_E_T_  = ' ' "
 _cQuery += " AND	Z07.D_E_L_E_T_  = ' ' "
 _cQuery += " AND	Z07.Z07_ALIAS	= 'SA2' "
-IF Len(cCodFor) == TamSX3("A2_COD")[01]
+If Len(cCodFor) == TamSX3("A2_COD")[01]
 _cQuery += " AND	SA2.A2_COD      = '"+ cCodFor +"' "
 Else
 _cQuery += " AND	SA2.A2_COD || SA2.A2_LOJA = '"+ cCodFor +"' "
@@ -309,12 +272,12 @@ _cQuery += " ORDER BY SA2.A2_LOJA , Z07.Z07_CAMPO "
 _cQuery	:= ChangeQuery(_cQuery)
 DBUseArea( .T. , "TOPCONN" , TCGenQry(,,_cQuery) , _cAlias , .F. , .T. )
 
-TcSetField( _cAlias , "Z07.Z07_DATA" , "D" , 8 , 0 )
+TCSetField( _cAlias , "Z07.Z07_DATA" , "D" , 8 , 0 )
 
 DBSelectArea(_cAlias)
 (_cAlias)->(DBGoTop())
 
-(_cAlias)->( dbEval( { || _nTotReg++ } ) )
+(_cAlias)->( DBEval( { || _nTotReg++ } ) )
 
 ProcRegua(_nTotReg)
 
@@ -354,18 +317,15 @@ If	Len(_aLbxAux) > 0 .And. ValType(oLbxAux) == "O"
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: CCOM001DET
 Autor-------------: Alexandre Villar
 Data da Criacao---: 17/07/2014
-===============================================================================================================================
 Descrição---------: Monta estrutura de Detalhes do Log de Alterações do Campo
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -405,8 +365,7 @@ _cQuery	:= ChangeQuery(_cQuery)
 
 DBUseArea( .T. , "TOPCONN" , TCGenQry(,,_cQuery) , _cAlias , .F. , .T. )
 
-//TcSetField( _cAlias , "Z07.Z07_DATA" , "D" , 8 , 0 )
-TcSetField( _cAlias , "DT_ALT" , "D" , 8 , 0 )
+TCSetField( _cAlias , "DT_ALT" , "D" , 8 , 0 )
 
 DBSelectArea(_cAlias)
 (_cAlias)->(DBGoTop()) 
@@ -455,4 +414,4 @@ If	Len(_aLbxAux) > 0 .And. ValType(oLbxAux) == "O"
 
 EndIf
 
-Return()
+Return

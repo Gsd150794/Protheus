@@ -1,38 +1,32 @@
-/* 
+/*
 ===============================================================================================================================
-                          ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                           
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges      | 26/09/2019 | Revisão de fontes. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------                  
- Igor Melgaço     | 06/08/2021 | Troca de chamada mata030 por CRMA980 - Chamado 37363	
--------------------------------------------------------------------------------------------------------------------------------                  
- Igor Melgaço     | 04/11/2021 | Ajuste para troca do Execauto do CRMA980 pelo Mata030. Chamado 37363		
+Igor Melgaço  |06/08/2021| Chamado 37363. Troca de chamada mata030 por CRMA980
+Igor Melgaço  |04/11/2021| Chamado 37363. Ajuste para troca do Execauto do CRMA980 pelo Mata030
+Lucas Borges  |04/09/2025| Chamado 51643. Incluída nova função no menu: AGPE003
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: GP10MENU
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 13/06/2019
-===============================================================================================================================
 Descrição---------: Ponto de Entrada para incluir item no menu do cadastro de funcionarios - Chamado 29648
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function GPE10MENU()
+User Function GPE10MENU
 
-aAdd(aRotina, { "Inclui Cliente", "fwmsgrun(,{|| U_IMPCLI()},'Aguarde...','Criando cliente...')", 0, 7, 0, Nil })
-aAdd(aRotina, { "Inclui Fornecedor", "fwmsgrun(,{|| U_IMPFOR()},'Aguarde...','Criando fornecedor...')", 0, 7, 0, Nil })
+aAdd(aRotina, { "Inclui Cliente", "U_IMPCLI()", 0, 7, 0, Nil })
+aAdd(aRotina, { "Inclui Fornecedor", "U_IMPFOR()", 0, 7, 0, Nil })
+aAdd(aRotina, { "Aj. Contrib. Sinfical","U_AGPE003()", 0, 4, 0, Nil })
 
 Return
 
@@ -41,32 +35,29 @@ Return
 Programa----------: IMPCLI
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 13/06/2019
-===============================================================================================================================
 Descrição---------: Cria cliente a partir do funcionario posicionado
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function IMPCLI()
+User Function IMPCLI
 
-Local _aArea		:= GetArea()
-Local _lMVCSA1      := U_ItGetMv( "MV_MVCSA1" , .F. ) // Parammetro para habilitar execução do ExecAuto do novo CRMA980 
+Local _aArea		:= FWGetArea() As Array
+Local _lMVCSA1      := SuperGetMV("MV_MVCSA1",.F.,.F.) As Logical// Parammetro para habilitar execução do ExecAuto do novo CRMA980 
 
-Private nSaveSX8	:= ""
-Private lMsErroAuto	:= .F.
-Private lMsHelpAuto	:= .T.
+Private nSaveSX8	:= "" As Numeric
+Private lMsErroAuto	:= .F. As Logical
+Private lMsHelpAuto	:= .T. As Logical
 
 //Valida se já não tem cliente com mesmo cnpj
-SA1->(Dbsetorder(3))
-If SA1->(Dbseek(xfilial("SA1")+SRA->RA_CIC))
-    MsgAlert("Funcionário já possui cliente cadastrado sob código: " + SA1->A1_COD + "/" + SA1->A1_LOJA,"GPE010MENU01")
+SA1->(DBSetOrder(3))
+If SA1->(DBSeek(xFilial("SA1")+SRA->RA_CIC))
+    FWAlertWarning("Funcionário já possui cliente cadastrado sob código: " + SA1->A1_COD + "/" + SA1->A1_LOJA,"GPE10MENU01")
     Return
-Endif
+EndIf
 
 //================================================================================
-// RECUPERA OS DADOS DO FUNCIONÁRIO PARA INCLUSÃO DO CLINTE
+//Recupera os dados do funcionário para inclusão do clinte
 //================================================================================
 _aCliente := DadosImpor( 1 , "" , "" )
 		
@@ -81,11 +72,11 @@ _aCliente:=U_AcertaDados("SA1",_aCliente)//por causado MVC
 //================================================================================
 nSaveSX8 := GetSx8Len()
 If _lMVCSA1
-    MSExecAuto( {|x,y,z| CRMA980(x,y,z) } , _aCliente , 3 , ) // SIGA AUTO PARA A INCLUSAO DO CLIENTE
+    MSExecAuto( {|x,y,z| CRMA980(x,y,z) } , _aCliente , 3 , )
 Else
-    MSExecAuto( {|x,y,z| mata030(x,y,z) } , _aCliente ,, 3 ) // SIGA AUTO PARA A INCLUSAO DO CLIENTE
+    MSExecAuto( {|x,y,z| mata030(x,y,z) } , _aCliente ,, 3 )
 EndIf
-SRA->(Dbgoto(_nposSRA))
+SRA->(DBGoTo(_nposSRA))
 		
 If lMsErroAuto
 	If ( __lSX8 )
@@ -93,22 +84,19 @@ If lMsErroAuto
 	EndIf
 			
 	MostraErro()
-	MsgStop("O cadastro do Funcionário: " + AllTrim(SRA->RA_NOME) + " possui alguns campos obrigatórios para realizar a importação"	+;
+	FWAlertWarning("O cadastro do Funcionário: " + AllTrim(SRA->RA_NOME) + " possui alguns campos obrigatórios para realizar a importação"	+;
 			" para o cadastro de Clientes que não foram preenchidos. Desta forma não será gerada a sua importação, favor checar novamente"	+;
-			" o cadastro deste funcionario, ao persistir o erro favor informar a área de TI/ERP.","GPE010MENU02")
+			" o cadastro deste funcionario, ao persistir o erro favor informar a área de TI/ERP.","GPE10MENU02")
 Else
 	If __lSX8
 		While ( GetSX8Len() > nSaveSX8 )
 			ConfirmSX8()
 		EndDo
 	EndIf
-    MsgInfo("Cliente " + SA1->A1_COD + "/" + SA1->A1_LOJA + "cadastrado com sucesso","GPE010MENU03")
+    FWAlertSuccess("Cliente " + SA1->A1_COD + "/" + SA1->A1_LOJA + "cadastrado com sucesso","GPE10MENU03")
 EndIf
 	                                  
-//================================================================================
-// Restaura a area
-//================================================================================
-RestArea( _aArea )
+FWRestArea(_aArea)
 
 Return
 
@@ -117,24 +105,21 @@ Return
 Programa----------: IMPFOR
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 13/06/2019
-===============================================================================================================================
 Descrição---------: Cria fornecedor a partir do funcionario posicionado
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function IMPFOR()
+User Function IMPFOR
 
-Local aVetor := {}
+Local aVetor := {} As Array
 
 //Valida se já não tem cliente com mesmo cnpj
-SA2->(Dbsetorder(3))
-If SA2->(Dbseek(xfilial("SA2")+SRA->RA_CIC))
-    MsgStop("Funcionário já possui fornecedor cadastrado sob código: " + SA2->A2_COD + "/" + SA2->A2_LOJA,"GPE010MENU04")
+SA2->(DBSetOrder(3))
+If SA2->(DBSeek(xFilial("SA2")+SRA->RA_CIC))
+    FWAlertWarning("Funcionário já possui fornecedor cadastrado sob código: " + SA2->A2_COD + "/" + SA2->A2_LOJA,"GPE10MENU04")
     Return
-Endif
+EndIf
 
 _cCodFor	:= U_ACOM005("J", "F", SRA->RA_CIC)
 _cLojaFor	:= "0001"
@@ -146,10 +131,10 @@ aAdd( aVetor , {	"A2_CGC"		, SRA->RA_CIC						, nil } )
 aAdd( aVetor , {	"A2_COD"		, _cCodFor							, nil } )
 aAdd( aVetor , {	"A2_LOJA"		, _cLojaFor							, nil } )
 aAdd( aVetor , {	"A2_NOME"		, AllTrim(SRA->RA_NOME)				, nil } ) 
-aAdd( aVetor , {	"A2_NREDUZ"		, substr(AllTrim(SRA->RA_NOME),1,20), nil } ) 
+aAdd( aVetor , {	"A2_NREDUZ"		, SubStr(AllTrim(SRA->RA_NOME),1,20), nil } ) 
 aAdd( aVetor , {	"A2_EST"		, AllTrim(SRA->RA_ESTADO)			, nil } )
 aAdd( aVetor , {	"A2_COD_MUN"	, AllTrim(SRA->RA_CODMUN)			, nil } )
-aAdd( aVetor , {	"A2_MUN"	     ,ALLTRIM(POSICIONE('CC2',1,xFilial('CC2')+SRA->RA_ESTADO+SRA->RA_CODMUN,'CC2_MUN'))   , nil } )                                                           
+aAdd( aVetor , {	"A2_MUN"	     ,AllTrim(Posicione('CC2',1,xFilial('CC2')+SRA->RA_ESTADO+SRA->RA_CODMUN,'CC2_MUN'))   , nil } )                                                           
 aAdd( aVetor , {	"A2_CEP"		, AllTrim(SRA->RA_CEP)				, nil } )
 aAdd( aVetor , {	"A2_END"		, AllTrim(SRA->RA_ENDEREC)+", "+AllTrim(SRA->RA_LOGRNUM), nil } )
 aAdd( aVetor , {	"A2_BAIRRO"		, AllTrim(SRA->RA_BAIRRO)			, nil } )
@@ -160,14 +145,14 @@ If !Empty( AllTrim(SRA->RA_EMAIL) )
 EndIf
 aAdd( aVetor , {	"A2_BANCO"		, SubStr(SRA->RA_BCDEPSA,1,3)		, nil } )
 aAdd( aVetor , {	"A2_AGENCIA"	, SubStr(SRA->RA_BCDEPSA,4,5)		, nil } )
-aAdd( aVetor , {	"A2_NUMCON"		, substr(SRA->RA_CTDEPSA,1,10)		, nil } )
+aAdd( aVetor , {	"A2_NUMCON"		, SubStr(SRA->RA_CTDEPSA,1,10)		, nil } )
 aAdd( aVetor , {	"A2_PAIS"		, '105'		 						, nil } )
 aAdd( aVetor , {	"A2_CODPAIS"	, '01058'	 						, nil } )
 aAdd( aVetor , {	"A2_TRIBFAV"	, '2'	 							, nil } )
 
 MSExecAuto( {|x,y| Mata020(x,y) } , aVetor , 3 )
 	
-IF lMSErroAuto
+If lMSErroAuto
 	DisarmTransaction()
 	If ( __lSx8 )
 		RollBackSx8()
@@ -175,11 +160,11 @@ IF lMSErroAuto
 	Mostraerro()
 	_lRet:= .F.    
 Else        
-	dbCommit()
+	DBCommit()
 	If ( __lSX8 )
 		ConfirmSX8()
 	EndIf				
-Endif
+EndIf
 
 Return
 
@@ -188,28 +173,25 @@ Return
 Programa----------: DadosImpor
 Autor-------------: Fabiano Dias
 Data da Criacao---: 07/07/2010
-===============================================================================================================================
 Descrição---------: Função que insere os dados da importação dos funcionários para o cadastro de clientes de acordo com a
 ------------------: operação (inclusão/alteração)
-===============================================================================================================================
-Parametros--------: _cTipo   = 1 - Inclusão / 2 - Alteração
+Parametros--------: _nTipo   = 1 - Inclusão / 2 - Alteração
 ------------------: _cCodCli = Código do Cliente
 ------------------: _cLojCLi = Loja do Cliente
-===============================================================================================================================
 Retorno-----------: _aCliente - Retorna os dados referentes ao cadastro
 ===============================================================================================================================
 */
-Static Function DadosImpor( _cTipo , _cCodCli , _cLojaCli )
+Static Function DadosImpor(_nTipo As Numeric,_cCodCli As Character,_cLojaCli As Character)
                          
-Local _aCliente		:= {}
-Local _cCodVend		:= "000156"
-Local _cDDD			:= ""
-Local _cTel			:= ""
-Local _cEmail		:= AllTrim( SRA->RA_EMAIL )
-Local _cCContabil	:= ""
-Local _cRisco		:= ""
-Local _nLimite		:= 0
-Local _dLimite		:= stod("20010101")
+Local _aCliente		:= {} As Array
+Local _cCodVend		:= "000156" As Character
+Local _cDDD			:= "" As Character
+Local _cTel			:= "" As Character
+Local _cEmail		:= AllTrim(SRA->RA_EMAIL) As Character
+Local _cCContabil	:= "" As Character
+Local _cRisco		:= "" As Character
+Local _nLimite		:= 0 As  Numeric
+Local _dLimite		:= SToD("20010101") As Date
 
 //================================================================================
 // Valida de qual filial esta sendo executado o cadastro do 
@@ -228,12 +210,12 @@ Do Case
 		_cCContabil := "1102069996"
 	Case cFilAnt == '91' 
 		_cCContabil := "1102069992"
-	OTHERWISE			
+	OtherWise			
 		_cCContabil := " "
 EndCase
 
 //================================================================================
-// VERIFICA SE O FUNCIONARIO POSSUI TELEFONE
+//Verifica se o funcionario possui telefone
 //================================================================================
 If Len( AllTrim( SRA->RA_TELEFON ) ) > 0
 	_cDDD	:= "0" + SubStr( SRA->RA_TELEFON , 1 , 2 )
@@ -248,14 +230,14 @@ aAdd( _aCliente , { "A1_FILIAL"		, xFilial("SA1")			, Nil }) // FILIAL
 //================================================================================ 	
 //Carrega parâmetros de limite de crédito
 //================================================================================ 	
-_cRisco 	:= 	U_ITGETMV( "IT_RISCOFUN" , "B" )
-_nLimite 	:=	U_ITGETMV( "IT_LIMFUNC" , 150 )
-_dLimite 	:=	U_ITGETMV( "IT_VENCLIMFUNC" , stod("20491231") )
+_cRisco 	:= 	SuperGetMV("IT_RISCOFUN",.F.,"B")
+_nLimite 	:=	SuperGetMV("IT_LIMFUNC" ,.F.,150)
+_dLimite 	:=	SuperGetMV("IT_VENCLIMFUNC",.F.,SToD("20491231"))
 
-aAdd( _aCliente , { "A1_NOME"		, LEFT(SRA->RA_NOMECMP,LEN(SA1->A1_NOME)), Nil }) // NOME
+aAdd( _aCliente , { "A1_NOME"		, Left(SRA->RA_NOMECMP,Len(SA1->A1_NOME)), Nil }) // NOME
 aAdd( _aCliente , { "A1_PESSOA"		, "F"						, Nil }) // PESSOA FISICA OU JURIDICA
 aAdd( _aCliente , { "A1_CGC"		, SRA->RA_CIC				, Nil }) // CGC
-aAdd( _aCliente , { "A1_NREDUZ"		, LEFT(SRA->RA_NOME,LEN(SA1->A1_NREDUZ))	, Nil }) // NOME REDUZIDO
+aAdd( _aCliente , { "A1_NREDUZ"		, Left(SRA->RA_NOME,Len(SA1->A1_NREDUZ))	, Nil }) // NOME REDUZIDO
 aAdd( _aCliente , { "A1_TIPO"		, "F"						, Nil }) // TIPO DE CLIENTE
 aAdd( _aCliente , { "A1_EST"		, SRA->RA_ESTADO			, Nil }) // ESTADO
 aAdd( _aCliente , { "A1_COD_MUN"	, SRA->RA_CODMUN			, Nil }) // COD.MUNICIPIO

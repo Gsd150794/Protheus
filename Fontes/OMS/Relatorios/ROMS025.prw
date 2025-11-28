@@ -15,7 +15,7 @@ Antonio Ramos    -  Igor Melgaço     - 12/06/2025 - 20/06/2025 - 50837   - Ajust
 =========================================================================================================================================================
 */
 
-#Include "Protheus.ch"      
+#Include "TOTVS.ch"      
 
 /*
 ===============================================================================================================================
@@ -54,7 +54,7 @@ _nCol     := 0
 _nLin     := 0
 _nCampos  := 0
 
-_adados       := {}
+_aDados       := {}
 cPerg         := "ROMS025N"
 oPrint		  := Nil
 _aDadosExcel  := {}
@@ -62,19 +62,19 @@ _aItalac_F3   := {}
 _lPergunte    := .T.  
 _aTitulo      := {}
 
-Aadd(_aDadosExcel,"G-Gerente")
-Aadd(_aDadosExcel,"C-Coordenador")
-Aadd(_aDadosExcel,"S-Supervisor")
-Aadd(_aDadosExcel,"V-Vendedor")
-Aadd(_aDadosExcel,"N-Gerente Nacional") 
+aAdd(_aDadosExcel,"G-Gerente")
+aAdd(_aDadosExcel,"C-Coordenador")
+aAdd(_aDadosExcel,"S-Supervisor")
+aAdd(_aDadosExcel,"V-Vendedor")
+aAdd(_aDadosExcel,"N-Gerente Nacional") 
                //        1           2             3             4               5            6                                           7         8        9  10  11  12
-Aadd(_aItalac_F3,{"MV_PAR07",/*_cTabela*/ ,/*_nCpoChave*/ , /*_nCpoDesc*/ , /*_bCondTab*/ , "Dados a Serem Exibidos no Relatório Excel" , 1 , _aDadosExcel , 5,   ,   ,   })
+aAdd(_aItalac_F3,{"MV_PAR07",/*_cTabela*/ ,/*_nCpoChave*/ , /*_nCpoDesc*/ , /*_bCondTab*/ , "Dados a Serem Exibidos no Relatório Excel" , 1 , _aDadosExcel , 5,   ,   ,   })
 
-Do While .T.
+While .T.
    _lPergunte := Pergunte( cPerg , .T.)
    
    If ! _lPergunte
-      If U_ITMSG("Deseja realmente encerrar a emissão deste relatório?","Atenção" , , ,2, 2) 
+      If U_ITMsg("Deseja realmente encerrar a emissão deste relatório?","Atenção" , , ,2, 2) 
          Exit
       EndIf
    Else
@@ -84,11 +84,11 @@ EndDo
 
 If _lPergunte 
    If MV_PAR08 == 1
-      fwmsgrun( ,{|oproc| ROMS025E(oproc) } , "Aguarde...", " Processando o relatorio..." ) // Baixa Vendedor
+      FWMsgRun( ,{|oproc| ROMS025E(oproc) } , "Aguarde...", " Processando o relatorio..." ) // Baixa Vendedor
    ElseIf MV_PAR08 == 2
-      fwmsgrun( ,{|oproc| ROMS025F(oproc) } , "Aguarde...", " Processando o relatorio..." ) // Baixa Detalhado
+      FWMsgRun( ,{|oproc| ROMS025F(oproc) } , "Aguarde...", " Processando o relatorio..." ) // Baixa Detalhado
    ElseIf MV_PAR08 == 3
-      fwmsgrun( ,{|oproc| ROMS025H(oproc) } , "Aguarde...", " Processando o relatorio..." ) // Previsão de Comissão
+      FWMsgRun( ,{|oproc| ROMS025H(oproc) } , "Aguarde...", " Processando o relatorio..." ) // Previsão de Comissão
    EndIf
    
    If MV_PAR08 == 2 // Gera os títulos para o relatório baixa detalhado.
@@ -99,7 +99,7 @@ If _lPergunte
       
    _aHeader := AClone(_aTitulo)
 
-   If len(_aDados) > 0
+   If Len(_aDados) > 0
 	   If Len(_aDados[1]) < Len(_aHeader)
 	      _nCampos := Len(_aDados[1]) 
 	   Else
@@ -109,25 +109,25 @@ If _lPergunte
 	   For _nLin := 1 to Len(_aDados)
 	      _aLinha := {}
 	      For _nCol := 1 to _nCampos
-	        AADD(_aLinha,_adados[_nLin,_nCol])
+	        aAdd(_aLinha,_aDados[_nLin,_nCol])
 	      Next
-	      AADD(_aData,_aLinha)
+	      aAdd(_aData,_aLinha)
 	   Next
       If Len(_aHeader) > _nCampos
          For _nLin := 1 to _nCampos
-            AADD(_aHeaderD,_aHeader[_nLin])
+            aAdd(_aHeaderD,_aHeader[_nLin])
          Next
       Else
          _aHeaderD := aClone(_aHeader)
       EndIf
 	   U_ITListBox( 'Fechamento de comissão - Analítico por Representante' ,_aHeaderD , _aData , .T. , 1 )
    Else
-	   U_ItMsg("Não foram encontrados dados","Atenção",,1)
+	   U_ITMsg("Não foram encontrados dados","Atenção",,1)
    EndIf
 	
 EndIf
 
-Return()
+Return
 /*
 ===============================================================================================================================
 Programa--------: ROMS025QRY
@@ -167,41 +167,41 @@ _cAnoMesFech  := ""
 //====================================================================================================
 If !Empty( MV_PAR01 )
    If MV_PAR08 <> 3 // Não é a opção Previsão de Comissão
-	  _cFiltro	+= " AND SUBSTR( E3_EMISSAO , 1 , 6 ) = '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
-	  _cFiltEmis	+= " AND SUBSTR( E3_EMISSAO , 1 , 6 ) = '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
-	  _cFilCooVe	+= " AND SUBSTR( E3_EMISSAO , 1 , 6 ) = '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
-	  _cFiltrobon	+= " AND SUBSTR( F2_EMISSAO , 1 , 6 ) = '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
+	  _cFiltro	+= " AND SubStr( E3_EMISSAO , 1 , 6 ) = '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
+	  _cFiltEmis	+= " AND SubStr( E3_EMISSAO , 1 , 6 ) = '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
+	  _cFilCooVe	+= " AND SubStr( E3_EMISSAO , 1 , 6 ) = '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
+	  _cFiltrobon	+= " AND SubStr( F2_EMISSAO , 1 , 6 ) = '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
    Else // É a opção Previsão de Comissão
 	  If Empty(MV_PAR09)
-	     _cFiltro	 += " AND SUBSTR( E3_EMISSAO , 1 , 6 ) = '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
-	     _cFiltEmis	 += " AND SUBSTR( E3_EMISSAO , 1 , 6 ) = '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
-	     _cFilCooVe	 += " AND SUBSTR( E3_EMISSAO , 1 , 6 ) = '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
-	     _cFiltrobon += " AND SUBSTR( F2_EMISSAO , 1 , 6 ) = '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
+	     _cFiltro	 += " AND SubStr( E3_EMISSAO , 1 , 6 ) = '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
+	     _cFiltEmis	 += " AND SubStr( E3_EMISSAO , 1 , 6 ) = '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
+	     _cFilCooVe	 += " AND SubStr( E3_EMISSAO , 1 , 6 ) = '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
+	     _cFiltrobon += " AND SubStr( F2_EMISSAO , 1 , 6 ) = '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
          //-----------------------------------------------------------------------------------------------------------------------//
-	     _cFilSemBaixa += " AND SUBSTR( F2_EMISSAO , 1 , 6 ) = '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
+	     _cFilSemBaixa += " AND SubStr( F2_EMISSAO , 1 , 6 ) = '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
 	  Else
-	     _cFiltro	 += " AND SUBSTR( E3_EMISSAO , 1 , 6 ) >= '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
-	     _cFiltEmis	 += " AND SUBSTR( E3_EMISSAO , 1 , 6 ) >= '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
-	     _cFilCooVe	 += " AND SUBSTR( E3_EMISSAO , 1 , 6 ) >= '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
-	     _cFiltrobon += " AND SUBSTR( F2_EMISSAO , 1 , 6 ) >= '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
+	     _cFiltro	 += " AND SubStr( E3_EMISSAO , 1 , 6 ) >= '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
+	     _cFiltEmis	 += " AND SubStr( E3_EMISSAO , 1 , 6 ) >= '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
+	     _cFilCooVe	 += " AND SubStr( E3_EMISSAO , 1 , 6 ) >= '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
+	     _cFiltrobon += " AND SubStr( F2_EMISSAO , 1 , 6 ) >= '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
 		 
-		 _cFiltro	 += " AND SUBSTR( E3_EMISSAO , 1 , 6 ) <= '"+ SubStr( MV_PAR09 , 3 , 4 ) + SubStr( MV_PAR09 , 1 , 2 ) +"'"
-	     _cFiltEmis	 += " AND SUBSTR( E3_EMISSAO , 1 , 6 ) <= '"+ SubStr( MV_PAR09 , 3 , 4 ) + SubStr( MV_PAR09 , 1 , 2 ) +"'"
-	     _cFilCooVe	 += " AND SUBSTR( E3_EMISSAO , 1 , 6 ) <= '"+ SubStr( MV_PAR09 , 3 , 4 ) + SubStr( MV_PAR09 , 1 , 2 ) +"'"
-	     _cFiltrobon += " AND SUBSTR( F2_EMISSAO , 1 , 6 ) <= '"+ SubStr( MV_PAR09 , 3 , 4 ) + SubStr( MV_PAR09 , 1 , 2 ) +"'"
+		 _cFiltro	 += " AND SubStr( E3_EMISSAO , 1 , 6 ) <= '"+ SubStr( MV_PAR09 , 3 , 4 ) + SubStr( MV_PAR09 , 1 , 2 ) +"'"
+	     _cFiltEmis	 += " AND SubStr( E3_EMISSAO , 1 , 6 ) <= '"+ SubStr( MV_PAR09 , 3 , 4 ) + SubStr( MV_PAR09 , 1 , 2 ) +"'"
+	     _cFilCooVe	 += " AND SubStr( E3_EMISSAO , 1 , 6 ) <= '"+ SubStr( MV_PAR09 , 3 , 4 ) + SubStr( MV_PAR09 , 1 , 2 ) +"'"
+	     _cFiltrobon += " AND SubStr( F2_EMISSAO , 1 , 6 ) <= '"+ SubStr( MV_PAR09 , 3 , 4 ) + SubStr( MV_PAR09 , 1 , 2 ) +"'"
 	     //-----------------------------------------------------------------------------------------------------------------------//
-	     _cFilSemBaixa += " AND SUBSTR( F2_EMISSAO , 1 , 6 ) >= '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
-	     _cFilSemBaixa += " AND SUBSTR( F2_EMISSAO , 1 , 6 ) <= '"+ SubStr( MV_PAR09 , 3 , 4 ) + SubStr( MV_PAR09 , 1 , 2 ) +"'"
+	     _cFilSemBaixa += " AND SubStr( F2_EMISSAO , 1 , 6 ) >= '"+ SubStr( MV_PAR01 , 3 , 4 ) + SubStr( MV_PAR01 , 1 , 2 ) +"'"
+	     _cFilSemBaixa += " AND SubStr( F2_EMISSAO , 1 , 6 ) <= '"+ SubStr( MV_PAR09 , 3 , 4 ) + SubStr( MV_PAR09 , 1 , 2 ) +"'"
 	  EndIf
 	  //==========================================================================================
 	  // Para as query que não são previsão considerar o período que a comissão não foi baixada.
 	  //==========================================================================================
 	  If ! Empty(_cFechComis) 
          _cAnoMesFech := SubStr(_cFechComis,4,4) + SubStr(_cFechComis,1,2) 
-		 _cFiltro	 += " AND SUBSTR( E3_EMISSAO , 1 , 6 ) >= '" + _cAnoMesFech + "'"
-	     _cFiltEmis	 += " AND SUBSTR( E3_EMISSAO , 1 , 6 ) >= '" + _cAnoMesFech + "'"
-	     _cFilCooVe	 += " AND SUBSTR( E3_EMISSAO , 1 , 6 ) >= '" + _cAnoMesFech + "'"
-	     _cFiltrobon += " AND SUBSTR( F2_EMISSAO , 1 , 6 ) >= '" + _cAnoMesFech + "'"
+		 _cFiltro	 += " AND SubStr( E3_EMISSAO , 1 , 6 ) >= '" + _cAnoMesFech + "'"
+	     _cFiltEmis	 += " AND SubStr( E3_EMISSAO , 1 , 6 ) >= '" + _cAnoMesFech + "'"
+	     _cFilCooVe	 += " AND SubStr( E3_EMISSAO , 1 , 6 ) >= '" + _cAnoMesFech + "'"
+	     _cFiltrobon += " AND SubStr( F2_EMISSAO , 1 , 6 ) >= '" + _cAnoMesFech + "'"
       EndIf
 	  
    EndIf	
@@ -280,8 +280,8 @@ _cFiltEmis	+= "%"
 _cFilVeCoo	+= "%"
 _cFilCooVe	+= "%"
 
-If !empty(_cFiltronc) .And. AllTrim(_cFiltronc) <> "%"
-   _cFiltronc := "% AND (" + substr(_cFiltronc,4,len(_cFiltronc)) + ") %" 
+If !Empty(_cFiltronc) .And. AllTrim(_cFiltronc) <> "%"
+   _cFiltronc := "% AND (" + SubStr(_cFiltronc,4,Len(_cFiltronc)) + ") %" 
 ElseIf Empty(_cFiltronc) .Or.  AllTrim(_cFiltronc) == "%"
    _cFiltronc := "% %" 
 EndIf
@@ -316,7 +316,7 @@ Do Case
 			E3.E3_VEND		AS CODVEND,
 			A3.A3_NOME		AS NOMEVEND,
 			(	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-				FROM %table:SE5% E5
+				FROM %Table:SE5% E5
 				WHERE
 					E1.E1_FILIAL    = E5.E5_FILIAL
 				AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -331,7 +331,7 @@ Do Case
 				AND E5.E5_SITUACA  <> 'C'
 				AND E5.E5_MOTBX     = 'CMP'
 				AND E5.E5_RECPAG    = 'R' ) - (	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-												FROM %table:SE5% E5
+												FROM %Table:SE5% E5
 												WHERE
 													E1.E1_FILIAL    = E5.E5_FILIAL
 												AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -347,7 +347,7 @@ Do Case
 												AND E5.E5_MOTBX     = 'CMP'
 												AND E5.E5_RECPAG    = 'P' ) COMPENSACAO,
 			(	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-				FROM %table:SE5% E5
+				FROM %Table:SE5% E5
 				WHERE
 					E1.E1_FILIAL    = E5.E5_FILIAL   
 				AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -365,7 +365,7 @@ Do Case
 						AND E5.E5_RECPAG   = 'R')
 					OR (	E5_TIPODOC     = 'DC' ) ) ) DESCONTO,
 			(	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-				FROM %table:SE5% E5
+				FROM %Table:SE5% E5
 				WHERE
 					E1.E1_FILIAL    = E5.E5_FILIAL   
 				AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -381,7 +381,7 @@ Do Case
 				AND E5.E5_MOTBX    IN ('NOR','DAC','FAT','LQ ')
 				AND E5.E5_RECPAG    = 'R'
 				AND E5.E5_DATA      < E3.E3_EMISSAO ) - (	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-															FROM %table:SE5% E5
+															FROM %Table:SE5% E5
 															WHERE
 																E1.E1_FILIAL        = E5.E5_FILIAL
 															AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -399,21 +399,21 @@ Do Case
       		'C' ORDENADACAO, E3.E3_NUM E3NUMORI,E3.E3_SERIE E3SERORI,
 
          NVL((SELECT SUM(SE1_2.E1_VALOR) 
-               FROM %table:SE1% SE1_2 
+               FROM %Table:SE1% SE1_2 
                WHERE SE1_2.E1_FILIAL = E1.E1_FILIAL AND SE1_2.E1_NUM = E1.E1_NUM AND SE1_2.E1_PREFIXO='DCT' AND SE1_2.E1_CLIENTE = E1.E1_CLIENTE AND SE1_2.E1_LOJA = E1.E1_LOJA AND SE1_2.E1_PARCELA = E1.E1_PARCELA AND SE1_2.D_E_L_E_T_ =' '), 0) VALDCT, /*VALOR DESCONTO */
          NVL((SELECT SUM(SE5.E5_VALOR) 
-               FROM %table:SE5% SE5 
+               FROM %Table:SE5% SE5 
                WHERE SE5.E5_FILORIG = E1.E1_FILIAL AND SE5.E5_NUMERO = E1.E1_NUM AND SE5.E5_PREFIXO='DCT' AND SE5.E5_CLIFOR = E1.E1_CLIENTE AND SE5.E5_LOJA = E1.E1_LOJA AND SE5.E5_PARCELA = E1.E1_PARCELA AND SE5.D_E_L_E_T_ =' '), 0) SE5DCT, /*VALOR DESCONTO COMPENSADO*/
          NVL((SELECT SUM(SE5.E5_VALOR) 
-               FROM %table:SE5% SE5 
+               FROM %Table:SE5% SE5 
                WHERE E1.E1_PREFIXO||E1.E1_NUM||E1.E1_TIPO||E1.E1_PARCELA||E1.E1_LOJA = SE5.E5_DOCUMEN AND SE5.E5_PREFIXO='VRB' AND SE5.D_E_L_E_T_ =' '), 0) SE5VRB, /*VALOR VERBA DESCONTADO */
          NVL((SELECT SUM(F2_ICMSRET) 
-               FROM %table:SF2% SF2 
+               FROM %Table:SF2% SF2 
                WHERE SF2.F2_FILIAL = E1.E1_FILIAL AND SF2.F2_DOC = E1.E1_NUM AND SF2.F2_SERIE = E1.E1_PREFIXO AND SF2.D_E_L_E_T_ =' '),0) VALST /*VALOR ICM ST */
          		
-      FROM %table:SE3% E3
+      FROM %Table:SE3% E3
 		
-		JOIN %table:SE1% E1 
+		JOIN %Table:SE1% E1 
 		ON
 			E1.E1_FILIAL  = E3.E3_FILIAL
 		AND E1.E1_TIPO    = E3.E3_TIPO
@@ -424,7 +424,7 @@ Do Case
 		AND E1.E1_CLIENTE = E3.E3_CODCLI
 		AND E1.E1_LOJA    = E3.E3_LOJA
 		
-		JOIN %table:SF2% F2
+		JOIN %Table:SF2% F2
 		ON
 			F2.F2_FILIAL  = E3.E3_FILIAL
 		AND F2.F2_DOC     = E3.E3_NUM
@@ -432,7 +432,7 @@ Do Case
 		AND F2.F2_CLIENTE = E3.E3_CODCLI
 		AND F2.F2_LOJA    = E3.E3_LOJA
 		
-		JOIN %table:SA3% A3 ON A3.A3_COD = E3.E3_VEND
+		JOIN %Table:SA3% A3 ON A3.A3_COD = E3.E3_VEND
 		
 		WHERE
 			E3.D_E_L_E_T_ = ' '
@@ -465,7 +465,7 @@ Do Case
 			E3.E3_VEND CODVEND,
 			A3.A3_NOME NOMEVEND,
 			(	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-				FROM %table:SE5% E5
+				FROM %Table:SE5% E5
 				WHERE
 					E1.E1_FILIAL    = E5.E5_FILIAL
 				AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -480,7 +480,7 @@ Do Case
 				AND E5.E5_SITUACA  <> 'C'
 				AND E5.E5_MOTBX     = 'CMP'
 				AND E5.E5_RECPAG    = 'R' ) - (	SELECT COALESCE(SUM(E5.E5_VALOR),0)
-												FROM %table:SE5% E5
+												FROM %Table:SE5% E5
 												WHERE
 													E1.E1_FILIAL    = E5.E5_FILIAL
 												AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -496,7 +496,7 @@ Do Case
 												AND E5.E5_MOTBX     = 'CMP'
 												AND E5.E5_RECPAG    = 'P' ) COMPENSACAO,
 			(	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-				FROM %table:SE5% E5
+				FROM %Table:SE5% E5
 				WHERE
 					E1.E1_FILIAL    = E5.E5_FILIAL
 				AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -514,7 +514,7 @@ Do Case
 						AND E5.E5_RECPAG    = 'R' )
 					OR ( E5_TIPODOC = 'DC' ) ) ) DESCONTO,
 			(	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-				FROM %table:SE5% E5
+				FROM %Table:SE5% E5
 				WHERE
 					E1.E1_FILIAL    = E5.E5_FILIAL
 				AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -530,7 +530,7 @@ Do Case
 				AND E5.E5_MOTBX    IN ( 'NOR' , 'DAC' , 'FAT' , 'LQ ' )
 				AND E5.E5_RECPAG    = 'R'
 				AND E5.E5_DATA      < E3.E3_EMISSAO ) - (	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-															FROM %table:SE5% E5
+															FROM %Table:SE5% E5
 															WHERE
 																E1.E1_FILIAL    = E5.E5_FILIAL
 															AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -548,21 +548,21 @@ Do Case
 			'C' ORDENADACAO, E3.E3_NUM E3NUMORI,E3.E3_SERIE E3SERORI,
 
          NVL((SELECT SUM(SE1_2.E1_VALOR) 
-               FROM %table:SE1% SE1_2 
+               FROM %Table:SE1% SE1_2 
                WHERE SE1_2.E1_FILIAL = E1.E1_FILIAL AND SE1_2.E1_NUM = E1.E1_NUM AND SE1_2.E1_PREFIXO='DCT' AND SE1_2.E1_CLIENTE = E1.E1_CLIENTE AND SE1_2.E1_LOJA = E1.E1_LOJA AND SE1_2.E1_PARCELA = E1.E1_PARCELA AND SE1_2.D_E_L_E_T_ =' '), 0) VALDCT, /*VALOR DESCONTO */
          NVL((SELECT SUM(SE5.E5_VALOR) 
-               FROM %table:SE5% SE5 
+               FROM %Table:SE5% SE5 
                WHERE SE5.E5_FILORIG = E1.E1_FILIAL AND SE5.E5_NUMERO = E1.E1_NUM AND SE5.E5_PREFIXO='DCT' AND SE5.E5_CLIFOR = E1.E1_CLIENTE AND SE5.E5_LOJA = E1.E1_LOJA AND SE5.E5_PARCELA = E1.E1_PARCELA AND SE5.D_E_L_E_T_ =' '), 0) SE5DCT, /*VALOR DESCONTO COMPENSADO*/
          NVL((SELECT SUM(SE5.E5_VALOR) 
-               FROM %table:SE5% SE5 
+               FROM %Table:SE5% SE5 
                WHERE E1.E1_PREFIXO||E1.E1_NUM||E1.E1_TIPO||E1.E1_PARCELA||E1.E1_LOJA = SE5.E5_DOCUMEN AND SE5.E5_PREFIXO='VRB' AND SE5.D_E_L_E_T_ =' '), 0) SE5VRB, /*VALOR VERBA DESCONTADO */
          NVL((SELECT SUM(F2_ICMSRET) 
-               FROM %table:SF2% SF2 
+               FROM %Table:SF2% SF2 
                WHERE SF2.F2_FILIAL = E1.E1_FILIAL AND SF2.F2_DOC = E1.E1_NUM AND SF2.F2_SERIE = E1.E1_PREFIXO AND SF2.D_E_L_E_T_ =' '),0) VALST /*VALOR ICM ST */
          		
-		FROM %table:SE3% E3
+		FROM %Table:SE3% E3
 		
-		JOIN %table:SE1% E1
+		JOIN %Table:SE1% E1
         ON
         	E1.E1_FILIAL  = E3.E3_FILIAL
         AND E1.E1_TIPO    = E3.E3_TIPO
@@ -573,9 +573,9 @@ Do Case
         AND E1.E1_CLIENTE = E3.E3_CODCLI
         AND E1.E1_LOJA    = E3.E3_LOJA
 		
-		JOIN %table:SA3% A3 ON A3.A3_COD = E3.E3_VEND
+		JOIN %Table:SA3% A3 ON A3.A3_COD = E3.E3_VEND
 		
-		JOIN %table:SF2% F2
+		JOIN %Table:SF2% F2
 		ON
 			F2.F2_FILIAL  = E3.E3_FILIAL
 		AND F2.F2_DOC     = E3.E3_NUM
@@ -589,8 +589,8 @@ Do Case
 	    AND E1.D_E_L_E_T_ = ' '
 	    AND A3.D_E_L_E_T_ = ' '
 	    AND E1.E1_NUM    IN (	SELECT SE1.E1_FATURA
-								FROM %table:SE1% SE1
-								JOIN %table:SF2% F2
+								FROM %Table:SE1% SE1
+								JOIN %Table:SF2% F2
 								ON
 									F2.F2_FILIAL   = SE1.E1_FILIAL
 								AND F2.F2_DOC      = SE1.E1_NUM
@@ -632,7 +632,7 @@ Do Case
 			E3.E3_VEND CODVEND,
 			A3.A3_NOME NOMEVEND,
 			(	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-				FROM %table:SE5% E5
+				FROM %Table:SE5% E5
 				WHERE 
 					E1.E1_FILIAL    = E5.E5_FILIAL   
 				AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -647,7 +647,7 @@ Do Case
 				AND E5.E5_SITUACA  <> 'C'
 				AND E5.E5_MOTBX     = 'CMP'
 				AND E5.E5_RECPAG    = 'R' ) - (	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-												FROM %table:SE5% E5
+												FROM %Table:SE5% E5
 												WHERE
 													E1.E1_FILIAL    = E5.E5_FILIAL   
 												AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -663,7 +663,7 @@ Do Case
 												AND E5.E5_MOTBX     = 'CMP'
 												AND E5.E5_RECPAG    = 'P' ) COMPENSACAO,
 			(	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-				FROM %table:SE5% E5
+				FROM %Table:SE5% E5
 				WHERE
 					E1.E1_FILIAL    = E5.E5_FILIAL   
 				AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -681,7 +681,7 @@ Do Case
 						AND E5.E5_RECPAG   = 'R')
 					OR(		E5_TIPODOC     = 'DC' ) ) ) DESCONTO,
 			(	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-				FROM %table:SE5% E5
+				FROM %Table:SE5% E5
 				WHERE
 					E1.E1_FILIAL    = E5.E5_FILIAL
 				AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -697,7 +697,7 @@ Do Case
 				AND E5.E5_MOTBX    IN ('NOR','DAC','FAT','LQ ')
 				AND E5.E5_RECPAG    = 'R'
 				AND E5.E5_DATA      < E3.E3_EMISSAO ) - (	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-															FROM %table:SE5% E5
+															FROM %Table:SE5% E5
 															WHERE 
 																E1.E1_FILIAL    = E5.E5_FILIAL
 															AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -715,20 +715,20 @@ Do Case
 			'C' ORDENADACAO, E3.E3_NUM E3NUMORI,E3.E3_SERIE E3SERORI,
 
          NVL((SELECT SUM(SE1_2.E1_VALOR) 
-               FROM %table:SE1% SE1_2 
+               FROM %Table:SE1% SE1_2 
                WHERE SE1_2.E1_FILIAL = E1.E1_FILIAL AND SE1_2.E1_NUM = E1.E1_NUM AND SE1_2.E1_PREFIXO='DCT' AND SE1_2.E1_CLIENTE = E1.E1_CLIENTE AND SE1_2.E1_LOJA = E1.E1_LOJA AND SE1_2.E1_PARCELA = E1.E1_PARCELA AND SE1_2.D_E_L_E_T_ =' '), 0) VALDCT, /*VALOR DESCONTO */
          NVL((SELECT SUM(SE5.E5_VALOR) 
-               FROM %table:SE5% SE5 
+               FROM %Table:SE5% SE5 
                WHERE SE5.E5_FILORIG = E1.E1_FILIAL AND SE5.E5_NUMERO = E1.E1_NUM AND SE5.E5_PREFIXO='DCT' AND SE5.E5_CLIFOR = E1.E1_CLIENTE AND SE5.E5_LOJA = E1.E1_LOJA AND SE5.E5_PARCELA = E1.E1_PARCELA AND SE5.D_E_L_E_T_ =' '), 0) SE5DCT, /*VALOR DESCONTO COMPENSADO*/
          NVL((SELECT SUM(SE5.E5_VALOR) 
-               FROM %table:SE5% SE5 
+               FROM %Table:SE5% SE5 
                WHERE E1.E1_PREFIXO||E1.E1_NUM||E1.E1_TIPO||E1.E1_PARCELA||E1.E1_LOJA = SE5.E5_DOCUMEN AND SE5.E5_PREFIXO='VRB' AND SE5.D_E_L_E_T_ =' '), 0) SE5VRB, /*VALOR VERBA DESCONTADO */
          NVL((SELECT SUM(F2_ICMSRET) 
-               FROM %table:SF2% SF2 
+               FROM %Table:SF2% SF2 
                WHERE SF2.F2_FILIAL = E1.E1_FILIAL AND SF2.F2_DOC = E1.E1_NUM AND SF2.F2_SERIE = E1.E1_PREFIXO AND SF2.D_E_L_E_T_ =' '),0) VALST /*VALOR ICM ST */
          		
-		FROM %table:SE3% E3
-		JOIN %table:SE1% E1
+		FROM %Table:SE3% E3
+		JOIN %Table:SE1% E1
 		ON
 			E1.E1_FILIAL  = E3.E3_FILIAL
 		AND E1.E1_TIPO    = E3.E3_TIPO
@@ -739,9 +739,9 @@ Do Case
 		AND E1.E1_CLIENTE = E3.E3_CODCLI
 		AND E1.E1_LOJA    = E3.E3_LOJA
 		
-		JOIN %table:SA3% A3 ON A3.A3_COD = E3.E3_VEND
+		JOIN %Table:SA3% A3 ON A3.A3_COD = E3.E3_VEND
 		
-		JOIN %table:SF2% F2
+		JOIN %Table:SF2% F2
 		ON
 			F2.F2_FILIAL  = E3.E3_FILIAL
 		AND F2.F2_DOC     = E3.E3_NUM
@@ -755,8 +755,8 @@ Do Case
 		AND E1.D_E_L_E_T_ = ' '
 		AND A3.D_E_L_E_T_ = ' '
 		AND E1.E1_NUMLIQ IN (	SELECT SE5.E5_DOCUMEN
-								FROM %table:SE5% SE5
-								JOIN %table:SF2% F2
+								FROM %Table:SE5% SE5
+								JOIN %Table:SF2% F2
 								ON
 									F2.F2_FILIAL  = SE5.E5_FILIAL
 								AND F2.F2_DOC     = SE5.E5_NUMERO
@@ -783,7 +783,7 @@ Do Case
 			E3.E3_EMISSAO DTEMISSAO,
 			E3.E3_EMISSAO DTBAIXA,
 			E3.E3_TIPO TIPO,
-			(	SELECT F2.F2_DOC FROM %table:SD1% D1,%table:SF2% F2
+			(	SELECT F2.F2_DOC FROM %Table:SD1% D1,%table:SF2% F2
 								WHERE
 									D1.D_E_L_E_T_ = ' '
 								AND F2.D_E_L_E_T_ = ' '
@@ -799,7 +799,7 @@ Do Case
 								AND F2.F2_LOJA    = D1.D1_LOJA
 								AND ROWNUM = 1
 								%exp:_cFilVeCoo% ) NUMERO,
-				(	SELECT F2.F2_SERIE FROM %table:SD1% D1,%table:SF2% F2
+				(	SELECT F2.F2_SERIE FROM %Table:SD1% D1,%table:SF2% F2
 								WHERE
 									D1.D_E_L_E_T_ = ' '
 								AND F2.D_E_L_E_T_ = ' '
@@ -832,21 +832,21 @@ Do Case
 			'D' ORDENADACAO, E3.E3_NUM E3NUMORI,E3.E3_SERIE E3SERORI,
 
          NVL((SELECT SUM(SE1_2.E1_VALOR) 
-               FROM %table:SE1% SE1_2 
+               FROM %Table:SE1% SE1_2 
                WHERE SE1_2.E1_FILIAL = E3.E3_FILIAL AND SE1_2.E1_NUM = E3.E3_NUM AND SE1_2.E1_PREFIXO='DCT' AND SE1_2.E1_CLIENTE = E3.E3_CODCLI AND SE1_2.E1_LOJA = E3.E3_LOJA AND SE1_2.E1_PARCELA = E3.E3_PARCELA AND SE1_2.D_E_L_E_T_ =' '), 0) VALDCT, /*VALOR DESCONTO */
          NVL((SELECT SUM(SE5.E5_VALOR) 
-               FROM %table:SE5% SE5 
+               FROM %Table:SE5% SE5 
                WHERE SE5.E5_FILORIG = E3.E3_FILIAL AND SE5.E5_NUMERO = E3.E3_NUM AND SE5.E5_PREFIXO='DCT' AND SE5.E5_CLIFOR = E3.E3_CODCLI AND SE5.E5_LOJA = E3.E3_LOJA AND SE5.E5_PARCELA = E3.E3_PARCELA AND SE5.D_E_L_E_T_ =' '), 0) SE5DCT, /*VALOR DESCONTO COMPENSADO*/
          NVL((SELECT SUM(SE5.E5_VALOR) 
-               FROM %table:SE5% SE5 
+               FROM %Table:SE5% SE5 
                WHERE E3.E3_PREFIXO||E3.E3_NUM||E3.E3_TIPO||E3.E3_PARCELA||E3.E3_LOJA = SE5.E5_DOCUMEN AND SE5.E5_PREFIXO='VRB' AND SE5.D_E_L_E_T_ =' '), 0) SE5VRB, /*VALOR VERBA DESCONTADO */
          NVL((SELECT SUM(F2_ICMSRET) 
-               FROM %table:SF2% SF2 
+               FROM %Table:SF2% SF2 
                WHERE SF2.F2_FILIAL = E3.E3_FILIAL AND SF2.F2_DOC = E3.E3_NUM AND SF2.F2_SERIE = E3.E3_PREFIXO AND SF2.D_E_L_E_T_ =' '),0) VALST /*VALOR ICM ST */
          		
-		FROM %table:SE3% E3
-		JOIN %table:SA3% A3 ON E3.E3_VEND = A3.A3_COD
-		JOIN %table:SA1% A1 ON A1.A1_COD = E3.E3_CODCLI AND A1.A1_LOJA = E3.E3_LOJA
+		FROM %Table:SE3% E3
+		JOIN %Table:SA3% A3 ON E3.E3_VEND = A3.A3_COD
+		JOIN %Table:SA1% A1 ON A1.A1_COD = E3.E3_CODCLI AND A1.A1_LOJA = E3.E3_LOJA
 		WHERE
 			E3.D_E_L_E_T_ = ' '
 		AND A3.D_E_L_E_T_ = ' ' 
@@ -855,7 +855,7 @@ Do Case
 		AND E3.E3_TIPO    = 'NCC'
 		%exp:_cFiltEmis%
 		
-		AND E3.E3_NUM    IN (	SELECT D1.D1_DOC FROM %table:SD1% D1,%table:SF2% F2
+		AND E3.E3_NUM    IN (	SELECT D1.D1_DOC FROM %Table:SD1% D1,%table:SF2% F2
 								WHERE
 									D1.D_E_L_E_T_ = ' '
 								AND F2.D_E_L_E_T_ = ' '
@@ -878,7 +878,7 @@ Do Case
 			E3.E3_EMISSAO	DTEMISSAO,
 			E3.E3_EMISSAO	DTBAIXA,
 			E3.E3_TIPO		TIPO,
-				(	SELECT F2.F2_DOC FROM %table:SD1% D1,%table:SF2% F2
+				(	SELECT F2.F2_DOC FROM %Table:SD1% D1,%table:SF2% F2
 								WHERE
 									D1.D_E_L_E_T_ = ' '
 								AND F2.D_E_L_E_T_ = ' '
@@ -894,7 +894,7 @@ Do Case
 								AND F2.F2_LOJA    = D1.D1_LOJA
 								AND ROWNUM = 1
 								%exp:_cFilVeCoo% ) NUMERO,
-				(	SELECT F2.F2_SERIE FROM %table:SD1% D1,%table:SF2% F2
+				(	SELECT F2.F2_SERIE FROM %Table:SD1% D1,%table:SF2% F2
 								WHERE
 									D1.D_E_L_E_T_ = ' '
 								AND F2.D_E_L_E_T_ = ' '
@@ -927,21 +927,21 @@ Do Case
 			'D'				ORDENADACAO, E3.E3_NUM E3NUMORI,E3.E3_SERIE E3SERORI,
 
          NVL((SELECT SUM(SE1_2.E1_VALOR) 
-               FROM %table:SE1% SE1_2 
+               FROM %Table:SE1% SE1_2 
                WHERE SE1_2.E1_FILIAL = E3.E3_FILIAL AND SE1_2.E1_NUM = E3.E3_NUM AND SE1_2.E1_PREFIXO='DCT' AND SE1_2.E1_CLIENTE = E3.E3_CODCLI AND SE1_2.E1_LOJA = E3.E3_LOJA AND SE1_2.E1_PARCELA = E3.E3_PARCELA AND SE1_2.D_E_L_E_T_ =' '), 0) VALDCT, /*VALOR DESCONTO */
          NVL((SELECT SUM(SE5.E5_VALOR) 
-               FROM %table:SE5% SE5 
+               FROM %Table:SE5% SE5 
                WHERE SE5.E5_FILORIG = E3.E3_FILIAL AND SE5.E5_NUMERO = E3.E3_NUM AND SE5.E5_PREFIXO='DCT' AND SE5.E5_CLIFOR = E3.E3_CODCLI AND SE5.E5_LOJA = E3.E3_LOJA AND SE5.E5_PARCELA = E3.E3_PARCELA AND SE5.D_E_L_E_T_ =' '), 0) SE5DCT, /*VALOR DESCONTO COMPENSADO*/
          NVL((SELECT SUM(SE5.E5_VALOR) 
-               FROM %table:SE5% SE5 
+               FROM %Table:SE5% SE5 
                WHERE E3.E3_PREFIXO||E3.E3_NUM||E3.E3_TIPO||E3.E3_PARCELA||E3.E3_LOJA = SE5.E5_DOCUMEN AND SE5.E5_PREFIXO='VRB' AND SE5.D_E_L_E_T_ =' '), 0) SE5VRB, /*VALOR VERBA DESCONTADO */
          NVL((SELECT SUM(F2_ICMSRET) 
-               FROM %table:SF2% SF2 
+               FROM %Table:SF2% SF2 
                WHERE SF2.F2_FILIAL = E3.E3_FILIAL AND SF2.F2_DOC = E3.E3_NUM AND SF2.F2_SERIE = E3.E3_PREFIXO AND SF2.D_E_L_E_T_ =' '),0) VALST /*VALOR ICM ST */
          		
-		FROM %table:SE3% E3
-		JOIN %table:SA3% A3 ON E3.E3_VEND = A3.A3_COD
-		JOIN %table:SA1% A1 ON A1.A1_COD = E3.E3_CODCLI AND A1.A1_LOJA = E3.E3_LOJA
+		FROM %Table:SE3% E3
+		JOIN %Table:SA3% A3 ON E3.E3_VEND = A3.A3_COD
+		JOIN %Table:SA1% A1 ON A1.A1_COD = E3.E3_CODCLI AND A1.A1_LOJA = E3.E3_LOJA
 		WHERE
 			E3.D_E_L_E_T_  = ' '
 		AND A3.D_E_L_E_T_  = ' '
@@ -951,7 +951,7 @@ Do Case
 		AND A3.A3_SUPER   <> ' '
 		%exp:_cFilCooVe%
 		AND E3.E3_NUM NOT IN (	SELECT D1.D1_DOC
-								FROM %table:SD1% D1,%table:SF2% F2
+								FROM %Table:SD1% D1,%table:SF2% F2
 								WHERE
 									D1.D_E_L_E_T_ = ' '
 								AND F2.D_E_L_E_T_ = ' '
@@ -992,8 +992,8 @@ Do Case
 		              SUM(E3.E3_BASE)	AS VLRRECEB,
 		              SUM(E1.E1_VALOR)	AS VLRFATU,
 		              'C'				AS ORDENADACAO
-			 	FROM %table:SE3% E3
-      		    JOIN %table:SE1% E1
+			 	FROM %Table:SE3% E3
+      		    JOIN %Table:SE1% E1
       		          ON E1.E1_FILIAL   = E3.E3_FILIAL 
                       AND E1.E1_TIPO    = E3.E3_TIPO
                       AND E1.E1_PREFIXO = E3.E3_PREFIXO
@@ -1003,20 +1003,20 @@ Do Case
                       AND E1.E1_CLIENTE = E3.E3_CODCLI
                       AND E1.E1_LOJA    = E3.E3_LOJA
                     
-			   JOIN %table:SF2% F2 
+			   JOIN %Table:SF2% F2 
 			   		  ON F2.F2_FILIAL   = E3.E3_FILIAL
 			          AND F2.F2_DOC     = E3.E3_NUM
 			          AND (F2.F2_SERIE   = E3.E3_PREFIXO OR E3.E3_PREFIXO = 'R')
 			          AND F2.F2_CLIENTE = E3.E3_CODCLI
 			          AND F2.F2_LOJA    = E3.E3_LOJA
-			   JOIN %table:SA3% A3 
+			   JOIN %Table:SA3% A3 
 			          ON A3.A3_COD = E3.E3_VEND      
                 ,
                 (
                   SELECT
                         SA3.A3_NOME,SA3.A3_COD
                   FROM 
-                        %table:SA3% SA3
+                        %Table:SA3% SA3
                   WHERE    
                         SA3.D_E_L_E_T_ = ' '                                                        
                 ) DESCSUPER
@@ -1053,8 +1053,8 @@ Do Case
 		              SUM(E1.E1_VALOR)  AS VLRFATU,
                       'C' ORDENADACAO
 			 	FROM
-                     %table:SE3% E3
-      		    JOIN %table:SE1% E1 
+                     %Table:SE3% E3
+      		    JOIN %Table:SE1% E1 
       		          ON E1.E1_FILIAL   = E3.E3_FILIAL 
                       AND E1.E1_TIPO    = E3.E3_TIPO
                       AND E1.E1_PREFIXO = E3.E3_PREFIXO
@@ -1063,14 +1063,14 @@ Do Case
                       AND E1.E1_PARCELA = E3.E3_PARCELA
                       AND E1.E1_CLIENTE = E3.E3_CODCLI
                       AND E1.E1_LOJA    = E3.E3_LOJA                    
-			   JOIN %table:SA3% A3 
+			   JOIN %Table:SA3% A3 
 			          ON A3.A3_COD = E3.E3_VEND      
                 ,
                 (
                   SELECT
                         SA3.A3_NOME,SA3.A3_COD
                   FROM 
-                        %table:SA3% SA3
+                        %Table:SA3% SA3
                   WHERE    
                         SA3.D_E_L_E_T_ = ' '                                                        
                 ) DESCSUPER
@@ -1084,8 +1084,8 @@ Do Case
 					                          SELECT
 					                                 SE1.E1_FATURA
 					                          FROM 
-					                                 %table:SE1% SE1
-					                                 JOIN %table:SF2% F2
+					                                 %Table:SE1% SE1
+					                                 JOIN %Table:SF2% F2
 					                                 ON  F2.F2_FILIAL  = SE1.E1_FILIAL
 					                                 AND F2.F2_DOC     = SE1.E1_NUM
 					                                 AND (F2.F2_SERIE   = SE1.E1_SERIE OR SE1.E1_SERIE = 'R')
@@ -1121,8 +1121,8 @@ Do Case
 		              SUM(E1.E1_VALOR)  AS VLRFATU,
                       'C' ORDENADACAO
 			 	FROM
-                     %table:SE3% E3
-      		    JOIN %table:SE1% E1 
+                     %Table:SE3% E3
+      		    JOIN %Table:SE1% E1 
       		          ON E1.E1_FILIAL   = E3.E3_FILIAL 
                       AND E1.E1_TIPO    = E3.E3_TIPO
                       AND E1.E1_PREFIXO = E3.E3_PREFIXO
@@ -1132,14 +1132,14 @@ Do Case
                       AND E1.E1_CLIENTE = E3.E3_CODCLI
                       AND E1.E1_LOJA    = E3.E3_LOJA
                       
-			   JOIN %table:SA3% A3 
+			   JOIN %Table:SA3% A3 
 			          ON A3.A3_COD = E3.E3_VEND      
                 ,
                 (
                   SELECT
                         SA3.A3_NOME,SA3.A3_COD
                   FROM 
-                        %table:SA3% SA3
+                        %Table:SA3% SA3
                   WHERE    
                         SA3.D_E_L_E_T_ = ' '                                                        
                 ) DESCSUPER
@@ -1153,8 +1153,8 @@ Do Case
                           SELECT
                                  SE5.E5_DOCUMEN 
                           FROM 
-                                 %table:SE5% SE5
-                                 JOIN %table:SF2% F2
+                                 %Table:SE5% SE5
+                                 JOIN %Table:SF2% F2
                                  ON  F2.F2_FILIAL  = SE5.E5_FILIAL
                                  AND F2.F2_DOC     = SE5.E5_NUMERO
                                  AND (F2.F2_SERIE   = SE5.E5_PREFIXO OR SE5.E5_PREFIXO = 'R')
@@ -1189,10 +1189,10 @@ Do Case
 		              TO_NUMBER(NULL)   AS VLRFATU,
 		              'D' ORDENADACAO    
 				FROM
-    				  %table:SE3% E3,%table:SA3% A3,
+    				  %Table:SE3% E3,%table:SA3% A3,
       				(
                            SELECT 
-                                 DISTINCT F2.F2_VEND1,D1.D1_FILIAL,D1.D1_DOC,D1.D1_SERIE,D1.D1_FORNECE,D1.D1_LOJA  FROM %table:SD1% D1,%table:SF2% F2
+                                 DISTINCT F2.F2_VEND1,D1.D1_FILIAL,D1.D1_DOC,D1.D1_SERIE,D1.D1_FORNECE,D1.D1_LOJA  FROM %Table:SD1% D1,%table:SF2% F2
                            WHERE 
                                 D1.D_E_L_E_T_ = ' '
                                 AND F2.D_E_L_E_T_ = ' '                  
@@ -1207,7 +1207,7 @@ Do Case
 			        	   SELECT
 			            		SA3.A3_NOME,SA3.A3_COD
 			               FROM 
-			                    %table:SA3% SA3
+			                    %Table:SA3% SA3
 			               WHERE    
 			                    SA3.D_E_L_E_T_ = ' '                                                        
 			       ) DESCSUPER
@@ -1245,15 +1245,15 @@ Do Case
 		         TO_NUMBER(NULL)   AS VLRFATU,
 		         'D' ORDENADACAO  
 		 FROM
-		        %table:SE3% E3    
-		        JOIN %table:SA3% A3
+		        %Table:SE3% E3    
+		        JOIN %Table:SA3% A3
 		        ON E3.E3_VEND = A3.A3_COD
           ,
          (
                   SELECT
                         SA3.A3_NOME,SA3.A3_COD
                   FROM 
-                        %table:SA3% SA3
+                        %Table:SA3% SA3
                   WHERE    
                         SA3.D_E_L_E_T_ = ' '                                                        
          ) DESCSUPER
@@ -1266,7 +1266,7 @@ Do Case
 		        AND A3.A3_SUPER <> ' '  
 		        %exp:_cFilCooVe%
 		        AND E3.E3_NUM NOT IN (
-                           SELECT D1.D1_DOC FROM %table:SD1% D1,%table:SF2% F2
+                           SELECT D1.D1_DOC FROM %Table:SD1% D1,%table:SF2% F2
                            WHERE 
                                 D1.D_E_L_E_T_ = ' '
                                 AND F2.D_E_L_E_T_ = ' '
@@ -1393,7 +1393,7 @@ Do Case
 		_cQuery += "    E1.D_E_L_E_T_ = ' ' " 
 		_cQuery += "    AND F2.D_E_L_E_T_ = ' ' " 
 		_cQuery += "    AND E1.E1_SALDO   > 0
-		_cQuery += "    AND E1.E1_VENCREA < '" + Dtos( Date() ) + "' "
+		_cQuery += "    AND E1.E1_VENCREA < '" + DToS( Date() ) + "' "
 		_cQuery += "    AND E1.E1_ORIGEM  NOT IN ( 'FINA460' , 'FINA280' )
        	_cQuery += "    AND F2.F2_VEND1 = E1.E1_VEND1  "
 		_cQuery += "    AND F2.F2_VEND2 = E1.E1_VEND2  "
@@ -1455,7 +1455,7 @@ Do Case
 		_cQuery += "    AND F2.D_E_L_E_T_ = ' ' " 
 		_cQuery += "    AND F2.F2_VEND3   <> ' '
 		_cQuery += "    AND ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1_SDDECRE ) > 0
-		_cQuery += "    AND TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) - TO_DATE('" + Dtos( date() ) + "' , 'YYYY/MM/DD' ) >= 0
+		_cQuery += "    AND TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) - TO_DATE('" + DToS( Date() ) + "' , 'YYYY/MM/DD' ) >= 0
 		_cQuery += "    AND E1.E1_ORIGEM NOT IN ( 'FINA460' , 'FINA280' )
 		_cQuery +=      _cFilSemBaixa   
       _cQuery += "    GROUP BY F2.F2_FILIAL,F2.F2_DOC, F2.F2_SERIE, F2.F2_EMISSAO, F2.F2_CLIENTE, F2.F2_LOJA, F2.F2_VEND1, F2.F2_VEND2, F2.F2_VEND3, F2.F2_VEND4 , F2.F2_VEND5"
@@ -1512,7 +1512,7 @@ Do Case
 		_cQuery += "    AND F2.D_E_L_E_T_ = ' ' " 
         _cQuery += "    AND E1.E1_ORIGEM  = 'FINA280' "
 		_cQuery += "    AND ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1_SDDECRE ) > 0 "
-		_cQuery += "    AND TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) - TO_DATE('"+Dtos(date())+"', 'YYYY/MM/DD' ) >= 0 "
+		_cQuery += "    AND TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) - TO_DATE('"+DToS(date())+"', 'YYYY/MM/DD' ) >= 0 "
 		_cQuery += "    AND E1.E1_NUM    IN (	SELECT SE1.E1_FATURA "
 		_cQuery += "                         	FROM " + RetSqlName("SE1") + " SE1 "
 		_cQuery += "                         	JOIN " + RetSqlName("SF2") + " SF2 "
@@ -1587,7 +1587,7 @@ Do Case
 		_cQuery += "    AND E1.E1_VEND1 <> ' ' "
 		_cQuery += "    AND E1.E1_ORIGEM = 'FINA040' "
 		_cQuery += "    AND ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1_SDDECRE ) > 0 "
-		_cQuery += "    AND TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) - TO_DATE('" + Dtos(date()) + "' , 'YYYY/MM/DD' ) >= 0 "
+		_cQuery += "    AND TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) - TO_DATE('" + DToS(date()) + "' , 'YYYY/MM/DD' ) >= 0 "
         _cQuery +=      _cFilSemBaixa 
         _cQuery += "    GROUP BY F2.F2_FILIAL,F2.F2_DOC, F2.F2_SERIE, F2.F2_EMISSAO, F2.F2_CLIENTE, F2.F2_LOJA, F2.F2_VEND1, F2.F2_VEND2, F2.F2_VEND3, F2.F2_VEND4 , F2.F2_VEND5 "
 		_cQuery += "    ORDER BY F2_FILIAL,F2_DOC, F2_SERIE "
@@ -1602,14 +1602,14 @@ Do Case
 
 EndCase       
 
-Return Nil  
+Return  
  
 /*
 ===============================================================================================================================
 Programa--------: ROMS025E
 Autor-----------: Fabiano Dias
 Data da Criacao-: 24/02/2011
-Descrição-------: Função que processa a impressão dos dados do relatório - Baixa Vendedor.
+Descrição-------: Função que Processa a impressão dos dados do relatório - Baixa Vendedor.
 Parametros------: oproc - objeto da barra de processamento
 Retorno---------: Nenhum
 ===============================================================================================================================
@@ -1646,25 +1646,25 @@ _aFiliais   := {}
 
 Begin Sequence
    If Empty(MV_PAR01)
-	  U_itmsg("Favor preencher o parâmetro: Mes/Ano antes de imprimir este relatório.","Atenção",,1)
+	  U_ITMsg("Favor preencher o parâmetro: Mes/Ano antes de imprimir este relatório.","Atenção",,1)
 	  Break 
    EndIf
      
    //=======================================================================================================
    // Chama a rotina para selecao dos registros da comissao.												
    //=======================================================================================================
-   fwMsgRun(,{|oproc|ROMS025QRY(_cAlias,1,oproc)},"Aguarde....","Filtrando os dados de credito e debito da comissão.")        
+   FWMsgRun(,{|oproc|ROMS025QRY(_cAlias,1,oproc)},"Aguarde....","Filtrando os dados de credito e debito da comissão.")        
 	
-   dbSelectArea(_cAlias)
-   (_cAlias)->(dbGotop())        
+   DBSelectArea(_cAlias)
+   (_cAlias)->(DBGoTop())        
 	            	
    //=============================================
    //Armazena o numero de registros encontrados.
    //=============================================
    COUNT TO _nCountRec 
 		
-   dbSelectArea(_cAlias)
-   (_cAlias)->(dbGotop())       
+   DBSelectArea(_cAlias)
+   (_cAlias)->(DBGoTop())       
 	               	
    //=============================================
    //Verifica se existem registros selecionados.
@@ -1672,31 +1672,31 @@ Begin Sequence
    If (_cAlias)->(!Eof())				
       _nni := 0
       
-      Do While (_cAlias)->(!Eof()) 
+      While (_cAlias)->(!Eof()) 
          _nni++
-         oproc:cCaption := ("Processando dados " + strzero(_nni,10) + " de " +  strzero(_nCountRec,10))
+         oproc:cCaption := ("Processando dados " + StrZero(_nni,10) + " de " +  StrZero(_nCountRec,10))
          ProcessMessages()
          _lachou := .F.
 
          //================================================
          // Busca dados adicionais
          //================================================
-         SF2->(Dbsetorder(1))
-         SA3->(Dbsetorder(1))
-         If SF2->(Dbseek((_cAlias)->FILIAL+(_cAlias)->NUMERO)) .AND. ALLTRIM((_cAlias)->CODCLI) == ALLTRIM(SF2->F2_CLIENTE) 
+         SF2->(DBSetOrder(1))
+         SA3->(DBSetOrder(1))
+         If SF2->(DBSeek((_cAlias)->FILIAL+(_cAlias)->NUMERO)) .And. AllTrim((_cAlias)->CODCLI) == AllTrim(SF2->F2_CLIENTE) 
             _cRazaoCli  := Posicione("SA1",1,xFilial("SA1")+SF2->F2_CLIENTE+SF2->F2_LOJA,"A1_NOME")
 			_cCodGrupo  := Posicione("SA1",1,xFilial("SA1")+SF2->F2_CLIENTE+SF2->F2_LOJA,"A1_GRPVEN")
 			_cDescGrupo := Posicione("ACY",1,xFilial("ACY")+_cCodGrupo,"ACY_DESCRI")
             _ccodrep    := SF2->F2_VEND1
-            _cnomerep   := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodrep)),SA3->A3_NOME," ")
+            _cnomerep   := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodrep)),SA3->A3_NOME," ")
             _ccodsup    := SF2->F2_VEND4
-            _cnomesup   := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodsup)),SA3->A3_NOME," ")
+            _cnomesup   := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodsup)),SA3->A3_NOME," ")
             _ccodcoord  := SF2->F2_VEND2
-            _cnomecoord := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodcoord)),SA3->A3_NOME," ")
+            _cnomecoord := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodcoord)),SA3->A3_NOME," ")
             _ccodger    := SF2->F2_VEND3
-            _cnomeger   := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodger)),SA3->A3_NOME," ")
+            _cnomeger   := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodger)),SA3->A3_NOME," ")
             _cCodGNac    := SF2->F2_VEND5
-            _cNomeGNac   := IIF(SA3->(Dbseek(xfilial("SA3")+_cCodGNac)),SA3->A3_NOME," ")
+            _cNomeGNac   := IIf(SA3->(DBSeek(xFilial("SA3")+_cCodGNac)),SA3->A3_NOME," ")
 
             _lachou     := .T.
          Else
@@ -1704,15 +1704,15 @@ Begin Sequence
 			_cCodGrupo  := Posicione("SA1",1,xFilial("SA1")+(_cAlias)->CODCLI+(_cAlias)->LOJA,"A1_GRPVEN")
 			_cDescGrupo := Posicione("ACY",1,xFilial("ACY")+_cCodGrupo,"ACY_DESCRI")
             _ccodrep    := (_cAlias)->CODVEND
-            _cnomerep   := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodrep)),SA3->A3_NOME," ")
-            _ccodsup    := POSICIONE("SA3",1,xfilial("SA3")+(_cAlias)->CODVEND,"A3_I_SUPE")
-            _cnomesup   := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodsup)),SA3->A3_NOME," ")
-            _ccodcoord  := POSICIONE("SA3",1,xfilial("SA3")+(_cAlias)->CODVEND,"A3_SUPER")
-            _cnomecoord := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodcoord)),SA3->A3_NOME," ")
-            _ccodger    := POSICIONE("SA3",1,xfilial("SA3")+(_cAlias)->CODVEND,"A3_GEREN")
-            _cnomeger   := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodger)),SA3->A3_NOME," ")
-            _cCodGNac    := POSICIONE("SA3",1,xfilial("SA3")+(_cAlias)->CODVEND,"A3_I_GERNC")
-            _cNomeGNac   := IIF(SA3->(Dbseek(xfilial("SA3")+_cCodGNac)),SA3->A3_NOME," ")
+            _cnomerep   := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodrep)),SA3->A3_NOME," ")
+            _ccodsup    := Posicione("SA3",1,xFilial("SA3")+(_cAlias)->CODVEND,"A3_I_SUPE")
+            _cnomesup   := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodsup)),SA3->A3_NOME," ")
+            _ccodcoord  := Posicione("SA3",1,xFilial("SA3")+(_cAlias)->CODVEND,"A3_SUPER")
+            _cnomecoord := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodcoord)),SA3->A3_NOME," ")
+            _ccodger    := Posicione("SA3",1,xFilial("SA3")+(_cAlias)->CODVEND,"A3_GEREN")
+            _cnomeger   := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodger)),SA3->A3_NOME," ")
+            _cCodGNac    := Posicione("SA3",1,xFilial("SA3")+(_cAlias)->CODVEND,"A3_I_GERNC")
+            _cNomeGNac   := IIf(SA3->(DBSeek(xFilial("SA3")+_cCodGNac)),SA3->A3_NOME," ")
          EndIf
 				
          _ncomsup   := 0
@@ -1721,56 +1721,56 @@ Begin Sequence
 		 _ncomrep   := 0
 		 _nComGNac  := 0
 				
-		 SE3->(Dbsetorder(1))
-		 If SE3->(Dbseek((_cAlias)->FILIAL+(_cAlias)->PREFIXO+(_cAlias)->E3NUMORI+(_cAlias)->PARCELA+(_cAlias)->SEQ))
-			Do while SE3->E3_FILIAL == (_cAlias)->FILIAL .AND. ;
-			   SE3->E3_PREFIXO == (_cAlias)->PREFIXO .AND. ;
-			   SE3->E3_NUM == (_cAlias)->E3NUMORI .AND. ;
-			   SE3->E3_PARCELA == (_cAlias)->PARCELA .AND. ;
+		 SE3->(DBSetOrder(1))
+		 If SE3->(DBSeek((_cAlias)->FILIAL+(_cAlias)->PREFIXO+(_cAlias)->E3NUMORI+(_cAlias)->PARCELA+(_cAlias)->SEQ))
+			While SE3->E3_FILIAL == (_cAlias)->FILIAL .And. ;
+			   SE3->E3_PREFIXO == (_cAlias)->PREFIXO .And. ;
+			   SE3->E3_NUM == (_cAlias)->E3NUMORI .And. ;
+			   SE3->E3_PARCELA == (_cAlias)->PARCELA .And. ;
 			   SE3->E3_SEQ == (_cAlias)->SEQ
                
                If SE3->E3_VEND == _ccodrep //Representante
-                  _ncomrep := ROUND(_ncomrep + SE3->E3_COMIS ,3)
+                  _ncomrep := Round(_ncomrep + SE3->E3_COMIS ,3)
                EndIf
 			   
 			   If SE3->E3_VEND == _ccodsup  //Supervisor
-                  _ncomsup := ROUND(_ncomsup + SE3->E3_COMIS ,3)
+                  _ncomsup := Round(_ncomsup + SE3->E3_COMIS ,3)
                EndIf
                
                If SE3->E3_VEND == _ccodcoord  //Coordenador
-                  _ncomcoord := ROUND(_ncomcoord + SE3->E3_COMIS ,3)
+                  _ncomcoord := Round(_ncomcoord + SE3->E3_COMIS ,3)
                EndIf
 
                If SE3->E3_VEND == _ccodger  //Gerente
-                  _ncomger := ROUND(_ncomger + SE3->E3_COMIS ,3)
+                  _ncomger := Round(_ncomger + SE3->E3_COMIS ,3)
                EndIf
 
 	           If SE3->E3_VEND == _cCodGNac  //Gerente Nacional
-                  _nComGNac := ROUND(_nComGNac + SE3->E3_COMIS ,3)
+                  _nComGNac := Round(_nComGNac + SE3->E3_COMIS ,3)
                EndIf
-               SE3->(Dbskip())
-            Enddo
+               SE3->(DBSkip())
+            EndDo
          EndIf
 
-         _nperrep := round(_ncomrep/(_cAlias)->BASECOMIS*100,3)
-         _nperrep := iif(_nperrep<0,-1*_nperrep,_nperrep)
+         _nperrep := Round(_ncomrep/(_cAlias)->BASECOMIS*100,3)
+         _nperrep := IIf(_nperrep<0,-1*_nperrep,_nperrep)
 				
-         _nbasecomis := iif((_cAlias)->COMISSAO<0,-1*(_cAlias)->BASECOMIS,(_cAlias)->BASECOMIS)
+         _nbasecomis := IIf((_cAlias)->COMISSAO<0,-1*(_cAlias)->BASECOMIS,(_cAlias)->BASECOMIS)
 				
-         _npersup := round(_ncomsup/(_cAlias)->BASECOMIS*100,3)
-         _npersup := iif(_npersup<0,-1*_npersup,_npersup)
+         _npersup := Round(_ncomsup/(_cAlias)->BASECOMIS*100,3)
+         _npersup := IIf(_npersup<0,-1*_npersup,_npersup)
 				
-         _npercoo := round(_ncomcoord/(_cAlias)->BASECOMIS*100,3)
-         _npercoo := iif(_npercoo<0,-1*_npercoo,_npercoo)
+         _npercoo := Round(_ncomcoord/(_cAlias)->BASECOMIS*100,3)
+         _npercoo := IIf(_npercoo<0,-1*_npercoo,_npercoo)
 				
-         _nperger := round(_ncomger/(_cAlias)->BASECOMIS*100,3)
-         _nperger := iif(_nperger<0,-1*_nperger,_nperger)
+         _nperger := Round(_ncomger/(_cAlias)->BASECOMIS*100,3)
+         _nperger := IIf(_nperger<0,-1*_nperger,_nperger)
 
-         _nPerGNac := round(_nComGNac/(_cAlias)->BASECOMIS*100,3)
+         _nPerGNac := Round(_nComGNac/(_cAlias)->BASECOMIS*100,3)
          _nPerGNac := IIf(_nPerGNac<0,-1*_nPerGNac,_nPerGNac)
 
-         _dtemissao := iif(!empty((_cAlias)->DTEMISSAO),stod((_cAlias)->DTEMISSAO),"")
-         _dtbaixa := iif(!empty((_cAlias)->DTBAIXA),stod((_cAlias)->DTBAIXA),"")
+         _dtemissao := IIf(!Empty((_cAlias)->DTEMISSAO),SToD((_cAlias)->DTEMISSAO),"")
+         _dtbaixa := IIf(!Empty((_cAlias)->DTBAIXA),SToD((_cAlias)->DTBAIXA),"")
 		                       
 		 _cNumeroNf := (_cAlias)->NUMERO
 		 _cSerieNf  := (_cAlias)->PARCELA
@@ -1781,17 +1781,17 @@ Begin Sequence
 		 
          //verifica se tem duplicata
          If Empty(MV_PAR07) .Or. ("G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07) // Imprime todos os dados
-            _npl :=  ascan(_adados,{|_vAux|	_vAux[1]  == (_cAlias)->FILIAL .and. ;
-											_vAux[2]  == (_cAlias)->TIPO .and. ;
-											_vAux[3]  == _dtemissao .and. ;
-											_vAux[4]  == _dtbaixa .and. ;
-											_vAux[5]  == _cNumeroNf .and. ;  // _vAux[5]  == (_cAlias)->NUMERO .and. ;
-											_vAux[6]  == _cSerieNf .and. ; // _vAux[6]  == (_cAlias)->PARCELA .and. ;
-											_vAux[7]  == _cCodGrupo .and. ;
-											_vAux[8]  == _cDescGrupo .and. ;
-											_vAux[9]  == (_cAlias)->CODCLI .and. ;
-											_vAux[10] == (_cAlias)->LOJA .and. ;
-											_vAux[11] == _cRazaoCli .AND. ;
+            _npl :=  aScan(_aDados,{|_vAux|	_vAux[1]  == (_cAlias)->FILIAL .And. ;
+											_vAux[2]  == (_cAlias)->TIPO .And. ;
+											_vAux[3]  == _dtemissao .And. ;
+											_vAux[4]  == _dtbaixa .And. ;
+											_vAux[5]  == _cNumeroNf .And. ;  // _vAux[5]  == (_cAlias)->NUMERO .And. ;
+											_vAux[6]  == _cSerieNf .And. ; // _vAux[6]  == (_cAlias)->PARCELA .And. ;
+											_vAux[7]  == _cCodGrupo .And. ;
+											_vAux[8]  == _cDescGrupo .And. ;
+											_vAux[9]  == (_cAlias)->CODCLI .And. ;
+											_vAux[10] == (_cAlias)->LOJA .And. ;
+											_vAux[11] == _cRazaoCli .And. ;
 											_vAux[37] == (_cAlias)->SEQ  })
 
 		 ElseIf ("N" $ MV_PAR07 .And. "G" $ MV_PAR07 .And.  "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07) .Or. ; // Não imprime vendedor
@@ -1800,31 +1800,31 @@ Begin Sequence
                 (! "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07)  .Or. ; // Não imprime gerente
                 ("N" $ MV_PAR07 .And. "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07)           // Não imprime gerente nacional
             
-			_npl :=  ascan(_adados,{|_vAux|	_vAux[1]  == (_cAlias)->FILIAL .and. ;
-											_vAux[2]  == (_cAlias)->TIPO .and. ;
-											_vAux[3]  == _dtemissao .and. ;
-											_vAux[4]  == _dtbaixa .and. ;
-											_vAux[5]  == _cNumeroNf .and. ;  // _vAux[5]  == (_cAlias)->NUMERO .and. ;
-											_vAux[6]  == _cSerieNf .and. ; // _vAux[6]  == (_cAlias)->PARCELA .and. ;
-											_vAux[7]  == _cCodGrupo .and. ;
-											_vAux[8]  == _cDescGrupo .and. ;
-											_vAux[9]  == (_cAlias)->CODCLI .and. ;
-											_vAux[10] == (_cAlias)->LOJA .and. ;
-											_vAux[11] == _cRazaoCli .AND. ;
+			_npl :=  aScan(_aDados,{|_vAux|	_vAux[1]  == (_cAlias)->FILIAL .And. ;
+											_vAux[2]  == (_cAlias)->TIPO .And. ;
+											_vAux[3]  == _dtemissao .And. ;
+											_vAux[4]  == _dtbaixa .And. ;
+											_vAux[5]  == _cNumeroNf .And. ;  // _vAux[5]  == (_cAlias)->NUMERO .And. ;
+											_vAux[6]  == _cSerieNf .And. ; // _vAux[6]  == (_cAlias)->PARCELA .And. ;
+											_vAux[7]  == _cCodGrupo .And. ;
+											_vAux[8]  == _cDescGrupo .And. ;
+											_vAux[9]  == (_cAlias)->CODCLI .And. ;
+											_vAux[10] == (_cAlias)->LOJA .And. ;
+											_vAux[11] == _cRazaoCli .And. ;
 											_vAux[33] == (_cAlias)->SEQ })
 
 		 Else
-            _npl :=  ascan(_adados,{|_vAux|	_vAux[1]  == (_cAlias)->FILIAL .and. ;
-											_vAux[2]  == (_cAlias)->TIPO .and. ;
-											_vAux[3]  == _dtemissao .and. ;
-											_vAux[4]  == _dtbaixa .and. ;
-											_vAux[5]  == _cNumeroNf .and. ;  // _vAux[5]  == (_cAlias)->NUMERO .and. ;
-											_vAux[6]  == _cSerieNf .and. ; // _vAux[6]  == (_cAlias)->PARCELA .and. ;
-											_vAux[7]  == _cCodGrupo .and. ;
-											_vAux[8]  == _cDescGrupo .and. ;
-											_vAux[9]  == (_cAlias)->CODCLI .and. ;
-											_vAux[10] == (_cAlias)->LOJA .and. ;
-											_vAux[11] == _cRazaoCli .AND. ;
+            _npl :=  aScan(_aDados,{|_vAux|	_vAux[1]  == (_cAlias)->FILIAL .And. ;
+											_vAux[2]  == (_cAlias)->TIPO .And. ;
+											_vAux[3]  == _dtemissao .And. ;
+											_vAux[4]  == _dtbaixa .And. ;
+											_vAux[5]  == _cNumeroNf .And. ;  // _vAux[5]  == (_cAlias)->NUMERO .And. ;
+											_vAux[6]  == _cSerieNf .And. ; // _vAux[6]  == (_cAlias)->PARCELA .And. ;
+											_vAux[7]  == _cCodGrupo .And. ;
+											_vAux[8]  == _cDescGrupo .And. ;
+											_vAux[9]  == (_cAlias)->CODCLI .And. ;
+											_vAux[10] == (_cAlias)->LOJA .And. ;
+											_vAux[11] == _cRazaoCli .And. ;
 											_vAux[21] == (_cAlias)->SEQ  })
          EndIf
 
@@ -1833,7 +1833,7 @@ Begin Sequence
 			// Incrementa array para geração de excel
 			//===============================================		  	
             If Empty(MV_PAR07) .Or. ("G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07) // Imprime todos os dados 
-               Aadd(_adados,{(_cAlias)->FILIAL	,;	             					  //01
+               aAdd(_aDados,{(_cAlias)->FILIAL	,;	             					  //01
 							 (_cAlias)->TIPO,;										  //02
 			 				 _dtemissao,;											  //03
 			 				 _dtbaixa,;												  //04
@@ -1874,13 +1874,13 @@ Begin Sequence
                       U_ROMS025I((_cAlias)->SE5DCT,"@E 999,999,999.999"),;
                       U_ROMS025I((_cAlias)->SE5VRB,"@E 999,999,999.999"),;
                       U_ROMS025I((_cAlias)->VALST,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
+							U_ROMS025I(Round((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
 					})
 							
             ElseIf "N" $ MV_PAR07 .And. "G" $ MV_PAR07 .And.  "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 //  Não imprime vendedor
-               aadd(_adados,{(_cAlias)->FILIAL	,;							         //01
+               aAdd(_aDados,{(_cAlias)->FILIAL	,;							         //01
 							 (_cAlias)->TIPO,;										 //02
 			 				 _dtemissao,;											 //03
 			 				 _dtbaixa,;												 //04
@@ -1917,13 +1917,13 @@ Begin Sequence
                       U_ROMS025I((_cAlias)->SE5DCT,"@E 999,999,999.999"),;
                       U_ROMS025I((_cAlias)->SE5VRB,"@E 999,999,999.999"),;
                       U_ROMS025I((_cAlias)->VALST,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
+							U_ROMS025I(Round((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
 					})
 
             ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07// Não imprime supervisor
-               aadd(_adados,{(_cAlias)->FILIAL	,;							         //01
+               aAdd(_aDados,{(_cAlias)->FILIAL	,;							         //01
 							 (_cAlias)->TIPO,;										 //02
 			 				 _dtemissao,;											 //03
 			 				 _dtbaixa,;												 //04
@@ -1960,13 +1960,13 @@ Begin Sequence
                       U_ROMS025I((_cAlias)->SE5DCT,"@E 999,999,999.999"),;
                       U_ROMS025I((_cAlias)->SE5VRB,"@E 999,999,999.999"),;
                       U_ROMS025I((_cAlias)->VALST,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
+							U_ROMS025I(Round((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
 					})
 
             ElseIf "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07// Não imprime Coordenador
-               aadd(_adados,{(_cAlias)->FILIAL	,;							         //01
+               aAdd(_aDados,{(_cAlias)->FILIAL	,;							         //01
 							 (_cAlias)->TIPO,;										 //02
 			 				 _dtemissao,;											 //03
 			 				 _dtbaixa,;												 //04
@@ -2003,13 +2003,13 @@ Begin Sequence
                       U_ROMS025I((_cAlias)->SE5DCT,"@E 999,999,999.999"),;
                       U_ROMS025I((_cAlias)->SE5VRB,"@E 999,999,999.999"),;
                       U_ROMS025I((_cAlias)->VALST,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
+							U_ROMS025I(Round((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
 					})
 
             ElseIf ! "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07 // Não imprime gerente
-               aadd(_adados,{(_cAlias)->FILIAL	,;							         //01
+               aAdd(_aDados,{(_cAlias)->FILIAL	,;							         //01
 							 (_cAlias)->TIPO,;										 //02
 			 				 _dtemissao,;											 //03
 			 				 _dtbaixa,;												 //04
@@ -2046,13 +2046,13 @@ Begin Sequence
                       U_ROMS025I((_cAlias)->SE5DCT,"@E 999,999,999.999"),;
                       U_ROMS025I((_cAlias)->SE5VRB,"@E 999,999,999.999"),;
                       U_ROMS025I((_cAlias)->VALST,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
+							U_ROMS025I(Round((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
 					})
 
                    ElseIf ! "N" $ MV_PAR07 .And. "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 // Não imprime gerente nacional
-                          Aadd(_adados,{(_cAlias)->FILIAL	,;	             		  //01
+                          aAdd(_aDados,{(_cAlias)->FILIAL	,;	             		  //01
 							 (_cAlias)->TIPO,;										  //02
 			 				 _dtemissao,;											  //03
 			 				 _dtbaixa,;												  //04
@@ -2089,12 +2089,12 @@ Begin Sequence
                       U_ROMS025I((_cAlias)->SE5DCT,"@E 999,999,999.999"),;
                       U_ROMS025I((_cAlias)->SE5VRB,"@E 999,999,999.999"),;
                       U_ROMS025I((_cAlias)->VALST,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
+							U_ROMS025I(Round((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
 					})
             ElseIf "N" $ MV_PAR07 .And. ! "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 // imprime apenas gerente nacional.
-               aadd(_adados,{(_cAlias)->FILIAL	,;							          //01
+               aAdd(_aDados,{(_cAlias)->FILIAL	,;							          //01
 							 (_cAlias)->TIPO,;										  //02
 			 				 _dtemissao,;											  //03
 			 				 _dtbaixa,;												  //04
@@ -2119,13 +2119,13 @@ Begin Sequence
                       U_ROMS025I((_cAlias)->SE5DCT,"@E 999,999,999.999"),;
                       U_ROMS025I((_cAlias)->SE5VRB,"@E 999,999,999.999"),;
                       U_ROMS025I((_cAlias)->VALST,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
+							U_ROMS025I(Round((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
 					})
 //-----------------------------------------------------------------------------------------------							 
             ElseIf "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07 //  imprime apenas gerente
-               aadd(_adados,{(_cAlias)->FILIAL	,;							         //01
+               aAdd(_aDados,{(_cAlias)->FILIAL	,;							         //01
 							 (_cAlias)->TIPO,;										 //02
 			 				 _dtemissao,;											 //03
 			 				 _dtbaixa,;												 //04
@@ -2150,12 +2150,12 @@ Begin Sequence
                       U_ROMS025I((_cAlias)->SE5DCT,"@E 999,999,999.999"),;
                       U_ROMS025I((_cAlias)->SE5VRB,"@E 999,999,999.999"),;
                       U_ROMS025I((_cAlias)->VALST,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
+							U_ROMS025I(Round((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
 					})
             ElseIf ! "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07 // imprime apenas Coordenador
-           	   aadd(_adados,{(_cAlias)->FILIAL	,;							         //01
+           	   aAdd(_aDados,{(_cAlias)->FILIAL	,;							         //01
 							 (_cAlias)->TIPO,;										 //02
 			 				 _dtemissao,;											 //03
 			 				 _dtbaixa,;												 //04
@@ -2180,12 +2180,12 @@ Begin Sequence
                       U_ROMS025I((_cAlias)->SE5DCT,"@E 999,999,999.999"),;
                       U_ROMS025I((_cAlias)->SE5VRB,"@E 999,999,999.999"),;
                       U_ROMS025I((_cAlias)->VALST,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
+							U_ROMS025I(Round((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
 					})
             ElseIf ! "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07  .And. ! "N" $ MV_PAR07 // imprime apenas supervisor
-               aadd(_adados,{(_cAlias)->FILIAL	,;							         //01
+               aAdd(_aDados,{(_cAlias)->FILIAL	,;							         //01
 							 (_cAlias)->TIPO,;										 //02
 			 				 _dtemissao,;											 //03
 			 				 _dtbaixa,;												 //04
@@ -2210,12 +2210,12 @@ Begin Sequence
                       U_ROMS025I((_cAlias)->SE5DCT,"@E 999,999,999.999"),;
                       U_ROMS025I((_cAlias)->SE5VRB,"@E 999,999,999.999"),;
                       U_ROMS025I((_cAlias)->VALST,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
+							U_ROMS025I(Round((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
 					})
             ElseIf ! "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07 // imprime apenas vendedor
-               aadd(_adados,{(_cAlias)->FILIAL	,;						             //01
+               aAdd(_aDados,{(_cAlias)->FILIAL	,;						             //01
 							 (_cAlias)->TIPO,;										 //02
 			 				 _dtemissao,;											 //03
 			 				 _dtbaixa,;												 //04
@@ -2240,12 +2240,12 @@ Begin Sequence
                       U_ROMS025I((_cAlias)->SE5DCT,"@E 999,999,999.999"),;
                       U_ROMS025I((_cAlias)->SE5VRB,"@E 999,999,999.999"),;
                       U_ROMS025I((_cAlias)->VALST,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
+							U_ROMS025I(Round((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
 					})
             Else // Não exibe dados do relatório em excel.
-               _adados := {}		
+               _aDados := {}		
             EndIf							  	
 		 EndIf
 
@@ -2254,11 +2254,11 @@ Begin Sequence
 		 //=======================================================================================================
 		 _nTotReg := 0
 		 
-		 If Ascan(_aVendBonif, (_cAlias)->CODVEND) == 0 //Ascan(_aVendBonif, MV_PAR06) == 0  // A Query da bonificação deve ser rodada apenas uma vez por vendedor
-		    //Aadd(_aVendBonif, MV_PAR06)
-		    Aadd(_aVendBonif, (_cAlias)->CODVEND)
+		 If aScan(_aVendBonif, (_cAlias)->CODVEND) == 0 //aScan(_aVendBonif, MV_PAR06) == 0  // A Query da bonificação deve ser rodada apenas uma vez por vendedor
+		    //aAdd(_aVendBonif, MV_PAR06)
+		    aAdd(_aVendBonif, (_cAlias)->CODVEND)
 		    MV_PAR06 := (_cAlias)->CODVEND   // Filtro codigo do Vendedor 
-		    fwMsgRun(,{|oproc|ROMS025QRY(_cAlias3,3,oproc)},"Aguarde....","Filtrando os dados bonificação.")    
+		    FWMsgRun(,{|oproc|ROMS025QRY(_cAlias3,3,oproc)},"Aguarde....","Filtrando os dados bonificação.")    
 		 		
   		    DBSelectArea(_cAlias3)
 		    (_cAlias3)->( DBGoTop() )
@@ -2268,7 +2268,7 @@ Begin Sequence
          
 		 If _nTotReg > 0
 			_nConAux := 0
-			Do While (_cAlias3)->( !Eof() )
+			While (_cAlias3)->( !Eof() )
 			   _nConAux++
 			   oproc:cCaption := 'Processando bonificações... ['+ StrZero(_nConAux,9) +'] de ['+ StrZero(_nTotReg,9) +'].'
 			   ProcessMessages()
@@ -2278,20 +2278,20 @@ Begin Sequence
 			   _cDescGrupo := Posicione("ACY",1,xFilial("ACY")+_cCodGrupo,"ACY_DESCRI")
 			   _cCodVen := (_cAlias3)->F2_VEND1
 			   _ccodsup :=  (_cAlias3)->F2_VEND4
-			   _cnomesup := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodsup)),SA3->A3_NOME," ")
+			   _cnomesup := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodsup)),SA3->A3_NOME," ")
 			   _ccodcoord := (_cAlias3)->F2_VEND2
-			   _cnomecoord := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodcoord)),SA3->A3_NOME," ")
+			   _cnomecoord := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodcoord)),SA3->A3_NOME," ")
 		       _ccodger := (_cAlias3)->F2_VEND3
-			   _cnomeger := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodger)),SA3->A3_NOME," ")
+			   _cnomeger := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodger)),SA3->A3_NOME," ")
                _cCodGNac := (_cAlias3)->F2_VEND5 
-			   _cNomeGNac := IIF(SA3->(Dbseek(xfilial("SA3")+_cCodGNac)),SA3->A3_NOME," ") 
+			   _cNomeGNac := IIf(SA3->(DBSeek(xFilial("SA3")+_cCodGNac)),SA3->A3_NOME," ") 
 			   
-			   If ascan(_adados, {|_vAux| _vAux[1]==(_cAlias3)->F2_FILIAL .and. _vAux[2]=="BON" .and. _vAux[5]==(_cAlias3)->F2_DOC}) ==  0
+			   If aScan(_aDados, {|_vAux| _vAux[1]==(_cAlias3)->F2_FILIAL .And. _vAux[2]=="BON" .And. _vAux[5]==(_cAlias3)->F2_DOC}) ==  0
 				  // Incrementa array para geração de excel
                   If Empty(MV_PAR07) .Or. ("G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07) // Imprime todos os dados
-				     Aadd(_adados,{(_cAlias3)->F2_FILIAL	,;					                                          //01
+				     aAdd(_aDados,{(_cAlias3)->F2_FILIAL	,;					                                          //01
 								   "BON",;													                              //02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                  //03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                  //03
 								   "  ",;													                              //04
 								   (_cAlias3)->F2_DOC,;									                                  //05
 								   "  ",;													                              //06
@@ -2306,7 +2306,7 @@ Begin Sequence
 								   U_ROMS025I(0,"@E 999,999,999.99"),;													  //15
 								   U_ROMS025I((_cAlias3)->VALTOT*-1,"@E 999,999,999.99"),;							      //16
 								   _cCodVen,;												                              //17
-								   POSICIONE("SA3",1,xfilial("SA3")+_cCodVen,"A3_NOME"),;	                              //18
+								   Posicione("SA3",1,xFilial("SA3")+_cCodVen,"A3_NOME"),;	                              //18
 								   _ccodsup,;												                              //19
 								   _cnomesup,;												                              //20
 								   _ccodcoord,;											                                  //21
@@ -2315,29 +2315,29 @@ Begin Sequence
 								   _cnomeger,;												                              //24
                                    _cCodGNac,;                                                                            //25    
                                    _cNomeGNac,;                                                                           //26
-								   U_ROMS025I(round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					  //25-->27
-								   U_ROMS025I(round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  //26-->28
-								   U_ROMS025I(round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					  //27-->29
-								   U_ROMS025I(round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  //28-->30
-								   U_ROMS025I(round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.99"),;					  //29-->31
-								   U_ROMS025I(round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  //30-->32
-								   U_ROMS025I(round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					  //31-->33
-								   U_ROMS025I(round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  //32-->34
-								   U_ROMS025I(round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					  //35
-								   U_ROMS025I(round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  //36
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					  //25-->27
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  //26-->28
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					  //27-->29
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  //28-->30
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.99"),;					  //29-->31
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  //30-->32
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					  //31-->33
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  //32-->34
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					  //35
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  //36
 								   " ",;    
                             U_ROMS025I((_cAlias3)->(VALDCT),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5DCT,"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5VRB,"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->VALST,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
+							U_ROMS025I(Round((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
 					})
                   ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. "N" $ MV_PAR07 //  Não imprime vendedor
-				     Aadd(_adados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
+				     aAdd(_aDados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
 								   "BON",;													                               //02
-							       DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   //03
+							       DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   //03
 								   "  ",;													                               //04
 								   (_cAlias3)->F2_DOC,;									                                   //05
 								   "  ",;													                               //06
@@ -2359,27 +2359,27 @@ Begin Sequence
 								   _cnomeger,;	    										                               //22
 								   _cCodGNac,;                                                                             //23    
                                    _cNomeGNac,;                                                                            //24 
-								   U_ROMS025I(round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   //23-->25 
-								   U_ROMS025I(round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //24-->26
-								   U_ROMS025I(round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   //25-->27
-								   U_ROMS025I(round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //26-->28
-								   U_ROMS025I(round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   //27-->29
-								   U_ROMS025I(round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //28-->30
-                                   U_ROMS025I(round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   //31
-								   U_ROMS025I(round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //32
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   //23-->25 
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //24-->26
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   //25-->27
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //26-->28
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   //27-->29
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //28-->30
+                                   U_ROMS025I(Round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   //31
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //32
 								   " ",;    
                             U_ROMS025I((_cAlias3)->(VALDCT),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5DCT,"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5VRB,"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->VALST,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
+							U_ROMS025I(Round((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
 					})
                   ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07 // Não imprime supervisor
-				     Aadd(_adados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
+				     aAdd(_aDados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
 								   "BON",;													                               //02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   //03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   //03
 								   "  ",;													                               //04
 								   (_cAlias3)->F2_DOC,;									                                   //05
 								   "  ",;													                               //06
@@ -2394,34 +2394,34 @@ Begin Sequence
 								   U_ROMS025I(0,"@E 999,999,999.99"),;													   //15
 								   U_ROMS025I((_cAlias3)->VALTOT*-1,"@E 999,999,999.99"),;							       //16
 								   _cCodVen,;												                               //17
-								   POSICIONE("SA3",1,xfilial("SA3")+_cCodVen,"A3_NOME"),;	                               //18
+								   Posicione("SA3",1,xFilial("SA3")+_cCodVen,"A3_NOME"),;	                               //18
 								   _ccodcoord,;											                                   //19
 								   _cnomecoord,;											                               //20
 								   _ccodger,;												                               //21
 								   _cnomeger,;												                               //22
 								   _cCodGNac,;                                                                             //23    
                                    _cNomeGNac,;                                                                            //24 
-								   U_ROMS025I(round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   //23-->25
-								   U_ROMS025I(round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //24-->26
-								   U_ROMS025I(round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   //25-->27
-								   U_ROMS025I(round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //26-->28
-								   U_ROMS025I(round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   //27-->29
-								   U_ROMS025I(round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //28-->30
-								   U_ROMS025I(round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   //31
-								   U_ROMS025I(round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //32
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   //23-->25
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //24-->26
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   //25-->27
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //26-->28
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   //27-->29
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //28-->30
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   //31
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //32
 								   " ",;    
                             U_ROMS025I((_cAlias3)->(VALDCT),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5DCT,"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5VRB,"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->VALST,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
+							U_ROMS025I(Round((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
 					})
                   ElseIf "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07  .And. "N" $ MV_PAR07 // Não imprime Coordenador
-				     Aadd(_adados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
+				     aAdd(_aDados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
 								   "BON",;													                               //02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   //03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   //03
 								   "  ",;													                               //04
 								   (_cAlias3)->F2_DOC,;									                                   //05
 								   "  ",;													                               //06
@@ -2436,35 +2436,35 @@ Begin Sequence
 								   U_ROMS025I(0,"@E 999,999,999.99"),;													   //15
 								   U_ROMS025I((_cAlias3)->VALTOT*-1,"@E 999,999,999.99"),;							       //16
 								   _cCodVen,;												                               //17
-								   POSICIONE("SA3",1,xfilial("SA3")+_cCodVen,"A3_NOME"),;	                               //18
+								   Posicione("SA3",1,xFilial("SA3")+_cCodVen,"A3_NOME"),;	                               //18
 								   _ccodsup,;												                               //19
 								   _cnomesup,;												                               //20
 								   _ccodger,;												                               //21
 								   _cnomeger,;												                               //22
 								   _cCodGNac,;                                                                             //23    
                                    _cNomeGNac,;                                                                            //24 
-								   U_ROMS025I(round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   //23-->25
-								   U_ROMS025I(round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //24-->26
-								   U_ROMS025I(round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   //25-->27
-								   U_ROMS025I(round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //26-->28
-								   U_ROMS025I(round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.993"),;					   //27-->29
-								   U_ROMS025I(round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //28-->30
-                                   U_ROMS025I(round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   //31
-								   U_ROMS025I(round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //32
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   //23-->25
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //24-->26
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   //25-->27
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //26-->28
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.993"),;					   //27-->29
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //28-->30
+                                   U_ROMS025I(Round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   //31
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //32
 								   " ",;    
                             U_ROMS025I((_cAlias3)->(VALDCT),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5DCT,"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5VRB,"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->VALST,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
+							U_ROMS025I(Round((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
 					})
                   //-----------------------------------------------------------------------------------
                   ElseIf !"G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07 // Não imprime gerente 
-				     Aadd(_adados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
+				     aAdd(_aDados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
 								   "BON",;													                               //02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   //03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   //03
 								   "  ",;													                               //04
 								   (_cAlias3)->F2_DOC,;									                                   //05
 								   "  ",;													                               //06
@@ -2479,35 +2479,35 @@ Begin Sequence
 								   U_ROMS025I(0,"@E 999,999,999.99"),;													   //15
 								   U_ROMS025I((_cAlias3)->VALTOT*-1,"@E 999,999,999.99"),;							       //16
 								   _cCodVen,;												                               //17
-								   POSICIONE("SA3",1,xfilial("SA3")+_cCodVen,"A3_NOME"),;	                               //18
+								   Posicione("SA3",1,xFilial("SA3")+_cCodVen,"A3_NOME"),;	                               //18
 								   _ccodsup,;												                               //19
 								   _cnomesup,;												                               //20
 								   _ccodcoord,;											                                   //21
 								   _cnomecoord,;											                               //22
 								    _cCodGNac,;                                                                            //23    
                                    _cNomeGNac,;                                                                            //24 
-								   U_ROMS025I(round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   //23-->25
-								   U_ROMS025I(round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //24-->26
-								   U_ROMS025I(round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   //25-->27
-								   U_ROMS025I(round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //26-->28
-								   U_ROMS025I(round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   //27-->29
-								   U_ROMS025I(round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //28-->30
-								   U_ROMS025I(round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   //31
-								   U_ROMS025I(round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //32
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   //23-->25
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //24-->26
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   //25-->27
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //26-->28
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   //27-->29
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //28-->30
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   //31
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //32
 								   " ",;    
                             U_ROMS025I((_cAlias3)->(VALDCT),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5DCT,"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5VRB,"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->VALST,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
+							U_ROMS025I(Round((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
 					})
 //------------------------------------
                   ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07 // Não imprime gerente nacional
-				     Aadd(_adados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
+				     aAdd(_aDados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
 								   "BON",;													                               //02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   //03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   //03
 								   "  ",;													                               //04
 								   (_cAlias3)->F2_DOC,;									                                   //05
 								   "  ",;													                               //06
@@ -2522,35 +2522,35 @@ Begin Sequence
 								   U_ROMS025I(0,"@E 999,999,999.99"),;													   //15
 								   U_ROMS025I((_cAlias3)->VALTOT*-1,"@E 999,999,999.99"),;							       //16
 								   _cCodVen,;												                               //17
-								   POSICIONE("SA3",1,xfilial("SA3")+_cCodVen,"A3_NOME"),;	                               //18
+								   Posicione("SA3",1,xFilial("SA3")+_cCodVen,"A3_NOME"),;	                               //18
 								   _ccodsup,;												                               //19
 								   _cnomesup,;												                               //20
 								   _ccodcoord,;											                                   //21
 								   _cnomecoord,;											                               //22
 								   _ccodger,;												                               //21
 								   _cnomeger,;												                               //22
-								   U_ROMS025I(round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   //23-->25
-								   U_ROMS025I(round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //24-->26
-								   U_ROMS025I(round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   //25-->27
-								   U_ROMS025I(round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //26-->28
-								   U_ROMS025I(round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   //27-->29
-								   U_ROMS025I(round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //28-->30
-								   U_ROMS025I(round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   //31
-								   U_ROMS025I(round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //32
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   //23-->25
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //24-->26
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   //25-->27
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //26-->28
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   //27-->29
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //28-->30
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   //31
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //32
 								   " ",;    
                             U_ROMS025I((_cAlias3)->(VALDCT),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5DCT,"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5VRB,"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->VALST,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
+							U_ROMS025I(Round((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
 					})
 
                   ElseIf "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07 // imprime apenas gerente
-				     Aadd(_adados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
+				     aAdd(_aDados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
 								   "BON",;													                               //02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   //03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   //03
 								   "  ",;													                               //04
 								   (_cAlias3)->F2_DOC,;									                                   //05
 								   "  ",;													                               //06
@@ -2566,21 +2566,21 @@ Begin Sequence
 								   U_ROMS025I((_cAlias3)->VALTOT*-1,"@E 999,999,999.99"),;							       //16
 								   _ccodger,;												                               //17
 								   _cnomeger,;												                               //18
-								   U_ROMS025I(round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   //19
-								   U_ROMS025I(round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //20
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   //19
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //20
 								   " ",;    
                             U_ROMS025I((_cAlias3)->(VALDCT),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5DCT,"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5VRB,"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->VALST,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
+							U_ROMS025I(Round((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
 					})
                   ElseIf ! "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07// imprime apenas Coordenador
-				     Aadd(_adados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
+				     aAdd(_aDados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
 							       "BON",;													                               //02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   //03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   //03
 								   "  ",;													                               //04
 								   (_cAlias3)->F2_DOC,;									                                   //05
 								   "  ",;													                               //06
@@ -2596,21 +2596,21 @@ Begin Sequence
 								   U_ROMS025I((_cAlias3)->VALTOT*-1,"@E 999,999,999.99"),;							       //16
 								   _ccodcoord,;											                                   //17
 								   _cnomecoord,;											                               //18
-								   U_ROMS025I(round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   //19
-								   U_ROMS025I(round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //20
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   //19
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //20
 								   " ",;    
                             U_ROMS025I((_cAlias3)->(VALDCT),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5DCT,"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5VRB,"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->VALST,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
+							U_ROMS025I(Round((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
 					})
                   ElseIf ! "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07// imprime apenas supervisor
-				     Aadd(_adados,{(_cAlias3)->F2_FILIAL	,;					                                  //01
+				     aAdd(_aDados,{(_cAlias3)->F2_FILIAL	,;					                                  //01
 								   "BON",;													                               //02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                         //03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                         //03
 								   "  ",;													                               //04
 								   (_cAlias3)->F2_DOC,;									                               //05
 								   "  ",;													                               //06
@@ -2626,21 +2626,21 @@ Begin Sequence
 								   U_ROMS025I((_cAlias3)->VALTOT*-1,"@E 999,999,999.99"),;							       //16
 								   _ccodsup,;												                               //17
 								   _cnomesup,;												                               //18
-								   U_ROMS025I(round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   //19
-				    			   U_ROMS025I(round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //20
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   //19
+				    			   U_ROMS025I(Round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //20
 								   " ",;    
                             U_ROMS025I((_cAlias3)->(VALDCT),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5DCT,"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5VRB,"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->VALST,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
+							U_ROMS025I(Round((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
 					})
                   ElseIf ! "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07 // imprime apenas vendedor
-				     Aadd(_adados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
+				     aAdd(_aDados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
 								   "BON",;													                               //02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   //03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   //03
 								   "  ",;													                               //04
 								   (_cAlias3)->F2_DOC,;									                                   //05
 								   "  ",;													                               //06
@@ -2655,22 +2655,22 @@ Begin Sequence
 								   U_ROMS025I(0,"@E 999,999,999.99"),;													   //15
 								   U_ROMS025I((_cAlias3)->VALTOT*-1,"@E 999,999,999.99"),;							       //16
 								   _cCodVen,;												                               //17
-								   POSICIONE("SA3",1,xfilial("SA3")+_cCodVen,"A3_NOME"),;	                               //18
-								   U_ROMS025I(round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   //19
-								   U_ROMS025I(round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //20
+								   Posicione("SA3",1,xFilial("SA3")+_cCodVen,"A3_NOME"),;	                               //18
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   //19
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //20
 								   " ",;    
                             U_ROMS025I((_cAlias3)->(VALDCT),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5DCT,"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5VRB,"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->VALST,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
+							U_ROMS025I(Round((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
 					})
 					ElseIf ! "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. "N" $ MV_PAR07 // imprime apenas Gerente Nacional
-				       Aadd(_adados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
+				       aAdd(_aDados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
 								   "BON",;													                               //02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   //03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   //03
 								   "  ",;													                               //04
 								   (_cAlias3)->F2_DOC,;									                                   //05
 								   "  ",;													                               //06
@@ -2686,27 +2686,27 @@ Begin Sequence
 								   U_ROMS025I((_cAlias3)->VALTOT*-1,"@E 999,999,999.99"),;							       //16
 								   _cCodGNac,;                                                                             //17    
                                    _cNomeGNac,;                                                                            //18
-								   U_ROMS025I(round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   //19
-								   U_ROMS025I(round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //20
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   //19
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //20
 								   " ",;    
                             U_ROMS025I((_cAlias3)->(VALDCT),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5DCT,"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5VRB,"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->VALST,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
-							U_ROMS025I(ROUND((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
+							U_ROMS025I(Round((_cAlias)->(VLRTITULO-COMPENSACAO),2),"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO)),2)  ,"@E 999,999,999.999"),;
+							U_ROMS025I(Round((_cAlias)->((VLRTITULO-COMPENSACAO)-((VLRTITULO-COMPENSACAO)*(VALST/VLRTITULO))),2),"@E 999,999,999.999");
 					})
                   Else // Não exibe dados do relatório em excel.
-                     _adados := {}		
+                     _aDados := {}		
                   EndIf
 			   EndIf
 			   
-			   (_cAlias3)->( Dbskip() )
-			Enddo
+			   (_cAlias3)->( DBSkip() )
+			EndDo
 		 EndIf					
 		 
-		 (_cAlias)->(DbSkip())
+		 (_cAlias)->(DBSkip())
 		 
 	  EndDo
    EndIf
@@ -2718,8 +2718,8 @@ MV_PAR06 := _cMVPAR05   // Filtro Vendedor
 //==========================
 //Finaliza o alias criado.
 //==========================
-dbSelectArea(_cAlias)
-(_cAlias)->(dbCloseArea())    
+DBSelectArea(_cAlias)
+(_cAlias)->(DBCloseArea())    
 
 Return 
 
@@ -2728,7 +2728,7 @@ Return
 Programa--------: ROMS025F
 Autor-----------: Julio de Paula Paz
 Data da Criacao-: 07/01/2019
-Descrição-------: Função que processa a impressão dos dados do relatório - Baixa Detalhado
+Descrição-------: Função que Processa a impressão dos dados do relatório - Baixa Detalhado
 Parametros------: oproc - objeto da barra de processamento
 Retorno---------: Nenhum
 ===============================================================================================================================
@@ -2775,25 +2775,25 @@ _cAlias3    := GetNextAlias()
 Begin Sequence
 
    If Empty(MV_PAR01)
-	  U_itmsg("Favor preencher o parâmetro: Mes/Ano antes de imprimir este relatório.","Atenção",,1)
+	  U_ITMsg("Favor preencher o parâmetro: Mes/Ano antes de imprimir este relatório.","Atenção",,1)
 	  Break 
    EndIf
      
    //=======================================================================================================
    // Chama a rotina para selecao dos registros da comissao.												
    //=======================================================================================================
-   fwMsgRun(,{|oproc|ROMS025QRY(_cAlias,1,oproc)},"Aguarde....","Filtrando os dados de credito e debito da comissão.")        
+   FWMsgRun(,{|oproc|ROMS025QRY(_cAlias,1,oproc)},"Aguarde....","Filtrando os dados de credito e debito da comissão.")        
 	
-   dbSelectArea(_cAlias)
-   (_cAlias)->(dbGotop())        
+   DBSelectArea(_cAlias)
+   (_cAlias)->(DBGoTop())        
 	            	
    //=============================================
    //Armazena o numero de registros encontrados.
    //=============================================
    COUNT TO _nCountRec 
 		
-   dbSelectArea(_cAlias)
-   (_cAlias)->(dbGotop())       
+   DBSelectArea(_cAlias)
+   (_cAlias)->(DBGoTop())       
 	               	
    //=============================================
    //Verifica se existem registros selecionados.
@@ -2801,46 +2801,46 @@ Begin Sequence
    If (_cAlias)->(!Eof())				
       _nni := 0
       
-      Do While (_cAlias)->(!Eof()) 
+      While (_cAlias)->(!Eof()) 
          _nni++
-         oproc:cCaption := ("Processando dados " + strzero(_nni,10) + " de " +  strzero(_nCountRec,10))
+         oproc:cCaption := ("Processando dados " + StrZero(_nni,10) + " de " +  StrZero(_nCountRec,10))
          ProcessMessages()
          _lachou := .F.
 
          //================================================
          // Busca dados adicionais
          //================================================
-         SF2->(Dbsetorder(1))
-         SA3->(Dbsetorder(1))
-         If SF2->(Dbseek((_cAlias)->FILIAL+(_cAlias)->NUMERO)) .AND. ALLTRIM((_cAlias)->CODCLI) == ALLTRIM(SF2->F2_CLIENTE) 
+         SF2->(DBSetOrder(1))
+         SA3->(DBSetOrder(1))
+         If SF2->(DBSeek((_cAlias)->FILIAL+(_cAlias)->NUMERO)) .And. AllTrim((_cAlias)->CODCLI) == AllTrim(SF2->F2_CLIENTE) 
             _cRazaoCli  := Posicione("SA1",1,xFilial("SA1")+SF2->F2_CLIENTE+SF2->F2_LOJA,"A1_NOME")
 			_cCodGrupo  := Posicione("SA1",1,xFilial("SA1")+SF2->F2_CLIENTE+SF2->F2_LOJA,"A1_GRPVEN")
 			_cDescGrupo := Posicione("ACY",1,xFilial("ACY")+_cCodGrupo,"ACY_DESCRI")
             _ccodrep    := SF2->F2_VEND1
-            _cnomerep   := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodrep)),SA3->A3_NOME," ")
+            _cnomerep   := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodrep)),SA3->A3_NOME," ")
             _ccodsup    := SF2->F2_VEND4
-            _cnomesup   := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodsup)),SA3->A3_NOME," ")
+            _cnomesup   := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodsup)),SA3->A3_NOME," ")
             _ccodcoord  := SF2->F2_VEND2
-            _cnomecoord := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodcoord)),SA3->A3_NOME," ")
+            _cnomecoord := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodcoord)),SA3->A3_NOME," ")
             _ccodger    := SF2->F2_VEND3
-            _cnomeger   := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodger)),SA3->A3_NOME," ")  
+            _cnomeger   := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodger)),SA3->A3_NOME," ")  
             _cCodGNac    := SF2->F2_VEND5
-            _cNomeGNac   := IIF(SA3->(Dbseek(xfilial("SA3")+_cCodGNac)),SA3->A3_NOME," ")
+            _cNomeGNac   := IIf(SA3->(DBSeek(xFilial("SA3")+_cCodGNac)),SA3->A3_NOME," ")
             _lachou     := .T.
          Else
             _cRazaoCli  := Posicione("SA1",1,xFilial("SA1")+(_cAlias)->CODCLI+(_cAlias)->LOJA,"A1_NOME")
 			_cCodGrupo  := Posicione("SA1",1,xFilial("SA1")+(_cAlias)->CODCLI+(_cAlias)->LOJA,"A1_GRPVEN")
 			_cDescGrupo := Posicione("ACY",1,xFilial("ACY")+_cCodGrupo,"ACY_DESCRI")
             _ccodrep    := (_cAlias)->CODVEND
-            _cnomerep   := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodrep)),SA3->A3_NOME," ")
-            _ccodsup    := POSICIONE("SA3",1,xfilial("SA3")+(_cAlias)->CODVEND,"A3_I_SUPE")
-            _cnomesup   := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodsup)),SA3->A3_NOME," ")
-            _ccodcoord  := POSICIONE("SA3",1,xfilial("SA3")+(_cAlias)->CODVEND,"A3_SUPER")
-            _cnomecoord := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodcoord)),SA3->A3_NOME," ")
-            _ccodger    := POSICIONE("SA3",1,xfilial("SA3")+(_cAlias)->CODVEND,"A3_GEREN")
-            _cnomeger   := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodger)),SA3->A3_NOME," ")
-            _cCodGNac    := POSICIONE("SA3",1,xfilial("SA3")+(_cAlias)->CODVEND,"A3_I_GERNC")
-            _cNomeGNac   := IIF(SA3->(Dbseek(xfilial("SA3")+_cCodGNac)),SA3->A3_NOME," ")
+            _cnomerep   := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodrep)),SA3->A3_NOME," ")
+            _ccodsup    := Posicione("SA3",1,xFilial("SA3")+(_cAlias)->CODVEND,"A3_I_SUPE")
+            _cnomesup   := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodsup)),SA3->A3_NOME," ")
+            _ccodcoord  := Posicione("SA3",1,xFilial("SA3")+(_cAlias)->CODVEND,"A3_SUPER")
+            _cnomecoord := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodcoord)),SA3->A3_NOME," ")
+            _ccodger    := Posicione("SA3",1,xFilial("SA3")+(_cAlias)->CODVEND,"A3_GEREN")
+            _cnomeger   := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodger)),SA3->A3_NOME," ")
+            _cCodGNac    := Posicione("SA3",1,xFilial("SA3")+(_cAlias)->CODVEND,"A3_I_GERNC")
+            _cNomeGNac   := IIf(SA3->(DBSeek(xFilial("SA3")+_cCodGNac)),SA3->A3_NOME," ")
          EndIf
 				
          _ncomsup := 0
@@ -2849,57 +2849,57 @@ Begin Sequence
 		 _ncomrep := 0
 		 _nComGNac  := 0
 				
-		 SE3->(Dbsetorder(1))
-		 If SE3->(Dbseek((_cAlias)->FILIAL+(_cAlias)->PREFIXO+(_cAlias)->E3NUMORI+(_cAlias)->PARCELA+(_cAlias)->SEQ))
-			Do while SE3->E3_FILIAL == (_cAlias)->FILIAL .AND. ;
-			   SE3->E3_PREFIXO == (_cAlias)->PREFIXO .AND. ;
-			   SE3->E3_NUM == (_cAlias)->E3NUMORI .AND. ;
-			   SE3->E3_PARCELA == (_cAlias)->PARCELA .AND. ;
+		 SE3->(DBSetOrder(1))
+		 If SE3->(DBSeek((_cAlias)->FILIAL+(_cAlias)->PREFIXO+(_cAlias)->E3NUMORI+(_cAlias)->PARCELA+(_cAlias)->SEQ))
+			While SE3->E3_FILIAL == (_cAlias)->FILIAL .And. ;
+			   SE3->E3_PREFIXO == (_cAlias)->PREFIXO .And. ;
+			   SE3->E3_NUM == (_cAlias)->E3NUMORI .And. ;
+			   SE3->E3_PARCELA == (_cAlias)->PARCELA .And. ;
 			   SE3->E3_SEQ == (_cAlias)->SEQ
                
                If SE3->E3_VEND == _ccodrep //Representante
-                  _ncomrep := ROUND(_ncomrep + SE3->E3_COMIS ,3)
+                  _ncomrep := Round(_ncomrep + SE3->E3_COMIS ,3)
                EndIf
 			   
 			   If SE3->E3_VEND == _ccodsup  //Supervisor
-                  _ncomsup := ROUND(_ncomsup + SE3->E3_COMIS ,3)
+                  _ncomsup := Round(_ncomsup + SE3->E3_COMIS ,3)
                EndIf
                
                If SE3->E3_VEND == _ccodcoord  //Coordenador
-                  _ncomcoord := ROUND(_ncomcoord + SE3->E3_COMIS ,3)
+                  _ncomcoord := Round(_ncomcoord + SE3->E3_COMIS ,3)
                EndIf
 
                If SE3->E3_VEND == _ccodger  //Gerente
-                  _ncomger := ROUND(_ncomger + SE3->E3_COMIS ,3)
+                  _ncomger := Round(_ncomger + SE3->E3_COMIS ,3)
                EndIf
 
 			   If SE3->E3_VEND == _cCodGNac //Gerente Nacional
-                  _nComGNac := ROUND(_nComGNac + SE3->E3_COMIS ,3)
+                  _nComGNac := Round(_nComGNac + SE3->E3_COMIS ,3)
                EndIf
 
-               SE3->(Dbskip())
-            Enddo
+               SE3->(DBSkip())
+            EndDo
          EndIf
 
-         _nperrep := round(_ncomrep/(_cAlias)->BASECOMIS*100,3)
-         _nperrep := iif(_nperrep<0,-1*_nperrep,_nperrep)
+         _nperrep := Round(_ncomrep/(_cAlias)->BASECOMIS*100,3)
+         _nperrep := IIf(_nperrep<0,-1*_nperrep,_nperrep)
 				
-         _nbasecomis := iif((_cAlias)->COMISSAO<0,-1*(_cAlias)->BASECOMIS,(_cAlias)->BASECOMIS)
+         _nbasecomis := IIf((_cAlias)->COMISSAO<0,-1*(_cAlias)->BASECOMIS,(_cAlias)->BASECOMIS)
 				
-         _npersup := round(_ncomsup/(_cAlias)->BASECOMIS*100,3)
-         _npersup := iif(_npersup<0,-1*_npersup,_npersup)
+         _npersup := Round(_ncomsup/(_cAlias)->BASECOMIS*100,3)
+         _npersup := IIf(_npersup<0,-1*_npersup,_npersup)
 				
-         _npercoo := round(_ncomcoord/(_cAlias)->BASECOMIS*100,3)
-         _npercoo := iif(_npercoo<0,-1*_npercoo,_npercoo)
+         _npercoo := Round(_ncomcoord/(_cAlias)->BASECOMIS*100,3)
+         _npercoo := IIf(_npercoo<0,-1*_npercoo,_npercoo)
 				
-         _nperger := round(_ncomger/(_cAlias)->BASECOMIS*100,3)
-         _nperger := iif(_nperger<0,-1*_nperger,_nperger)
+         _nperger := Round(_ncomger/(_cAlias)->BASECOMIS*100,3)
+         _nperger := IIf(_nperger<0,-1*_nperger,_nperger)
 		 
-         _nPerGNac := round(_nComGNac/(_cAlias)->BASECOMIS*100,3)
+         _nPerGNac := Round(_nComGNac/(_cAlias)->BASECOMIS*100,3)
          _nPerGNac := IIf(_nPerGNac<0,-1*_nPerGNac,_nPerGNac)
 
-         _dtemissao := iif(!empty((_cAlias)->DTEMISSAO),stod((_cAlias)->DTEMISSAO),"")
-         _dtbaixa := iif(!empty((_cAlias)->DTBAIXA),stod((_cAlias)->DTBAIXA),"")
+         _dtemissao := IIf(!Empty((_cAlias)->DTEMISSAO),SToD((_cAlias)->DTEMISSAO),"")
+         _dtbaixa := IIf(!Empty((_cAlias)->DTBAIXA),SToD((_cAlias)->DTBAIXA),"")
 			
 		 _cNumeroNf := (_cAlias)->NUMERO
 		 _cSerieNf  := (_cAlias)->PARCELA
@@ -2910,17 +2910,17 @@ Begin Sequence
 
          //verifica se tem duplicata
          If Empty(MV_PAR07) .Or. ("G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07) // Imprime todos os dados // 1
-           _npl :=  ascan(_adados,{|_vAux|	_vAux[1]  == (_cAlias)->FILIAL .and. ;
-											_vAux[2]  == (_cAlias)->TIPO .and. ;
-											_vAux[3]  == _dtemissao .and. ;
-											_vAux[4]  == _dtbaixa .and. ;
-											_vAux[5]  == _cNumeroNf .and. ; // (_cAlias)->NUMERO .and. ;
-											_vAux[6]  == _cSerieNf .and. ; // (_cAlias)->PARCELA
-											_vAux[7]  == _cCodGrupo .and. ;
-											_vAux[8]  == _cDescGrupo .and. ;
-											_vAux[9]  == (_cAlias)->CODCLI .and. ;
-											_vAux[10] == (_cAlias)->LOJA .and. ;
-											_vAux[11] == _cRazaoCli .and. ;
+           _npl :=  aScan(_aDados,{|_vAux|	_vAux[1]  == (_cAlias)->FILIAL .And. ;
+											_vAux[2]  == (_cAlias)->TIPO .And. ;
+											_vAux[3]  == _dtemissao .And. ;
+											_vAux[4]  == _dtbaixa .And. ;
+											_vAux[5]  == _cNumeroNf .And. ; // (_cAlias)->NUMERO .And. ;
+											_vAux[6]  == _cSerieNf .And. ; // (_cAlias)->PARCELA
+											_vAux[7]  == _cCodGrupo .And. ;
+											_vAux[8]  == _cDescGrupo .And. ;
+											_vAux[9]  == (_cAlias)->CODCLI .And. ;
+											_vAux[10] == (_cAlias)->LOJA .And. ;
+											_vAux[11] == _cRazaoCli .And. ;
 											_vAux[47] == (_cAlias)->SEQ})
 
          ElseIf ("G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. "N" $ MV_PAR07) .Or. ; // Não imprime vendedor   
@@ -2929,31 +2929,31 @@ Begin Sequence
                 (! "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07) .Or. ; // Não imprime gerente 
                 ("G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07)        // Não imprime gerente nacional 
 										
-            _npl :=  ascan(_adados,{|_vAux|	_vAux[1]  == (_cAlias)->FILIAL .and. ;
-											_vAux[2]  == (_cAlias)->TIPO .and. ;
-											_vAux[3]  == _dtemissao .and. ;
-											_vAux[4]  == _dtbaixa .and. ;
-											_vAux[5]  == _cNumeroNf .and. ; // (_cAlias)->NUMERO .and. ;
-											_vAux[6]  == _cSerieNf .and. ; // (_cAlias)->PARCELA
-											_vAux[7]  == _cCodGrupo .and. ;
-											_vAux[8]  == _cDescGrupo .and. ;
-											_vAux[9]  == (_cAlias)->CODCLI .and. ;
-											_vAux[10] == (_cAlias)->LOJA .and. ;
-											_vAux[11] == _cRazaoCli .and. ;
+            _npl :=  aScan(_aDados,{|_vAux|	_vAux[1]  == (_cAlias)->FILIAL .And. ;
+											_vAux[2]  == (_cAlias)->TIPO .And. ;
+											_vAux[3]  == _dtemissao .And. ;
+											_vAux[4]  == _dtbaixa .And. ;
+											_vAux[5]  == _cNumeroNf .And. ; // (_cAlias)->NUMERO .And. ;
+											_vAux[6]  == _cSerieNf .And. ; // (_cAlias)->PARCELA
+											_vAux[7]  == _cCodGrupo .And. ;
+											_vAux[8]  == _cDescGrupo .And. ;
+											_vAux[9]  == (_cAlias)->CODCLI .And. ;
+											_vAux[10] == (_cAlias)->LOJA .And. ;
+											_vAux[11] == _cRazaoCli .And. ;
 											_vAux[41] == (_cAlias)->SEQ})
          Else
 
-            _npl :=  ascan(_adados,{|_vAux|	_vAux[1]  == (_cAlias)->FILIAL .and. ;
-											_vAux[2]  == (_cAlias)->TIPO .and. ;
-											_vAux[3]  == _dtemissao .and. ;
-											_vAux[4]  == _dtbaixa .and. ;
-											_vAux[5]  == _cNumeroNf .and. ; // (_cAlias)->NUMERO .and. ;
-											_vAux[6]  == _cSerieNf .and. ; // (_cAlias)->PARCELA
-											_vAux[7]  == _cCodGrupo .and. ;
-											_vAux[8]  == _cDescGrupo .and. ;
-											_vAux[9]  == (_cAlias)->CODCLI .and. ;
-											_vAux[10] == (_cAlias)->LOJA .and. ;
-											_vAux[11] == _cRazaoCli .and. ;
+            _npl :=  aScan(_aDados,{|_vAux|	_vAux[1]  == (_cAlias)->FILIAL .And. ;
+											_vAux[2]  == (_cAlias)->TIPO .And. ;
+											_vAux[3]  == _dtemissao .And. ;
+											_vAux[4]  == _dtbaixa .And. ;
+											_vAux[5]  == _cNumeroNf .And. ; // (_cAlias)->NUMERO .And. ;
+											_vAux[6]  == _cSerieNf .And. ; // (_cAlias)->PARCELA
+											_vAux[7]  == _cCodGrupo .And. ;
+											_vAux[8]  == _cDescGrupo .And. ;
+											_vAux[9]  == (_cAlias)->CODCLI .And. ;
+											_vAux[10] == (_cAlias)->LOJA .And. ;
+											_vAux[11] == _cRazaoCli .And. ;
 											_vAux[23] == (_cAlias)->SEQ})
 
          EndIf
@@ -3426,7 +3426,7 @@ Begin Sequence
             _aRegDados := ROMS025G(_aLinhaD, (_cAlias)->FILIAL, (_cAlias)->NUMERO, (_cAlias)->SERIE, (_cAlias)->CODCLI, (_cAlias)->LOJA,(_cAlias)->TIPO,_aLinhaAD)
             
             For _nI := 1 To Len(_aRegDados)
-                Aadd(_aDados, AClone(_aRegDados[_nI]))
+                aAdd(_aDados, AClone(_aRegDados[_nI]))
             Next
 
 			_aLinhaD :=  {}	
@@ -3439,10 +3439,10 @@ Begin Sequence
 		 
 		 _nTotReg := 0 
 		 
-		 If Ascan(_aVendBonif, MV_PAR06) == 0  // A Query da bonificação deve ser rodada apenas uma vez por vendedor
-		    Aadd(_aVendBonif, MV_PAR06)
+		 If aScan(_aVendBonif, MV_PAR06) == 0  // A Query da bonificação deve ser rodada apenas uma vez por vendedor
+		    aAdd(_aVendBonif, MV_PAR06)
 		    
-		    fwMsgRun(,{|oproc|ROMS025QRY(_cAlias3,3,oproc)},"Aguarde....","Filtrando os dados bonificação.")    
+		    FWMsgRun(,{|oproc|ROMS025QRY(_cAlias3,3,oproc)},"Aguarde....","Filtrando os dados bonificação.")    
 		 		
   		    DBSelectArea(_cAlias3)
 		    (_cAlias3)->( DBGoTop() )
@@ -3452,7 +3452,7 @@ Begin Sequence
          
          If _nTotReg > 0
 			_nConAux := 0
-			Do While (_cAlias3)->( !Eof() )
+			While (_cAlias3)->( !Eof() )
 			   _nConAux++
 			   oproc:cCaption := 'Processando bonificações... ['+ StrZero(_nConAux,9) +'] de ['+ StrZero(_nTotReg,9) +'].'
 			   ProcessMessages()
@@ -3462,21 +3462,21 @@ Begin Sequence
 			   _cDescGrupo := Posicione("ACY",1,xFilial("ACY")+_cCodGrupo,"ACY_DESCRI")
 			   _cCodVen := (_cAlias3)->F2_VEND1
 			   _ccodsup :=  (_cAlias3)->F2_VEND4
-			   _cnomesup := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodsup)),SA3->A3_NOME," ")
+			   _cnomesup := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodsup)),SA3->A3_NOME," ")
 			   _ccodcoord := (_cAlias3)->F2_VEND2
-			   _cnomecoord := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodcoord)),SA3->A3_NOME," ")
+			   _cnomecoord := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodcoord)),SA3->A3_NOME," ")
 		       _ccodger := (_cAlias3)->F2_VEND3
-			   _cnomeger := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodger)),SA3->A3_NOME," ")
+			   _cnomeger := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodger)),SA3->A3_NOME," ")
 
 			   _cCodGNac := (_cAlias3)->F2_VEND5
-               _cNomeGNac := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodger)),SA3->A3_NOME," ")
+               _cNomeGNac := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodger)),SA3->A3_NOME," ")
 			   
-			   If ascan(_adados, {|_vAux| _vAux[1]==(_cAlias3)->F2_FILIAL .and. _vAux[2]=="BON" .and. _vAux[5]==(_cAlias3)->F2_DOC}) ==  0
+			   If aScan(_aDados, {|_vAux| _vAux[1]==(_cAlias3)->F2_FILIAL .And. _vAux[2]=="BON" .And. _vAux[5]==(_cAlias3)->F2_DOC}) ==  0
 				  // Incrementa array para geração de excel
                   If Empty(MV_PAR07) .Or. ("G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07 ) // Imprime todos os dados  // 1
 				     _aLinhaD :=  {(_cAlias3)->F2_FILIAL	,;					                                          // 01
 								   "BON",;													                              // 02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                  // 03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                  // 03
 								   "  ",;													                              // 04
 								   (_cAlias3)->F2_DOC,;									                                  // 05
 								   "  ",;													                              // 06
@@ -3491,7 +3491,7 @@ Begin Sequence
 								   0,;													                                  // 15
 								   (_cAlias3)->VALTOT*-1,;							                                      // 16
 								   _cCodVen,;												                              // 17
-								   POSICIONE("SA3",1,xfilial("SA3")+_cCodVen,"A3_NOME"),;	                              // 18
+								   Posicione("SA3",1,xFilial("SA3")+_cCodVen,"A3_NOME"),;	                              // 18
 								   _ccodsup,;												                              // 19
 								   _cnomesup,;												                              // 20
 								   _ccodcoord,;											                                  // 21
@@ -3500,24 +3500,24 @@ Begin Sequence
 								   _cnomeger,;												                              // 24
                                    _cCodGNac,;                                                                            // 25
                                    _cNomeGNac,;                                                                           // 26 
-								   U_ROMS025I(round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					  // 25-->27 
-								   U_ROMS025I(round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  // 26-->28 
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					  // 25-->27 
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  // 26-->28 
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                    // 27-->29  "% Com Nota Rep"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                    // 28-->30  "Media % Sistemica Rep"
-								   U_ROMS025I(round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					  // 29-->31  "Vlr Com Sup"
-								   U_ROMS025I(round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  // 30-->32  "% Com Sup"	
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					  // 29-->31  "Vlr Com Sup"
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  // 30-->32  "% Com Sup"	
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                    // 31-->33  "% Com Nota Sup"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                    // 32-->34  "Media % Sistemica Sup"
-								   U_ROMS025I(round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					  // 33-->35  "Vlr Com Cood"
-								   U_ROMS025I(round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  // 34-->36  "% Com Cood"
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					  // 33-->35  "Vlr Com Cood"
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  // 34-->36  "% Com Cood"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                    // 35-->37  "% Com Nota Coord"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                    // 36-->38  "Media % Sistemica Coord"
-								   U_ROMS025I(round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					  // 37-->39  "Vlr Com Ger"
-								   U_ROMS025I(round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  // 38-->40  "% Com Ger"	
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					  // 37-->39  "Vlr Com Ger"
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  // 38-->40  "% Com Ger"	
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                    // 39-->41  "% Com Nota Ger"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                    // 40-->42  "Media % Sistemica Ger"
-                                   U_ROMS025I(round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					  // 43 "Vlr Com Ger Nac"
-								   U_ROMS025I(round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  // 44 "% Com Ger Nac"	
+                                   U_ROMS025I(Round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					  // 43 "Vlr Com Ger Nac"
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  // 44 "% Com Ger Nac"	
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                    // 45 "% Com Nota Ger Nac"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                    // 46 "Media % Sistemica Ger Nac"
 								   " ";                                                                                   // 41-->47  "Sequenc.Comissão"
@@ -3530,7 +3530,7 @@ Begin Sequence
                   ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. "N" $ MV_PAR07 //  Não imprime vendedor  // 2
 				     _aLinhaD :=  {(_cAlias3)->F2_FILIAL	,;					                                           // 01
 								   "BON",;													                               // 02
-							       DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   // 03
+							       DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   // 03
 								   "  ",;													                               // 04
 								   (_cAlias3)->F2_DOC,;									                                   // 05
 								   "  ",;													                               // 06
@@ -3552,20 +3552,20 @@ Begin Sequence
 								   _cnomeger,;												                               // 22
                                    _cCodGNac,;                                                                             // 23
                                    _cNomeGNac,;                                                                            // 24 
-								   U_ROMS025I(round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   // 23-->25 
-								   U_ROMS025I(round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 24-->26 
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   // 23-->25 
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 24-->26 
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 25-->27   "% Com Nota Sup"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 26-->28   "Media % Sistemica Sup"
-								   U_ROMS025I(round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   // 27-->29   "Vlr Com Cood"
-								   U_ROMS025I(round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 28-->30   "% Com Cood"
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   // 27-->29   "Vlr Com Cood"
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 28-->30   "% Com Cood"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 29-->31   "% Com Nota Coord"   
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 30-->32   "Media % Sistemica Coord" 
-								   U_ROMS025I(round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   // 31-->33   "Vlr Com Ger"
-								   U_ROMS025I(round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 32-->34   "% Com Ger"
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   // 31-->33   "Vlr Com Ger"
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 32-->34   "% Com Ger"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 33-->35   "% Com Nota Ger"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 34-->36   "Media % Sistemica Ger"
-                                   U_ROMS025I(round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   // 37  "Vlr Com Ger Nac"
-								   U_ROMS025I(round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 38  "% Com Ger Nac"	
+                                   U_ROMS025I(Round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   // 37  "Vlr Com Ger Nac"
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 38  "% Com Ger Nac"	
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 39  "% Com Nota Ger Nac"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 40  "Media % Sistemica Ger Nac"
 								   " ";                                                                                    // 35-->41  "Sequenc.Comissão"
@@ -3578,7 +3578,7 @@ Begin Sequence
                   ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07 // Não imprime supervisor // 3
 				     _aLinhaD :=  {(_cAlias3)->F2_FILIAL	,;					                                           // 01
 								   "BON",;													                               // 02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   // 03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   // 03
 								   "  ",;													                               // 04
 								   (_cAlias3)->F2_DOC,;									                                   // 05
 								   "  ",;													                               // 06
@@ -3593,27 +3593,27 @@ Begin Sequence
 								   0,;													                                   // 15
 								   (_cAlias3)->VALTOT*-1,;							                                       // 16
 								   _cCodVen,;												                               // 17
-								   POSICIONE("SA3",1,xfilial("SA3")+_cCodVen,"A3_NOME"),;	                               // 18
+								   Posicione("SA3",1,xFilial("SA3")+_cCodVen,"A3_NOME"),;	                               // 18
 								   _ccodcoord,;											                                   // 19
 								   _cnomecoord,;											                               // 20
 								   _ccodger,;												                               // 21
 								   _cnomeger,;												                               // 22
                                    _cCodGNac,;                                                                             // 23
                                    _cNomeGNac,;                                                                            // 24 
-								   U_ROMS025I(round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   // 23-->25
-								   U_ROMS025I(round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 24-->26 
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   // 23-->25
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 24-->26 
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 25-->27   "% Com Nota Rep"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 26-->28   "Media % Sistemica Rep"
-								   U_ROMS025I(round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   // 27-->29   "Vlr Com Cood"
-								   U_ROMS025I(round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 28-->30   "% Com Cood"
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   // 27-->29   "Vlr Com Cood"
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 28-->30   "% Com Cood"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 29-->31   "% Com Nota Coord"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 30-->32   "Media % Sistemica Coord"
-								   U_ROMS025I(round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   // 31-->33   "Vlr Com Ger"
-								   U_ROMS025I(round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 32-->34   "% Com Ger"
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   // 31-->33   "Vlr Com Ger"
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 32-->34   "% Com Ger"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 33-->35   "% Com Nota Ger"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 34-->36   "Media % Sistemica Ger"
-                                   U_ROMS025I(round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   // 37 "Vlr Com Ger Nac"
-								   U_ROMS025I(round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 38 "% Com Ger Nac"	
+                                   U_ROMS025I(Round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   // 37 "Vlr Com Ger Nac"
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 38 "% Com Ger Nac"	
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 39 "% Com Nota Ger Nac"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 40 "Media % Sistemica Ger Nac"
 								   " ";                                                                                    // 35-->41  "Sequenc.Comissão"
@@ -3626,7 +3626,7 @@ Begin Sequence
                   ElseIf "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07// Não imprime Coordenador  // 4 
 				     _aLinhaD :=  {(_cAlias3)->F2_FILIAL	,;					                                           // 01
 								   "BON",;													                               // 02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   // 03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   // 03
 								   "  ",;													                               // 04
 								   (_cAlias3)->F2_DOC,;									                                   // 05
 								   "  ",;													                               // 06
@@ -3641,27 +3641,27 @@ Begin Sequence
 								   0,;													                                   // 15
 								   (_cAlias3)->VALTOT*-1,;							                                       // 16
 								   _cCodVen,;												                               // 17
-								   POSICIONE("SA3",1,xfilial("SA3")+_cCodVen,"A3_NOME"),;	                               // 18
+								   Posicione("SA3",1,xFilial("SA3")+_cCodVen,"A3_NOME"),;	                               // 18
 								   _ccodsup,;												                               // 19
 								   _cnomesup,;												                               // 20
 								   _ccodger,;												                               // 21
 								   _cnomeger,;												                               // 22
                                    _cCodGNac,;                                                                             // 23
                                    _cNomeGNac,;                                                                            // 24 
-								   U_ROMS025I(round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   // 23-->25
-								   U_ROMS025I(round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 24-->26
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   // 23-->25
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 24-->26
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 25-->27  "% Com Nota Rep"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 26-->28  "Media % Sistemica Rep"
-								   U_ROMS025I(round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   // 27-->29  "Vlr Com Sup"
-								   U_ROMS025I(round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 28-->30  "% Com Sup"
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   // 27-->29  "Vlr Com Sup"
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 28-->30  "% Com Sup"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 29-->31  "% Com Nota Sup"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 30-->32  "Media % Sistemica Sup"
-								   U_ROMS025I(round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   // 31-->33  "Vlr Com Ger"
-								   U_ROMS025I(round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 32-->34  "% Com Ger"
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   // 31-->33  "Vlr Com Ger"
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 32-->34  "% Com Ger"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 33-->35  "% Com Nota Ger"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 34-->36  "Media % Sistemica Ger"
-                                   U_ROMS025I(round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   // 37 "Vlr Com Ger Nac"
-								   U_ROMS025I(round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 38 "% Com Ger Nac"	
+                                   U_ROMS025I(Round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   // 37 "Vlr Com Ger Nac"
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 38 "% Com Ger Nac"	
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 39 "% Com Nota Ger Nac"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 40 "Media % Sistemica Ger Nac"
 								   " ";                                                                                    // 35-->41  "Sequenc.Comissão"
@@ -3674,7 +3674,7 @@ Begin Sequence
                   ElseIf ! "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07// Não imprime gerente  // 5
 				     _aLinhaD :=  {(_cAlias3)->F2_FILIAL	,;					                                           // 01
 								   "BON",;													                               // 02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   // 03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   // 03
 								   "  ",;													                               // 04
 								   (_cAlias3)->F2_DOC,;									                                   // 05
 								   "  ",;													                               // 06
@@ -3689,27 +3689,27 @@ Begin Sequence
 								   0,;													                                   // 15
 								   (_cAlias3)->VALTOT*-1,;							                                       // 16
 								   _cCodVen,;												                               // 17
-								   POSICIONE("SA3",1,xfilial("SA3")+_cCodVen,"A3_NOME"),;	                               // 18
+								   Posicione("SA3",1,xFilial("SA3")+_cCodVen,"A3_NOME"),;	                               // 18
 								   _ccodsup,;												                               // 19
 								   _cnomesup,;												                               // 20
 								   _ccodcoord,;											                                   // 21
 								   _cnomecoord,;											                               // 22
                                    _cCodGNac,;                                                                             // 23
                                    _cNomeGNac,;                                                                            // 24 
-								   U_ROMS025I(round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   // 23-->25
-								   U_ROMS025I(round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 24-->26
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   // 23-->25
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 24-->26
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 25-->27  "% Com Nota Rep"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 26-->28  "Media % Sistemica Rep"
-								   U_ROMS025I(round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   // 27-->29  "Vlr Com Sup"
-								   U_ROMS025I(round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 28-->30  "% Com Sup"	
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   // 27-->29  "Vlr Com Sup"
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 28-->30  "% Com Sup"	
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 29-->31  "% Com Nota Sup"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 30-->32  "Media % Sistemica Sup"
-								   U_ROMS025I(round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   // 31-->33  "Vlr Com Cood"
-								   U_ROMS025I(round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 32-->34  "% Com Cood"
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   // 31-->33  "Vlr Com Cood"
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 32-->34  "% Com Cood"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 33-->35  "% Com Nota Coord" 
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 34-->36  "Media % Sistemica Coord"
-                                   U_ROMS025I(round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   // 37 "Vlr Com Ger Nac"
-								   U_ROMS025I(round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 38 "% Com Ger Nac"	
+                                   U_ROMS025I(Round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   // 37 "Vlr Com Ger Nac"
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 38 "% Com Ger Nac"	
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 39 "% Com Nota Ger Nac"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 40 "Media % Sistemica Ger Nac"
 								   " ";                                                                                    // 35-->41 "Sequenc.Comissão"
@@ -3722,7 +3722,7 @@ Begin Sequence
                   ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07 // Não imprime gerente Nacional // 5
 				     _aLinhaD :=  {(_cAlias3)->F2_FILIAL	,;					                                           // 01
 								   "BON",;													                               // 02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   // 03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   // 03
 								   "  ",;													                               // 04
 								   (_cAlias3)->F2_DOC,;									                                   // 05
 								   "  ",;													                               // 06
@@ -3737,27 +3737,27 @@ Begin Sequence
 								   0,;													                                   // 15
 								   (_cAlias3)->VALTOT*-1,;							                                       // 16
 								   _cCodVen,;												                               // 17
-								   POSICIONE("SA3",1,xfilial("SA3")+_cCodVen,"A3_NOME"),;	                               // 18
+								   Posicione("SA3",1,xFilial("SA3")+_cCodVen,"A3_NOME"),;	                               // 18
 								   _ccodsup,;												                               // 19
 								   _cnomesup,;												                               // 20
 								   _ccodcoord,;											                                   // 21
 								   _cnomecoord,;											                               // 22
 								   _ccodger,;												                               // 23
 								   _cnomeger,;												                               // 24
-								   U_ROMS025I(round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   // 23-->25
-								   U_ROMS025I(round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 24-->26
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   // 23-->25
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 24-->26
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 25-->27  "% Com Nota Rep"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 26-->28  "Media % Sistemica Rep"
-								   U_ROMS025I(round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   // 27-->29  "Vlr Com Sup"
-								   U_ROMS025I(round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 28-->30  "% Com Sup"	
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   // 27-->29  "Vlr Com Sup"
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 28-->30  "% Com Sup"	
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 29-->31  "% Com Nota Sup"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 30-->32  "Media % Sistemica Sup"
-								   U_ROMS025I(round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   // 31-->33  "Vlr Com Cood"
-								   U_ROMS025I(round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 32-->34  "% Com Cood"
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   // 31-->33  "Vlr Com Cood"
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 32-->34  "% Com Cood"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 33-->35  "% Com Nota Coord" 
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 34-->36  "Media % Sistemica Coord"
-								   U_ROMS025I(round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   // 37  "Vlr Com Ger"
-								   U_ROMS025I(round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 38  "% Com Ger"
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   // 37  "Vlr Com Ger"
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 38  "% Com Ger"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 39  "% Com Nota Ger"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 40  "Media % Sistemica Ger"
 								   " ";                                                                                    // 35-->41  "Sequenc.Comissão"
@@ -3770,7 +3770,7 @@ Begin Sequence
                   ElseIf ! "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. "N" $ MV_PAR07 // imprime apenas gerente nacional
 				     _aLinhaD :=  {(_cAlias3)->F2_FILIAL	,;					                                           // 01
 								   "BON",;													                               // 02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   // 03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   // 03
 								   "  ",;													                               // 04
 								   (_cAlias3)->F2_DOC,;									                                   // 05
 								   "  ",;													                               // 06
@@ -3786,8 +3786,8 @@ Begin Sequence
 								   (_cAlias3)->VALTOT*-1,;							                                       // 16
 								   _cCodGNac,;                                                                             // 17
                                    _cNomeGNac,;                                                                            // 18 
-								   U_ROMS025I(round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   // 19 "Vlr Com Ger Nac"
-								   U_ROMS025I(round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 20 "% Com Ger Nac"	
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   // 19 "Vlr Com Ger Nac"
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 20 "% Com Ger Nac"	
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 21 "% Com Nota Ger Nac"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 22 "Media % Sistemica Ger Nac"
 								   " ";                                                                                    // 23 "Sequenc.Comissão"
@@ -3800,7 +3800,7 @@ Begin Sequence
                   ElseIf "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07// imprime apenas gerente // 6
 				     _aLinhaD :=  {(_cAlias3)->F2_FILIAL	,;					                                           // 01
 								   "BON",;													                               // 02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   // 03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   // 03
 								   "  ",;													                               // 04
 								   (_cAlias3)->F2_DOC,;									                                   // 05
 								   "  ",;													                               // 06
@@ -3816,8 +3816,8 @@ Begin Sequence
 								   (_cAlias3)->VALTOT*-1,;							                                       // 16
 								   _ccodger,;												                               // 17
 								   _cnomeger,;												                               // 18
-								   U_ROMS025I(round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   // 19
-								   U_ROMS025I(round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 20
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   // 19
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 20
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 21 "% Com Nota Ger"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 22 "Media % Sistemica Ger"
 								   " ";                                                                                    // 23 "Sequenc.Comissão"
@@ -3830,7 +3830,7 @@ Begin Sequence
                   ElseIf ! "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07 // imprime apenas Coordenador // 7
 				     _aLinhaD :=  {(_cAlias3)->F2_FILIAL	,;					                                           // 01
 							       "BON",;													                               // 02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   // 03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   // 03
 								   "  ",;													                               // 04
 								   (_cAlias3)->F2_DOC,;									                                   // 05
 								   "  ",;													                               // 06
@@ -3846,8 +3846,8 @@ Begin Sequence
 								   (_cAlias3)->VALTOT*-1,;							                                       // 16
 								   _ccodcoord,;											                                   // 17
 								   _cnomecoord,;											                               // 18
-								   U_ROMS025I(round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   // 19
-								   U_ROMS025I(round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 20
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   // 19
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 20
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 21 "% Com Nota Coord"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 22 "Media % Sistemica Coord"
 								   " ";                                                                                    // 23 "Sequenc.Comissão"
@@ -3860,7 +3860,7 @@ Begin Sequence
                   ElseIf ! "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07 // imprime apenas supervisor // 8 
 				     _aLinhaD :=  {(_cAlias3)->F2_FILIAL	,;					                                           // 01
 								   "BON",;													                               // 02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   // 03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   // 03
 								   "  ",;													                               // 04
 								   (_cAlias3)->F2_DOC,;									                                   // 05
 								   "  ",;													                               // 06
@@ -3876,8 +3876,8 @@ Begin Sequence
 								   (_cAlias3)->VALTOT*-1,;							                                       // 16
 								   _ccodsup,;												                               // 17
 								   _cnomesup,;												                               // 18
-								   U_ROMS025I(round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   // 19
-				    			   U_ROMS025I(round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 20
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   // 19
+				    			   U_ROMS025I(Round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 20
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 21 "% Com Nota Sup"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 22 "Media % Sistemica Sup"
 								   " ";                                                                                    // 23 "Sequenc.Comissão"
@@ -3890,7 +3890,7 @@ Begin Sequence
                   ElseIf ! "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07 // imprime apenas vendedor // 9 
 				     _aLinhaD :=  {(_cAlias3)->F2_FILIAL	,;					                                           // 01
 								   "BON",;													                               // 02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   // 03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   // 03
 								   "  ",;													                               // 04
 								   (_cAlias3)->F2_DOC,;									                                   // 05
 								   "  ",;													                               // 06
@@ -3905,9 +3905,9 @@ Begin Sequence
 								   0,;													                                   // 15
 								   (_cAlias3)->VALTOT*-1,;							                                       // 16
 								   _cCodVen,;												                               // 17
-								   POSICIONE("SA3",1,xfilial("SA3")+_cCodVen,"A3_NOME"),;	                               // 18
-								   U_ROMS025I(round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   // 19
-								   U_ROMS025I(round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 20
+								   Posicione("SA3",1,xFilial("SA3")+_cCodVen,"A3_NOME"),;	                               // 18
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   // 19
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   // 20
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 21 "% Com Nota Rep"
                                    U_ROMS025I(0,"@E 999,999,999.999"),;                                                     // 22 "Media % Sistemica Rep"
 								   " ";                                                                                    // 23 "Sequenc.Comissão"
@@ -3927,18 +3927,18 @@ Begin Sequence
                   _aRegDados := ROMS025G(_aLinhaD, (_cAlias3)->F2_FILIAL, (_cAlias3)->F2_DOC, (_cAlias3)->F2_SERIE, (_cAlias3)->F2_CLIENTE, (_cAlias3)->F2_LOJA,"BON",_aLinhaAD)
             
                   For _nI := 1 To Len(_aRegDados)
-                      Aadd(_aDados, AClone(_aRegDados[_nI]))
+                      aAdd(_aDados, AClone(_aRegDados[_nI]))
                   Next
 
 				  _aLinhaD :=  {}	
 
                EndIf
 			   
-			   (_cAlias3)->( Dbskip() )
-			Enddo
+			   (_cAlias3)->( DBSkip() )
+			EndDo
 		 EndIf					
 		 
-		 (_cAlias)->(DbSkip())
+		 (_cAlias)->(DBSkip())
 		 
 	  EndDo
    EndIf
@@ -3950,8 +3950,8 @@ MV_PAR06 := _cMVPAR05   // Filtro Vendedor
 //==========================
 //Finaliza o alias criado.
 //==========================
-dbSelectArea(_cAlias)
-(_cAlias)->(dbCloseArea())    
+DBSelectArea(_cAlias)
+(_cAlias)->(DBCloseArea())    
 
 Return 
 
@@ -4035,18 +4035,18 @@ Begin Sequence
    // Nota Fiscal de Devolução - Deve-se localizar a nota fiscal de origem.
    //==========================================================================
    If AllTrim(_cTipoDoc) == "NCC"   // DEVOLUÇÃO
-      SD1->(DbSetOrder(1)) // D1_FILIAL+D1_DOC+D1_SERIE+D1_FORNECE+D1_LOJA+D1_COD+D1_ITEM                                                                                                     
-      If SD1->(DbSeek(U_ItKey(_cFilialNF,"D1_FILIAL")+U_ItKey(_cNRNF,"D1_DOC")+U_ItKey(_cSerieNf,"D1_SERIE")+U_ItKey(_cCodCli,"D1_FORNECE")+U_ItKey(_cLojaCli,"D1_LOJA")))
-	     SF1->(DbSetOrder(1)) // F1_FILIAL+F1_DOC+F1_SERIE+F1_FORNECE+F1_LOJA+F1_TIPO
+      SD1->(DBSetOrder(1)) // D1_FILIAL+D1_DOC+D1_SERIE+D1_FORNECE+D1_LOJA+D1_COD+D1_ITEM                                                                                                     
+      If SD1->(DBSeek(U_ItKey(_cFilialNF,"D1_FILIAL")+U_ItKey(_cNRNF,"D1_DOC")+U_ItKey(_cSerieNf,"D1_SERIE")+U_ItKey(_cCodCli,"D1_FORNECE")+U_ItKey(_cLojaCli,"D1_LOJA")))
+	     SF1->(DBSetOrder(1)) // F1_FILIAL+F1_DOC+F1_SERIE+F1_FORNECE+F1_LOJA+F1_TIPO
 
-         Do While ! SD1->(Eof()) .And. SD1->(D1_FILIAL+D1_DOC+D1_SERIE+D1_FORNECE+D1_LOJA) == U_ItKey(_cFilialNF,"D1_FILIAL")+U_ItKey(_cNRNF,"D1_DOC")+U_ItKey(_cSerieNf,"D1_SERIE")+U_ItKey(_cCodCli,"D1_FORNECE")+U_ItKey(_cLojaCli,"D1_LOJA")
-		    SF1->(DbSeek(SD1->(D1_FILIAL+D1_DOC+D1_SERIE+D1_FORNECE+D1_LOJA)))
+         While ! SD1->(Eof()) .And. SD1->(D1_FILIAL+D1_DOC+D1_SERIE+D1_FORNECE+D1_LOJA) == U_ItKey(_cFilialNF,"D1_FILIAL")+U_ItKey(_cNRNF,"D1_DOC")+U_ItKey(_cSerieNf,"D1_SERIE")+U_ItKey(_cCodCli,"D1_FORNECE")+U_ItKey(_cLojaCli,"D1_LOJA")
+		    SF1->(DBSeek(SD1->(D1_FILIAL+D1_DOC+D1_SERIE+D1_FORNECE+D1_LOJA)))
             _nTotNF := SF1->F1_VALMERC
             _nPercItem := SD1->D1_TOTAL / SF1->F1_VALMERC
 
             _aLinhaNF := {}
             For _nI := 1 To Len(_aDadosR)
-                Aadd(_aLinhaNF, _aDadosR[_nI])
+                aAdd(_aLinhaNF, _aDadosR[_nI])
             Next
 
             _aComiss     := U_ROMS025B(SD1->D1_FILIAL,SD1->D1_DOC,SD1->D1_SERIE,SD1->D1_FORNECE,SD1->D1_LOJA,SD1->D1_COD)
@@ -4513,46 +4513,46 @@ Begin Sequence
             _cDescPrd := Posicione("SB1",1,xFilial("SB1")+SD1->D1_COD,"B1_DESC")     // Desc. Prod.
             _cBIMIX   := Posicione("SB1",1,xFilial("SB1")+SD1->D1_COD,"B1_I_BIMIX")  // Mix BI
             
-			Aadd(_aLinhaNF, _cBIMIX        )    // Mix BI
-            Aadd(_aLinhaNF, SD1->D1_ITEM   )    // "Item"           
-            Aadd(_aLinhaNF, SD1->D1_COD    )    // "Produto"           
-            Aadd(_aLinhaNF, _cDescPrd      )    // "Descrição"        
-			Aadd(_aLinhaNF, U_ROMS025I(SD1->D1_PICM,"@E 999,999,999.999"))          // "Aliq.%"           
-            Aadd(_aLinhaNF, U_ROMS025I(SD1->D1_QUANT,"@E 999,999,999.999"))         // "Qtde"             
-			Aadd(_aLinhaNF, SD1->D1_UM     )    // "U.M."               
-			Aadd(_aLinhaNF, U_ROMS025I(SD1->D1_QTSEGUM,"@E 999,999,999.999"))       // "Qtde 2a U.M."  
-            Aadd(_aLinhaNF, SD1->D1_SEGUM  )    // "2a U.M."         
-            Aadd(_aLinhaNF, U_ROMS025I(SD1->D1_VUNIT,"@E 999,999,999.999"))         // "Vlr.Uni."        
-            Aadd(_aLinhaNF, U_ROMS025I(SD1->D1_TOTAL,"@E 999,999,999.999"))         // "Valor Total"     
+			aAdd(_aLinhaNF, _cBIMIX        )    // Mix BI
+            aAdd(_aLinhaNF, SD1->D1_ITEM   )    // "Item"           
+            aAdd(_aLinhaNF, SD1->D1_COD    )    // "Produto"           
+            aAdd(_aLinhaNF, _cDescPrd      )    // "Descrição"        
+			aAdd(_aLinhaNF, U_ROMS025I(SD1->D1_PICM,"@E 999,999,999.999"))          // "Aliq.%"           
+            aAdd(_aLinhaNF, U_ROMS025I(SD1->D1_QUANT,"@E 999,999,999.999"))         // "Qtde"             
+			aAdd(_aLinhaNF, SD1->D1_UM     )    // "U.M."               
+			aAdd(_aLinhaNF, U_ROMS025I(SD1->D1_QTSEGUM,"@E 999,999,999.999"))       // "Qtde 2a U.M."  
+            aAdd(_aLinhaNF, SD1->D1_SEGUM  )    // "2a U.M."         
+            aAdd(_aLinhaNF, U_ROMS025I(SD1->D1_VUNIT,"@E 999,999,999.999"))         // "Vlr.Uni."        
+            aAdd(_aLinhaNF, U_ROMS025I(SD1->D1_TOTAL,"@E 999,999,999.999"))         // "Valor Total"     
 
-            Aadd(_aLinhaNF, SD1->D1_NFORI  )    // "NF.Origem"       
-            Aadd(_aLinhaNF, SD1->D1_SERIORI)    // "Serie Origem"  
+            aAdd(_aLinhaNF, SD1->D1_NFORI  )    // "NF.Origem"       
+            aAdd(_aLinhaNF, SD1->D1_SERIORI)    // "Serie Origem"  
             
             For i := 1 to Len(_aDadosRAD)
-               AADD(_aLinhaNF,_aDadosRAD[i])
+               aAdd(_aLinhaNF,_aDadosRAD[i])
             Next
 
-            Aadd(_aRet, AClone(_aLinhaNF))
+            aAdd(_aRet, AClone(_aLinhaNF))
                         
-            SD1->(DbSkip())
+            SD1->(DBSkip())
          EndDo
       Else
          _aLinhaNF := {}
          For _nI := 1 To Len(_aDadosR)
-             Aadd(_aLinhaNF, _aDadosR[_nI])
+             aAdd(_aLinhaNF, _aDadosR[_nI])
          Next
          
-         //SE1->(DbSetOrder(31)) // 31 - V - E1_FILIAL+E1_NUM+E1_SERIE+E1_CLIENTE+E1_LOJA    
-         SE1->(DbSetOrder(2)) // E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO    
+         //SE1->(DBSetOrder(31)) // 31 - V - E1_FILIAL+E1_NUM+E1_SERIE+E1_CLIENTE+E1_LOJA    
+         SE1->(DBSetOrder(2)) // E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO    
          
-         If SE1->(DbSeek(U_ItKey(_cFilialNF,"E1_FILIAL")+U_ItKey(_cCodCli,"E1_CLIENTE")+U_ItKey(_cLojaCli,"E1_LOJA")+U_ItKey("DCT","E1_PREFIXO")+U_ItKey(_cNRNF,"E1_NUM")  ))
-            Do While ! SE1->(Eof()) .And. SE1->(E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM) == U_ItKey(_cFilialNF,"E1_FILIAL")+U_ItKey(_cCodCli,"E1_CLIENTE")+U_ItKey(_cLojaCli,"E1_LOJA")+U_ItKey("DCT","E1_PREFIXO")+U_ItKey(_cNRNF,"E1_NUM")
+         If SE1->(DBSeek(U_ItKey(_cFilialNF,"E1_FILIAL")+U_ItKey(_cCodCli,"E1_CLIENTE")+U_ItKey(_cLojaCli,"E1_LOJA")+U_ItKey("DCT","E1_PREFIXO")+U_ItKey(_cNRNF,"E1_NUM")  ))
+            While ! SE1->(Eof()) .And. SE1->(E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM) == U_ItKey(_cFilialNF,"E1_FILIAL")+U_ItKey(_cCodCli,"E1_CLIENTE")+U_ItKey(_cLojaCli,"E1_LOJA")+U_ItKey("DCT","E1_PREFIXO")+U_ItKey(_cNRNF,"E1_NUM")
                If AllTrim(SE1->E1_TIPO) == "NCC" .And. AllTrim(SE1->E1_PREFIXO) == "DCT"
                   _aLinhaNF[2] := "DCT"
                   Exit
                EndIf
                
-               SE1->(DbSkip())
+               SE1->(DBSkip())
             EndDo
          EndIf
 
@@ -4642,26 +4642,26 @@ Begin Sequence
 		 EndIf
 
          For i := 1 to Len(_aDadosRAD)
-            AADD(_aLinhaNF,_aDadosRAD[i])
+            aAdd(_aLinhaNF,_aDadosRAD[i])
          Next
 		 
-       Aadd(_aLinhaNF, "" )    // Mix BI
-         Aadd(_aLinhaNF, "" )    // "Item"           
-         Aadd(_aLinhaNF, "" )    // "Produto"           
-         Aadd(_aLinhaNF, "" )    // "Descrição"        
-         Aadd(_aLinhaNF, U_ROMS025I(0 ,"@E 999,999,999.99"))    // "Aliq.%"           
-         Aadd(_aLinhaNF, U_ROMS025I(0 ,"@E 999,999,999.99"))    // "Qtde"             
-         Aadd(_aLinhaNF, "" )    // "U.M."               
-         Aadd(_aLinhaNF, U_ROMS025I(0 ,"@E 999,999,999.99"))    // "Qtde 2a U.M."  
-         Aadd(_aLinhaNF, "" )    // "2a U.M."         
-         Aadd(_aLinhaNF, U_ROMS025I(0 ,"@E 999,999,999.99"))    // "Vlr.Uni."        
-         Aadd(_aLinhaNF, U_ROMS025I(0 ,"@E 999,999,999.99"))    // "Valor Total"     
-         Aadd(_aLinhaNF, "" )    // "NF.Origem"       
-         Aadd(_aLinhaNF, "" )    // "Serie Origem"  
+       aAdd(_aLinhaNF, "" )    // Mix BI
+         aAdd(_aLinhaNF, "" )    // "Item"           
+         aAdd(_aLinhaNF, "" )    // "Produto"           
+         aAdd(_aLinhaNF, "" )    // "Descrição"        
+         aAdd(_aLinhaNF, U_ROMS025I(0 ,"@E 999,999,999.99"))    // "Aliq.%"           
+         aAdd(_aLinhaNF, U_ROMS025I(0 ,"@E 999,999,999.99"))    // "Qtde"             
+         aAdd(_aLinhaNF, "" )    // "U.M."               
+         aAdd(_aLinhaNF, U_ROMS025I(0 ,"@E 999,999,999.99"))    // "Qtde 2a U.M."  
+         aAdd(_aLinhaNF, "" )    // "2a U.M."         
+         aAdd(_aLinhaNF, U_ROMS025I(0 ,"@E 999,999,999.99"))    // "Vlr.Uni."        
+         aAdd(_aLinhaNF, U_ROMS025I(0 ,"@E 999,999,999.99"))    // "Valor Total"     
+         aAdd(_aLinhaNF, "" )    // "NF.Origem"       
+         aAdd(_aLinhaNF, "" )    // "Serie Origem"  
 
 
          
-         Aadd(_aRet, AClone(_aLinhaNF))
+         aAdd(_aRet, AClone(_aLinhaNF))
              
       EndIf
 
@@ -4676,23 +4676,23 @@ Begin Sequence
      
       _nRegSF2 := SF2->(Recno())
        
-      SF2->(DbSetOrder(1)) // F2_FILIAL+F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA+F2_FORMUL+F2_TIPO
-      If SF2->(DbSeek(U_ItKey(_cFilialNF,"D2_FILIAL")+U_ItKey(_cNRNF,"D2_DOC")+U_ItKey(_cSerieNf,"D2_SERIE")+U_ItKey(_cCodCli,"D2_CLIENTE")+U_ItKey(_cLojaCli,"D2_LOJA")))
+      SF2->(DBSetOrder(1)) // F2_FILIAL+F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA+F2_FORMUL+F2_TIPO
+      If SF2->(DBSeek(U_ItKey(_cFilialNF,"D2_FILIAL")+U_ItKey(_cNRNF,"D2_DOC")+U_ItKey(_cSerieNf,"D2_SERIE")+U_ItKey(_cCodCli,"D2_CLIENTE")+U_ItKey(_cLojaCli,"D2_LOJA")))
          _nValTotMerc := SF2->F2_VALMERC
       EndIf
       
-      SF2->(DbGoTo(_nRegSF2))
+      SF2->(DBGoTo(_nRegSF2))
        
 	  _nTotNF := _nValTotMerc //SF2->F2_VALMERC 
 
       _nFatorBas := _aDadosR[16] / _nTotNF
 
-      SD2->(DbSetOrder(3)) // D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA+D2_COD+D2_ITEM
-      If SD2->(DbSeek(U_ItKey(_cFilialNF,"D2_FILIAL")+U_ItKey(_cNRNF,"D2_DOC")+U_ItKey(_cSerieNf,"D2_SERIE")+U_ItKey(_cCodCli,"D2_CLIENTE")+U_ItKey(_cLojaCli,"D2_LOJA")))
-         Do While ! SD2->(Eof()) .And. SD2->(D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA) == U_ItKey(_cFilialNF,"D2_FILIAL")+U_ItKey(_cNRNF,"D2_DOC")+U_ItKey(_cSerieNf,"D2_SERIE")+U_ItKey(_cCodCli,"D2_CLIENTE")+U_ItKey(_cLojaCli,"D2_LOJA")
+      SD2->(DBSetOrder(3)) // D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA+D2_COD+D2_ITEM
+      If SD2->(DBSeek(U_ItKey(_cFilialNF,"D2_FILIAL")+U_ItKey(_cNRNF,"D2_DOC")+U_ItKey(_cSerieNf,"D2_SERIE")+U_ItKey(_cCodCli,"D2_CLIENTE")+U_ItKey(_cLojaCli,"D2_LOJA")))
+         While ! SD2->(Eof()) .And. SD2->(D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA) == U_ItKey(_cFilialNF,"D2_FILIAL")+U_ItKey(_cNRNF,"D2_DOC")+U_ItKey(_cSerieNf,"D2_SERIE")+U_ItKey(_cCodCli,"D2_CLIENTE")+U_ItKey(_cLojaCli,"D2_LOJA")
             _aLinhaNF := {}
             For _nI := 1 To Len(_aDadosR)
-                Aadd(_aLinhaNF, _aDadosR[_nI])
+                aAdd(_aLinhaNF, _aDadosR[_nI])
             Next
 
             If AllTrim(_cTipoDoc ) == "BON"
@@ -5260,35 +5260,35 @@ Begin Sequence
             EndIf
 
             For i := 1 to Len(_aDadosRAD)
-               AADD(_aLinhaNF,_aDadosRAD[i])
+               aAdd(_aLinhaNF,_aDadosRAD[i])
             Next
             
             _cDescPrd := Posicione("SB1",1,xFilial("SB1")+SD2->D2_COD,"B1_DESC")    // Desc. Prod.
 			_cBIMIX   := Posicione("SB1",1,xFilial("SB1")+SD2->D2_COD,"B1_I_BIMIX") // Mix BI
             
-			Aadd(_aLinhaNF, _cBIMIX        )                                      // "Mix BI"           
-            Aadd(_aLinhaNF, SD2->D2_ITEM   )                                      // "Item"           
-            Aadd(_aLinhaNF, SD2->D2_COD    )                                      // "Produto"           
-            Aadd(_aLinhaNF, _cDescPrd      )                                      // "Descrição"   
-            Aadd(_aLinhaNF, U_ROMS025I(SD2->D2_PICM,"@E 999,999,999.99")   )       // "Aliq.%"           
-            Aadd(_aLinhaNF, U_ROMS025I(SD2->D2_QUANT,"@E 999,999,999.99")  )       // "Qtde"             
-			Aadd(_aLinhaNF, SD2->D2_UM     )                                      // "U.M."               
-			Aadd(_aLinhaNF, U_ROMS025I(SD2->D2_QTSEGUM,"@E 999,999,999.99"))       // "Qtde 2a U.M."  
-    		Aadd(_aLinhaNF, SD2->D2_SEGUM  )                                      // "2a U.M."         
-            Aadd(_aLinhaNF, U_ROMS025I(SD2->D2_PRCVEN,"@E 999,999,999.99") )       // "Vlr.Uni."        
-            Aadd(_aLinhaNF, U_ROMS025I(SD2->D2_TOTAL,"@E 999,999,999.99")  )       // "Valor Total"     
-			Aadd(_aLinhaNF, SD2->D2_NFORI  )                                      // "NF.Origem"       
-            Aadd(_aLinhaNF, SD2->D2_SERIORI)                                      // "Serie Origem"  
+			aAdd(_aLinhaNF, _cBIMIX        )                                      // "Mix BI"           
+            aAdd(_aLinhaNF, SD2->D2_ITEM   )                                      // "Item"           
+            aAdd(_aLinhaNF, SD2->D2_COD    )                                      // "Produto"           
+            aAdd(_aLinhaNF, _cDescPrd      )                                      // "Descrição"   
+            aAdd(_aLinhaNF, U_ROMS025I(SD2->D2_PICM,"@E 999,999,999.99")   )       // "Aliq.%"           
+            aAdd(_aLinhaNF, U_ROMS025I(SD2->D2_QUANT,"@E 999,999,999.99")  )       // "Qtde"             
+			aAdd(_aLinhaNF, SD2->D2_UM     )                                      // "U.M."               
+			aAdd(_aLinhaNF, U_ROMS025I(SD2->D2_QTSEGUM,"@E 999,999,999.99"))       // "Qtde 2a U.M."  
+    		aAdd(_aLinhaNF, SD2->D2_SEGUM  )                                      // "2a U.M."         
+            aAdd(_aLinhaNF, U_ROMS025I(SD2->D2_PRCVEN,"@E 999,999,999.99") )       // "Vlr.Uni."        
+            aAdd(_aLinhaNF, U_ROMS025I(SD2->D2_TOTAL,"@E 999,999,999.99")  )       // "Valor Total"     
+			aAdd(_aLinhaNF, SD2->D2_NFORI  )                                      // "NF.Origem"       
+            aAdd(_aLinhaNF, SD2->D2_SERIORI)                                      // "Serie Origem"  
 
-            Aadd(_aRet, AClone(_aLinhaNF))
+            aAdd(_aRet, AClone(_aLinhaNF))
                         
-            SD2->(DbSkip())
+            SD2->(DBSkip())
             
          EndDo
 	  Else 
          _aLinhaNF := {}
          For _nI := 1 To Len(_aDadosR)
-             Aadd(_aLinhaNF, _aDadosR[_nI])
+             aAdd(_aLinhaNF, _aDadosR[_nI])
          Next
 
          If ValType(_aLinhaNF[12]) == "N"
@@ -5384,31 +5384,31 @@ Begin Sequence
 	        _aLinhaNF[46] := U_ROMS025I(_aLinhaNF[46],"@E 999,999,999.999")                    // 46   
 	     EndIf 	
       
-	     Aadd(_aLinhaNF, "" )                                // Mix BI
-         Aadd(_aLinhaNF, "" )                                // "Item"           
-         Aadd(_aLinhaNF, "" )                                // "Produto"           
-         Aadd(_aLinhaNF, "" )                                // "Descrição"        
-         Aadd(_aLinhaNF, U_ROMS025I(0,"@E 999,999,999.99"))  // "Aliq.%"           
-         Aadd(_aLinhaNF, U_ROMS025I(0,"@E 999,999,999.99"))  // "Qtde"             
-         Aadd(_aLinhaNF, "" )                                // "U.M."               
-         Aadd(_aLinhaNF, U_ROMS025I(0 ,"@E 999,999,999.99")) // "Qtde 2a U.M."  
-         Aadd(_aLinhaNF, "" )                                // "2a U.M."         
-         Aadd(_aLinhaNF, U_ROMS025I(0,"@E 999,999,999.99"))  // "Vlr.Uni."        
-         Aadd(_aLinhaNF, U_ROMS025I(0,"@E 999,999,999.99"))  // "Valor Total"     
-         Aadd(_aLinhaNF, "" )                                // "NF.Origem"       
-         Aadd(_aLinhaNF, "" )                                // "Serie Origem"  
+	     aAdd(_aLinhaNF, "" )                                // Mix BI
+         aAdd(_aLinhaNF, "" )                                // "Item"           
+         aAdd(_aLinhaNF, "" )                                // "Produto"           
+         aAdd(_aLinhaNF, "" )                                // "Descrição"        
+         aAdd(_aLinhaNF, U_ROMS025I(0,"@E 999,999,999.99"))  // "Aliq.%"           
+         aAdd(_aLinhaNF, U_ROMS025I(0,"@E 999,999,999.99"))  // "Qtde"             
+         aAdd(_aLinhaNF, "" )                                // "U.M."               
+         aAdd(_aLinhaNF, U_ROMS025I(0 ,"@E 999,999,999.99")) // "Qtde 2a U.M."  
+         aAdd(_aLinhaNF, "" )                                // "2a U.M."         
+         aAdd(_aLinhaNF, U_ROMS025I(0,"@E 999,999,999.99"))  // "Vlr.Uni."        
+         aAdd(_aLinhaNF, U_ROMS025I(0,"@E 999,999,999.99"))  // "Valor Total"     
+         aAdd(_aLinhaNF, "" )                                // "NF.Origem"       
+         aAdd(_aLinhaNF, "" )                                // "Serie Origem"  
  
          For i := 1 to Len(_aDadosRAD)
-            AADD(_aLinhaNF,_aDadosRAD[i])
+            aAdd(_aLinhaNF,_aDadosRAD[i])
          Next
 
-         Aadd(_aRet, AClone(_aLinhaNF))
+         aAdd(_aRet, AClone(_aLinhaNF))
 
       EndIf   
    Else
       _aLinhaNF := {}
       For _nI := 1 To Len(_aDadosR)
-          Aadd(_aLinhaNF, _aDadosR[_nI])
+          aAdd(_aLinhaNF, _aDadosR[_nI])
       Next
 
       If ValType(_aLinhaNF[12]) == "N"
@@ -5505,24 +5505,24 @@ Begin Sequence
 	  EndIf 
 	  	
       For i := 1 to Len(_aDadosRAD)
-         AADD(_aLinhaNF,_aDadosRAD[i])
+         aAdd(_aLinhaNF,_aDadosRAD[i])
       Next
 	  
-	  Aadd(_aLinhaNF, "" )                                // Mix BI
-      Aadd(_aLinhaNF, "" )                                // "Item"           
-      Aadd(_aLinhaNF, "" )                                // "Produto"           
-      Aadd(_aLinhaNF, "" )                                // "Descrição"        
-      Aadd(_aLinhaNF, U_ROMS025I(0,"@E 999,999,999.99"))  // "Aliq.%"           
-      Aadd(_aLinhaNF, U_ROMS025I(0,"@E 999,999,999.99"))  // "Qtde"             
-      Aadd(_aLinhaNF, "" )                                // "U.M."               
-      Aadd(_aLinhaNF, U_ROMS025I(0 ,"@E 999,999,999.99")) // "Qtde 2a U.M."  
-      Aadd(_aLinhaNF, "" )                                // "2a U.M."         
-      Aadd(_aLinhaNF, U_ROMS025I(0,"@E 999,999,999.99"))  // "Vlr.Uni."        
-      Aadd(_aLinhaNF, U_ROMS025I(0,"@E 999,999,999.99"))  // "Valor Total"     
-      Aadd(_aLinhaNF, "" )                                // "NF.Origem"       
-      Aadd(_aLinhaNF, "" )                                // "Serie Origem"  
+	  aAdd(_aLinhaNF, "" )                                // Mix BI
+      aAdd(_aLinhaNF, "" )                                // "Item"           
+      aAdd(_aLinhaNF, "" )                                // "Produto"           
+      aAdd(_aLinhaNF, "" )                                // "Descrição"        
+      aAdd(_aLinhaNF, U_ROMS025I(0,"@E 999,999,999.99"))  // "Aliq.%"           
+      aAdd(_aLinhaNF, U_ROMS025I(0,"@E 999,999,999.99"))  // "Qtde"             
+      aAdd(_aLinhaNF, "" )                                // "U.M."               
+      aAdd(_aLinhaNF, U_ROMS025I(0 ,"@E 999,999,999.99")) // "Qtde 2a U.M."  
+      aAdd(_aLinhaNF, "" )                                // "2a U.M."         
+      aAdd(_aLinhaNF, U_ROMS025I(0,"@E 999,999,999.99"))  // "Vlr.Uni."        
+      aAdd(_aLinhaNF, U_ROMS025I(0,"@E 999,999,999.99"))  // "Valor Total"     
+      aAdd(_aLinhaNF, "" )                                // "NF.Origem"       
+      aAdd(_aLinhaNF, "" )                                // "Serie Origem"  
 
-      Aadd(_aRet, AClone(_aLinhaNF))
+      aAdd(_aRet, AClone(_aLinhaNF))
              
    EndIf
   
@@ -5537,7 +5537,7 @@ Return _aRet
 Programa--------: ROMS025H
 Autor-----------: Julio de Paula Paz
 Data da Criacao-: 29/03/2019
-Descrição-------: Função que processa a impressão dos dados do relatório - Previsão de Comissão
+Descrição-------: Função que Processa a impressão dos dados do relatório - Previsão de Comissão
 Parametros------: oproc - objeto da barra de processamento
 Retorno---------: Nenhum
 ===============================================================================================================================
@@ -5612,25 +5612,25 @@ _aFiliais:= {}
 
 Begin Sequence
    If Empty(MV_PAR01)
-	  U_itmsg("Favor preencher o parâmetro: Mes/Ano antes de imprimir este relatório.","Atenção",,1)
+	  U_ITMsg("Favor preencher o parâmetro: Mes/Ano antes de imprimir este relatório.","Atenção",,1)
 	  Break 
    EndIf
      
    //=======================================================================================================
    // Chama a rotina para selecao dos registros da comissao.												
    //=======================================================================================================
-   fwMsgRun(,{|oproc|ROMS025QRY(_cAlias,1,oproc)},"Aguarde....","Filtrando os dados de credito e debito da comissão.")        
+   FWMsgRun(,{|oproc|ROMS025QRY(_cAlias,1,oproc)},"Aguarde....","Filtrando os dados de credito e debito da comissão.")        
 	
-   dbSelectArea(_cAlias)
-   (_cAlias)->(dbGotop())        
+   DBSelectArea(_cAlias)
+   (_cAlias)->(DBGoTop())        
 	            	
    //=============================================
    //Armazena o numero de registros encontrados.
    //=============================================
    COUNT TO _nCountRec 
 		
-   dbSelectArea(_cAlias)
-   (_cAlias)->(dbGotop())       
+   DBSelectArea(_cAlias)
+   (_cAlias)->(DBGoTop())       
 	
    //=============================================
    //Verifica se existem registros selecionados.
@@ -5638,48 +5638,48 @@ Begin Sequence
    If (_cAlias)->(!Eof())				
       _nni := 0
       
-      Do While (_cAlias)->(!Eof()) 
+      While (_cAlias)->(!Eof()) 
          _nni++
-         oproc:cCaption := ("Processando dados " + strzero(_nni,10) + " de " +  strzero(_nCountRec,10))
+         oproc:cCaption := ("Processando dados " + StrZero(_nni,10) + " de " +  StrZero(_nCountRec,10))
          ProcessMessages()
          _lachou := .F.
          
          //================================================
          // Busca dados adicionais
          //================================================
-         SF2->(Dbsetorder(1))
-         SA3->(Dbsetorder(1))
-         If SF2->(Dbseek((_cAlias)->FILIAL+(_cAlias)->NUMERO)) .AND. ALLTRIM((_cAlias)->CODCLI) == ALLTRIM(SF2->F2_CLIENTE) 
+         SF2->(DBSetOrder(1))
+         SA3->(DBSetOrder(1))
+         If SF2->(DBSeek((_cAlias)->FILIAL+(_cAlias)->NUMERO)) .And. AllTrim((_cAlias)->CODCLI) == AllTrim(SF2->F2_CLIENTE) 
             _cRazaoCli  := Posicione("SA1",1,xFilial("SA1")+SF2->F2_CLIENTE+SF2->F2_LOJA,"A1_NOME")
 			_cCodGrupo  := Posicione("SA1",1,xFilial("SA1")+SF2->F2_CLIENTE+SF2->F2_LOJA,"A1_GRPVEN")
 			_cDescGrupo := Posicione("ACY",1,xFilial("ACY")+_cCodGrupo,"ACY_DESCRI")
             _ccodrep    := SF2->F2_VEND1
-            _cnomerep   := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodrep)),SA3->A3_NOME," ")
+            _cnomerep   := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodrep)),SA3->A3_NOME," ")
             _ccodsup    := SF2->F2_VEND4
-            _cnomesup   := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodsup)),SA3->A3_NOME," ")
+            _cnomesup   := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodsup)),SA3->A3_NOME," ")
             _ccodcoord  := SF2->F2_VEND2
-            _cnomecoord := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodcoord)),SA3->A3_NOME," ")
+            _cnomecoord := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodcoord)),SA3->A3_NOME," ")
             _ccodger    := SF2->F2_VEND3
-            _cnomeger   := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodger)),SA3->A3_NOME," ")
+            _cnomeger   := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodger)),SA3->A3_NOME," ")
 		
 			_cCodGNc    := SF2->F2_VEND5
-            _cNomeGnc   := IIF(SA3->(Dbseek(xfilial("SA3")+_cCodGNc)),SA3->A3_NOME," ")
+            _cNomeGnc   := IIf(SA3->(DBSeek(xFilial("SA3")+_cCodGNc)),SA3->A3_NOME," ")
             _lachou     := .T.
          Else
             _cRazaoCli  := Posicione("SA1",1,xFilial("SA1")+(_cAlias)->CODCLI+(_cAlias)->LOJA,"A1_NOME")
 			_cCodGrupo  := Posicione("SA1",1,xFilial("SA1")+(_cAlias)->CODCLI+(_cAlias)->LOJA,"A1_GRPVEN")
 			_cDescGrupo := Posicione("ACY",1,xFilial("ACY")+_cCodGrupo,"ACY_DESCRI")
             _ccodrep    := (_cAlias)->CODVEND
-            _cnomerep   := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodrep)),SA3->A3_NOME," ")
-            _ccodsup    := POSICIONE("SA3",1,xfilial("SA3")+(_cAlias)->CODVEND,"A3_I_SUPE")
-            _cnomesup   := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodsup)),SA3->A3_NOME," ")
-            _ccodcoord  := POSICIONE("SA3",1,xfilial("SA3")+(_cAlias)->CODVEND,"A3_SUPER")
-            _cnomecoord := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodcoord)),SA3->A3_NOME," ")
-            _ccodger    := POSICIONE("SA3",1,xfilial("SA3")+(_cAlias)->CODVEND,"A3_GEREN")
-            _cnomeger   := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodger)),SA3->A3_NOME," ")
+            _cnomerep   := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodrep)),SA3->A3_NOME," ")
+            _ccodsup    := Posicione("SA3",1,xFilial("SA3")+(_cAlias)->CODVEND,"A3_I_SUPE")
+            _cnomesup   := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodsup)),SA3->A3_NOME," ")
+            _ccodcoord  := Posicione("SA3",1,xFilial("SA3")+(_cAlias)->CODVEND,"A3_SUPER")
+            _cnomecoord := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodcoord)),SA3->A3_NOME," ")
+            _ccodger    := Posicione("SA3",1,xFilial("SA3")+(_cAlias)->CODVEND,"A3_GEREN")
+            _cnomeger   := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodger)),SA3->A3_NOME," ")
         
-			_cCodGnc    := POSICIONE("SA3",1,xfilial("SA3")+(_cAlias)->CODVEND,"A3_I_GERNC")
-            _cNomeGnc   := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodger)),SA3->A3_NOME," ")
+			_cCodGnc    := Posicione("SA3",1,xFilial("SA3")+(_cAlias)->CODVEND,"A3_I_GERNC")
+            _cNomeGnc   := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodger)),SA3->A3_NOME," ")
          EndIf
 				
          _ncomsup := 0
@@ -5688,71 +5688,71 @@ Begin Sequence
 		 _ncomrep := 0
 		 _nComGnc := 0
 
-		 SE3->(Dbsetorder(1))
-		 If SE3->(Dbseek((_cAlias)->FILIAL+(_cAlias)->PREFIXO+(_cAlias)->E3NUMORI+(_cAlias)->PARCELA+(_cAlias)->SEQ))
-			Do while SE3->E3_FILIAL == (_cAlias)->FILIAL .AND. ;
-			   SE3->E3_PREFIXO == (_cAlias)->PREFIXO .AND. ;
-			   SE3->E3_NUM == (_cAlias)->E3NUMORI .AND. ;
-			   SE3->E3_PARCELA == (_cAlias)->PARCELA .AND. ;
+		 SE3->(DBSetOrder(1))
+		 If SE3->(DBSeek((_cAlias)->FILIAL+(_cAlias)->PREFIXO+(_cAlias)->E3NUMORI+(_cAlias)->PARCELA+(_cAlias)->SEQ))
+			While SE3->E3_FILIAL == (_cAlias)->FILIAL .And. ;
+			   SE3->E3_PREFIXO == (_cAlias)->PREFIXO .And. ;
+			   SE3->E3_NUM == (_cAlias)->E3NUMORI .And. ;
+			   SE3->E3_PARCELA == (_cAlias)->PARCELA .And. ;
 			   SE3->E3_SEQ == (_cAlias)->SEQ
                
                If SE3->E3_VEND == _ccodrep //Representante
-                  _ncomrep := ROUND(_ncomrep + SE3->E3_COMIS ,3)
+                  _ncomrep := Round(_ncomrep + SE3->E3_COMIS ,3)
                EndIf
 			   
 			   If SE3->E3_VEND == _ccodsup  //Supervisor
-                  _ncomsup := ROUND(_ncomsup + SE3->E3_COMIS ,3)
+                  _ncomsup := Round(_ncomsup + SE3->E3_COMIS ,3)
                EndIf
                
                If SE3->E3_VEND == _ccodcoord  //Coordenador
-                  _ncomcoord := ROUND(_ncomcoord + SE3->E3_COMIS ,3)
+                  _ncomcoord := Round(_ncomcoord + SE3->E3_COMIS ,3)
                EndIf
 
                If SE3->E3_VEND == _ccodger  //Gerente
-                  _ncomger := ROUND(_ncomger + SE3->E3_COMIS ,3)
+                  _ncomger := Round(_ncomger + SE3->E3_COMIS ,3)
                EndIf 
 
 			   If SE3->E3_VEND == _cCodGnc  //Gerente Nacional
-                  _nComGnc := ROUND(_nComGnc + SE3->E3_COMIS ,3)
+                  _nComGnc := Round(_nComGnc + SE3->E3_COMIS ,3)
                EndIf
 
-               SE3->(Dbskip())
-            Enddo
+               SE3->(DBSkip())
+            EndDo
          EndIf
             
-         _nperrep := round(_ncomrep/(_cAlias)->BASECOMIS*100,3)
-         _nperrep := iif(_nperrep<0,-1*_nperrep,_nperrep)
+         _nperrep := Round(_ncomrep/(_cAlias)->BASECOMIS*100,3)
+         _nperrep := IIf(_nperrep<0,-1*_nperrep,_nperrep)
 			
-         _nbasecomis := iif((_cAlias)->COMISSAO<0,-1*(_cAlias)->BASECOMIS,(_cAlias)->BASECOMIS)
+         _nbasecomis := IIf((_cAlias)->COMISSAO<0,-1*(_cAlias)->BASECOMIS,(_cAlias)->BASECOMIS)
 				
-         _npersup := round(_ncomsup/(_cAlias)->BASECOMIS*100,3)
-         _npersup := iif(_npersup<0,-1*_npersup,_npersup)
+         _npersup := Round(_ncomsup/(_cAlias)->BASECOMIS*100,3)
+         _npersup := IIf(_npersup<0,-1*_npersup,_npersup)
 				
-         _npercoo := round(_ncomcoord/(_cAlias)->BASECOMIS*100,3)
-         _npercoo := iif(_npercoo<0,-1*_npercoo,_npercoo)
+         _npercoo := Round(_ncomcoord/(_cAlias)->BASECOMIS*100,3)
+         _npercoo := IIf(_npercoo<0,-1*_npercoo,_npercoo)
 				
-         _nperger := round(_ncomger/(_cAlias)->BASECOMIS*100,3)
-         _nperger := iif(_nperger<0,-1*_nperger,_nperger)   
+         _nperger := Round(_ncomger/(_cAlias)->BASECOMIS*100,3)
+         _nperger := IIf(_nperger<0,-1*_nperger,_nperger)   
 
-         _nPerGnc := round(_nComGnc/(_cAlias)->BASECOMIS*100,3)
-         _nPerGnc := iif(_nPerGnc<0,-1*_nPerGnc,_nPerGnc)   
+         _nPerGnc := Round(_nComGnc/(_cAlias)->BASECOMIS*100,3)
+         _nPerGnc := IIf(_nPerGnc<0,-1*_nPerGnc,_nPerGnc)   
 				
-         _dtemissao := iif(!empty((_cAlias)->DTEMISSAO),stod((_cAlias)->DTEMISSAO),"")
-         _dtbaixa := iif(!empty((_cAlias)->DTBAIXA),stod((_cAlias)->DTBAIXA),"")
+         _dtemissao := IIf(!Empty((_cAlias)->DTEMISSAO),SToD((_cAlias)->DTEMISSAO),"")
+         _dtbaixa := IIf(!Empty((_cAlias)->DTBAIXA),SToD((_cAlias)->DTBAIXA),"")
 			
          //verifica se tem duplicata
          If Empty(MV_PAR07) .Or. ("G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07) // Imprime todos os dados
-            _npl :=  ascan(_adados,{|_vAux|	_vAux[1]  == (_cAlias)->FILIAL .and. ;
-											_vAux[2]  == (_cAlias)->TIPO .and. ;
-											_vAux[3]  == _dtemissao .and. ;
-											_vAux[4]  == _dtbaixa .and. ;
-											_vAux[5]  == (_cAlias)->NUMERO .and. ;
-											_vAux[6]  == (_cAlias)->PARCELA .and. ;
-											_vAux[7]  == _cCodGrupo .and. ;
-											_vAux[8]  == _cDescGrupo .and. ;
-											_vAux[9]  == (_cAlias)->CODCLI .and. ;
-											_vAux[10] == (_cAlias)->LOJA .and. ;
-											_vAux[11] == _cRazaoCli .AND. ;
+            _npl :=  aScan(_aDados,{|_vAux|	_vAux[1]  == (_cAlias)->FILIAL .And. ;
+											_vAux[2]  == (_cAlias)->TIPO .And. ;
+											_vAux[3]  == _dtemissao .And. ;
+											_vAux[4]  == _dtbaixa .And. ;
+											_vAux[5]  == (_cAlias)->NUMERO .And. ;
+											_vAux[6]  == (_cAlias)->PARCELA .And. ;
+											_vAux[7]  == _cCodGrupo .And. ;
+											_vAux[8]  == _cDescGrupo .And. ;
+											_vAux[9]  == (_cAlias)->CODCLI .And. ;
+											_vAux[10] == (_cAlias)->LOJA .And. ;
+											_vAux[11] == _cRazaoCli .And. ;
 											_vAux[37] == (_cAlias)->SEQ })
 
         ElseIf ("G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. "N" $ MV_PAR07) .Or. ; // Não imprime vendedor   
@@ -5761,30 +5761,30 @@ Begin Sequence
                (! "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07) .Or. ; // Não imprime gerente 
                ("G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07)        // Não imprime gerente nacional 
 
-            _npl :=  ascan(_adados,{|_vAux|	_vAux[1]  == (_cAlias)->FILIAL .and. ;
-											_vAux[2]  == (_cAlias)->TIPO .and. ;
-											_vAux[3]  == _dtemissao .and. ;
-											_vAux[4]  == _dtbaixa .and. ;
-											_vAux[5]  == (_cAlias)->NUMERO .and. ;
-											_vAux[6]  == (_cAlias)->PARCELA .and. ;
-											_vAux[7]  == _cCodGrupo .and. ;
-											_vAux[8]  == _cDescGrupo .and. ;
-											_vAux[9]  == (_cAlias)->CODCLI .and. ;
-											_vAux[10] == (_cAlias)->LOJA .and. ;
-											_vAux[11] == _cRazaoCli .AND. ;
+            _npl :=  aScan(_aDados,{|_vAux|	_vAux[1]  == (_cAlias)->FILIAL .And. ;
+											_vAux[2]  == (_cAlias)->TIPO .And. ;
+											_vAux[3]  == _dtemissao .And. ;
+											_vAux[4]  == _dtbaixa .And. ;
+											_vAux[5]  == (_cAlias)->NUMERO .And. ;
+											_vAux[6]  == (_cAlias)->PARCELA .And. ;
+											_vAux[7]  == _cCodGrupo .And. ;
+											_vAux[8]  == _cDescGrupo .And. ;
+											_vAux[9]  == (_cAlias)->CODCLI .And. ;
+											_vAux[10] == (_cAlias)->LOJA .And. ;
+											_vAux[11] == _cRazaoCli .And. ;
 											_vAux[33] == (_cAlias)->SEQ })
          Else
-            _npl :=  ascan(_adados,{|_vAux|	_vAux[1]  == (_cAlias)->FILIAL .and. ;
-											_vAux[2]  == (_cAlias)->TIPO .and. ;
-											_vAux[3]  == _dtemissao .and. ;
-											_vAux[4]  == _dtbaixa .and. ;
-											_vAux[5]  == (_cAlias)->NUMERO .and. ;
-											_vAux[6]  == (_cAlias)->PARCELA .and. ;
-											_vAux[7]  == _cCodGrupo .and. ;
-											_vAux[8]  == _cDescGrupo .and. ;
-											_vAux[9]  == (_cAlias)->CODCLI .and. ;
-											_vAux[10] == (_cAlias)->LOJA .and. ;
-											_vAux[11] == _cRazaoCli .AND. ;
+            _npl :=  aScan(_aDados,{|_vAux|	_vAux[1]  == (_cAlias)->FILIAL .And. ;
+											_vAux[2]  == (_cAlias)->TIPO .And. ;
+											_vAux[3]  == _dtemissao .And. ;
+											_vAux[4]  == _dtbaixa .And. ;
+											_vAux[5]  == (_cAlias)->NUMERO .And. ;
+											_vAux[6]  == (_cAlias)->PARCELA .And. ;
+											_vAux[7]  == _cCodGrupo .And. ;
+											_vAux[8]  == _cDescGrupo .And. ;
+											_vAux[9]  == (_cAlias)->CODCLI .And. ;
+											_vAux[10] == (_cAlias)->LOJA .And. ;
+											_vAux[11] == _cRazaoCli .And. ;
 											_vAux[21] == (_cAlias)->SEQ }) 
          EndIf
 
@@ -5793,7 +5793,7 @@ Begin Sequence
 			// Incrementa array para geração de excel
 			//===============================================		  	
             If Empty(MV_PAR07) .Or. ("G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07) // Imprime todos os dados
-               Aadd(_adados,{(_cAlias)->FILIAL	,;	             					 //01
+               aAdd(_aDados,{(_cAlias)->FILIAL	,;	             					 //01
 							 (_cAlias)->TIPO,;										 //02
 			 				 _dtemissao,;											 //03
 			 				 _dtbaixa,;												 //04
@@ -5837,7 +5837,7 @@ Begin Sequence
 							})
 							
             ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. "N" $ MV_PAR07//  Não imprime vendedor
-               aadd(_adados,{(_cAlias)->FILIAL	,;							         //01
+               aAdd(_aDados,{(_cAlias)->FILIAL	,;							         //01
 							 (_cAlias)->TIPO,;										 //02
 			 				 _dtemissao,;											 //03
 			 				 _dtbaixa,;												 //04
@@ -5876,7 +5876,7 @@ Begin Sequence
                       U_ROMS025I((_cAlias)->VALST,"@E 999,999,999.999");  
 							})
             ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07// Não imprime supervisor
-               aadd(_adados,{(_cAlias)->FILIAL	,;							         //01
+               aAdd(_aDados,{(_cAlias)->FILIAL	,;							         //01
 							 (_cAlias)->TIPO,;										 //02
 			 				 _dtemissao,;											 //03
 			 				 _dtbaixa,;												 //04
@@ -5915,7 +5915,7 @@ Begin Sequence
                       U_ROMS025I((_cAlias)->VALST,"@E 999,999,999.999");  
 							 })
             ElseIf "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07// Não imprime Coordenador
-               aadd(_adados,{(_cAlias)->FILIAL	,;							         //01
+               aAdd(_aDados,{(_cAlias)->FILIAL	,;							         //01
 							 (_cAlias)->TIPO,;										 //02
 			 				 _dtemissao,;											 //03
 			 				 _dtbaixa,;												 //04
@@ -5954,7 +5954,7 @@ Begin Sequence
                       U_ROMS025I((_cAlias)->VALST,"@E 999,999,999.999");  
 							}) 
             ElseIf ! "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07// Não imprime gerente
-               aadd(_adados,{(_cAlias)->FILIAL	,;							         //01
+               aAdd(_aDados,{(_cAlias)->FILIAL	,;							         //01
 							 (_cAlias)->TIPO,;										 //02
 			 				 _dtemissao,;											 //03
 			 				 _dtbaixa,;												 //04
@@ -5993,7 +5993,7 @@ Begin Sequence
                       U_ROMS025I((_cAlias)->VALST,"@E 999,999,999.999");  
 							 })
             ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07// Não imprime gerente nacional
-               aadd(_adados,{(_cAlias)->FILIAL	,;							         //01
+               aAdd(_aDados,{(_cAlias)->FILIAL	,;							         //01
 							 (_cAlias)->TIPO,;										 //02
 			 				 _dtemissao,;											 //03
 			 				 _dtbaixa,;												 //04
@@ -6033,7 +6033,7 @@ Begin Sequence
 							 })
 
             ElseIf ! "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. "N" $ MV_PAR07 // imprime apenas gerente nacional
-               aadd(_adados,{(_cAlias)->FILIAL	,;							         //01
+               aAdd(_aDados,{(_cAlias)->FILIAL	,;							         //01
 							 (_cAlias)->TIPO,;										 //02
 			 				 _dtemissao,;											 //03
 			 				 _dtbaixa,;												 //04
@@ -6061,7 +6061,7 @@ Begin Sequence
 							})
 //------------------------------------------------------------------------------------------------------------------------------
             ElseIf "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07  // imprime apenas gerente
-               aadd(_adados,{(_cAlias)->FILIAL	,;							         //01
+               aAdd(_aDados,{(_cAlias)->FILIAL	,;							         //01
 							 (_cAlias)->TIPO,;										 //02
 			 				 _dtemissao,;											 //03
 			 				 _dtbaixa,;												 //04
@@ -6088,7 +6088,7 @@ Begin Sequence
                       U_ROMS025I((_cAlias)->VALST,"@E 999,999,999.999");  
 							})
             ElseIf ! "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07 // imprime apenas Coordenador
-           	   aadd(_adados,{(_cAlias)->FILIAL	,;							         //01
+           	   aAdd(_aDados,{(_cAlias)->FILIAL	,;							         //01
 							 (_cAlias)->TIPO,;										 //02
 			 				 _dtemissao,;											 //03
 			 				 _dtbaixa,;												 //04
@@ -6115,7 +6115,7 @@ Begin Sequence
                       U_ROMS025I((_cAlias)->VALST,"@E 999,999,999.999");  
 							})
             ElseIf ! "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07 // imprime apenas supervisor
-               aadd(_adados,{(_cAlias)->FILIAL	,;							         //01
+               aAdd(_aDados,{(_cAlias)->FILIAL	,;							         //01
 							 (_cAlias)->TIPO,;										 //02
 			 				 _dtemissao,;											 //03
 			 				 _dtbaixa,;												 //04
@@ -6142,7 +6142,7 @@ Begin Sequence
                       U_ROMS025I((_cAlias)->VALST,"@E 999,999,999.999");  
 							})						
             ElseIf ! "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07 // imprime apenas vendedor
-               aadd(_adados,{(_cAlias)->FILIAL	,;						             //01
+               aAdd(_aDados,{(_cAlias)->FILIAL	,;						             //01
 							 (_cAlias)->TIPO,;										 //02
 			 				 _dtemissao,;											 //03
 			 				 _dtbaixa,;												 //04
@@ -6169,7 +6169,7 @@ Begin Sequence
                       U_ROMS025I((_cAlias)->VALST,"@E 999,999,999.999");  
 							})							
             Else // Não exibe dados do relatório em excel.
-               _adados := {}		
+               _aDados := {}		
             EndIf							  	
 		 EndIf
 
@@ -6177,7 +6177,7 @@ Begin Sequence
 		 // Chama a rotina para selecao dos registros da comissao.												
 		 //=======================================================================================================
 		 MV_PAR06 := (_cAlias)->CODVEND   // Filtro codigo do Vendedor 
-		 fwMsgRun(,{|oproc|ROMS025QRY(_cAlias3,3,oproc)},"Aguarde....","Filtrando os dados bonificação.")    
+		 FWMsgRun(,{|oproc|ROMS025QRY(_cAlias3,3,oproc)},"Aguarde....","Filtrando os dados bonificação.")    
 		
 		 _nTotReg := 0 
 		 		
@@ -6188,7 +6188,7 @@ Begin Sequence
 
 		 If _nTotReg > 0
 			_nConAux := 0
-			Do While (_cAlias3)->( !Eof() )
+			While (_cAlias3)->( !Eof() )
 			   _nConAux++
 			   oproc:cCaption := 'Processando bonificações... ['+ StrZero(_nConAux,9) +'] de ['+ StrZero(_nTotReg,9) +'].'
 			   ProcessMessages()
@@ -6198,21 +6198,21 @@ Begin Sequence
 			   _cDescGrupo := Posicione("ACY",1,xFilial("ACY")+_cCodGrupo,"ACY_DESCRI")
 			   _cCodVen := (_cAlias3)->F2_VEND1
 			   _ccodsup :=  (_cAlias3)->F2_VEND4
-			   _cnomesup := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodsup)),SA3->A3_NOME," ")
+			   _cnomesup := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodsup)),SA3->A3_NOME," ")
 			   _ccodcoord := (_cAlias3)->F2_VEND2
-			   _cnomecoord := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodcoord)),SA3->A3_NOME," ")
+			   _cnomecoord := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodcoord)),SA3->A3_NOME," ")
 		       _ccodger := (_cAlias3)->F2_VEND3
-			   _cnomeger := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodger)),SA3->A3_NOME," ")
+			   _cnomeger := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodger)),SA3->A3_NOME," ")
 			   
 			   _cCodGNc  := (_cAlias3)->F2_VEND5
-			   _cNomeGnc := IIF(SA3->(Dbseek(xFilial("SA3")+_cCodGNc)),SA3->A3_NOME," ")
+			   _cNomeGnc := IIf(SA3->(DBSeek(xFilial("SA3")+_cCodGNc)),SA3->A3_NOME," ")
 
-			   If ascan(_adados, {|_vAux| _vAux[1]==(_cAlias3)->F2_FILIAL .and. _vAux[2]=="BON" .and. _vAux[5]==(_cAlias3)->F2_DOC}) ==  0
+			   If aScan(_aDados, {|_vAux| _vAux[1]==(_cAlias3)->F2_FILIAL .And. _vAux[2]=="BON" .And. _vAux[5]==(_cAlias3)->F2_DOC}) ==  0
 				  // Incrementa array para geração de excel
                   If Empty(MV_PAR07) .Or. ("G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07) // Imprime todos os dados
-				     Aadd(_adados,{(_cAlias3)->F2_FILIAL	,;					                                          //01
+				     aAdd(_aDados,{(_cAlias3)->F2_FILIAL	,;					                                          //01
 								   "BON",;													                              //02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                  //03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                  //03
 								   "  ",;													                              //04
 								   (_cAlias3)->F2_DOC,;									                                  //05
 								   "  ",;													                              //06
@@ -6227,7 +6227,7 @@ Begin Sequence
 								   U_ROMS025I(0,"@E 999,999,999.99"),;													  //15
 								   U_ROMS025I((_cAlias3)->VALTOT*-1,"@E 999,999,999.99"),;							      //16
 								   _cCodVen,;												                              //17
-								   POSICIONE("SA3",1,xfilial("SA3")+_cCodVen,"A3_NOME"),;	                              //18
+								   Posicione("SA3",1,xFilial("SA3")+_cCodVen,"A3_NOME"),;	                              //18
 								   _ccodsup,;												                              //19
 								   _cnomesup,;												                              //20
 								   _ccodcoord,;											                                  //21
@@ -6236,16 +6236,16 @@ Begin Sequence
 								   _cnomeger,;												                              //24
 								   _cCodGNc,;                                                                             //25
 			                       _cNomeGnc,;                                                                            //26
-								   U_ROMS025I(round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					  //25-->27
-								   U_ROMS025I(round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  //26-->28
-								   U_ROMS025I(round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					  //27-->29
-								   U_ROMS025I(round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  //28-->30
-								   U_ROMS025I(round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					  //29-->31
-								   U_ROMS025I(round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  //30-->32
-								   U_ROMS025I(round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					  //31-->33
-								   U_ROMS025I(round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  //32-->34
-								   U_ROMS025I(round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					  //35
-								   U_ROMS025I(round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  //36
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					  //25-->27
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  //26-->28
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					  //27-->29
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  //28-->30
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					  //29-->31
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  //30-->32
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					  //31-->33
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  //32-->34
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					  //35
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		  //36
 								   " ",;                                                                                   //33-->37
                             U_ROMS025I((_cAlias3)->(SE5DCT+SE5VRB),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5DCT,"@E 999,999,999.999"),;
@@ -6254,9 +6254,9 @@ Begin Sequence
 								   })
 
                   ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. "N" $ MV_PAR07 //  Não imprime vendedor
-				     Aadd(_adados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
+				     aAdd(_aDados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
 								   "BON",;													                               //02
-							       DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   //03
+							       DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   //03
 								   "  ",;													                               //04
 								   (_cAlias3)->F2_DOC,;									                                   //05
 								   "  ",;													                               //06
@@ -6278,14 +6278,14 @@ Begin Sequence
 								   _cnomeger,;												                               //22
 								   _cCodGNc,;                                                                              //23
 			                       _cNomeGnc,;                                                                             //24
-								   U_ROMS025I(round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   //23-->25
-								   U_ROMS025I(round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //24-->26
-								   U_ROMS025I(round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   //25-->27
-								   U_ROMS025I(round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //26-->28
-								   U_ROMS025I(round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   //27-->29
-								   U_ROMS025I(round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //28-->30
-								   U_ROMS025I(round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   //31
-								   U_ROMS025I(round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //32
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   //23-->25
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //24-->26
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   //25-->27
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //26-->28
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   //27-->29
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //28-->30
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   //31
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //32
 								   " ",;                                                                                    //29-->33
                             U_ROMS025I((_cAlias3)->(SE5DCT+SE5VRB),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5DCT,"@E 999,999,999.999"),;
@@ -6294,9 +6294,9 @@ Begin Sequence
 							       })
 
                   ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07 // Não imprime supervisor
-				     Aadd(_adados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
+				     aAdd(_aDados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
 								   "BON",;													                               //02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   //03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   //03
 								   "  ",;													                               //04
 								   (_cAlias3)->F2_DOC,;									                                   //05
 								   "  ",;													                               //06
@@ -6311,21 +6311,21 @@ Begin Sequence
 								   U_ROMS025I(0,"@E 999,999,999.99"),;													   //15
 								   U_ROMS025I((_cAlias3)->VALTOT*-1,"@E 999,999,999.99"),;							       //16
 								   _cCodVen,;												                               //17
-								   POSICIONE("SA3",1,xfilial("SA3")+_cCodVen,"A3_NOME"),;	                               //18
+								   Posicione("SA3",1,xFilial("SA3")+_cCodVen,"A3_NOME"),;	                               //18
 								   _ccodcoord,;											                                   //19
 								   _cnomecoord,;											                               //20
 								   _ccodger,;												                               //21
 								   _cnomeger,;												                               //22
 								   _cCodGNc,;                                                                              //23
 			                       _cNomeGnc,;                                                                             //24
-								   U_ROMS025I(round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   //23-->25
-								   U_ROMS025I(round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //24-->26
-								   U_ROMS025I(round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   //25-->27
-								   U_ROMS025I(round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //26-->28
-								   U_ROMS025I(round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   //27-->29
-								   U_ROMS025I(round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //28-->30
-								   U_ROMS025I(round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   //31
-								   U_ROMS025I(round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //32
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   //23-->25
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //24-->26
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   //25-->27
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //26-->28
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   //27-->29
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //28-->30
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   //31
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //32
 								   " ",;                                                                                    //29-->33
                             U_ROMS025I((_cAlias3)->(SE5DCT+SE5VRB),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5DCT,"@E 999,999,999.999"),;
@@ -6334,9 +6334,9 @@ Begin Sequence
 							 	   })
 
                   ElseIf "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07 // Não imprime Coordenador
-				     Aadd(_adados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
+				     aAdd(_aDados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
 								   "BON",;													                               //02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   //03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   //03
 								   "  ",;													                               //04
 								   (_cAlias3)->F2_DOC,;									                                   //05
 								   "  ",;													                               //06
@@ -6351,21 +6351,21 @@ Begin Sequence
 								   U_ROMS025I(0,"@E 999,999,999.99"),;													   //15
 								   U_ROMS025I((_cAlias3)->VALTOT*-1,"@E 999,999,999.99"),;							       //16
 								   _cCodVen,;												                               //17
-								   POSICIONE("SA3",1,xfilial("SA3")+_cCodVen,"A3_NOME"),;	                               //18
+								   Posicione("SA3",1,xFilial("SA3")+_cCodVen,"A3_NOME"),;	                               //18
 								   _ccodsup,;												                               //19
 								   _cnomesup,;												                               //20
 								   _ccodger,;												                               //21
 								   _cnomeger,;												                               //22 
 								   _cCodGNc,;                                                                              //23
 			                       _cNomeGnc,;                                                                             //24
-								   U_ROMS025I(round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   //23-->25
-								   U_ROMS025I(round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //24-->26
-								   U_ROMS025I(round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   //25-->27
-								   U_ROMS025I(round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //26-->28
-								   U_ROMS025I(round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   //27-->29
-								   U_ROMS025I(round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //28-->30
-								   U_ROMS025I(round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   //31
-								   U_ROMS025I(round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //32
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   //23-->25
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //24-->26
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   //25-->27
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //26-->28
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   //27-->29
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //28-->30
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   //31
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //32
 								   " ",;                                                                                    //29-->33
                             U_ROMS025I((_cAlias3)->(SE5DCT+SE5VRB),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5DCT,"@E 999,999,999.999"),;
@@ -6374,9 +6374,9 @@ Begin Sequence
 								   })
 
                   ElseIf ! "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07 // Não imprime gerente
-				     Aadd(_adados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
+				     aAdd(_aDados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
 								   "BON",;													                               //02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   //03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   //03
 								   "  ",;													                               //04
 								   (_cAlias3)->F2_DOC,;									                                   //05
 								   "  ",;													                               //06
@@ -6391,21 +6391,21 @@ Begin Sequence
 								   U_ROMS025I(0,"@E 999,999,999.99"),;													   //15
 								   U_ROMS025I((_cAlias3)->VALTOT*-1,"@E 999,999,999.99"),;							       //16
 								   _cCodVen,;												                               //17
-								   POSICIONE("SA3",1,xfilial("SA3")+_cCodVen,"A3_NOME"),;	                               //18
+								   Posicione("SA3",1,xFilial("SA3")+_cCodVen,"A3_NOME"),;	                               //18
 								   _ccodsup,;												                               //19
 								   _cnomesup,;												                               //20
 								   _ccodcoord,;											                                   //21
 								   _cnomecoord,;											                               //22
 								   _cCodGNc,;                                                                              //23
 			                       _cNomeGnc,;                                                                             //24
-								   U_ROMS025I(round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   //23-->25
-								   U_ROMS025I(round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //24-->26
-								   U_ROMS025I(round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   //25-->27
-								   U_ROMS025I(round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //26-->28
-								   U_ROMS025I(round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   //27-->29
-								   U_ROMS025I(round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //28-->30
-								   U_ROMS025I(round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   //31
-								   U_ROMS025I(round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //32
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   //23-->25
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //24-->26
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   //25-->27
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //26-->28
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   //27-->29
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //28-->30
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   //31
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //32
 								   " ",;                                                                                    //29-->33
                             U_ROMS025I((_cAlias3)->(SE5DCT+SE5VRB),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5DCT,"@E 999,999,999.999"),;
@@ -6415,9 +6415,9 @@ Begin Sequence
 
 //-------------------------------------------------------------------------------------------------------------------------------
 ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07 // Não imprime gerente nacional.
-				     Aadd(_adados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
+				     aAdd(_aDados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
 								   "BON",;													                               //02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   //03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   //03
 								   "  ",;													                               //04
 								   (_cAlias3)->F2_DOC,;									                                   //05
 								   "  ",;													                               //06
@@ -6432,21 +6432,21 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 								   U_ROMS025I(0,"@E 999,999,999.99"),;													   //15
 								   U_ROMS025I((_cAlias3)->VALTOT*-1,"@E 999,999,999.99"),;							       //16
 								   _cCodVen,;												                               //17
-								   POSICIONE("SA3",1,xfilial("SA3")+_cCodVen,"A3_NOME"),;	                               //18
+								   Posicione("SA3",1,xFilial("SA3")+_cCodVen,"A3_NOME"),;	                               //18
 								   _ccodsup,;												                               //19
 								   _cnomesup,;												                               //20
 								   _ccodcoord,;											                                   //21
 								   _cnomecoord,;											                               //22
 								   _ccodger,;												                               //23
 								   _cnomeger,;												                               //24 
-								   U_ROMS025I(round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   //23-->25
-								   U_ROMS025I(round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //24-->26
-								   U_ROMS025I(round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   //25-->27
-								   U_ROMS025I(round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //26-->28
-								   U_ROMS025I(round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   //27-->29
-								   U_ROMS025I(round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //28-->30
-								   U_ROMS025I(round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   //31
-								   U_ROMS025I(round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //32
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   //23-->25
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //24-->26
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   //25-->27
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //26-->28
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   //27-->29
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //28-->30
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   //31
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //32
 								   " ",;                                                                                    //29-->33
                             U_ROMS025I((_cAlias3)->(SE5DCT+SE5VRB),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5DCT,"@E 999,999,999.999"),;
@@ -6455,9 +6455,9 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 								   })
 //-------------------------------------------------------------------------------------------------------------------------------
                   ElseIf ! "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. "N" $ MV_PAR07 // imprime apenas gerente nacional
-				     Aadd(_adados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
+				     aAdd(_aDados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
 								   "BON",;													                               //02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   //03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   //03
 								   "  ",;													                               //04
 								   (_cAlias3)->F2_DOC,;									                                   //05
 								   "  ",;													                               //06
@@ -6473,8 +6473,8 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 								   U_ROMS025I((_cAlias3)->VALTOT*-1,"@E 999,999,999.99"),;							       //16
 								   _cCodGNc,;                                                                              //17
 			                       _cNomeGnc,;                                                                             //18
-								   U_ROMS025I(round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   //19
-								   U_ROMS025I(round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //20
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/-100,3),"@E 999,999,999.999"),;					   //19
+								   U_ROMS025I(Round((_cAlias3)->COMIS5/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //20
 								   " ",;                                                                                    //21
                             U_ROMS025I((_cAlias3)->(SE5DCT+SE5VRB),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5DCT,"@E 999,999,999.999"),;
@@ -6483,9 +6483,9 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 							    	})
 //-----------------------------------------------------------------------------------------------------------------------------------------------
                   ElseIf "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07 // imprime apenas gerente
-				     Aadd(_adados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
+				     aAdd(_aDados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
 								   "BON",;													                               //02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   //03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   //03
 								   "  ",;													                               //04
 								   (_cAlias3)->F2_DOC,;									                                   //05
 								   "  ",;													                               //06
@@ -6501,8 +6501,8 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 								   U_ROMS025I((_cAlias3)->VALTOT*-1,"@E 999,999,999.99"),;							       //16
 								   _ccodger,;												                               //17
 								   _cnomeger,;												                               //18
-								   U_ROMS025I(round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   //19
-								   U_ROMS025I(round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //20
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/-100,3),"@E 999,999,999.999"),;					   //19
+								   U_ROMS025I(Round((_cAlias3)->COMIS3/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //20
 								   " ",;                                                                                    //21
                             U_ROMS025I((_cAlias3)->(SE5DCT+SE5VRB),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5DCT,"@E 999,999,999.999"),;
@@ -6510,9 +6510,9 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
                             U_ROMS025I((_cAlias3)->VALST,"@E 999,999,999.999");  
 							    	})
                   ElseIf ! "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07 // imprime apenas Coordenador
-				     Aadd(_adados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
+				     aAdd(_aDados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
 							       "BON",;													                               //02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   //03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   //03
 								   "  ",;													                               //04
 								   (_cAlias3)->F2_DOC,;									                                   //05
 								   "  ",;													                               //06
@@ -6528,8 +6528,8 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 								   U_ROMS025I((_cAlias3)->VALTOT*-1,"@E 999,999,999.99"),;							       //16
 								   _ccodcoord,;											                                   //17
 								   _cnomecoord,;											                               //18
-								   U_ROMS025I(round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   //19
-								   U_ROMS025I(round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //20
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/-100,3),"@E 999,999,999.999"),;					   //19
+								   U_ROMS025I(Round((_cAlias3)->COMIS2/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;		   //20
 								   " ",;                                                                                    //21
                             U_ROMS025I((_cAlias3)->(SE5DCT+SE5VRB),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5DCT,"@E 999,999,999.999"),;
@@ -6537,9 +6537,9 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
                             U_ROMS025I((_cAlias3)->VALST,"@E 999,999,999.999");  
 								   })
                   ElseIf ! "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07 // imprime apenas supervisor
-				     Aadd(_adados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
+				     aAdd(_aDados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
 								   "BON",;													                               //02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   //03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   //03
 								   "  ",;													                               //04
 								   (_cAlias3)->F2_DOC,;									                                   //05
 								   "  ",;													                               //06
@@ -6555,8 +6555,8 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 								   U_ROMS025I((_cAlias3)->VALTOT*-1,"@E 999,999,999.99"),;							       //16
 								   _ccodsup,;												                               //17
 								   _cnomesup,;												                               //18
-								   U_ROMS025I(round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   //19
-				    			   U_ROMS025I(round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //20
+								   U_ROMS025I(Round((_cAlias3)->COMIS4/-100,3),"@E 999,999,999.999"),;					   //19
+				    			   U_ROMS025I(Round((_cAlias3)->COMIS4/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //20
 								   " ",;                                                                                    //21
                             U_ROMS025I((_cAlias3)->(SE5DCT+SE5VRB),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5DCT,"@E 999,999,999.999"),;
@@ -6564,9 +6564,9 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
                             U_ROMS025I((_cAlias3)->VALST,"@E 999,999,999.999");  
 								   })
                   ElseIf ! "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07 // imprime apenas vendedor
-				     Aadd(_adados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
+				     aAdd(_aDados,{(_cAlias3)->F2_FILIAL	,;					                                           //01
 								   "BON",;													                               //02
-								   DTOC(stod((_cAlias3)->F2_EMISSAO)),;					                                   //03
+								   DToC(SToD((_cAlias3)->F2_EMISSAO)),;					                                   //03
 								   "  ",;													                               //04
 								   (_cAlias3)->F2_DOC,;									                                   //05
 								   "  ",;													                               //06
@@ -6581,9 +6581,9 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 								   U_ROMS025I(0,"@E 999,999,999.99"),;													   //15
 								   U_ROMS025I((_cAlias3)->VALTOT*-1,"@E 999,999,999.99"),;							       //16
 								   _cCodVen,;												                               //17
-								   POSICIONE("SA3",1,xfilial("SA3")+_cCodVen,"A3_NOME"),;	                               //18
-								   U_ROMS025I(round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   //19
-								   U_ROMS025I(round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //20
+								   Posicione("SA3",1,xFilial("SA3")+_cCodVen,"A3_NOME"),;	                               //18
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/-100,3),"@E 999,999,999.999"),;					   //19
+								   U_ROMS025I(Round((_cAlias3)->COMIS1/(_cAlias3)->VALTOT,3),"@E 999,999,999.999"),;	   //20
 								   " ",;                                                                                    //21
                             U_ROMS025I((_cAlias3)->(SE5DCT+SE5VRB),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias3)->SE5DCT,"@E 999,999,999.999"),;
@@ -6591,15 +6591,15 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
                             U_ROMS025I((_cAlias3)->VALST,"@E 999,999,999.999");  
 							 	   })
                   Else // Não exibe dados do relatório em excel.
-                     _adados := {}		
+                     _aDados := {}		
                   EndIf
 			   EndIf
 			   
-			   (_cAlias3)->( Dbskip() )
-			Enddo
+			   (_cAlias3)->( DBSkip() )
+			EndDo
 		 EndIf					
 		 
-		 (_cAlias)->(DbSkip())
+		 (_cAlias)->(DBSkip())
 		 
 	  EndDo
 
@@ -6611,7 +6611,7 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
    // Chama a rotina para selecao dos registros da previsão de comissao.												
    //=======================================================================================================
    //MV_PAR06 := (_cAlias)->CODVEND   // Filtro codigo do Vendedor 
-   fwMsgRun(,{|oproc|ROMS025QRY(_cAlias4,4,oproc)},"Aguarde....","Filtrando os dados Previsão de Comissão")    
+   FWMsgRun(,{|oproc|ROMS025QRY(_cAlias4,4,oproc)},"Aguarde....","Filtrando os dados Previsão de Comissão")    
 		
    _nTotReg := 0 
 		 		
@@ -6622,7 +6622,7 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 
    If _nTotReg > 0
 	  _nConAux := 0
-	  Do While (_cAlias4)->( !Eof() )
+	  While (_cAlias4)->( !Eof() )
          _nConAux++
 		 oproc:cCaption := 'Processando dados previsão de comissões... ['+ StrZero(_nConAux,9) +'] de ['+ StrZero(_nTotReg,9) +'].'
 		 ProcessMessages()
@@ -6632,14 +6632,14 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 	     _cDescGrupo := Posicione("ACY",1,xFilial("ACY")+_cCodGrupo,"ACY_DESCRI")
 		 _cCodVen := (_cAlias4)->F2_VEND1
 		 _ccodsup :=  (_cAlias4)->F2_VEND4
-		 _cnomesup := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodsup)),SA3->A3_NOME," ")
+		 _cnomesup := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodsup)),SA3->A3_NOME," ")
 		 _ccodcoord := (_cAlias4)->F2_VEND2
-		 _cnomecoord := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodcoord)),SA3->A3_NOME," ")
+		 _cnomecoord := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodcoord)),SA3->A3_NOME," ")
 		 _ccodger := (_cAlias4)->F2_VEND3
-		 _cnomeger := IIF(SA3->(Dbseek(xfilial("SA3")+_ccodger)),SA3->A3_NOME," ")
+		 _cnomeger := IIf(SA3->(DBSeek(xFilial("SA3")+_ccodger)),SA3->A3_NOME," ")
 
          _cCodGNc  := (_cAlias4)->F2_VEND5
-		 _cNomeGnc := IIF(SA3->(Dbseek(xfilial("SA3")+_cCodGNc)),SA3->A3_NOME," ")
+		 _cNomeGnc := IIf(SA3->(DBSeek(xFilial("SA3")+_cCodGNc)),SA3->A3_NOME," ")
 
 		_aParcelaPre := ROMS025P((_cAlias4)->F2_FILIAL, (_cAlias4)->F2_CLIENTE, (_cAlias4)->F2_LOJA, (_cAlias4)->F2_SERIE, (_cAlias4)->F2_DOC)
 		_nTotParcela := Len(_aParcelaPre)
@@ -6678,12 +6678,12 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 			_nPerCom5 := _aComissao[11] 
 
 
-		     If ascan(_adados, {|_vAux| _vAux[1]==(_cAlias4)->F2_FILIAL .and. _vAux[2]=="PRE" .and. _vAux[5]==(_cAlias4)->F2_DOC .And. _vAux[6] == _cParcela }) ==  0
+		     If aScan(_aDados, {|_vAux| _vAux[1]==(_cAlias4)->F2_FILIAL .And. _vAux[2]=="PRE" .And. _vAux[5]==(_cAlias4)->F2_DOC .And. _vAux[6] == _cParcela }) ==  0
 			    // Incrementa array para geração de excel
                 If Empty(MV_PAR07) .Or. ("G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07) // Imprime todos os dados
-			       Aadd(_adados,{(_cAlias4)->F2_FILIAL	,;					                                              //01
+			       aAdd(_aDados,{(_cAlias4)->F2_FILIAL	,;					                                              //01
 			 		             "PRE",;													                              //02
-							     DTOC(stod((_cAlias4)->F2_EMISSAO)),;					                                  //03
+							     DToC(SToD((_cAlias4)->F2_EMISSAO)),;					                                  //03
 							     "  ",;													                                  //04
 							     (_cAlias4)->F2_DOC,;									                                  //05
 							     _cParcela,;											                                  //06
@@ -6698,7 +6698,7 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 							     U_ROMS025I(0,"@E 999,999,999.99"),;													  //15
 							     U_ROMS025I(_nBaseComiss, "@E 999,999,999.99"),;				                          //16  // U_ROMS025I(_nBaseComiss * _nPercParcela ,"@E 999,999,999.99"),;	
 							     _cCodVen,;												                                  //17
-							     POSICIONE("SA3",1,xfilial("SA3")+_cCodVen,"A3_NOME"),;	                                  //18
+							     Posicione("SA3",1,xFilial("SA3")+_cCodVen,"A3_NOME"),;	                                  //18
 							     _ccodsup,;												                                  //19
 							     _cnomesup,;												                              //20
 							     _ccodcoord,;											                                  //21
@@ -6707,16 +6707,16 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 							     _cnomeger,;												                              //24
                                  _cCodGNc,;                                                                               //25
 			                     _cNomeGnc,;                                                                              //26
-							     U_ROMS025I(round( _nComiss1 , 3)  ,"@E 999,999,999.999")     ,;	                      //25-->27  
-							     U_ROMS025I(round( _nPerCom1 , 3)  ,"@E 999,999,999.999")     ,;                          //26-->28  
-							     U_ROMS025I(round( _nComiss4 , 3)  ,"@E 999,999,999.999")     ,;	                      //27-->29  
-							     U_ROMS025I(round( _nPerCom4 , 3)  ,"@E 999,999,999.999")     ,;	                      //28-->30  
-							     U_ROMS025I(round( _nComiss2 , 3)  ,"@E 999,999,999.999")     ,;	                      //29-->31  
-							     U_ROMS025I(round( _nPerCom2 , 3)  ,"@E 999,999,999.999")     ,;	                      //30-->32  
-							     U_ROMS025I(round( _nComiss3 , 3)  ,"@E 999,999,999.999")     ,;		                  //31-->33  
-								 U_ROMS025I(round( _nPerCom3 , 3)  ,"@E 999,999,999.999")     ,;	                      //32-->34
-								 U_ROMS025I(round( _nComiss5 , 3)  ,"@E 999,999,999.999")     ,;		                  //35  
-								 U_ROMS025I(round( _nPerCom5 , 3)  ,"@E 999,999,999.999")     ,;	                      //36  
+							     U_ROMS025I(Round( _nComiss1 , 3)  ,"@E 999,999,999.999")     ,;	                      //25-->27  
+							     U_ROMS025I(Round( _nPerCom1 , 3)  ,"@E 999,999,999.999")     ,;                          //26-->28  
+							     U_ROMS025I(Round( _nComiss4 , 3)  ,"@E 999,999,999.999")     ,;	                      //27-->29  
+							     U_ROMS025I(Round( _nPerCom4 , 3)  ,"@E 999,999,999.999")     ,;	                      //28-->30  
+							     U_ROMS025I(Round( _nComiss2 , 3)  ,"@E 999,999,999.999")     ,;	                      //29-->31  
+							     U_ROMS025I(Round( _nPerCom2 , 3)  ,"@E 999,999,999.999")     ,;	                      //30-->32  
+							     U_ROMS025I(Round( _nComiss3 , 3)  ,"@E 999,999,999.999")     ,;		                  //31-->33  
+								 U_ROMS025I(Round( _nPerCom3 , 3)  ,"@E 999,999,999.999")     ,;	                      //32-->34
+								 U_ROMS025I(Round( _nComiss5 , 3)  ,"@E 999,999,999.999")     ,;		                  //35  
+								 U_ROMS025I(Round( _nPerCom5 , 3)  ,"@E 999,999,999.999")     ,;	                      //36  
                          "  ",;
                            U_ROMS025I(0,"@E 999,999,999.99"),; //37
                            U_ROMS025I(0,"@E 999,999,999.99"),; //38
@@ -6726,9 +6726,9 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 							     })
 							  
                 ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. "N" $ MV_PAR07 //  Não imprime vendedor
-			       Aadd(_adados,{(_cAlias4)->F2_FILIAL	,;					                                               //01
+			       aAdd(_aDados,{(_cAlias4)->F2_FILIAL	,;					                                               //01
 					    	     "PRE",;													                               //02
-							     DTOC(stod((_cAlias4)->F2_EMISSAO)),;					                                   //03
+							     DToC(SToD((_cAlias4)->F2_EMISSAO)),;					                                   //03
 							     "  ",;													                                   //04
 							     (_cAlias4)->F2_DOC,;									                                   //05
 							     _cParcela,;											                                   //06
@@ -6750,14 +6750,14 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 							     _cnomeger,;												                               //22
 								 _cCodGNc,;                                                                                //23
 			                     _cNomeGnc,;                                                                               //24
-							     U_ROMS025I(round(_nComiss4 ,3),"@E 999,999,999.999"),;				                       //23-->25
-							     U_ROMS025I(round(_nPerCom4 ,3),"@E 999,999,999.999"),;	                                   //24-->26
-							     U_ROMS025I(round(_nComiss2 ,3),"@E 999,999,999.999"),;				                       //25-->27
-							     U_ROMS025I(round(_nPerCom2 ,3),"@E 999,999,999.999"),;	                                   //26-->28 
-						         U_ROMS025I(round(_nComiss3 ,3),"@E 999,999,999.999"),;				                       //27-->29 
-							     U_ROMS025I(round(_nPerCom3 ,3),"@E 999,999,999.999"),;	                                   //28-->30 
-								 U_ROMS025I(round(_nComiss5 ,3),"@E 999,999,999.999"),;				                       //31 
-							     U_ROMS025I(round(_nPerCom5 ,3),"@E 999,999,999.999"),;	                                   //32 
+							     U_ROMS025I(Round(_nComiss4 ,3),"@E 999,999,999.999"),;				                       //23-->25
+							     U_ROMS025I(Round(_nPerCom4 ,3),"@E 999,999,999.999"),;	                                   //24-->26
+							     U_ROMS025I(Round(_nComiss2 ,3),"@E 999,999,999.999"),;				                       //25-->27
+							     U_ROMS025I(Round(_nPerCom2 ,3),"@E 999,999,999.999"),;	                                   //26-->28 
+						         U_ROMS025I(Round(_nComiss3 ,3),"@E 999,999,999.999"),;				                       //27-->29 
+							     U_ROMS025I(Round(_nPerCom3 ,3),"@E 999,999,999.999"),;	                                   //28-->30 
+								 U_ROMS025I(Round(_nComiss5 ,3),"@E 999,999,999.999"),;				                       //31 
+							     U_ROMS025I(Round(_nPerCom5 ,3),"@E 999,999,999.999"),;	                                   //32 
 							      " ",;                                                                                     //29-->33
                             U_ROMS025I((_cAlias4)->(SE5DCT+SE5VRB),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias4)->SE5DCT,"@E 999,999,999.999"),;
@@ -6765,9 +6765,9 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
                             U_ROMS025I((_cAlias4)->VALST,"@E 999,999,999.999");   
 							     })
                 ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07 // Não imprime supervisor
-			       Aadd(_adados,{(_cAlias4)->F2_FILIAL	,;					                                               //01
+			       aAdd(_aDados,{(_cAlias4)->F2_FILIAL	,;					                                               //01
 				    	 	     "PRE",;													                               //02
-							     DTOC(stod((_cAlias4)->F2_EMISSAO)),;					                                   //03
+							     DToC(SToD((_cAlias4)->F2_EMISSAO)),;					                                   //03
 							     "  ",;													                                   //04
 							     (_cAlias4)->F2_DOC,;									                                   //05
 							     _cParcela,;											                                   //06
@@ -6782,21 +6782,21 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 							     U_ROMS025I(0,"@E 999,999,999.99"),;													   //15
 							     U_ROMS025I(_nBaseComiss ,"@E 999,999,999.99"),;						                   //16  // U_ROMS025I(_nBaseComiss * _nPercParcela,"@E 999,999,999.99"),;	
 							     _cCodVen,;												                                   //17
-							     POSICIONE("SA3",1,xfilial("SA3")+_cCodVen,"A3_NOME"),;	                                   //18
+							     Posicione("SA3",1,xFilial("SA3")+_cCodVen,"A3_NOME"),;	                                   //18
 							     _ccodcoord,;											                                   //19
 							     _cnomecoord,;											                                   //20
 							     _ccodger,;												                                   //21
 							     _cnomeger,;												                               //22
 								 _cCodGNc,;                                                                                //23
 			                     _cNomeGnc,;                                                                               //24
-						         U_ROMS025I(round(_nComiss1 ,3),"@E 999,999,999.999"),;				                       //23-->25 
-							     U_ROMS025I(round(_nPerCom1 ,3),"@E 999,999,999.999"),;	                                   //24-->26 
-							     U_ROMS025I(round(_nComiss2 ,3),"@E 999,999,999.999"),;				                       //25-->27 
-							     U_ROMS025I(round(_nPerCom2 ,3),"@E 999,999,999.999"),;	                                   //26-->28 
-							     U_ROMS025I(round(_nComiss3 ,3),"@E 999,999,999.999"),;				                       //27-->29 
-							     U_ROMS025I(round(_nPerCom3 ,3),"@E 999,999,999.999"),;	                                   //28-->30 
-                                 U_ROMS025I(round(_nComiss5 ,3),"@E 999,999,999.999"),;				                       //31 
-							     U_ROMS025I(round(_nPerCom5 ,3),"@E 999,999,999.999"),;	                                   //32  
+						         U_ROMS025I(Round(_nComiss1 ,3),"@E 999,999,999.999"),;				                       //23-->25 
+							     U_ROMS025I(Round(_nPerCom1 ,3),"@E 999,999,999.999"),;	                                   //24-->26 
+							     U_ROMS025I(Round(_nComiss2 ,3),"@E 999,999,999.999"),;				                       //25-->27 
+							     U_ROMS025I(Round(_nPerCom2 ,3),"@E 999,999,999.999"),;	                                   //26-->28 
+							     U_ROMS025I(Round(_nComiss3 ,3),"@E 999,999,999.999"),;				                       //27-->29 
+							     U_ROMS025I(Round(_nPerCom3 ,3),"@E 999,999,999.999"),;	                                   //28-->30 
+                                 U_ROMS025I(Round(_nComiss5 ,3),"@E 999,999,999.999"),;				                       //31 
+							     U_ROMS025I(Round(_nPerCom5 ,3),"@E 999,999,999.999"),;	                                   //32  
 							     " ",;                                                                                      //29-->33
                             U_ROMS025I((_cAlias4)->(SE5DCT+SE5VRB),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias4)->SE5DCT,"@E 999,999,999.999"),;
@@ -6804,9 +6804,9 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
                             U_ROMS025I((_cAlias4)->VALST,"@E 999,999,999.999");   
 							    })
                 ElseIf "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07 // Não imprime Coordenador
-				   Aadd(_adados,{(_cAlias4)->F2_FILIAL	,;					                                               //01
+				   aAdd(_aDados,{(_cAlias4)->F2_FILIAL	,;					                                               //01
 								"PRE",;													                                   //02
-								DTOC(stod((_cAlias4)->F2_EMISSAO)),;					                                   //03
+								DToC(SToD((_cAlias4)->F2_EMISSAO)),;					                                   //03
 								"  ",;													                                   //04
 								(_cAlias4)->F2_DOC,;									                                   //05
 								_cParcela,;												                                   //06
@@ -6821,21 +6821,21 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 								U_ROMS025I(0,"@E 999,999,999.99"),;													       //15
 								U_ROMS025I(_nBaseComiss,"@E 999,999,999.99"),;						                       //16 // U_ROMS025I(_nBaseComiss * _nPercParcela,"@E 999,999,999.99"),;						       //16 
 								_cCodVen,;												                                   //17
-								POSICIONE("SA3",1,xfilial("SA3")+_cCodVen,"A3_NOME"),;	                                   //18
+								Posicione("SA3",1,xFilial("SA3")+_cCodVen,"A3_NOME"),;	                                   //18
 								_ccodsup,;												                                   //19
 								_cnomesup,;												                                   //20
 								_ccodger,;												                                   //21
 								_cnomeger,;												                                   //22
                                 _cCodGNc,;                                                                                 //23
 			                    _cNomeGnc,;                                                                                //24
-								U_ROMS025I(round(_nComiss1 ,3),"@E 999,999,999.999"),;				                       //23-->25 
-								U_ROMS025I(round(_nPerCom1 ,3),"@E 999,999,999.999"),;	                                   //24-->26 
-								U_ROMS025I(round(_nComiss4 ,3),"@E 999,999,999.999"),;				                       //25-->27 
-								U_ROMS025I(round(_nPerCom4 ,3),"@E 999,999,999.999"),;	                                   //26-->28 
-								U_ROMS025I(round(_nComiss3 ,3),"@E 999,999,999.999"),;				                       //27-->29 
-								U_ROMS025I(round(_nPerCom3 ,3),"@E 999,999,999.999"),;	                                   //28-->30
-                                U_ROMS025I(round(_nComiss5 ,3),"@E 999,999,999.999"),;				                       //31 
-							    U_ROMS025I(round(_nPerCom5 ,3),"@E 999,999,999.999"),;	                                   //32  
+								U_ROMS025I(Round(_nComiss1 ,3),"@E 999,999,999.999"),;				                       //23-->25 
+								U_ROMS025I(Round(_nPerCom1 ,3),"@E 999,999,999.999"),;	                                   //24-->26 
+								U_ROMS025I(Round(_nComiss4 ,3),"@E 999,999,999.999"),;				                       //25-->27 
+								U_ROMS025I(Round(_nPerCom4 ,3),"@E 999,999,999.999"),;	                                   //26-->28 
+								U_ROMS025I(Round(_nComiss3 ,3),"@E 999,999,999.999"),;				                       //27-->29 
+								U_ROMS025I(Round(_nPerCom3 ,3),"@E 999,999,999.999"),;	                                   //28-->30
+                                U_ROMS025I(Round(_nComiss5 ,3),"@E 999,999,999.999"),;				                       //31 
+							    U_ROMS025I(Round(_nPerCom5 ,3),"@E 999,999,999.999"),;	                                   //32  
 								" ",;                                                                                       //29-->33
                             U_ROMS025I((_cAlias4)->(SE5DCT+SE5VRB),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias4)->SE5DCT,"@E 999,999,999.999"),;
@@ -6843,9 +6843,9 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
                             U_ROMS025I((_cAlias4)->VALST,"@E 999,999,999.999");   
 								})
                 ElseIf ! "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. "N" $ MV_PAR07 // Não imprime gerente
-			       Aadd(_adados,{(_cAlias4)->F2_FILIAL	,;					                                               //01
+			       aAdd(_aDados,{(_cAlias4)->F2_FILIAL	,;					                                               //01
 						         "PRE",;													                               //02
-							      DTOC(stod((_cAlias4)->F2_EMISSAO)),;					                                   //03
+							      DToC(SToD((_cAlias4)->F2_EMISSAO)),;					                                   //03
 							      "  ",;													                               //04
 							      (_cAlias4)->F2_DOC,;									                                   //05
 							      _cParcela,;												                               //06
@@ -6860,21 +6860,21 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 							      U_ROMS025I(0,"@E 999,999,999.99"),;													   //15
 							      U_ROMS025I(_nBaseComiss,"@E 999,999,999.99"),;					                       //16 // U_ROMS025I(_nBaseComiss * _nPercParcela,"@E 999,999,999.99"),;
 							      _cCodVen,;												                               //17
-							      POSICIONE("SA3",1,xfilial("SA3")+_cCodVen,"A3_NOME"),;	                               //18
+							      Posicione("SA3",1,xFilial("SA3")+_cCodVen,"A3_NOME"),;	                               //18
 							      _ccodsup,;												                               //19
 							      _cnomesup,;												                               //20
 							      _ccodcoord,;											                                   //21
 							      _cnomecoord,;											                                   //22
                                   _cCodGNc,;                                                                               //23
 			                      _cNomeGnc,;                                                                              //24
-							      U_ROMS025I(round(_nComiss1 ,3),"@E 999,999,999.999"),;				                   //23-->25 
-							      U_ROMS025I(round(_nPerCom1 ,3),"@E 999,999,999.999"),;	                               //24-->26 
-							      U_ROMS025I(round(_nComiss4 ,3),"@E 999,999,999.999"),;				                   //25-->27 
-								  U_ROMS025I(round(_nPerCom4 ,3),"@E 999,999,999.999"),;	                               //26-->28  
-							      U_ROMS025I(round(_nComiss2 ,3),"@E 999,999,999.999"),;				                   //27-->29 
-							      U_ROMS025I(round(_nPerCom2 ,3),"@E 999,999,999.999"),;	                               //28-->30
-                                  U_ROMS025I(round(_nComiss5 ,3),"@E 999,999,999.999"),;		                           //31 
-							      U_ROMS025I(round(_nPerCom5 ,3),"@E 999,999,999.999"),;	                               //32  
+							      U_ROMS025I(Round(_nComiss1 ,3),"@E 999,999,999.999"),;				                   //23-->25 
+							      U_ROMS025I(Round(_nPerCom1 ,3),"@E 999,999,999.999"),;	                               //24-->26 
+							      U_ROMS025I(Round(_nComiss4 ,3),"@E 999,999,999.999"),;				                   //25-->27 
+								  U_ROMS025I(Round(_nPerCom4 ,3),"@E 999,999,999.999"),;	                               //26-->28  
+							      U_ROMS025I(Round(_nComiss2 ,3),"@E 999,999,999.999"),;				                   //27-->29 
+							      U_ROMS025I(Round(_nPerCom2 ,3),"@E 999,999,999.999"),;	                               //28-->30
+                                  U_ROMS025I(Round(_nComiss5 ,3),"@E 999,999,999.999"),;		                           //31 
+							      U_ROMS025I(Round(_nPerCom5 ,3),"@E 999,999,999.999"),;	                               //32  
 							      " ",;                                                                                     //29-->33
                             U_ROMS025I((_cAlias4)->(SE5DCT+SE5VRB),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias4)->SE5DCT,"@E 999,999,999.999"),;
@@ -6882,9 +6882,9 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
                             U_ROMS025I((_cAlias4)->VALST,"@E 999,999,999.999");   
 								  })       
                 ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07 // Não imprime gerente nacional
-			       Aadd(_adados,{(_cAlias4)->F2_FILIAL	,;					                                               //01
+			       aAdd(_aDados,{(_cAlias4)->F2_FILIAL	,;					                                               //01
 						         "PRE",;													                               //02
-							      DTOC(stod((_cAlias4)->F2_EMISSAO)),;					                                   //03
+							      DToC(SToD((_cAlias4)->F2_EMISSAO)),;					                                   //03
 							      "  ",;													                               //04
 							      (_cAlias4)->F2_DOC,;									                                   //05
 							      _cParcela,;												                               //06
@@ -6899,21 +6899,21 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 							      U_ROMS025I(0,"@E 999,999,999.99"),;													   //15
 							      U_ROMS025I(_nBaseComiss,"@E 999,999,999.99"),;					                       //16 
 							      _cCodVen,;												                               //17
-							      POSICIONE("SA3",1,xfilial("SA3")+_cCodVen,"A3_NOME"),;	                               //18
+							      Posicione("SA3",1,xFilial("SA3")+_cCodVen,"A3_NOME"),;	                               //18
 							      _ccodsup,;												                               //19
 							      _cnomesup,;												                               //20
 							      _ccodcoord,;											                                   //21
 							      _cnomecoord,;											                                   //22
                                   _ccodger,;												                               //23
 								  _cnomeger,;	                                                                           //24
-							      U_ROMS025I(round(_nComiss1 ,3),"@E 999,999,999.999"),;				                   //23-->25 
-							      U_ROMS025I(round(_nPerCom1 ,3),"@E 999,999,999.999"),;	                               //24-->26 
-							      U_ROMS025I(round(_nComiss4 ,3),"@E 999,999,999.999"),;				                   //25-->27 
-								  U_ROMS025I(round(_nPerCom4 ,3),"@E 999,999,999.999"),;	                               //26-->28  
-							      U_ROMS025I(round(_nComiss2 ,3),"@E 999,999,999.999"),;				                   //27-->29 
-							      U_ROMS025I(round(_nPerCom2 ,3),"@E 999,999,999.999"),;	                               //28-->30
-                                  U_ROMS025I(round(_nComiss3 ,3),"@E 999,999,999.999"),;				                   //27-->29 
-							      U_ROMS025I(round(_nPerCom3 ,3),"@E 999,999,999.999"),;                                   //28-->30
+							      U_ROMS025I(Round(_nComiss1 ,3),"@E 999,999,999.999"),;				                   //23-->25 
+							      U_ROMS025I(Round(_nPerCom1 ,3),"@E 999,999,999.999"),;	                               //24-->26 
+							      U_ROMS025I(Round(_nComiss4 ,3),"@E 999,999,999.999"),;				                   //25-->27 
+								  U_ROMS025I(Round(_nPerCom4 ,3),"@E 999,999,999.999"),;	                               //26-->28  
+							      U_ROMS025I(Round(_nComiss2 ,3),"@E 999,999,999.999"),;				                   //27-->29 
+							      U_ROMS025I(Round(_nPerCom2 ,3),"@E 999,999,999.999"),;	                               //28-->30
+                                  U_ROMS025I(Round(_nComiss3 ,3),"@E 999,999,999.999"),;				                   //27-->29 
+							      U_ROMS025I(Round(_nPerCom3 ,3),"@E 999,999,999.999"),;                                   //28-->30
 							      " ",;                                                                                     //29-->33
                             U_ROMS025I((_cAlias4)->(SE5DCT+SE5VRB),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias4)->SE5DCT,"@E 999,999,999.999"),;
@@ -6922,9 +6922,9 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 								  })       
 
                 ElseIf ! "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. "N" $ MV_PAR07 // imprime apenas gerente nacional
-			       Aadd(_adados,{(_cAlias4)->F2_FILIAL	,;					                                               //01
+			       aAdd(_aDados,{(_cAlias4)->F2_FILIAL	,;					                                               //01
 						          "PRE",;													                               //02
-							      DTOC(stod((_cAlias4)->F2_EMISSAO)),;					                                   //03
+							      DToC(SToD((_cAlias4)->F2_EMISSAO)),;					                                   //03
 							      "  ",;													                               //04
 							      (_cAlias4)->F2_DOC,;									                                   //05
 							      _cParcela,;												                               //06
@@ -6940,8 +6940,8 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 							      U_ROMS025I(_nBaseComiss,"@E 999,999,999.99"),;					                       //16
 							      _cCodGNc,;                                                                               //17
 			                      _cNomeGnc,;                                                                              //18
-                                  U_ROMS025I(round(_nComiss5 ,3),"@E 999,999,999.999"),;		                           //19 
-							      U_ROMS025I(round(_nPerCom5 ,3),"@E 999,999,999.999"),;	                               //20  
+                                  U_ROMS025I(Round(_nComiss5 ,3),"@E 999,999,999.999"),;		                           //19 
+							      U_ROMS025I(Round(_nPerCom5 ,3),"@E 999,999,999.999"),;	                               //20  
 							      " ",;                                                                                     //21
                             U_ROMS025I((_cAlias4)->(SE5DCT+SE5VRB),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias4)->SE5DCT,"@E 999,999,999.999"),;
@@ -6949,9 +6949,9 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
                             U_ROMS025I((_cAlias4)->VALST,"@E 999,999,999.999");   
 							 })
                 ElseIf "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07 // imprime apenas gerente
-			       Aadd(_adados,{(_cAlias4)->F2_FILIAL	,;					                                               //01
+			       aAdd(_aDados,{(_cAlias4)->F2_FILIAL	,;					                                               //01
 						          "PRE",;													                               //02
-							      DTOC(stod((_cAlias4)->F2_EMISSAO)),;					                                   //03
+							      DToC(SToD((_cAlias4)->F2_EMISSAO)),;					                                   //03
 							      "  ",;													                               //04
 							      (_cAlias4)->F2_DOC,;									                                   //05
 							      _cParcela,;												                               //06
@@ -6967,8 +6967,8 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 							      U_ROMS025I(_nBaseComiss,"@E 999,999,999.99"),;					                       //16
 							      _ccodger,;												                               //17
 							      _cnomeger,;												                               //18
-							      U_ROMS025I(round(_nComiss3 ,3),"@E 999,999,999.999"),;				                   //19 
-							      U_ROMS025I(round(_nPerCom3 ,3),"@E 999,999,999.999"),;	                               //20 
+							      U_ROMS025I(Round(_nComiss3 ,3),"@E 999,999,999.999"),;				                   //19 
+							      U_ROMS025I(Round(_nPerCom3 ,3),"@E 999,999,999.999"),;	                               //20 
 							      " ",;                                                                                     //21
                             U_ROMS025I((_cAlias4)->(SE5DCT+SE5VRB),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias4)->SE5DCT,"@E 999,999,999.999"),;
@@ -6976,9 +6976,9 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
                             U_ROMS025I((_cAlias4)->VALST,"@E 999,999,999.999");   
 							 })
                 ElseIf ! "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07 // imprime apenas Coordenador
-			       Aadd(_adados,{(_cAlias4)->F2_FILIAL	,;					                                               //01
+			       aAdd(_aDados,{(_cAlias4)->F2_FILIAL	,;					                                               //01
 							     "PRE",;													                               //02
-							     DTOC(stod((_cAlias4)->F2_EMISSAO)),;					                                   //03
+							     DToC(SToD((_cAlias4)->F2_EMISSAO)),;					                                   //03
 							     "  ",;													                                   //04
 							     (_cAlias4)->F2_DOC,;									                                   //05
 							     _cParcela,;											                                   //06
@@ -6994,8 +6994,8 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 							     U_ROMS025I(_nBaseComiss,"@E 999,999,999.99"),;						                       //16 // U_ROMS025I(_nBaseComiss * _nPercParcela,"@E 999,999,999.99"),;	
 							     _ccodcoord,;											                                   //17
 							     _cnomecoord,;											                                   //18
-							     U_ROMS025I(round(_nComiss2 ,3),"@E 999,999,999.999"),;				                       //19 
-							     U_ROMS025I(round(_nPerCom2 ,3),"@E 999,999,999.999"),;                                    //20 
+							     U_ROMS025I(Round(_nComiss2 ,3),"@E 999,999,999.999"),;				                       //19 
+							     U_ROMS025I(Round(_nPerCom2 ,3),"@E 999,999,999.999"),;                                    //20 
 							     " ",;                                                                                      //21
                             U_ROMS025I((_cAlias4)->(SE5DCT+SE5VRB),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias4)->SE5DCT,"@E 999,999,999.999"),;
@@ -7003,9 +7003,9 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
                             U_ROMS025I((_cAlias4)->VALST,"@E 999,999,999.999");   
 							     })
                 ElseIf ! "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. ! "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07 // imprime apenas supervisor
-			       Aadd(_adados,{(_cAlias4)->F2_FILIAL	,;					                                               //01
+			       aAdd(_aDados,{(_cAlias4)->F2_FILIAL	,;					                                               //01
 						         "PRE",;													                               //02
-							     DTOC(stod((_cAlias4)->F2_EMISSAO)),;					                                   //03
+							     DToC(SToD((_cAlias4)->F2_EMISSAO)),;					                                   //03
 							     "  ",;													                                   //04
 							     (_cAlias4)->F2_DOC,;									                                   //05
 							     _cParcela,;											                                   //06
@@ -7021,8 +7021,8 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 							    U_ROMS025I(_nBaseComiss,"@E 999,999,999.99"),;						                       //16 // U_ROMS025I(_nBaseComiss * _nPercParcela,"@E 999,999,999.99"),;
 							    _ccodsup,;												                                   //17
 							    _cnomesup,;												                                   //18
-							    U_ROMS025I(round(_nComiss4 ,3),"@E 999,999,999.999"),;				                       //19 
-				    		    U_ROMS025I(round(_nPerCom4 ,3),"@E 999,999,999.999"),;	                                   //20 
+							    U_ROMS025I(Round(_nComiss4 ,3),"@E 999,999,999.999"),;				                       //19 
+				    		    U_ROMS025I(Round(_nPerCom4 ,3),"@E 999,999,999.999"),;	                                   //20 
 							    " ",;                                                                                       //21
                             U_ROMS025I((_cAlias4)->(SE5DCT+SE5VRB),"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias4)->SE5DCT,"@E 999,999,999.999"),;
@@ -7030,9 +7030,9 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
                             U_ROMS025I((_cAlias4)->VALST,"@E 999,999,999.999");   
 							    })
                 ElseIf ! "G" $ MV_PAR07 .And. ! "C" $ MV_PAR07 .And. ! "S" $ MV_PAR07 .And. "V" $ MV_PAR07 .And. ! "N" $ MV_PAR07 // imprime apenas vendedor
-			       Aadd(_adados,{(_cAlias4)->F2_FILIAL	,;					                                               //01
+			       aAdd(_aDados,{(_cAlias4)->F2_FILIAL	,;					                                               //01
 					     	     "PRE",;													                               //02
-						    	 DTOC(stod((_cAlias4)->F2_EMISSAO)),;					                                   //03
+						    	 DToC(SToD((_cAlias4)->F2_EMISSAO)),;					                                   //03
 							     "  ",;													                                   //04
 							     (_cAlias4)->F2_DOC,;									                                   //05
 							     _cParcela,;											                                   //06
@@ -7047,9 +7047,9 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
 							     U_ROMS025I(0,"@E 999,999,999.99"),;													   //15
 							     U_ROMS025I(_nBaseComiss ,"@E 999,999,999.99"),;						                   //16 // U_ROMS025I(_nBaseComiss * _nPercParcela,"@E 999,999,999.99"),;	
 							     _cCodVen,;												                                   //17
-							     POSICIONE("SA3",1,xfilial("SA3")+_cCodVen,"A3_NOME"),;	                                   //18
-							     U_ROMS025I(round(_nComiss1 ,3),"@E 999,999,999.999"),;				                       //19 
-							     U_ROMS025I(round(_nPerCom1 ,3),"@E 999,999,999.999"),;                                    //20 
+							     Posicione("SA3",1,xFilial("SA3")+_cCodVen,"A3_NOME"),;	                                   //18
+							     U_ROMS025I(Round(_nComiss1 ,3),"@E 999,999,999.999"),;				                       //19 
+							     U_ROMS025I(Round(_nPerCom1 ,3),"@E 999,999,999.999"),;                                    //20 
 							     " ",;                                                                                      //21
                             U_ROMS025I((_cAlias4)->(SE5DCT+SE5VRB),"@E 999,999,999.999"),;//U_ROMS025I((_cAlias4)->VALDCT,"@E 999,999,999.999"),;
                             U_ROMS025I((_cAlias4)->SE5DCT,"@E 999,999,999.999"),;
@@ -7059,8 +7059,8 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
                EndIf
 		    EndIf
 		Next //EndIf	   
-		 (_cAlias4)->( Dbskip() )
-	  Enddo
+		 (_cAlias4)->( DBSkip() )
+	  EndDo
    EndIf					
 
    //========================================================================================
@@ -7074,22 +7074,22 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
       For _nI := 1 To Len(_aDados) 
           _aDadosLin := {}
           For _nJ := 1 To _nTotColun
-              Aadd(_aDadosLin, _aDados[_nI,_nJ])
+              aAdd(_aDadosLin, _aDados[_nI,_nJ])
           Next
           
           If AllTrim(_aDados[_nI,2]) == "NF"
-             Aadd(_aDadosLin, "1") // Primeira linha na ordenação. 
+             aAdd(_aDadosLin, "1") // Primeira linha na ordenação. 
           ElseIf AllTrim(_aDados[_nI,2]) == "PRE"          
-             Aadd(_aDadosLin, "2") // Segunda linha na ordenação. 
+             aAdd(_aDadosLin, "2") // Segunda linha na ordenação. 
           ElseIf AllTrim(_aDados[_nI,2]) == "BON"          
-             Aadd(_aDadosLin, "3") // Segunda linha na ordenação. 
+             aAdd(_aDadosLin, "3") // Segunda linha na ordenação. 
           ElseIf AllTrim(_aDados[_nI,2]) == "NCC"          
-             Aadd(_aDadosLin, "9") // Segunda linha na ordenação. 
+             aAdd(_aDadosLin, "9") // Segunda linha na ordenação. 
           Else         
-             Aadd(_aDadosLin, "9") // Ultima linha na ordenação. 
+             aAdd(_aDadosLin, "9") // Ultima linha na ordenação. 
           EndIf
           
-          Aadd(_aDadosIndex,_aDadosLin) 
+          aAdd(_aDadosIndex,_aDadosLin) 
       Next
    
       _nTotColun += 1
@@ -7104,10 +7104,10 @@ ElseIf "G" $ MV_PAR07 .And. "C" $ MV_PAR07 .And. "S" $ MV_PAR07 .And. "V" $ MV_P
           _aDadosLin := {}
       
           For _nJ := 1 To _nTotColun
-              Aadd(_aDadosLin, _aDadosIndex[_nI,_nJ])
+              aAdd(_aDadosLin, _aDadosIndex[_nI,_nJ])
           Next
 
-          Aadd(_aDados , _aDadosLin) 
+          aAdd(_aDados , _aDadosLin) 
       Next
    
    EndIf		 
@@ -7119,8 +7119,8 @@ MV_PAR06 := _cMVPAR05   // Filtro Vendedor
 //==========================
 //Finaliza o alias criado.
 //==========================
-dbSelectArea(_cAlias)
-(_cAlias)->(dbCloseArea())    
+DBSelectArea(_cAlias)
+(_cAlias)->(DBCloseArea())    
 
 Return 
 
@@ -7142,7 +7142,7 @@ _lRet := .T.
 Begin Sequence
    If _cCampo == "MV_PAR09"
       If MV_PAR08 <> 3 .And. ! Empty(MV_PAR09)
-         U_ITMSG("A data final de previsão de comissão deve ser preenchida apenas quando o tipo de emissão de relatório for 'Previsão de Comissão'.","Atenção", ,1) 
+         U_ITMsg("A data final de previsão de comissão deve ser preenchida apenas quando o tipo de emissão de relatório For 'Previsão de Comissão'.","Atenção", ,1) 
          _lRet := .F.
       EndIf
    EndIf
@@ -7513,7 +7513,7 @@ Begin Sequence
 
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -7981,28 +7981,28 @@ Begin Sequence
    //   COMPLEMENTO DO TÍTULO DO RELATÓRIO BAIXA DETALHADO
    //===========================================================================================   
    //If MV_PAR08 == 2
-      Aadd(_aTitulo,"Mix BI"      ) 
-      Aadd(_aTitulo,"Item"        ) 
-      Aadd(_aTitulo,"Produto"     )
-      Aadd(_aTitulo,"Descrição"   )
-      Aadd(_aTitulo,"Aliq.%"      )
-      Aadd(_aTitulo,"Qtde"        )
-      Aadd(_aTitulo,"U.M."        )
-      Aadd(_aTitulo,"Qtde 2a U.M.")
-      Aadd(_aTitulo,"2a U.M."     )
-      Aadd(_aTitulo,"Vlr.Uni."    )
-      Aadd(_aTitulo,"Valor Total" )
-      Aadd(_aTitulo,"NF.Origem"   )
-      Aadd(_aTitulo,"Serie Origem") 
-      Aadd(_aTitulo,"Vr Desconto") 
-      Aadd(_aTitulo,"Vr Desc Compensado") 
-      Aadd(_aTitulo,"Vr Verba Descontado") 
-      Aadd(_aTitulo,"Vr ICM ST") 
+      aAdd(_aTitulo,"Mix BI"      ) 
+      aAdd(_aTitulo,"Item"        ) 
+      aAdd(_aTitulo,"Produto"     )
+      aAdd(_aTitulo,"Descrição"   )
+      aAdd(_aTitulo,"Aliq.%"      )
+      aAdd(_aTitulo,"Qtde"        )
+      aAdd(_aTitulo,"U.M."        )
+      aAdd(_aTitulo,"Qtde 2a U.M.")
+      aAdd(_aTitulo,"2a U.M."     )
+      aAdd(_aTitulo,"Vlr.Uni."    )
+      aAdd(_aTitulo,"Valor Total" )
+      aAdd(_aTitulo,"NF.Origem"   )
+      aAdd(_aTitulo,"Serie Origem") 
+      aAdd(_aTitulo,"Vr Desconto") 
+      aAdd(_aTitulo,"Vr Desc Compensado") 
+      aAdd(_aTitulo,"Vr Verba Descontado") 
+      aAdd(_aTitulo,"Vr ICM ST") 
    //EndIf
 
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -8035,27 +8035,27 @@ _nVTotSF2 := 0
 Begin Sequence
    _aRet := {0,0,0,0, _nVTotSF2,0 }
    
-   SF2->(DbSetOrder(1)) // F2_FILIAL+F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA+F2_FORMUL+F2_TIPO
-   If SF2->(DbSeek(U_ItKey(_cFilialNF,"D2_FILIAL")+U_ItKey(_cNRNF,"D2_DOC")+U_ItKey(_cSerieNf,"D2_SERIE")+U_ItKey(_cCodCli,"D2_CLIENTE")+U_ItKey(_cLojaCli,"D2_LOJA")))
+   SF2->(DBSetOrder(1)) // F2_FILIAL+F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA+F2_FORMUL+F2_TIPO
+   If SF2->(DBSeek(U_ItKey(_cFilialNF,"D2_FILIAL")+U_ItKey(_cNRNF,"D2_DOC")+U_ItKey(_cSerieNf,"D2_SERIE")+U_ItKey(_cCodCli,"D2_CLIENTE")+U_ItKey(_cLojaCli,"D2_LOJA")))
       _nVTotSF2 := SF2->F2_VALMERC
    EndIf
    
-   SD2->(DbSetOrder(3)) // D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA+D2_COD+D2_ITEM
-   If SD2->(DbSeek(U_ItKey(_cFilialNF,"D2_FILIAL")+U_ItKey(_cNRNF,"D2_DOC")+U_ItKey(_cSerieNf,"D2_SERIE")+U_ItKey(_cCodCli,"D2_CLIENTE")+U_ItKey(_cLojaCli,"D2_LOJA")))
-      Do While ! SD2->(Eof()) .And. SD2->(D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA) == U_ItKey(_cFilialNF,"D2_FILIAL")+U_ItKey(_cNRNF,"D2_DOC")+U_ItKey(_cSerieNf,"D2_SERIE")+U_ItKey(_cCodCli,"D2_CLIENTE")+U_ItKey(_cLojaCli,"D2_LOJA")
+   SD2->(DBSetOrder(3)) // D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA+D2_COD+D2_ITEM
+   If SD2->(DBSeek(U_ItKey(_cFilialNF,"D2_FILIAL")+U_ItKey(_cNRNF,"D2_DOC")+U_ItKey(_cSerieNf,"D2_SERIE")+U_ItKey(_cCodCli,"D2_CLIENTE")+U_ItKey(_cLojaCli,"D2_LOJA")))
+      While ! SD2->(Eof()) .And. SD2->(D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA) == U_ItKey(_cFilialNF,"D2_FILIAL")+U_ItKey(_cNRNF,"D2_DOC")+U_ItKey(_cSerieNf,"D2_SERIE")+U_ItKey(_cCodCli,"D2_CLIENTE")+U_ItKey(_cLojaCli,"D2_LOJA")
          If SD2->D2_COD == U_ItKey(_cProd,"D2_COD")
             _aRet := {SD2->D2_COMIS1, SD2->D2_COMIS2, SD2->D2_COMIS3, SD2->D2_COMIS4, _nVTotSF2, SD2->D2_TOTAL, SD2->D2_COMIS5}
          EndIf   
          
-         SD2->(DbSkip())   
+         SD2->(DBSkip())   
       EndDo
    EndIf      
      
 End Sequence
 
 RestOrd(_aOrd)
-SD2->(DbGoTo(_nRegSD2))
-SF2->(DbGoTo(_nRegSF2))
+SD2->(DBGoTo(_nRegSD2))
+SF2->(DBGoTo(_nRegSF2))
 
 Return _aRet
 
@@ -8064,7 +8064,7 @@ Return _aRet
 Programa--------: ROMS025P
 Autor-----------: Julio de Paula Paz
 Data da Criacao-: 29/03/2019
-Descrição-------: Função que processa a impressão dos dados do relatório - Previsão de Comissão
+Descrição-------: Função que Processa a impressão dos dados do relatório - Previsão de Comissão
 Parametros------: _cFilialNF = Filial
                   _cCodCli   = Codigo do Cliente
 				  _cLojaCli  = Loja do Cliente
@@ -8089,29 +8089,29 @@ _aTitulosSE1 := {}
 _nI := 0
 
 Begin Sequence
-   SE1->(DbSetOrder(2)) // E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO 
+   SE1->(DBSetOrder(2)) // E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO 
 
-   If SE1->(DbSeek(U_ItKey(_cFilialNF,"E1_FILIAL")+U_ItKey(_cCodCli,"E1_CLIENTE")+U_ItKey(_cLojaCli,"E1_LOJA")+U_ItKey(_cPrefixo,"E1_PREFIXO")+U_ItKey(_cNRNF,"E1_NUM")  ))
+   If SE1->(DBSeek(U_ItKey(_cFilialNF,"E1_FILIAL")+U_ItKey(_cCodCli,"E1_CLIENTE")+U_ItKey(_cLojaCli,"E1_LOJA")+U_ItKey(_cPrefixo,"E1_PREFIXO")+U_ItKey(_cNRNF,"E1_NUM")  ))
       
 	  _aParcelas   := {}
       _nTotParc    := 0
       _aTitulosSE1 := {}
 
-      Do While ! SE1->(Eof()) .And. SE1->(E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM) == U_ItKey(_cFilialNF,"E1_FILIAL")+U_ItKey(_cCodCli,"E1_CLIENTE")+U_ItKey(_cLojaCli,"E1_LOJA")+U_ItKey(_cPrefixo,"E1_PREFIXO")+U_ItKey(_cNRNF,"E1_NUM")
+      While ! SE1->(Eof()) .And. SE1->(E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM) == U_ItKey(_cFilialNF,"E1_FILIAL")+U_ItKey(_cCodCli,"E1_CLIENTE")+U_ItKey(_cLojaCli,"E1_LOJA")+U_ItKey(_cPrefixo,"E1_PREFIXO")+U_ItKey(_cNRNF,"E1_NUM")
          If AllTrim(SE1->E1_TIPO) == "NF"
 		    If SE1->E1_SALDO > 0    //   1               2             3             4               5              6              7
-			   Aadd(_aTitulosSE1,{SE1->E1_PARCELA, SE1->E1_SALDO,SE1->E1_COMIS1,SE1->E1_COMIS2,SE1->E1_COMIS3,SE1->E1_COMIS4, SE1->E1_VALOR})
+			   aAdd(_aTitulosSE1,{SE1->E1_PARCELA, SE1->E1_SALDO,SE1->E1_COMIS1,SE1->E1_COMIS2,SE1->E1_COMIS3,SE1->E1_COMIS4, SE1->E1_VALOR})
 			EndIf
 
             _nTotParc += SE1->E1_SALDO
          EndIf
                
-         SE1->(DbSkip())
+         SE1->(DBSkip())
       EndDo
    EndIf
 
    For _nI := 1 To Len(_aTitulosSE1)
-       Aadd(_aParcelas, {_aTitulosSE1[_nI,1],;   // Nr. da Parcela      1
+       aAdd(_aParcelas, {_aTitulosSE1[_nI,1],;   // Nr. da Parcela      1
  	                     _aTitulosSE1[_nI,2] / _nTotParc,; // % da Parcela   2
 						 _aTitulosSE1[_nI,3],;   // % Comis1  3
 						 _aTitulosSE1[_nI,4],;   // % Comis2  4
@@ -8122,13 +8122,13 @@ Begin Sequence
    Next
 
    If Empty(_aParcelas) //  1     2  3  4  5  6  7   8
-      Aadd(_aParcelas, {Space(2), 1, 1, 1, 1 ,1 ,1 , 1})
+      aAdd(_aParcelas, {Space(2), 1, 1, 1, 1 ,1 ,1 , 1})
    EndIf
 
 End Sequence
 
 RestOrd(_aOrd)
-SE1->(DbGoTo(_nRegAtu))
+SE1->(DBGoTo(_nRegAtu))
 
 Return _aParcelas
 
@@ -8138,7 +8138,7 @@ Return _aParcelas
 Programa--------: ROMS025R
 Autor-----------: Julio de Paula Paz
 Data da Criacao-: 29/03/2019
-Descrição-------: Função que processa a impressão dos dados do relatório - Previsão de Comissão
+Descrição-------: Função que Processa a impressão dos dados do relatório - Previsão de Comissão
 Parametros------: _cParcela     = Numero da Parcela
                   _nBaseComiss  = Valor base de Comissão
                   _nPercParcela = Percentual da Parcela  
@@ -8199,9 +8199,9 @@ Begin Sequence
    _nValCom5 := 0
    _nTotalBase := 0
 
-   SD2->(DbSetOrder(3)) // D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA+D2_COD+D2_ITEM   
-   SD2->(DbSeek(_cFilialNF+_cNRNF+_cPrefixo+_cCodCli+_cLojaCli))
-   Do While ! SD2->(Eof()) .And. SD2->(D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA) == _cFilialNF+_cNRNF+_cPrefixo+_cCodCli+_cLojaCli
+   SD2->(DBSetOrder(3)) // D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA+D2_COD+D2_ITEM   
+   SD2->(DBSeek(_cFilialNF+_cNRNF+_cPrefixo+_cCodCli+_cLojaCli))
+   While ! SD2->(Eof()) .And. SD2->(D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA) == _cFilialNF+_cNRNF+_cPrefixo+_cCodCli+_cLojaCli
       _nValCom1 += ((SD2->D2_COMIS1 / 100) * _nValBaseCom) 
       _nValCom2 += ((SD2->D2_COMIS2 / 100) * _nValBaseCom) 
       _nValCom3 += ((SD2->D2_COMIS3 / 100) * _nValBaseCom) 
@@ -8210,7 +8210,7 @@ Begin Sequence
 
       _nTotalBase += _nValBaseCom
 
-      SD2->(DbSkip())
+      SD2->(DBSkip())
    EndDo
 
    _nPerCom1 := _nValCom1 / _nTotalBase //_nValBaseCom
@@ -8237,7 +8237,7 @@ Begin Sequence
 End Sequence
 
 RestOrd(_aOrd)
-SD2->(DbGoTo(_nRegAtu))
+SD2->(DBGoTo(_nRegAtu))
 
 Return _aRet  
 

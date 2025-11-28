@@ -2,33 +2,24 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor              |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-  Alex Wallauer     | 08/08/2017 | Ajustes para versão 12 - Chamado 20782
--------------------------------------------------------------------------------------------------------------------------------                            
-  Josué Prestes     | 10/06/2019 | Revisão para loboguara - Chamado 29593     
--------------------------------------------------------------------------------------------------------------------------------
-  Lucas Borges 	    | 17/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-  Alex Wallauer     | 30/08/2021 | Criacao e tratamento do campo novo Z14_TIPO.  Chamado 37602
+Alex Wallauer |30/08/2021| Chamado 37602. Criacao e tratamento do campo novo Z14_TIPO.
+julio Paz     |10/09/2025| Chamado 51687. Ajustar as validações e mensagens da gravação do Pedido de Vendas para validar 
+			  |			 | corretamente as permissões do usuário por Armazém.
+julio Paz     |12/09/2025| Chamado 51687. Ajustes nas validações, remoção do trecho Else nas validações de acesso do usuário aos armazéns.
 ===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes e Defines da Rotina.
-//====================================================================================================
-#Include "rwmake.ch"
-#Include "protheus.CH"
+
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: ACFG004
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 24/09/2015
-===============================================================================================================================
 Descrição---------: Cadastro de usuários x filiais x armazéns - Chamado 12079
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -42,7 +33,6 @@ Private aInfo       := { aSize[1] , aSize[2] , aSize[3] , aSize[4] , 3 , 3 }
 Private lMsErroAuto := .F. 
 Private _lCopia := .F.
 
-
 //VERIFICA PERMISSÃO DE ACESSO
 _lAcesso := U_ITVACESS( 'ZZL' , 3 , 'ZZL_USRFIL' , "S" )
 
@@ -55,17 +45,17 @@ If !_lAcesso
 									'um usuário com acesso ou, se necessário, '		,;
 									'solicite o acesso à área de TI/ERP.'			} , 3  )
 	
-	Return()
+	Return
 	
 EndIf
 
 // pega tamanhos das telas
-AADD( aObjects , { 100 , 050 , .T. , .F. , .F. } )
-AADD( aObjects , { 100 , 100 , .T. , .T. , .F. } )
+aAdd( aObjects , { 100 , 050 , .T. , .F. , .F. } )
+aAdd( aObjects , { 100 , 100 , .T. , .T. , .F. } )
 aPosObj := MsObjSize( aInfo , aObjects )
 
 //Variaveis privadas usadas no modelo 3
-SetPrvt("AROTINA,CCADASTRO,CALIAS")
+SetPrvt("aRotina,CCADASTRO,CALIAS")
 SetPrvt("NOPCE,NOPCG,NUSADO")
 SetPrvt("CTITULO,CALIASENCHOICE,CLINOK,CTUDOK,CFIELDOK")
 SetPrvt("NREG,NOPC")
@@ -79,35 +69,27 @@ aRotina := {{ OemToAnsi("Pesquisar")  ,"axPesqui"		, 0 , 1		},; // Pesquisar
             { OemToAnsi("Excluir")    ,'U_ACFG004CAD(5)'	, 0 , 5 , 1	},; // Excluir
             { OemToAnsi("Copiar")     ,'U_ACFG004CAD(6)'	, 0 , 6 , 3	}}  // Copiar
             
-//================================================================
-//| Define o cabecalho da tela de atualizacoes                   |
-//================================================================
-
+//Define o cabecalho da tela de atualizacoes
 cCadastro := OemToAnsi("Gestão de usuários x filiais x armazéns")
 cAlias := "Z14"
 
-//================================================================
-//| Endereca a funcao de BROWSE                                  |
-//================================================================
+//Endereca a funcao de BROWSE
 mBrowse(6, 1,22,75,cAlias,,,,,,)
 
 Return
-
 
 /*
 ===============================================================================================================================
 Programa----------: ACFG004CAD
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 24/09/2015
-===============================================================================================================================
 Descrição---------: Rotina de controle do cadastro e manutenção dos dados.   
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function ACFG004CAD( nOpc )
+
 Local aButtons  := {} , _nni
 Local bCampo    := { |nCPO| Field(nCPO) }
 
@@ -121,64 +103,59 @@ SetPrvt("wVar")
 
 _lcopia := .F.
 
-if  nOpc == 3	  // Incluir
+If  nOpc == 3	  // Incluir
 	nOpcE := 3
 	nOpcG := 3 
-elseif nOpc == 4 	// Alterar
+ElseIf nOpc == 4 	// Alterar
 	nOpcE := 4
 	nOpcG := 4
-elseif nOpc == 2 	// Visualizar
+ElseIf nOpc == 2 	// Visualizar
 	nOpcE := 2
 	nOpcG := 2
-elseif nOpc == 6   // Copiar
+ElseIf nOpc == 6   // Copiar
 	nOpcE := 3
 	nOpcG := 3 
 	_lcopia := .T.
-else                // Excluir
+Else                // Excluir
 	nOpcE := 5
 	nOpcG := 5
-endif
+EndIf
 
-
-//================================================================
 //| Cria variaveis M->????? da Enchoice                          |
-//================================================================
 aCpoEnchoice  :={}
 _astruct := Z14->(Dbstruct())
 
-For _nni := 1 to len(_astruct)
+For _nni := 1 to Len(_astruct)
 	
-	AADD( aCpoEnchoice , alltrim(_astruct[_nni][1]) )
+	aAdd( aCpoEnchoice , AllTrim(_astruct[_nni][1]) )
 	
-	wVar	:= "M->"+ alltrim(_astruct[_nni][1])
-	&wVar	:= CriaVar( alltrim(_astruct[_nni][1]) ) // executa x3_relacao
+	wVar	:= "M->"+ AllTrim(_astruct[_nni][1])
+	&wVar	:= CriaVar( AllTrim(_astruct[_nni][1]) ) // executa x3_relacao
 
 Next _nni
 
-If nOpc # 3  //se nao for inclusao 
+If nOpc # 3  //se nao For inclusao 
 
-	DbSelectArea("Z14")
+	DBSelectArea("Z14")
 	
 	For _nni := 1 TO FCount()
 		M->&(EVAL(bCampo,_nni)) := FieldGet(_nni)
 	Next _nni
 	
-Endif
+EndIf
 
-if nOpc == 6    //se for cópia
+If nOpc == 6    //se For cópia
 
   M->Z14_USER := "                         "
   M->Z14_NOME := "                              "
   M->Z14_CODUSU := "      "
  
-endif 
+EndIf 
 
 //Log de utilização
 U_ITLOGACS()
 
-//================================================================
 //| Executa a Modelo 2                                           |
-//================================================================
 cTitulo			:= OemToAnsi("Cadastro de Usuarios")
 cAliasEnchoice	:= "Z14"
 cTudOk			:= "AllwaysTrue()"
@@ -192,20 +169,17 @@ DEFINE MSDIALOG oDlg2 TITLE cTitulo From 9,0 to 35,170	of oMainWnd
 
 	oDlg2:lMaximized:=.T.
 	
-ACTIVATE MSDIALOG oDlg2 ON INIT (EnchoiceBar(oDlg2,{|| If(obrigatorio(aGets,aTela),ACFG004GRA(),.f.),nOpca := 1},{||oDlg2:End()},,aButtons) , oMsMGet:oBox:Align:=CONTROL_ALIGN_ALLCLIENT )
+ACTIVATE MSDIALOG oDlg2 ON INIT (EnchoiceBar(oDlg2,{|| If(obrigatorio(aGets,aTela),ACFG004GRA(),.F.),nOpca := 1},{||oDlg2:End()},,aButtons) , oMsMGet:oBox:Align:=CONTROL_ALIGN_ALLCLIENT )
 
-Return()
+Return
 
 /* 
 ===============================================================================================================================
 Programa----------: ACFG004GRA 
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 24/09/2015
-===============================================================================================================================
 Descrição---------: Funcao de Gravacao     
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -224,46 +198,46 @@ If Inclui
 
 EndIf
 
-If nOpcG # 2 .And. _lVldInc // nao for consulta
+If nOpcG # 2 .And. _lVldInc // nao For consulta
     
 
-	If Inclui .or. Altera .or. _lCopia
+	If Inclui .Or. Altera .Or. _lCopia
 	
 		RecLock( "Z14" , If( Altera , .F. , .T. ) )
 		
 		Z14->Z14_FILIAL := xFilial("Z14")
 		
-		for x:=1 to len(aCpoEnchoice)
+		For x:=1 to Len(aCpoEnchoice)
 		
 			wVar := "M->"  + aCpoEnchoice[x]
 			ax   :="Z14->" + aCpoEnchoice[x]
 			
-			if (POSICIONE("SX3",2,aCpoEnchoice[x],"X3_CONTEXT")!="V")
+			If (Posicione("SX3",2,aCpoEnchoice[x],"X3_CONTEXT")!="V")
 	
 				&ax := &wVar
 	
-			endif
+			EndIf
 			
-		next x
+		Next x
 
-		MsUnlock()
+		MSUnLock()
 
-		if Inclui .or. Altera .or. _lCopia
+		If Inclui .Or. Altera .Or. _lCopia
 	
 			ConfirmSx8()
 	
-		Endif
+		EndIf
 		
 	Else  // exclusao
 
 			RecLock("Z14",.F.)
 			dbdelete()
-			MsUnlock()
+			MSUnLock()
 			WriteSx2("Z14")  
 		
-	Endif
+	EndIf
 	
-Endif
+EndIf
 
 If _lVldInc
 
@@ -278,31 +252,28 @@ Return(.T.)
 Programa----------: ACFG004VLD
 Autor-------------:Josué Danich Prestes 
 Data da Criacao---: 24/09/2015
-===============================================================================================================================
 Descrição---------: Valida dados antes da inclusão do usuário
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function ACFG004VLD() 
 
 Local _lRet:= .T.
-Local _npos := Z14->( RECNO() )
+Local _npos := Z14->( Recno() )
 
-dbSelectArea("Z14") 
-Z14->(dbSetOrder(1))
+DBSelectArea("Z14") 
+Z14->(DBSetOrder(1))
 
-If  Z14->(dbSeek(xFilial("Z14") + M->Z14_CODUSU +M->Z14_FILACE))
+If  Z14->(DBSeek(xFilial("Z14") + M->Z14_CODUSU +M->Z14_FILACE))
 
 	_lRet:= .F.                                                                                                 
 	
-	Alert("O usuário: " + IIF(PSWSEEK(M->Z14_CODUSU),PSWRET(1)[1,4]," ")   + " já está cadastrado para essa filial de acesso!")
+	Alert("O usuário: " + IIf(PSWSEEK(M->Z14_CODUSU),PSWRET(1)[1,4]," ")   + " já está cadastrado para essa filial de acesso!")
 
 EndIf
 
-Z14-> ( DBGOTO( _npos ) )
+Z14-> ( DBGoTo( _npos ) )
 
 Return _lRet
 
@@ -311,11 +282,8 @@ Return _lRet
 Programa----------: ACFG004R
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 24/09/2015
-===============================================================================================================================
 Descrição---------: Retorna nome completo do usuário
-===============================================================================================================================
 Parametros--------: _ccodusu - código do usuário no configurador padrão
-===============================================================================================================================
 Retorno-----------: _cNome - nome completo do usuário
 ===============================================================================================================================
 */
@@ -331,9 +299,9 @@ If PswSeek(_ccodusu,.T.)
 
 	_aRetUser := PswRet(1)
 
-   _cNome   := upper(alltrim(_aRetUser[1,4]))
+   _cNome   := Upper(AllTrim(_aRetUser[1,4]))
 
-Endif
+EndIf
 
 Return _cNome
 
@@ -342,25 +310,21 @@ Return _cNome
 Programa----------: ACFG004E
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 24/09/2015
-===============================================================================================================================
 Descrição---------: Valida filial x usuário x armazém
-===============================================================================================================================
 Parametros--------: _ccodusu - código do usuário no configurador padrão
 					_cfilace - filial sendo acessada
 					_carma - armazém em uso
 					_cproduto - produto em uso
 					_lmens - apresenta mensagem de erro ou não
 					_cmens - string com armazéns que já apresentaram mensagem de bloqueio
-===============================================================================================================================
-Retorno-----------: _aret[1] - Lógico liberando ou não o uso do armazém
-				    _aret[2] - String com armazéns bloqueados
+Retorno-----------: _aRet[1] - Lógico liberando ou não o uso do armazém
+				    _aRet[2] - String com armazéns bloqueados
 ===============================================================================================================================
 */
 User Function ACFG004E(_ccodusu, _cfilace, _carma,_cproduto,_lmen)
 
-//Local _aarea 		:= Getarea()
 Local _lRet 		:= .T.
-Local _Ni 			:= 1
+Local _nI 			:= 1
 Local _aarmaz		:= {}
 Local _aRet 		:= {}
 Local _cmens		:= ""
@@ -370,71 +334,70 @@ Default _lmen		:= .F.
 DBSelectArea("Z14")
 Z14->( DBSetOrder(1) )
 	
-If Z14->( DBSeek( xFilial("Z14") + alltrim(_ccodusu)+ _cfilace ) ) 
+If Z14->( DBSeek( xFilial("Z14") + AllTrim(_ccodusu)+ _cfilace ) ) 
 
-   IF Z14->(FIELDPOS("Z14_TIPO")) <> 0 .AND. !EMPTY(Z14->Z14_TIPO)
-	  _cTipos:= ALLTRIM(Z14->Z14_TIPO)
-   ENDIF	
-   _cTpProd:=Posicione("SB1",1,xfilial("SB1")+_cproduto,"B1_TIPO")
+   If Z14->(FIELDPOS("Z14_TIPO")) <> 0 .And. !Empty(Z14->Z14_TIPO)
+	  _cTipos:= AllTrim(Z14->Z14_TIPO)
+   EndIf	
+   _cTpProd:=Posicione("SB1",1,xFilial("SB1")+_cproduto,"B1_TIPO")
 
 	//se achou usuário e filial de acesso pesquisa para ver se armazém está liberado
-	IF EMPTY(_cTipos)
-	   If !(_carma $ alltrim(Z14->Z14_LOCAL)) //Armazens dos produtos acabados
+	If Empty(_cTipos)
+	   If !(_carma $ AllTrim(Z14->Z14_LOCAL)) //Armazens dos produtos acabados
 		
-		    //Se for PA marca o produto x armazém como acesso restrito
+		    //Se For PA marca o produto x armazém como acesso restrito
 		    If _cTpProd = "PA"
-		    	If ascan(_aarmaz, _carma ) == 0
-		    		aadd(_aarmaz, _carma+" e "+_cTpProd )
-		    	Endif
+		    	If aScan(_aarmaz, _carma ) == 0
+		    		aAdd(_aarmaz, _carma+" e "+_cTpProd )
+		    	EndIf
 		    	_lRet := .F.
-		    Endif
-		Endif
+		    EndIf
+		EndIf
 	Else
-	   If !(_carma $ alltrim(Z14->Z14_LOCAL)) //Armazens dos produtos acados
+	   If !(_carma $ AllTrim(Z14->Z14_LOCAL)) //Armazens dos produtos acados
 			
-			If ascan(_aarmaz, _carma ) == 0
-				aadd(_aarmaz, _carma+" e / ou "+_cTpProd  )
-			Endif
+			If aScan(_aarmaz, _carma ) == 0
+				aAdd(_aarmaz, _carma+" e / ou "+_cTpProd  )
+			EndIf
 			_lRet := .F.
 		Else
-		   IF !_cTpProd $ _cTipos
-			   If ascan(_aarmaz, _carma ) == 0
-				  aadd(_aarmaz, _carma+" e / ou "+_cTpProd)
-			   Endif
+		   If !_cTpProd $ _cTipos
+			   If aScan(_aarmaz, _carma ) == 0
+				  aAdd(_aarmaz, _carma+" e / ou "+_cTpProd)
+			   EndIf
 			   _lRet := .F.
-		   ENDIF
+		   EndIf
 
-		ENDIF
+		EndIf
 
-	Endif
-		
-Endif
+	EndIf
+EndIf
  
 //apresenta mensagem se teve problemas
-If !(_lRet) .and. len(_aarmaz) > 0 
+If !(_lRet) .And. Len(_aarmaz) > 0 
 
-	_Ni := 1
+	_nI := 1
 	
-	For _ni := 1 to len(_aarmaz)
+	For _nI := 1 to Len(_aarmaz)
 	
-		if len(alltrim(_cmens)) > 0
+		If Len(AllTrim(_cmens)) > 0
 		
 			_cmens += " ,"
 			
-		Endif
+		EndIf
 		
-		_cmens += _aarmaz[_ni]
+		_cmens += _aarmaz[_nI]
 		
 	Next
 	
-	if _lmen
+	If _lmen
 	
 		MessageBox( 'Usuário sem acesso ao(s) Armazém / Tipo abaixo nessa filial: ' + CRLF + _cmens + CRLF + CRLF+;
 					'Caso necessário solicite a manutenção à um usuário com acesso ou, se necessário, solicite o acesso à área de TI/ERP.' , 'Atenção!' , 48 )
 					
-	Endif
+	EndIf
 			
-Endif
+EndIf
 
 _aRet := { _lRet, _cmens } 
 	

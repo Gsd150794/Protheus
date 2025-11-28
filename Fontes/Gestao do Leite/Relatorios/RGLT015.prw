@@ -2,18 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 08/04/2022 | Chamado 39723. Corrigida query para soma dos grupos
-Lucas Borges  | 04/06/2024 | Chamado 47460. Ajustado pra permitir imprimir mais de um setor
-Lucas Borges  | 11/02/2025 | Chamado 49877. Removido tratamento sobre a versão do Mix
+Lucas Borges  |08/04/2022| Chamado 39723. Corrigida query para soma dos grupos
+Lucas Borges  |04/06/2024| Chamado 47460. Ajustado pra permitir imprimir mais de um setor
+Lucas Borges  |11/02/2025| Chamado 49877. Removido tratamento sobre a versão do Mix
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -147,7 +144,7 @@ Else
 		 GROUP BY ZL8.ZL8_COD, ZL8.ZL8_NREDUZ
 		 ORDER BY ZL8.ZL8_COD
 	EndSql
-	While !(_cAlias)->(EOf())
+	While !(_cAlias)->(Eof())
 		aAdd(aStruct,{(_cAlias)->ZL8_COD,(_cAlias)->ZL8_NREDUZ,0})
 		(_cAlias)->(DBSkip())
 	EndDo
@@ -253,7 +250,7 @@ BeginSql alias _cAlias
 	   AND ZLF.ZLF_LINROT BETWEEN %exp:MV_PAR12% AND %exp:MV_PAR13%
 	   AND ZLF.ZLF_A2COD BETWEEN %exp:MV_PAR08% AND %exp:MV_PAR10%
 	   AND ZLF.ZLF_A2LOJA BETWEEN %exp:MV_PAR09% AND %exp:MV_PAR11%
-	   AND SUBSTR(ZLF.ZLF_A2COD,1,1) = 'P'
+	   AND SubStr(ZLF.ZLF_A2COD,1,1) = 'P'
 	   GROUP BY ZLF.ZLF_SETOR, ZLF.ZLF_LINROT, ZLF.ZLF_A2COD, ZLF.ZLF_A2LOJA, ZL3.ZL3_DESCRI, SA2.A2_NOME, ZL3.ZL3_FRETIS, ZL3.ZL3_FRETLJ, SA2F.A2_NOME
 	 ORDER BY 1,2,3,4
 EndSql
@@ -262,7 +259,7 @@ Count To nqtdregs
 SetRegua(nqtdregs)
 (_cAlias)->(DBGoTop())
 
-While (_cAlias)->(!EOf())
+While (_cAlias)->(!Eof())
 
 	IncRegua()
 	
@@ -296,7 +293,7 @@ While (_cAlias)->(!EOf())
 
 		If MV_PAR14 == 1
 
-			aVlrPrd := getTotGp( xfilial("ZLD") , aStruct[_nX,1] , (_cAlias)->ZLD_SETOR , (_cAlias)->ZLD_LINROT , (_cAlias)->ZLD_RETIRO , (_cAlias)->ZLD_RETILJ , MV_PAR02 , MV_PAR03 , "L" , .T. )
+			aVlrPrd := getTotGp( xFilial("ZLD") , aStruct[_nX,1] , (_cAlias)->ZLD_SETOR , (_cAlias)->ZLD_LINROT , (_cAlias)->ZLD_RETIRO , (_cAlias)->ZLD_RETILJ , MV_PAR02 , MV_PAR03 , "L" , .T. )
 
 			// Armazena total geral
 			aStruct[_nX,3] += aVlrPrd[01]
@@ -311,7 +308,7 @@ While (_cAlias)->(!EOf())
 		Else
 			_cAlias2 := GetNextAlias()
 			BeginSql alias _cAlias2
-				SELECT NVL(SUM(CASE WHEN ZL8.ZL8_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL ELSE ZLF.ZLF_TOTAL * -1 END),0) TOTAL
+				SELECT NVL(SUM(Case WHEN ZL8.ZL8_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL Else ZLF.ZLF_TOTAL * -1 END),0) TOTAL
 				FROM %Table:ZLF% ZLF, %Table:ZL8% ZL8
 				WHERE ZLF.D_E_L_E_T_ = ' '
 				AND ZL8.D_E_L_E_T_ = ' '
@@ -345,13 +342,13 @@ While (_cAlias)->(!EOf())
 
 	// Verifica parametro: se mostra apenas os valores liquido negativos
 	// ou todos.
-	If ((nLiq < 0 .and. MV_PAR15 == 1) .or. MV_PAR15 <> 1)
+	If ((nLiq < 0 .And. MV_PAR15 == 1) .Or. MV_PAR15 <> 1)
 
 		// MOSTRA PRODUTOR E SEUS RESPECTIVOS VALORES
 		@nLin,000 PSay (_cAlias)->ZLD_RETIRO + "-" +(_cAlias)->ZLD_RETILJ + " "+Left((_cAlias)->NOMEPROD,15)
 
 		// Obtem volume do produtor
-		nVolume := U_VolLeite(xfilial("ZLD"),dt1,dt2,(_cAlias)->ZLD_SETOR,(_cAlias)->ZLD_LINROT,(_cAlias)->ZLD_RETIRO,(_cAlias)->ZLD_RETILJ,"")
+		nVolume := U_VolLeite(xFilial("ZLD"),dt1,dt2,(_cAlias)->ZLD_SETOR,(_cAlias)->ZLD_LINROT,(_cAlias)->ZLD_RETIRO,(_cAlias)->ZLD_RETILJ,"")
 
 		// armazena volume para o subtotal
 		nSubVolume += nVolume 
@@ -360,7 +357,7 @@ While (_cAlias)->(!EOf())
 		@nLin,030 PSay nVolume Picture "@E 9,999,999"
 
 		// Mostra o preco do leite
-		nPreco := u_getTotCr(xfilial("ZLD"),(_cAlias)->ZLD_SETOR,(_cAlias)->ZLD_LINROT,(_cAlias)->ZLD_RETIRO,(_cAlias)->ZLD_RETILJ,MV_PAR02,MV_PAR03)
+		nPreco := u_getTotCr(xFilial("ZLD"),(_cAlias)->ZLD_SETOR,(_cAlias)->ZLD_LINROT,(_cAlias)->ZLD_RETIRO,(_cAlias)->ZLD_RETILJ,MV_PAR02,MV_PAR03)
 		nPreco := nPreco/nVolume
 		@nLin,040 PSay nPreco Picture "@E 9999.9999"
 
@@ -398,7 +395,7 @@ EndDo
 nLin := showSubTotal(nLin)
 
 //---------------------------------------------------
-// Mostra Resumo (se nao for apenas negativos)
+// Mostra Resumo (se nao For apenas negativos)
 //---------------------------------------------------
 If MV_PAR15 <> 1
 	Cabec1 := "Setor: "+ MV_PAR01 +" Mix: "+MV_PAR02
@@ -542,7 +539,7 @@ Retorno-----------: xRet - retorno conforme o parametro _lRetArr
 */
 Static Function getTotGp(_cFilial,_cGrupo,_cSetor,_cLinha,_cFornece,_cLoja,_cCodMix,_cEntMix,_cTpMix,_lRetArr)
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cAliasZLF:= GetNextAlias()
 Local _cFiltro	:= ''
 Local _xRet		:= NIL
@@ -568,8 +565,8 @@ _cFiltro+= "%"
 
 //Obtendo movimentos na ZLF do grupo corrente
 BeginSql alias _cAliasZLF
-	SELECT SUM( CASE WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL ELSE 0 END ) CREDITO,
-			SUM( CASE WHEN ZLF_DEBCRE = 'D' THEN ZLF_TOTAL ELSE 0 END ) DEBITO
+	SELECT SUM( Case WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL Else 0 END ) CREDITO,
+			SUM( Case WHEN ZLF_DEBCRE = 'D' THEN ZLF_TOTAL Else 0 END ) DEBITO
 	FROM %Table:ZLF% ZLF, %Table:ZL8% ZL8
 	WHERE ZLF.D_E_L_E_T_ = ' '
 	AND ZL8.D_E_L_E_T_ = ' '
@@ -600,6 +597,6 @@ While (_cAliasZLF)->( !Eof() )
 EndDo
 (_cAliasZLF)->( DBCloseArea() )
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return(_xRet)

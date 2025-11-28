@@ -2,28 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
-Lucas Borges  | 23/12/2024 | Chamado 49431. Retirada filial 06 do grupo 01 e incluída no grupo Admin
-Lucas Borges  | 27/12/2024 | Chamado 49445. Ajuste na regra de transferência
-Lucas Borges  | 14/04/2025 | Chamado 50417. Implementada regra para considerar Centro de Custo
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
+Lucas Borges  |14/04/2025| Chamado 50417. Implementada regra para considerar Centro de Custo
+Lucas Borges  |13/11/2025| Chamado 52977. Corrigida regra para o crédito presumido
+Lucas Borges  |19/11/2025| Chamado 53054. Alterada conta do ICMS sob Transferências 
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE 'PROTHEUS.CH'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MCTB002
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 09/05/2023
-===============================================================================================================================
 Descrição---------: Retorna conta contábil para os Lançamentos Padrões do Compras, Estoque e Faturamento
-===============================================================================================================================
 Parametros--------: _ccod = Tipo de Conta (650002CC=Conta Credito, 650002CD= Conta Debito)
-===============================================================================================================================
 Retorno-----------: _cRetorno = Retorna a conta contabil
 ===============================================================================================================================
 */
@@ -61,7 +56,7 @@ Local _lProdRev := SB1->B1_GRUPO $ '0008/0011/0015/0016/0017/0018/0019/0021/0023
 _lProdProp := ((SB1->B1_GRUPO $ '0001/0002/0003/0004/0005/0006/0007/0009/0010/0012/0013/0014/0020/0022' .Or. AllTrim(SB1->B1_COD) $ '08000000056/10030001911');
 	.And. !AllTrim(SB1->B1_COD) $ '00060071501/00070070301/00070080301')
 
-If SELECT("QRYSD2") > 0
+If Select("QRYSD2") > 0
 	_cCCusto := 'SD2->D2_CCUSTO'
 ElseIf SELECT("QRYSD1") > 0
 	_cCCusto := 'SD1->D1_CC'
@@ -656,8 +651,8 @@ ElseIf _cCod $ '666008CD' .Or. (_cCod $ '666007CD' .And. SD3->D3_TM $ '997')
 //668002CC - Entrada Saldo em Estoque - Inventário - Credito - TM 498/499
 //668003CC - Entrada Saldo em Estoque - Recepção Leite - Credito - TM 001/002/497 (menos a 494)
 //============================================================================
-ElseIf _cCod $ '668002CC' .OR. (_cCod $ '668003CC' .And. !SD3->D3_TM $ '493/494/495')
-	If SD3->D3_TM == '497' .OR. _cCod $ '668002CC'
+ElseIf _cCod $ '668002CC' .Or. (_cCod $ '668003CC' .And. !SD3->D3_TM $ '493/494/495')
+	If SD3->D3_TM == '497' .Or. _cCod $ '668002CC'
 		If cFilAnt $ _cFil01
 			_cRetorno := '3299029991' //( - ) AJUSTE DE INVENTARIO
 		ElseIf cFilAnt $ _cFil05
@@ -748,19 +743,19 @@ ElseIf _cCod $ '670001CD/672001CC'
 //============================================================================
 Else	
 	_lHigiene := SB1->B1_GRUPO == '0802' .Or. AllTrim(SB1->B1_COD) $ '09990000071/09990000243/09990000308/09990000323/10000000048/10000000063/10000000098/10030000234/10030000654/10030000655';
-			.OR. (AllTrim(SB1->B1_COD) >= '10030001124' .AND. AllTrim(SB1->B1_COD) <= '10030001126');
-			.OR. (AllTrim(SB1->B1_COD) >= '10030001418' .AND. AllTrim(SB1->B1_COD) <= '10030001420');
-			.OR. (AllTrim(SB1->B1_COD) >= '10030001494' .AND. AllTrim(SB1->B1_COD) <= '10030001496')
+			.Or. (AllTrim(SB1->B1_COD) >= '10030001124' .And. AllTrim(SB1->B1_COD) <= '10030001126');
+			.Or. (AllTrim(SB1->B1_COD) >= '10030001418' .And. AllTrim(SB1->B1_COD) <= '10030001420');
+			.Or. (AllTrim(SB1->B1_COD) >= '10030001494' .And. AllTrim(SB1->B1_COD) <= '10030001496')
 	
 	_lConsumo := ((SB1->B1_GRUPO == '0999' .And. !(AllTrim(SB1->B1_TIPO) == 'MN') );
-		.OR. (SB1->B1_GRUPO $ '0808/0812' .And. !AllTrim(SB1->B1_COD) $ '08120000040/08120000041/08120000072/08120000073/08120000074') ;
-		.OR. AllTrim(SB1->B1_COD) $ '03010010134/06000000305/06000008546/07990001993/08000000001/08030000878/08030000879/08040000030/08050000407/08070000001';
-		.OR. (AllTrim(SB1->B1_COD) >= '08070000009' .And. AllTrim(SB1->B1_COD) <= '08070000013');
-		.OR. AllTrim(SB1->B1_COD) $ '08070000015/08070000016/08070000020/08070000022/08070000023/08070000025/08090000006/08090000064/08090000119/08110000174/'+;
+		.Or. (SB1->B1_GRUPO $ '0808/0812' .And. !AllTrim(SB1->B1_COD) $ '08120000040/08120000041/08120000072/08120000073/08120000074') ;
+		.Or. AllTrim(SB1->B1_COD) $ '03010010134/06000000305/06000008546/07990001993/08000000001/08030000878/08030000879/08040000030/08050000407/08070000001';
+		.Or. (AllTrim(SB1->B1_COD) >= '08070000009' .And. AllTrim(SB1->B1_COD) <= '08070000013');
+		.Or. AllTrim(SB1->B1_COD) $ '08070000015/08070000016/08070000020/08070000022/08070000023/08070000025/08090000006/08090000064/08090000119/08110000174/'+;
 		'08120000001/08120000002/10000000082/10020000013/10020000028/10020000100/10020000112/08120000124/10030000061';
-		.OR. (AllTrim(SB1->B1_COD) >= '10030000063' .And. AllTrim(SB1->B1_COD) <= '10030000065');
-		.OR. (AllTrim(SB1->B1_COD) >= '10030000683' .And. AllTrim(SB1->B1_COD) <= '10030001536');
-		.OR. AllTrim(SB1->B1_COD) $ '10030000070/10030000074/10030000083/10030000095/10030000152/10030000475/10030000080/10030000186/10030000218/10030000350/10030000503/'+;
+		.Or. (AllTrim(SB1->B1_COD) >= '10030000063' .And. AllTrim(SB1->B1_COD) <= '10030000065');
+		.Or. (AllTrim(SB1->B1_COD) >= '10030000683' .And. AllTrim(SB1->B1_COD) <= '10030001536');
+		.Or. AllTrim(SB1->B1_COD) $ '10030000070/10030000074/10030000083/10030000095/10030000152/10030000475/10030000080/10030000186/10030000218/10030000350/10030000503/'+;
 		'10030000557/10030000614/10030000851/10030000961/10030001041/10030001150/10030001643/10030001236/10030001238/10030001240/10030001244/10030001307/10030001615/'+;
 		'10030001539/10030001540/10030001570/10030001573/10030001587/10030001609/10030001741/10030001831/10030001854/10030001881/10030001883/10030001999/10030002005/10030002052/'+;
 		'10030001758/10030001920/10030001925/10030001927/10030002084/10030002136/10030002292/10030002357/10030002375/10030002484/10030002584/10030002485/10030002491/10030002671/'+;
@@ -770,7 +765,7 @@ Else
 	_lPeqValor := ((SB1->B1_GRUPO $ '0811/0813' .And. !AllTrim(SB1->B1_COD) =='08130000002');
 		.Or. AllTrim(SB1->B1_COD) $ '10020000100/10020000112/10020000137/10020000172/10020000241/10020000262/10020000561/10020001898/10030000035/10030000195/10030000445/'+;
 			'10020001993/10030000189/10030000466/10030000531/10030000544/10030000566/10030000636')
-	_lUniforme := (SB1->B1_GRUPO == '0805' .OR. AllTrim(SB1->B1_COD) $ '10030000038/10030000069/10030002901/10030003054')
+	_lUniforme := (SB1->B1_GRUPO == '0805' .Or. AllTrim(SB1->B1_COD) $ '10030000038/10030000069/10030002901/10030003054')
 
 	If _cCod $ '666009CD' .Or. (_cCod $ '668002CD' .And.  SD3->D3_TM == '498') .Or. (_cCod $ '668003CC' .And.  SD3->D3_TM == '495')
 		If _cCod $ '666009CD' .And. SD3->D3_TM == '600' .Or. _cCod $ '668003CC'
@@ -1064,7 +1059,7 @@ Else
 
 	//Produto em Processo
 	ElseIf (_cCod $ _cGEst01+'610008CC/650002CD/670001CC/672001CD/681001CD' ;
-	.OR. (_cCod $ '678001CC' .And. AllTrim(SF4->F4_CF) $ '5108/5208/5927'));
+	.Or. (_cCod $ '678001CC' .And. AllTrim(SF4->F4_CF) $ '5108/5208/5927'));
 	.And. SB1->B1_TIPO $ 'PP/PI/SP'
 		If cFilAnt $ _cFil01
 			_cRetorno := '1102010121' //PRODUTOS EM PROCESSO - MATRIZ
@@ -1091,9 +1086,9 @@ Else
 		_cRetorno := '3105010004' //DEVOLUCOES DE VENDAS
 	
 	//Imobilizado
-	ElseIf _cCod $ '650002CD/610001CC/610008CC' .And. SB1->B1_TIPO $ 'AT/AI' .AND. SD1->D1_VUNIT > 326.61 .And.;
+	ElseIf _cCod $ '650002CD/610001CC/610008CC' .And. SB1->B1_TIPO $ 'AT/AI' .And. SD1->D1_VUNIT > 326.61 .And.;
 		((AllTrim(SF4->F4_CF) $ '1551/2551/1556/2556' .And. !cFilAnt $ _cFil20);
-		.OR. (AllTrim(SF4->F4_CF) $ '1551/2551/1949/2949' .And. cFilAnt $ _cFil20))
+		.Or. (AllTrim(SF4->F4_CF) $ '1551/2551/1949/2949' .And. cFilAnt $ _cFil20))
 		_cAlias := GetNextAlias()
 		BeginSql alias _cAlias
 			SELECT SED.ED_DEBITO
@@ -1153,7 +1148,7 @@ Else
 		(_cAlias)->( DBCloseArea() )
 	
 	//Produto Acabado e Insumos
-	ElseIf (_cCod $ '666006CD' .And. (SB1->B1_TIPO $ 'PA' .OR. SB1->B1_GRUPO == '0801'))
+	ElseIf (_cCod $ '666006CD' .And. (SB1->B1_TIPO $ 'PA' .Or. SB1->B1_GRUPO == '0801'))
 		If _lCCusto .Or. cFilAnt $ _cFilAdm
 			_cRetorno := '3201020027'
 		ElseIf cFilAnt $ _cFil01
@@ -1271,9 +1266,9 @@ Else
 		If _cCod $ '610006CD/610003CD'
 			_cRetorno := '3301010029' //ICMS ST TRANSFERENCIA
 		ElseIf _cCod $ '610002CD'
-			If (cFilAnt == '01' .And. (Iif(SD2->D2_TIPO $ 'B/D',SA2->A2_CGC,SA1->A1_CGC) == '01257995001458'));
-				.Or. Iif(SD2->D2_TIPO $ 'B/D',SA2->A2_CGC,SA1->A1_CGC) $ '01257995001610/01257995003744';
-				.Or. ( cFilAnt == '01' .And. (Iif(SD2->D2_TIPO $ 'B/D',SA2->A2_CGC,SA1->A1_CGC) == '01257995002853') .And. AllTrim(SF4->F4_CF) $ '5408');
+			If (cFilAnt == '01' .And. (IIf(SD2->D2_TIPO $ 'B/D',SA2->A2_CGC,SA1->A1_CGC) == '01257995001458'));
+				.Or. IIf(SD2->D2_TIPO $ 'B/D',SA2->A2_CGC,SA1->A1_CGC) $ '01257995001610/01257995003744';
+				.Or. ( cFilAnt == '01' .And. (IIf(SD2->D2_TIPO $ 'B/D',SA2->A2_CGC,SA1->A1_CGC) == '01257995002853') .And. AllTrim(SF4->F4_CF) $ '5408');
 				.Or. AllTrim(SF4->F4_CF) $ '5557'
 				_cRetorno := '3301010033' //ICMS TRANSFERENCIA
 			Else
@@ -1381,7 +1376,7 @@ Else
 
 	//Transferências Entradas ICMS
 	ElseIf _cCod == '650010CC' .And. AllTrim(SF4->F4_CF) $ '1151/1152/1208/1209'
-		_cRetorno := '1102070068' //( - ) ICMS TRANSFERENCIA DE MERCADORIA
+		_cRetorno := '1102070067' //ICMS TRANSFERENCIA DE MERCADORIA
 
 	//Rmessa Produtos em feira exposição
 	ElseIf _cCod $ '678001CD' .And. AllTrim(SF4->F4_CF) $ '5914'
@@ -1409,15 +1404,15 @@ Else
 		EndIf
 
 	//Anulação de serviço de transporte de vendas
-	ElseIf _cCod $ '610001CD/610008CC' .And. AllTrim(SF4->F4_CF) $ '5206' .AND. AllTrim(SB1->B1_COD) $ '10000000005'
+	ElseIf _cCod $ '610001CD/610008CC' .And. AllTrim(SF4->F4_CF) $ '5206' .And. AllTrim(SB1->B1_COD) $ '10000000005'
 		_cRetorno := '3301010024' //( - ) ANULACAO DE SERVICO DE TRANSPORTE
 	
 	//Anulação de serviço de transporte de transferência e remessa
-	ElseIf _cCod $ '610001CC/610008CC' .And. AllTrim(SF4->F4_CF) $ '5206' .AND. AllTrim(SB1->B1_COD) $ '10000000014'
+	ElseIf _cCod $ '610001CC/610008CC' .And. AllTrim(SF4->F4_CF) $ '5206' .And. AllTrim(SB1->B1_COD) $ '10000000014'
 		_cRetorno := '3301020051' //(-)DEVOLUCAO DE COMPRAS
 
 	//Devoluções de Compras
-	ElseIf _cCod == '610002CD' .And. AllTrim(SF4->F4_I_GTES)$'S00011' .AND. SD2->D2_TIPO=='D'
+	ElseIf _cCod == '610002CD' .And. AllTrim(SF4->F4_I_GTES)$'S00011' .And. SD2->D2_TIPO=='D'
 		If cFilAnt $ _cFil01+_cFil05
 			_cRetorno := '3299010048' //ICMS S/DEVOLUCAO DE COMPRAS IND
 		ElseIf cFilAnt $ _cFil10
@@ -1459,7 +1454,7 @@ Else
 		_cRetorno:= '3105010001' //I C M S
 
 	//Devolução de compra de bem para o ativo imobilizado
-	ElseIf _cCod $ '610001CC/610008CC' .And. AllTrim(SF4->F4_CF) $ '5553/5206' .AND. ;
+	ElseIf _cCod $ '610001CC/610008CC' .And. AllTrim(SF4->F4_CF) $ '5553/5206' .And. ;
 		AllTrim(SB1->B1_COD) $ '10020000031/10020000032/10020000033/10020000054/10020000057/10020000058/10020000059/10020000060/10020000062/10020000063/10020000064/10020000073/10020000074/10020000075/10020000076/10020000084/10020000085/10020000086/10020000087/10020000088/10020000089/10020000090/10020000091/10020000092/10020000093/10020000094/10020000095/10020000096/10020000102/10020000104/10020000105/10020000109/10020000115/10020000118/10020000119/10020000120/10020000121/10020000122/10020000123/10020000124'
 		_cRetorno := '1302030001' //MAQUINAS E EQUIPAMENTOS INDUSTRIAIS
 	
@@ -1483,14 +1478,14 @@ Else
 		EndIf
 
 	//Pedágios sem movimentação financeira
-	ElseIf ((_cCod $ '650001CC' .AND. SF4->F4_DUPLIC == 'N' ) .Or. (_cCod $ '650002CD' .And. Substr(SA2->A2_COD,1,1) <> "C")) .AND. AllTrim(SB1->B1_COD) $ '09990000672'
+	ElseIf ((_cCod $ '650001CC' .And. SF4->F4_DUPLIC == 'N' ) .Or. (_cCod $ '650002CD' .And. SubStr(SA2->A2_COD,1,1) <> "C")) .And. AllTrim(SB1->B1_COD) $ '09990000672'
 		If _cCod $ '650002CD'
 			_cRetorno := '3301010017' //PEDAGIOS NOS TRANSP DE VENDAS
 		Else
 			_cRetorno := '3301010022' //(-) RECUPERACOES DE DESPESAS
 		EndIf
 	//Transporte de Materiais de Consumo e de Expediente
-	ElseIf _cCod $ '650002CD' .And. AllTrim(SF4->F4_CF) $ '1352/1353/1933' .AND. (SB1->B1_GRUPO $ '0631/0805/0808/0809/0812/0999' .OR. AllTrim(SB1->B1_COD) $ '10000000015/10000000023')
+	ElseIf _cCod $ '650002CD' .And. AllTrim(SF4->F4_CF) $ '1352/1353/1933' .And. (SB1->B1_GRUPO $ '0631/0805/0808/0809/0812/0999' .Or. AllTrim(SB1->B1_COD) $ '10000000015/10000000023')
 		_cRetorno := '3301020017' //FRETES E CARRETOS
 
 	//Transporte de Materia Prima/ Leite Cru, Leite em pó/Soro de Leite
@@ -1501,8 +1496,8 @@ Else
 			.And. (SB1->B1_GRUPO $ '0800/0814/1005';
 			.Or. IIf(AllTrim(SF4->F4_CF) < '5000', SubStr(SA2->A2_COD,1,1) == "G" ;
 			.Or. (SA2->A2_COD == "T00443" .And. AllTrim(SB1->B1_COD) $ '10000000006' .And. cFilAnt == '90') ;
-			.Or. (Substr(SA2->A2_COD,1,1) == "C" .And. AllTrim(SB1->B1_COD) $ '09990000672') ; //Pedágio de matéria prima
-			.Or. (Substr(SA2->A2_COD,1,1) <> "T" .And. AllTrim(SB1->B1_COD) $ '10000000006' .And. cFilAnt == '93') ;
+			.Or. (SubStr(SA2->A2_COD,1,1) == "C" .And. AllTrim(SB1->B1_COD) $ '09990000672') ; //Pedágio de matéria prima
+			.Or. (SubStr(SA2->A2_COD,1,1) <> "T" .And. AllTrim(SB1->B1_COD) $ '10000000006' .And. cFilAnt == '93') ;
 			.Or. !Empty(SF1->F1_L_MIX),.F.);
 			.Or. AllTrim(SB1->B1_COD) $ '10040000004'));
 			/*Regra 02*/;
@@ -1610,13 +1605,13 @@ Else
 		_cRetorno := '3301010001' //FRETES S/ VENDAS
 
 	//Degustação
-	ElseIf _cCod $ '650002CD' .And. AllTrim(SB1->B1_COD) $ '10000000008/10000000082/10000000133' .AND. SD1->D1_FORNECE = 'F01645'
+	ElseIf _cCod $ '650002CD' .And. AllTrim(SB1->B1_COD) $ '10000000008/10000000082/10000000133' .And. SD1->D1_FORNECE = 'F01645'
 		If cFilAnt $ _cFil90
 			_cRetorno := '3301020014' //SERVICOS TERCEIROS PJ
 		EndIf	
 
 	//Convenio a repassar
-	ElseIf _cCod $ '650002CD' .And. AllTrim(SB1->B1_COD) $ '10000000158' .AND. SD1->D1_FORNECE = 'F23411'
+	ElseIf _cCod $ '650002CD' .And. AllTrim(SB1->B1_COD) $ '10000000158' .And. SD1->D1_FORNECE = 'F23411'
 		_cRetorno := '2101140005' //CONVENIO  A REPASSAR
 
 	//Transporte de Embalagens, Embalagens
@@ -1627,8 +1622,8 @@ Else
 			.Or. (_cCod $ '668003CC' .And. AllTrim(SD3->D3_TM)$ '493');
 			.Or. _cCod $ '666007CD');
 		  .And.;
-	 	((SB1->B1_GRUPO >= '0300' .And. SB1->B1_GRUPO <= '0599') .OR. SB1->B1_GRUPO == '0806';
-	 	.OR. AllTrim(SB1->B1_COD) $ '06000008620/06000008738/06000008087/06000004466/06020000246/06250000151/06250000336/06250000933/07990001993/08120000040/08120000041/08120000072/08120000073/08120000074/10030000863')
+	 	((SB1->B1_GRUPO >= '0300' .And. SB1->B1_GRUPO <= '0599') .Or. SB1->B1_GRUPO == '0806';
+	 	.Or. AllTrim(SB1->B1_COD) $ '06000008620/06000008738/06000008087/06000004466/06020000246/06250000151/06250000336/06250000933/07990001993/08120000040/08120000041/08120000072/08120000073/08120000074/10030000863')
 		If _cCod $ _cGEst01 + '650002CD/610001CC/610008CC/678001CC/681001CD/682001CD'
 			If cFilAnt $ _cFil01+_cFil05
 				If SB1->B1_GRUPO $'0332/0333' .And. _cCod $ _cGEst01 + '678001CC'
@@ -1727,7 +1722,7 @@ Else
 
 	//Material de consumo, Produtos Químicos, Higienização e Limpeza
 	ElseIf (_cCod $ _cGEst01 + '650002CD/610001CC/610008CC/678001CC/666006CD/670002CC/681001CD') .And. (_lConsumo .Or. _lPeqValor .Or. _lHigiene .Or. _lUniforme;
-		.OR. (SB1->B1_GRUPO $ '0803/0804' .And. !AllTrim(SB1->B1_COD) $ '08040000004/08040000219/') )
+		.Or. (SB1->B1_GRUPO $ '0803/0804' .And. !AllTrim(SB1->B1_COD) $ '08040000004/08040000219/') )
 		//Higienização e Limpeza
 		If  (_cCod $ '666006CD' .Or. (_cCod $ '650002CD' .And. SF4->F4_ESTOQUE == 'N')) .And._lHigiene
 			If _lCCusto .Or. cFilAnt $ _cFil90+_cFilAdm
@@ -1863,7 +1858,7 @@ Else
 			ElseIf cFilAnt $ _cFil93
 				_cRetorno := '3299200007'
 			EndIf
-		ElseIf !(Substr(_cCod,1,3)=='650' .And. SF4->F4_ESTOQUE == 'N')
+		ElseIf !(SubStr(_cCod,1,3)=='650' .And. SF4->F4_ESTOQUE == 'N')
 			If cFilAnt $ _cFil01+_cFil05
 				If !_cCod $ _cGEst01 + '678001CC' .And. _lConsumo
 					_cRetorno := '1102010017' //MATERIAL DE CONSUMO MATRIZ
@@ -1944,19 +1939,19 @@ Else
 		_cRetorno := SB1->B1_CONTA
 	
 	//Transporte de Peças, Manutenção, Construção Civil e Instalação Industrial em Andamento
-	ElseIf (_cCod $ _cGEst01 + '650002CD/610001CC/610008CC/666006CD/678001CC/681001CD/670002CC') .And. (((SB1->B1_GRUPO >= '0600' .AND. SB1->B1_GRUPO <= '0799' .OR. SB1->B1_GRUPO = '0810') ;
-	.And. !AllTrim(SB1->B1_COD) $ '06350000001/06410000018' .AND. !SB1->B1_GRUPO $ '0630/0641') ;
-	.OR. AllTrim(SB1->B1_COD) $ '08070000018/08070000019/10020000006/10020000077/10020000097/10020000106/10020000108/10020000116/10020000125/10020000567/10020000929';
-	.OR. AllTrim(SB1->B1_COD) $ '10000000001/10000000002/10000000012/10000000021/10000000027/10000000036/10000000045/10000000053/10000000054/10000000055/10000000092/10000000094/10000000095/10000000110/10000000129/10000000132/10000000134/10000000143/10000000148';
-	.OR. AllTrim(SB1->B1_COD) $ '10020001703/10030000021/10030000022/10030000031/10030000060/10030000081/10030000342/10030000380/10030000410/10030001575/10030001678/10030001691/10030001885/10030001997/10030002004';
-	.OR. AllTrim(SB1->B1_COD) $ '10020000854/06410000081/10030001692/06410000015/06410000014/06410000013/06410000075/10030001888/';
-	.OR. (AllTrim(SB1->B1_COD) >= '10020000028' .AND. AllTrim(SB1->B1_COD) <= '10020000030') ;
-	.OR. (AllTrim(SB1->B1_COD) >= '10020000034' .AND. AllTrim(SB1->B1_COD) <= '10020000053') ;
-	.OR. (AllTrim(SB1->B1_COD) >= '10020000065' .AND. AllTrim(SB1->B1_COD) <= '10020000072') ;
-	.OR. (AllTrim(SB1->B1_COD) >= '10020000079' .AND. AllTrim(SB1->B1_COD) <= '10020000083') ;
-	.OR. (AllTrim(SB1->B1_COD) >= '10030000013' .AND. AllTrim(SB1->B1_COD) <= '10030000015') ;
-	.OR. (SB1->B1_GRUPO == '0999' .And. AllTrim(SB1->B1_TIPO) == 'MN') )
-		If (_cCod $ '650002CD' .And. SF4->F4_ESTOQUE == 'N') .Or._cCod $ '666006CD' .OR. AllTrim(SB1->B1_COD) $ '10000000001/10000000002/10000000012/10000000021/10000000027/10000000036/10000000045/10000000053/10000000054/10000000055/10000000092/10000000094/10000000095/10000000110/10000000129/10000000132/10000000134/10000000143/10000000148'
+	ElseIf (_cCod $ _cGEst01 + '650002CD/610001CC/610008CC/666006CD/678001CC/681001CD/670002CC') .And. (((SB1->B1_GRUPO >= '0600' .And. SB1->B1_GRUPO <= '0799' .Or. SB1->B1_GRUPO = '0810') ;
+	.And. !AllTrim(SB1->B1_COD) $ '06350000001/06410000018' .And. !SB1->B1_GRUPO $ '0630/0641') ;
+	.Or. AllTrim(SB1->B1_COD) $ '08070000018/08070000019/10020000006/10020000077/10020000097/10020000106/10020000108/10020000116/10020000125/10020000567/10020000929';
+	.Or. AllTrim(SB1->B1_COD) $ '10000000001/10000000002/10000000012/10000000021/10000000027/10000000036/10000000045/10000000053/10000000054/10000000055/10000000092/10000000094/10000000095/10000000110/10000000129/10000000132/10000000134/10000000143/10000000148';
+	.Or. AllTrim(SB1->B1_COD) $ '10020001703/10030000021/10030000022/10030000031/10030000060/10030000081/10030000342/10030000380/10030000410/10030001575/10030001678/10030001691/10030001885/10030001997/10030002004';
+	.Or. AllTrim(SB1->B1_COD) $ '10020000854/06410000081/10030001692/06410000015/06410000014/06410000013/06410000075/10030001888/';
+	.Or. (AllTrim(SB1->B1_COD) >= '10020000028' .And. AllTrim(SB1->B1_COD) <= '10020000030') ;
+	.Or. (AllTrim(SB1->B1_COD) >= '10020000034' .And. AllTrim(SB1->B1_COD) <= '10020000053') ;
+	.Or. (AllTrim(SB1->B1_COD) >= '10020000065' .And. AllTrim(SB1->B1_COD) <= '10020000072') ;
+	.Or. (AllTrim(SB1->B1_COD) >= '10020000079' .And. AllTrim(SB1->B1_COD) <= '10020000083') ;
+	.Or. (AllTrim(SB1->B1_COD) >= '10030000013' .And. AllTrim(SB1->B1_COD) <= '10030000015') ;
+	.Or. (SB1->B1_GRUPO == '0999' .And. AllTrim(SB1->B1_TIPO) == 'MN') )
+		If (_cCod $ '650002CD' .And. SF4->F4_ESTOQUE == 'N') .Or._cCod $ '666006CD' .Or. AllTrim(SB1->B1_COD) $ '10000000001/10000000002/10000000012/10000000021/10000000027/10000000036/10000000045/10000000053/10000000054/10000000055/10000000092/10000000094/10000000095/10000000110/10000000129/10000000132/10000000134/10000000143/10000000148'
 			If _lCCusto .Or. cFilAnt $ _cFil90+_cFilAdm
 				_cRetorno := '3301020010' //MANUTENCAO E REPAROS
 			ElseIf cFilAnt $ _cFil01
@@ -1992,7 +1987,7 @@ Else
 			ElseIf cFilAnt $ _cFil40
 				_cRetorno := '1102010064'
 			ElseIf cFilAnt $ _cFil90+_cFilAdm
-				If AllTrim(SF4->F4_CF) $ '1352/1353' .AND. (SB1->B1_GRUPO >= '0600' .AND. SB1->B1_GRUPO <= '0799')
+				If AllTrim(SF4->F4_CF) $ '1352/1353' .And. (SB1->B1_GRUPO >= '0600' .And. SB1->B1_GRUPO <= '0799')
 					_cRetorno := '3301020017' //FRETES E CARRETOS
 				ElseIf _cCod $ _cGEst01
 					_cRetorno := '1102010184'
@@ -2006,8 +2001,8 @@ Else
 
 	//Lanches e Refeições
 	ElseIf _cCod $ '650002CD/610001CC/666006CD' .And. (SB1->B1_GRUPO == '0809' ;
-	.OR. AllTrim(SB1->B1_COD) $ '00010010101/00010110101/00020010301/00040010101/00040010201/00080010401/00150020401' ;
-	.OR. (SD1->D1_FORNECE == 'F01645' .AND. AllTrim(SB1->B1_COD) == '10000000078'))
+	.Or. AllTrim(SB1->B1_COD) $ '00010010101/00010110101/00020010301/00040010101/00040010201/00080010401/00150020401' ;
+	.Or. (SD1->D1_FORNECE == 'F01645' .And. AllTrim(SB1->B1_COD) == '10000000078'))
 		_cRetorno := '3301020038' //LANCHES E REFEICOES
 	
 	//Transporte de Insumos, Insumos/Lactose/Açucar/Pre Mix Chocolate
@@ -2053,7 +2048,7 @@ Else
 				_cRetorno := '1102010074'
 			ElseIf cFilAnt == '90'
 				_cRetorno := '1102010062'
-			ElseIf AllTrim(SF4->F4_CF) $ '1352/1353' .AND. cFilAnt $ _cFilAdm
+			ElseIf AllTrim(SF4->F4_CF) $ '1352/1353' .And. cFilAnt $ _cFilAdm
 				_cRetorno := '3301020017' //FRETES E CARRETOS
 			ElseIf cFilAnt $ _cFil93
 				_cRetorno := '1102010151'
@@ -2080,9 +2075,9 @@ Else
 	ElseIf ((_cCod $ '610001CC/610008CC' .And. AllTrim(SF4->F4_CF) $ '5556/5206');
 		.Or. _cCod $ _cGEst01 + '650002CD/610001CC/610008CC/666006CD/678001CC/681001CD');
 		.And. (SB1->B1_GRUPO == '0630' ;
-		.OR. (AllTrim(SB1->B1_COD) >= '08070000003' .AND. AllTrim(SB1->B1_COD) <= '08070000006');
-		.OR. AllTrim(SB1->B1_COD) $ '08070000016/08070000020/08070000021/08070000024/08070000026/08070000033/08070000035/08070000036/08070000038/08070000039/08070000040/08070000043/08070000050/08070000063/08070000071';
-		.OR. (AllTrim(SB1->B1_COD) >= '08070000029' .AND. AllTrim(SB1->B1_COD) <= '08070000031'))
+		.Or. (AllTrim(SB1->B1_COD) >= '08070000003' .And. AllTrim(SB1->B1_COD) <= '08070000006');
+		.Or. AllTrim(SB1->B1_COD) $ '08070000016/08070000020/08070000021/08070000024/08070000026/08070000033/08070000035/08070000036/08070000038/08070000039/08070000040/08070000043/08070000050/08070000063/08070000071';
+		.Or. (AllTrim(SB1->B1_COD) >= '08070000029' .And. AllTrim(SB1->B1_COD) <= '08070000031'))
 		If _cCod $ '666006CD' .Or. (_cCod $ '650002CD' .And. SF4->F4_ESTOQUE == 'N')
 			If _lCCusto .Or. cFilAnt $ _cFilAdm
 				_cRetorno := '3301020008' //COMBUSTIVEIS E LUBRIFICANTE
@@ -2195,7 +2190,7 @@ Else
 
 	//Benfeitorias
 	ElseIf _cCod $ '650002CD' .And. (AllTrim(SB1->B1_COD) $ '10020000007/10030000007/10030000008/10030000020/10030000039/10030000040/10030000067/10030000068/10030000071/10030000079';
-		.OR. (AllTrim(SB1->B1_COD) >= '10030000044' .AND. AllTrim(SB1->B1_COD) <= '10030000056'))
+		.Or. (AllTrim(SB1->B1_COD) >= '10030000044' .And. AllTrim(SB1->B1_COD) <= '10030000056'))
 		If cFilAnt $ '05/91/92/0A'
 			_cRetorno := '1304010001' //BENFEITORIAS IMOVEIS DE TER
 		Else
@@ -2225,7 +2220,7 @@ Else
 		EndIf
 
 	//Industrialização Efetuada por Terceiros
-	ElseIf _cCod $ '650002CD' .And. (AllTrim(SB1->B1_COD) $ '10000000026' .OR. AllTrim(SF4->F4_CF) == '1125')
+	ElseIf _cCod $ '650002CD' .And. (AllTrim(SB1->B1_COD) $ '10000000026' .Or. AllTrim(SF4->F4_CF) == '1125')
 		If cFilAnt $ _cFil01+_cFil05
 			_cRetorno := '3299010055' //INDUSTRIALIZACAO EFETUADA POR TERCEIROS
 		ElseIf cFilAnt $ _cFil10
@@ -2257,7 +2252,7 @@ Else
 			ElseIf cFilAnt $ _cFil93
 				_cRetorno := '1102070089'
 			EndIf
-		ElseIf _cCod $ '610001CD' .Or. (_cCod == '650001CC' .And. Empty(SF1->F1_L_MIX)) .And. AllTrim(SB1->B1_COD) == '10070000004'
+		ElseIf _cCod $ '610001CD' .Or. (_cCod == '650001CC' .And. Empty(SF1->F1_L_MIX))
 			//ICMS ST Frete
 			If AllTrim(SB1->B1_COD) == '10070000004'
 				If cFilAnt == '20'
@@ -2357,7 +2352,7 @@ Else
 				_cRetorno := '110206G001' //CLIENTES DIVERSOS GERAL
 			EndIf
 		ElseIf (AllTrim(SF4->F4_CF) > '5000' .And. SD2->D2_TIPO $ 'B/D') .Or. AllTrim(SF4->F4_CF) < '5000' //Entradas e Devolução de Compras
-			If Substr(SA2->A2_CONTA,1,6) $ '210105/210106' .OR. AllTrim(SA2->A2_CONTA) == '2101019999'
+			If SubStr(SA2->A2_CONTA,1,6) $ '210105/210106' .Or. AllTrim(SA2->A2_CONTA) == '2101019999'
 				_cRetorno := SA2->A2_CONTA
 			Else
 				_cRetorno := '210101D001' //FORNECEDORES DIVERSOS GERAL
@@ -2367,7 +2362,7 @@ Else
 EndIf
 
 //Retorna sempre uma conta genérica quando não identificar a conta correta
-If Empty(_cRetorno) .AND. Substr(_cCod,7,1) $ 'IC'
+If Empty(_cRetorno) .And. SubStr(_cCod,7,1) $ 'IC'
 	If (FWIsInCallStack('CTBANFE') .Or. ((FWIsInCallStack('MATA331') .Or. FWIsInCallStack('MATA330') .Or. FWIsInCallStack('M330JCTB')) .And. !_cCod $ '678001CD/641001CD/681001CD/682001CD'));
 		.Or. _cCod $ '610008CC'
 		If FWIsInCallStack('CTBANFE') .And. SF4->F4_ESTOQUE == 'N'
@@ -2415,6 +2410,6 @@ If Empty(_cRetorno) .AND. Substr(_cCod,7,1) $ 'IC'
 	EndIf
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return (_cRetorno)

@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 19/06/2019 | Corrigido cálculo da média. Chamado: 29572
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 19/06/2019 | Ajustado para exibir produtores que não possuem nenhuma análise importada. Chamado: 29763
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 25/07/2019 | Corrigida a barra de progresso. Help 28346
+Lucas Borges  |19/06/2019| Chamado 29572. Corrigido cálculo da média.
+Lucas Borges  |19/06/2019| Chamado 29763. Ajustado para exibir produtores que não possuem nenhuma análise importada.
+Lucas Borges  |25/07/2019| Chamado 28346. Corrigida a barra de progresso.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT005
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 19/05/2019
-===============================================================================================================================
 Descrição---------: Relatório de reincidência de eventos de qualidade. Chamado 29479
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -45,11 +37,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 29/05/2019
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -111,11 +100,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 29/05/2019
-===============================================================================================================================
 Descrição---------: Realiza a impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -142,21 +128,21 @@ Local _nOk			:=0
 Local _nX			:=0
 Local _nI			:=0
 Local _nMed			:=0
-Local _cMes01 		:= Substr(MesExtenso(Month(MonthSub(MV_PAR07,4))),1,3)
-Local _cMes02 		:= Substr(MesExtenso(Month(MonthSub(MV_PAR07,3))),1,3)
-Local _cMes03 		:= Substr(MesExtenso(Month(MonthSub(MV_PAR07,2))),1,3)
-Local _cMes04 		:= Substr(MesExtenso(Month(MonthSub(MV_PAR07,1))),1,3)
-Local _cMes05 		:= Substr(MesExtenso(Month(MV_PAR07)),1,3)
+Local _cMes01 		:= SubStr(MesExtenso(Month(MonthSub(MV_PAR07,4))),1,3)
+Local _cMes02 		:= SubStr(MesExtenso(Month(MonthSub(MV_PAR07,3))),1,3)
+Local _cMes03 		:= SubStr(MesExtenso(Month(MonthSub(MV_PAR07,2))),1,3)
+Local _cMes04 		:= SubStr(MesExtenso(Month(MonthSub(MV_PAR07,1))),1,3)
+Local _cMes05 		:= SubStr(MesExtenso(Month(MV_PAR07)),1,3)
 Local _nCountRec	:= 0
 
 //Chama função que permitirá a seleção das filiais
 If MV_PAR09 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZLD")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Altero nome dinâmico das colunas
@@ -479,11 +465,11 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	//Reinicio o valor das variáveis
 	_nMedT01:=0
 	_nMedT02:=0
@@ -568,10 +554,10 @@ While !oReport:Cancel() .And. (_cAlias)->(!EOF())
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->ZLD_FILIAL
 	_cSetor	:= (_cAlias)->ZL2_COD + ' - ' + (_cAlias)->ZL2_DESCRI
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

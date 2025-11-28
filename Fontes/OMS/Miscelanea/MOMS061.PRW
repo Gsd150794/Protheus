@@ -10,7 +10,7 @@ Alex Wallauer | 05/07/2021 | Criacao da divisao dos menus de operador logistico 
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include "PROTHEUS.CH"
+#Include "TOTVS.ch"
 #Include "RWMAKE.CH"
 #Include "TopConn.ch"
 #Include "vkey.ch"
@@ -31,4 +31,4 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function MOMS061()//U_MOMS061
-RETURN U_MOMS047("OPL")
+Return U_MOMS047("OPL")

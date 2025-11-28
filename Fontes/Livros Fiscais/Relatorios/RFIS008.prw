@@ -2,13 +2,13 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -340,9 +340,9 @@ Local _nOrdem		:= oReport:Section(1):GetOrder() //1-Agrupa por filial 2-Agrupa t
 If MV_PAR09 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"SFT")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
+	aAdd(_aSelFil,cFilAnt)
 EndIf
 
 //=====================================================
@@ -366,7 +366,7 @@ MakeSqlExpr(oReport:uParam)
 //====================================================================================================
 // Monta filtro de acordo com a tabela de origem
 //====================================================================================================
-//Normalmente não precisaria desse filtro pois o fonte trataria o agendamento independente da filial, porém, se for informado apenas a empresa, ele irá processar
+//Normalmente não precisaria desse filtro pois o fonte trataria o agendamento independente da filial, porém, se For informado apenas a empresa, ele irá processar
 //e disparar e-mail para todas as filiais que nem usam o leite. Se informar todas as filiais que usam o leite, ele processará todos ao mesmo tempo, ocupando todas as threads.
 //Diante disso, travei para que sempre sejam processadas todas as filiais ao mesmo tempo, bastando agendar uma filial qualquer.
 If !FWGetRunSchedule()
@@ -402,7 +402,7 @@ oReport:SetMeter(0)
 
 BeginSql alias _cAlias
 	SELECT E2_NATUREZ,ENT.*,B1_DESC,BM_DESC,ED_DESCRIC,CTT_DESC01,BASE.*
-  FROM (SELECT B.*,CASE
+  FROM (SELECT B.*,Case
           WHEN (TIPOMOV = 'E' AND D1_TIPO IN ('B', 'D')) OR (TIPOMOV = 'S' AND D1_TIPO NOT IN ('B', 'D'))THEN
           (SELECT E1_NATUREZ
             FROM %Table:SE1%
@@ -413,7 +413,7 @@ BeginSql alias _cAlias
             AND D1_FORNECE = E1_CLIENTE
             AND D1_LOJA = E1_LOJA
             AND ROWNUM = 1)
-          ELSE
+          Else
           (SELECT E2_NATUREZ
             FROM %Table:SE2%
             WHERE D_E_L_E_T_ = ' '
@@ -424,35 +424,35 @@ BeginSql alias _cAlias
             AND D1_LOJA = E2_LOJA
             AND ROWNUM = 1)
         END E2_NATUREZ,
-      CASE WHEN (TIPOMOV = 'E' AND STATUS = 'CLASSIFICADO') THEN 
-        CASE WHEN D1_CF NOT IN('1933','2933') AND (DS_VALMERC <> F1_VALMERC OR DS_FRETE <> F1_FRETE OR DS_SEGURO <> F1_SEGURO) THEN 'Mercadoria, frete e/ou seguro diferente do XML' 
+      Case WHEN (TIPOMOV = 'E' AND STATUS = 'CLASSIFICADO') THEN 
+        Case WHEN D1_CF NOT IN('1933','2933') AND (DS_VALMERC <> F1_VALMERC OR DS_FRETE <> F1_FRETE OR DS_SEGURO <> F1_SEGURO) THEN 'Mercadoria, frete e/ou seguro diferente do XML' 
         WHEN D1_CF IN ('1910','2910') AND D1_PEDIDO <> ' ' THEN 'Bonificacao com pedido vinculado'
-        WHEN D1_TIPO <> 'I' AND D1_TOTAL+D1_VALFRE+D1_SEGURO+D1_DESPESA-D1_VALDESC+ DECODE(F4_INCIDE,'N',0,D1_VALIPI) <> D1_BASEICM AND SUBSTR(D1_CLASFIS,2,2) IN ('00','10') AND F4_BASEICM = 0 THEN 'Diferenca base de calculo/valor contabil para notas tributadas'
-        WHEN D1_TIPO <> 'I' AND D1_TOTAL+D1_VALFRE+D1_SEGURO+D1_DESPESA-D1_VALDESC+ DECODE(F4_INCIDE,'N',0,D1_VALIPI) = D1_BASEICM AND SUBSTR(D1_CLASFIS,2,2) = '20' THEN 'Base de calculo igual valor contabil para situacoes com reducao'
-        WHEN D1_TIPO <> 'I' AND D1_VALICM = 0 AND SUBSTR(D1_CLASFIS,2,2) IN ('00','10','20') THEN 'ICMS zerado'
-        WHEN SUBSTR(D1_CLASFIS,2,2) = '40' AND (F4_CF NOT IN ('1352','1151','1920','1921','1203','1204','1916','1101','1949') 
+        WHEN D1_TIPO <> 'I' AND D1_TOTAL+D1_VALFRE+D1_SEGURO+D1_DESPESA-D1_VALDESC+ DECODE(F4_INCIDE,'N',0,D1_VALIPI) <> D1_BASEICM AND SubStr(D1_CLASFIS,2,2) IN ('00','10') AND F4_BASEICM = 0 THEN 'Diferenca base de calculo/valor contabil para notas tributadas'
+        WHEN D1_TIPO <> 'I' AND D1_TOTAL+D1_VALFRE+D1_SEGURO+D1_DESPESA-D1_VALDESC+ DECODE(F4_INCIDE,'N',0,D1_VALIPI) = D1_BASEICM AND SubStr(D1_CLASFIS,2,2) = '20' THEN 'Base de calculo igual valor contabil para situacoes com reducao'
+        WHEN D1_TIPO <> 'I' AND D1_VALICM = 0 AND SubStr(D1_CLASFIS,2,2) IN ('00','10','20') THEN 'ICMS zerado'
+        WHEN SubStr(D1_CLASFIS,2,2) = '40' AND (F4_CF NOT IN ('1352','1151','1920','1921','1203','1204','1916','1101','1949') 
             OR (F4_CF = '1949' AND D1_GRUPO <> '0813')
             OR (F4_CF = '1101' AND D1_COD NOT IN ('08000000004','08000000034','08000000062','08000000065'))
             ) THEN 'Operacao isenta com CST ou CFOP errado'
-        WHEN D1_COD IN ('08070000004','08070000063') AND NOT ((D1_CF IN ('1101','1949') AND SUBSTR(D1_CLASFIS,2,2) = '90')
-            OR (D1_CF IN ('2101','2949') AND SUBSTR(D1_CLASFIS,2,2) = '00')) THEN 'Nota de lenha com CST ou CFOP errado'
-        WHEN SUBSTR(D1_CLASFIS,2,2) = '10' AND (D1_VALICM = 0 OR D1_ICMSRET = 0) THEN 'ICMS/ST incorreto - CST 10'
-        WHEN SUBSTR(D1_CLASFIS,2,2) = '60' AND F4_CF IN ('1410','1411') AND D1_ICMSRET <> 0 THEN 'ICMS/ST incorreto - CST 60'          
-        WHEN D1_SERIE NOT BETWEEN '890' AND '899' AND D1_SERIE NOT BETWEEN '910' AND '969' AND NOT (SUBSTR(D1_CLASFIS,2,2) IN ('40','90') AND F1_ESPECIE = 'CTE') 
+        WHEN D1_COD IN ('08070000004','08070000063') AND NOT ((D1_CF IN ('1101','1949') AND SubStr(D1_CLASFIS,2,2) = '90')
+            OR (D1_CF IN ('2101','2949') AND SubStr(D1_CLASFIS,2,2) = '00')) THEN 'Nota de lenha com CST ou CFOP errado'
+        WHEN SubStr(D1_CLASFIS,2,2) = '10' AND (D1_VALICM = 0 OR D1_ICMSRET = 0) THEN 'ICMS/ST incorreto - CST 10'
+        WHEN SubStr(D1_CLASFIS,2,2) = '60' AND F4_CF IN ('1410','1411') AND D1_ICMSRET <> 0 THEN 'ICMS/ST incorreto - CST 60'          
+        WHEN D1_SERIE NOT BETWEEN '890' AND '899' AND D1_SERIE NOT BETWEEN '910' AND '969' AND NOT (SubStr(D1_CLASFIS,2,2) IN ('40','90') AND F1_ESPECIE = 'CTE') 
           AND DT_XMLICM > 0  AND D1_VALICM = 0 THEN 'XML possui ICMS, mas o lançamento não'
-        WHEN D1_SERIE NOT BETWEEN '890' AND '899' AND D1_SERIE NOT BETWEEN '910' AND '969' AND NOT (SUBSTR(D1_CLASFIS,2,2) IN ('40','90') AND F1_ESPECIE = 'CTE') 
+        WHEN D1_SERIE NOT BETWEEN '890' AND '899' AND D1_SERIE NOT BETWEEN '910' AND '969' AND NOT (SubStr(D1_CLASFIS,2,2) IN ('40','90') AND F1_ESPECIE = 'CTE') 
           AND DT_XMLICST > 0 AND D1_ICMSRET = 0 THEN 'XML possui ICMS-ST, mas o lançamento não'
-        WHEN SUBSTR(D1_FORNECE,1,1) IN ('T','C','G') AND F4_CF NOT IN ('1352') THEN 'CFOP errado para frete'
-        WHEN SUBSTR(D1_FORNECE,1,1) NOT IN ('T','C','G') AND F4_CF IN ('1352') THEN 'CFOP indevido para frete'
-        WHEN D1_CF = '2352' AND NOT ((SUBSTR(D1_CLASFIS,2,2) = '00' AND D1_VALICM > 0 AND D1_PICM > 0) 
-            OR (SUBSTR(D1_CLASFIS,2,2) = '90' AND ((F4_COMPL = 'N' AND D1_VALICM = 0 AND D1_PICM = 0) OR F4_COMPL <> 'N' AND D1_VALICM > 0 AND D1_PICM > 0))
+        WHEN SubStr(D1_FORNECE,1,1) IN ('T','C','G') AND F4_CF NOT IN ('1352') THEN 'CFOP errado para frete'
+        WHEN SubStr(D1_FORNECE,1,1) NOT IN ('T','C','G') AND F4_CF IN ('1352') THEN 'CFOP indevido para frete'
+        WHEN D1_CF = '2352' AND NOT ((SubStr(D1_CLASFIS,2,2) = '00' AND D1_VALICM > 0 AND D1_PICM > 0) 
+            OR (SubStr(D1_CLASFIS,2,2) = '90' AND ((F4_COMPL = 'N' AND D1_VALICM = 0 AND D1_PICM = 0) OR F4_COMPL <> 'N' AND D1_VALICM > 0 AND D1_PICM > 0))
             ) THEN 'CST divergente da TES'
         WHEN F4_ICM = 'S' AND ((F4_BASEICM = 0 AND F4_LFICM = 'T') OR (F4_BASEICM > 0 AND F4_LFICM = 'O')) AND DT_XALQICM <> D1_PICM THEN 'Alíquota do ICMS do XML diferente do escriturado'
         /*WHEN XMLICM <> F1_VALICM THEN 'Valor do ICMS do XML diferente do escriturado'*/
         WHEN D1_VALIPI > 0 AND DT_XALQIPI <> D1_IPI THEN 'Alíquota do IPI do XML diferente do escriturado'
         /*WHEN XMLIPI <> F1_VALIPI THEN 'Valor do IPI do XML diferente do escriturado'*/
         WHEN F1_ESPECIE = 'CTE' AND D1_TIPO = 'C' AND D1_ALQIMP5 > 0 AND D1_ALQIMP5 <> 7.6 THEN 'CTe- Complementar com alíquota diferenciada'
-        ELSE ' ' 
+        Else ' ' 
         END
       END ERRO
 		 FROM (SELECT %exp:_cCampos1% 'E' TIPOMOV, DECODE (FT_FILIAL, NULL, 'NAO','SIM') GER_LIVRO, DECODE(DS_FILIAL,NULL,'NAO','SIM') COLAB, DECODE(F1_STATUS, 'A', 'CLASSIFICADO', 'PRE-NOTA') STATUS
@@ -566,7 +566,7 @@ BeginSql alias _cAlias
    AND CTT_CUSTO(+) = D1_CC
    AND D1_FORNECE = A2_COD
    AND D1_LOJA = A2_LOJA
-   AND ENT = CASE WHEN (TIPOMOV = 'E' AND D1_TIPO IN ('B', 'D')) OR(TIPOMOV = 'S' AND D1_TIPO NOT IN ('B', 'D')) THEN 'SA1' ELSE 'SA2' END
+   AND ENT = Case WHEN (TIPOMOV = 'E' AND D1_TIPO IN ('B', 'D')) OR(TIPOMOV = 'S' AND D1_TIPO NOT IN ('B', 'D')) THEN 'SA1' Else 'SA2' END
    %exp:_cFilTot%
 EndSql
 //==========================================================================
@@ -591,7 +591,7 @@ oReport:Section(1):Init()
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(0)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	//Mascara para impressao - CNPJ/CPF
@@ -600,7 +600,7 @@ While !oReport:Cancel() .And. (_cAlias)->(!EOF())
 	Else
 		oReport:Section(1):Cell("A2_CGC"):SetPicture("@R 999.999.999-99")
 	EndIf
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
@@ -613,10 +613,10 @@ Return
 Programa----------: SchedDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 25/05/2017
-Descrição---------: Definição de Static Function SchedDef para o novo Schedule
+Descrição---------: DefiniçStaticStatic Function SchedDef para o novo Schedule
 					No novo Schedule existe uma forma para a definição dos Perguntes para o botão Parâmetros, além do cadastro 
-					das funções no SXD. Ao definir em sua rotina a static function SchedDef(), no cadastro da rotina no Agenda-
-					mento do Schedule será verificado se existe esta static function e irá executá-la habilitando o botão Parâ-
+					das funções no SXD. Ao definir em sua rotinStaticatic Function SchedDef(), no cadastro da rotina no Agenda-
+					mento do Schedule será verificado se existe estStaticic Function e irá executá-la habilitando o botão Parâ-
 					metros com as informações do retorno da SchedDef(), deixando de verificar assim as informações na SXD. O 
 					retorno da SchedDef deverá ser um array.
 					Válido para Function e User Function, lembrando que uma vez definido a SchedDef, ao chamar a rotina o ambi-

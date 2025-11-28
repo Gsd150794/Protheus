@@ -13,7 +13,7 @@
 //====================================================================================================
 
 
-#INCLUDE "Protheus.ch"
+#Include "TOTVS.ch"
 #Include "FwMVCDef.ch"
 #Include "RWMAKE.CH"
 #Include "TopConn.ch"
@@ -35,7 +35,7 @@ Retorno---------: Nenhum
 
 User Function AOMS137()
 
-Local _aArea   := GetArea()
+Local _aArea   := FWGetArea()
 Local _oBrowse
 
     _oBrowse := FWMBrowse():New()
@@ -44,9 +44,9 @@ Local _oBrowse
     _oBrowse:SetDescription("Transit time por Operador Logistico")
     _oBrowse:Activate()
 
-    RestArea(_aArea)
+    FWRestArea(_aArea)
     
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -96,55 +96,55 @@ Local _oModel := Nil
 Local _bValid	:= {|_oModel| U_AOMS137V(_oModel)}
 
 //Criação da estrutura de dados utilizada na interface
-Local _oStZ31CAB := FWFormStruct(1,"Z31",{ |x| ALLTRIM(x) $ 'Z31_FORNEC, Z31_LOJA, Z31_NOMEFO, Z31_UF' } )
-Local _oStZ31DET := FWFormStruct(1,"Z31",{ |x| ALLTRIM(x) $ 'Z31_MESO,Z31_NMESO, Z31_MICRO, Z31_NMICRO, Z31_CODMUN, Z31_MUN, Z31_TTIME' } )
+Local _oStZ31CAB := FWFormStruct(1,"Z31",{ |x| AllTrim(x) $ 'Z31_FORNEC, Z31_LOJA, Z31_NOMEFO, Z31_UF' } )
+Local _oStZ31DET := FWFormStruct(1,"Z31",{ |x| AllTrim(x) $ 'Z31_MESO,Z31_NMESO, Z31_MICRO, Z31_NMICRO, Z31_CODMUN, Z31_MUN, Z31_TTIME' } )
 
 Local _aGatAux	:= {}
 
 //Z31_FORNEC  
-_aGatAux := FwStruTrigger( 'Z31_FORNEC', 'Z31_LOJA', 'IIF(EMPTY(ALLTRIM(M->Z31_LOJA)),POSICIONE("SA2",1,XFILIAL("SA2")+M->Z31_FORNEC,"A2_LOJA"),M->Z31_LOJA)', .F. )
+_aGatAux := FwStruTrigger( 'Z31_FORNEC', 'Z31_LOJA', 'IIf(Empty(AllTrim(M->Z31_LOJA)),Posicione("SA2",1,xFilial("SA2")+M->Z31_FORNEC,"A2_LOJA"),M->Z31_LOJA)', .F. )
 _oStZ31CAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'Z31_FORNEC', 'Z31_NOMEFO', 'POSICIONE("SA2",1,XFILIAL("SA2")+M->Z31_FORNEC+M->Z31_LOJA,"A2_NOME")', .F. )
+_aGatAux := FwStruTrigger( 'Z31_FORNEC', 'Z31_NOMEFO', 'Posicione("SA2",1,xFilial("SA2")+M->Z31_FORNEC+M->Z31_LOJA,"A2_NOME")', .F. )
 _oStZ31CAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'Z31_FORNEC', 'Z31_UF', 'POSICIONE("SA2",1,XFILIAL("SA2")+M->Z31_FORNEC+M->Z31_LOJA,"A2_EST")', .F. )
+_aGatAux := FwStruTrigger( 'Z31_FORNEC', 'Z31_UF', 'Posicione("SA2",1,xFilial("SA2")+M->Z31_FORNEC+M->Z31_LOJA,"A2_EST")', .F. )
 _oStZ31CAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 //Z31_LOJA
-_aGatAux := FwStruTrigger( 'Z31_LOJA', 'Z31_NOMEFO', 'POSICIONE("SA2",1,XFILIAL("SA2")+M->Z31_FORNEC+M->Z31_LOJA,"A2_NOME")', .F. )
+_aGatAux := FwStruTrigger( 'Z31_LOJA', 'Z31_NOMEFO', 'Posicione("SA2",1,xFilial("SA2")+M->Z31_FORNEC+M->Z31_LOJA,"A2_NOME")', .F. )
 _oStZ31CAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'Z31_LOJA', 'Z31_UF', 'POSICIONE("SA2",1,XFILIAL("SA2")+M->Z31_FORNEC+M->Z31_LOJA,"A2_EST")', .F. )
+_aGatAux := FwStruTrigger( 'Z31_LOJA', 'Z31_UF', 'Posicione("SA2",1,xFilial("SA2")+M->Z31_FORNEC+M->Z31_LOJA,"A2_EST")', .F. )
 _oStZ31CAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 //Z31_MESO
-_aGatAux := FwStruTrigger( 'Z31_MESO', 'Z31_NMESO', 'POSICIONE("Z21",1,XFILIAL("Z21")+M->Z31_MESO,"Z21_NOME")', .F. )
+_aGatAux := FwStruTrigger( 'Z31_MESO', 'Z31_NMESO', 'Posicione("Z21",1,xFilial("Z21")+M->Z31_MESO,"Z21_NOME")', .F. )
 _oStZ31DET:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'Z31_MESO', 'Z31_MICRO', 'space(len(Z31->Z31_MICRO))', .F. )
+_aGatAux := FwStruTrigger( 'Z31_MESO', 'Z31_MICRO', 'Space(Len(Z31->Z31_MICRO))', .F. )
 _oStZ31DET:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 _aGatAux := FwStruTrigger( 'Z31_MESO', 'Z31_NMICRO', '""', .F. )
 _oStZ31DET:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'Z31_MESO', 'Z31_CODMUN', 'space(len(Z31->Z31_CODMUN))', .F. )
+_aGatAux := FwStruTrigger( 'Z31_MESO', 'Z31_CODMUN', 'Space(Len(Z31->Z31_CODMUN))', .F. )
 _oStZ31DET:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 _aGatAux := FwStruTrigger( 'Z31_MESO', 'Z31_MUN', '""', .F. )
 _oStZ31DET:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 //Z31_MICRO
-_aGatAux := FwStruTrigger( 'Z31_MICRO', 'Z31_NMICRO', 'POSICIONE("Z22",1,XFILIAL("Z22")+M->Z31_MICRO,"Z22_NOME")', .F. )
+_aGatAux := FwStruTrigger( 'Z31_MICRO', 'Z31_NMICRO', 'Posicione("Z22",1,xFilial("Z22")+M->Z31_MICRO,"Z22_NOME")', .F. )
 _oStZ31DET:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'Z31_MICRO', 'Z31_CODMUN', 'space(len(Z31->Z31_CODMUN))', .F. )
+_aGatAux := FwStruTrigger( 'Z31_MICRO', 'Z31_CODMUN', 'Space(Len(Z31->Z31_CODMUN))', .F. )
 _oStZ31DET:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 _aGatAux := FwStruTrigger( 'Z31_MICRO', 'Z31_MUN', '""', .F. )
 _oStZ31DET:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-//Instanciando o modelo, não é recomendado colocar nome da user function (por causa do u_), respeitando 10 caracteres
+//Instanciando o modelo, não é recomendado colocar nome da User Function (por causa do u_), respeitando 10 caracteres
 _oModel := MPFormModel():New("AOMS137M",,_bValid ,/*bCommit*/,/*bCancel*/) 
     
 //Atribuindo formulários para o modelo
@@ -173,7 +173,7 @@ Return _oModel
 
 Static Function AOMS137VLD(_oModel)
 
-Return .t.
+Return .T.
 
 /*
 ===============================================================================================================================
@@ -195,8 +195,8 @@ Static Function ViewDef()
 Local _oModel := FWLoadModel("AOMS137")
 
 //Criação da estrutura de dados utilizada na interface do cadastro de Autor
-Local _oStZ31CAB := FWFormStruct(2,"Z31",{ |x| ALLTRIM(x) $ 'Z31_FORNEC, Z31_LOJA, Z31_NOMEFO,Z31_UF' } )
-Local _oStZ31DET := FWFormStruct(2,"Z31",{ |x| ALLTRIM(x) $ 'Z31_MESO,Z31_NMESO, Z31_MICRO, Z31_NMICRO, Z31_CODMUN, Z31_MUN, Z31_TTIME' } )
+Local _oStZ31CAB := FWFormStruct(2,"Z31",{ |x| AllTrim(x) $ 'Z31_FORNEC, Z31_LOJA, Z31_NOMEFO,Z31_UF' } )
+Local _oStZ31DET := FWFormStruct(2,"Z31",{ |x| AllTrim(x) $ 'Z31_MESO,Z31_NMESO, Z31_MICRO, Z31_NMICRO, Z31_CODMUN, Z31_MUN, Z31_TTIME' } )
           
 //Criando _oView como nulo
 Local _oView := Nil
@@ -254,14 +254,14 @@ If _nOperation == MODEL_OPERATION_INSERT
 EndIf
 
 If _lValida
-    Z31->(DbSetOrder(1))
-	If Z31->( Dbseek(xfilial("Z31") + _cFornec + _cLoja + _cUF ) )
+    Z31->(DBSetOrder(1))
+	If Z31->( DBSeek(xFilial("Z31") + _cFornec + _cLoja + _cUF ) )
 
 		_lOk := .F.
-		U_ITMSG("Chave (fornecedor + Loja + Estado) informada já consta no cadastro. ",;
+		U_ITMsg("Chave (fornecedor + Loja + Estado) informada já consta no cadastro. ",;
                 "Atenção",;
                 "Verifique e modifique o chave digitada.  ",3 , , , .T.)	
-	Endif
+	EndIf
 EndIf
 
 RestOrd(_aOrd)
@@ -297,13 +297,13 @@ Local _cMicro     := ""
     ElseIf cTabela == "Z22"
         _cRetorno := "(Z22->Z22_EST + Z22->Z22_MESO) = '"+_cUF+_cMeso+"' "
     ElseIf cTabela ==  "CC2"
-        If Empty(Alltrim(_cMicro))
-            If Empty(Alltrim(_cMeso))
+        If Empty(AllTrim(_cMicro))
+            If Empty(AllTrim(_cMeso))
                 _cRetorno := "(CC2->CC2_EST) = '"+_cUF+"' "
             Else
                 _cRetorno := "(CC2->CC2_EST + CC2->CC2_I_MESO) = '"+_cUF+_cMeso+"' "
             EndIf
-        Elseif Empty(Alltrim(_cMeso))
+        ElseIf Empty(AllTrim(_cMeso))
             _cRetorno := "(CC2->CC2_EST) = '"+_cUF+"' "
         Else
             _cRetorno := "(CC2->CC2_EST + CC2->CC2_I_MESO + CC2->CC2_I_MICR) = '"+_cUF+_cMeso+_cMicro+"' "
@@ -329,11 +329,11 @@ User Function AOMS137X()
 Local _oModel  := FwModelActivete()
 Local _cUF     := _oModel:GetValue( 'Z31MASTER', 'Z31_UF' )
 Local _cCodMun := _oModel:GetValue( 'Z31DETAIL', 'Z31_CODMUN' )
-Local _cMun    := POSICIONE("CC2",1,XFILIAL("CC2")+_cUF+_cCodMun,"CC2_MUN")
-Local _cMeso   := POSICIONE("CC2",1,XFILIAL("CC2")+_cUF+_cCodMun,"CC2_I_MESO")
-Local _cNMeso  := POSICIONE("Z21",1,XFILIAL("Z21")+_cMeso,"Z21_NOME")
-Local _cMicro  := POSICIONE("CC2",1,XFILIAL("CC2")+_cUF+_cCodMun,"CC2_I_MICR")
-Local _cNMicro := POSICIONE("Z22",1,XFILIAL("Z22")+_cMicro,"Z22_NOME")
+Local _cMun    := Posicione("CC2",1,xFilial("CC2")+_cUF+_cCodMun,"CC2_MUN")
+Local _cMeso   := Posicione("CC2",1,xFilial("CC2")+_cUF+_cCodMun,"CC2_I_MESO")
+Local _cNMeso  := Posicione("Z21",1,xFilial("Z21")+_cMeso,"Z21_NOME")
+Local _cMicro  := Posicione("CC2",1,xFilial("CC2")+_cUF+_cCodMun,"CC2_I_MICR")
+Local _cNMicro := Posicione("Z22",1,xFilial("Z22")+_cMicro,"Z22_NOME")
 
 _oModel:LoadValue( 'Z31DETAIL', 'Z31_MUN'   , _cMun )
 _oModel:LoadValue( 'Z31DETAIL', 'Z31_MESO'  , _cMeso )

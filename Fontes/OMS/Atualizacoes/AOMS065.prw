@@ -15,7 +15,7 @@ Lucas Borges      | 14/10/2019 | Removidos os Warning na compilação da release 1
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 #Include 'ApWizard.Ch'
 #Include 'FWMVCDEF.ch'
 
@@ -56,7 +56,7 @@ oBrowse:DisableDetails()
 
 oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -111,11 +111,11 @@ Local _aParAux	:= {}
 Local nI		:= 0
 
 If !AOMS065VUS()
-	Return()
+	Return
 EndIf
 
 //================================================================================
-// Desativa a Flag de Cópia quando não for Replicação de Propostas
+// Desativa a Flag de Cópia quando não For Replicação de Propostas
 //================================================================================
 _lOpcCopy := .F.
 
@@ -127,8 +127,8 @@ DEFINE	WIZARD 	_oWizard TITLE "Italac"																							;
        	MESSAGE	"Inclusão de Estimativas"			 																			;
        	TEXT 	"Esta rotina tem o objetivo de iniciar o processo de cadastramento de estimativas para a produção das"	+CRLF+	;
        			"Unidades. Nessa etapa é necessário informar o período e a forma de cadastro para prosseguir"			+CRLF	;
-       	NEXT	{||.T.} 																										;
-       	FINISH 	{||.F.} 																										;
+       	Next	{||.T.} 																										;
+       	Finish 	{||.F.} 																										;
        	PANEL
 
 	//================================================================================
@@ -138,8 +138,8 @@ DEFINE	WIZARD 	_oWizard TITLE "Italac"																							;
           	HEADER 	"Informações"											;
           	MESSAGE "Informe os campos para início do processamento..."		;
           	BACK 	{|| .T. }												;
-          	NEXT 	{|| Eval( _bNext , 2 ) }								;
-          	FINISH 	{|| .F. }												;
+          	Next 	{|| Eval( _bNext , 2 ) }								;
+          	Finish 	{|| .F. }												;
           	PANEL
 	
 	DBSelectArea('ZC3')
@@ -155,7 +155,7 @@ DEFINE	WIZARD 	_oWizard TITLE "Italac"																							;
 	        HEADER 	'Confirmar o processamento'								;
 	        MESSAGE ''														;
 	        BACK 	{|| .T. } 												;
-	        FINISH 	{|| Eval( _bFinish ) } 									;
+	        Finish 	{|| Eval( _bFinish ) } 									;
 	        PANEL
 	
 	//================================================================================
@@ -179,7 +179,7 @@ If	_lGravaOK
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -207,10 +207,10 @@ Local _cDtRef	:= ''
 Local _nTotReg	:= 0
 
 If Empty( _cPeriod )
-	_cPeriod := SubStr( DtoS( Date() ) , 1 , 6 )
+	_cPeriod := SubStr( DToS( Date() ) , 1 , 6 )
 EndIf
 
-_cDtRef := SubStr( DtoS( MonthSub( StoD( _cPeriod + '01' ) , 1 ) ) , 1 , 6 )
+_cDtRef := SubStr( DToS( MonthSub( SToD( _cPeriod + '01' ) , 1 ) ) , 1 , 6 )
 
 If _aRetPar[01] == 1
 
@@ -232,7 +232,7 @@ If _aRetPar[01] == 1
 	_cQuery += " AND B1.B1_I_WFUM  <> ' ' " 
 	_cQuery += " AND D3.D3_TM      IN ( '001' , '003' ) "
 	_cQuery += " AND D3.D3_ESTORNO <> 'S' "
-	_cQuery += " AND SUBSTR( D3.D3_EMISSAO , 1 , 6 ) = '"+ _cDtRef +"' "
+	_cQuery += " AND SubStr( D3.D3_EMISSAO , 1 , 6 ) = '"+ _cDtRef +"' "
 	
 	If !Empty( _cCodUni )
 	_cQuery += " AND D3.D3_FILIAL  = '"+ _cCodUni +"' "
@@ -258,7 +258,7 @@ If _aRetPar[01] == 1
 			
 			DBSelectArea('ZC3')
 			ZC3->( DBSetOrder(1) )
-			IF ZC3->( DBSeek( xFilial('ZC3') + (_cAlias)->FILIAL + _cPeriod + (_cAlias)->PRODUTO ) )
+			If ZC3->( DBSeek( xFilial('ZC3') + (_cAlias)->FILIAL + _cPeriod + (_cAlias)->PRODUTO ) )
 				
 				If !_lAtual
 					
@@ -282,7 +282,7 @@ If _aRetPar[01] == 1
 					ZC3->( RecLock( 'ZC3' , .F. ) )
 					ZC3->ZC3_QTDEST	:= (_cAlias)->QUANT
 					ZC3->ZC3_QTDSUM	:= (_cAlias)->QTSEGUM
-					ZC3->( MsUnLock() )
+					ZC3->( MSUnLock() )
 					
 				EndIf
 				
@@ -297,7 +297,7 @@ If _aRetPar[01] == 1
 					ZC3->ZC3_QTDEST	:= (_cAlias)->QUANT
 					ZC3->ZC3_QTDSUM	:= (_cAlias)->QTSEGUM
 					
-				ZC3->( MsUnLock() )
+				ZC3->( MSUnLock() )
 				
 			EndIf
 			
@@ -321,7 +321,7 @@ Else
 	
 EndIf
 
-Return()
+Return
 
 Static Function AOMS065NXT( nPanel )
 
@@ -545,7 +545,7 @@ If _nOper == MODEL_OPERATION_INSERT
 
 	DBSelectArea('ZC3')
 	ZC3->( DBSetOrder(1) )
-	IF ZC3->( DBSeek( xFilial('ZC3') + _oModel:GetValue('ZC3MASTER','ZC3_UNIPRD') + _oModel:GetValue('ZC3MASTER','ZC3_PERIOD') ) )
+	If ZC3->( DBSeek( xFilial('ZC3') + _oModel:GetValue('ZC3MASTER','ZC3_UNIPRD') + _oModel:GetValue('ZC3MASTER','ZC3_PERIOD') ) )
 		
 		Help( ,, "AOMS065" ,, "Já existem registros nesse período para a Unidade Atual!" , 1 , 0 )
 		_lRet := .F.

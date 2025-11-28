@@ -2,41 +2,33 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 22/10/2019 | Tratamento para o campo NOVO CLAIM. Chamado 30921 
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 29/12/2020 | Incluído tratamento para execução desnecessária no execauto do leite. Chamado: 34986
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 25/03/2022 | Gravação das informações no fechamento via PE ao invés de RecLock. Chamado 39465
+Alex Wallauer |22/10/2019| Chamado 30921. Tratamento para o campo NOVO CLAIM.
+Lucas Borges  |29/12/2020| Chamado 34986. Incluído tratamento para execução desnecessária no execauto do leite.
+Lucas Borges  |25/03/2022| Chamado 39465. Gravação das informações no fechamento via PE ao invés de RecLock.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MT100GE2
 Autor-------------: Vladimir Souza
 Data da Criacao---: 16/12/2014
-===============================================================================================================================
 Descrição---------: Ponto de Entrada apos gravacao do titulos no financeiro - SE2 , tela listando os titulos de impostos. Rotina 
 					que efetua a integração entre o documento de entrada e os títulos financeiros a pagar,após a gravação de cada
 					parcela. Finalidade: Complementar a gravação na tabela dos títulos financeiros a pagar
-===============================================================================================================================
-Parametros--------: PARAMIXB[1]	-> A -> ACols dos títulos financeiro a pagar
-					PARAMIXB[2]	-> N -> 1=inclusão de títulos, 2=exclusão de títulos
-					PARAMIXB[3]	-> A -> AHeader dos títulos financeiros a pagar
-					PARAMIXB[4]	-> N -> Numero da parcela sendo processada
-					PARAMIXB[5]	-> N -> Array das parcelas do titulo
-===============================================================================================================================
+Parametros--------: ParamIXB[1]	-> A -> ACols dos títulos financeiro a pagar
+					ParamIXB[2]	-> N -> 1=inclusão de títulos, 2=exclusão de títulos
+					ParamIXB[3]	-> A -> AHeader dos títulos financeiros a pagar
+					ParamIXB[4]	-> N -> Numero da parcela sendo processada
+					ParamIXB[5]	-> N -> Array das parcelas do titulo
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function MT100GE2()
+User Function MT100GE2
 
 Local _cAlias	:= ""
 Local _aTitulos	:= {}
@@ -54,14 +46,14 @@ If _lRLeite
 		If SC7->C7_I_CLAIM = "1"
 			SE2->(RecLock("SE2",.F.))
 			SE2->E2_I_CLAIM:="1"
-			SE2->(MsUnlock())
+			SE2->(MSUnLock())
 		EndIf
 	EndIf
 	
 	_cAlias	:= GetNextAlias()
 	BeginSql alias _cAlias
 		SELECT E2_NUM, E2_PREFIXO, E2_PARCELA, E2_NATUREZ, ED_DESCRIC, E2_FORNECE, E2_LOJA, E2_VALOR, E2_VENCREA
-		FROM %table:SE2% SE2, %table:SED% SED
+		FROM %Table:SE2% SE2, %Table:SED% SED
 		WHERE SE2.D_E_L_E_T_ = ' '
 		AND SED.D_E_L_E_T_ = ' '
 		AND E2_FILIAL = %xFilial:SE2%
@@ -79,7 +71,7 @@ If _lRLeite
 							(_cAlias)->E2_FORNECE		,;
 							(_cAlias)->E2_LOJA			,;
 							(_cAlias)->E2_VALOR			,;
-							STOD( (_cAlias)->E2_VENCREA )})
+							SToD( (_cAlias)->E2_VENCREA )})
 
 		(_cAlias)->( DBSkip() )
 	EndDo
@@ -105,12 +97,12 @@ If _lRLeite
 						Transform(	_aTitulos[_oLbx:nAt][08] , "99,999,999.99" )	,;
 									_aTitulos[_oLbx:nAt][09]						}}
 
-		DEFINE SBUTTON FROM 107,415 TYPE 1 ACTION _oDlg:End() ENABLE OF _oDlg
+		DEFINE SBUTTON FROM 107,415 Type 1 ACTION _oDlg:End() ENABLE OF _oDlg
 
 		ACTIVATE MSDIALOG _oDlg CENTER
 
 	EndIf
-ElseIf !_lRLeite .And. PARAMIXB[2] //MGLT009 e Inclusão
+ElseIf !_lRLeite .And. ParamIXB[2] //MGLT009 e Inclusão
 	SE2->E2_L_MIX := ZLE->ZLE_COD
 	SE2->E2_L_SETOR := ZL2->ZL2_COD
 	SE2->E2_L_LINRO := ZL3->ZL3_COD

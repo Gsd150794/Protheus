@@ -6,15 +6,11 @@
 -------------------------------------------------------------------------------------------------------------------------------
 Alex Wallauer |04/10/2019| Chamado 30768. Ajustes de layout de tela para versão nova.
 Lucas Borges  |09/05/2025| Chamado 50617. Corrigir chamada estática no nome das tabelas do sistema
-===============================================================================================================================
-Analista       - Programador     - Inicio     - Envio    - Chamado - Motivo de Alteração
-===============================================================================================================================
-Lucas          - Alex Wallauer   - 02/05/2025 - 06/05/25 - 50525   - Ajuste para remoção de diretório local C:\SMARTCLIENT\.
+Alex Wallauer |06/05/2025| Chamado 50525. Ajuste para remoção de diretório Local C:\SMARTCLIENT\.
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "COLORS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -95,7 +91,7 @@ Define Font _oFont12b   Name "Courier New"       Size 0,-12 Bold  // Tamanho 12 
 //===============================================================
 // Cria o arquivo Temporario para insercao dos dados selecionados. 
 //===============================================================
-FWMSGRUN(,{|| MEST008C(_cAlias)  },'MONTANDO A ESTRUTURA DOS DADOS...','AGUARDE...')
+FWMsgRun(,{|| MEST008C(_cAlias)  },'MONTANDO A ESTRUTURA DOS DADOS...','AGUARDE...')
 
                                                                                  
 Begin Transaction
@@ -103,7 +99,7 @@ Begin Transaction
 //===============================================================
 // Insere os dados no arquivo temporario criado                    
 //===============================================================
-FWMSGRUN(,{|oProc| MEST008D(_cAlias,oProc)  },'INSERINDO OS DADOS SELECIONADOS...','AGUARDE...')
+FWMsgRun(,{|oProc| MEST008D(_cAlias,oProc)  },'INSERINDO OS DADOS SELECIONADOS...','AGUARDE...')
 
 //===============================================================
 // Faz o calculo automatico de dimensoes de objetos     
@@ -113,7 +109,7 @@ _aSize := MSADVSIZE()
 //===============================================================
 // Obtem tamanhos das telas                                            
 //===============================================================
-AAdd( _aObjects, { 0, 0, .t., .t., .t. } )
+aAdd( _aObjects, { 0, 0, .T., .T., .T. } )
 
 _aInfo    := { _aSize[ 1 ], _aSize[ 2 ], _aSize[ 3 ], _aSize[ 4 ], 3, 3 } 
 _aPosObj1 := MsObjSize( _aInfo, _aObjects,  , .T. ) 
@@ -121,9 +117,9 @@ _aPosObj1 := MsObjSize( _aInfo, _aObjects,  , .T. )
 //===============================================================
 // Botoes da tela.                       
 //===============================================================
-Aadd( _aBotoes, {"S4WB005N" ,{|| MEST008V()                                                                             },"Visualizar Produto..." ,"Produto"      })
+aAdd( _aBotoes, {"S4WB005N" ,{|| MEST008V()                                                                             },"Visualizar Produto..." ,"Produto"      })
 //aAdd( _aBotoes, {'RELATORIO',{||MsgRun("Imprimindo Relatório Aguarde...",,{|| ,MEST008IP() })  },"Imprimir"})    
-aAdd( _aBotoes, {'RELATORIO',{|| FWMSGRUN(,{|oProc| MEST008IP(oProc) },'Aguarde processamento...','Lendo dados...')  },"Imprimir"})    
+aAdd( _aBotoes, {'RELATORIO',{|| FWMsgRun(,{|oProc| MEST008IP(oProc) },'Aguarde processamento...','Lendo dados...')  },"Imprimir"})    
 aAdd( _aBotoes, {'S4WB011N' ,{|| U_MEST008F()  }         ,"Filtrar"})   
 aAdd( _aBotoes, {'FORM '    ,{||U_MEST008E()  }         ,"Exportar Excel"})  
 aAdd( _aBotoes, {'PENDENTE' ,{||U_MEST008M("MARCAR")}   ,"Marcar Todos"})  
@@ -161,10 +157,10 @@ If FlatMode()
 Else
 	_nHeight	:= 143
 	_nWidth	:= 315
-Endif                    
+EndIf                    
 
-dbSelectArea(_cAlias)     
-(_cAlias)->(dbGotop())
+DBSelectArea(_cAlias)     
+(_cAlias)->(DBGoTop())
 
 _oBrowse := TCBrowse():New( 35,01,_aPosObj1[1,3] + 7,_aPosObj1[1,4]-50,,;
 	                     ,{20,20,02,09,02,02,10,06,04,54,08,08,08,17,17},;
@@ -176,15 +172,15 @@ For x:=1 to Len(_aStruct)
 			
 		If _aStruct[x,1] == _cAlias + "_STATUS" 
 
-			_oBrowse:AddColumn(TCColumn():New("",{|| IIF(&(_cAlias+'->' +_cAlias + "_STATUS") == Space(2),_oNO,_oOK)},,,,"CENTER",,.T.,.F.,,,,.F.,))  
+			_oBrowse:AddColumn(TCColumn():New("",{|| IIf(&(_cAlias+'->' +_cAlias + "_STATUS") == Space(2),_oNO,_oOK)},,,,"CENTER",,.T.,.F.,,,,.F.,))  
 
 		ElseIf _aStruct[x,1] == _cAlias + "_LEGEND"
 
-		   	_oBrowse:AddColumn(TCColumn():New("",{|| IIF(&(_cAlias + '->' +_cAlias + "_BLOQ") == "S",_oBloqueado,IIF(&(_cAlias + '->' +_cAlias + "_OBSOL")="S",_oObsoleto,_oNOrmal))},,,,"CENTER",,.T.,.F.,,,,.F.,))  
+		   	_oBrowse:AddColumn(TCColumn():New("",{|| IIf(&(_cAlias + '->' +_cAlias + "_BLOQ") == "S",_oBloqueado,IIf(&(_cAlias + '->' +_cAlias + "_OBSOL")="S",_oObsoleto,_oNOrmal))},,,,"CENTER",,.T.,.F.,,,,.F.,))  
 
 		Else
 
-			_oBrowse:AddColumn(TCColumn():New(OemToAnsi(_aTitulo[x,2]),&("{ || " + _cAlias + '->' + _aStruct[x,1]+"}"),_aTitulo[x,3],,,if(_aStruct[x,2]=="N","RIGHT","LEFT"),,.F.,.F.,,,,.F.,))      					
+			_oBrowse:AddColumn(TCColumn():New(OemToAnsi(_aTitulo[x,2]),&("{ || " + _cAlias + '->' + _aStruct[x,1]+"}"),_aTitulo[x,3],,,If(_aStruct[x,2]=="N","RIGHT","LEFT"),,.F.,.F.,,,,.F.,))      					
 
 		EndIf
 		
@@ -202,19 +198,19 @@ _oBrowse:bHeaderClick := { |_oBrowse, _nCol| _nColuna:= _nCol,MsgRun("FAVOR AGUA
 
 _oDlg1:lMaximized:=.T.
     
-ACTIVATE MSDIALOG _oDlg1 ON INIT (EnchoiceBar(_oDlg1,{|| IF(MEST008VL(_nQtdPrd),(_nOpca:= 1,_oDlg1:End()),) },;
+ACTIVATE MSDIALOG _oDlg1 ON INIT (EnchoiceBar(_oDlg1,{|| If(MEST008VL(_nQtdPrd),(_nOpca:= 1,_oDlg1:End()),) },;
                                                      {||                         _nOpca:= 2,_oDlg1:End()},,_aBotoes),;
                                        (_oPanel:Align:=CONTROL_ALIGN_TOP,_oBrowse:Align:=CONTROL_ALIGN_ALLCLIENT,_oBrowse:Refresh()))
                                               
-IF _nOpca = 1
+If _nOpca = 1
 
-   FWMSGRUN(,{|oProc| MEST008AL(oProc) },'Aguarde processamento...','Lendo dados...')   
+   FWMsgRun(,{|oProc| MEST008AL(oProc) },'Aguarde processamento...','Lendo dados...')   
    
-ENDIF
+EndIf
 //===============================================================
 // Fecha a area de uso do arquivo temporario no Protheus.          
 //===============================================================
-(_cAlias)->(DbCloseArea())
+(_cAlias)->(DBCloseArea())
 	
 End Transaction
 
@@ -239,19 +235,19 @@ _aTitulo  := {}
 // Criando estrutura da tabela temporaria das unidades                 
 //==================================================================================
    
-AAdd(_aStruct,{_cTab+"_STATUS"  ,"C",02,1,1   })  
-AAdd(_aStruct,{_cTab+"_LEGEND"  ,"C",02,1,1   })  
-AAdd(_aStruct,{_cTab+"_TIPO"    ,"C",02,1,1   })
-AAdd(_aStruct,{_cTab+"_GRUPO"   ,"C",04,1,1   })
-AAdd(_aStruct,{_cTab+"_PRIMOV"  ,"D",08,1,1   })
-AAdd(_aStruct,{_cTab+"_DETPRI"  ,"C",20,1,1   })
-AAdd(_aStruct,{_cTab+"_ULMOV"   ,"D",08,1,1   })
-AAdd(_aStruct,{_cTab+"_DETUL"   ,"C",20,1,1   })
-AAdd(_aStruct,{_cTab+"_CODIGO"  ,"C",20,1,1   })
-AAdd(_aStruct,{_cTab+"_DESCRI"  ,"C",60,1,1   })
-AAdd(_aStruct,{_cTab+"_BLOQ"    ,"C",01,1,0   })
-AAdd(_aStruct,{_cTab+"_OBSOL"   ,"C",01,1,0   })
-Aadd(_aStruct,{_cTab+"_SEQCAL"  ,"C",14,1,0   })
+aAdd(_aStruct,{_cTab+"_STATUS"  ,"C",02,1,1   })  
+aAdd(_aStruct,{_cTab+"_LEGEND"  ,"C",02,1,1   })  
+aAdd(_aStruct,{_cTab+"_TIPO"    ,"C",02,1,1   })
+aAdd(_aStruct,{_cTab+"_GRUPO"   ,"C",04,1,1   })
+aAdd(_aStruct,{_cTab+"_PRIMOV"  ,"D",08,1,1   })
+aAdd(_aStruct,{_cTab+"_DETPRI"  ,"C",20,1,1   })
+aAdd(_aStruct,{_cTab+"_ULMOV"   ,"D",08,1,1   })
+aAdd(_aStruct,{_cTab+"_DETUL"   ,"C",20,1,1   })
+aAdd(_aStruct,{_cTab+"_CODIGO"  ,"C",20,1,1   })
+aAdd(_aStruct,{_cTab+"_DESCRI"  ,"C",60,1,1   })
+aAdd(_aStruct,{_cTab+"_BLOQ"    ,"C",01,1,0   })
+aAdd(_aStruct,{_cTab+"_OBSOL"   ,"C",01,1,0   })
+aAdd(_aStruct,{_cTab+"_SEQCAL"  ,"C",14,1,0   })
 
 _aStructExcel := Aclone(_aStruct)             
 
@@ -259,23 +255,23 @@ _aStructExcel := Aclone(_aStruct)
 // Armazena no array aCampos o nome, descricao dos campos e picture  
 //==================================================================================
 
-AAdd(_aTitulo,{_cTab+"_STATUS"  ,"  "                   ," "                          	,1})  
-AAdd(_aTitulo,{_cTab+"_LEGEND"  ,"  "                   ," "                          	,2})  
-AAdd(_aTitulo,{_cTab+"_TIPO"   ,"TIPO"                  ,PesqPict("SB1","B1_TIPO") 		,3})  
-AAdd(_aTitulo,{_cTab+"_GRUPO"     ,"GRUPO >>"            ,PesqPict("SB1","B1_GRUPO")  	,4})
-AAdd(_aTitulo,{_cTab+"_PRIMOV"  ,"PRI MOVIM"              ,PesqPict("SD3","D3_EMISSAO")	,5})
-AAdd(_aTitulo,{_cTab+"_DETPRI"  ,"DOC ORI"              ,"@!"	,6})
-AAdd(_aTitulo,{_cTab+"_ULMOV"  ,"ULT MOVIM"              ,PesqPict("SD3","D3_EMISSAO") 	,7})
-AAdd(_aTitulo,{_cTab+"_DETUL"  ,"DOC ORI"              ,"@!"	,8})
-AAdd(_aTitulo,{_cTab+"_CODIGO"    ,"CODIGO"                 ,PesqPict("SB1","B1_COD")  	,9})
-AAdd(_aTitulo,{_cTab+"_DESCRI"  ,"DESCRICAO"             ,PesqPict("SB1","B1_DESC") 	,10})
+aAdd(_aTitulo,{_cTab+"_STATUS"  ,"  "                   ," "                          	,1})  
+aAdd(_aTitulo,{_cTab+"_LEGEND"  ,"  "                   ," "                          	,2})  
+aAdd(_aTitulo,{_cTab+"_TIPO"   ,"TIPO"                  ,PesqPict("SB1","B1_TIPO") 		,3})  
+aAdd(_aTitulo,{_cTab+"_GRUPO"     ,"GRUPO >>"            ,PesqPict("SB1","B1_GRUPO")  	,4})
+aAdd(_aTitulo,{_cTab+"_PRIMOV"  ,"PRI MOVIM"              ,PesqPict("SD3","D3_EMISSAO")	,5})
+aAdd(_aTitulo,{_cTab+"_DETPRI"  ,"DOC ORI"              ,"@!"	,6})
+aAdd(_aTitulo,{_cTab+"_ULMOV"  ,"ULT MOVIM"              ,PesqPict("SD3","D3_EMISSAO") 	,7})
+aAdd(_aTitulo,{_cTab+"_DETUL"  ,"DOC ORI"              ,"@!"	,8})
+aAdd(_aTitulo,{_cTab+"_CODIGO"    ,"CODIGO"                 ,PesqPict("SB1","B1_COD")  	,9})
+aAdd(_aTitulo,{_cTab+"_DESCRI"  ,"DESCRICAO"             ,PesqPict("SB1","B1_DESC") 	,10})
 
 
 //===============================================================
 // Verifica se ja existe um arquivo com mesmo nome, se sim deleta. 
 //===============================================================
 If Select(_cTab) <> 0
-	(_cTab)->(dbCloseArea())
+	(_cTab)->(DBCloseArea())
 EndIf
 
 _otemp := FWTemporaryTable():New( _cTab, _aStruct)
@@ -303,33 +299,33 @@ Local _cFiltro  := "%"
 Local _cFilD3   := "%"
 Local _cFilD2   := "%"
 Local _cFilD1   := "%"
-Local _culmov   := stod("20010101")
-Local _cprimov  := stod("20490101")
+Local _culmov   := SToD("20010101")
+Local _cprimov  := SToD("20490101")
 Local _culdoc	  := ""
 Local _cpridoc  := ""
 Local _ctipul	  := ""
 Local _ctipri	  := ""
-Local _cfilial := alltrim(xfilial("SBZ"))
+Local _cfilial := AllTrim(xFilial("SBZ"))
 Local _cSeqMov  := ""
       
 //Filtros
 
 //filtro de filial
-_cfilial:= alltrim(xfilial("SBZ"))
-_cFiltro+= " AND B1_FILIAL = '" + XFILIAL("SB1") + "'"
-_cFilD1 += " AND D1_FILIAL = '" + XFILIAL("SD1") + "'"
-_cFilD2 += " AND D2_FILIAL = '" + XFILIAL("SD3") + "'"
-_cfild3 += " AND D3_FILIAL = '" + XFILIAL("SD3") + "'"
+_cfilial:= AllTrim(xFilial("SBZ"))
+_cFiltro+= " AND B1_FILIAL = '" + xFilial("SB1") + "'"
+_cFilD1 += " AND D1_FILIAL = '" + xFilial("SD1") + "'"
+_cFilD2 += " AND D2_FILIAL = '" + xFilial("SD3") + "'"
+_cfild3 += " AND D3_FILIAL = '" + xFilial("SD3") + "'"
 
 
 //Tipo de produto
 If !Empty(MV_PAR04)
-	_cFiltro  += " AND B1.B1_TIPO IN " + FormatIn(ALLTRIM(MV_PAR04),";")
+	_cFiltro  += " AND B1.B1_TIPO IN " + FormatIn(AllTrim(MV_PAR04),";")
 EndIf   
 		
 //Grupo de produto
 If !Empty(MV_PAR03)
-	_cFiltro  += " AND B1.B1_GRUPO IN " + FormatIn(ALLTRIM(MV_PAR03),";")
+	_cFiltro  += " AND B1.B1_GRUPO IN " + FormatIn(AllTrim(MV_PAR03),";")
 EndIf      
 		
 _cFiltro      += "%"
@@ -337,27 +333,27 @@ _cFiltro      += "%"
 //filtros da D3
 If !Empty(MV_PAR06)
 	
-	_cfild3 += " AND NOT (D3_TM IN " + FormatIn(ALLTRIM(MV_PAR06),";") + ")" 	
+	_cfild3 += " AND NOT (D3_TM IN " + FormatIn(AllTrim(MV_PAR06),";") + ")" 	
 
-Endif
+EndIf
 
 //filtros duplos da D3
 If !Empty(MV_PAR07)
 	
-	_cfild3 += " AND NOT ( SUBSTR(D3_DOC,1," + ALLTRIM(STR(LEN(ALLTRIM(MV_PAR07)))) + ") = '" + ALLTRIM(MV_PAR07) + "')"  	
+	_cfild3 += " AND NOT ( SubStr(D3_DOC,1," + AllTrim(Str(Len(AllTrim(MV_PAR07)))) + ") = '" + AllTrim(MV_PAR07) + "')"  	
 
-Endif
+EndIf
 //estorno e movimento de estoque do D3
 _cFilD3      += " AND D3_ESTORNO <> 'S'"
 _cFilD3      += "%"
 
 //estorno e movimento de estoque do D1
-_cFilD1   	+= " AND (SELECT F4_ESTOQUE FROM " + retsqlname("SF4") + " F4 WHERE F4.F4_FILIAL = '" + Xfilial("SF4") + "'"
+_cFilD1   	+= " AND (SELECT F4_ESTOQUE FROM " + retsqlname("SF4") + " F4 WHERE F4.F4_FILIAL = '" + xFilial("SF4") + "'"
 _cFilD1	    += " AND F4.D_E_L_E_T_ = ' ' AND F4.F4_CODIGO = D1.D1_TES AND ROWNUM = 1) = 'S'"
 _cFilD1   	+= "%"
 
 //estorno e movimento de estoque do D2
-_cFilD2      += " AND (SELECT F4_ESTOQUE FROM " + retsqlname("SF4") + " F4 WHERE F4.F4_FILIAL = '" + Xfilial("SF4") + "'"
+_cFilD2      += " AND (SELECT F4_ESTOQUE FROM " + retsqlname("SF4") + " F4 WHERE F4.F4_FILIAL = '" + xFilial("SF4") + "'"
 _cFilD2      += " AND F4.D_E_L_E_T_ = ' ' AND F4.F4_CODIGO = D2.D2_TES AND ROWNUM = 1) = 'S'"
 _cFilD2      += "%"
 
@@ -366,7 +362,7 @@ _cFilD2      += "%"
 //===============================================================
 If Select(_cAliasSB1) <> 0
 	
-	(_cAliasSB1)->(dbCloseArea())
+	(_cAliasSB1)->(DBCloseArea())
 
 EndIf
 
@@ -385,32 +381,32 @@ If MV_PAR08 == 3 //só obsoletos
 			   	SELECT 
 
 				 	B1.B1_DESC,B1.B1_COD,B1.B1_GRUPO,B1.B1_TIPO,B1.B1_MSBLQL,
-				 	(SELECT MAX(D2.D2_EMISSAO) FROM %table:SD2% D2 WHERE D2.D2_COD = B1.B1_COD AND D2.D_E_L_E_T_ = ' ' %exp:_cfild2%) ULD2,
-				 	(SELECT MAX(D1.D1_DTDIGIT) FROM %table:SD1% D1 WHERE D1.D1_COD = B1.B1_COD AND D1.D_E_L_E_T_ = ' ' %exp:_cfild1%) ULD1,
-				 	(SELECT MAX(D3.D3_EMISSAO) FROM %table:SD3% D3 WHERE D3.D3_COD = B1.B1_COD AND D3.D_E_L_E_T_ = ' ' %exp:_cfild3%) ULD3,
+				 	(SELECT MAX(D2.D2_EMISSAO) FROM %Table:SD2% D2 WHERE D2.D2_COD = B1.B1_COD AND D2.D_E_L_E_T_ = ' ' %exp:_cfild2%) ULD2,
+				 	(SELECT MAX(D1.D1_DTDIGIT) FROM %Table:SD1% D1 WHERE D1.D1_COD = B1.B1_COD AND D1.D_E_L_E_T_ = ' ' %exp:_cfild1%) ULD1,
+				 	(SELECT MAX(D3.D3_EMISSAO) FROM %Table:SD3% D3 WHERE D3.D3_COD = B1.B1_COD AND D3.D_E_L_E_T_ = ' ' %exp:_cfild3%) ULD3,
 				 	'2001010' PRI2,
 				 	'2001010' PRI1,
 				 	'2001010' PRI3,
 	 			 	
-	 			 	(SELECT D2.R_E_C_N_O_ FROM %table:SD2% D2 WHERE ROWNUM = 1
-	 			 	 AND D2.D2_EMISSAO =  (SELECT MAX(D2.D2_EMISSAO) FROM %table:SD2% D2 WHERE D2.D2_COD = B1.B1_COD AND D2.D_E_L_E_T_ = ' ' %exp:_cfild2%)
+	 			 	(SELECT D2.R_E_C_N_O_ FROM %Table:SD2% D2 WHERE ROWNUM = 1
+	 			 	 AND D2.D2_EMISSAO =  (SELECT MAX(D2.D2_EMISSAO) FROM %Table:SD2% D2 WHERE D2.D2_COD = B1.B1_COD AND D2.D_E_L_E_T_ = ' ' %exp:_cfild2%)
 	 			 	 AND D2.D2_COD = B1.B1_COD AND D2.D_E_L_E_T_ = ' ' %exp:_cfild2%) REGD2MAX, 
 				 	
-				 	(SELECT D1.R_E_C_N_O_ FROM %table:SD1% D1 WHERE ROWNUM = 1
-				 	AND D1.D1_DTDIGIT = (SELECT MAX(D1.D1_DTDIGIT) FROM %table:SD1% D1 WHERE D1.D1_COD = B1.B1_COD AND D1.D_E_L_E_T_ = ' ' %exp:_cfild1%)
+				 	(SELECT D1.R_E_C_N_O_ FROM %Table:SD1% D1 WHERE ROWNUM = 1
+				 	AND D1.D1_DTDIGIT = (SELECT MAX(D1.D1_DTDIGIT) FROM %Table:SD1% D1 WHERE D1.D1_COD = B1.B1_COD AND D1.D_E_L_E_T_ = ' ' %exp:_cfild1%)
 				 	AND D1.D1_COD = B1.B1_COD AND D1.D_E_L_E_T_ = ' ' %exp:_cfild1%) REGD1MAX,
 				 	
-				 	(SELECT D3.R_E_C_N_O_ FROM %table:SD3% D3 WHERE ROWNUM = 1
-				 	AND D3.D3_EMISSAO = (SELECT MAX(D3.D3_EMISSAO) FROM %table:SD3% D3 WHERE D3.D3_COD = B1.B1_COD AND D3.D_E_L_E_T_ = ' ' %exp:_cfild3%)  
+				 	(SELECT D3.R_E_C_N_O_ FROM %Table:SD3% D3 WHERE ROWNUM = 1
+				 	AND D3.D3_EMISSAO = (SELECT MAX(D3.D3_EMISSAO) FROM %Table:SD3% D3 WHERE D3.D3_COD = B1.B1_COD AND D3.D_E_L_E_T_ = ' ' %exp:_cfild3%)  
 				 	AND D3.D3_COD = B1.B1_COD AND D3.D_E_L_E_T_ = ' ' %exp:_cfild3%) REGD3MAX,
 				 	
 				 	'N/D' DOCD2MIN,
 				 	'N/D' DOCD1MIN,
 				 	'N/D' DOCD3MIN,
-					(SELECT BZ_I_OBSOL FROM %table:SBZ% BZ WHERE BZ.BZ_FILIAL = %exp:_cfilial% AND  BZ.BZ_COD = B1.B1_COD AND BZ.D_E_L_E_T_ = ' ' AND ROWNUM = 1 ) BZOBSOL 
+					(SELECT BZ_I_OBSOL FROM %Table:SBZ% BZ WHERE BZ.BZ_FILIAL = %exp:_cfilial% AND  BZ.BZ_COD = B1.B1_COD AND BZ.D_E_L_E_T_ = ' ' AND ROWNUM = 1 ) BZOBSOL 
 	
 				FROM 
-					%table:SB1% B1 
+					%Table:SB1% B1 
 				WHERE 
 			        B1.D_E_L_E_T_ = ' '
 			        %exp:_cFiltro%			 
@@ -423,55 +419,55 @@ Else //procura normal
 			   	SELECT 
 
 				 	B1.B1_DESC,B1.B1_COD,B1.B1_GRUPO,B1.B1_TIPO,B1.B1_MSBLQL,
-				 	(SELECT MAX(D2.D2_EMISSAO) FROM %table:SD2% D2 WHERE D2.D2_COD = B1.B1_COD AND D2.D_E_L_E_T_ = ' ' %exp:_cfild2%) ULD2,
-				 	(SELECT MAX(D1.D1_DTDIGIT) FROM %table:SD1% D1 WHERE D1.D1_COD = B1.B1_COD AND D1.D_E_L_E_T_ = ' ' %exp:_cfild1%) ULD1,
-				 	(SELECT MAX(D3.D3_EMISSAO) FROM %table:SD3% D3 WHERE D3.D3_COD = B1.B1_COD AND D3.D_E_L_E_T_ = ' ' %exp:_cfild3%) ULD3,
-				 	(SELECT MIN(D2.D2_EMISSAO) FROM %table:SD2% D2 WHERE D2.D2_COD = B1.B1_COD AND D2.D_E_L_E_T_ = ' ' %exp:_cfild2%) PRI2,
-				 	(SELECT MIN(D1.D1_DTDIGIT) FROM %table:SD1% D1 WHERE D1.D1_COD = B1.B1_COD AND D1.D_E_L_E_T_ = ' ' %exp:_cfild1%) PRI1,
-				 	(SELECT MIN(D3.D3_EMISSAO) FROM %table:SD3% D3 WHERE D3.D3_COD = B1.B1_COD AND D3.D_E_L_E_T_ = ' ' %exp:_cfild3%) PRI3,
+				 	(SELECT MAX(D2.D2_EMISSAO) FROM %Table:SD2% D2 WHERE D2.D2_COD = B1.B1_COD AND D2.D_E_L_E_T_ = ' ' %exp:_cfild2%) ULD2,
+				 	(SELECT MAX(D1.D1_DTDIGIT) FROM %Table:SD1% D1 WHERE D1.D1_COD = B1.B1_COD AND D1.D_E_L_E_T_ = ' ' %exp:_cfild1%) ULD1,
+				 	(SELECT MAX(D3.D3_EMISSAO) FROM %Table:SD3% D3 WHERE D3.D3_COD = B1.B1_COD AND D3.D_E_L_E_T_ = ' ' %exp:_cfild3%) ULD3,
+				 	(SELECT MIN(D2.D2_EMISSAO) FROM %Table:SD2% D2 WHERE D2.D2_COD = B1.B1_COD AND D2.D_E_L_E_T_ = ' ' %exp:_cfild2%) PRI2,
+				 	(SELECT MIN(D1.D1_DTDIGIT) FROM %Table:SD1% D1 WHERE D1.D1_COD = B1.B1_COD AND D1.D_E_L_E_T_ = ' ' %exp:_cfild1%) PRI1,
+				 	(SELECT MIN(D3.D3_EMISSAO) FROM %Table:SD3% D3 WHERE D3.D3_COD = B1.B1_COD AND D3.D_E_L_E_T_ = ' ' %exp:_cfild3%) PRI3,
 	 			 	
-	 			 	(SELECT D2.R_E_C_N_O_ FROM %table:SD2% D2 WHERE ROWNUM = 1
-	 			 	AND D2.D2_EMISSAO = (SELECT MAX(D2.D2_EMISSAO) FROM %table:SD2% D2 WHERE D2.D2_COD = B1.B1_COD AND D2.D_E_L_E_T_ = ' ' %exp:_cfild2%)  
+	 			 	(SELECT D2.R_E_C_N_O_ FROM %Table:SD2% D2 WHERE ROWNUM = 1
+	 			 	AND D2.D2_EMISSAO = (SELECT MAX(D2.D2_EMISSAO) FROM %Table:SD2% D2 WHERE D2.D2_COD = B1.B1_COD AND D2.D_E_L_E_T_ = ' ' %exp:_cfild2%)  
 	 			 	AND D2.D2_COD = B1.B1_COD AND D2.D_E_L_E_T_ = ' ' %exp:_cfild2%) REGD2MAX,
 	 			 	
-				 	(SELECT D1.R_E_C_N_O_ FROM %table:SD1% D1 WHERE ROWNUM = 1
-				 	 AND D1.D1_DTDIGIT = (SELECT MAX(D1.D1_DTDIGIT) FROM %table:SD1% D1 WHERE D1.D1_COD = B1.B1_COD AND D1.D_E_L_E_T_ = ' ' %exp:_cfild1%)
+				 	(SELECT D1.R_E_C_N_O_ FROM %Table:SD1% D1 WHERE ROWNUM = 1
+				 	 AND D1.D1_DTDIGIT = (SELECT MAX(D1.D1_DTDIGIT) FROM %Table:SD1% D1 WHERE D1.D1_COD = B1.B1_COD AND D1.D_E_L_E_T_ = ' ' %exp:_cfild1%)
 				 	 AND D1.D1_COD = B1.B1_COD AND D1.D_E_L_E_T_ = ' ' %exp:_cfild1%) REGD1MAX,
 				 	 
-				 	(SELECT D3.R_E_C_N_O_ FROM %table:SD3% D3 WHERE ROWNUM = 1
-				 	 AND D3.D3_EMISSAO = (SELECT MAX(D3.D3_EMISSAO) FROM %table:SD3% D3 WHERE D3.D3_COD = B1.B1_COD AND D3.D_E_L_E_T_ = ' ' %exp:_cfild3%)
+				 	(SELECT D3.R_E_C_N_O_ FROM %Table:SD3% D3 WHERE ROWNUM = 1
+				 	 AND D3.D3_EMISSAO = (SELECT MAX(D3.D3_EMISSAO) FROM %Table:SD3% D3 WHERE D3.D3_COD = B1.B1_COD AND D3.D_E_L_E_T_ = ' ' %exp:_cfild3%)
 				 	 AND D3.D3_COD = B1.B1_COD AND D3.D_E_L_E_T_ = ' ' %exp:_cfild3%) REGD3MAX,
 				 	 
-				 	(SELECT D2.R_E_C_N_O_ FROM %table:SD2% D2 WHERE ROWNUM = 1
-				 	 AND D2.D2_EMISSAO = (SELECT MIN(D2.D2_EMISSAO) FROM %table:SD2% D2 WHERE D2.D2_COD = B1.B1_COD AND D2.D_E_L_E_T_ = ' ' %exp:_cfild2%) 
+				 	(SELECT D2.R_E_C_N_O_ FROM %Table:SD2% D2 WHERE ROWNUM = 1
+				 	 AND D2.D2_EMISSAO = (SELECT MIN(D2.D2_EMISSAO) FROM %Table:SD2% D2 WHERE D2.D2_COD = B1.B1_COD AND D2.D_E_L_E_T_ = ' ' %exp:_cfild2%) 
 				 	 AND D2.D2_COD = B1.B1_COD AND D2.D_E_L_E_T_ = ' ' %exp:_cfild2%) REGD2MIN,
 				 	
-				 	(SELECT D1.R_E_C_N_O_ FROM %table:SD1% D1 WHERE ROWNUM = 1
-				 	 AND D1.D1_DTDIGIT = (SELECT MIN(D1.D1_DTDIGIT) FROM %table:SD1% D1 WHERE D1.D1_COD = B1.B1_COD AND D1.D_E_L_E_T_ = ' ' %exp:_cfild1%)  
+				 	(SELECT D1.R_E_C_N_O_ FROM %Table:SD1% D1 WHERE ROWNUM = 1
+				 	 AND D1.D1_DTDIGIT = (SELECT MIN(D1.D1_DTDIGIT) FROM %Table:SD1% D1 WHERE D1.D1_COD = B1.B1_COD AND D1.D_E_L_E_T_ = ' ' %exp:_cfild1%)  
 				 	 AND D1.D1_COD = B1.B1_COD AND D1.D_E_L_E_T_ = ' ' %exp:_cfild1%) REGD1MIN,
 				 	 
-				 	(SELECT D3.R_E_C_N_O_ FROM %table:SD3% D3 WHERE ROWNUM = 1
-				 	 AND D3.D3_EMISSAO = (SELECT MIN(D3.D3_EMISSAO) FROM %table:SD3% D3 WHERE D3.D3_COD = B1.B1_COD AND D3.D_E_L_E_T_ = ' ' %exp:_cfild3%)  
+				 	(SELECT D3.R_E_C_N_O_ FROM %Table:SD3% D3 WHERE ROWNUM = 1
+				 	 AND D3.D3_EMISSAO = (SELECT MIN(D3.D3_EMISSAO) FROM %Table:SD3% D3 WHERE D3.D3_COD = B1.B1_COD AND D3.D_E_L_E_T_ = ' ' %exp:_cfild3%)  
 				 	 AND D3.D3_COD = B1.B1_COD AND D3.D_E_L_E_T_ = ' ' %exp:_cfild3%) REGD3MIN,
 				 	 
-					(SELECT BZ_I_OBSOL FROM %table:SBZ% BZ WHERE BZ.BZ_FILIAL = %exp:_cfilial% AND  BZ.BZ_COD = B1.B1_COD AND BZ.D_E_L_E_T_ = ' ' 
+					(SELECT BZ_I_OBSOL FROM %Table:SBZ% BZ WHERE BZ.BZ_FILIAL = %exp:_cfilial% AND  BZ.BZ_COD = B1.B1_COD AND BZ.D_E_L_E_T_ = ' ' 
 						AND ROWNUM = 1 ) BZOBSOL 
 	
 				FROM 
-					%table:SB1% B1 
+					%Table:SB1% B1 
 				WHERE 
 			        B1.D_E_L_E_T_ = ' '
 			        %exp:_cFiltro%			 
 				ORDER BY B1.B1_COD
 			EndSql
 	
-Endif
+EndIf
 
-(_cAliasSB1)->(DbGoTop())   
+(_cAliasSB1)->(DBGoTop())   
 
-If (_cAliasSB1)->(EOF())
+If (_cAliasSB1)->(Eof())
 
-   U_ITMSG("Não encontrou resgistros",'Atenção!',"SOLUCAO",1) // CANCEL
+   U_ITMsg("Não encontrou resgistros",'Atenção!',"SOLUCAO",1) // Cancel
     
 	//1 - Indica que nao foram encontrados dados 0 - Indica que foram encontrados dados
 	Return .F.
@@ -480,21 +476,21 @@ EndIf
 
 _nConta:=0
 COUNT TO _nConta
-_cTot:=ALLTRIM(STR(_nConta))
-_nTam:=LEN(_cTot)+1
+_cTot:=AllTrim(Str(_nConta))
+_nTam:=Len(_cTot)+1
 _nConta:=0
 
 MV_PAR01:=MV_PAR01
 MV_PAR02:=MV_PAR02
 
-(_cAliasSB1)->(DbGoTop())   
+(_cAliasSB1)->(DBGoTop())   
 
 _cAliasSB2	:= 	GetNextAlias()
 
-DO While (_cAliasSB1)->(!EOF())
+While (_cAliasSB1)->(!Eof())
 
    _nConta++
-   oProc:cCaption := ("2/2-Lendo Dados: "+ALLTRIM(STR(_nConta,_nTam)) +" de "+ _cTot)
+   oProc:cCaption := ("2/2-Lendo Dados: "+AllTrim(Str(_nConta,_nTam)) +" de "+ _cTot)
    ProcessMessages()
 
 	_culmov := '20010101'
@@ -502,84 +498,84 @@ DO While (_cAliasSB1)->(!EOF())
 
 	//Define ultimo movimento e se grava
 	If (_cAliasSB1)->ULD2 >  _culmov
-       SD2->(DbGoTo((_cAliasSB1)->REGD2MAX))
+       SD2->(DBGoTo((_cAliasSB1)->REGD2MAX))
        
        _cSeqMov   := SD2->D2_SEQCALC 
 	   _culmov    := (_cAliasSB1)->ULD2
 	   _culdoc    := SD2->D2_DOC//(_cAliasSB1)->DOCD2MAX // _culdoc := (_cAliasSB1)->DOCD2MAX
 	   _ctipul    := "SD2"
 	
-	Endif
+	EndIf
 
 	If (_cAliasSB1)->ULD1 >  _culmov
-       SD1->(DbGoTo((_cAliasSB1)->REGD1MAX))                                      
+       SD1->(DBGoTo((_cAliasSB1)->REGD1MAX))                                      
        
        _cSeqMov   := SD1->D1_SEQCALC
 	   _culmov    := (_cAliasSB1)->ULD1
 	   _culdoc    := SD1->D1_DOC  //(_cAliasSB1)->DOCD1MAX // _culdoc := (_cAliasSB1)->DOCD1MAX
 	   _ctipul    := "SD1"
 	
-	Endif
+	EndIf
 
 	If (_cAliasSB1)->ULD3 >  _culmov
-       SD3->(DbGoTo((_cAliasSB1)->REGD3MAX))
+       SD3->(DBGoTo((_cAliasSB1)->REGD3MAX))
        
        _cSeqMov   := SD3->D3_SEQCALC
 	   _culmov    := (_cAliasSB1)->ULD3
 	   _culdoc    := SD3->D3_DOC //(_cAliasSB1)->DOCD3MAX // _culdoc := (_cAliasSB1)->DOCD3MAX
 	   _ctipul    := "SD3"
 	
-	Endif
+	EndIf
 	
 	//Define primeiro movimento e se grava
-	If MV_PAR08 <> 3 .AND. (_cAliasSB1)->PRI2 <  _cprimov
-       SD2->(DbGoTo((_cAliasSB1)->REGD2MIN))
+	If MV_PAR08 <> 3 .And. (_cAliasSB1)->PRI2 <  _cprimov
+       SD2->(DBGoTo((_cAliasSB1)->REGD2MIN))
        
        _cSeqMov    := SD2->D2_SEQCALC
 	   _cprimov    := (_cAliasSB1)->PRI2
 	   _cpridoc    := SD2->D2_DOC // (_cAliasSB1)->DOCD2MIN // _cpridoc := (_cAliasSB1)->DOCD2MIN
 	   _ctipri     := "SD2"
 	
-	Endif
+	EndIf
 
-	If MV_PAR08 <> 3 .AND. (_cAliasSB1)->PRI1 <  _cprimov
-       SD1->(DbGoTo((_cAliasSB1)->REGD1MIN))
+	If MV_PAR08 <> 3 .And. (_cAliasSB1)->PRI1 <  _cprimov
+       SD1->(DBGoTo((_cAliasSB1)->REGD1MIN))
        
        _cSeqMov    := SD1->D1_SEQCALC
 	   _cprimov    := (_cAliasSB1)->PRI1
 	   _cpridoc    := SD1->D1_DOC  // (_cAliasSB1)->DOCD1MIN // _cpridoc := (_cAliasSB1)->DOCD1MIN
 	   _ctipri     := "SD1"
 	
-	Endif
+	EndIf
 
-	If MV_PAR08 <> 3 .AND. (_cAliasSB1)->PRI3 <  _cprimov
-       SD3->(DbGoTo((_cAliasSB1)->REGD3MIN))
+	If MV_PAR08 <> 3 .And. (_cAliasSB1)->PRI3 <  _cprimov
+       SD3->(DBGoTo((_cAliasSB1)->REGD3MIN))
        
        _cSeqMov    := SD3->D3_SEQCALC 
 	   _cprimov    := (_cAliasSB1)->PRI3
 	   _cpridoc    := SD3->D3_DOC  //(_cAliasSB1)->DOCD3MIN // _cpridoc := (_cAliasSB1)->DOCD3MIN
 	   _ctipri     := "SD3"
 	
-	Endif
+	EndIf
 	
 	//Se não tem data de primeiro movimento apresenta 01/01/2001 para o usuário saber que não tem 
 	If _cprimov == '20490101'
 	
 		_cprimov := "20010101"
 		
-	Endif
+	EndIf
 
 	//só inclui o que tem ultimo movimento menor que o indicado no primeiro parametro e primeiro movimento maior que o indicado no primeiro parametro
-	if stod(_culmov) <= MV_PAR02 .AND. ( stod(_cprimov) >= MV_PAR01 .or. MV_PAR08 = 3)
+	If SToD(_culmov) <= MV_PAR02 .And. ( SToD(_cprimov) >= MV_PAR01 .Or. MV_PAR08 = 3)
 	
 
 		//filtra bloqueados e obsoletos de acordo com MV_PAR08
-		IF MV_PAR08 = 1 .OR.;//TODOS
-		  (MV_PAR08 = 2 .AND. (_cAliasSB1)->B1_MSBLQL == 'S') .OR. ;                                     //BLOQUEADOS
-		  (MV_PAR08 = 3 .AND. (_cAliasSB1)->BZOBSOL   == 'S' .AND. (_cAliasSB1)->B1_MSBLQL != 'S') .OR. ;//OBSOLETOS
-		  (MV_PAR08 = 4 .AND. (_cAliasSB1)->BZOBSOL   != 'S' .AND. (_cAliasSB1)->B1_MSBLQL != 'S')       //LIBERADOS
+		If MV_PAR08 = 1 .OR.;//TODOS
+		  (MV_PAR08 = 2 .And. (_cAliasSB1)->B1_MSBLQL == 'S') .Or. ;                                     //BLOQUEADOS
+		  (MV_PAR08 = 3 .And. (_cAliasSB1)->BZOBSOL   == 'S' .And. (_cAliasSB1)->B1_MSBLQL != 'S') .Or. ;//OBSOLETOS
+		  (MV_PAR08 = 4 .And. (_cAliasSB1)->BZOBSOL   != 'S' .And. (_cAliasSB1)->B1_MSBLQL != 'S')       //LIBERADOS
 		
-			DbSelectArea(_cTab)	                     	
+			DBSelectArea(_cTab)	                     	
 			RecLock(_cTab,.T.)    
 		
 		
@@ -587,9 +583,9 @@ DO While (_cAliasSB1)->(!EOF())
 				&(_cTab+'->'+_cTab+'_LEGEND') 		:= Space(2) 
 				&(_cTab+'->'+_cTab+'_TIPO') 		:= (_cAliasSB1)->B1_TIPO
 				&(_cTab+'->'+_cTab+'_GRUPO'   ) 	:= (_cAliasSB1)->B1_GRUPO
-				&(_cTab+'->'+_cTab+'_PRIMOV') 		:= stod(_cprimov)
+				&(_cTab+'->'+_cTab+'_PRIMOV') 		:= SToD(_cprimov)
 				&(_cTab+'->'+_cTab+'_DETPRI') 		:= _cpridoc + " - " + _ctipri
-				&(_cTab+'->'+_cTab+'_ULMOV') 		:= stod(_culmov)
+				&(_cTab+'->'+_cTab+'_ULMOV') 		:= SToD(_culmov)
 				&(_cTab+'->'+_cTab+'_DETUL') 		:= _culdoc + " - " + _ctipul
 				&(_cTab+'->'+_cTab+'_CODIGO'  ) 	:= (_cAliasSB1)->B1_COD
 				&(_cTab+'->'+_cTab+'_DESCRI') 		:= (_cAliasSB1)->B1_DESC
@@ -597,17 +593,17 @@ DO While (_cAliasSB1)->(!EOF())
 				&(_cTab+'->'+_cTab+'_BLOQ') 		:= (_cAliasSB1)->B1_MSBLQL
                 &(_cTab+'->'+_cTab+'_SEQCAL')       := _cSeqMov
                 
-			(_cTab)->(MsUnlock())       
+			(_cTab)->(MSUnLock())       
 
-		Endif
+		EndIf
 
-	Endif		
+	EndIf		
 		         
-	(_cAliasSB1)->(DbSkip())            
+	(_cAliasSB1)->(DBSkip())            
 	
 EndDo
 
-_cAliasSB1->(DbCloseArea())
+_cAliasSB1->(DBCloseArea())
 
 U_ITLOGACS('MEST008')
 
@@ -634,7 +630,7 @@ If _cStatus == Space(2)
 		
 		_nQtdPrd++ 
 			     		
-	(_cTab)->(MsUnlock())  
+	(_cTab)->(MSUnLock())  
 		
 Else
 			
@@ -644,11 +640,11 @@ Else
 	
 		_nQtdPrd--  
 
-	(_cTab)->(MsUnlock())  
+	(_cTab)->(MSUnLock())  
 	
 EndIf      
 	
-_nQtdPrd:= Iif(_nQtdPrd<0,0,_nQtdPrd)
+_nQtdPrd:= IIf(_nQtdPrd<0,0,_nQtdPrd)
 
 _oQtda:Refresh()	
 	
@@ -669,13 +665,13 @@ Retorno-----------: Nenhum
 */
 Static Function MEST008S2(_cTab,_nColuna)
 
-Local _aArea:= GetArea()
+Local _aArea:= FWGetArea()
 		
 	  //Marca ou desmarca todos os titulos selecionados 	
       If _nColuna == 1    
       
-      		dbSelectArea(_cTab)
-      		(_cTab)->(dbGotop())
+      		DBSelectArea(_cTab)
+      		(_cTab)->(DBGoTop())
       		
       		While (_cTab)->(!Eof())   
       		                    
@@ -686,7 +682,7 @@ Local _aArea:= GetArea()
 						&(_cTab+'->'+_cTab+'_STATUS'):= 'XX'
 						_nQtdPrd++ 
 						
-						(_cTab)->(MsUnlock())  
+						(_cTab)->(MSUnLock())  
 					
 		        //Titulo selecionado
 				Else
@@ -695,20 +691,20 @@ Local _aArea:= GetArea()
 						&(_cTab+'->'+_cTab+'_STATUS'):= Space(2) 
 						_nQtdPrd--  
 	
-					(_cTab)->(MsUnlock())  
+					(_cTab)->(MSUnLock())  
 	
    				EndIf      
            
-      		(_cTab)->(dbSkip())
+      		(_cTab)->(DBSkip())
       		EndDo     
       		
-      		_nQtdPrd:= Iif(_nQtdPrd<0,0,_nQtdPrd)  
+      		_nQtdPrd:= IIf(_nQtdPrd<0,0,_nQtdPrd)  
    			_oQtda:Refresh()	
    						
-			restArea(_aArea) 
+			FWRestArea(_aArea) 
 			                 
 		      
-      Endif                  
+      EndIf                  
 	
 _oBrowse:DrawSelect()   
 _oBrowse:Refresh(.T.)      
@@ -727,14 +723,14 @@ Retorno-----------: Nenhum
 */
 Static Function MEST008V()
 
-Local _aArea:= GetArea()
+Local _aArea:= FWGetArea()
 Private cCadastro
 cCadastro 	:= OemToAnsi( "Visualizar" )
 
-DbSelectArea("SB1")
-SB1->(DbSetOrder(1))
+DBSelectArea("SB1")
+SB1->(DBSetOrder(1))
 
-If SB1->(dbSeek(  xFILIAL("SB1") + TE1->TE1_CODIGO ))
+If SB1->(DBSeek(  xFilial("SB1") + TE1->TE1_CODIGO ))
 
 	AxVisual( "SB1", SB1->( Recno() ), 2 )
 
@@ -745,7 +741,7 @@ If SB1->(dbSeek(  xFILIAL("SB1") + TE1->TE1_CODIGO ))
 
 EndIf
 
-RestArea( _aArea )        
+FWRestArea( _aArea )        
 
 Return
 
@@ -779,7 +775,7 @@ _nLinha:=0100
 	
 	EndIf
 	
-	_oPrint:Say (_nLinha + 50,(_nColInic + 2750),"DATA DE EMISSÃO: " + DtoC(DATE()),_oFont12b)
+	_oPrint:Say (_nLinha + 50,(_nColInic + 2750),"DATA DE EMISSÃO: " + DToC(DATE()),_oFont12b)
 	_nLinha+=(_nSaltoLinha * 3)           
 	                                                   
 	_oPrint:Say (_nLinha,_nColFinal / 2,cTitulo,_oFont16b,_nColFinal,,,2)
@@ -833,8 +829,8 @@ Static Function MEST008DD(_cTipo,_cGrupo,_cUlmov,_cCodigo,_cDescri,_cprimov)
                                                             
 _oPrint:Say (_nLinha + _nAjuAltLi1,_nColInic + 10   ,_cTipo                     ,_oFont12)
 _oPrint:Say (_nLinha + _nAjuAltLi1,_nColInic + 160  ,_cGrupo    		          ,_oFont12)
-_oPrint:Say (_nLinha + _nAjuAltLi1,_nColInic + 500  ,dtoc(_cprimov)               ,_oFont12)
-_oPrint:Say (_nLinha + _nAjuAltLi1,_nColInic + 700  ,dtoc(_cUlmov)               ,_oFont12)
+_oPrint:Say (_nLinha + _nAjuAltLi1,_nColInic + 500  ,DToC(_cprimov)               ,_oFont12)
+_oPrint:Say (_nLinha + _nAjuAltLi1,_nColInic + 700  ,DToC(_cUlmov)               ,_oFont12)
 _oPrint:Say (_nLinha + _nAjuAltLi1,_nColInic + 850  ,_cCodigo                     ,_oFont12)
 _oPrint:Say (_nLinha + _nAjuAltLi1,_nColInic + 1190  ,_cDescri	                   ,_oFont12)
 
@@ -919,7 +915,7 @@ Retorno-----------: Nenhum
 */                          
 Static Function MEST008IP(oProc)   
 
-Local _aArea        := GetArea() 
+Local _aArea        := FWGetArea() 
                   
 Private _oFont10
 Private _oFont10b
@@ -953,8 +949,8 @@ _oPrint:= TMSPrinter():New( "AJUSTA OBSOLETO SB1" )
 _oPrint:SetPaperSize(9)	// Seta para papel A4		
 _oPrint:SetLandscape() // Paisagem
 
-dbSelectArea("TE1")
-TE1->(dbGotop())    
+DBSelectArea("TE1")
+TE1->(DBGoTop())    
 
 //Imprime o cabecalho e cabecalho de dados da primeira pagina
 MEST008CA(0)     
@@ -962,14 +958,14 @@ MEST008CA(0)
 MEST008CD()
 
 _nConta:=TE1->(LASTREC())
-_cTot:=ALLTRIM(STR(_nConta))
-_nTam:=LEN(_cTot)+1
+_cTot:=AllTrim(Str(_nConta))
+_nTam:=Len(_cTot)+1
 _nConta:=0
 
-DO While TE1->(!Eof())
+While TE1->(!Eof())
    
    _nConta++
-   oProc:cCaption := ("Imprmindo Mat.: "+ALLTRIM(STR(_nConta,_nTam)) +" de "+ _cTot)
+   oProc:cCaption := ("Imprmindo Mat.: "+AllTrim(Str(_nConta,_nTam)) +" de "+ _cTot)
    ProcessMessages()
 
 	_nLinha+=_nSaltoLinha   
@@ -977,14 +973,14 @@ DO While TE1->(!Eof())
     MEST008QB(1,1,1)   
     MEST008DD(TE1->TE1_TIPO,TE1->TE1_GRUPO,TE1->TE1_ULMOV,TE1->TE1_CODIGO,TE1->TE1_DESCRI,TE1->TE1_PRIMOV)
      
-	TE1->(dbSkip())
+	TE1->(DBSkip())
 	
 EndDo
 
 _oPrint:EndPage()
 _oPrint:Preview()
 
-restArea(_aArea)         
+FWRestArea(_aArea)         
 
 //===============================================================
 // Grava log de Impressão dos dados.
@@ -1005,95 +1001,95 @@ Retorno-----------: Nenhum
 */   
 Static Function MEST008AL(oProc)
 
-Local _aArea        := GetArea()  
+Local _aArea        := FWGetArea()  
 Local _aLog		  := {}  
 
-Private lMsErroAuto := .f.
-lMsErroAuto := .f.
+Private lMsErroAuto := .F.
+lMsErroAuto := .F.
 
-dbSelectArea("TE1")
-TE1->(dbGotop())
+DBSelectArea("TE1")
+TE1->(DBGoTop())
 
-AADD( _aLog , "FUNÇÃO MEST008"								)		                 
-AADD( _aLog , "DATA DE PROCESSAMENTO: "+ DTOC( DATE() )		)
-AADD( _aLog , "HORA DO INICIO DO PROCESSAMENTO: "+ TIME()	)
+aAdd( _aLog , "FUNÇÃO MEST008"								)		                 
+aAdd( _aLog , "DATA DE PROCESSAMENTO: "+ DToC( Date() )		)
+aAdd( _aLog , "HORA DO INICIO DO PROCESSAMENTO: "+ Time()	)
 
 _nConta:=0
 _nConta:=TE1->(LASTREC())
-_cTot:=ALLTRIM(STR(_nConta))
-_nTam:=LEN(_cTot)+1
+_cTot:=AllTrim(Str(_nConta))
+_nTam:=Len(_cTot)+1
 _nConta:=0
 		
 
-SBZ->(DbSetOrder(1))
-SB1->(DbSetOrder(1))
+SBZ->(DBSetOrder(1))
+SB1->(DBSetOrder(1))
 
-do While TE1->(!Eof())
+While TE1->(!Eof())
 
    _nConta++
-   oProc:cCaption := ("Lendo Dados: "+ALLTRIM(STR(_nConta,_nTam)) +" de "+ _cTot)
+   oProc:cCaption := ("Lendo Dados: "+AllTrim(Str(_nConta,_nTam)) +" de "+ _cTot)
    ProcessMessages()
        
 	//Somente registros marcados 
 	If TE1->TE1_STATUS == 'XX' 
 	
 		
-		If SBZ->(dbSeek(  xFILIAL("SBZ") + TE1->TE1_CODIGO )) .AND. SB1->(dbSeek(  xFILIAL("SB1") + TE1->TE1_CODIGO ))                        
+		If SBZ->(DBSeek(  xFilial("SBZ") + TE1->TE1_CODIGO )) .And. SB1->(DBSeek(  xFilial("SB1") + TE1->TE1_CODIGO ))                        
 		
 			//verifica parâmetro para ver o que muda
-			If MV_PAR05 == 1 .OR. MV_PAR05 == 3
+			If MV_PAR05 == 1 .Or. MV_PAR05 == 3
 			
 				RecLock("SBZ",.F.)
 				SBZ->BZ_I_OBSOL := 'S'
-				AADD( _aLog ,	"O PRODUTO "+ ALLTRIM(TE1->TE1_CODIGO) +" FOI MARCADO COMO OBSOLETO." )
-				SBZ->(MsUnlock())  
+				aAdd( _aLog ,	"O PRODUTO "+ AllTrim(TE1->TE1_CODIGO) +" FOI MARCADO COMO OBSOLETO." )
+				SBZ->(MSUnLock())  
 				
-			Endif
+			EndIf
 			
-			If MV_PAR05 == 2 .OR. MV_PAR05 == 3
+			If MV_PAR05 == 2 .Or. MV_PAR05 == 3
 			
 				RecLock("SB1",.F.)  
 				SB1->B1_MSBLQL := 'S'
-				AADD( _aLog ,	"O PRODUTO "+ ALLTRIM(TE1->TE1_CODIGO) +" FOI MARCADO COMO BLOQUEADO." )
-				SB1->(MsUnlock()) 
+				aAdd( _aLog ,	"O PRODUTO "+ AllTrim(TE1->TE1_CODIGO) +" FOI MARCADO COMO BLOQUEADO." )
+				SB1->(MSUnLock()) 
 				
-			Endif
+			EndIf
 			
 			If MV_PAR05 == 4
 			
 				RecLock("SB1",.F.)  
 				SB1->B1_MSBLQL := 'N'
-				AADD( _aLog ,	"O PRODUTO "+ ALLTRIM(TE1->TE1_CODIGO) +" FOI MARCADO COMO DESBLOQUEADO." )
-				SB1->(MsUnlock()) 
+				aAdd( _aLog ,	"O PRODUTO "+ AllTrim(TE1->TE1_CODIGO) +" FOI MARCADO COMO DESBLOQUEADO." )
+				SB1->(MSUnLock()) 
 				
 					
-			Endif
+			EndIf
 	
 			If MV_PAR05 == 5
 			
 				RecLock("SBZ",.F.)  
 				SBZ->BZ_I_OBSOL := 'N'
-				AADD( _aLog ,	"O PRODUTO "+ ALLTRIM(TE1->TE1_CODIGO) +" FOI DESMARCADO COMO OBSOLETO." )
-				SBZ->(MsUnlock())  
+				aAdd( _aLog ,	"O PRODUTO "+ AllTrim(TE1->TE1_CODIGO) +" FOI DESMARCADO COMO OBSOLETO." )
+				SBZ->(MSUnLock())  
 					
-			Endif
+			EndIf
 		Else
 		
-				xmaghelpfis("Erro","Erro ao alterar o seguinte produto: " + TE1->TE1_CODIGO +" - " + TE1->TE1_DESCRI)
-				AADD( _aLog ,	"O PRODUTO "+ ALLTRIM(TE1->TE1_CODIGO) +" NÃO FOI ENCONTRADO NO SB1 E SBZ." )
+				xMagHelpFis("Erro","Erro ao alterar o seguinte produto: " + TE1->TE1_CODIGO +" - " + TE1->TE1_DESCRI)
+				aAdd( _aLog ,	"O PRODUTO "+ AllTrim(TE1->TE1_CODIGO) +" NÃO FOI ENCONTRADO NO SB1 E SBZ." )
 			
 		EndIf	
 	
 	EndIf
 
-	TE1->(dbSkip())
+	TE1->(DBSkip())
 
 EndDo
 
-restArea(_aArea) 
+FWRestArea(_aArea) 
 
-AADD( _aLog ,	"FINAL - INDICADOR DE PRODUTOS" )
-AADD( _aLog ,	"HORA DO FIM DO PROCESSAMENTO: "+ TIME() )
+aAdd( _aLog ,	"FINAL - INDICADOR DE PRODUTOS" )
+aAdd( _aLog ,	"HORA DO FIM DO PROCESSAMENTO: "+ Time() )
 
 oProc:cCaption := "Gravando Log..."
 ProcessMessages()
@@ -1118,7 +1114,7 @@ Local _lRet:= .T.
 
 If _nQtdPrd == 0      
 	
-	xmaghelpfis("Validação","Favor selecionar um ou mais títulos antes de realizar esta operação.",;
+	xMagHelpFis("Validação","Favor selecionar um ou mais títulos antes de realizar esta operação.",;
 	            "Favor proceder de acordo com a solicitação efetuada acima, qualquer dúvida favor entrar em contato com o depto de informática.")              
 	
 	_lRet:= .F.
@@ -1175,7 +1171,7 @@ EndDo
 (_cAlias)->( DBCloseArea() )
 
 //Se tiver documentos válidos cria a consulta
-If len(_aDados) > 0
+If Len(_aDados) > 0
 
 	If U_ITListBox( _cTitAux , { '__' , 'Código', 'Descrição' } , @_aDados , .F. , 2 , 'Selecione os tipos de movimento desejados: ' )
 
@@ -1189,14 +1185,14 @@ If len(_aDados) > 0
 	
 		&( ReadVar() ) := SubStr( _cRet , 1 , Len(_cRet) - 1 )
 		
-	Endif
+	EndIf
 
 //se não tiver documentos válidos alerta e sai
 Else
 	
 	alert("Não há tipos de movimentos válidos!")
 	
-Endif
+EndIf
 
 Return( .T. )
 
@@ -1222,20 +1218,20 @@ Aviso( "Salvar Log em TXT" , "Este programa ira gerar um arquivo texto com o Log
 _cArq := cGetFile( "Documento Texto |*.TXT", "Salvar Arquivo Como..." , 0 , "C:\" , .T. , GETF_LOCALHARD+GETF_NETWORKDRIVE)
 
 If Empty(_cArq)
-     Return()
+     Return
 EndIf
 
-_nPos := At( ".TXT" , UPPER(_cArq) )
+_nPos := At( ".TXT" , Upper(_cArq) )
 
 If _nPos == 0
-     _cArq := Alltrim(_cArq) + ".TXT"
+     _cArq := AllTrim(_cArq) + ".TXT"
 EndIf
 
 _nHdl := FCreate(_cArq)
 
 If _nHdl == -1
      MsgAlert( "O arquivo de nome "+_cArq+" nao pode ser criado!" , "Atencao!" )
-     Return()
+     Return
 EndIf
 
 ProcRegua( Len(_aLog) )
@@ -1245,7 +1241,7 @@ For _nI := 1 To Len(_aLog)
 	FWrite( _nHdl , _aLog[_nI] + chr(13) + chr(10) )
 	
 	If FError() # 0
-   		MsgAlert ( "ERRO AO GRAVAR NO ARQUIVO: "+ str( FError() ) )
+   		MsgAlert ( "ERRO AO GRAVAR NO ARQUIVO: "+ Str( FError() ) )
    		Exit
 	EndIf
 	
@@ -1257,7 +1253,7 @@ FClose(_nHdl)
 
 MsgInfo( "Arquivo TXT gerado com sucesso!" )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1284,13 +1280,13 @@ Begin Sequence
    // Cria tabela temporária para Exportação de dados em Excel  
    //===============================================================
    _cCampo := _cAlias + "_LEGEND"
-   _nI := Ascan(_aStructExcel,{|x| x[1] == _cCampo})
+   _nI := aScan(_aStructExcel,{|x| x[1] == _cCampo})
    If _nI > 0
       _aStructExcel[_nI,3] := 15 // Aumenta o tamanho do campo para gravar o texto da legenda.
    EndIf                                                                                      
    
    If Select("TRBEXCEL") > 0
-      TRBEXCEL->(dbCloseArea())
+      TRBEXCEL->(DBCloseArea())
    EndIf
 
    _otemp := FWTemporaryTable():New( "TRBEXCEL", _aStructExcel )
@@ -1325,7 +1321,7 @@ Begin Sequence
    
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -1343,7 +1339,7 @@ Local _nTotRegs := (_cAlias)->(LastRec())
 Local _nI
 
 Local _cDir := GetTempPath()  // Diretório de Geração das planilhas.
-Local _cArq := "REL_CONFERENCIA_FISCAL_"+Dtos(Date())+"_"+StrTran(Time(),":","")+".xml"  // Nome da planilha a ser gerada.   
+Local _cArq := "REL_CONFERENCIA_FISCAL_"+DToS(Date())+"_"+StrTran(Time(),":","")+".xml"  // Nome da planilha a ser gerada.   
 Local _aCabecalho := {}//- Array de cabecalho da planilha {{"Titulo 1","Alinhamento","Formatacao","Totaliza(s/n)"},
 Local _aCampos := {}
 Local _cCampo
@@ -1356,13 +1352,13 @@ Begin Sequence
    //================================================================================
    // Gravando dados para o relatorio em Excel.
    //================================================================================      
-   (_cAlias)->(DbGoTop())
-   Do While ! (_cAlias)->(Eof())  
+   (_cAlias)->(DBGoTop())
+   While ! (_cAlias)->(Eof())  
       IncProc("Gravando dados para Rel.Excel...")
       
       If AllTrim(_cDados) == _aDados[2] //{"Todos os Dados","Apenas Dados Selecionados"}
          If Empty(&(_cAlias+'->' +_cAlias + "_STATUS"))
-            (_cAlias)->(DbSkip())
+            (_cAlias)->(DBSkip())
             Loop
          EndIf
       EndIf
@@ -1379,9 +1375,9 @@ Begin Sequence
       Else
          &(_cCampo) := "NORMAL"
       EndIf
-      TRBEXCEL->(MsUnLock())      
+      TRBEXCEL->(MSUnLock())      
       
-      (_cAlias)->(DbSkip())
+      (_cAlias)->(DBSkip())
    EndDo
 
    //================================================================================
@@ -1394,31 +1390,31 @@ Begin Sequence
    //================================================================================         
    _aCabecalho := {}//- Array de cabecalho da planilha {{"Titulo 1","Alinhamento","Formatacao","Totaliza(s/n)"},
    //                Titulo das Colunas             ,Alinhamento ,Formatação, Totaliza?
-   Aadd(_aCabecalho,{"STATUS"   ,1           ,1         ,.F.})
-   Aadd(_aCabecalho,{"LEGENDA"  ,1           ,1         ,.F.})
-   Aadd(_aCabecalho,{"TIPO"     ,1           ,1         ,.F.})
-   Aadd(_aCabecalho,{"GRUPO >>" ,1           ,1         ,.F.})
-   Aadd(_aCabecalho,{"PRI MOVIM",1           ,1         ,.F.})
-   Aadd(_aCabecalho,{"DOC ORI"  ,1           ,1         ,.F.})
-   Aadd(_aCabecalho,{"ULT MOVIM",1           ,1         ,.F.})
-   Aadd(_aCabecalho,{"DOC ORI"  ,1           ,1         ,.F.})
-   Aadd(_aCabecalho,{"CODIGO"   ,1           ,1         ,.F.})
-   Aadd(_aCabecalho,{"DESCRICAO",1           ,1         ,.F.})
+   aAdd(_aCabecalho,{"STATUS"   ,1           ,1         ,.F.})
+   aAdd(_aCabecalho,{"LEGENDA"  ,1           ,1         ,.F.})
+   aAdd(_aCabecalho,{"TIPO"     ,1           ,1         ,.F.})
+   aAdd(_aCabecalho,{"GRUPO >>" ,1           ,1         ,.F.})
+   aAdd(_aCabecalho,{"PRI MOVIM",1           ,1         ,.F.})
+   aAdd(_aCabecalho,{"DOC ORI"  ,1           ,1         ,.F.})
+   aAdd(_aCabecalho,{"ULT MOVIM",1           ,1         ,.F.})
+   aAdd(_aCabecalho,{"DOC ORI"  ,1           ,1         ,.F.})
+   aAdd(_aCabecalho,{"CODIGO"   ,1           ,1         ,.F.})
+   aAdd(_aCabecalho,{"DESCRICAO",1           ,1         ,.F.})
    
    //======================================================================================================================
    // Array com os campos para leitura de dados e montagem dos dados do relatório.
    //======================================================================================================================
    _aCampos := {} // {"TRBREL->A1_COD", "TRBREL->A1_LOJA", "TRBREL->A1_NOME"} 
-   Aadd(_aCampos,"TRBEXCEL->"+_cAlias+"_STATUS" )
-   Aadd(_aCampos,"TRBEXCEL->"+_cAlias+"_LEGEND")
-   Aadd(_aCampos,"TRBEXCEL->"+_cAlias+"_TIPO"  )
-   Aadd(_aCampos,"TRBEXCEL->"+_cAlias+"_GRUPO" )
-   Aadd(_aCampos,"TRBEXCEL->"+_cAlias+"_PRIMOV")
-   Aadd(_aCampos,"TRBEXCEL->"+_cAlias+"_DETPRI")
-   Aadd(_aCampos,"TRBEXCEL->"+_cAlias+"_ULMOV" )
-   Aadd(_aCampos,"TRBEXCEL->"+_cAlias+"_DETUL" )
-   Aadd(_aCampos,"TRBEXCEL->"+_cAlias+"_CODIGO")
-   Aadd(_aCampos,"TRBEXCEL->"+_cAlias+"_DESCRI")
+   aAdd(_aCampos,"TRBEXCEL->"+_cAlias+"_STATUS" )
+   aAdd(_aCampos,"TRBEXCEL->"+_cAlias+"_LEGEND")
+   aAdd(_aCampos,"TRBEXCEL->"+_cAlias+"_TIPO"  )
+   aAdd(_aCampos,"TRBEXCEL->"+_cAlias+"_GRUPO" )
+   aAdd(_aCampos,"TRBEXCEL->"+_cAlias+"_PRIMOV")
+   aAdd(_aCampos,"TRBEXCEL->"+_cAlias+"_DETPRI")
+   aAdd(_aCampos,"TRBEXCEL->"+_cAlias+"_ULMOV" )
+   aAdd(_aCampos,"TRBEXCEL->"+_cAlias+"_DETUL" )
+   aAdd(_aCampos,"TRBEXCEL->"+_cAlias+"_CODIGO")
+   aAdd(_aCampos,"TRBEXCEL->"+_cAlias+"_DESCRI")
    
    //================================================================================
    // Abrindo o relatório no Excel.
@@ -1428,9 +1424,9 @@ Begin Sequence
 
 End Sequence
 
-(_cAlias)->(DbGoTo(_nRegAtu)) // Posiciona no ultimo registro posicionado na tela,antes de gerar relatório em Excel.
+(_cAlias)->(DBGoTo(_nRegAtu)) // Posiciona no ultimo registro posicionado na tela,antes de gerar relatório em Excel.
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -1507,13 +1503,13 @@ Begin Sequence
          _cExpres01 := ""
       
          If ! Empty(_dDtPriMov)
-            _cExpres01 := "Dtos("+_cAlias+"_PRIMOV)"
+            _cExpres01 := "DToS("+_cAlias+"_PRIMOV)"
             If AllTrim(_cMove_P) == _aItensDt[1]     // "Maior"
-               _cExpres01 += " > Dtos(_dDtPriMov) "
+               _cExpres01 += " > DToS(_dDtPriMov) "
             ElseIf AllTrim(_cMove_P) == _aItensDt[2] // "Igual"
-               _cExpres01 += " = Dtos(_dDtPriMov) "
+               _cExpres01 += " = DToS(_dDtPriMov) "
             ElseIf AllTrim(_cMove_P) == _aItensDt[3] // "Menor"
-               _cExpres01 += " < Dtos(_dDtPriMov) "
+               _cExpres01 += " < DToS(_dDtPriMov) "
             EndIf       
          EndIf
       
@@ -1522,13 +1518,13 @@ Begin Sequence
                _cExpres01 += " .And. "
             EndIf
                                       
-            _cExpres01 += " Dtos("+_cAlias+"_ULMOV)" 
+            _cExpres01 += " DToS("+_cAlias+"_ULMOV)" 
             If AllTrim(_cMove_F) == _aItensDt[1]     // "Maior"
-               _cExpres01 += " > Dtos(_dDtUltMov) "
+               _cExpres01 += " > DToS(_dDtUltMov) "
             ElseIf AllTrim(_cMove_F) == _aItensDt[2] // "Igual"
-               _cExpres01 += " = Dtos(_dDtUltMov) "
+               _cExpres01 += " = DToS(_dDtUltMov) "
             ElseIf AllTrim(_cMove_F) == _aItensDt[3] // "Menor"
-               _cExpres01 += " < Dtos(_dDtUltMov) "
+               _cExpres01 += " < DToS(_dDtUltMov) "
             EndIf     
          EndIf
            
@@ -1578,11 +1574,11 @@ Begin Sequence
 
 End Sequence
 
-(_cAlias)->(DbGoTop())
+(_cAlias)->(DBGoTop())
 
 _oBrowse:Refresh(.T.)
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -1599,23 +1595,23 @@ User Function MEST008M(_cOpcao)
 Local _nRegAtu := (_cAlias)->(Recno())
 
 Begin Sequence         
-   (_cAlias)->(DbGoTop())
-   Do While ! (_cAlias)->(Eof())
+   (_cAlias)->(DBGoTop())
+   While ! (_cAlias)->(Eof())
       If _cOpcao == "MARCAR"
          MEST008S1(_cAlias,Space(2))
       Else // DESMARCAR
          MEST008S1(_cAlias,"XX")
       EndIf
            
-      (_cAlias)->(DbSkip())
+      (_cAlias)->(DBSkip())
    EndDo
 End Sequence
 
-(_cAlias)->(DbGoTo(_nRegAtu)) 
+(_cAlias)->(DBGoTo(_nRegAtu)) 
 
 //===============================================================
 // Grava log de Marcação de registros.
 //=============================================================== 
 U_ITLOGACS('MEST008E')
 
-Return Nil
+Return

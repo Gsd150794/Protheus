@@ -2,30 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 06/12/2018 | Chamado 27271. Nova validação da observação dos armazens 1=Fisicos e 2=Virtuais
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 15/04/2019 | Chamado 28685. Validação p/ não permitir fracionamento de UM que são inteiras.
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 19/09/2024 | Chamado 48569. Incluir a rotina de Desconto Tetra Pak nas exceções para validação de acesso
+Alex Wallauer |15/04/2019| Chamado 28685. Validação p/ não permitir fracionamento de UM que são inteiras.
+Lucas Borges  |19/09/2024| Chamado 48569. Incluir a rotina de Desconto Tetra Pak nas exceções para validação de acesso
+Lucas Borges  |17/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
 ===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
+
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MT260TOK
 Autor-------------: Tiago Correa Castro
 Data da Criacao---: 25/04/2009
-===============================================================================================================================
-Descrição---------: Ponto de Entrada que valida movimento de transferencia modelo I	
-===============================================================================================================================
+Descrição---------: Ponto de Entrada que valida movimento de transferencia modelo I
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: Lógico validando o lançamento 
 ===============================================================================================================================
 */ 
@@ -43,11 +36,11 @@ Local _nCMdest	:= 0
 Local _aSldNeg	:= 0 
 Local _nDif		:= 0
 Local _lValidFrac1UM:= .T.
-Local _cUmNoFra		:= U_ITGetMV("IT_UMNOFRAC","PC,UN")
+Local _cUmNoFra		:= SuperGetMV("IT_UMNOFRAC",.F.,"PC,UN")
 
-ZZL->(DbSetOrder(3))
-If ZZL->(DbSeek(xFilial("ZZL")+RetCodUsr()))
-	If ZZL->ZZL_AUTSIM <> 'S' .And. !FWIsInCallStack("DESCTETRAE") .And. !FWIsInCallStack("DESCTETRAE") //Não validar quando for estorno de NF-e da Tetra Pak
+ZZL->(DBSetOrder(3))
+If ZZL->(DBSeek(xFilial("ZZL")+RetCodUsr()))
+	If ZZL->ZZL_AUTSIM <> 'S' .And. !FWIsInCallStack("DESCTETRAE") .And. !FWIsInCallStack("DESCTETRAE") //Não validar quando For estorno de NF-e da Tetra Pak
     	FWAlertWarning("Usuário sem permissão para realizar transferência simples. Não será possível realizar a transferência. Entre em contato com o suporte do TI.", "MT260TOK01")
     	_lRet := .F.
 	ElseIf !(cLocOrig $ ZZL->ZZL_ARMAZE)
@@ -58,13 +51,13 @@ If ZZL->(DbSeek(xFilial("ZZL")+RetCodUsr()))
        	FWAlertWarning("Usuário sem permissão para utilizar este armazem de destino. Não será possível realizar a transferência simples. Armazens permitidos ao usuário: '"+;
          				AllTrim(ZZL->ZZL_ARMAZE)+"'. Entre em contato com o suporte do TI.","MT260TOK03")
          _lRet := .F.
-	ElseIf Substr(cCodOrig,1,4) == "0006" .And. nQuant260D == 0
+	ElseIf SubStr(cCodOrig,1,4) == "0006" .And. nQuant260D == 0
 		 FWAlertWarning("Para esse produto e obrigatório o preenchimento da segunda unidade de medida (Peças).","MT260TOK04")
 		 _lRet := .F.
-	ElseIf SuperGetMV("IT_BLQMOV",.F., "") .And. Demis260 > DATE()
+	ElseIf SuperGetMV("IT_BLQMOV",.F., "") .And. Demis260 > Date()
 	  FWAlertWarning("Movimento com data maior que a data atual, os movimentos com data maior que a data atual estão bloqueados. Entre em contato com o suporte do TI.","MT260TOK05")
 	  _lRet := .F.
-	ElseIf cLocOrig == '34' .or. cLocDest == '34'
+	ElseIf cLocOrig == '34' .Or. cLocDest == '34'
    		FWAlertWarning("Não é permitida transferência simples usando armazém 34. Utilize a rotina de transferência multipla","MT260TOK06")
 		_lRet := .F.	
 	Else
@@ -81,8 +74,8 @@ If ZZL->(DbSeek(xFilial("ZZL")+RetCodUsr()))
 		EndIf
 
 		If cCodOrig <> cCodDest
-			If AllTrim(cCodOrig) $ (U_ITGetMV("ITLTGRN",'08000000062')+U_ITGetMV("ITLTMP",'08000000034')+U_ITGetMV("ITCRGRN",'08000000063;08000000064')+U_ITGetMV("ITCRMP",'08000000007'));
-				.And. AllTrim(cCodDest) $ (U_ITGetMV("ITLTGRN",'08000000062')+U_ITGetMV("ITLTMP",'08000000034')+U_ITGetMV("ITCRGRN",'08000000063;08000000064')+U_ITGetMV("ITCRMP",'08000000007'))
+			If AllTrim(cCodOrig) $ (SuperGetMV("IT_LTGRN",.F.,'08000000062')+SuperGetMV("IT_LTMP",.F.,'08000000034')+SuperGetMV("IT_CRGRN",.F.,'08000000064;08000000063')+SuperGetMV("IT_CRMP",.F.,'08000000007'));
+				.And. AllTrim(cCodDest) $ (SuperGetMV("IT_LTGRN",.F.,'08000000062')+SuperGetMV("IT_LTMP",.F.,'08000000034')+SuperGetMV("IT_CRGRN",.F.,'08000000064;08000000063')+SuperGetMV("IT_CRMP",.F.,'08000000007'))
 				If AllTrim(cLocOrig) == "03" .And. AllTrim(cLocDest) == "03"
 					_lRet := .T.
 				Else
@@ -98,8 +91,8 @@ If ZZL->(DbSeek(xFilial("ZZL")+RetCodUsr()))
 		If _lRet
 			_aSldNeg := U_VldEstRetrNeg(cCodOrig, cLocOrig, nQuant260, Demis260)	
 			If Len(_aSldNeg) > 0
-				_nDif := _aSldNeg[2] - nQuant260
-				FWAlertWarning("Quantidade requisitada é maior que o saldo no dia "+DtoC(_aSldNeg[1])	+" para o produto: "+CHR(13)+CHR(10)+Alltrim(cCodOrig)+"-"+cLocOrig+". Diferenca: ";
+				_nDIf := _aSldNeg[2] - nQuant260
+				FWAlertWarning("Quantidade requisitada é maior que o saldo no dia "+DToC(_aSldNeg[1])	+" para o produto: "+CHR(13)+CHR(10)+AllTrim(cCodOrig)+"-"+cLocOrig+". Diferenca: ";
 						+AllTrim(TRANSFORM(_nDif, "@E 999,999,999,999.99")), "Saldo Insuficiente. Verifique o saldo no Kardex.","MT260TOK10")
 				_lRet := .F.
 			EndIf
@@ -115,43 +108,43 @@ If ZZL->(DbSeek(xFilial("ZZL")+RetCodUsr()))
 			SB2->(DBSeek(xFilial("SB2")+cCodDest+cLocDest))//Produto de destino
 			_nCMdest := SB2->B2_CM1
 			
-			If _nCMdest > 0 .AND. !(SB2->B2_QATU == 0 .And. SB2->B2_VATU1 == 0)//Produto de Destino
+			If _nCMdest > 0 .And. !(SB2->B2_QATU == 0 .And. SB2->B2_VATU1 == 0)//Produto de Destino
 				_nDifPrd := (_nCMdest - _nCMorig) / _nCMorig
 				If _nDifPrd < 0 
 					_nDifPrd := (_nDifPrd * (-1))
-				Endif 
+				EndIf 
 				_nDifPrd := _nDifPrd * 100
 			
-				If _nDifPrd >= _nDifCM2 .and. _nDifPrd < _nDifCM //Diferenca entre 51% e 70%
+				If _nDifPrd >= _nDifCM2 .And. _nDifPrd < _nDifCM //Diferenca entre 51% e 70%
 					If !FWAlertYesNo("ATENÇÃO! Diferença entre valor de Custo Medio de Origem e Destino é "+TRANSFORM(_nDifPrd, "@E 999.9999")+"%. Deseja prosseguir?","MT260TOK11")
 					_lRet := .F.		
-					Endif
-				Elseif _nDifPrd >= _nDifCM //Diferenca maior que 70%
+					EndIf
+				ElseIf _nDifPrd >= _nDifCM //Diferenca maior que 70%
 					FWAlertWarning("Transferência não permitida! Diferença entre valor de Custo Medio de Origem e Destino é "+TRANSFORM(_nDifPrd, "@E 999.9999")+"%"+;
 								"Favor analisar o Kardex! Se necessário, entre em contato com o Depto. de TI.","MT260TOK12")
 					_lRet := .F.	
-				Endif
-			Endif   
-		Endif
+				EndIf
+			EndIf   
+		EndIf
 	
-		IF _lRet
+		If _lRet
 			If ZZL->ZZL_PEFRPA == "S"
 				_lValidFrac1UM:=.F.
 			EndIf
 			
 			SB1->(DBSetOrder(1))
-			IF _lValidFrac1UM .And. SB1->(DBSeek(xFilial("SB1") + cCodOrig))
-				IF (SB1->B1_UM $ _cUmNoFra .And. nQuant260 <> Int(nQuant260))
-					FWAlertWarning("Não é permitido fracionar a quantidade da 1a. UM de produto onde a Unid. Medida for "+_cUmNoFra+". "+;
+			If _lValidFrac1UM .And. SB1->(DBSeek(xFilial("SB1") + cCodOrig))
+				If (SB1->B1_UM $ _cUmNoFra .And. nQuant260 <> Int(nQuant260))
+					FWAlertWarning("Não é permitido fracionar a quantidade da 1a. UM de produto onde a Unid. Medida For "+_cUmNoFra+". "+;
 							"Favor informar apenas quantidades inteiras na Primeira Unidade de Medida.","MT260TOK13")
 					_lRet := .F.
-				ENDIF
-				IF (SB1->B1_SEGUM $ _cUmNoFra .And. nQuant260D <> Int(nQuant260D))
-					FWAlertWarning("Não é permitido fracionar a quantidade da 2a. UM de produto onde a Unid. Medida for "+_cUmNoFra+". "+;
+				EndIf
+				If (SB1->B1_SEGUM $ _cUmNoFra .And. nQuant260D <> Int(nQuant260D))
+					FWAlertWarning("Não é permitido fracionar a quantidade da 2a. UM de produto onde a Unid. Medida For "+_cUmNoFra+". "+;
 							"Favor informar apenas quantidades inteiras na Segunda Unidade de Medida.","MT260TOK14")
 					_lRet := .F.
-				ENDIF
-			ENDIF
+				EndIf
+			EndIf
 		EndIf
 	EndIf
 Else

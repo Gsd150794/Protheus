@@ -11,8 +11,8 @@ Alex Walaluer | 26/11/2018 | Criação do RDMAKE. Chamado 27120
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#include 'protheus.ch'
-#include "topconn.ch"
+#Include "TOTVS.ch"
+#Include "topconn.ch"
 
 /*
 ===============================================================================================================================
@@ -27,62 +27,62 @@ Parametros------: NENHUM
 Retorno---------: NENHUM
 ===============================================================================================================================
 */
-USER FUNCTION MOMS040()
-LOCAL cTimeInicial:=TIME()
+User Function MOMS040()
+Local cTimeInicial:=Time()
 Local _aParRet :={}
 Local _aParAux :={} , nI 
-Local _bOK     :={|| IF(MV_PAR02 > 0 .AND. !EMPTY(MV_PAR02),.T.,(U_ITMSG("Dados INVALIDO",'Atenção!',"Tente novamente com os dados corretos",3),.F.) ) }
+Local _bOK     :={|| If(MV_PAR02 > 0 .And. !Empty(MV_PAR02),.T.,(U_ITMsg("Dados INVALIDO",'Atenção!',"Tente novamente com os dados corretos",3),.F.) ) }
 Private aLogFre := {}
 
-MV_PAR01:=SPACE(LEN(DAK->DAK_COD))
+MV_PAR01:=Space(Len(DAK->DAK_COD))
 MV_PAR02:=0
 MV_PAR03:=1
 //1  , 2                   , 3       , 4                        ,5      ,6         ,7    ,8    ,9
-AADD( _aParAux , { 1 , "Carga"	           , MV_PAR01, "@!" 	                , ""	, "DAK"		, "" , 080 , .F. } )
-AADD( _aParAux , { 1 , "Valor Frete"       , MV_PAR02, "@E 999,999,999,999.99"	, ""	, ""		, "" , 080 , .F. } )
-AADD( _aParAux , { 3 , "Tipo Processamento", MV_PAR03, {"Analise","Efetivar"}   , 40	, ""		, .T., .T. , .T. } )
+aAdd( _aParAux , { 1 , "Carga"	           , MV_PAR01, "@!" 	                , ""	, "DAK"		, "" , 080 , .F. } )
+aAdd( _aParAux , { 1 , "Valor Frete"       , MV_PAR02, "@E 999,999,999,999.99"	, ""	, ""		, "" , 080 , .F. } )
+aAdd( _aParAux , { 3 , "Tipo Processamento", MV_PAR03, {"Analise","Efetivar"}   , 40	, ""		, .T., .T. , .T. } )
 
 For nI := 1 To Len( _aParAux )
 	aAdd( _aParRet , _aParAux[nI][03] )
 Next nI
 
-DO WHILE .T.
+While .T.
 	
-	IF !ParamBox( _aParAux , "Dados do frete da Carga" , @_aParRet, _bOK )
-		RETURN .F.
+	If !ParamBox( _aParAux , "Dados do frete da Carga" , @_aParRet, _bOK )
+		Return .F.
 	EndIf
-	cTimeInicial:=TIME()
+	cTimeInicial:=Time()
 	DBSelectArea("DAK")
 	DAK->( DBSetOrder(1) ) //DAK_FILIAL+DAK_COD+DAK_SEQCAR
 	If DAK->( DBSeek( xFilial("DAK") + MV_PAR01 ) )
 	   
-		IF 	U_ITMSG("Valor atual R$"+STR(DAK->DAK_I_FRET,15,2),'Atenção!',"Confirma a ateração do valor atual para o valor: R$"+STR(MV_PAR02,15,2) ,2,2,2)
+		If 	U_ITMsg("Valor atual R$"+Str(DAK->DAK_I_FRET,15,2),'Atenção!',"Confirma a ateração do valor atual para o valor: R$"+Str(MV_PAR02,15,2) ,2,2,2)
 			
-			FWMSGRUN( ,{|oProc|  fAtuaFrete(oProc,MV_PAR02,MV_PAR01) } , "Hora Inicial: "+cTimeInicial )
+			FWMsgRun( ,{|oProc|  fAtuaFrete(oProc,MV_PAR02,MV_PAR01) } , "Hora Inicial: "+cTimeInicial )
 			
-			IF LEN(aLogFre) > 0
+			If Len(aLogFre) > 0
 				U_ITListBox( 'Log de Atualizao do FRETE da Carga (MOMS040)' ,;
 				{'Carga','Pedido','Nf + Serie','Item','Frete / Ratiado',"Peso Rateio"},aLogFre,.F.,,,,;
 				{     40,      35,          30,   30 ,     50          ,          50} )
-			ELSE
-				U_ITMSG("Não houve atualização para essa carga Carga",'Atenção!',"Tente novamente com os dados corretos",3)
-				LOOP
-			ENDIF
+			Else
+				U_ITMsg("Não houve atualização para essa carga Carga",'Atenção!',"Tente novamente com os dados corretos",3)
+				Loop
+			EndIf
 			
-		ELSE
-			LOOP
-		ENDIF
+		Else
+			Loop
+		EndIf
 		
-	ELSE
+	Else
 		
-		U_ITMSG("Carga não existe nesssa Filial: "+xFilial("DAK"),'Atenção!',"Tente novamente com os dados corretos",3)
-		LOOP
+		U_ITMsg("Carga não existe nesssa Filial: "+xFilial("DAK"),'Atenção!',"Tente novamente com os dados corretos",3)
+		Loop
 		
 	EndIf
 	
-	EXIT
+	Exit
 	
-ENDDO
+EndDo
 
 
 Return
@@ -107,10 +107,10 @@ Local _nFretDAI 	:= 0
 //================================================================================
 //| Gravacao dao Valor total da Carga                                            |
 //================================================================================
-IF oProc <> NIL
+If oProc <> NIL
    oProc:cCaption :=  'Gravando Frete na Carga...'
    ProcessMessages()
-Endif
+EndIf
 
 BEGIN TRANSACTION	
 
@@ -119,11 +119,11 @@ DAK->( DBSetOrder(1) ) //DAK_FILIAL+DAK_COD+DAK_SEQCAR
 If DAK->( DBSeek( xFilial("DAK") + _cCarga ) )
 
 
-	IF MV_PAR03 = 2
+	If MV_PAR03 = 2
 	   DAK->( RecLock( "DAK" , .F. ) )
 	   DAK->DAK_I_FRET := _nValor
-	   DAK->( MsUnlock() )
-	 ENDIF
+	   DAK->( MSUnLock() )
+	 EndIf
 	//================================================================================
 	//| Recupera o peso total da carga sem considerar Produtos Unitizadores do PALLET|
 	//================================================================================
@@ -136,7 +136,7 @@ If DAK->( DBSeek( xFilial("DAK") + _cCarga ) )
 		_nPesoTAux := DAK->DAK_PESO
 	EndIf
 //                  'Carga'       ,'PV','Nf + Serie','Item','Frete',PESO
-	AADD(aLogFre, {_cCarga+" DAK:","","","",_nValor,_nPesoTot+_nPesoTAux} ) 
+	aAdd(aLogFre, {_cCarga+" DAK:","","","",_nValor,_nPesoTot+_nPesoTAux} ) 
 	
 EndIf
 
@@ -145,9 +145,9 @@ EndIf
 //================================================================================
 DBSelectArea("DAI")
 DAI->( DBSetOrder(1) ) //DAI_FILIAL+DAI_COD+DAI_SEQCAR+DAI_SEQUEN+DAI_PEDIDO
-If DAI->( DBSeek( xFILIAL("DAI") + _cCarga ) )
+If DAI->( DBSeek( xFilial("DAI") + _cCarga ) )
 
-   DO While DAI->(!Eof()) .And. DAI->DAI_COD == _cCarga .And. DAI->DAI_FILIAL == xFILIAL("DAI")
+   While DAI->(!Eof()) .And. DAI->DAI_COD == _cCarga .And. DAI->DAI_FILIAL == xFilial("DAI")
 	
 	    //================================================================================
 	    //| Caso a carga possua Produtos acabados mais pedidos de PALLET sera rateado o  |
@@ -162,7 +162,7 @@ If DAI->( DBSeek( xFILIAL("DAI") + _cCarga ) )
 				
 				_nFretDAI	:=	((_nValor /	_nPesoTot)	*	DAI->DAI_PESO)	       
 			
-			ELSE
+			Else
 				_cTipoPV:=" [P]"
 			EndIf
 		
@@ -176,14 +176,14 @@ If DAI->( DBSeek( xFILIAL("DAI") + _cCarga ) )
 			
 		EndIf
 
-	    IF MV_PAR03 = 2 .AND. _nFretDAI > 0
+	    If MV_PAR03 = 2 .And. _nFretDAI > 0
 	       DAI->( RecLock( "DAI" , .F. ) )
 		   DAI->DAI_I_FRET:=_nFretDAI
-		   DAI->( MsUnlock() )
+		   DAI->( MSUnLock() )
 		EndIf
 
                     //'Carga'        ,'Pedido'                ,'Nf + Serie','Item','Frete'           ,PESO
-        AADD(aLogFre,{_cCarga+" DAI:",DAI->DAI_PEDIDO+_cTipoPV,""          ,""    ,ROUND(_nFretDAI,2),DAI->DAI_PESO})
+        aAdd(aLogFre,{_cCarga+" DAI:",DAI->DAI_PEDIDO+_cTipoPV,""          ,""    ,Round(_nFretDAI,2),DAI->DAI_PESO})
 		
 	    DAI->( DBSkip() )
 	    
@@ -191,33 +191,33 @@ If DAI->( DBSeek( xFILIAL("DAI") + _cCarga ) )
 	
 EndIf
 
-IF oProc <> NIL
+If oProc <> NIL
    oProc:cCaption :=  'Gravando Frete na NF...'
    ProcessMessages()
-Endif
+EndIf
 
 If _nValor > 0 .And. DAK->DAK_PESO > 0
 
    DBSelectArea("SF2")
    SF2->( DBSetOrder(5) ) //F2_FILIAL+F2_CARGA+F2_SEQCAR+F2_SERIE+F2_DOC+F2_CLIENTE+F2_LOJA
-   If SF2->(DBSeek( xFILIAL("SF2") + _cCarga ) )
+   If SF2->(DBSeek( xFilial("SF2") + _cCarga ) )
 
-      DO While SF2->(!Eof()) .And. SF2->F2_CARGA == _cCarga .And. SF2->F2_FILIAL == xFILIAL("SF2")
+      While SF2->(!Eof()) .And. SF2->F2_CARGA == _cCarga .And. SF2->F2_FILIAL == xFilial("SF2")
 
          GravaFrNF( _nValor , _nPesoTot , DAK->DAK_PESO,_cCarga )
 
 	     SF2->( DBSkip() )
 	    
        EndDo
-   ENDIF
+   EndIf
 
    SF2->( DBSetOrder(1) )
    
-ENDIF
+EndIf
 
 END TRANSACTION 	
 
-Return()
+Return
 
 
 /*
@@ -254,37 +254,37 @@ If _nPesoTotC > 0
 		//Gravacao do Valor Frete por nota
 		_nVlrFretNF := ( ( _nVlrTotFret / _nPesoTotC ) * _nPesoNota )
 
-	    IF MV_PAR03 = 2
+	    If MV_PAR03 = 2
 		   SF2->( RecLock( "SF2" , .F. ) )
 		   SF2->F2_I_FRET := _nVlrFretNF
-		   SF2->( MsUnlock() )
-		ENDIF   
+		   SF2->( MSUnLock() )
+		EndIf   
                     //'Carga'        ,'Pedido'       ,'Nf + Serie'             ,'Item','Frete'             ,PESO
-        AADD(aLogFre,{_cCarga+" SF2:",SF2->F2_I_PEDID,SF2->F2_DOC+SF2->F2_SERIE,""    ,ROUND(_nVlrFretNF,2),_nPesoNota})
+        aAdd(aLogFre,{_cCarga+" SF2:",SF2->F2_I_PEDID,SF2->F2_DOC+SF2->F2_SERIE,""    ,Round(_nVlrFretNF,2),_nPesoNota})
 		
 		
 		SD2->( DBSetOrder(3) ) //D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA+D2_COD+D2_ITEM
-		If SD2->( DBSeek( xfilial("SD2") + _cDoc + _cSerie + _cCliente + _cLoja ) )
+		If SD2->( DBSeek( xFilial("SD2") + _cDoc + _cSerie + _cCliente + _cLoja ) )
 			
-			While SD2->(!Eof()) .and. SD2->( D2_FILIAL + D2_DOC + D2_SERIE + D2_CLIENTE + D2_LOJA ) == xFilial("SD2") + _cDoc + _cSerie + _cCliente + _cLoja
+			While SD2->(!Eof()) .And. SD2->( D2_FILIAL + D2_DOC + D2_SERIE + D2_CLIENTE + D2_LOJA ) == xFilial("SD2") + _cDoc + _cSerie + _cCliente + _cLoja
 				
-				_nPesoItem := ( POSICIONE( "SB1" , 1 , xFilial("SB1") + SD2->D2_COD , "B1_PESBRU" ) * SD2->D2_QUANT )
+				_nPesoItem := ( Posicione( "SB1" , 1 , xFilial("SB1") + SD2->D2_COD , "B1_PESBRU" ) * SD2->D2_QUANT )
 				
 				//Gravacao do Valor Frete por item da Nota
-	            IF MV_PAR03 = 2
+	            If MV_PAR03 = 2
 				   SD2->( RecLock( "SD2" , .F. ) )
 				   SD2->D2_I_FRET := ( ( _nVlrFretNF / _nPesoNota ) * _nPesoItem )
-				   SD2->( MsUnlock() )
-				ENDIF   
+				   SD2->( MSUnLock() )
+				EndIf   
                             //'Carga'        ,'Pedido'       ,'Nf + Serie'             ,'Item'      ,'Frete'                                      ,PESO
-                AADD(aLogFre,{_cCarga+" SD2:",SF2->F2_I_PEDID,SF2->F2_DOC+SF2->F2_SERIE,SD2->D2_ITEM,ROUND(( _nVlrFretNF / _nPesoNota ) * _nPesoItem,2),_nPesoItem})
+                aAdd(aLogFre,{_cCarga+" SD2:",SF2->F2_I_PEDID,SF2->F2_DOC+SF2->F2_SERIE,SD2->D2_ITEM,Round(( _nVlrFretNF / _nPesoNota ) * _nPesoItem,2),_nPesoItem})
 				
 			SD2->( DBSkip() )
 			EndDo
 			
 		EndIf
-	ELSE            //'Carga'        ,'Pedido'              ,'Nf + Serie'             ,'Item','Frete',PESO
-        AADD(aLogFre,{_cCarga+" SD2:",SF2->F2_I_PEDID+" [P]",SF2->F2_DOC+SF2->F2_SERIE,""    ,0      ,_nPesoNota})
+	Else            //'Carga'        ,'Pedido'              ,'Nf + Serie'             ,'Item','Frete',PESO
+        aAdd(aLogFre,{_cCarga+" SD2:",SF2->F2_I_PEDID+" [P]",SF2->F2_DOC+SF2->F2_SERIE,""    ,0      ,_nPesoNota})
 	EndIf
 
 Else//Quando somente pedidos de PALLET compõem a carga
@@ -292,30 +292,30 @@ Else//Quando somente pedidos de PALLET compõem a carga
 	//Gravacao do Valor do Frete por nota
 	_nVlrFretNF := ( ( _nVlrTotFret / _nPesoTAux) * _nPesoNota )
 
-    IF MV_PAR03 = 2
+    If MV_PAR03 = 2
 	   SF2->( RecLock( "SF2" , .F. ) )
 	   SF2->F2_I_FRET := _nVlrFretNF
-	   SF2->( MsUnlock() )
-	ENDIF   
+	   SF2->( MSUnLock() )
+	EndIf   
                 //'Carga'        ,'Pedido'       ,'Nf + Serie'             ,'Item','Frete'    ,PESO
-    AADD(aLogFre,{_cCarga+" SF2:",SF2->F2_I_PEDID,SF2->F2_DOC+SF2->F2_SERIE,""    ,ROUND(_nVlrFretNF,2),_nPesoNota})
+    aAdd(aLogFre,{_cCarga+" SF2:",SF2->F2_I_PEDID,SF2->F2_DOC+SF2->F2_SERIE,""    ,Round(_nVlrFretNF,2),_nPesoNota})
 	
 	SD2->( DBSetOrder(3) ) //D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA+D2_COD+D2_ITEM
-	If SD2->( DBSeek( xfilial("SD2") + _cDoc + _cSerie + _cCliente + _cLoja ) )
+	If SD2->( DBSeek( xFilial("SD2") + _cDoc + _cSerie + _cCliente + _cLoja ) )
 		
-		While SD2->(!Eof()) .and. SD2->( D2_FILIAL + D2_DOC + D2_SERIE + D2_CLIENTE + D2_LOJA ) == xfilial("SD2") + _cDoc + _cSerie + _cCliente + _cLoja
+		While SD2->(!Eof()) .And. SD2->( D2_FILIAL + D2_DOC + D2_SERIE + D2_CLIENTE + D2_LOJA ) == xFilial("SD2") + _cDoc + _cSerie + _cCliente + _cLoja
 			
-			_nPesoItem := ( POSICIONE( "SB1" , 1 , xFilial("SB1") + SD2->D2_COD , "B1_PESBRU" ) * SD2->D2_QUANT )
+			_nPesoItem := ( Posicione( "SB1" , 1 , xFilial("SB1") + SD2->D2_COD , "B1_PESBRU" ) * SD2->D2_QUANT )
 			
 			//Gravacao do Valor Frete por item da Nota                                     |
-	        IF MV_PAR03 = 2
+	        If MV_PAR03 = 2
 			   SD2->( RecLock( "SD2" , .F. ) )
 			   SD2->D2_I_FRET := ( ( _nVlrFretNF / _nPesoNota ) * _nPesoItem )
-			   SD2->( MsUnlock() )
-			ENDIF   
+			   SD2->( MSUnLock() )
+			EndIf   
 			
                         //'Carga'        ,'Pedido'              ,'Nf + Serie'             ,'Item'      ,'Frete'                                      ,PESO
-            AADD(aLogFre,{_cCarga+" SD2:",SF2->F2_I_PEDID+" [P]",SF2->F2_DOC+SF2->F2_SERIE,SD2->D2_ITEM,ROUND(( _nVlrFretNF / _nPesoNota ) * _nPesoItem,2),_nPesoItem})
+            aAdd(aLogFre,{_cCarga+" SD2:",SF2->F2_I_PEDID+" [P]",SF2->F2_DOC+SF2->F2_SERIE,SD2->D2_ITEM,Round(( _nVlrFretNF / _nPesoNota ) * _nPesoItem,2),_nPesoItem})
 		    SD2->( DBSkip() )
 		EndDo
 		
@@ -325,4 +325,4 @@ EndIf
 
 SD2->( DBSetOrder(1) )
 
-Return()
+Return

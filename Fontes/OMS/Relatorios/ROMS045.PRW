@@ -10,13 +10,13 @@ Lucas Borges      | 28/08/2024 | Incluída proteção na classe evitando error.log 
 =============================================================================================================================== 
 Analista     - Programador  - Inicio   - Envio    - Chamado - Motivo da Alteração
 ===============================================================================================================================
-Alex         - Igor Melgaço - 02/05/25 - 06/05/25 - 50525   - Ajuste para remoção de diretório local C:\SMARTCLIENT\.
+Alex         - Igor Melgaço - 02/05/25 - 06/05/25 - 50525   - Ajuste para remoção de diretório Local C:\SMARTCLIENT\.
 ===============================================================================================================================
 */
-#INCLUDE "RWMAKE.CH"
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "RPTDEF.CH"
-#INCLUDE "FWPrintSetup.ch"
+#Include "RWMAKE.CH"
+#Include "TOTVS.ch"
+#Include "RPTDEF.CH"
+#Include "FWPrintSetup.ch"
 
 /*
 ===============================================================================================================================
@@ -34,13 +34,13 @@ Retorno-----------: Nenhum
 User Function ROMS045()
 
 Private oPrint
-Private cproduto := space(15)
+Private cproduto := Space(15)
 Private nquant := 0
-Private dprod := date()
-Private dvalid := date() + 240
-Private clote := space(4)
+Private dprod := Date()
+Private dvalid := Date() + 240
+Private clote := Space(4)
 Private npeso := 0
-Private csequen := space(7)
+Private csequen := Space(7)
 
 //_cPallet:= ZFW->ZFW_PALLET
 cproduto:= ZFW->ZFW_PRODUT
@@ -69,7 +69,7 @@ Retorno-----------: Nenhum
 */  
 Static Function roms045E()
 
-LOCAL _ni
+Local _nI
 Private nlinha := 40
 Private ncoluna := 20
 Private ntamh := 1120
@@ -82,22 +82,22 @@ oFont10n := TFont():New("Arial", 9, 10, .T., .T., 5,,, .T., .F.,,,,,, oPrint)
 oFont12n := TFont():New("Arial", 9, 12, .T., .T., 5,,, .T., .F.,,,,,, oPrint)
 
 //Localiza produto selecionado
-posicione("SB1",1,xfilial("SB1")+cproduto,"B1_COD")
+Posicione("SB1",1,xFilial("SB1")+cproduto,"B1_COD")
 
-If len(alltrim(SB1->B1_I_DUN14)) < 10
-	U_ITMSG("Produto sem código DUN14 válido","Atenção","Preencha o campo "+AVSX3("B1_I_DUN14",5)+" no cadastro do produto: "+cproduto,3)
+If Len(AllTrim(SB1->B1_I_DUN14)) < 10
+	U_ITMsg("Produto sem código DUN14 válido","Atenção","Preencha o campo "+AVSX3("B1_I_DUN14",5)+" no cadastro do produto: "+cproduto,3)
 	Return
-Endif
+EndIf
 
 If !Pergunte("ROMS045",.T.)
-     return
-Endif
+     Return
+EndIf
 
 nTrPl := MV_PAR01
 
-PRIVATE _lSite:=.F.//U_ITMSG("Origem do Codigo de Barra do Site ? ",'Atenção!',,3,2,2)
+Private _lSite:=.F.//U_ITMsg("Origem do Codigo de Barra do Site ? ",'Atenção!',,3,2,2)
 
-IF _lSite
+If _lSite
    ntamv    :=1680
    ntamh    :=1120
    nAltura  :=0480 
@@ -114,7 +114,7 @@ IF _lSite
    oPrint :SetPortrait()                  // Fixa a Impressao em Retrato
    oPrint :Setup()
 
-ELSE
+Else
 
    ntamv    :=1550//ALTURA DAS LINHA LATERAIS 
    ntamh    :=1140//LARGURA DA ETIQUETA
@@ -131,7 +131,7 @@ ELSE
    cLocal:= GetTempPath() 
 
    cFileName:="ROM045_"
-   cFileName+=DToS( DATE() ) + "_"
+   cFileName+=DToS( Date() ) + "_"
    cFileName+=StrTran(TIME(), ":" , "" )
    cFileName:=cFileName+".pdf"
 
@@ -139,14 +139,14 @@ ELSE
    oPrint:SetPortrait()                  // Fixa a Impressao em Retrato
 	oPrint:Setup()
 
-	IF UPPER(oPrint:cPathPDF) == "C:\" .OR. EMPTY(oPrint:cPathPDF)
+	If Upper(oPrint:cPathPDF) == "C:\" .Or. Empty(oPrint:cPathPDF)
 	   oPrint:cPathPDF := cLocal
-	ENDIF
+	EndIf
 	
-	IF oPrint:nModalResult = 2//APERTOU O CANCELA
-	   RETURN .F.
-	ENDIF
-ENDIF   
+	If oPrint:nModalResult = 2//APERTOU O CANCELA
+	   Return .F.
+	EndIf
+EndIf   
 
 oFont10  := TFont():New("Arial", 9, (10+nTamFonte  ), .T., .F., 5,,, .T., .F.,,,,,, oPrint)
 oFont10n := TFont():New("Arial", 9, (10+nTamFonte  ), .T., .T., 5,,, .T., .F.,,,,,, oPrint)
@@ -172,30 +172,30 @@ nLinha += 060 - nLinhAux2
 
 nsoma := 0
 
-cprebar := "9" + SUBSTR(alltrim(SB1->B1_I_DUN14),2,(len(alltrim(SB1->B1_I_DUN14))-2))
+cprebar := "9" + SubStr(AllTrim(SB1->B1_I_DUN14),2,(Len(AllTrim(SB1->B1_I_DUN14))-2))
 
-For _ni := 1 to len(cprebar)
-   If int(_ni/2) == _ni/2
-      nsoma +=  val(substr(cprebar,_ni,1))
+For _nI := 1 to Len(cprebar)
+   If int(_nI/2) == _nI/2
+      nsoma +=  Val(SubStr(cprebar,_nI,1))
    Else
-      nsoma += 3 * val(substr(cprebar,_ni,1))
-  Endif
+      nsoma += 3 * Val(SubStr(cprebar,_nI,1))
+  EndIf
 Next	
 
 nprox := nsoma
 
-Do while int(nprox/10) != nprox/10
+While int(nprox/10) != nprox/10
 	nprox++
-Enddo
+EndDo
 
-cdigito := alltrim(str(nprox-nsoma))
+cdigito := AllTrim(Str(nprox-nsoma))
 cgtin := cprebar + cdigito
 
-IF SB1->B1_UM = "KG"
+If SB1->B1_UM = "KG"
    nPesoLiq:=npeso-(ZFW->ZFW_TREMB+ZFW->ZFW_TRCAX)
-ELSE
+Else
    nPesoLiq:=npeso
-ENDIF
+EndIf
 
 oPrint:Say(nLinha+nLinhAux1, nColuna + _nEsqu1, cgtin, oFont10)//150
 oPrint:Say(nLinha+nLinhAux1, nColuna + _nEsqu2, transform(nPesoLiq,"@E 9,999,999.99") + " kg.", oFont10)// - (aret[3])//750
@@ -210,8 +210,8 @@ oPrint:Line(nlinha - 10  , ncoluna + nAltura, nlinha + 110,  ncoluna + nAltura)
 
 nLinha += 060 - nLinhAux2
 
-oPrint:Say(nLinha+nLinhAux1, nColuna + _nEsqu1, dtoc(dvalid), oFont10)//210
-oPrint:Say(nLinha+nLinhAux1, nColuna + _nEsqu2, TRANSFORM(round(nquant,2),"@E 9,999,999"), oFont10)//710
+oPrint:Say(nLinha+nLinhAux1, nColuna + _nEsqu1, DToC(dvalid), oFont10)//210
+oPrint:Say(nLinha+nLinhAux1, nColuna + _nEsqu2, TRANSFORM(Round(nquant,2),"@E 9,999,999"), oFont10)//710
 
 nLinha += 050
 oPrint:Line(nlinha,ncoluna - 5,nlinha,ncoluna + ntamh)
@@ -224,7 +224,7 @@ oPrint:Line(nlinha - 10 , ncoluna + nAltura, nlinha + 110,  ncoluna + nAltura)
 nLinha += 060 - nLinhAux2
 
 oPrint:Say(nLinha+nLinhAux1, nColuna + _nEsqu1, clote, oFont10)//210
-oPrint:Say(nLinha+nLinhAux1, nColuna + _nEsqu2, dtoc(dprod), oFont10)//750
+oPrint:Say(nLinha+nLinhAux1, nColuna + _nEsqu2, DToC(dprod), oFont10)//750
 
 nLinha += 050
 oPrint:Line(nlinha,ncoluna - 5,nlinha,ncoluna + ntamh)
@@ -236,8 +236,8 @@ oPrint:Say(nLinha+nLinhAux1, nColuna + _nEsqu2, "Produto", oFont10n)//710
 
 nLinha += 060 - nLinhAux2
 
-oPrint:Say(nLinha+nLinhAux1, nColuna + _nEsqu1, transform(round((npeso+nTrPl),2),"@E 9,999,999.99") + " kg.", oFont10)//110
-oPrint:Say(nLinha+nLinhAux1, nColuna + _nEsqu2, substr(alltrim(SB1->B1_DESC),1,30), oFont10)//510
+oPrint:Say(nLinha+nLinhAux1, nColuna + _nEsqu1, transform(Round((npeso+nTrPl),2),"@E 9,999,999.99") + " kg.", oFont10)//110
+oPrint:Say(nLinha+nLinhAux1, nColuna + _nEsqu2, SubStr(AllTrim(SB1->B1_DESC),1,30), oFont10)//510
 
 
 nLinha += 050
@@ -269,21 +269,21 @@ cprebar := "0" + "789808064" + csequen
 
 nsoma := 0
 
-For _ni := 1 to len(cprebar)
-   If int(_ni/2) == _ni/2
-      nsoma +=  val(substr(cprebar,_ni,1))
+For _nI := 1 to Len(cprebar)
+   If int(_nI/2) == _nI/2
+      nsoma +=  Val(SubStr(cprebar,_nI,1))
    Else
-      nsoma += 3 * val(substr(cprebar,_ni,1))
-   Endif
-Next _ni
+      nsoma += 3 * Val(SubStr(cprebar,_nI,1))
+   EndIf
+Next _nI
 
 nprox := nsoma
 
-Do while int(nprox/10) != nprox/10
+While int(nprox/10) != nprox/10
 	nprox++
-Enddo
+EndDo
 
-cdigito := alltrim(str(nprox-nsoma))
+cdigito := AllTrim(Str(nprox-nsoma))
 
 oPrint:Say(nLinha+nLinhAux1, nColuna + _nEsqu1, "0" + "789808064" + csequen + cdigito, oFont10)// 350
 
@@ -306,29 +306,29 @@ oPrint:Say(nLinha+nLinhAux1, nColuna + 10, "Tara Total:", oFont10n)
 oPrint:Say(nLinha+nLinhAux1, nColuna + 350, transform((ZFW->ZFW_TREMB+ZFW->ZFW_TRCAX+nTrPl),"@E 9,999.999") + " kg", oFont10)//aret[2] + aret[1]
 nLinha += 050
 
-ccodbar1 := "(02)" + cgtin + "(3102)" + strzero(round((nPesoLiq)*100,0),6) // - aret[3]
+ccodbar1 := "(02)" + cgtin + "(3102)" + StrZero(Round((nPesoLiq)*100,0),6) // - aret[3]
 
-ccodbar1 += "(3302)" +  strzero(round((npeso+nTrPl)*100,0),6) + "(37)" + ALLTRIM(str(round(nquant,0))) 
+ccodbar1 += "(3302)" +  StrZero(Round((npeso+nTrPl)*100,0),6) + "(37)" + AllTrim(Str(Round(nquant,0))) 
 
-ccodbar2 := "(15)" + substr(dtos(dvalid),3,2) +  substr(dtos(dvalid),5,2) + substr(dtos(dvalid),7,2) 
+ccodbar2 := "(15)" + SubStr(DToS(dvalid),3,2) +  SubStr(DToS(dvalid),5,2) + SubStr(DToS(dvalid),7,2) 
 //    					ano                        mes                           dia          
 
-ccodbar2 += "(11)" +  substr(dtos(dprod),3,2) +  substr(dtos(dprod),5,2) + substr(dtos(dprod),7,2) 
+ccodbar2 += "(11)" +  SubStr(DToS(dprod),3,2) +  SubStr(DToS(dprod),5,2) + SubStr(DToS(dprod),7,2) 
 //						ano                        mes                           dia   
 
-ccodbar2 += "(7030)" + "0763763"// + "(10)" + ALLTRIM(clote)
+ccodbar2 += "(7030)" + "0763763"// + "(10)" + AllTrim(clote)
 //                      Reg SIF
 
 cCodBar2Say:=ccodbar2
-ccodbar2:=STRTRAN(ccodbar2,"(","")
-ccodbar2:=STRTRAN(ccodbar2,")","")
-ccodbar2 += "(10)" + ALLTRIM(clote)
-cCodBar2Say+= "(10)" + ALLTRIM(clote)
+ccodbar2:=StrTran(ccodbar2,"(","")
+ccodbar2:=StrTran(ccodbar2,")","")
+ccodbar2 += "(10)" + AllTrim(clote)
+cCodBar2Say+= "(10)" + AllTrim(clote)
 
 ccodbar3 := "(00)0" + "789808064" + csequen + cdigito
 //                       Registro GS1 
 
-IF _lSite
+If _lSite
    _cExt     := ".gif"
    _EndHttp1 := "https://barcode.tec-it.com/barcode.ashx?data="
    _EndHttp2 := "&code=EANUCC128&multiplebarcodes=true&translate-esc=true&unit=Fit&dpi=96&imagetype=Gif&rotation=0&color=%23000000&bgcolor=%23ffffff&qunit=Mm&quiet=0"
@@ -336,72 +336,72 @@ IF _lSite
 
    url := _EndHttp1 + ccodbar1 + _EndHttp2
    Html  := HttpGet( Url )
-  	IF Html <> nil
+  	If Html <> nil
 	   MemoWrite( _cCaminho + ccodbar1 + _cExt, Html )
-	ENDIF   
+	EndIf   
 	oPrint:SayBitmap( nlinha - 05 ,ncoluna+40,_cCaminho + ccodbar1 + _cExt,1050,170 )
-ELSE
+Else
 	cCodBar1Say:=ccodbar1
-	ccodbar1:=STRTRAN(ccodbar1,"(","")
-	ccodbar1:=STRTRAN(ccodbar1,")","")
+	ccodbar1:=StrTran(ccodbar1,"(","")
+	ccodbar1:=StrTran(ccodbar1,")","")
 	cCodBar3Say:=ccodbar3
-	ccodbar3:=STRTRAN(ccodbar3,"(","")
-	ccodbar3:=STRTRAN(ccodbar3,")","")
+	ccodbar3:=StrTran(ccodbar3,"(","")
+	ccodbar3:=StrTran(ccodbar3,")","")
 	_cTypeBar:="EAN128"//"CODE128"
-ENDIF
+EndIf
    
 nLinha += 180
 
-IF _lSite
+If _lSite
 	url := _EndHttp1 + ccodbar2 + _EndHttp2
 	Html  := HttpGet( Url )
-  	IF Html <> nil
+  	If Html <> nil
 	   MemoWrite( _cCaminho + ccodbar2 + _cExt, Html )
-	ENDIF   
+	EndIf   
 	oPrint:SayBitmap( nlinha + 55 ,ncoluna+40,_cCaminho + ccodbar2 + _cExt,1050,170 )
-ELSE
+Else
    oPrint:Say(nLinha-20, nColuna + 100, cCodBar1Say, oFont10)
-ENDIF
+EndIf
 
 nLinha += 245
 
-IF _lSite
+If _lSite
 	url := _EndHttp1 + ccodbar3 + _EndHttp2
 	Html  := HttpGet( Url )
-  	IF Html <> nil
+  	If Html <> nil
 	   MemoWrite( _cCaminho + ccodbar3 + _cExt, Html )
-	ENDIF   
+	EndIf   
 	oPrint:SayBitmap( nlinha + 55 ,ncoluna+40,_cCaminho + ccodbar3 + _cExt,600,170 )
   	SLEEP(5000)
-ELSE
+Else
 	oPrint:Say(nLinha-050, nColuna + 100, cCodBar2Say, oFont10)
 	oPrint:FWMSBAR(_cTypeBar,21,0.4,ccodbar1,oPrint,.T.,,.T.,0.0168,0.7,.F.,"Arial","C",.F.,1,1,.F.)
 	oPrint:FWMSBAR(_cTypeBar,26,0.5,ccodbar2,oPrint,.T.,,.T.,0.0168,0.7,.F.,"Arial","C",.F.,1,1,.F.)
 	oPrint:FWMSBAR(_cTypeBar,31,0.5,ccodbar3,oPrint,.T.,,.T.,0.0168,0.7,.F.,"Arial","C",.F.,1,1,.F.)
-ENDIF
+EndIf
 
 nLinha += 245
 
-IF _lSite
+If _lSite
 	nLinha += 60
-ELSE
+Else
 	oPrint:Say(nLinha-070, nColuna + 100, cCodBar3Say, oFont10)
 	nLinha += 20
-ENDIF
+EndIf
 
 oPrint:Line(nlinhaIni,ncoluna - 5     , nlinha, ncoluna - 5     )//LINHA LATERAL ESQUERDA
 oPrint:Line(nlinhaIni,ncoluna + ntamh , nlinha, ncoluna + ntamh )//LINHA LATERAL DIRETA
 oPrint:Line(nlinha   ,ncoluna - 5     , nlinha ,ncoluna + ntamh )//LINHA FINAL
 
-IF _lSite
+If _lSite
     LjMsgRun( "Gerando a visualização..." , "Aguarde!" , {|| oPrint:Preview() } )//Visualiza antes de imprimir
 	oPrint:End()
-ELSE
+Else
    If !(oPrint:nModalResult == PD_OK)
 	   oPrint:Deactivate() 
 	   Return
    EndIf
     LjMsgRun( "Gerando a visualização..." , "Aguarde!" , {|| oPrint:Preview() } )//Visualiza antes de imprimir
-ENDIF
+EndIf
 
 Return

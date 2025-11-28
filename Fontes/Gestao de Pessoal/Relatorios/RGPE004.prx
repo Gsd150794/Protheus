@@ -2,38 +2,30 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                           
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Josué Danich     | 28/12/2015 | Adicionado include protheus.ch para permitir uso de constante FWGETTAMFILIAL - Chamado 13385 
--------------------------------------------------------------------------------------------------------------------------------
- Josué Danich     | 28/11/2017 | Reconstrução do relatório pra versão 12 - Chamado 22519 
--------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges     | 02/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+Josué Danich  |28/12/2015| Chamado 13385. AdicionadIncludede protheus.ch para permitir uso de constante FWGETTAMFILIAL
+Josué Danich  |28/11/2017| Chamado 22519. Reconstrução do relatório pra versão 12
+Lucas Borges  |02/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
 #Include "GPER400.CH"
 #Include "Report.ch"
-#Include "protheus.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa--------: RGPE004
-===============================================================================================================================
 Descrição-------: Versão customizada do relatório padrão GPER400
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
 User Function RGPE004()
 
 	Local	oReport
-	Local	aArea 		:= GetArea()
+	Local	aArea 		:= FWGetArea()
 
 	Private cString	:= "SRA"				// alias do arquivo principal (Base)
 	Private cPerg		:= "GP400RA"
@@ -57,17 +49,14 @@ User Function RGPE004()
 	oReport:= RGPE004R()
 	oReport:PrintDialog()
 
-	RestArea( aArea )
+	FWRestArea( aArea )
 Return
 
 /*
 ===============================================================================================================================
 Programa--------: RGPE004R
-===============================================================================================================================
 Descrição-------: Relacao de Programacao de Ferias
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -86,7 +75,7 @@ Local aOrd    	:= If(cPaisLoc <> "MEX",{OemToAnsi(STR0001),OemToAnsi(STR0002),Oe
 //-- Inicio definicao do Relatorio
 	DEFINE REPORT oReport NAME "GPER400" TITLE OemToAnsi(STR0008) PARAMETER "GP400RA" ACTION {|oReport| RGPE004P(oReport)} DESCRIPTION cDesc
 
-		DEFINE SECTION oSection1 OF oReport TABLES "SRA", "SRF" TITLE OemToAnsi(STR0047) TOTAL IN COLUMN ORDERS aOrd
+		DEFINE Section oSection1 OF oReport TABLES "SRA", "SRF" TITLE OemToAnsi(STR0047) TOTAL IN COLUMN ORDERS aOrd
 
 			DEFINE CELL NAME "RA_FILIAL" 	OF oSection1 ALIAS cString
 			DEFINE CELL NAME "RA_CC" 	 	OF oSection1 ALIAS cString
@@ -114,14 +103,14 @@ Local aOrd    	:= If(cPaisLoc <> "MEX",{OemToAnsi(STR0001),OemToAnsi(STR0002),Oe
 				DEFINE CELL NAME "TOTAL"		OF oSection1 ALIAS "   "  BLOCK {||cTotal } 	TITLE oemToAnsi(STR0043) SIZE 7 PICTURE "@E 9999.9"									//-- Total de Ferias ( nDiasVenc + nDiasProp - nDFaltaV - nDFaltaP )
 			EndIf
 
-			DEFINE SECTION oSection2 OF oSection1 TABLES "SRF" TOTAL IN COLUMN TITLE STR0049
+			DEFINE Section oSection2 OF oSection1 TABLES "SRF" TOTAL IN COLUMN TITLE STR0049
 			oSection2:SetHeaderSection(.F.)
 
 				DEFINE CELL NAME "PROGFER"	OF oSection2	ALIAS "   " BLOCK {|| cProgrFer} SIZE 120    //-- Programacao de ferias
 				DEFINE CELL NAME "DIASFER"	OF oSection2	ALIAS "   " BLOCK {|| cDiasFer } SIZE 016	 //-- Dias de ferias
 				DEFINE CELL NAME "DIASABO"	OF oSection2	ALIAS "   " BLOCK {|| cDiasAbo } SIZE 050    //-- Dias de Abono
 
-		DEFINE SECTION oSection3  OF oReport TABLES "SRA" TOTAL IN COLUMN  TITLE STR0001
+		DEFINE Section oSection3  OF oReport TABLES "SRA" TOTAL IN COLUMN  TITLE STR0001
 
 			DEFINE CELL NAME "RA_CC" 		OF oSection3 ALIAS "SRA" TITLE oemToAnsi(STR0001)
 			DEFINE CELL NAME "CDESCCC" 		OF oSection3 ALIAS "   "  BLOCK {|| cDescCC } TITLE "" SIZE 50
@@ -131,11 +120,8 @@ Return oReport
 /*
 ===============================================================================================================================
 Programa--------: RGPE004P
-===============================================================================================================================
 Descrição-------: Print Report
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -249,7 +235,7 @@ Private lFirst		:= .T.
 // Verifica a existencia dos campos de programacao ferias no SRF
 //================================================================
 lTemCpoProg := fTCpoProg()
-lOrdSRF 	:= If(nOrdem==5 .or. nOrdem==6, .T. ,lOrdSRF)
+lOrdSRF 	:= If(nOrdem==5 .Or. nOrdem==6, .T. ,lOrdSRF)
 //================================================================
 // Transforma parametros do tipo Range em  expressao ADPL para  
 // ser utilizada no filtro                                      
@@ -259,42 +245,42 @@ MakeAdvplExpr("GP400RA")								//--Deve ser antes de alimentar as mv's
 //================================================================
 // Carrega pergunte                                             
 //================================================================
-cFilAtual	:= mv_par01                          			//  Filial
-cCCusto	:= mv_par02                          			//  Centro de Custo De
-cMatric	:= mv_par03                          			//  Matricula De
-cNome    	:= mv_par04                          			//  Nome Ate
-cSituacao	:= mv_par05                          			//  Situacao Funcionario
-cCategoria	:= mv_par06                          			//  Categoria Funcionario
-lSalta		:= If( mv_par07 == 1 , .T. , .F. )   			//  Salta Pagina Quebra C.Custo
-nTipFerias	:= mv_par08                          			//  1-Nao programadas, 2-Programadas e 3-Ambas
-dProgDe	:= mv_par09                          			//  Data inicial para ferias programdas
-dProgAte	:= mv_par10                          			//  Data Final   para ferias programdas
-nPeriodo	:= mv_par11							 			// Imprimir 1 periodo, 2 periodos ou os 3 periodos
-cProcesso	:= If( Empty(mv_par12),"", AllTrim(mv_par12) )	//  Processo
+cFilAtual	:= MV_PAR01                          			//  Filial
+cCCusto	:= MV_PAR02                          			//  Centro de Custo De
+cMatric	:= MV_PAR03                          			//  Matricula De
+cNome    	:= MV_PAR04                          			//  Nome Ate
+cSituacao	:= MV_PAR05                          			//  Situacao Funcionario
+cCategoria	:= MV_PAR06                          			//  Categoria Funcionario
+lSalta		:= If( MV_PAR07 == 1 , .T. , .F. )   			//  Salta Pagina Quebra C.Custo
+nTipFerias	:= MV_PAR08                          			//  1-Nao programadas, 2-Programadas e 3-Ambas
+dProgDe	:= MV_PAR09                          			//  Data inicial para ferias programdas
+dProgAte	:= MV_PAR10                          			//  Data Final   para ferias programdas
+nPeriodo	:= MV_PAR11							 			// Imprimir 1 periodo, 2 periodos ou os 3 periodos
+cProcesso	:= If( Empty(MV_PAR12),"", AllTrim(MV_PAR12) )	//  Processo
 
-DbSelectArea("RCH")
-RCH->( DbSetOrder(1) )
+DBSelectArea("RCH")
+RCH->( DBSetOrder(1) )
 lRCHComp := Empty(RCH->RCH_FILIAL)
 
 If cPaisLoc == "BRA"
-	nTipo	   	:= mv_par13										// 1-Programacao de Ferias, 2-Programacao de Recesso
+	nTipo	   	:= MV_PAR13										// 1-Programacao de Ferias, 2-Programacao de Recesso
 Else
 	nTipo := 1
 EndIf
 
 If nTipo == 1
-	cCategoria 	:= mv_par06                          	//  Categoria Funcionario
+	cCategoria 	:= MV_PAR06                          	//  Categoria Funcionario
 Else
 	cCategoria 	:= "EG"                          		//  Categoria Estagiario Horista e Mensalista
-Endif
+EndIf
 
 If nTipo == 2
 	nPeriodo	:= 1
-Endif
+EndIf
 
 If cPaisLoc == "BRA"
-	nDiasMax	:= If( Empty(mv_par14), 45 , val(mv_par14) )
-	nDiasIdeal	:= If( Empty(mv_par15), 30 , val(mv_par15) )
+	nDiasMax	:= If( Empty(MV_PAR14), 45 , Val(MV_PAR14) )
+	nDiasIdeal	:= If( Empty(MV_PAR15), 30 , Val(MV_PAR15) )
 Else
 	nDiasMax	:= 45
 	nDiasIdeal	:= 30
@@ -311,13 +297,13 @@ Else
 	cTitulo 	:= OemToAnsi(STR0051) + " "
 	cTitulo 	+= If(nOrdem==1,STR0012,If(nOrdem==2,STR0013,If(nOrdem==3,STR0020,If(nOrdem==4,STR0021,If(nOrdem==5,STR0022,STR0023))))) //"RELACAO DE PROGRAMACAO DE RECESSO "###"( C.CUSTO )"###"( MATRICULA )"###"( NOME )"###"( C.CUSTO + NOME )"###"( DATA BASE )"###"( DATA INICIO )"
 
-Endif
+EndIf
 
 oReport:SetTitle(cTitulo)
 
 If nTipo == 2
 	    oSection1:Hide()
-	   	DEFINE SECTION oSection1 OF oReport TABLES "SRA" , "SRF" TOTAL IN COLUMN ORDERS aOrd TITLE oemToAnsi(STR0058)  //-- Estagiario
+	   	DEFINE Section oSection1 OF oReport TABLES "SRA" , "SRF" TOTAL IN COLUMN ORDERS aOrd TITLE oemToAnsi(STR0058)  //-- Estagiario
 		DEFINE CELL NAME "RA_FILIAL" 	OF oSection1 ALIAS cString
 		DEFINE CELL NAME "RA_CC" 	 	OF oSection1 ALIAS cString
 		DEFINE CELL NAME "RA_MAT" 	 	OF oSection1 ALIAS cString
@@ -331,70 +317,70 @@ If nTipo == 2
 	   	DEFINE CELL NAME "FERIASPRO"	OF oSection1 ALIAS "   "  BLOCK {||cFerProp } 	TITLE oemToAnsi(STR0055) + CRLF + oemToAnsi(STR0041) PICTURE "@E 999.9"	//-- Dias de Recesso Proporcionais
 	  	DEFINE CELL NAME "TOTAL"		OF oSection1 ALIAS "   "  BLOCK {||cTotal } 	TITLE oemToAnsi(STR0043) + CRLF + oemToAnsi(STR0055) PICTURE "@E 999.9"	//-- Total Recesso ( nDiasVenc + nDiasProp - nDFaltaV - nDFaltaP )
 		oSection1:Show()
-Endif
+EndIf
 
 //================================================================
 // Quebra de pagina C.Custo                                     
 //================================================================
-If (nOrdem = 1 .or. nOrdem = 4)
+If (nOrdem = 1 .Or. nOrdem = 4)
 	DEFINE BREAK oBreakCc OF oReport WHEN {|| SRA->RA_FILIAL+SRA->RA_CC } TITLE { || OemToansi(STR0064 + STR0063) }
-	oBreakCc:OnBreak({|x,y| cBreakCC := OemToansi(STR0064 + STR0063) + oSection1:Cell("RA_CC"):GetText() + " - " + Iif(lOldDescCC .AND. !lFimArqui, cOldDescCC, cLocDescCC) })
+	oBreakCc:OnBreak({|x,y| cBreakCC := OemToansi(STR0064 + STR0063) + oSection1:Cell("RA_CC"):GetText() + " - " + IIf(lOldDescCC .And. !lFimArqui, cOldDescCC, cLocDescCC) })
 	oBreakCc:SetTotalText({||cBreakCC})
 
-	DEFINE FUNCTION FROM oSection1:Cell("FERIASVENC") FUNCTION SUM BREAK oBreakCC NO END SECTION PICTURE "@E 9999.9"
-	DEFINE FUNCTION FROM oSection1:Cell("FERIASPRO") FUNCTION SUM BREAK oBreakCC NO END SECTION PICTURE "@E 9999.9"
+	DEFINE FUNCTION FROM oSection1:Cell("FERIASVENC") FUNCTION SUM BREAK oBreakCC NO END Section PICTURE "@E 9999.9"
+	DEFINE FUNCTION FROM oSection1:Cell("FERIASPRO") FUNCTION SUM BREAK oBreakCC NO END Section PICTURE "@E 9999.9"
 
 	If nTipo == 1
-		DEFINE FUNCTION FROM oSection1:Cell("FALTASVEN") FUNCTION SUM BREAK oBreakCC NO END SECTION PICTURE "@E 9999.9"
-		DEFINE FUNCTION FROM oSection1:Cell("FALTAPROP") FUNCTION SUM BREAK oBreakCC NO END SECTION PICTURE "@E 9999.9"
-	Endif
+		DEFINE FUNCTION FROM oSection1:Cell("FALTASVEN") FUNCTION SUM BREAK oBreakCC NO END Section PICTURE "@E 9999.9"
+		DEFINE FUNCTION FROM oSection1:Cell("FALTAPROP") FUNCTION SUM BREAK oBreakCC NO END Section PICTURE "@E 9999.9"
+	EndIf
 
-	DEFINE FUNCTION FROM oSection1:Cell("TOTAL") FUNCTION SUM BREAK oBreakCC NO END SECTION PICTURE "@E 99999.9"
+	DEFINE FUNCTION FROM oSection1:Cell("TOTAL") FUNCTION SUM BREAK oBreakCC NO END Section PICTURE "@E 99999.9"
 
 	If lSalta
 		oBreakCc:SetPageBreak(.T.)
-	Endif
-Endif
+	EndIf
+EndIf
 
 //================================================================
 // Quebra de pagina Filial                                      
 //================================================================
 DEFINE BREAK oBreakFil OF oReport WHEN {|| SRA->RA_FILIAL }  TITLE { || OemToansi(STR0064 + STR0062) + cBreakFil }
 oBreakFil:OnBreak({|x,y| cBreakFil := x })
-DEFINE FUNCTION FROM oSection1:Cell("FERIASVENC") FUNCTION SUM BREAK oBreakFil NO END SECTION PICTURE "@E 9999.9"
-DEFINE FUNCTION FROM oSection1:Cell("FERIASPRO") FUNCTION SUM BREAK oBreakFil NO END SECTION PICTURE "@E 9999.9"
+DEFINE FUNCTION FROM oSection1:Cell("FERIASVENC") FUNCTION SUM BREAK oBreakFil NO END Section PICTURE "@E 9999.9"
+DEFINE FUNCTION FROM oSection1:Cell("FERIASPRO") FUNCTION SUM BREAK oBreakFil NO END Section PICTURE "@E 9999.9"
 
 If nTipo == 1
-	DEFINE FUNCTION FROM oSection1:Cell("FALTASVEN") FUNCTION SUM BREAK oBreakFil NO END SECTION PICTURE "@E 9999.9"
-	DEFINE FUNCTION FROM oSection1:Cell("FALTAPROP") FUNCTION SUM BREAK oBreakFil NO END SECTION PICTURE "@E 9999.9"
-Endif
+	DEFINE FUNCTION FROM oSection1:Cell("FALTASVEN") FUNCTION SUM BREAK oBreakFil NO END Section PICTURE "@E 9999.9"
+	DEFINE FUNCTION FROM oSection1:Cell("FALTAPROP") FUNCTION SUM BREAK oBreakFil NO END Section PICTURE "@E 9999.9"
+EndIf
 
-DEFINE FUNCTION FROM oSection1:Cell("TOTAL") FUNCTION SUM BREAK oBreakFil NO END SECTION PICTURE "@E 99999.9"
+DEFINE FUNCTION FROM oSection1:Cell("TOTAL") FUNCTION SUM BREAK oBreakFil NO END Section PICTURE "@E 99999.9"
 
 oBreakFil:SetPageBreak(.T.)
 oSection1:SetHeaderPage(.T.)    //-- Imprime Cabecalho padrao
 oSection2:SetHeaderPage(.F.)    //-- Imprime Cabecalho padrao
 oSection3:SetHeaderPage(.F.)    //-- Imprime Cabecalho padrao
 
-dbSelectArea( "SRA" )
-dbGoTop()
+DBSelectArea( "SRA" )
+DBGoTop()
 
 If nOrdem == 1
-	dbSetOrder( 2 )
+	DBSetOrder( 2 )
 	cOrdem	:= "SRA->RA_FILIAL + SRA->RA_CC + SRA->RA_MAT"
 ElseIf nOrdem == 2
-	dbSetOrder( 1 )
+	DBSetOrder( 1 )
 	cOrdem	:= "SRA->RA_FILIAL + SRA->RA_MAT"
 ElseIf nOrdem == 3
-	dbSetOrder( 3 )
+	DBSetOrder( 3 )
 	cOrdem	:= "SRA->RA_FILIAL + SRA->RA_NOME + SRA->RA_MAT"
 ElseIf nOrdem == 4
-    dbSetOrder( 8 )
+    DBSetOrder( 8 )
 	cOrdem	:= "SRA->RA_FILIAL + SRA->RA_CC + SRA->RA_NOME"
 ElseIf nOrdem == 5
-	cOrdem	:= "SRF->RF_FILIAL + DTOS(SRF->RF_DATABAS)"
+	cOrdem	:= "SRF->RF_FILIAL + DToS(SRF->RF_DATABAS)"
 ElseIf nOrdem == 6
-	cOrdem	:= "SRF->RF_FILIAL + DTOS(SRF->RF_DATAINI)"
+	cOrdem	:= "SRF->RF_FILIAL + DToS(SRF->RF_DATAINI)"
 EndIf
 
 //================================================================
@@ -402,13 +388,13 @@ EndIf
 //================================================================
 If lOrdSRF 					// Ordem por Programa‡Æo de F‚rias
 
-	dbSelectArea("SRF")
-	cArqNtx1  := CriaTrab(NIL,.f.)
+	DBSelectArea("SRF")
+	cArqNtx1  := CriaTrab(NIL,.F.)
 	IndRegua("SRF",cArqNtx1,cOrdem,,,STR0024)		// Selecionando Registros
-	dbSetOrder(1)
-	SRF->( dbGoTop() )
+	DBSetOrder(1)
+	SRF->( DBGoTop() )
 Else
-	dbSelectArea( "SRA" )
+	DBSelectArea( "SRA" )
 EndIf
 
 //================================================================
@@ -416,27 +402,27 @@ EndIf
 //================================================================
 
 If !cFilAtual=Space(FwGetTamFilial)
-	cFiltro += cFilAtual + " .AND. "
+	cFiltro += cFilAtual + " .And. "
 EndIf
 
 If !Empty(cCCusto)
-	cFiltro += cCCusto + " .AND. "
+	cFiltro += cCCusto + " .And. "
 EndIf
 
 If !Empty(cMatric)
-	cFiltro += cMatric + " .AND. "
+	cFiltro += cMatric + " .And. "
 EndIf
 
 If !Empty(cNome)
-	cFiltro += cNome + " .AND. "
+	cFiltro += cNome + " .And. "
 EndIf
 
 cUserFiltro += oSection1:GetUserExp( cString,.F.)
-cUserFiltro += If( !Empty(cUserFiltro), " .AND. ", "" )
+cUserFiltro += If( !Empty(cUserFiltro), " .And. ", "" )
 
 cFiltro += If( !Empty(cUserFiltro), cUserFiltro, "" )
 
-cFiltro += 'RA_SITFOLH $ "' + cSituacao + '" .AND. '
+cFiltro += 'RA_SITFOLH $ "' + cSituacao + '" .And. '
 cFiltro += 'RA_CATFUNC $ "' + cCategoria + '"'
 
 oSection1:SetFilter(cFiltro)
@@ -490,16 +476,16 @@ While !Eof()
 		//================================================================
 		//Efetua busca no SRA Filtrado pelo Range                       
 		//================================================================
-		SRA->(dbsetorder(1) )
-	 	SRA->(dbseek( SRF->(RF_FILIAL+RF_MAT)   ) )
+		SRA->(DBSetOrder(1) )
+	 	SRA->(DBSeek( SRF->(RF_FILIAL+RF_MAT)   ) )
 	 	If SRA->(Eof())
-	 		dbSelectArea( "SRF" )
-			SRF->(DBSKIP())
+	 		DBSelectArea( "SRF" )
+			SRF->(DBSkip())
 
-			lFimArqui := EOF()
+			lFimArqui := Eof()
 
-			LOOP
-		Endif
+			Loop
+		EndIf
 	EndIf
 
 	//================================================================
@@ -507,14 +493,14 @@ While !Eof()
 	//================================================================
 	If !( SRA->RA_SITFOLH $ cSituacao ) .Or. !( SRA->RA_CATFUNC $ cCategoria )
 		If lOrdSRF 							// Ordem por Programa‡Æo de F‚rias
-			dbSelectArea( "SRF" )
+			DBSelectArea( "SRF" )
 		EndIf
-		dbSkip()
+		DBSkip()
 
-		lFimArqui := EOF()
+		lFimArqui := Eof()
 
 		Loop
-	Endif
+	EndIf
 
 
 
@@ -522,13 +508,13 @@ While !Eof()
 	=========================================================================
 	Consiste Processos para Impressao                                      
 	=========================================================================*/
-	IF !(SRA->( RA_PROCES ) $ cRProc ) .And. Substr(cRProc,1,1) <> "*"
+	If !(SRA->( RA_PROCES ) $ cRProc ) .And. SubStr(cRProc,1,1) <> "*"
 		If lOrdSRF 						   // Ordem por Programa‡Æo de F‚rias
-			dbSelectArea( "SRF" )
+			DBSelectArea( "SRF" )
 		EndIf
-		dbskip()
+		DBSkip()
 
-		lFimArqui := EOF()
+		lFimArqui := Eof()
 
 		Loop
 	EndIf
@@ -538,11 +524,11 @@ While !Eof()
 	//================================================================
 	If !(SRA->RA_FILIAL $ fValidFil()) .Or. !Eval(cAcessaSRA)
 		If lOrdSRF					 // Ordem por Programa‡ao de F‚rias
-			dbSelectArea( "SRF")
+			DBSelectArea( "SRF")
 		EndIf
-		dbSkip()
+		DBSkip()
 
-		lFimArqui := EOF()
+		lFimArqui := Eof()
 
 		Loop
 	EndIf
@@ -553,23 +539,23 @@ While !Eof()
 	//================================================================
 	If cPaisLoc == "VEN"
 		//# Tratamento pra Venezuela - Busca Tabela S006
-		fRetTab(@aTabFer,"S006",4,,fCalcFimAq(Iif(empty(dDataRef),dDataBase,dDataRef)),SRA->RA_SINDICA)
-		If len(aTabFer)<> 0 		//Previne qdo aTabFer estiver vazia, devido RCC vazia
+		fRetTab(@aTabFer,"S006",4,,fCalcFimAq(IIf(Empty(dDataRef),dDataBase,dDataRef)),SRA->RA_SINDICA)
+		If Len(aTabFer)<> 0 		//Previne qdo aTabFer estiver vazia, devido RCC vazia
 			nDiasDir := aTabFer[6]
-		Endif
+		EndIf
 
 	ElseIf cPaisLoc == "PER"
 		//# Tratamento pro Peru - Busca Tabela S017
-		fRetTab(@aTabFer,"S017",,,fCalcFimAq(Iif(dDataRef==Nil,dDataBase,dDataRef)),)
+		fRetTab(@aTabFer,"S017",,,fCalcFimAq(IIf(dDataRef==Nil,dDataBase,dDataRef)),)
 
 		If SRA->RA_MEIOPER == "1" //# Part Time
-			If len(aTabFer)<> 0
+			If Len(aTabFer)<> 0
 				nDiasDir := aTabFer[6]
 			EndIf
 		Else
-			If len(aTabFer)<> 0
+			If Len(aTabFer)<> 0
 				nDiasDir := aTabFer[5]
-			Endif
+			EndIf
 		EndIf
 	Else
 		//# aAdd( aTabFer, {nMesesPer,nNroMeses,Round(nDiasPMes*nMesesPer,0),nDiasPMes} )
@@ -601,12 +587,12 @@ While !Eof()
 				EndIf
 				
 				If lOrdSRF
-					DbSelectArea( "SRF" )
+					DBSelectArea( "SRF" )
 				Else
-					DbSelectArea( "SRA" )
+					DBSelectArea( "SRA" )
 				EndIf
 				
-				DbSkip()
+				DBSkip()
 				Loop				
 			Else
 				If !( SRA->RA_FILIAL + cPeriodo $ cValidPer )
@@ -615,12 +601,12 @@ While !Eof()
 				EndIf
 				
 				If lOrdSRF
-					DbSelectArea( "SRF" )
+					DBSelectArea( "SRF" )
 				Else
-					DbSelectArea( "SRA" )
+					DBSelectArea( "SRA" )
 				EndIf
 				
-				DbSkip()
+				DBSkip()
 				Loop
 			EndIf
 		Else
@@ -634,25 +620,25 @@ While !Eof()
 		If cPaisLoc == "BRA"
 			nTempoParc := SRA->RA_HRSEMAN
 			If SRA->RA_HOPARC == "1" .And. nTempoParc <= 25 .And. nTempoParc  > 0 .And. Len(aTabFer2) > 0	.And. P_REGPARCI
-				nPosTbFer := Ascan(aTabFer2, { |X|  nTempoParc <= X[6] .And. nTempoParc > X[5] })
+				nPosTbFer := aScan(aTabFer2, { |X|  nTempoParc <= X[6] .And. nTempoParc > X[5] })
 				If nPosTbFer > 0
 					aTabFer := aClone(aTabFer2[nPosTbFer])
-				Endif
-			Endif
+				EndIf
+			EndIf
 		EndIf
 
-		If len(aTabFer)<> 0
+		If Len(aTabFer)<> 0
 			nDiasDir := aTabFer[3]
 		EndIf
 	EndIf
 
-	dbSelectArea( "SRF" )
+	DBSelectArea( "SRF" )
 
-	dbSetOrder(2)
+	DBSetOrder(2)
 	aAuxFer:= {}
 	aPerFerias:= {}	//# Zera o array
-	If SRF->(dbseek(SRA->(RA_FILIAL+RA_MAT)+FGetCodFol("0072")))
-		While !SRF->(eof()) .And. SRA->(RA_FILIAL+RA_MAT)+FGetCodFol("0072") == SRF->(RF_FILIAL+RF_MAT+RF_PD)
+	If SRF->(DBSeek(SRA->(RA_FILIAL+RA_MAT)+FGetCodFol("0072")))
+		While !SRF->(Eof()) .And. SRA->(RA_FILIAL+RA_MAT)+FGetCodFol("0072") == SRF->(RF_FILIAL+RF_MAT+RF_PD)
 		    If SRF->RF_STATUS $ " 1"
 		    	
 		    	//===============================================================================================================
@@ -662,7 +648,7 @@ While !Eof()
 		    		  
 		    		If SRF->RF_DFERVAT == 0  
 					
-		    			SRF->(dbskip())
+		    			SRF->(DBSkip())
 		    			Loop			
 		    		
 		    		EndIf	
@@ -672,21 +658,21 @@ While !Eof()
 				aAdd(aAuxFer,SRF->(RECNO()))
 				
 			EndIf
-			SRF->(dbskip())
-		Enddo
-	Endif
+			SRF->(DBSkip())
+		EndDo
+	EndIf
 
 	If lOrdSRF
-		dbSelectArea( "SRF" )
+		DBSelectArea( "SRF" )
 	Else
-		dbSelectArea( "SRA" )
+		DBSelectArea( "SRA" )
 	EndIf
 
 	//================================================================
 	// Calculo dos Dias de Ferias Vencidas e a Vencer               
 	//================================================================
    For nX:= 1 To Len(aAuxFer)
-  		SRF->(DbGoTo(aAuxFer[nX]))
+  		SRF->(DBGoTo(aAuxFer[nX]))
 
 		nDiasVenc := nDiasProp := nDiasAbono := 0
 		//===================================================================
@@ -701,14 +687,14 @@ While !Eof()
 		
 		If nDiasVenc > 0 .And. SRF->RF_DFERANT > 0
 			nDiasVenc	:= Max(nDiasVenc - SRF->RF_DFERANT, 0)
-		Elseif nDiasVenc == 0 .And. nDiasProp > 0 .And. SRF->RF_DFERANT > 0
+		ElseIf nDiasVenc == 0 .And. nDiasProp > 0 .And. SRF->RF_DFERANT > 0
 			nDiasProp   :=  nDiasProp - SRF->RF_DFERANT
-		Endif
+		EndIf
 
 		If ! Empty(SRF->RF_DATAINI)
 			// aPerFerias - Mnemonico tipo Publico com os Periodos de Ferias
 			nDiaVen := SRF->RF_DFERVAT
-		Endif
+		EndIf
 
 		//================================================================
 		// Calculo dias de  faltas                                      
@@ -721,7 +707,7 @@ While !Eof()
 		lMetFalP := lMetadeFal
 		If !lMetFalP
 			nDFaltaP := ((nDFaltaP / 30) * nDiasProp )
-		Endif
+		EndIf
 
 		//================================================================
 		// Montagem da data do inicio da programacao das ferias         
@@ -742,7 +728,7 @@ While !Eof()
 			nDiasAbo1 := SRF->RF_DABPRO1
 			nDiasAbo2 := SRF->RF_DABPRO2
 
-			If cPaisLoc == "BRA" .or. cPaisLoc == "PTG"
+			If cPaisLoc == "BRA" .Or. cPaisLoc == "PTG"
 				nDiasAbo3 := SRF->RF_DABPRO3
 			EndIf
 
@@ -757,7 +743,7 @@ While !Eof()
 				nDiasAbo1	:= Int(nDiasAbo1)
 				//==================================================================
 				// Se Ferias forem  gozadas em  um  unico periodo, proporcionaliza
-				// o abono pecuniario, se nao, utiliza o que for informado nos cam
+				// o abono pecuniario, se nao, utiliza o que For informado nos cam
 				// pos de dias de ferias e abono de cada  periodo                 
 				//==================================================================
 			ElseIf SRF->RF_TEMABPE == "S" .And. lUnicoPer
@@ -767,9 +753,9 @@ While !Eof()
 				// nalizacao dos dias de abono pecuniario em funcao das faltas no 
 				// periodo aquisitivo.                                            
 				//==================================================================
-		   		nDiasAbo1	:= int( ( nDiaVen - IF(!lMetFalV, If(!lTempoParc, nDFaltaV, 0), nDiaVen / 2 )) / 3 )
+		   		nDiasAbo1	:= int( ( nDiaVen - If(!lMetFalV, If(!lTempoParc, nDFaltaV, 0), nDiaVen / 2 )) / 3 )
 			EndIf
-		Endif
+		EndIf
 
 		//================================================================
 		// Verifica Data Inicio                                         
@@ -777,12 +763,12 @@ While !Eof()
 		If (!Empty(dDtIProg1) .Or. !Empty(dDtIProg2) .Or. !Empty(dDtIProg3)) .And. nTipFerias == 1
 
 
-			lFimArqui := EOF()
+			lFimArqui := Eof()
 
 			Loop
 		ElseIf Empty(dDtIProg1) .And. Empty(dDtIProg2) .And. Empty(dDtIProg3) .And. nTipFerias == 2
 
-			lFimArqui := EOF()
+			lFimArqui := Eof()
 
 			Loop
 		EndIf
@@ -795,7 +781,7 @@ While !Eof()
 	   	   (dDtIProg2 < dProgDe .Or. dDtIProg2 > dProgAte) .And.;
 	   	   (dDtIProg3 < dProgDe .Or. dDtIProg3 > dProgAte)
 
-			lFimArqui := EOF()
+			lFimArqui := Eof()
 			Loop
 		EndIf
 
@@ -804,7 +790,7 @@ While !Eof()
 		//================================================================
 
 		If nOrdem == 1 .Or. nOrdem == 4
-			If !(cCcAnt == SRA->RA_CC) .or. !(cFiAnt == SRA->RA_FILIAL)
+			If !(cCcAnt == SRA->RA_CC) .Or. !(cFiAnt == SRA->RA_FILIAL)
 				If !(cCcAnt == Space(20))
 					oReport:ThinLine()
 				EndIf
@@ -826,7 +812,7 @@ While !Eof()
 				oSection3:Init(.T.)
 				oSection3:PrintLine()
 				oSection3:Finish()
-			Endif
+			EndIf
 		EndIf
 
 		If !(cFiAnt == SRA->RA_FILIAL)
@@ -843,9 +829,9 @@ While !Eof()
 		// Inicializa 1a Secao                                          
 		//================================================================
 		oSection1:Init(.F.)
-		If nOrdem == 1 .or. nOrdem == 4
+		If nOrdem == 1 .Or. nOrdem == 4
 			lFirst	:= .F.
-   		Endif
+   		EndIf
 
 		//================================================================
 		// Imprime Detalhe Para o Funcionario-Ferias Pendentes          
@@ -854,9 +840,9 @@ While !Eof()
 
 			oReport:SkipLine()
 			cDtBase		:= SRF->RF_IVENPEN												//-- Data base de ferias
-			cPerAquis	:= DtoC(SRF->RF_IVENPEN)+Space(2)+DtoC(SRF->RF_FVENPEN)	    	//-- Periodo aquisitivo
-			cLimideal	:= DtoC((cAliasSRF)->RF_FVENPEN + nDiasIdeal)					//-- Data limite Ideal
-			cLimMax		:= DtoC(DFimPAqui - nDiasMax) 									//-- Data Limite Maximo
+			cPerAquis	:= DToC(SRF->RF_IVENPEN)+Space(2)+DToC(SRF->RF_FVENPEN)	    	//-- Periodo aquisitivo
+			cLimideal	:= DToC((cAliasSRF)->RF_FVENPEN + nDiasIdeal)					//-- Data limite Ideal
+			cLimMax		:= DToC(DFimPAqui - nDiasMax) 									//-- Data Limite Maximo
 			FerVenc		:= SRF->RF_DVENPEN 												//-- Ferias Vencidas
 	 		cFaltasVen  := 0
 			cFerProp	:= 0
@@ -868,8 +854,8 @@ While !Eof()
 					cPerc13	:= (cAliasSRF)->RF_PERC13S
 				Else
 					cPerc13	:=  "|______|"
-				Endif
-			Endif
+				EndIf
+			EndIf
 
 			oSection1:PrintLine()
 			oSection1:cell("RA_FILIAL"):Hide()
@@ -882,18 +868,18 @@ While !Eof()
 		//================================================================
 		// Imprime Detalhe Para o Funcionario                           
 		//================================================================
-		cDtBase			:= DtoC(SRF->RF_DATABAS)									//-- Data base de ferias
+		cDtBase			:= DToC(SRF->RF_DATABAS)									//-- Data base de ferias
 		If cPaisLoc <> "MEX"
-			cPerAquis		:= DtoC(SRF->RF_DATABAS) + Space(2) + DtoC(DFimPAqui)
-			cLimideal		:= DtoC(DFimPAqui + nDiasIdeal)							//-- Data limite Ideal
-			cLimMax		:= DtoC(DPRPAqui - nDiasMax ) 								//-- Data Limite Maximo
+			cPerAquis		:= DToC(SRF->RF_DATABAS) + Space(2) + DToC(DFimPAqui)
+			cLimideal		:= DToC(DFimPAqui + nDiasIdeal)							//-- Data limite Ideal
+			cLimMax		:= DToC(DPRPAqui - nDiasMax ) 								//-- Data Limite Maximo
 			cFerVenc		:= nDiasVenc 													//-- Ferias Vencidas
 			cFaltasVen		:= nDFaltaV													//-- Faltas Vencidas
 			cFerProp		:= nDiasProp													//-- Ferias Proporcionais
 			cFaltasProp	:= nDFaltaP													//-- Faltas Proporcionais
 			cTotal			:= (nDiasVenc + nDiasProp - If(!lMetFalV, If(!lTempoParc, nDFaltaV, 0), nDiasVenc/2) - If(!lMetFalP, If(!lTempoParc, nDFaltaP, 0), nDiasProp / 2))//-- Total de Ferias
 		Else
-			cPerAquis		:= DtoC(SRF->RF_DATAFIM)									//-- Data Final
+			cPerAquis		:= DToC(SRF->RF_DATAFIM)									//-- Data Final
 			cFerVenc 		:= SRF->RF_DIASDIR											//-- Quantidade Referencia
 			cFaltasVen  	:= SRF->RF_DFERVAT											//-- Vencidas
 			cFerProp		:= SRF->RF_DFERAAT											//-- Proporcionais
@@ -905,7 +891,7 @@ While !Eof()
 			cPerc13	:= SRF->RF_PERC13S
 		Else
 			cPerc13	:=  "|____|"
-		Endif
+		EndIf
 		//================================================================
 		//Efetua impressao da Section1 e atualiza impress.Cabecalho     
 		//================================================================
@@ -927,7 +913,7 @@ While !Eof()
 				nDiasAbono := If(nCnt1 == 1, nDiasAbo1, If(nCnt1 == 2, nDiasAbo2, nDiasAbo3))
 			Else
 				dDtIniProg := dDtIProg1
-			Endif
+			EndIf
 
 			nDiasFePro := If(nCnt1 == 1, If(nDiasFer1=0, nDiaVen,If( lUnicoPer,(nDiaVen- If(!lMetFalV, If(!lTempoParc, nDFaltaV, 0), nDiaVen/2) -nDiasAbo1),nDiasFer1)), If(nCnt1 == 2, nDiasFer2, nDiasFer3))
 
@@ -936,27 +922,27 @@ While !Eof()
 			If nCnt1 == 1 .And. ! Empty(SRF->RF_DATAINI) .And. ;
 			 (! lTemCpoProg ) .Or. ( lTemCpoProg .And. SRF->RF_DFEPRO1 = 0  .And. SRF->RF_DABPRO1 = 0 )
 				nDiasFePro -= ( (cAliasSRF)->RF_DFERANT + If(!lMetFalV, If(!lTempoParc, nDFaltaV, 0), (cAliasSRF)->RF_DFERANT / 2) + nDiasAbono)
-			Endif
+			EndIf
 
 			nDiasFePro := Max(nDiasFePro, 0)
 			nDiasFePro := Min(nDiasFePro,nDiasDir)
 
 			If nTipo == 1
-				cProgrFer  := If(nCnt1 == 1,STR0025,if(nCnt1 == 2,STR0026,STR0027))//"1a -  P R O G R A M A C A O  D E  F E R I A S"#"2a -  P R O G R A M A C A O  D E  F E R I A S"#"3a -  P R O G R A M A C A O  D E  F E R I A S"
+				cProgrFer  := If(nCnt1 == 1,STR0025,If(nCnt1 == 2,STR0026,STR0027))//"1a -  P R O G R A M A C A O  D E  F E R I A S"#"2a -  P R O G R A M A C A O  D E  F E R I A S"#"3a -  P R O G R A M A C A O  D E  F E R I A S"
 			Else
 				cProgrFer  := STR0057
-			Endif
+			EndIf
 
 			//-- Periodo de gozo de ferias
 			If !Empty(dDtIniProg)
 				If nDiasFePro  > 0
-					cDtAteDesc	:= DtoC(dDtIniProg+(nDiasFePro-1))
+					cDtAteDesc	:= DToC(dDtIniProg+(nDiasFePro-1))
 				ElseIf nDiaVen > 0
-					cDtAteDesc	:= DtoC(dDtIniProg+nDiaVen  -1)
+					cDtAteDesc	:= DToC(dDtIniProg+nDiaVen  -1)
 				Else
 					cDtAteDesc	:= "______/______/______"
-				Endif
-				cProgrFer	+= PadC(DtoC(dDtIniProg),20)
+				EndIf
+				cProgrFer	+= PadC(DToC(dDtIniProg),20)
 				cProgrFer	+= STR0014
 				cProgrFer	+= PadC(cDtAteDesc,20)   //"  A  "
 			Else
@@ -970,28 +956,28 @@ While !Eof()
 					cDiasFer	:= STR0028	//D.FER.
 				Else
 					cDiasFer	:= STR0059	//D.REC.
-				Endif
+				EndIf
 
 				If nDiasFePro > 0
 					cDiasFer += Space(2) + TransForm(nDiasFePro,"999.9")			//"D.Ferias
 				Else
-					cDiasFer += space(2)+ "|______|" 								//"D.Ferias
-				Endif
+					cDiasFer += Space(2)+ "|______|" 								//"D.Ferias
+				EndIf
 
 				//Dias de Abono
 				If nTipo == 1
 					If nDiasAbono > 0
-						cDiasAbo	:= STR0029+ space(1)+ TransForm(nDiasAbono,"999.9") + Space(2) + oemtoAnsi(STR0046)+  Space(1)+oemtoAnsi(STR0047)+ Space(3)+Replicate("_", 40) 	//"D.AB.  + Assinatura "
+						cDiasAbo	:= STR0029+ Space(1)+ TransForm(nDiasAbono,"999.9") + Space(2) + oemtoAnsi(STR0046)+  Space(1)+oemtoAnsi(STR0047)+ Space(3)+Replicate("_", 40) 	//"D.AB.  + Assinatura "
 
-					Elseif nDiasAbono = 0 .And. (cAliasSRF)->RF_TEMABPE == "S" .And. nDiasFePro = 0
-						cDiasAbo	:= STR0029+ space(3)+ STR0030 + Space(5)+ oemtoAnsi(STR0046)+  Space(1)+ oemtoAnsi(STR0047)+ Space(3)+Replicate("_", 40)							//"D.AB. + 'Sim'    + Assinatura "
+					ElseIf nDiasAbono = 0 .And. (cAliasSRF)->RF_TEMABPE == "S" .And. nDiasFePro = 0
+						cDiasAbo	:= STR0029+ Space(3)+ STR0030 + Space(5)+ oemtoAnsi(STR0046)+  Space(1)+ oemtoAnsi(STR0047)+ Space(3)+Replicate("_", 40)							//"D.AB. + 'Sim'    + Assinatura "
 
 					Else
-						cDiasAbo	:= STR0029+ space(1)+ "|______|"  + Space(2) + oemtoAnsi(STR0046)+ Space(1)+ oemtoAnsi(STR0047)+ Space(3)+Replicate("_", 40)						//"D.AB. +|______|  + Assinatura "
-					Endif
+						cDiasAbo	:= STR0029+ Space(1)+ "|______|"  + Space(2) + oemtoAnsi(STR0046)+ Space(1)+ oemtoAnsi(STR0047)+ Space(3)+Replicate("_", 40)						//"D.AB. +|______|  + Assinatura "
+					EndIf
 				Else
 					cDiasAbo		:=	oemtoAnsi(STR0046)+ Space(1)+ oemtoAnsi(STR0058)+ Space(3)+ Replicate("_", 40)	//Assinatura do##Estagiario
-				Endif
+				EndIf
 
 			Else
 				cDiasFer := "|___|"
@@ -1001,7 +987,7 @@ While !Eof()
 
 			oReport:SkipLine()
 			oSection2:Init(.F.)
-			oSection2:Printline()
+			oSection2:PrintLine()
 			oSection2:Finish()
 		Next nCnt1
 
@@ -1014,30 +1000,30 @@ While !Eof()
 		cCcAnt   := SRA->RA_CC
 	Next nX
 	If lOrdSRF
-		dbSelectArea( "SRF" )
+		DBSelectArea( "SRF" )
 	Else
-		dbSelectArea( "SRA" )
+		DBSelectArea( "SRA" )
 	EndIf
-	dbSkip()
+	DBSkip()
 
-	lFimArqui := EOF()
-Enddo
+	lFimArqui := Eof()
+EndDo
 
 //================================================================
 // Termino do relatorio                                         
 //================================================================
-dbSelectArea( "SRF" )
+DBSelectArea( "SRF" )
 Set Filter to
 RetIndex("SRF")
-dbSetOrder(1)
+DBSetOrder(1)
 
 If lOrdSRF					 			// Ordem por Programa‡Æo de F‚rias
 	fErase(cArqNtx1  + OrdBagExt() )
 EndIf
 
-dbSelectArea( "SRA" )
+DBSelectArea( "SRA" )
 Set Filter to
-dbSetOrder(1)
+DBSetOrder(1)
 
 If Len(aLogFil) > 0
 	If lRCHComp

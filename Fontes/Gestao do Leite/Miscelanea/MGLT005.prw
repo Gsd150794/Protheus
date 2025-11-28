@@ -10,7 +10,7 @@ Lucas Borges  |04/06/2025| Chamado 50617. Corrgida a exportação do arquivo usand
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -101,7 +101,7 @@ _cTabela := "%" + RetSqlName(_cAux) +" "+ _cAux + " %"
 _cFiltro += " AND "+ _cAux +".D_E_L_E_T_ = ' '"
 _cFiltro += " AND "+ _cAux +"_SETOR = ZL2.ZL2_COD"
 _cFiltro += " AND "+ _cAux +"_LINROT = ZL3.ZL3_COD"
-_cFiltro += " AND "+ _cAux +"_DTCOLE	BETWEEN '"+ DTOS(MV_PAR01) +"' AND '"+ DTOS(MV_PAR02) +"' "
+_cFiltro += " AND "+ _cAux +"_DTCOLE	BETWEEN '"+ DToS(MV_PAR01) +"' AND '"+ DToS(MV_PAR02) +"' "
 _cFiltro += " AND "+ _cAux +"_FILIAL	= '"+ xFilial(_cAux)+"' "
 //Se preencheu os setores, já fiz a validação de acesso no SX1
 //Se não preencheu e não tem acesso a todos, filtra de forma que não retorme registros
@@ -123,10 +123,10 @@ _cFiltro += "%"
 //====================================================================================================
 // SQL para verificar os produtores dos Setores que movimentaram entrada de leite no periodo
 //====================================================================================================
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 SELECT A2.A2_COD, A2.A2_LOJA, A2.A2_NOME, A2.A2_CGC, A2.A2_L_TIPPR, A2.A2_L_NIRF, A2.A2_L_SIGSI, A2.A2_END, A2.A2_MUN, A2.A2_CEP, A2.A2_EST,
 		A2.A2_L_ATIVO, A2.A2_L_TIPPR, ZL3.ZL3_COD, ZL3.ZL3_DESCRI, ZL2.ZL2_COD, ZL2.ZL2_DESCRI, A2_L_LONGI, A2_L_LATIT, A2_EST, A2_INSCR,
-		CASE 
+		Case 
 			WHEN A2.A2_L_CLASS = 'I' THEN 'Tanque Individual'
 			WHEN A2.A2_L_CLASS IN('C','U') THEN 'Tanque Coletivo'
 			WHEN A2.A2_L_CLASS = 'N' THEN 'Latao'
@@ -145,10 +145,10 @@ SELECT A2.A2_COD, A2.A2_LOJA, A2.A2_NOME, A2.A2_CGC, A2.A2_L_TIPPR, A2.A2_L_NIRF
  GROUP BY A2.A2_COD, A2.A2_LOJA, A2.A2_NOME, A2.A2_CGC, A2.A2_L_TIPPR, A2.A2_L_NIRF, A2.A2_L_SIGSI, A2.A2_END, A2.A2_MUN, A2.A2_CEP, A2.A2_EST,
  		A2.A2_L_ATIVO, A2.A2_L_TIPPR, A2.A2_L_CLASS, ZL3.ZL3_COD, ZL3.ZL3_DESCRI, ZL2.ZL2_COD, ZL2.ZL2_DESCRI, A2_L_LONGI, A2_L_LATIT, A2_EST, A2_INSCR
  ORDER BY ZL3.ZL3_DESCRI, A2.A2_NOME
-EndSQL
+EndSql
 
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 _oSelf:SetRegua1(_nCountRec)
 _oSelf:IncRegua1("Gerando arquivo...")
 
@@ -164,23 +164,23 @@ _cFMesAnt	:= MesExtenso( Month(_dFMesAnt) ) +"/"+ StrZero( Year(_dFMesAnt) , 4 )
 // Processa registros encontrados
 //====================================================================================================
 If _nCountRec > 0
-	Do While (_cAlias)->(!Eof())
+	While (_cAlias)->(!Eof())
 		//================================================================================
 		//| Exporta somente produtores ativos  se considera apenas ativos                |
 		//================================================================================
 		If MV_PAR10 == 2
 			If (_cAlias)->A2_L_ATIVO <> "S"
-				(_cAlias)->(DbSkip())
+				(_cAlias)->(DBSkip())
 				Loop
 			Else
 				If MV_PAR09 == 1
 					If !((_cAlias)->A2_L_TIPPR $ "P|A")
-						(_cAlias)->(DbSkip())
+						(_cAlias)->(DBSkip())
 						Loop
 					EndIf
 				ElseIf MV_PAR09 == 2
 					If !((_cAlias)->A2_L_TIPPR $ "C|A")
-						(_cAlias)->(DbSkip())
+						(_cAlias)->(DBSkip())
 						Loop
 					EndIf
 				EndIf
@@ -250,7 +250,7 @@ If _nCountRec > 0
 	_oFile:Write(_cBuffer)
 Else
 	FWAlertWarning("Não foram encontrados registros para processar com os filtros informados! Verifique os parâmetros digitados.","MGLT00502")
-	Return()
+	Return
 EndIf
 
 _oFile:Close()

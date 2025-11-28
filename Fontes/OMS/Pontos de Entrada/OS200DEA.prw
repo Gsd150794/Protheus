@@ -31,8 +31,8 @@ User Function OS200DEA()
 
 Local aBTN := {}
 
-aBTN := PARAMIXB[1]
-nTam := len(aBTN) 
+aBTN := ParamIXB[1]
+nTam := Len(aBTN) 
 If ValType(aBTN)== "A" .And. Len(aBTN) > 0
      aDel(aBTN,1)
      aSize(aBTN,nTam-1)

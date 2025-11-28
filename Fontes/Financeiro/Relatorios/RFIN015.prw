@@ -10,8 +10,8 @@ Lucas Borges  |08/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
 
-#Include "Protheus.ch"
-#include "report.ch"
+#Include "TOTVS.ch"
+#Include "report.ch"
 
 #Define TITULO	"Relatório DCI a Compensar"
 
@@ -20,11 +20,8 @@ Lucas Borges  |08/10/2024| Chamado 48465. Retirada manipulação do SX1
 Programa--------: RFIN015
 Autor-----------: Alex Wallauer
 Data da Criacao-: 28/02/2018
-===============================================================================================================================
 Descrição-------: Relatório DCI a Compensar. CHAMADO: 21103
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -32,24 +29,21 @@ Retorno---------: Nenhum
 User Function RFIN015()
 
 Local _cPerg:="RFIN015"
-PRIVATE _cAlias:=GetNextAlias()
+Private _cAlias:=GetNextAlias()
 
 Pergunte( _cPerg , .T. )
 
 oReport:=RFIN015RUN(_cPerg)
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: RFIN015RUN
 Autor-------------: Alex Wallauer
 Data da Criacao---: 02/02/2018
-===============================================================================================================================
 Descrição---------: Processa a montagem do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -68,7 +62,7 @@ oReport:nFontBody	:= 08
 oReport:cFontBody	:= "Courier New"
 oReport:nLineHeight	:= 45 // Define a altura da linha.
 
-DEFINE SECTION oSecEntr_1 OF oReport TITLE "DCI a Compensar" TABLES "SE1"
+DEFINE Section oSecEntr_1 OF oReport TITLE "DCI a Compensar" TABLES "SE1"
 
   TRCell():New(oSecEntr_1,"E1_FILIAL" ,"SE1","Filial DCI"  ,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
   TRCell():New(oSecEntr_1,"E1_PREFIXO","SE1","Prefixo DCI" ,/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
@@ -100,17 +94,13 @@ DEFINE SECTION oSecEntr_1 OF oReport TITLE "DCI a Compensar" TABLES "SE1"
 
 Return( oReport )
 
-
 /*
 ===============================================================================================================================
 Programa--------: RFIN015PRT
 Autor-----------: Alex Wallauer
 Data da Criacao-: 02/02/2018
-===============================================================================================================================
 Descrição-------: Função para consulta e preparação dos dados do relatório
-===============================================================================================================================
 Parametros------: oReport 
-===============================================================================================================================
 Retorno---------: NENHUM
 ===============================================================================================================================*/
 Static Function RFIN015PRT( oReport )
@@ -131,9 +121,9 @@ _cQuery := " SELECT R_E_C_N_O_ SE1_REC "
 _cQuery += " FROM  "+ RETSQLNAME('SE1') +" SE1 "
 _cQuery += " WHERE SE1.D_E_L_E_T_ = ' '"
 // Filtra Filial
-MV_PAR01:=ALLTRIM(MV_PAR01)
-If !EMPTY(MV_PAR01)
-   If LEN(MV_PAR01) < 4
+MV_PAR01:=AllTrim(MV_PAR01)
+If !Empty(MV_PAR01)
+   If Len(MV_PAR01) < 4
       MV_PAR01:=LEFT(MV_PAR01,2)
       _cQuery += " AND E1_FILIAL = '" + MV_PAR01 + "' "
    Else
@@ -141,32 +131,32 @@ If !EMPTY(MV_PAR01)
    EndIf
 EndIf
 // Filtra Emissão
-If EMPTY( MV_PAR03 ) .AND. !EMPTY( MV_PAR02 )
-   _cQuery += " AND E1_EMISSAO >= '" + DtoS( MV_PAR02 ) + "' "
-ELSEIf DtoS( MV_PAR02 ) == DtoS( MV_PAR03 ) .AND. !EMPTY( MV_PAR02 )
-   _cQuery += " AND E1_EMISSAO = '" + DtoS( MV_PAR02 ) + "' "
-ElseIF !EMPTY( MV_PAR03 )
-   _cQuery += " AND E1_EMISSAO BETWEEN '" + DtoS( MV_PAR02 ) + "' AND '" + DtoS( MV_PAR03 ) + "' "
+If Empty( MV_PAR03 ) .And. !Empty( MV_PAR02 )
+   _cQuery += " AND E1_EMISSAO >= '" + DToS( MV_PAR02 ) + "' "
+ElseIf DToS( MV_PAR02 ) == DToS( MV_PAR03 ) .And. !Empty( MV_PAR02 )
+   _cQuery += " AND E1_EMISSAO = '" + DToS( MV_PAR02 ) + "' "
+ElseIf !Empty( MV_PAR03 )
+   _cQuery += " AND E1_EMISSAO BETWEEN '" + DToS( MV_PAR02 ) + "' AND '" + DToS( MV_PAR03 ) + "' "
 EndIf
 // Filtra Cliente + LOJA
-IF EMPTY(MV_PAR06) .AND. !EMPTY(MV_PAR04)
+If Empty(MV_PAR06) .And. !Empty(MV_PAR04)
    _cQuery += " AND E1_CLIENTE >= '" + MV_PAR04 + "' "
-   IF !EMPTY(MV_PAR05)
+   If !Empty(MV_PAR05)
       _cQuery += " AND E1_LOJA >= '" + MV_PAR05 + "' "
-   ENDIF
-ELSEIf  MV_PAR04 == MV_PAR06  .AND. !EMPTY(MV_PAR04)
+   EndIf
+ElseIf  MV_PAR04 == MV_PAR06  .And. !Empty(MV_PAR04)
    _cQuery += " AND E1_CLIENTE = '" + MV_PAR04 + "' "
-   IF MV_PAR05 == MV_PAR07  .AND. !EMPTY(MV_PAR05)
+   If MV_PAR05 == MV_PAR07  .And. !Empty(MV_PAR05)
       _cQuery += " AND E1_LOJA = '" + MV_PAR05 + "' "
-   ELSEIF !EMPTY(MV_PAR07)
+   ElseIf !Empty(MV_PAR07)
       _cQuery += " AND E1_LOJA BETWEEN '" + MV_PAR05 + "' AND '" + MV_PAR07 + "' "
-   ENDIF
-ELSEIF !EMPTY(MV_PAR06)
+   EndIf
+ElseIf !Empty(MV_PAR06)
    _cQuery += " AND E1_CLIENTE BETWEEN '" + MV_PAR04 + "' AND '" + MV_PAR06 + "' "
-   IF !EMPTY(MV_PAR07)
+   If !Empty(MV_PAR07)
       _cQuery += " AND E1_LOJA BETWEEN '" + MV_PAR05 + "' AND '" + MV_PAR07 + "' "
-   ENDIF
-ENDIF
+   EndIf
+EndIf
 
 _cQuery += " AND E1_PREFIXO = 'DCI' "
 _cQuery += " AND E1_SALDO > 0 "
@@ -195,39 +185,39 @@ oSection1:Init()
 
 oReport:SetMeter(_nTotReg)       
 
-(_cAlias)->(DBGOTOP())
+(_cAlias)->(DBGoTop())
 
 SE1->( DBSetOrder(2) )//E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM                  +E1_PARCELA   +E1_TIPO
 SD1->( DBSetOrder(1) )
 
-DO WHILE !oReport:Cancel() .And. (_cAlias)->( !Eof() )
+While !oReport:Cancel() .And. (_cAlias)->( !Eof() )
 
     oReport:IncMeter()
 
-	SE1->(DBGOTO( (_cAlias)->SE1_REC) )
+	SE1->(DBGoTo( (_cAlias)->SE1_REC) )
 	
 	_nVlrNCI:=SE1->E1_VALOR
-	_cNumTit:=LEFT(SE1->E1_I_CHDCI,LEN(SE1->E1_NUM))//SF1->(F1_DOC+F1_SERIE+F1_FORNECE+F1_LOJA+F1_TIPO+IF(EMPTY(F1_FORMUL),"N",F1_FORMUL))
-	_cSerie :=SUBSTR( SE1->E1_I_CHDCI , LEN(SE1->E1_NUM)+1 , LEN(SF1->F1_SERIE))
+	_cNumTit:=LEFT(SE1->E1_I_CHDCI,Len(SE1->E1_NUM))//SF1->(F1_DOC+F1_SERIE+F1_FORNECE+F1_LOJA+F1_TIPO+If(Empty(F1_FORMUL),"N",F1_FORMUL))
+	_cSerie :=SubStr( SE1->E1_I_CHDCI , Len(SE1->E1_NUM)+1 , Len(SF1->F1_SERIE))
 	
 	//SE1->E1_FILIAL+SE1->E1_CLIENTE+SE1->E1_LOJA+E1_PREFIXO+E1_NUM  +E1_PARCELA+E1_TIPO
 	_cChave :=SE1->E1_FILIAL+SE1->E1_CLIENTE+SE1->E1_LOJA+_cSerie   +_cNumTit//+"01"      +"NCC"
-	IF SE1->(DBSEEK(_cChave))
+	If SE1->(DBSeek(_cChave))
 		oSection1:Cell("NC_PREFIXO"):SetValue(SE1->E1_PREFIXO)
 		oSection1:Cell("NC_TIPO"   ):SetValue(SE1->E1_TIPO   )
 		oSection1:Cell("NC_NUM"    ):SetValue(SE1->E1_NUM    )
-		oSection1:Cell("NC_EMIS1"  ):SetValue(DTOC(SE1->E1_EMIS1))
+		oSection1:Cell("NC_EMIS1"  ):SetValue(DToC(SE1->E1_EMIS1))
 		oSection1:Cell("NC_VALOR"  ):SetValue(SE1->E1_VALOR  )
 		oSection1:Cell("NC_SALDO"  ):SetValue(SE1->E1_SALDO  )
-	ELSE
+	Else
 		oSection1:Cell("NC_PREFIXO"):SetValue("")
 		oSection1:Cell("NC_TIPO"   ):SetValue("")
 		oSection1:Cell("NC_NUM"    ):SetValue("Não Achou")
 		oSection1:Cell("NC_EMIS1"  ):SetValue("")
 		oSection1:Cell("NC_VALOR"  ):SetValue(0)
 		oSection1:Cell("NC_SALDO"  ):SetValue(0)
-	    SE1->(DBGOTO( (_cAlias)->SE1_REC) )
-	ENDIF
+	    SE1->(DBGoTo( (_cAlias)->SE1_REC) )
+	EndIf
 	
 	_nVlrDCT:=0
 	oSection1:Cell("DCT_PREFIXO"):SetValue("")
@@ -235,40 +225,40 @@ DO WHILE !oReport:Cancel() .And. (_cAlias)->( !Eof() )
 	oSection1:Cell("DCT_VALOR"  ):SetValue(0)
 	If !SD1->( DBSeek( SE1->E1_FILIAL+_cNumTit+_cSerie+SE1->E1_CLIENTE+SE1->E1_LOJA))
 	   oSection1:Cell("DCT_NUM"):SetValue("Não Achou NF")
-	ELSEIF EMPTY( SD1->D1_NFORI )
+	ElseIf Empty( SD1->D1_NFORI )
 	   oSection1:Cell("DCT_NUM"):SetValue("Sem NF Origem")
-	ELSE
+	Else
 		_cNumTit:=SD1->D1_NFORI
 		_cSerie :="DCT"
 		_cChave :=SE1->E1_FILIAL+SE1->E1_CLIENTE+SE1->E1_LOJA+_cSerie+_cNumTit//+"01"+"NCC"
-		IF SE1->(DBSEEK(_cChave))
+		If SE1->(DBSeek(_cChave))
 			oSection1:Cell("DCT_PREFIXO"):SetValue(SE1->E1_PREFIXO)
 			oSection1:Cell("DCT_TIPO"   ):SetValue(SE1->E1_TIPO   )
 			oSection1:Cell("DCT_NUM"    ):SetValue(SE1->E1_NUM    )
 			oSection1:Cell("DCT_VALOR"  ):SetValue(SE1->E1_VALOR  )
 			_nVlrDCT:=SE1->E1_VALOR
-		ELSE
+		Else
 			oSection1:Cell("DCT_TIPO"   ):SetValue("Não Achou DCT")
 			oSection1:Cell("DCT_NUM"    ):SetValue(SD1->D1_NFORI)
 			oSection1:Cell("DCT_PREFIXO"):SetValue(SD1->D1_SERIORI)
-		ENDIF
-	ENDIF
+		EndIf
+	EndIf
 	
-	SE1->(DBGOTO( (_cAlias)->SE1_REC) )//Volta para DCI
+	SE1->(DBGoTo( (_cAlias)->SE1_REC) )//Volta para DCI
 	
-	IF RIGHT(ALLTRIM(SE1->E1_I_CHDCI),1) = "S"
+	If RIGHT(AllTrim(SE1->E1_I_CHDCI),1) = "S"
 		oSection1:Cell("COMPENSANA"):SetValue("DCT")
-	ELSEIF (_nVlrNCI-_nVlrDCT) > -0.02 .AND. (_nVlrNCI-_nVlrDCT) < 0.02
+	ElseIf (_nVlrNCI-_nVlrDCT) > -0.02 .And. (_nVlrNCI-_nVlrDCT) < 0.02
 		oSection1:Cell("COMPENSANA"):SetValue("VERIFICAR")
-	ELSE
+	Else
 		oSection1:Cell("COMPENSANA"):SetValue("NCC")
-	ENDIF
+	EndIf
 	
 	oSection1:PrintLine()
 	
 	(_cAlias)->( DBSkip() )
 	
-ENDDO
+EndDo
 
 oSection1:Finish()
 

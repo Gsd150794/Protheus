@@ -2,32 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Darcio Sporl  | 23/08/2016 | Relatório criado para mostrar os itens habilitados e desabilitados no menu. Chamado 16793		        
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 15/12/2017 | Correção de error.log - Chamado 22901
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 17/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+Darcio Sporl  |23/08/2016| Chamado 16793. Relatório criado para mostrar os itens habilitados e desabilitados no menu.
+Alex Wallauer |15/12/2017| Chamado 22901. Correção de error.log
+Lucas Borges  |17/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
 ===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes e Defines da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
-#INCLUDE 'TOPCONN.CH'
-#INCLUDE "Fileio.ch"
+
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RCFG001
 Autor-------------: Darcio R Sporl
 Data da Criacao---: 30/08/2016
-===============================================================================================================================
 Descrição---------: Relatório dos itens de menu
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -45,9 +36,9 @@ Private cFile	:= CGETFILE( 'Local' , "Selecione o diretorio dos MENUS",0,"SERVID
 oReport := RptDef(cPerg)
 oReport:PrintDialog()
 
-IF _nConta > 0 
-  U_ITMSG("Foram lidos "+ALLTRIM(STR(_nConta))+" MENU(S).","Concluido",,2)
-ENDIF
+If _nConta > 0 
+	U_ITMsg("Foram lidos "+AllTrim(Str(_nConta))+" MENU(S).","Concluido",,2)
+EndIf
 
 Return
 
@@ -56,15 +47,13 @@ Return
 Programa----------: RptDef
 Autor-------------: Darcio R Sporl
 Data da Criacao---: 23/08/2016
-===============================================================================================================================
 Descrição---------: Função que faz a montagem do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function RptDef(cNome)
+
 Local oReport	:= Nil
 Local oSection1	:= Nil
 	
@@ -101,15 +90,13 @@ Return(oReport)
 Programa----------: RptDef
 Autor-------------: Darcio R Sporl
 Data da Criacao---: 23/08/2016
-===============================================================================================================================
 Descrição---------: Função que imprime o relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function ReportPrint(oReport)
+
 Local oSection1 := oReport:Section(1)
 Local oSection2 := oReport:Section(1):Section(1)
 Local nX		:= 0
@@ -130,7 +117,7 @@ ADir(cFile + "*.XNU", aFiles, aSizes)
 oReport:SetMeter(Len(aFiles))
 ProcRegua(Len(aFiles))
 
-_cTot:=" / "+ALLTRIM(STR(Len(aFiles)))
+_cTot:=" / "+AllTrim(Str(Len(aFiles)))
 _nConta:=0
 For nX := 1 To Len(aFiles)
 	If oReport:Cancel()
@@ -140,7 +127,7 @@ For nX := 1 To Len(aFiles)
 	oReport:IncMeter()
 	
 	_cNomeMenu:=cFile+aFiles[nX]//Variavel criada para ver no error.log
-	IncProc("Lendo Menu: "+_cNomeMenu+" - "+ALLTRIM(STR(_nConta))+_cTot)
+	IncProc("Lendo Menu: "+_cNomeMenu+" - "+AllTrim(Str(_nConta))+_cTot)
 
 	If !("OLD" $ aFiles[nX])
 
@@ -151,12 +138,12 @@ For nX := 1 To Len(aFiles)
 			oSection1:Init()
 
 			oSection1:Cell("CARQMN")	:SetValue(cFile + aFiles[nX])
-			oSection1:Printline()
+			oSection1:PrintLine()
 
 			nHandle := FT_FUse(cFile + aFiles[nX])
 			If nHandle == -1
-				U_ITMSG('Erro de abertura do menu: '+cFile + aFiles[nX]+' FERROR '+str(ferror()),"Atenção",,2)
-				LOOP
+				U_ITMsg('Erro de abertura do menu: '+cFile + aFiles[nX]+' FERROR '+Str(ferror()),"Atenção",,2)
+				Loop
 			Else
 				cTexto	:=  '<?xml version="1.0" encoding="ISO-8859-1" standalone="yes" ?>' + Chr(13) + Chr(10)
 				FT_FGoTop()
@@ -179,52 +166,52 @@ For nX := 1 To Len(aFiles)
 				oXml	:= XmlParser( cTexto, "_", @cError, @cWarning )
 
 				If (oXml == NIL )
-					oSection2:Cell("CTITMN"):SetValue("Falha ao gerar Objeto XML do menu "+ALLTRIM(cFile+aFiles[nX])+" : "+ALLTRIM(cError)+" / "+ALLTRIM(cWarning))
-					LOOP
+					oSection2:Cell("CTITMN"):SetValue("Falha ao gerar Objeto XML do menu "+AllTrim(cFile+aFiles[nX])+" : "+AllTrim(cError)+" / "+AllTrim(cWarning))
+					Loop
 				Else
 					oSection2:init()
 
                     If ValType( XmlChildEx( oXml:_APMENU , "_MENU"	) ) = 'U'
-				       oSection2:Cell("CTITMN"):SetValue("Menu: "+ALLTRIM(cFile+aFiles[nX])+" sem o _MENU "+STR(nL))//U_ITMSG("Menu: "+ALLTRIM(cFile+aFiles[nX])+" sem o _MENU "+STR(nL),"Atenção",,3)
-                       LOOP
-                    ELSEIf ValType( XmlChildEx( oXml:_APMENU , "_MENU"	) ) = 'O'
+				       oSection2:Cell("CTITMN"):SetValue("Menu: "+AllTrim(cFile+aFiles[nX])+" sem o _MENU "+Str(nL))//U_ITMsg("Menu: "+AllTrim(cFile+aFiles[nX])+" sem o _MENU "+Str(nL),"Atenção",,3)
+                       Loop
+                    ElseIf ValType( XmlChildEx( oXml:_APMENU , "_MENU"	) ) = 'O'
 					   XmlNode2Arr( oXml:_APMENU:_MENU, "_MENU" )
-                    ENDIF
-                    _nTotMenus:=LEN(oXml:_APMENU:_MENU)-1//Tira sempre o ultimo menu que é desabilitado
+                    EndIf
+                    _nTotMenus:=Len(oXml:_APMENU:_MENU)-1//Tira sempre o ultimo menu que é desabilitado
 					For nL := 1 To _nTotMenus
 
                         _aMenu:={}
                         _lMenuItem:=.F.
                         If ValType( XmlChildEx( oXml:_APMENU:_MENU[nL],"_MENU") ) = 'U'
                            If ValType( XmlChildEx( oXml:_APMENU:_MENU[nL],"_MENUITEM") ) = 'U'
-                              LOOP
-                           ELSEIf ValType( XmlChildEx( oXml:_APMENU:_MENU[nL],"_MENUITEM") ) = 'O'
+                              Loop
+                           ElseIf ValType( XmlChildEx( oXml:_APMENU:_MENU[nL],"_MENUITEM") ) = 'O'
  						      _aMenu:={oXml:_APMENU:_MENU[nL]:_MENUITEM}
-                           ELSEIf ValType( XmlChildEx( oXml:_APMENU:_MENU[nL],"_MENUITEM") ) = 'A'
+                           ElseIf ValType( XmlChildEx( oXml:_APMENU:_MENU[nL],"_MENUITEM") ) = 'A'
  						      _aMenu:=oXml:_APMENU:_MENU[nL]:_MENUITEM
-                           ELSE
-                              LOOP
-                           ENDIF
+                           Else
+                              Loop
+                           EndIf
                            _lMenuItem:=.T.
-                        ELSEIf Valtype(oXml:_APMENU:_MENU[nL]:_MENU) = "O"
+                        ElseIf ValType(oXml:_APMENU:_MENU[nL]:_MENU) = "O"
 							_aMenu:={oXml:_APMENU:_MENU[nL]:_MENU}
-						ELSEIf Valtype(oXml:_APMENU:_MENU[nL]:_MENU) = "A"
+						ElseIf ValType(oXml:_APMENU:_MENU[nL]:_MENU) = "A"
 						    _aMenu:=oXml:_APMENU:_MENU[nL]:_MENU
-						ELSE
-						    LOOP 
+						Else
+						    Loop 
 						EndIf
 
 						For nI := 1 To Len(_aMenu)
 ///***************  MENUITEM NIVEL 1 *********************
                            If ValType( XmlChildEx(_aMenu[nI],"_MENUITEM") ) = 'U'
                               aXMLITEM:={}
-                           ELSEIf ValType( XmlChildEx( _aMenu[nI],"_MENUITEM") ) = 'O'
+                           ElseIf ValType( XmlChildEx( _aMenu[nI],"_MENUITEM") ) = 'O'
  						      aXMLITEM:={_aMenu[nI]:_MENUITEM}
-                           ELSEIf ValType( XmlChildEx( _aMenu[nI],"_MENUITEM") ) = 'A'
+                           ElseIf ValType( XmlChildEx( _aMenu[nI],"_MENUITEM") ) = 'A'
  						      aXMLITEM:=_aMenu[nI]:_MENUITEM
-                           ELSE
+                           Else
                               aXMLITEM:={}
-                           ENDIF
+                           EndIf
 ///***************  MENUITEM NIVEL 1 *********************
 
 						   If ValType(aXMLITEM) == "A"
@@ -233,11 +220,11 @@ For nX := 1 To Len(aFiles)
 //***************  MENUITEM NIVEL 2 *********************
                                     If ValType( XmlChildEx(aXMLITEM[nY],"_MENUITEM") ) = 'U'
                                        aXMLIT:=aXMLITEM[nY]
-                                    ELSEIf ValType( XmlChildEx( aXMLITEM[nY],"_MENUITEM") ) = 'O'
+                                    ElseIf ValType( XmlChildEx( aXMLITEM[nY],"_MENUITEM") ) = 'O'
  						               aXMLIT:=aXMLITEM[nY]:_MENUITEM
-                                    ELSEIf ValType( XmlChildEx( aXMLITEM[nY],"_MENUITEM") ) = 'A'
+                                    ElseIf ValType( XmlChildEx( aXMLITEM[nY],"_MENUITEM") ) = 'A'
  						               aXMLIT:=aXMLITEM[nY]:_MENUITEM
-                                    ENDIF
+                                    EndIf
 //***************  MENUITEM NIVEL 2 *********************
 
 									If ValType(aXMLIT) = "A"
@@ -253,21 +240,21 @@ For nX := 1 To Len(aFiles)
 											oSection2:Cell("CTITIT")	:SetValue(aXMLIT[nW]:_TITLE:TEXT)
 											oSection2:Cell("CFUNIT")	:SetValue(aXMLIT[nW]:_FUNCTION:TEXT)
 											oSection2:Cell("CSTAIT")	:SetValue(aXMLIT[nW]:_STATUS:TEXT)
-											oSection2:Printline()
+											oSection2:PrintLine()
 										Next nW
 
-									ElseIF ValType(aXMLIT) == "O"
+									ElseIf ValType(aXMLIT) == "O"
 
 				                        If ValType( XmlChildEx( oXml:_APMENU:_MENU[nL], "_TITLE"	) ) <> 'U'
 										   oSection2:Cell("CTITMN")	:SetValue(StrTran(oXml:_APMENU:_MENU[nL]:_TITLE:TEXT,";",""))
-									    ELSE
+									    Else
 										   oSection2:Cell("CTITMN")	:SetValue("  ")
-									    ENDIF
+									    EndIf
 				                        If ValType( XmlChildEx( oXml:_APMENU:_MENU[nL], "_STATUS"	) ) <> 'U'
 										   oSection2:Cell("CSTAMN")	:SetValue(oXml:_APMENU:_MENU[nL]:_STATUS:TEXT)
-									    ELSE
+									    Else
 										   oSection2:Cell("CSTAMN")	:SetValue("   ")
-									    ENDIF
+									    EndIf
 										oSection2:Cell("CTITPT")	:SetValue(_aMenu[nI]:_TITLE:TEXT)
 										oSection2:Cell("CSTAPT")	:SetValue(_aMenu[nI]:_STATUS:TEXT)
 										oSection2:Cell("CTITSB")	:SetValue("")
@@ -277,24 +264,24 @@ For nX := 1 To Len(aFiles)
 										oSection2:Cell("CTITIT")	:SetValue(aXMLITEM[nY]:_TITLE:TEXT)
 				                        If ValType( XmlChildEx( aXMLITEM[nY] , "_FUNCTION"	) ) <> 'U'
 										   oSection2:Cell("CFUNIT")	:SetValue(aXMLITEM[nY]:_FUNCTION:TEXT)
-										ELSE
+										Else
 										   oSection2:Cell("CFUNIT")	:SetValue("   ")
 				                        EndIf
 										oSection2:Cell("CSTAIT")	:SetValue(aXMLITEM[nY]:_STATUS:TEXT)
-										oSection2:Printline()
+										oSection2:PrintLine()
 
 									EndIf
 
 //***************  MENU NIVEL 2 *********************
                                     If ValType( XmlChildEx(aXMLITEM[nY],"_MENU") ) = 'U'
-                                       LOOP//aXMLTT:=aXMLITEM[nY] // já imprimiu em cima
-                                    ELSEIf ValType( XmlChildEx( aXMLITEM[nY],"_MENU") ) = 'O'
+                                       Loop//aXMLTT:=aXMLITEM[nY] // já imprimiu em cima
+                                    ElseIf ValType( XmlChildEx( aXMLITEM[nY],"_MENU") ) = 'O'
  						               aXMLTT:={aXMLITEM[nY]:_MENU}
-                                    ELSEIf ValType( XmlChildEx( aXMLITEM[nY],"_MENU") ) = 'A'
+                                    ElseIf ValType( XmlChildEx( aXMLITEM[nY],"_MENU") ) = 'A'
  						               aXMLTT:=aXMLITEM[nY]:_MENU
-                                    ELSE
-                                       LOOP
-                                    ENDIF
+                                    Else
+                                       Loop
+                                    EndIf
 //***************  MENU NIVEL 2 *********************
 
 									If ValType(aXMLTT) == "O"
@@ -302,7 +289,7 @@ For nX := 1 To Len(aFiles)
 										If aScan(aData, {|x| AllTrim(x[1]) == "_MENUITEM"}) > 0	
 				                           If ValType( XmlChildEx( aXMLTT , "_MENUITEM"	) ) = 'A'
 				                              _nTot:=Len(aXMLTT:_MENUITEM)
-				                           ELSE
+				                           Else
                                               _nTot:=Len(aXMLTT)
 				                           EndIf	
 
@@ -319,12 +306,12 @@ For nX := 1 To Len(aFiles)
 												   oSection2:Cell("CTITIT")	:SetValue(aXMLTT:_MENUITEM[nM]:_TITLE:TEXT)
 												   oSection2:Cell("CFUNIT")	:SetValue(aXMLTT:_MENUITEM[nM]:_FUNCTION:TEXT)
 												   oSection2:Cell("CSTAIT")	:SetValue(aXMLTT:_MENUITEM[nM]:_STATUS:TEXT)
-												ELSE
+												Else
 												   oSection2:Cell("CTITIT")	:SetValue(aXMLTT[nM]:_TITLE:TEXT)
 												   oSection2:Cell("CFUNIT")	:SetValue(aXMLTT[nM]:_FUNCTION:TEXT)
 												   oSection2:Cell("CSTAIT")	:SetValue(aXMLTT[nM]:_STATUS:TEXT)
-												ENDIF
-												oSection2:Printline()
+												EndIf
+												oSection2:PrintLine()
 											Next nM
 										EndIf
 									ElseIf ValType(aXMLTT) == "A"
@@ -332,7 +319,7 @@ For nX := 1 To Len(aFiles)
 
 				                           If ValType( XmlChildEx( aXMLTT[nM] , "_MENUITEM"	) ) = 'A'
 				                              _nTot:=Len(aXMLTT[nM]:_MENUITEM)
-				                           ELSE
+				                           Else
                                               _nTot:=Len(aXMLTT)
 				                           EndIf	
 											For nA := 1 To _nTot
@@ -349,13 +336,13 @@ For nX := 1 To Len(aFiles)
 												   oSection2:Cell("CTITIT")	:SetValue(aXMLTT[nM]:_MENUITEM[nA]:_TITLE:TEXT)
 												   oSection2:Cell("CFUNIT")	:SetValue(aXMLTT[nM]:_MENUITEM[nA]:_FUNCTION:TEXT)
 												   oSection2:Cell("CSTAIT")	:SetValue(aXMLTT[nM]:_MENUITEM[nA]:_STATUS:TEXT)
-												ELSE
+												Else
 												   oSection2:Cell("CTITIT")	:SetValue(aXMLTT[nM]:_TITLE:TEXT)
 												   oSection2:Cell("CFUNIT")	:SetValue(aXMLTT[nM]:_FUNCTION:TEXT)
 												   oSection2:Cell("CSTAIT")	:SetValue(aXMLTT[nM]:_STATUS:TEXT)
-												ENDIF
+												EndIf
 												
-												oSection2:Printline()
+												oSection2:PrintLine()
 											Next nA
 										Next nM
 									EndIf
@@ -365,13 +352,13 @@ For nX := 1 To Len(aFiles)
 ///***************  MENU NIVEL 1 *********************
                             If ValType( XmlChildEx(_aMenu[nI],"_MENU") ) = 'U'
                                aXMLSUB:={}
-                            ELSEIf ValType( XmlChildEx( _aMenu[nI],"_MENU") ) = 'O'
+                            ElseIf ValType( XmlChildEx( _aMenu[nI],"_MENU") ) = 'O'
  						       aXMLSUB:={_aMenu[nI]:_MENU}
-                            ELSEIf ValType( XmlChildEx( _aMenu[nI],"_MENU") ) = 'A'
+                            ElseIf ValType( XmlChildEx( _aMenu[nI],"_MENU") ) = 'A'
  						       aXMLSUB:=_aMenu[nI]:_MENU
-                            ELSE
+                            Else
                                aXMLSUB:={}
-                            ENDIF
+                            EndIf
 ///***************  MENU NIVEL 1 *********************
 
 							If ValType(aXMLSUB) == "A"
@@ -379,13 +366,13 @@ For nX := 1 To Len(aFiles)
 //***************  MENUITEM NIVEL 3 *********************
                                     If ValType( XmlChildEx(aXMLSUB[nD],"_MENUITEM") ) = 'U'
  						               aXMLSB:=aXMLSUB[nD]
-                                    ELSEIf ValType( XmlChildEx( aXMLSUB[nD],"_MENUITEM") ) = 'O'
+                                    ElseIf ValType( XmlChildEx( aXMLSUB[nD],"_MENUITEM") ) = 'O'
  						               aXMLSB:={aXMLSUB[nD]:_MENUITEM}
-                                    ELSEIf ValType( XmlChildEx( aXMLSUB[nD],"_MENUITEM") ) = 'A'
+                                    ElseIf ValType( XmlChildEx( aXMLSUB[nD],"_MENUITEM") ) = 'A'
  						               aXMLSB:=aXMLSUB[nD]:_MENUITEM
-                                    ELSE
-                                       LOOP
-                                    ENDIF
+                                    Else
+                                       Loop
+                                    EndIf
 //***************  MENUITEM NIVEL 3 *********************
                                     
 									If ValType(aXMLSB) = "A"
@@ -401,10 +388,10 @@ For nX := 1 To Len(aFiles)
 											oSection2:Cell("CTITIT")	:SetValue(aXMLSB[nJ]:_TITLE:TEXT)
 											oSection2:Cell("CFUNIT")	:SetValue(aXMLSB[nJ]:_FUNCTION:TEXT)
 											oSection2:Cell("CSTAIT")	:SetValue(aXMLSB[nJ]:_STATUS:TEXT)
-											oSection2:Printline()
+											oSection2:PrintLine()
 
 										Next nJ
-									ElseIF ValType(aXMLSB) == "O"
+									ElseIf ValType(aXMLSB) == "O"
 										oSection2:Cell("CTITMN")	:SetValue(StrTran(oXml:_APMENU:_MENU[nL]:_TITLE:TEXT,";",""))
 										oSection2:Cell("CSTAMN")	:SetValue(oXml:_APMENU:_MENU[nL]:_STATUS:TEXT)
 										oSection2:Cell("CTITPT")	:SetValue(_aMenu[nI]:_TITLE:TEXT)
@@ -416,23 +403,23 @@ For nX := 1 To Len(aFiles)
 										oSection2:Cell("CTITIT")	:SetValue(aXMLSB:_TITLE:TEXT)
 				                        If ValType( XmlChildEx( aXMLSB , "_FUNCTION"	) ) <> 'U'
 										   oSection2:Cell("CFUNIT")	:SetValue(aXMLSB:_FUNCTION:TEXT)
-										ELSE
+										Else
 										   oSection2:Cell("CFUNIT")	:SetValue("       ")
 				                        EndIf
 										oSection2:Cell("CSTAIT")	:SetValue(aXMLSB:_STATUS:TEXT)
-										oSection2:Printline()
+										oSection2:PrintLine()
 									EndIf
 
 //***************  MENU NIVEL 3 *********************
                                     If ValType( XmlChildEx(aXMLSUB[nD],"_MENU") ) = 'U'
- 						               LOOP//aXMLRT:=aXMLSUB[nD] já imprimiu em cima
-                                    ELSEIf ValType( XmlChildEx( aXMLSUB[nD],"_MENU") ) = 'O'
+ 						               Loop//aXMLRT:=aXMLSUB[nD] já imprimiu em cima
+                                    ElseIf ValType( XmlChildEx( aXMLSUB[nD],"_MENU") ) = 'O'
  						               aXMLRT:=aXMLSUB[nD]:_MENU
-                                    ELSEIf ValType( XmlChildEx( aXMLSUB[nD],"_MENU") ) = 'A'
+                                    ElseIf ValType( XmlChildEx( aXMLSUB[nD],"_MENU") ) = 'A'
  						               aXMLRT:=aXMLSUB[nD]:_MENU
-                                    ELSE
-                                       LOOP
-                                    ENDIF
+                                    Else
+                                       Loop
+                                    EndIf
 //***************  MENU NIVEL 3 *********************
 
 									If ValType(aXMLRT) == "O"
@@ -450,20 +437,20 @@ For nX := 1 To Len(aFiles)
 												oSection2:Cell("CTITIT")	:SetValue(aXMLRT:_MENUITEM[nB]:_TITLE:TEXT)
 												oSection2:Cell("CFUNIT")	:SetValue(aXMLRT:_MENUITEM[nB]:_FUNCTION:TEXT)
 												oSection2:Cell("CSTAIT")	:SetValue(aXMLRT:_MENUITEM[nB]:_STATUS:TEXT)
-												oSection2:Printline()
+												oSection2:PrintLine()
 											Next nB
 										EndIf
 									ElseIf ValType(aXMLRT) == "A"
 										For nB := 1 To Len(aXMLRT)
                                             If ValType( XmlChildEx(aXMLRT[nB],"_MENUITEM") ) = 'U'
  						                       aXMLSB4:={aXMLRT[nB]}
-                                            ELSEIf ValType( XmlChildEx( aXMLRT[nB],"_MENUITEM") ) = 'O'
+                                            ElseIf ValType( XmlChildEx( aXMLRT[nB],"_MENUITEM") ) = 'O'
  						                       aXMLSB4:={aXMLRT[nB]:_MENUITEM}
-                                            ELSEIf ValType( XmlChildEx( aXMLSUB[nD],"_MENUITEM") ) = 'A'
+                                            ElseIf ValType( XmlChildEx( aXMLSUB[nD],"_MENUITEM") ) = 'A'
  						                       aXMLSB4:=aXMLRT[nB]:_MENUITEM
-                                            ELSE
-                                               LOOP
-                                            ENDIF
+                                            Else
+                                               Loop
+                                            EndIf
 											For nC := 1 To Len(aXMLSB4)
 												oSection2:Cell("CTITMN")	:SetValue(StrTran(oXml:_APMENU:_MENU[nL]:_TITLE:TEXT,";",""))
 												oSection2:Cell("CSTAMN")	:SetValue(oXml:_APMENU:_MENU[nL]:_STATUS:TEXT)
@@ -476,7 +463,7 @@ For nX := 1 To Len(aFiles)
 												oSection2:Cell("CTITIT")	:SetValue(aXMLSB4[nC]:_TITLE:TEXT)
 												oSection2:Cell("CFUNIT")	:SetValue(aXMLSB4[nC]:_FUNCTION:TEXT)
 												oSection2:Cell("CSTAIT")	:SetValue(aXMLSB4[nC]:_STATUS:TEXT)
-												oSection2:Printline()
+												oSection2:PrintLine()
 											Next nC
 										Next nB
 									EndIf

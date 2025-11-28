@@ -12,7 +12,7 @@
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include "Protheus.Ch"
+#Include "TOTVS.ch"
 #Include "FWMVCDef.Ch"
 
 /*
@@ -30,14 +30,14 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS131()
-Local aArea   := GetArea() As Array
+Local aArea   := FWGetArea() As Array
 Local _bCond  As Block
 Local _cCond  As Character
 //Local _aRotBack As Array
 
-IF !FWIsInCallStack("MATA030")
-   RETURN MATA030()//CADASTRO DE CLIENTES QUANDO CHAMADA DO U_FORMULA()
-ENDIF
+If !FWIsInCallStack("MATA030")
+   Return MATA030()//CADASTRO DE CLIENTES QUANDO CHAMADA DO U_FORMULA()
+EndIf
 
 //_aRotBack := AClone(aRotina)
 Private aRotina:= MenuDef() 
@@ -46,7 +46,7 @@ Private _cTitulo
 Private _oBrowse 
 
 Begin Sequence 
-   DbSelectArea("ZBB")
+   DBSelectArea("ZBB")
 
    _bCond := { || SA1->A1_COD = ZBB_CLIENT .And. SA1->A1_LOJA = ZBB_LOJA }
    _cCond := "SA1->A1_COD = ZBB_CLIENT .And. SA1->A1_LOJA = ZBB_LOJA"
@@ -71,11 +71,11 @@ End Sequence
 
 //aRotina := AClone(_aRotBack)
 
-DbSelectArea("SA1")
+DBSelectArea("SA1")
 
-RestArea(aArea)
+FWRestArea(aArea)
 
-Return Nil
+Return
  
 /*
 ===============================================================================================================================
@@ -97,9 +97,9 @@ User Function AOMS131P()
  M->ZBB_CLIENT := SA1->A1_COD
  M->ZBB_LOJA   := SA1->A1_LOJA
  M->ZBB_NOMCLI := SA1->A1_NOME
- IF DUT->(MsSeek(xFilial("DUT")+M->ZBB_TPVEIC))
+ If DUT->(MsSeek(xFilial("DUT")+M->ZBB_TPVEIC))
     M->ZBB_PALETE := DUT->DUT_QTUNIH
- Endif
+ EndIf
 
 Return _cRet 
 
@@ -124,20 +124,20 @@ Begin Sequence
    _cTpVeic   := ZBB->ZBB_TPVEIC
    _cNomeVeic := AllTrim(ZBB->ZBB_NOMVEI)
 
-   If U_ItMsg("Confirma a Exclusão do Tipo de Veiculo: " + _cTpVeic + " - " + _cNomeVeic + " ?" ,"Atenção", , ,2, 2)
+   If U_ITMsg("Confirma a Exclusão do Tipo de Veiculo: " + _cTpVeic + " - " + _cNomeVeic + " ?" ,"Atenção", , ,2, 2)
       
       ZBB->(RecLock("ZBB",.F.))
       ZBB->(DbDelete())
-      ZBB->(MsUnLock())
+      ZBB->(MSUnLock())
       _oBrowse:Refresh()
 
-      U_ItMsg("Tipo de Veiculo :" + _cTpVeic + " - " + _cNomeVeic + ", excluido com sucesso!","Atenção",,1)
+      U_ITMsg("Tipo de Veiculo :" + _cTpVeic + " - " + _cNomeVeic + ", excluido com sucesso!","Atenção",,1)
 
    EndIf 
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -161,7 +161,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -182,9 +182,9 @@ Local _lRet := .T.
 
 Begin Sequence 
    
-   ZBB->(DbSetOrder(1))
+   ZBB->(DBSetOrder(1))
    If ZBB->(MsSeek(xFilial("ZBB")+SA1->A1_COD+SA1->A1_LOJA+M->ZBB_TPVEIC))
-      U_ItMsg("Já existe o tipo de veiculo cadastrado para este Cliente e Loja.","Atenção",,1)
+      U_ITMsg("Já existe o tipo de veiculo cadastrado para este Cliente e Loja.","Atenção",,1)
       _lRet := .F.
    EndIf 
    
@@ -207,7 +207,7 @@ Retorno-----------: _aRotina - Array com as opções de menu
 */
 Static Function MenuDef()
  Local aRotina2 := {}
- //If FWIsInCallStack("CFGA530") // Colocar esse IF menu do primeiro Browse (CRM980MDEF.PRW (MVC) e MA030ROT.PRW) com todas as linhas abaixo 
+ //If FWIsInCallStack("CFGA530") // Colocar esse If menu do primeiro Browse (CRM980MDEF.PRW (MVC) e MA030ROT.PRW) com todas as linhas abaixo 
  //   para conceder acesso ao Fonte MATA030 através de privilegios do configurador 
  aAdd(aRotina2,{ "Pesquisar"    ,"AxPesqui"                , 0, 1})
  aAdd(aRotina2,{ "Visualizar"   ,"AxVisual"                , 0, 2})

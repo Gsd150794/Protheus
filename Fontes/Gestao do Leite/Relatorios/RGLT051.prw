@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor            |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas B. Ferreira | 19/06/2019 | Revisão de fontes. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas B. Ferreira | 26/08/2019 | Modificada validação de acesso aos setores. Chamado 30185
--------------------------------------------------------------------------------------------------------------------------------
-Lucas B. Ferreira | 12/12/2021 | Migração do relatório para tReport. Chamado 38597
+Lucas Borges  |19/06/2019| Chamado 28346. Revisão de fontes.
+Lucas Borges  |26/08/2019| Chamado 30185. Modificada validação de acesso aos setores.
+Lucas Borges  |12/12/2021| Chamado 38597. Migração do relatório para tReport.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE 'Protheus.ch' 
+#Include "TOTVS.ch" 
 
 /*
 ===============================================================================================================================
 Programa--------: RGLT051
 Autor-----------: Lucas Borges Ferreira
 Data da Criacao-: 03/11/2021
-===============================================================================================================================
 Descrição-------: Relatório dos Valores Recolhidos de Fundepec/Fundesa - Por Produtor
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -45,11 +37,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Processa a montagem do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -101,11 +90,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Processa a impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -131,10 +117,10 @@ Local _nVolume	:= 0
 If MV_PAR01 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZLF")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio
@@ -215,7 +201,7 @@ BeginSql alias _cAlias
 	   AND SA2.A2_LOJA = ZLF.ZLF_A2LOJA
 	   AND ZL2.ZL2_FILIAL = ZLF.ZLF_FILIAL
 	   AND ZL2.ZL2_COD = ZLF.ZLF_SETOR
-	   AND SUBSTR(ZLF.ZLF_A2COD, 1, 1) = 'P'
+	   AND SubStr(ZLF.ZLF_A2COD, 1, 1) = 'P'
 	   AND ZLFF.ZLF_FILIAL(+) = ZLF.ZLF_FILIAL
 	   AND ZLFF.ZLF_CODZLE(+) = ZLF.ZLF_CODZLE
 	   AND ZLFF.ZLF_SETOR(+) = ZLF.ZLF_SETOR
@@ -248,27 +234,27 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->ZLF_FILIAL
 	_cSetor	:= (_cAlias)->ZL2_COD + ' - ' + (_cAlias)->ZL2_DESCRI
 	_cProdutor := (_cAlias)->A2_COD
 	If (_nX:= aScan(_aTot,{|x| x[1] == _cFilial } )) == 0
-		Aadd(_aTot,{_cFilial,(_cAlias)->VOLUME,(_cAlias)->VALOR})
+		aAdd(_aTot,{_cFilial,(_cAlias)->VOLUME,(_cAlias)->VALOR})
 	Else
 		_aTot[_nX,2]+=(_cAlias)->VOLUME
       	_aTot[_nX,3]+=(_cAlias)->VALOR
 	EndIf
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 //Impressão do Resumo das filiais
 oReport:EndPage()

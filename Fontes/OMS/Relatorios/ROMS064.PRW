@@ -15,7 +15,7 @@ Jerry Santiago   - Julio Paz      - 14/07/2025 - 21/07/25 - 50633   - Inclusão d
 
 */
 
-#Include "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -32,13 +32,13 @@ User Function ROMS064()
 
 Begin Sequence
    
-   If U_ITMSG("Confirma a Impressão do Espelho de Pedido de Vendas para o Pedido Posicionado?","Atenção" , , ,2, 2) 
-      fwmsgrun(,{|oproc| U_ROMS064R(oproc)},"Aguarde...","Imprimindo espelho do pedido...")
+   If U_ITMsg("Confirma a Impressão do Espelho de Pedido de Vendas para o Pedido Posicionado?","Atenção" , , ,2, 2) 
+      FWMsgRun(,{|oproc| U_ROMS064R(oproc)},"Aguarde...","Imprimindo espelho do pedido...")
    EndIf 
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -70,7 +70,7 @@ Local I				:= 0
 Local _cTipo		:= ""
 Local _cCoord		:= ""
 Local _cSuperv      := ""
-Local _dData		:= StoD('')
+Local _dData		:= SToD('')
 Local _cHora		:= ''
 Local cDesCondCli   := ''
 Local cDesCond      := ''
@@ -171,18 +171,18 @@ Begin Sequence
      MPSysOpenQuery( _cQuery , _cAliasD)
 		
    DBSelectArea(_cAliasD)
-   (_cAliasD)->( DBGotop() )
+   (_cAliasD)->( DBGoTop() )
 		
    COUNT TO _nCount
 		
-   (_cAliasD)->( DBGotop() )
+   (_cAliasD)->( DBGoTop() )
 		
    ProcRegua(_nCount)
 		
    If _nCount > 0
 		
-	  DbSelectArea("SA3")
-	  SA3->( DBSetorder(1) )
+	  DBSelectArea("SA3")
+	  SA3->( DBSetOrder(1) )
 	  If SA3->( DBSeek( xFilial("SA3") + (_cAliasD)->VEND ))
 	 	 _cCoord  := SA3->A3_SUPER
 	     _cSuperv := SA3->A3_I_SUPE 
@@ -271,9 +271,9 @@ Begin Sequence
 	  _oPrint:Say( 525 , 0110 , AllTrim((_cAliasD)->NUMPED) +" / "+SC5->C5_NUM			, _oFont09			)
 			
 	  //_oPrint:Say( 485 , 0410 , "FiL Faturamento / Fil Carregamento"			, _oFont10n			)
-	  //_oPrint:Say( 525 , 0410 , (_cAliasD)->FILIAL +" - "+ Alltrim((_cAliasD)->DESCR),_oFont09			)
+	  //_oPrint:Say( 525 , 0410 , (_cAliasD)->FILIAL +" - "+ AllTrim((_cAliasD)->DESCR),_oFont09			)
 	  _oPrint:Say( 485 , 0450 , "FiL Faturamento / Fil Carregamento"			, _oFont10n			)
-	  _oPrint:Say( 525 , 0450 , (_cAliasD)->FILIAL +" - "+ Alltrim((_cAliasD)->DESCR),_oFont09			)
+	  _oPrint:Say( 525 , 0450 , (_cAliasD)->FILIAL +" - "+ AllTrim((_cAliasD)->DESCR),_oFont09			)
 		
 	  _oPrint:Say( 485 , 1210 , "Cond. Pagto. Pedido:"				, _oFont10n			)
 	  _oPrint:Say( 525 , 1210 , cDesCond										, _oFont09			)
@@ -292,13 +292,13 @@ Begin Sequence
 	  _oPrint:Box( 600 , 1500 , 640 , 2300 )
 			
 	  _oPrint:Say( 565 , 0110 , "Dt/Hr Inc.Ven."										, _oFont10n	)
-	  _oPrint:Say( 605 , 0110 , Dtoc( StoD( (_cAliasD)->EMISS ) )		+" - "+ (_cAliasD)->HRINC +" hs"	, _oFont10	)
+	  _oPrint:Say( 605 , 0110 , DToC( SToD( (_cAliasD)->EMISS ) )		+" - "+ (_cAliasD)->HRINC +" hs"	, _oFont10	)
 			
 	  _oPrint:Say( 565 , 0810 , "Dt/Hr de Aprovação"									, _oFont10n	)
-	  _oPrint:Say( 605 , 0810 , Dtoc( StoD( (_cAliasD)->DATAAPR ) )	+" - "+ (_cAliasD)->HRAPR +" hs"	, _oFont10	)
+	  _oPrint:Say( 605 , 0810 , DToC( SToD( (_cAliasD)->DATAAPR ) )	+" - "+ (_cAliasD)->HRAPR +" hs"	, _oFont10	)
 			
 	  _oPrint:Say( 565 , 1510 , "Dt/Hr Impr."										, _oFont10n	)
-	  _oPrint:Say( 605 , 1510 , DtoC( _dData ) +" - "+ _cHora +" hs"										, _oFont10	)
+	  _oPrint:Say( 605 , 1510 , DToC( _dData ) +" - "+ _cHora +" hs"										, _oFont10	)
 		 	
 	  cQtCol := 660
 			
@@ -328,21 +328,21 @@ Begin Sequence
 	  //===================================================================
 	  //Busca informações de rede do cliente para apresentar na descrição
 	  //===================================================================
-	  _crede := posicione("SA1",1,xFilial("SA1")+(_cAliasD)->CODCLI+(_cAliasD)->LOJCLI,"A1_GRPVEN")
+	  _crede := Posicione("SA1",1,xFilial("SA1")+(_cAliasD)->CODCLI+(_cAliasD)->LOJCLI,"A1_GRPVEN")
 		    
-	  If empty(_crede) .or. alltrim(_crede) == "999999"
+	  If Empty(_crede) .Or. AllTrim(_crede) == "999999"
 	     _cdescr := ""
 	  Else
-	     ACY->( DBSetorder(1) )
-		 If ACY->( Dbseek( xFilial("ACY") + alltrim(_crede) ) )
-		 	_cdescr := " - " + alltrim( ACY->ACY_DESCRI )
+	     ACY->( DBSetOrder(1) )
+		 If ACY->( DBSeek( xFilial("ACY") + AllTrim(_crede) ) )
+		 	_cdescr := " - " + AllTrim( ACY->ACY_DESCRI )
 		 Else
 		 	_cdescr := ""
-		 Endif
-      Endif		    
+		 EndIf
+      EndIf		    
 
-	  _oPrint:Say( cQtCol + 5 , 0110 , Alltrim((_cAliasD)->NOME)            				, _oFont09		)
-	  _oPrint:Say( cQtCol + 5 , 0110 + (len(Alltrim((_cAliasD)->NOME)) * 18) , _cdescr		, _oFont10n	)
+	  _oPrint:Say( cQtCol + 5 , 0110 , AllTrim((_cAliasD)->NOME)            				, _oFont09		)
+	  _oPrint:Say( cQtCol + 5 , 0110 + (Len(AllTrim((_cAliasD)->NOME)) * 18) , _cdescr		, _oFont10n	)
 	  _oPrint:Say( cQt1Col + 5 , 1810 , "Cód./Loja:"											, _oFont10n 	)
 	  _oPrint:Say( cQtCol  + 5 , 1810 , (_cAliasD)->CODCLI +" / "+ (_cAliasD)->LOJCLI		, _oFont09  	)
 			
@@ -398,9 +398,9 @@ Begin Sequence
 	     _n1 :=  1 
 	  Else
 		 _n1 :=  0
-	  Endif 
+	  EndIf 
 
-	  _n2:= INT( Len( Alltrim( _cENDEREC ) ) / 35 )  
+	  _n2:= INT( Len( AllTrim( _cENDEREC ) ) / 35 )  
 
 	  _ncalc := (_n1 + _n2) * 40
 
@@ -424,7 +424,7 @@ Begin Sequence
 			
 	  lRet	:= .T.
 	  _cENDEREC := (_cAliasD)->ENDEREC
-	  nQtEnd	:= Len( Alltrim( _cENDEREC ) )
+	  nQtEnd	:= Len( AllTrim( _cENDEREC ) )
 	  nLinEnd	:= cQtCol + 5
 	  n		:= 1
 			
@@ -450,7 +450,7 @@ Begin Sequence
 	  cMvFil	:= ""
 			
 	  For I := 1 To Len(aSM0)
-	      cMvFil += aSM0[I][2] + IIF( I == Len(aSM0) , "" , ";" )
+	      cMvFil += aSM0[I][2] + IIf( I == Len(aSM0) , "" , ";" )
 	  Next I
 			
 	  cTit := " SELECT "
@@ -461,7 +461,7 @@ Begin Sequence
 	  cTit += "       WHERE "
 	  cTit += "           E11.D_E_L_E_T_ = ' ' "
 	  cTit += "       AND E11.E1_SALDO   + E11.E1_SDACRES - E11.E1_SDDECRE > 0 "
-	  cTit += "       AND E11.E1_VENCREA < '"+ DtoS(Date()) +"' "
+	  cTit += "       AND E11.E1_VENCREA < '"+ DToS(Date()) +"' "
 	  cTit += "       AND E11.E1_FILIAL  IN "+ FormatIn(cMvFil,";") +" "
 	  cTit += "       AND E11.E1_CLIENTE = '"+ (_cAliasD)->CODCLI +"' "
 	  cTit += "       AND E11.E1_TIPO    NOT IN ('RA','NCC') ) SLD_VENCTO ,"
@@ -470,7 +470,7 @@ Begin Sequence
 	  cTit += "       WHERE "
 	  cTit += "           E12.D_E_L_E_T_ = ' ' "
 	  cTit += "       AND E12.E1_SALDO   + E12.E1_SDACRES - E12.E1_SDDECRE > 0 "
-	  cTit += "       AND E12.E1_VENCREA >= '"+ DtoS(Date()) +"' "
+	  cTit += "       AND E12.E1_VENCREA >= '"+ DToS(Date()) +"' "
 	  cTit += "       AND E12.E1_FILIAL  IN "+ FormatIn(cMvFil,";") +" "
 	  cTit += "       AND E12.E1_CLIENTE = '"+ (_cAliasD)->CODCLI +"' "
 	  cTit += "       AND E12.E1_TIPO    NOT IN ('RA','NCC') ) SLD_A_VENCTO "
@@ -489,7 +489,7 @@ Begin Sequence
 	  MPSysOpenQuery( cTit , _cAlias)
 	 	 	
 	  DBSelectArea( _cAlias )
-	  (_cAlias)->( DBGotop() )
+	  (_cAlias)->( DBGoTop() )
 			
 	  cQtCol := cQtCol + 060
 	    	
@@ -525,20 +525,20 @@ Begin Sequence
 	  _oPrint:Say( cQtCol  + 5 , _nCol2+10 , "R$ "+ Transform( (_cAlias)->SLD_A_VENCTO , "@E 99,999,999,999.99" )	, _oFont09	)
 
 //*********************************************************************************************************************************************			
-	  cRisCli:=UPPER(SA1->A1_RISCO) 
+	  cRisCli:=Upper(SA1->A1_RISCO) 
 	  nLimCr:= SA1->A1_LC
 	  SA1->( DBSetOrder(1) )	        
 	  If SA1->( DBSeek( xFilial("SA1") + (_cAliasD)->CODCLI) )
-	  	 DO WHILE SA1->(!EOF()) .AND. xFilial("SA1") == SA1->A1_FILIAL .AND.  (_cAliasD)->CODCLI == SA1->A1_COD
-	  	 	IF !EMPTY(SA1->A1_LC)
-	  	 		cRisCli :=  UPPER(SA1->A1_RISCO) 
+	  	 While SA1->(!Eof()) .And. xFilial("SA1") == SA1->A1_FILIAL .And.  (_cAliasD)->CODCLI == SA1->A1_COD
+	  	 	If !Empty(SA1->A1_LC)
+	  	 		cRisCli :=  Upper(SA1->A1_RISCO) 
 	  	 		nLimCr  := SA1->A1_LC
 			   cShelf  := SA1->A1_I_SHLFP
-	  	 		EXIT
-	  	 	ENDIF
-	  	 	SA1->(DBSKIP())
-	  	 ENDDO
-	  ENDIF
+	  	 		Exit
+	  	 	EndIf
+	  	 	SA1->(DBSkip())
+	  	 EndDo
+	  EndIf
 	  _oPrint:Say( cQt1Col + 5 , _nCol3+10 , "Limite de Credito (Risco):"											, _oFont10n	)
 	  _oPrint:Say( cQtCol  + 5 , _nCol3+10 , "R$ "+ Transform( nLimCr , "@E 999,999,999.99" )+" ( "+cRisCli+" )"	, _oFont09	) 
 
@@ -551,7 +551,7 @@ Begin Sequence
       _ctab := SC5->C5_I_TAB
 
 	  _oPrint:Say( cQt1Col + 5 , 1610 , "Tabela de preço:"												, _oFont10n	)
-	  _oPrint:Say( cQtCol  + 5 , 1610 , _ctab + " - " + posicione("DA0",1,xFilial("DA0")+_ctab,"DA0_DESCRI")	, _oFont09	)
+	  _oPrint:Say( cQtCol  + 5 , 1610 , _ctab + " - " + Posicione("DA0",1,xFilial("DA0")+_ctab,"DA0_DESCRI")	, _oFont09	)
 
 	  cQtCol += 060
 			
@@ -605,16 +605,16 @@ Begin Sequence
 	  _oPrint:Say( cQt1Col + 05 , 1410 , "Observação (Comercial): " , _oFont10n )
 			
 	  lRet1	:= .T.
-	  nQtObs	:= Len( AllTrim( (_cAliasD)->( STRTRAN( STRTRAN( OBSCOM , CHR(13) , " " ) , CHR(10) , " " ) ) ) )
+	  nQtObs	:= Len( AllTrim( (_cAliasD)->( StrTran( StrTran( OBSCOM , CHR(13) , " " ) , CHR(10) , " " ) ) ) )
 	  n		:= 1
 	  nLinEnd	:= cQtCol + 5
 			
 	  While lRet1
 				
-	     _cTxtAux := (_cAliasD)->( STRTRAN( STRTRAN( OBSCOM , CHR(13) , " " ) , CHR(10) , " " ) )
+	     _cTxtAux := (_cAliasD)->( StrTran( StrTran( OBSCOM , CHR(13) , " " ) , CHR(10) , " " ) )
 				
 		 If nQtObs > 0
-			_oPrint:Say( nLinEnd , 1410 , IIF( Empty( _cTxtAux ) , "Nenhum Registro" , SubStr( _cTxtAux , n , 55 ) ) , _oFont09 )
+			_oPrint:Say( nLinEnd , 1410 , IIf( Empty( _cTxtAux ) , "Nenhum Registro" , SubStr( _cTxtAux , n , 55 ) ) , _oFont09 )
 		 Else
 		    lRet1 := .F.
 		 EndIf
@@ -648,13 +648,13 @@ Begin Sequence
 	  _oPrint:Box( cQt1Col , 1050 , cQt1Col + 40 , 1400 )
 	  _oPrint:Box( cQtCol  , 1050 , cQtCol  + 40 , 1400 )
 			
-	  _oPrint:Say( cQtCol  + 5 , 0110 , IIF( Empty( (_cAliasD)->TIPCAR ) , "N/A" , IIF( (_cAliasD)->TIPCAR == '1' , (_cAliasD)->TIPCAR +" - Paletizada" , (_cAliasD)->TIPCAR +" - Batida" ) ) , _oFont09 )
+	  _oPrint:Say( cQtCol  + 5 , 0110 , IIf( Empty( (_cAliasD)->TIPCAR ) , "N/A" , IIf( (_cAliasD)->TIPCAR == '1' , (_cAliasD)->TIPCAR +" - Paletizada" , (_cAliasD)->TIPCAR +" - Batida" ) ) , _oFont09 )
 			
 	  _oPrint:Say( cQt1Col + 5 , 0510 , "Quant. Chapa:"		, _oFont10n )
-	  _oPrint:Say( cQtCol  + 5 , 0510 , IIF( Empty( (_cAliasD)->CHAPA ) , "N/A" , (_cAliasD)->CHAPA ) , _oFont09 )
+	  _oPrint:Say( cQtCol  + 5 , 0510 , IIf( Empty( (_cAliasD)->CHAPA ) , "N/A" , (_cAliasD)->CHAPA ) , _oFont09 )
 			
 	  _oPrint:Say( cQt1Col + 5 , 0860 , "Hr. Descarga:"		, _oFont10n )
-	  _oPrint:Say( cQtCol  + 5 , 0860 , IIF( Empty( (_cAliasD)->HRDES ) , "N/A" , (_cAliasD)->HRDES)	, _oFont09 )
+	  _oPrint:Say( cQtCol  + 5 , 0860 , IIf( Empty( (_cAliasD)->HRDES ) , "N/A" , (_cAliasD)->HRDES)	, _oFont09 )
 	 		
 	  _oPrint:Say( cQt1Col + 5 , 1060 , "Custo Descarga: "	, _oFont10n )
 	  _oPrint:Say( cQtCol  + 5 , 1060 , Transform( (_cAliasD)->CUSDES , "@E 99,999,999.99" )			, _oFont09 )
@@ -692,7 +692,7 @@ Begin Sequence
 	  While lRet2
 			
 		 If nQtMNF > 0
-			_oPrint:Say( nLinEnd , 1210 , IIF( Empty( AllTrim( (_cAliasD)->MENNF ) ) , "N/A" , Substr( (_cAliasD)->MENNF , n , 68 ) )	, _oFont09 )
+			_oPrint:Say( nLinEnd , 1210 , IIf( Empty( AllTrim( (_cAliasD)->MENNF ) ) , "N/A" , SubStr( (_cAliasD)->MENNF , n , 68 ) )	, _oFont09 )
 		 Else
 			lRet2 := .F.
 		 EndIf
@@ -710,9 +710,9 @@ Begin Sequence
 			
 	  _oPrint:Say( cQtCol + 6 , 0110 , "Porcentagem de Leite Magro "			, _oFont10n	)
 			
-	  If val((_cAliasD)->EVENTO) > 0
-	     _oPrint:Say( cQtCol + 6 , 1210 , "Pedido de Evento: " + alltrim((_cAliasD)->EVENTO)	+ "  -  " + posicione("ZY4",1,xfilial("ZY4")+(_cAliasD)->EVENTO,"ZY4_DESCRI"), _oFont10n	)
-	  Endif
+	  If Val((_cAliasD)->EVENTO) > 0
+	     _oPrint:Say( cQtCol + 6 , 1210 , "Pedido de Evento: " + AllTrim((_cAliasD)->EVENTO)	+ "  -  " + Posicione("ZY4",1,xFilial("ZY4")+(_cAliasD)->EVENTO,"ZY4_DESCRI"), _oFont10n	)
+	  EndIf
 			
 	  cQtCol += 45
 			
@@ -785,7 +785,7 @@ Begin Sequence
 	  nTotPes	:= 0
 	  nPesBru	:= 0
 			
-	  While (_cAliasD)->( !EoF() )
+	  While (_cAliasD)->( !Eof() )
 	     nFatConv	:= GetAdvFVal( "SB1" , "B1_CONV"	, xFilial("SB1") + (_cAliasD)->PROD , 1 , "" )
 		 cTpConv		:= GetAdvFVal( "SB1" , "B1_TIPCONV"	, xFilial("SB1") + (_cAliasD)->PROD , 1 , "" )
 		 nNewFat		:= GetAdvFVal( "SB1" , "B1_I_FATCO"	, xFilial("SB1") + (_cAliasD)->PROD , 1 , "" )
@@ -1003,12 +1003,12 @@ Begin Sequence
 		 cQtCol := 070
       EndIf
   	  
-	  IF SC5->(FIELDPOS("C5_ASSCOD")) <> 0 .AND. !EMPTY(SC5->C5_ASSCOD)
-         ZPG->(DBSETORDER( 1 ))//ZPG_FILIAL+ZPG_ASSCOD"
-         ZPG->(DBSEEK( xFilial()+SC5->C5_ASSCOD ))
-	     _oPrint:Say( cQtCol      , 0100 , "Assistente  Responsavel: "+ALLTRIM(ZPG->ZPG_ASSNOM)+ " / Tel.: "+ALLTRIM(ZPG->ZPG_TEL1), _oFont10n )
-	     _oPrint:Say( cQtCol + 150, 0100 , "E-Mail: "+ALLTRIM(ZPG->ZPG_EMAIL), _oFont10n )
-	  ENDIF
+	  If SC5->(FIELDPOS("C5_ASSCOD")) <> 0 .And. !Empty(SC5->C5_ASSCOD)
+         ZPG->(DBSetOrder( 1 ))//ZPG_FILIAL+ZPG_ASSCOD"
+         ZPG->(DBSeek( xFilial()+SC5->C5_ASSCOD ))
+	     _oPrint:Say( cQtCol      , 0100 , "Assistente  Responsavel: "+AllTrim(ZPG->ZPG_ASSNOM)+ " / Tel.: "+AllTrim(ZPG->ZPG_TEL1), _oFont10n )
+	     _oPrint:Say( cQtCol + 150, 0100 , "E-Mail: "+AllTrim(ZPG->ZPG_EMAIL), _oFont10n )
+	  EndIf
 
 	  If _cTipo == '10'
 		 //_oPrint:Say( cQtCol			, 0100 , "Autorização: "												, _oFont14n )
@@ -1035,7 +1035,7 @@ Begin Sequence
 
 End Sequence 
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1094,23 +1094,23 @@ Begin Sequence
    //============================================================================= 
    FillGetDados(1     ,"SC6"   ,1       ,          ,             ,{||.T.}    ,_aNoFields ,,,,,.T.)
    
-   SC6->(DbSetOrder(1))                                     
+   SC6->(DBSetOrder(1))                                     
    SC6->(MsSeek(SC5->(C5_FILIAL+C5_NUM)))
 
    _aItensPV := {}
 
-   Do While ! SC6->(Eof()) .And. SC6->(C6_FILIAL+C6_NUM) == SC5->(C5_FILIAL+C5_NUM)
-      Aadd(aCols,Array(Len(aHeader)+1))  
+   While ! SC6->(Eof()) .And. SC6->(C6_FILIAL+C6_NUM) == SC5->(C5_FILIAL+C5_NUM)
+      aAdd(aCols,Array(Len(aHeader)+1))  
        
       For _nI := 1 To Len(aHeader)
-	       _cCampo := Alltrim(aHeader[_nI,2])
+	       _cCampo := AllTrim(aHeader[_nI,2])
 	       
 	       If (aHeader[_nI,10] # "V" .And. ! (_cCampo $ "C6_QTDLIB/C6_ALI_WT/C6_REC_WT")) 
 	          aCols[Len(aCols)][_nI] := &("SC6->"+_cCampo)
 	       EndIf
       Next    
     
-      SC6->(DbSkip())
+      SC6->(DBSkip())
    EndDo
 
    _nRet := Ma410Impos( 6, .T., {}) // Total do Pedido de Vendas com impostos.
@@ -1140,12 +1140,12 @@ Begin Sequence
    _nQtdeM := 0
    _nQtdeI := 0
 
-   SB1->(DbSetOrder(1))
+   SB1->(DBSetOrder(1))
 
-   SC6->(DbSetOrder(1))
+   SC6->(DBSetOrder(1))
    SC6->(MsSeek(_cCodFil+_cNrPed))
     
-   Do While ! SC6->(Eof()) .And. SC6->(C6_FILIAL+C6_NUM) == _cCodFil+_cNrPed
+   While ! SC6->(Eof()) .And. SC6->(C6_FILIAL+C6_NUM) == _cCodFil+_cNrPed
       
 	  If SB1->(MsSeek(xFilial("SB1")+SC6->C6_PRODUTO))
          If SB1->B1_I_TIPLT = "M"
@@ -1155,7 +1155,7 @@ Begin Sequence
          EndIf
 	  EndIf 	 
 
-      SC6->(DbSkip())
+      SC6->(DBSkip())
    EndDo 
 
    If _nQtdeM <> 0 
@@ -1164,6 +1164,6 @@ Begin Sequence
 	
 End Sequence
 
-SC6->(DbGoTo(_nRegSC6))
+SC6->(DBGoTo(_nRegSC6))
 
 Return _nRet

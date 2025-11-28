@@ -15,7 +15,7 @@ Jerry Santiago   - Julio Paz      - 14/07/2025 - 21/07/25 - 50633   - Inclusão d
 
 */
 
-#Include "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -45,7 +45,7 @@ Default _cCodCli		:= ''
 Default _cLojCli		:= ''
 Default _cFilPed		:= ''
 
-IF !Empty(_cPed) .And. !Empty(_cCodCli) .And. !Empty(_cLojCli) .And. !Empty(_cFilPed) .And. !Empty(_cCodVen)
+If !Empty(_cPed) .And. !Empty(_cCodCli) .And. !Empty(_cLojCli) .And. !Empty(_cFilPed) .And. !Empty(_cCodVen)
 	aAdd( _aPed , { _cFilPed , _cPed , _cCodCli , _cLojCli , _cCodVen } )
 EndIf
 
@@ -53,12 +53,12 @@ DEFINE MSDIALOG _oDlg TITLE "IMPRIMIR PEDIDOS?" FROM 000,000 TO 200,500 COLORS 0
 
 	@006,007 GROUP	_oGroup1 TO 059,238 PROMPT "Selecione um dos modos de impressão indicados abaixo:"	OF _oDlg COLOR 0,16777215 PIXEL
 	@026,020 RADIO	_oRadMnu1 VAR _nRadMnu1 ITEMS "Pedido Posicionado","Vários Pedidos","Varios Pedidos(Somente não impressos)"	SIZE 200,028	OF _oDlg COLOR 0,16777215 PIXEL
-	@070,045 BUTTON _oButton1 PROMPT "Confirmar"										SIZE 044,015	OF _oDlg ACTION ( fwmsgrun( ,{|oproc| U_ROMS035RUN(oproc) } , "Processando..." , 'Aguarde!' ) , _oDlg:End() ) PIXEL
+	@070,045 BUTTON _oButton1 PROMPT "Confirmar"										SIZE 044,015	OF _oDlg ACTION ( FWMsgRun( ,{|oproc| U_ROMS035RUN(oproc) } , "Processando..." , 'Aguarde!' ) , _oDlg:End() ) PIXEL
 	@070,158 BUTTON _oButton2 PROMPT "Cancelar"											SIZE 047,015	OF _oDlg ACTION _oDlg:End() PIXEL
 
 ACTIVATE MSDIALOG _oDlg CENTERED
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -96,7 +96,7 @@ Local _nOpca		:= 0
 Local _cTipo		:= ""
 Local _cCoord		:= ""
 Local _cSuperv      := ""
-Local _dData		:= StoD('')
+Local _dData		:= SToD('')
 Local _cHora		:= ''
 Local cDesCondCli   := ''
 Local cDesCond      := ''
@@ -106,7 +106,7 @@ Private _lInvAll	:= .F.
 Private _cMark	:= GetMark()
 Private _oMark	:= NIL
 
-If (_nRadMnu1 == 2 .or. _nRadMnu1 == 3) .Or. Empty( _aPed ) 
+If (_nRadMnu1 == 2 .Or. _nRadMnu1 == 3) .Or. Empty( _aPed ) 
 	
 	_aPed := {}
 	
@@ -122,20 +122,20 @@ If (_nRadMnu1 == 2 .or. _nRadMnu1 == 3) .Or. Empty( _aPed )
 				{ "VEND1"  	, 'C' , 06 , 0 },;
 				{ "NMVEND1" , 'C' , 30 , 0 } }
 	
-	If select("TTRB") > 0
+	If Select("TTRB") > 0
 	
-		dbselectarea("TTRB")
-		dbclosearea()
+		DBSelectArea("TTRB")
+		DBCloseArea()
 		
-	Endifç
+	EndIfç
 	
 	_otemp := FWTemporaryTable():New( "TTRB", _aStru )
 
 	DBSelectArea("TMP")
-	TMP->( DBGotop() )
+	TMP->( DBGoTop() )
 	While TMP->( !Eof() )
 	    
-		If _nRadMnu1 == 2 .or. (_nRadMnu1 == 3 .and. TMP->IMPRIME != '1-SIM')
+		If _nRadMnu1 == 2 .Or. (_nRadMnu1 == 3 .And. TMP->IMPRIME != '1-SIM')
 		
 			DBSelectArea("TTRB")
 			RecLock( "TTRB" , .T. )
@@ -150,9 +150,9 @@ If (_nRadMnu1 == 2 .or. _nRadMnu1 == 3) .Or. Empty( _aPed )
 			TTRB->VEND1	    := TMP->VEND1
 			TTRB->NMVEND1   := TMP->NMVEND1
 			
-			TTRB->( MsunLock() )
+			TTRB->( MSUnLock() )
 			
-		Endif
+		EndIf
 		
 	TMP->( DBSkip() )
 	EndDo
@@ -172,8 +172,8 @@ If (_nRadMnu1 == 2 .or. _nRadMnu1 == 3) .Or. Empty( _aPed )
 	
 	DEFINE MSDIALOG _oDlg TITLE "Selecione os pedidos para imprimir:" From 0,0 To _aSize[6],_aSize[5] PIXEL 
 	    
-		DbSelectArea("TTRB")
-		DbGotop()
+		DBSelectArea("TTRB")
+		DBGoTop()
 		
 		_oMark							:= MsSelect():New( "TTRB" , "OK" , "" , _aCpoBro , @_lInvAll , @_cMark , { 035 , 000 , _aSize[04] , _aSize[03] } )
 		_oMark:obrowse:lCanAllmark	:= .T.
@@ -185,15 +185,15 @@ If (_nRadMnu1 == 2 .or. _nRadMnu1 == 3) .Or. Empty( _aPed )
 	
 		Return
 		
-	Endif
+	EndIf
 	
 	
-	TTRB->( DBGotop() )
+	TTRB->( DBGoTop() )
 	While TTRB->( !Eof() ) 
 	
 		If Marked("OK")
 		
-				Aadd( _aPed , { TTRB->FILIAL , TTRB->NUMPED , TTRB->CODCLI , TTRB->LOJA , TTRB->VEND1 } ) 
+				aAdd( _aPed , { TTRB->FILIAL , TTRB->NUMPED , TTRB->CODCLI , TTRB->LOJA , TTRB->VEND1 } ) 
 		
 		EndIf
 		
@@ -217,7 +217,7 @@ If !Empty( _aPed )
 	
 	For _nI := 1 To Len( _aPed )
 
-		oproc:cCaption := ("Imprimindo pedido " + strzero(_ni,3) + " de " + strzero(len(_aped),3)) + "..."
+		oproc:cCaption := ("Imprimindo pedido " + StrZero(_nI,3) + " de " + StrZero(Len(_aped),3)) + "..."
 		ProcessMessages()
 	
 		_aCfgRun[01] := _aPed[_nI][1]
@@ -226,19 +226,19 @@ If !Empty( _aPed )
 		_aCfgRun[04] := _aPed[_nI][4]
 		_aCfgRun[05] := _aPed[_nI][5]
 		
-		If alltrim(funname()) == "AOMS061"
+		If AllTrim(funname()) == "AOMS061"
 			
-			TMP->( Dbsetorder(3) )
-			TMP->( Dbgotop() )
-			TMP->( Dbseek( _aCfgRun[01] + _aCfgRun[02] ) )
+			TMP->( DBSetOrder(3) )
+			TMP->( DBGoTop() )
+			TMP->( DBSeek( _aCfgRun[01] + _aCfgRun[02] ) )
 				
-			TMP->( Reclock( "TMP", .F. ) )
+			TMP->( RecLock( "TMP", .F. ) )
 		
 			TMP->IMPRIME := '1-SIM'
 		
-			TMP->( MsUnlock() )
+			TMP->( MSUnLock() )
 				
-		Endif
+		EndIf
 		
 		
 			 
@@ -321,18 +321,18 @@ If !Empty( _aPed )
 		MPSysOpenQuery( _cQuery , _cAliasD)
 		
 		DBSelectArea(_cAliasD)
-		(_cAliasD)->( DBGotop() )
+		(_cAliasD)->( DBGoTop() )
 		
 		COUNT TO _nCount
 		
-		(_cAliasD)->( DBGotop() )
+		(_cAliasD)->( DBGoTop() )
 		
 		ProcRegua(_nCount)
 		
 		If _nCount > 0
 		
-			DbSelectArea("SA3")
-			SA3->( DBSetorder(1) )
+			DBSelectArea("SA3")
+			SA3->( DBSetOrder(1) )
 			If SA3->( DBSeek( xFilial("SA3") + _aCfgRun[05] ) )
 				_cCoord  := SA3->A3_SUPER
 				_cSuperv := SA3->A3_I_SUPE 
@@ -347,7 +347,7 @@ If !Empty( _aPed )
 				_dData := Date()
 				_cHora := SubStr( Time() , 1 , 5 )
 				
-				While !EOF() .And. SZW->( ZW_FILIAL + ZW_IDPED ) == _cChvAux
+				While !Eof() .And. SZW->( ZW_FILIAL + ZW_IDPED ) == _cChvAux
 				
 					RecLock( "SZW" , .F. )
 					
@@ -355,7 +355,7 @@ If !Empty( _aPed )
 						SZW->ZW_HRIMPRI := _cHora
 						SZW->ZW_IMPRIME := '1'
 					
-					SZW->( MSUNLOCK() )
+					SZW->( MSUnLock() )
 					
 				SZW->( DBSkip() )
 				EndDo
@@ -441,11 +441,11 @@ If !Empty( _aPed )
 			
 			_oPrint:Say( 485 , 0410 , "FiL Faturamento / Fil Carregamento"			, _oFont10n			)
 			
-			If !Empty(Alltrim((_cAliasD)->DESCR2))
-			    _oPrint:Say( 525 , 0410 , (_cAliasD)->FILIAL +" - "+ Alltrim((_cAliasD)->DESCR)	+ "   /   " +(_cAliasD)->FILPRO +" - "+ Alltrim((_cAliasD)->DESCR2),_oFont09			)
+			If !Empty(AllTrim((_cAliasD)->DESCR2))
+			    _oPrint:Say( 525 , 0410 , (_cAliasD)->FILIAL +" - "+ AllTrim((_cAliasD)->DESCR)	+ "   /   " +(_cAliasD)->FILPRO +" - "+ AllTrim((_cAliasD)->DESCR2),_oFont09			)
 			Else 
-			    _oPrint:Say( 525 , 0410 , (_cAliasD)->FILIAL +" - "+ Alltrim((_cAliasD)->DESCR),_oFont09			)
-			EndIF			
+			    _oPrint:Say( 525 , 0410 , (_cAliasD)->FILIAL +" - "+ AllTrim((_cAliasD)->DESCR),_oFont09			)
+			EndIf			
 			
 			_oPrint:Say( 485 , 1210 , "Condição de Pagamento Pedido:"				, _oFont10n			)
 			_oPrint:Say( 525 , 1210 , cDesCond										, _oFont09			)
@@ -472,16 +472,16 @@ If !Empty( _aPed )
 			_oPrint:Box( 600 , nCol4 , 640 , 2300  )
 			
 			_oPrint:Say( 565 , 0110     , "Data / Hora de Inclusão do Vendedor"										, _oFont10n	)
-			_oPrint:Say( 605 , 0110     , Dtoc( StoD( (_cAliasD)->EMISS ) )		+" - "+ (_cAliasD)->HRINC +" hs"	, _oFont10	)
+			_oPrint:Say( 605 , 0110     , DToC( SToD( (_cAliasD)->EMISS ) )		+" - "+ (_cAliasD)->HRINC +" hs"	, _oFont10	)
 			
 			_oPrint:Say( 565 , nCol2+10 , "Data / Hora de Aprovação do Coordenador"									, _oFont10n	)
-			_oPrint:Say( 605 , nCol2+10 , Dtoc( StoD( (_cAliasD)->DATAAPR ) )	+" - "+ (_cAliasD)->HRAPR +" hs"	, _oFont10	)
+			_oPrint:Say( 605 , nCol2+10 , DToC( SToD( (_cAliasD)->DATAAPR ) )	+" - "+ (_cAliasD)->HRAPR +" hs"	, _oFont10	)
 			
 			_oPrint:Say( 565 , nCol3+10 , "Data / Hora de Aprovação do Gerente"									    , _oFont10n	)
-			_oPrint:Say( 605 , nCol3+10 , Dtoc( StoD( (_cAliasD)->ZW_I_DLIBG ) )+" - "+ LEFT((_cAliasD)->ZW_I_HLIBG,5)+" hs" , _oFont10	)
+			_oPrint:Say( 605 , nCol3+10 , DToC( SToD( (_cAliasD)->ZW_I_DLIBG ) )+" - "+ LEFT((_cAliasD)->ZW_I_HLIBG,5)+" hs" , _oFont10	)
 			
 			_oPrint:Say( 565 , nCol4+10 , "Data / Hora de Impressão do Pedido "										, _oFont10n	)
-			_oPrint:Say( 605 , nCol4+10 , DtoC( _dData ) +" - "+ _cHora +" hs"										, _oFont10	)
+			_oPrint:Say( 605 , nCol4+10 , DToC( _dData ) +" - "+ _cHora +" hs"										, _oFont10	)
 		 	
 			cQtCol := 660
 			
@@ -510,31 +510,31 @@ If !Empty( _aPed )
 		    //===================================================================
 		    //Busca informações de rede do cliente para apresentar na descrição
 		    //===================================================================
-		    _crede := posicione("SA1",1,xFilial("SA1")+(_cAliasD)->CODCLI+(_cAliasD)->LOJCLI,"A1_GRPVEN")
+		    _crede := Posicione("SA1",1,xFilial("SA1")+(_cAliasD)->CODCLI+(_cAliasD)->LOJCLI,"A1_GRPVEN")
 		    
-		    If empty(_crede) .or. alltrim(_crede) == "999999"
+		    If Empty(_crede) .Or. AllTrim(_crede) == "999999"
 		    
 		    	_cdescr := ""
 		    		
 		    Else
 		    
-		    	ACY->( DBSetorder(1) )
+		    	ACY->( DBSetOrder(1) )
 		    	
-		    	If ACY->( Dbseek( xFilial("ACY") + alltrim(_crede) ) )
+		    	If ACY->( DBSeek( xFilial("ACY") + AllTrim(_crede) ) )
 		    	
-		    		_cdescr := " - " + alltrim( ACY->ACY_DESCRI )
+		    		_cdescr := " - " + AllTrim( ACY->ACY_DESCRI )
 		    		
 		    	Else
 		    	
 		    		_cdescr := ""
 		    		
-		    	Endif
+		    	EndIf
 		    	
-		    Endif		    
+		    EndIf		    
 		    
 		    
-			_oPrint:Say( cQtCol + 5 , 0110 , Alltrim((_cAliasD)->NOME)            				, _oFont09		)
-			_oPrint:Say( cQtCol + 5 , 0110 + (len(Alltrim((_cAliasD)->NOME)) * 18) , _cdescr		, _oFont10n	)
+			_oPrint:Say( cQtCol + 5 , 0110 , AllTrim((_cAliasD)->NOME)            				, _oFont09		)
+			_oPrint:Say( cQtCol + 5 , 0110 + (Len(AllTrim((_cAliasD)->NOME)) * 18) , _cdescr		, _oFont10n	)
 			_oPrint:Say( cQt1Col + 5 , 1810 , "Cód./Loja:"											, _oFont10n 	)
 			_oPrint:Say( cQtCol  + 5 , 1810 , (_cAliasD)->CODCLI +" / "+ (_cAliasD)->LOJCLI		, _oFont09  	)
 			
@@ -590,9 +590,9 @@ If !Empty( _aPed )
 				_n1 :=  1 
 			Else
 				_n1 :=  0
-			Endif 
+			EndIf 
 
-			_n2:= INT( Len( Alltrim( _cENDEREC ) ) / 35 )  
+			_n2:= INT( Len( AllTrim( _cENDEREC ) ) / 35 )  
 
 			_ncalc := (_n1 + _n2) * 40
 
@@ -616,7 +616,7 @@ If !Empty( _aPed )
 			
 			lRet	:= .T.
 			_cENDEREC := (_cAliasD)->ENDEREC
-			nQtEnd	:= Len( Alltrim( _cENDEREC ) )
+			nQtEnd	:= Len( AllTrim( _cENDEREC ) )
 			nLinEnd	:= cQtCol + 5
 			n		:= 1
 			
@@ -642,7 +642,7 @@ If !Empty( _aPed )
 			cMvFil	:= ""
 			
 			For I := 1 To Len(aSM0)
-				cMvFil += aSM0[I][2] + IIF( I == Len(aSM0) , "" , ";" )
+				cMvFil += aSM0[I][2] + IIf( I == Len(aSM0) , "" , ";" )
 			Next I
 			
 			cTit := " SELECT "
@@ -653,7 +653,7 @@ If !Empty( _aPed )
 			cTit += "       WHERE "
 			cTit += "           E11.D_E_L_E_T_ = ' ' "
 			cTit += "       AND E11.E1_SALDO   + E11.E1_SDACRES - E11.E1_SDDECRE > 0 "
-			cTit += "       AND E11.E1_VENCREA < '"+ DtoS(Date()) +"' "
+			cTit += "       AND E11.E1_VENCREA < '"+ DToS(Date()) +"' "
 			cTit += "       AND E11.E1_FILIAL  IN "+ FormatIn(cMvFil,";") +" "
 			cTit += "       AND E11.E1_CLIENTE = '"+ (_cAliasD)->CODCLI +"' "
 			cTit += "       AND E11.E1_TIPO    NOT IN ('RA','NCC') ) SLD_VENCTO ,"
@@ -662,7 +662,7 @@ If !Empty( _aPed )
 			cTit += "       WHERE "
 			cTit += "           E12.D_E_L_E_T_ = ' ' "
 			cTit += "       AND E12.E1_SALDO   + E12.E1_SDACRES - E12.E1_SDDECRE > 0 "
-			cTit += "       AND E12.E1_VENCREA >= '"+ DtoS(Date()) +"' "
+			cTit += "       AND E12.E1_VENCREA >= '"+ DToS(Date()) +"' "
 			cTit += "       AND E12.E1_FILIAL  IN "+ FormatIn(cMvFil,";") +" "
 			cTit += "       AND E12.E1_CLIENTE = '"+ (_cAliasD)->CODCLI +"' "
 			cTit += "       AND E12.E1_TIPO    NOT IN ('RA','NCC') ) SLD_A_VENCTO "
@@ -681,7 +681,7 @@ If !Empty( _aPed )
 			MPSysOpenQuery( cTit , _cAlias)
 	 	 	
 	 	 	DBSelectArea( _cAlias )
-			(_cAlias)->( DBGotop() )
+			(_cAlias)->( DBGoTop() )
 			
 	    	cQtCol := cQtCol + 060
 
@@ -716,19 +716,19 @@ If !Empty( _aPed )
 			_oPrint:Say( cQtCol  + 5 , _nCol2+10 , "R$ "+ Transform( (_cAlias)->SLD_A_VENCTO , "@E 99,999,999,999.99" )	, _oFont09	)
 
 //*********************************************************************************************************************************************			
-	        cRisCli:=UPPER(SA1->A1_RISCO) 
+	        cRisCli:=Upper(SA1->A1_RISCO) 
 	        nLimCr:= SA1->A1_LC
 	        SA1->( DBSetOrder(1) )	        
 	        If SA1->( DBSeek( xFilial("SA1") + (_cAliasD)->CODCLI) )
-	        	DO WHILE SA1->(!EOF()) .AND. xFilial("SA1") == SA1->A1_FILIAL .AND.  (_cAliasD)->CODCLI == SA1->A1_COD
-	        		IF !EMPTY(SA1->A1_LC)
-	        			cRisCli :=  UPPER(SA1->A1_RISCO) 
+	        	While SA1->(!Eof()) .And. xFilial("SA1") == SA1->A1_FILIAL .And.  (_cAliasD)->CODCLI == SA1->A1_COD
+	        		If !Empty(SA1->A1_LC)
+	        			cRisCli :=  Upper(SA1->A1_RISCO) 
 	        			nLimCr  := SA1->A1_LC
-	        			EXIT
-	        		ENDIF
-	        		SA1->(DBSKIP())
-	        	ENDDO
-	        ENDIF
+	        			Exit
+	        		EndIf
+	        		SA1->(DBSkip())
+	        	EndDo
+	        EndIf
 
 			_oPrint:Say( cQt1Col + 5 , _nCol3+10 , "Limite de Credito (Risco):"											, _oFont10n	)
 			_oPrint:Say( cQtCol  + 5 , _nCol3+10 , "R$ "+ Transform( nLimCr , "@E 999,999,999.99" )+" ( "+cRisCli+" )"	, _oFont09	) 
@@ -736,9 +736,9 @@ If !Empty( _aPed )
 //*********************************************************************************************************************************************			
 
 			//Posiciona SZW e calcula tabela de preço
-			SZW->(Dbgoto((_cAliasD)->REGSZW))
+			SZW->(DBGoTo((_cAliasD)->REGSZW))
 
-			If SZW->ZW_FILPRO != '0 ' .and. !empty(SZW->ZW_FILPRO) .and. SZW->ZW_FILPRO != SZW->ZW_FILIAL 
+			If SZW->ZW_FILPRO != '0 ' .And. !Empty(SZW->ZW_FILPRO) .And. SZW->ZW_FILPRO != SZW->ZW_FILIAL 
 		
 				_cfilpro := SZW->ZW_FILPRO
 			
@@ -746,7 +746,7 @@ If !Empty( _aPed )
 		
 				_cfilpro := SZW->ZW_FILIAL
 			
-			Endif
+			EndIf
 
 			_cvend2 := Posicione("SA3",1,xFilial("SA3")+SZW->ZW_VEND1,"A3_SUPER")  
 			_cvend3 := Posicione("SA3",1,xFilial("SA3")+SZW->ZW_VEND1,"A3_GEREN")                                                                                      
@@ -754,7 +754,7 @@ If !Empty( _aPed )
             _ctab := SZW->ZW_TABELA 
 
 			_oPrint:Say( cQt1Col + 5 , 1610 , "Tabela de preço:"												, _oFont10n	)
-			_oPrint:Say( cQtCol  + 5 , 1610 , _ctab + " - " + posicione("DA0",1,xFilial("DA0")+_ctab,"DA0_DESCRI")	, _oFont09	)
+			_oPrint:Say( cQtCol  + 5 , 1610 , _ctab + " - " + Posicione("DA0",1,xFilial("DA0")+_ctab,"DA0_DESCRI")	, _oFont09	)
 
 			cQtCol += 060
 			
@@ -805,16 +805,16 @@ If !Empty( _aPed )
 			_oPrint:Say( cQt1Col + 05 , 1410 , "Observação (Comercial): " , _oFont10n )
 			
 			lRet1	:= .T.
-			nQtObs	:= Len( AllTrim( (_cAliasD)->( STRTRAN( STRTRAN( OBSCOM , CHR(13) , " " ) , CHR(10) , " " ) ) ) )
+			nQtObs	:= Len( AllTrim( (_cAliasD)->( StrTran( StrTran( OBSCOM , CHR(13) , " " ) , CHR(10) , " " ) ) ) )
 			n		:= 1
 			nLinEnd	:= cQtCol + 5
 			
 			While lRet1
 				
-				_cTxtAux := (_cAliasD)->( STRTRAN( STRTRAN( OBSCOM , CHR(13) , " " ) , CHR(10) , " " ) )
+				_cTxtAux := (_cAliasD)->( StrTran( StrTran( OBSCOM , CHR(13) , " " ) , CHR(10) , " " ) )
 				
 				If nQtObs > 0
-					_oPrint:Say( nLinEnd , 1410 , IIF( Empty( _cTxtAux ) , "Nenhum Registro" , SubStr( _cTxtAux , n , 55 ) ) , _oFont09 )
+					_oPrint:Say( nLinEnd , 1410 , IIf( Empty( _cTxtAux ) , "Nenhum Registro" , SubStr( _cTxtAux , n , 55 ) ) , _oFont09 )
 				Else
 					lRet1 := .F.
 				EndIf
@@ -848,13 +848,13 @@ If !Empty( _aPed )
 			_oPrint:Box( cQt1Col , 1050 , cQt1Col + 40 , 1400 )
 			_oPrint:Box( cQtCol  , 1050 , cQtCol  + 40 , 1400 )
 			
-			_oPrint:Say( cQtCol  + 5 , 0110 , IIF( Empty( (_cAliasD)->TIPCAR ) , "N/A" , IIF( (_cAliasD)->TIPCAR == '1' , (_cAliasD)->TIPCAR +" - Paletizada" , (_cAliasD)->TIPCAR +" - Batida" ) ) , _oFont09 )
+			_oPrint:Say( cQtCol  + 5 , 0110 , IIf( Empty( (_cAliasD)->TIPCAR ) , "N/A" , IIf( (_cAliasD)->TIPCAR == '1' , (_cAliasD)->TIPCAR +" - Paletizada" , (_cAliasD)->TIPCAR +" - Batida" ) ) , _oFont09 )
 			
 	    	_oPrint:Say( cQt1Col + 5 , 0510 , "Quant. Chapa:"		, _oFont10n )
-			_oPrint:Say( cQtCol  + 5 , 0510 , IIF( Empty( (_cAliasD)->CHAPA ) , "N/A" , (_cAliasD)->CHAPA ) , _oFont09 )
+			_oPrint:Say( cQtCol  + 5 , 0510 , IIf( Empty( (_cAliasD)->CHAPA ) , "N/A" , (_cAliasD)->CHAPA ) , _oFont09 )
 			
 			_oPrint:Say( cQt1Col + 5 , 0860 , "Hr. Descarga:"		, _oFont10n )
-			_oPrint:Say( cQtCol  + 5 , 0860 , IIF( Empty( (_cAliasD)->HRDES ) , "N/A" , (_cAliasD)->HRDES)	, _oFont09 )
+			_oPrint:Say( cQtCol  + 5 , 0860 , IIf( Empty( (_cAliasD)->HRDES ) , "N/A" , (_cAliasD)->HRDES)	, _oFont09 )
 	 		
 			_oPrint:Say( cQt1Col + 5 , 1060 , "Custo Descarga: "	, _oFont10n )
 			_oPrint:Say( cQtCol  + 5 , 1060 , Transform( (_cAliasD)->CUSDES , "@E 99,999,999.99" )			, _oFont09 )
@@ -892,7 +892,7 @@ If !Empty( _aPed )
 			While lRet2
 			
 				If nQtMNF > 0
-					_oPrint:Say( nLinEnd , 1210 , IIF( Empty( AllTrim( (_cAliasD)->MENNF ) ) , "N/A" , Substr( (_cAliasD)->MENNF , n , 68 ) )	, _oFont09 )
+					_oPrint:Say( nLinEnd , 1210 , IIf( Empty( AllTrim( (_cAliasD)->MENNF ) ) , "N/A" , SubStr( (_cAliasD)->MENNF , n , 68 ) )	, _oFont09 )
 				Else
 					lRet2 := .F.
 				EndIf
@@ -911,11 +911,11 @@ If !Empty( _aPed )
 			
 			_oPrint:Say( cQtCol + 6 , 0110 , "Porcentagem de Leite Magro "			, _oFont10n	)
 			
-			If val((_cAliasD)->EVENTO) > 0
+			If Val((_cAliasD)->EVENTO) > 0
 			
-				_oPrint:Say( cQtCol + 6 , 1210 , "Pedido de Evento: " + alltrim((_cAliasD)->EVENTO)	+ "  -  " + posicione("ZY4",1,xfilial("ZY4")+(_cAliasD)->EVENTO,"ZY4_DESCRI"), _oFont10n	)
+				_oPrint:Say( cQtCol + 6 , 1210 , "Pedido de Evento: " + AllTrim((_cAliasD)->EVENTO)	+ "  -  " + Posicione("ZY4",1,xFilial("ZY4")+(_cAliasD)->EVENTO,"ZY4_DESCRI"), _oFont10n	)
 				
-			Endif
+			EndIf
 			
 			cQtCol += 45
 			
@@ -996,7 +996,7 @@ If !Empty( _aPed )
 			nTotPes	:= 0
 			nPesBru	:= 0
 			
-			While (_cAliasD)->( !EoF() ) .And. _aCfgRun[01] == (_cAliasD)->NUMPED
+			While (_cAliasD)->( !Eof() ) .And. _aCfgRun[01] == (_cAliasD)->NUMPED
 			    
 				nFatConv	:= GetAdvFVal( "SB1" , "B1_CONV"	, xFilial("SB1") + (_cAliasD)->PROD , 1 , "" )
 				cTpConv		:= GetAdvFVal( "SB1" , "B1_TIPCONV"	, xFilial("SB1") + (_cAliasD)->PROD , 1 , "" )
@@ -1265,4 +1265,4 @@ Else
 
 EndIf
 
-Return()
+Return

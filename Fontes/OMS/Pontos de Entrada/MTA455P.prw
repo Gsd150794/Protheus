@@ -38,7 +38,7 @@ Setor-------------: OMS
 
 User Function MTA455P()
     
-Local _aArea 	:= GetArea()
+Local _aArea 	:= FWGetArea()
 Local _lRet		:= .F.
 Local _cUsuLog	:= RetCodUsr()
 
@@ -64,6 +64,6 @@ Else
 
 EndIf
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return( _lRet )

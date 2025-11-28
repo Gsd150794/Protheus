@@ -6,7 +6,7 @@
 --------------------------------------------------------------------------------------------------------------------------------
  Julio Paz        | 12/07/2018 | Incluir validações, bloquear carga de pedidos vendas bloqueados e sem liberação. Chamado 25479.  
 -------------------------------------------------------------------------------------------------------------------------------- 
- Josué Danich     | 04/09/2018 | Ajuste e posição de array no paramixb - Chamado 26152 
+ Josué Danich     | 04/09/2018 | Ajuste e posição de arrParamIXBramIXB - Chamado 26152 
 --------------------------------------------------------------------------------------------------------------------------------
  Lucas Borges     | 11/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
  -------------------------------------------------------------------------------------------------------------------------------
@@ -33,17 +33,17 @@ Retorno---------: Nenhum
 */
 User Function OM200OK()
 
-Local _nPosCarga := PARAMIXB[3]
-Local _aDadoCarg := PARAMIXB[2][_nPosCarga]
+Local _nPosCarga := ParamIXB[3]
+Local _aDadoCarg := ParamIXB[2][_nPosCarga]
 Local _lRet      := .T.
 Local _lPreCarga := .F.
-Local _aPedidos  := PARAMIXB[01]
+Local _aPedidos  := ParamIXB[01]
 Local _aSC5		 := GetArea("SC5") 
 Local _alog 	 := {}
 Local oproc      := nil
 
 //====================================================================================
-//Verifica versão do OMSA200 pois mudou a posição do array do paramixb a partir 
+//Verifica versão do OMSA200 pois mudou a posição do arrParamIXBramIXB a partir 
 // do fontes depois de 06/08/2018 sem documentação no TDN
 //====================================================================================
 Local aTipo := {}
@@ -56,12 +56,12 @@ Local _npos2 := 9 //posição antiga do codigo do caminhao
 
 GetFuncArray( "OMSA200", aTipo, aArquivo, aLinha, aData, aHora )
 
-If AARQUIVO[1] == "OMSA200.PRW" .AND. ADATA[1] > STOD("20180805")
+If AARQUIVO[1] == "OMSA200.PRW" .And. ADATA[1] > SToD("20180805")
 
 	_npos := 13 //posicao nova do codigo do motorista
 	_npos2 := 10 //posicao nova do codigo do caminhao
 	
-Endif
+EndIf
 
 //====================================================================================
 //Verifica se o veiculo ou motorista foram informados na opcao veiculo da carga  
@@ -69,14 +69,14 @@ Endif
 
 If Empty(_aDadoCarg[_npos2]) .Or. Empty(_aDadoCarg[_npos])
 	        
-   IF !u_itmsg("Voce esta fazendo uma Pre-Carga?","Atencao",,2,2,2)	
-	   u_itmsg("Favor informar um veiculo antes de concluir a montagem da carga.","Atenção! (OM200OK)",;
+   If !U_ITMsg("Voce esta fazendo uma Pre-Carga?","Atencao",,2,2,2)	
+	   U_ITMsg("Favor informar um veiculo antes de concluir a montagem da carga.","Atenção! (OM200OK)",;
 				     "Botão disponivel na montagem da carga em Associar veiculo",1)         
 				     
 	   _lRet:= .F.
-   ELSE
+   Else
        _lPreCarga:= .T.
-   ENDIF
+   EndIf
 	
 EndIf 
 
@@ -93,32 +93,32 @@ EndIf
 //=================================================================
 If _lRet
 	_aRetorno:={.T.,{}}//A variavel do retorno da funcão verpeds() tem que se PRIVATE
-	FWMSGRUN(,{|oproc| _aRetorno := verpeds(_aPedidos, oproc) }, "Aguarde", "OM200OK - Analisando crédito dos pedidos...")
+	FWMsgRun(,{|oproc| _aRetorno := verpeds(_aPedidos, oproc) }, "Aguarde", "OM200OK - Analisando crédito dos pedidos...")
 	_lRet:=_aRetorno[1]
 	_aLog:=_aRetorno[2]
 
-	If !_lRet .AND. LEN(_aLog) > 0
+	If !_lRet .And. Len(_aLog) > 0
 	
 		U_ITListBox( 'Relação de Pedidos que não podem montar carga: (OM200OK)' ,;
 		             {"Pedido","Cod Cli","Nome do Cliente","Resultado da Analise"} , _aLog , .F. , 1 , 'Resultado da Análise dos pedidos: ',,;
 		             {      30,       30,               80,                   200} )
 
-	ENDIF
+	EndIf
 
-Endif
+EndIf
 
 	
-IF _lRet
+If _lRet
 
    _cCaminDAK := _aDadoCarg[_npos2]
    _cMotorDAK := _aDadoCarg[_npos]
    _lRet:=U_OM200Tela(.F.,_lPreCarga)
 
-Endif
+EndIf
 
-Restarea(_aSC5)	
+FWRestArea(_aSC5)	
 
-Return IF(_lRet,NIL,.F.)//nao pode retornar um valor logico se for .T. pq ele mata a validacao padrao se for .F. //Return _lRet
+Return If(_lRet,NIL,.F.)//nao pode retornar um valor logico se For .T. pq ele mata a validacao padrao se For .F. //Return _lRet
 
 
 /*/
@@ -138,64 +138,64 @@ Retorno---------: _lRet - Se passaram ou não na análise de crédito
 Static Function Verpeds(_aPedidos, oproc)
 
 Local _lRet := .T.
-Local _ni   := 1
+Local _nI   := 1
 Local _alog := {}
-Local _cChep:= Alltrim(GetMV("IT_CCHEP"))
+Local _cChep:= AllTrim(GetMV("IT_CCHEP"))
 
-SA1->(Dbsetorder(1))
-SC5->(Dbsetorder(1))
-SC6->(Dbsetorder(1))
+SA1->(DBSetOrder(1))
+SC5->(DBSetOrder(1))
+SC6->(DBSetOrder(1))
 
-FOR _ni := 1 TO len(_aPedidos)
+For _nI := 1 TO Len(_aPedidos)
 
-	oproc:ccaption := ("OM200OK - Analisando Pedido: "+_aPedidos[_ni][5])
+	oproc:ccaption := ("OM200OK - Analisando Pedido: "+_aPedidos[_nI][5])
     ProcessMessages()
 
 	//Valida crédito do pedido
-		If SC5->(Dbseek(_aPedidos[_ni][12]+_aPedidos[_ni][5]))
+		If SC5->(DBSeek(_aPedidos[_nI][12]+_aPedidos[_nI][5]))
 
-           IF SA1->( DBSeek( xFilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI ) ) .AND. SA1->A1_MSBLQL == '1'
-		   	  AADD(_aLog,{SC5->C5_NUM,SC5->C5_CLIENTE,POSICIONE("SA1",1,xfilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI,"A1_NOME"),"Cliente Bloqueado"})
-              LOOP
-           ENDIF
+           If SA1->( DBSeek( xFilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI ) ) .And. SA1->A1_MSBLQL == '1'
+		   	  aAdd(_aLog,{SC5->C5_NUM,SC5->C5_CLIENTE,Posicione("SA1",1,xFilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI,"A1_NOME"),"Cliente Bloqueado"})
+              Loop
+           EndIf
 
 		   If  SC5->C5_TIPO = 'N' 
 
 		   		_nTotPV:=0
 		   		_lValCredito:=.T.
    
-		   		SC6->(Dbseek(SC5->C5_FILIAL+SC5->C5_NUM))
+		   		SC6->(DBSeek(SC5->C5_FILIAL+SC5->C5_NUM))
 
-		   		DO WHILE SC6->C6_NUM == SC5->C5_NUM .AND. SC5->C5_FILIAL == SC6->C6_FILIAL .AND. SC6->(!EOF())
+		   		While SC6->C6_NUM == SC5->C5_NUM .And. SC5->C5_FILIAL == SC6->C6_FILIAL .And. SC6->(!Eof())
 	   
 		   			_nTotPV += SC6->C6_VALOR
 
-		   			If SC6->C6_PRODUTO == _cChep .OR. SC6->C6_CF $ '5910/6910/5911/6911'//NÃO VALIDA CRÉDITO PARA PALLET CHEP E PARA BONIFICAÇÃO
+		   			If SC6->C6_PRODUTO == _cChep .Or. SC6->C6_CF $ '5910/6910/5911/6911'//NÃO VALIDA CRÉDITO PARA PALLET CHEP E PARA BONIFICAÇÃO
 		   				_lValCredito:=.F.
-		   				EXIT
-		   			ENDIF
+		   				Exit
+		   			EndIf
 
-		   			If posicione("SF4",1,xFilial("SF4")+SC6->C6_TES,"F4_DUPLIC") != 'S' //NÃO VALIDA CRÉDITO PARA PEDIDO SEM DUPLICATA
+		   			If Posicione("SF4",1,xFilial("SF4")+SC6->C6_TES,"F4_DUPLIC") != 'S' //NÃO VALIDA CRÉDITO PARA PEDIDO SEM DUPLICATA
 		   				_lValCredito:=.F.
-		   				EXIT
-		   			Endif
+		   				Exit
+		   			EndIf
     
-		   			If posicione("ZAY",1,xfilial("ZAY")+ SC6->C6_CF ,"ZAY_TPOPER") != 'V' //NÃO VALIDA CRÉDITO PARA PEDIDO COM CFOP QUE NÃO SEJA DE VENDA
+		   			If Posicione("ZAY",1,xFilial("ZAY")+ SC6->C6_CF ,"ZAY_TPOPER") != 'V' //NÃO VALIDA CRÉDITO PARA PEDIDO COM CFOP QUE NÃO SEJA DE VENDA
 		   				_lValCredito:=.F.
-		   				EXIT
-		   			Endif
+		   				Exit
+		   			EndIf
       
-		   			SC6->(DbSkip())
+		   			SC6->(DBSkip())
   
-		   		Enddo
+		   		EndDo
 
-		   		IF _lValCredito
+		   		If _lValCredito
 
 		   			_aRetCre := U_ValidaCredito( _nTotPV , SC5->C5_CLIENTE , SC5->C5_LOJACLI , .T. , , , , SC5->C5_MOEDA,,SC5->C5_NUM)
 		   			_cBlqCred:=_aRetCre[1]
-		   			aadd(_alog,{SC5->C5_NUM,SC5->C5_CLIENTE,POSICIONE("SA1",1,xfilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI,"A1_NOME"),_Aretcre[1]})
+		   			aAdd(_alog,{SC5->C5_NUM,SC5->C5_CLIENTE,Posicione("SA1",1,xFilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI,"A1_NOME"),_Aretcre[1]})
         	
-		   			SC5->(Reclock("SC5",.F.))
+		   			SC5->(RecLock("SC5",.F.))
 	
 		   				If _aRetCre[2] = "B"//Se bloqueou
 		   						   				
@@ -203,9 +203,9 @@ FOR _ni := 1 TO len(_aPedidos)
   			   		
 		   						_lBlq2			:= .F.
 		   						SC5->C5_I_BLCRE	:= "R"
-		   						SC5->C5_I_DTAVA := DATE()
-		   						SC5->C5_I_HRAVA := TIME()
-		   						SC5->C5_I_USRAV := cusername
+		   						SC5->C5_I_DTAVA := Date()
+		   						SC5->C5_I_HRAVA := Time()
+		   						SC5->C5_I_USRAV := cUserName
 		   						SC5->C5_I_MOTBL := _cBlqCred
 							
 						
@@ -213,37 +213,37 @@ FOR _ni := 1 TO len(_aPedidos)
 						
 		   						_lBlq2			:= .F.
 		   						SC5->C5_I_BLCRE	:= "B"
-		   						SC5->C5_I_DTAVA := DATE()
-		   						SC5->C5_I_HRAVA := TIME()
-		   						SC5->C5_I_USRAV := cusername
+		   						SC5->C5_I_DTAVA := Date()
+		   						SC5->C5_I_HRAVA := Time()
+		   						SC5->C5_I_USRAV := cUserName
 		   						SC5->C5_I_MOTBL := _cBlqCred
 								
-		   					Endif
+		   					EndIf
 		   					
 		   					_lRet := .F.  
 	
 		   				EndIf
 
 		   				SC5->C5_I_MOTBL := _cBlqCred//Sempre grava a descrição
-		   				SC5->(Msunlock())
+		   				SC5->(MSUnLock())
   
 		   		Else
 		   		
-		   			AADD(_alog,{SC5->C5_NUM,SC5->C5_CLIENTE,POSICIONE("SA1",1,xfilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI,"A1_NOME"),"Não necessita de avaliação de crédito"})
+		   			aAdd(_alog,{SC5->C5_NUM,SC5->C5_CLIENTE,Posicione("SA1",1,xFilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI,"A1_NOME"),"Não necessita de avaliação de crédito"})
 		   		
-		   		ENDIF
+		   		EndIf
 		   		
 		   		U_ENVSITPV() //Envia interface de situação do pedido para o RDC
   
-		   ELSE
+		   Else
 
-   			  AADD(_alog,{SC5->C5_NUM,SC5->C5_CLIENTE,POSICIONE("SA1",1,xfilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI,"A1_NOME"),"Não necessita de avaliação de crédito"})
+   			  aAdd(_alog,{SC5->C5_NUM,SC5->C5_CLIENTE,Posicione("SA1",1,xFilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI,"A1_NOME"),"Não necessita de avaliação de crédito"})
 
-		   ENDIF
+		   EndIf
 
-		 Endif
+		 EndIf
 		 
-NEXT
+Next
 
 Return {_lRet,_aLog}
 
@@ -267,14 +267,14 @@ Local _nI, _aDadosVld := {}
 Local _cMsg
 
 Begin Sequence
-   //SC5->(Dbseek(_aPedidos[_ni][12]+_aPedidos[_ni][5])) // ordem 1
+   //SC5->(DBSeek(_aPedidos[_nI][12]+_aPedidos[_nI][5])) // ordem 1
    // C9_FILIAL+C9_PEDIDO+C9_ITEM+C9_SEQUEN+C9_PRODUTO+C9_BLEST+C9_BLCRED                                                                                             
-   SC9->(DbSetOrder(1))
+   SC9->(DBSetOrder(1))
    
    For _nI := 1 To Len(_aPedCarga)
        _cMsg := ""
-       If SC9->(DbSeek(_aPedCarga[_nI][12]+_aPedCargas[_nI][5]))  
-          Do While ! SC9->(Eof()) .And. SC9->(C9_FILIAL+C9_PEDIDO) == _aPedCarga[_nI][12]+_aPedCargas[_nI][5] 
+       If SC9->(DBSeek(_aPedCarga[_nI][12]+_aPedCargas[_nI][5]))  
+          While ! SC9->(Eof()) .And. SC9->(C9_FILIAL+C9_PEDIDO) == _aPedCarga[_nI][12]+_aPedCargas[_nI][5] 
              If !Empty(SC9->C9_BLEST)
                 _cMsg += " Pedido de vendas com bloqueio de estoque. Item: " + SC9->C9_ITEM + ". "  
              EndIf
@@ -284,15 +284,15 @@ Begin Sequence
              EndIf
           
              If ! Empty(_cMsg)
-                Aadd(_aDadosVld,{_aPedCarga[_nI][12], _aPedCarga[_nI][5], _cMsg})          
+                aAdd(_aDadosVld,{_aPedCarga[_nI][12], _aPedCarga[_nI][5], _cMsg})          
                 _lRet := .F.
                 _cMsg := ""
              EndIf
              
-             SC9->(DbSkip())
+             SC9->(DBSkip())
           EndDo
        Else
-          Aadd(_aDadosVld,{_aPedCarga[_nI][12],_aPedCarga[_nI][5], "Pedido de Vendas sem liberação."})
+          aAdd(_aDadosVld,{_aPedCarga[_nI][12],_aPedCarga[_nI][5], "Pedido de Vendas sem liberação."})
           _lRet := .F.
        EndIf
    Next

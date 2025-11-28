@@ -22,9 +22,9 @@ Jerry         | 05/08/2022 | Rotina nova para Ativação, Inativação e alteração d
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include 'Protheus.ch'
-#INCLUDE "FWMVCDEF.CH"
-#INCLUDE "TBICONN.CH"
+#Include "TOTVS.ch"
+#Include "FWMVCDEF.CH"
+#Include "TBICONN.CH"
  
 /* 
 ===============================================================================================================================
@@ -71,8 +71,8 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User function ITDA1EXC()   
-Local _ni		:= 0
+User Function ITDA1EXC()   
+Local _nI		:= 0
 Local _cQuery := ''
 Local calias  := GetNextAlias()
 Public _lexclui := .T.
@@ -91,47 +91,47 @@ EndIf
 
 DBUseArea( .T. , "TOPCONN" , TcGenQry(,,_cQuery) , cAlias , .T. , .F. )
 
-If (cAlias)->(!Eof()) .and. (cAlias)->total > 0
+If (cAlias)->(!Eof()) .And. (cAlias)->total > 0
 
- 	u_itmsg("Tabela de vendas não pode ser excluida pois está sendo usada em pedidos de vendas ativos","Atenção","Exclua ou altere os pedidos de vendas antes de excluir a tabela de preços",1)
+ 	U_ITMsg("Tabela de vendas não pode ser excluida pois está sendo usada em pedidos de vendas ativos","Atenção","Exclua ou altere os pedidos de vendas antes de excluir a tabela de preços",1)
  	Return
  	
-Endif
+EndIf
 
 FWExecView("Exclusão de tabela de Preço", 'OMSA010', MODEL_OPERATION_VIEW)
 
-If u_itmsg("Deseja excluir tabela de preços " + DA0->DA0_CODTAB + "?", "Atenção","",2,2)
+If U_ITMsg("Deseja excluir tabela de preços " + DA0->DA0_CODTAB + "?", "Atenção","",2,2)
 
 	BEGIN TRANSACTION
 
 	//Guarda se é tabela replicada
 	_ccodigo := DA0->DA0_CODTAB
 
-	DA1->(Dbsetorder(1))
+	DA1->(DBSetOrder(1))
 	_lfalha := .F.
-	If DA1->(Dbseek(DA0->DA0_FILIAL+DA0->DA0_CODTAB))
+	If DA1->(DBSeek(DA0->DA0_FILIAL+DA0->DA0_CODTAB))
 	
 		_anums := {}
 	
-		Do while DA0->DA0_FILIAL == DA1->DA1_FILIAL .AND. DA0->DA0_CODTAB == DA1->DA1_CODTAB
+		While DA0->DA0_FILIAL == DA1->DA1_FILIAL .And. DA0->DA0_CODTAB == DA1->DA1_CODTAB
 		
-			aadd(_anums,DA1->(Recno()))
+			aAdd(_anums,DA1->(Recno()))
 			
-			DA1->(Dbskip())
+			DA1->(DBSkip())
 			
-		Enddo
+		EndDo
 		
-		For _ni := 1 to len(_anums)
+		For _nI := 1 to Len(_anums)
 		
-			DA1->(Dbgoto(_anums[_ni]))
+			DA1->(DBGoTo(_anums[_nI]))
 			
 			//Grava log da exclusão
-			Reclock("ZGS",.T.)
-			ZGS->ZGS_FILIAL := xfilial("ZGS")
+			RecLock("ZGS",.T.)
+			ZGS->ZGS_FILIAL := xFilial("ZGS")
 			ZGS->ZGS_ITEM   := DA1->DA1_ITEM
-			ZGS->ZGS_DATA   := date()
-			ZGS->ZGS_HORA   := time()
-			ZGS->ZGS_USER   := cusername
+			ZGS->ZGS_DATA   := Date()
+			ZGS->ZGS_HORA   := Time()
+			ZGS->ZGS_USER   := cUserName
 			ZGS->ZGS_MODULO := funname()	
 			ZGS->ZGS_CODTAB := DA0->DA0_CODTAB
 			ZGS->ZGS_DATDE 	:= DA0->DA0_DATDE
@@ -178,37 +178,37 @@ If u_itmsg("Deseja excluir tabela de preços " + DA0->DA0_CODTAB + "?", "Atenção"
             ZGS->ZGS_I_PES3 := DA0->DA0_I_PES3
 			ZGS->ZGS_STATUS := "X"
 			
-			ZGS->(Msunlock())
+			ZGS->(MSUnLock())
 			
-			Reclock("DA1",.F.)
+			RecLock("DA1",.F.)
 			DA1->(Dbdelete())
-			DA1->(Msunlock())
+			DA1->(MSUnLock())
 			
 		Next
 	
 	Else
 	
 		Disarmtransaction()
-		u_itmsg("Falha ao excluir tabela de preços","Atenção",,1)
+		U_ITMsg("Falha ao excluir tabela de preços","Atenção",,1)
 		_lfalha := .T.
 
-	Endif
+	EndIf
 	
 	If !(_lfalha)
 
-		Reclock("DA0",.F.)
+		RecLock("DA0",.F.)
 		DA0->(Dbdelete())
-		DA0->(Msunlock())
+		DA0->(MSUnLock())
 
-	Endif
+	EndIf
 	
 	END TRANSACTION
 	
 	If !(_lfalha)
-		u_itmsg("Tabela " + ZGS->ZGS_CODTAB + " excluida com sucesso","Atenção",,3)
-	Endif
+		U_ITMsg("Tabela " + ZGS->ZGS_CODTAB + " excluida com sucesso","Atenção",,3)
+	EndIf
 	
-Endif
+EndIf
 	
 _lexclui := .F.
 

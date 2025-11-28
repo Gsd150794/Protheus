@@ -2,29 +2,21 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 15/08/2018 | Corrigida passagem de campos. Chamado 25898
--------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 27/08/2018 | Correções em consulta específica para listar dados de todas filiais. Chamado 26160.
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 08/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 21/01/2020 | Alterar a consulta específica Rel.Conf.Cod.ajuste p/permitir digitar o cód.Apuração. Chamado 31220 
+Julio Paz     |27/08/2018| Chamado 26160. Correções em consulta específica para listar dados de todas filiais.
+Lucas Borges  |08/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
+Julio Paz     |21/01/2020| Chamado 31220. Alterar a consulta específica Rel.Conf.Cod.ajuste p/permitir digitar o cód.Apuração.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: XFUNFIS
 Autor-------------: Erich Buttner
 Data da Criacao---: 16/05/2013
-===============================================================================================================================
 Descrição---------: Rotinas genéricas para utilização nos desenvolvimentos do módulo Fiscal
 ===============================================================================================================================
 */
@@ -34,15 +26,13 @@ Descrição---------: Rotinas genéricas para utilização nos desenvolvimentos do mó
 Programa--------: CODAJUS
 Autor-----------: Erich Buttner
 Data da Criacao-: 16/05/2013
-===============================================================================================================================
 Descrição-------: Monta Tela para consulta de Contas de Ajustes
-===============================================================================================================================
 Parametros------: 
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
 User Function CODAJUS()
+
 Local i := 0
 Local n := 0
 Local aAjust := {}
@@ -53,7 +43,7 @@ Local _nRegAtu := CC7->(Recno())
 Private nTam       	:= 0
 Private nMaxSelect 	:= 0
 Private aCat      	:= {}
-Private MvRet     	:= Alltrim(ReadVar())
+Private MvRet     	:= AllTrim(ReadVar())
 Private MvPar     	:= ""
 Private cTitulo   	:= ""
 Private MvParDef  	:= ""
@@ -61,20 +51,16 @@ Private MvParDef  	:= ""
 
 #IFDEF WINDOWS
 	oWnd := GetWndDefault()
-#ENDIF
+#EndIf
 
 //Realizado a inclusão dos codigos abaixo, utilzado no Relatório RFIS005
 If IsInCallStack("U_RFIS005")
-	//aadd(aAjust,"RO10000003") 
-	//aadd(aAjust,"RO10000006") 
-	//aadd(aAjust,"RO10000007")
-	//aadd(aAjust,"RO10000012")
 
-    CC7->(DbGoTop())	
-    Do While ! CC7->(Eof())
+    CC7->(DBGoTop())	
+    While ! CC7->(Eof())
        // Filtra dados das filiais
        If !CC7->CC7_FILIAL $ MV_PAR01
-          CC7->(DbSkip())
+          CC7->(DBSkip())
           Loop
        EndIf
     
@@ -83,32 +69,32 @@ If IsInCallStack("U_RFIS005")
        ElseIf !Empçty(CC7->CC7_CLANAP)
           _cCodAjuste := U_ItKey(CC7->CC7_CLANAP,"CC7_CODLAN")
        Else
-          CC7->(DbSkip())
+          CC7->(DBSkip())
           Loop
        EndIf
     
-       _nI :=Ascan(aAjust,_cCodAjuste )
+       _nI :=aScan(aAjust,_cCodAjuste )
        If _nI == 0
-          Aadd(aAjust,_cCodAjuste)
+          aAdd(aAjust,_cCodAjuste)
        EndIf
        
-       CC7->(DbSkip()) 
+       CC7->(DBSkip()) 
     EndDo
 Else
-	aadd(aAjust,"RO40000001") // ALTERADO POR ERICH BUTTNER DIA 11/06/13 - INCLUIR 2 CODIGOS NOVOS
-	aadd(aAjust,"RO40000002") // ALTERADO POR ERICH BUTTNER DIA 11/06/13 - INCLUIR 2 CODIGOS NOVOS
-	aadd(aAjust,"GO10009029")
-	aadd(aAjust,"GO000019  ")
-Endif
+	aAdd(aAjust,"RO40000001") // ALTERADO POR ERICH BUTTNER DIA 11/06/13 - INCLUIR 2 CODIGOS NOVOS
+	aAdd(aAjust,"RO40000002") // ALTERADO POR ERICH BUTTNER DIA 11/06/13 - INCLUIR 2 CODIGOS NOVOS
+	aAdd(aAjust,"GO10009029")
+	aAdd(aAjust,"GO000019  ")
+EndIf
 
 //Tratamento para carregar variaveis da lista de opcoes
 nTam:=10
 nMaxSelect := 6 //75 / 7
 cTitulo := "Codigo Ajuste"
 
-for n := 1 to len(aAjust) 
+For n := 1 to Len(aAjust) 
 	MvParDef += aAjust[n] // ALTERADO POR ERICH BUTTNER DIA 11/06/13 - INCLUIR 2 CODIGOS NOVOS//AllTrim(aAjust[n])
-next n 
+Next n 
 
 //=====================================================================
 // Trativa abaixo para no caso de uma alteracao do campo trazer todos |
@@ -134,18 +120,18 @@ EndIf
 nTam:=10
 nMaxSelect := 6 
 &MvRet := &MvRet +Space(nTam * nMaxSelect + nMaxSelect) 
-&MvRet := SubSTr(&MvRet,1, (nTam * nMaxSelect + nMaxSelect)) 
+&MvRet := SubStr(&MvRet,1, (nTam * nMaxSelect + nMaxSelect)) 
 
 //Executa funcao que monta tela de opcoes
 If f_Opcoes(@MvPar,cTitulo,aAjust,MvParDef,12,49,.F.,nTam,nMaxSelect)
 	
    //Tratamento para separar retorno com barra ";"
    &MvRet := ""  
-   for i:=1 to Len(MvPar) step nTam
-       if !(SubStr(MvPar,i,1) $ " |*")
+   For i:=1 to Len(MvPar) step nTam
+       If !(SubStr(MvPar,i,1) $ " |*")
 	      &MvRet  += SubStr(MvPar,i,nTam) + ";"
-	   endIf
-   next i
+	   EndIf
+   Next i
 
    //Trata para tirar o ultimo caracter
    &MvRet := SubStr(&MvRet,1,Len(&MvRet)-1)
@@ -153,7 +139,7 @@ If f_Opcoes(@MvPar,cTitulo,aAjust,MvParDef,12,49,.F.,nTam,nMaxSelect)
    &MvRet := SubStr(&MvRet,1,99)
 EndIf
 
-CC7->(DbGoTo(_nRegAtu))
+CC7->(DBGoTo(_nRegAtu))
 
 Return(.T.)
 
@@ -162,9 +148,7 @@ Return(.T.)
 Programa--------: ICompFis
 Autor-----------: Erich Buttner
 Data da Criacao-: 27/02/2013
-===============================================================================================================================
 Descrição-------: Cadastra os complementos de notas fiscais de entrada e de saida com as informacoes necessarias ao Sped.
-===============================================================================================================================
 Parâmetros------:	_cTpMov - tipo do movimento
 					_cDoc - documento na tabela CDT
 					_cSerie - série do documento
@@ -172,13 +156,12 @@ Parâmetros------:	_cTpMov - tipo do movimento
 					_cLoja - loja do cliente/fornecedor
 					_cTpFrete - tipo de frete
 					_cMensFis  - mensagem fiscal a ser gravada
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
 User Function ICompFis(_cTpMov,_cDoc,_cSerie,_cCliFor,_cLoja,_cTpFrete,_cMensFis)
 
-Local _aArea 	:= GetArea()
+Local _aArea 	:= FWGetArea()
 Local _aAreaCCE := CCE->(GetArea())
 Local _aAreaCDT := CDT->(GetArea())
 Local _aAreaCDD := CDD->(GetArea())
@@ -212,15 +195,15 @@ _cMensFis += "FFIIMM"
 Begin Transaction
 	While !(_lRet)
 
-		If !Empty(AllTrim(Substr(_cMensFis,_nPos1,254)))
+		If !Empty(AllTrim(SubStr(_cMensFis,_nPos1,254)))
 
 			While _nPos4 <> 1 .And. _nPos2 <= 254
-				If Substr(_cMensFis,_nPos3,1) == Char(10)
+				If SubStr(_cMensFis,_nPos3,1) == Char(10)
 					_nPos4 := 1
 					_nPos5 := 2
 				EndIf
 
-				If "FFIIMM" $ Substr(AllTrim(_cMensFis),_nPos1,_nPos2)
+				If "FFIIMM" $ SubStr(AllTrim(_cMensFis),_nPos1,_nPos2)
 					_nPos4 := 1
 					_nPos5 := 1
 				EndIf
@@ -228,7 +211,7 @@ Begin Transaction
 				_nPos3 ++
 			EndDo
 
-			_cMensAlt2:= _cMensAlt2+AllTrim(Substr(AllTrim(_cMensFis),_nPos1,_nPos2-_nPos5))
+			_cMensAlt2:= _cMensAlt2+AllTrim(SubStr(AllTrim(_cMensFis),_nPos1,_nPos2-_nPos5))
 			_cMensAlt2:= StrTran(AllTrim(_cMensAlt2),"FFIIMM","")
 
 			For _nX:=1 To Len(_cMensAlt2)
@@ -242,7 +225,7 @@ Begin Transaction
 			If   !Empty(AllTrim(_cMensAlt2)) .And. !('FFIIMM' $ AllTrim(_cMensAlt2))
 
 				_cAliasCCE	:= GetNextAlias()
-				BeginSQL Alias _cAliasCCE
+				BeginSql Alias _cAliasCCE
 			     SELECT CCE_COD
 			       FROM %Table:CCE%
 			      WHERE D_E_L_E_T_ = ' '
@@ -251,29 +234,29 @@ Begin Transaction
 				EndSql
 
 				_cCceCod := (_cAliasCCE)->CCE_COD
-				(_cAliasCCE)->(dbCloseArea())
+				(_cAliasCCE)->(DBCloseArea())
 
-				DbSelectArea("CCE")
-				CCE->(DbSetOrder(1))
+				DBSelectArea("CCE")
+				CCE->(DBSetOrder(1))
 
 				If Empty(_cCceCod)
-					Reclock("CCE",.T.)
+					RecLock("CCE",.T.)
 					CCE->CCE_FILIAL	:= xFilial("CCE")
 					CCE->CCE_COD	:= GetSx8Num("CCE","CCE_COD")
 					CCE->CCE_DESCR	:= AllTrim(StrTran(StrTran(_cMensAlt2,Char(10),""),Char(13),""))
-					CCE->(MsUnLock())
+					CCE->(MSUnLock())
 					ConfirmSX8()
 					_cCceCod := CCE->CCE_COD
 
 				EndIf
 
-				DbSelectArea("CDT")
-				CDT->(DbSetOrder(1))
+				DBSelectArea("CDT")
+				CDT->(DBSetOrder(1))
 
-				If CDT->(DbSeek(xFilial("CDT")+_cTpMov+_cDoc+_cSerie+_cCliFor+_cLoja+_cCceCod))
-					Reclock ("CDT",.F.)
+				If CDT->(DBSeek(xFilial("CDT")+_cTpMov+_cDoc+_cSerie+_cCliFor+_cLoja+_cCceCod))
+					RecLock ("CDT",.F.)
 				Else
-					Reclock ("CDT",.T.)
+					RecLock ("CDT",.T.)
 				EndIf
 
 				CDT->CDT_FILIAL	:= xFilial("CDT")
@@ -285,7 +268,7 @@ Begin Transaction
 				CDT->CDT_IFCOMP	:= _cCceCod
 				CDT->CDT_INDFRT	:= "" //ALTERADO POR ERICH BUTTNER DIA 08/08/13 - CORREÇÃO DA INFORMAÇÃO DO CAMPO CDT_INDFRT //CDT->CDT_INDFRT	:= _cTpFrete CHAMADO - 3957
 
-				CDT->(MsUnlock())
+				CDT->(MSUnLock())
 			Else
 				_lRet:= .T.
 			EndIf
@@ -310,7 +293,7 @@ Begin Transaction
 
 			SELECT SD1.D1_FILIAL,SD1.D1_DOC,SD1.D1_SERIE,SD1.D1_FORNECE,SD1.D1_LOJA,
 				SD1.D1_NFORI,D1_SERIORI,SD1.D1_TIPO,SD1.D1_TES,SD1.D1_ORIGLAN
-			FROM %table:SD1% SD1
+			FROM %Table:SD1% SD1
 				WHERE SD1.D1_FILIAL = %xFilial:SD1%
 				AND SD1.D1_DOC = %Exp:_cDoc%
 				AND SD1.D1_SERIE = %Exp:_cSerie%
@@ -321,26 +304,26 @@ Begin Transaction
 			ORDER BY %Order:SD1%
 		EndSql
 
-		Do While !((_cAliasSD1)->(Eof()))
+		While !((_cAliasSD1)->(Eof()))
 
 			//==============================================================
 			//Verifica o cliente/fornecedor do documento original
 			//==============================================================
 
-		  	SF4->(dbSetOrder(1))
-			SF4->(DbSeek(xFilial("SF4")+(_cAliasSD1)->D1_TES))
+		  	SF4->(DBSetOrder(1))
+			SF4->(DBSeek(xFilial("SF4")+(_cAliasSD1)->D1_TES))
 			_lAchouSF2 := .F.  // Forço a reinicialização da variável a cada passo do laço.
 
 			If (_cAliasSD1)->D1_TIPO $ "DB" .Or. SF4->F4_PODER3 == "D"
-				If !SF2->(dbSeek(xFilial("SF2")+(_cAliasSD1)->(D1_NFORI+D1_SERIORI+D1_FORNECE+D1_LOJA)))
-					(_cAliasSD1)->(dbSkip())
+				If !SF2->(DBSeek(xFilial("SF2")+(_cAliasSD1)->(D1_NFORI+D1_SERIORI+D1_FORNECE+D1_LOJA)))
+					(_cAliasSD1)->(DBSkip())
 					Loop
 				Else
 				    _lAchouSF2 := .T.
 				EndIf
 			Else
-				If !SF1->(dbSeek(xFilial("SF1")+(_cAliasSD1)->(D1_NFORI+D1_SERIORI+D1_FORNECE+D1_LOJA)))
-					(_cAliasSD1)->(dbSkip())
+				If !SF1->(DBSeek(xFilial("SF1")+(_cAliasSD1)->(D1_NFORI+D1_SERIORI+D1_FORNECE+D1_LOJA)))
+					(_cAliasSD1)->(DBSkip())
 					Loop
 				EndIf
 			EndIf
@@ -356,10 +339,10 @@ Begin Transaction
 				   aAdd(_aDocRef,{(_cAliasSD1)->D1_NFORI,(_cAliasSD1)->D1_SERIORI,(_cAliasSF1)->F1_FORNECE,(_cAliasSF1)->F1_LOJA,(_cAliasSD1)->D1_TIPO,(_cAliasSF1)->F1_CHVNFE})
 				EndIf
 			EndIf
-			(_cAliasSD1)->(dbSkip())
+			(_cAliasSD1)->(DBSkip())
 
 		EndDo
-		(_cAliasSD1)->(dbCloseArea())
+		(_cAliasSD1)->(DBCloseArea())
 
 	Else
 
@@ -369,7 +352,7 @@ Begin Transaction
 
 			SELECT SD2.D2_FILIAL,SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,
 				SD2.D2_NFORI,SD2.D2_SERIORI,SD2.D2_TIPO,SD2.D2_TES
-			FROM %table:SD2% SD2
+			FROM %Table:SD2% SD2
 			WHERE SD2.D2_FILIAL = %xFilial:SD2%
 				AND SD2.D2_DOC = %Exp:_cDoc%
 				AND SD2.D2_SERIE = %Exp:_cSerie%
@@ -380,25 +363,25 @@ Begin Transaction
 			ORDER BY %Order:SD2%
 		EndSql
 
-		Do While !((_cAliasSD2)->(Eof()))
+		While !((_cAliasSD2)->(Eof()))
 
 			//==============================================================
 			//Verifica o cliente/fornecedor do documento original
 			//==============================================================
-			SF4->(dbSetOrder(1))
-			SF4->(DbSeek(xFilial("SF4")+(_cAliasSD2)->D2_TES))
+			SF4->(DBSetOrder(1))
+			SF4->(DBSeek(xFilial("SF4")+(_cAliasSD2)->D2_TES))
 			_lAchouSF1 := .F.  // Forço a reinicialização da variável a cada passo do laço.
 
 			If (_cAliasSD2)->D2_TIPO $ "DB" .Or. SF4->F4_PODER3 == "D"
-				If !SF1->(dbSeek(xFilial("SF1")+(_cAliasSD2)->(D2_NFORI+D2_SERIORI+D2_CLIENTE+D2_LOJA)))
-					(_cAliasSD2)->(dbSkip())
+				If !SF1->(DBSeek(xFilial("SF1")+(_cAliasSD2)->(D2_NFORI+D2_SERIORI+D2_CLIENTE+D2_LOJA)))
+					(_cAliasSD2)->(DBSkip())
 					Loop
 				Else
 				    _lAchouSF1 := .T.
-				Endif
+				EndIf
 			Else
-				If !SF2->(dbSeek(xFilial("SF2")+(_cAliasSD2)->(D2_NFORI+D2_SERIORI+D2_CLIENTE+D2_LOJA)))
-					(_cAliasSD2)->(dbSkip())
+				If !SF2->(DBSeek(xFilial("SF2")+(_cAliasSD2)->(D2_NFORI+D2_SERIORI+D2_CLIENTE+D2_LOJA)))
+					(_cAliasSD2)->(DBSkip())
 					Loop
 				EndIf
 			EndIf
@@ -415,23 +398,23 @@ Begin Transaction
 				EndIf
 			EndIf
 
-			(_cAliasSD2)->(dbSkip())
+			(_cAliasSD2)->(DBSkip())
 
 		EndDo
-		(_cAliasSD2)->(dbCloseArea())
-	Endif
+		(_cAliasSD2)->(DBCloseArea())
+	EndIf
 	If !Empty(_aDocRef)
-		DbSelectArea("CDD")
-		CDD->(DbSetOrder(1)) //CDD_FILIAL+CDD_TPMOV+CDD_DOC+CDD_SERIE+CDD_CLIFOR+CDD_LOJA+CDD_DOCREF+CDD_SERREF+CDD_PARREF+CDD_LOJREF
-		DbSelectArea("CCE")
-		CCE->(DbSetOrder(1))
+		DBSelectArea("CDD")
+		CDD->(DBSetOrder(1)) //CDD_FILIAL+CDD_TPMOV+CDD_DOC+CDD_SERIE+CDD_CLIFOR+CDD_LOJA+CDD_DOCREF+CDD_SERREF+CDD_PARREF+CDD_LOJREF
+		DBSelectArea("CCE")
+		CCE->(DBSetOrder(1))
 
-		If Empty(_cCceCod) .Or. !(CCE->(DbSeek(xFilial("CCE")+_cCceCod)))
+		If Empty(_cCceCod) .Or. !(CCE->(DBSeek(xFilial("CCE")+_cCceCod)))
 
 			_cMensAlt2	:= "DOCUMENTO REFERENCIADO"
 			_cAliasCCE	:= GetNextAlias()
 
-			BeginSQL Alias _cAliasCCE
+			BeginSql Alias _cAliasCCE
 			  SELECT CCE_COD
 				FROM %Table:CCE%
 			  WHERE D_E_L_E_T_ = ' '
@@ -440,14 +423,14 @@ Begin Transaction
 			EndSql
 
 			_cCceCod := (_cAliasCCE)->CCE_COD
-			(_cAliasCCE)->(dbCloseArea())
+			(_cAliasCCE)->(DBCloseArea())
 
 			If Empty(_cCceCod)
-				Reclock("CCE",.T.)
+				RecLock("CCE",.T.)
 				CCE->CCE_FILIAL	:= xFilial("CCE")
 				CCE->CCE_COD	:= GetSx8Num("CCE","CCE_COD")
 				CCE->CCE_DESCR	:= _cMensAlt2
-				CCE->(MsUnLock())
+				CCE->(MSUnLock())
 				ConfirmSX8()
 				
 				_cCceCod := CCE->CCE_COD
@@ -455,7 +438,7 @@ Begin Transaction
 		EndIf
 
 		For _nX:=1 to Len(_aDocRef)
-			If !CDD->(DbSeek(xFilial("CDD")+_cTpMov+_cDoc+_cSerie+_cCliFor+_cLoja+_aDocRef[_nX][1]+_aDocRef[_nX][2]+_aDocRef[_nX][3]+_aDocRef[_nX][4]))
+			If !CDD->(DBSeek(xFilial("CDD")+_cTpMov+_cDoc+_cSerie+_cCliFor+_cLoja+_aDocRef[_nX][1]+_aDocRef[_nX][2]+_aDocRef[_nX][3]+_aDocRef[_nX][4]))
 				RecLock("CDD",.T.)
 				CDD->CDD_FILIAL	:= xFilial("CDD")
 				CDD->CDD_TPMOV	:= _cTpMov
@@ -471,21 +454,21 @@ Begin Transaction
 				CDD->CDD_CHVNFE	:= _aDocRef[_nX][6]
 				CDD->CDD_SDOC	:= _cSerie
 				CDD->CDD_SDOCRF	:= _aDocRef[_nX][2]
-				CDD->(MsUnLock())
+				CDD->(MSUnLock())
 			EndIf
 		Next
 
 	EndIf
 End Transaction
-RestArea(_aAreaCCE)
-RestArea(_aAreaCDT)
-RestArea(_aAreaCDD)
-RestArea(_aAreaSF4)
-RestArea(_aAreaSD1)
-RestArea(_aAreaSD2)
-RestArea(_aAreaSF1)
-RestArea(_aAreaSF2)
-RestArea(_aArea)
+FWRestArea(_aAreaCCE)
+FWRestArea(_aAreaCDT)
+FWRestArea(_aAreaCDD)
+FWRestArea(_aAreaSF4)
+FWRestArea(_aAreaSD1)
+FWRestArea(_aAreaSD2)
+FWRestArea(_aAreaSF1)
+FWRestArea(_aAreaSF2)
+FWRestArea(_aArea)
 Return
 
 /*
@@ -493,15 +476,12 @@ Return
 Programa--------: ECompFis
 Autor-----------: Lucas Borges Ferreira
 Data da Criacao-: 02/07/2018
-===============================================================================================================================
 Descrição-------: Exclui os complementos de notas fiscais de entrada e de saida com as informacoes necessarias ao Sped.
-===============================================================================================================================
 Parâmetros------:	_cTpMov - tipo do movimento
 					_cDoc - documento na tabela CDT
 					_cSerie - série do documento
 					_cCliFor - código de cliente/fornecedor
 					_cLoja - loja do cliente/fornecedor
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */

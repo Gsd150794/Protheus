@@ -2,29 +2,21 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Josué Prestes | 10/06/2019 | Ajuste para loboguara - Chamado 29593
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 17/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+Josué Prestes |10/06/2019| Chamado 29593. Ajuste para loboguara
+Lucas Borges  |17/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
 ===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes e Defines da Rotina.
-//====================================================================================================
-#include "Protheus.ch"               
-#include "TopConn.ch"
+#Include "TOTVS.ch"               
 
 /*
 ===============================================================================================================================
 Programa----------: ACFG001
 Autor-------------: Lucas Crevilari
 Data da Criacao---: 24/10/2014
-===============================================================================================================================
 Descrição---------: Tela para amarrar Filial ao Centro de Custo
-===============================================================================================================================
 Parametros--------:
-===============================================================================================================================
 Retorno-----------:
 ===============================================================================================================================
 */
@@ -37,26 +29,21 @@ oBrowse:SetAlias( "ZLH" )
 oBrowse:SetDescription( "Cadastro Filial X Centro de Custo" )
 oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MenuDef
 Autor-------------: Lucas Crevilari
 Data da Criacao---: 24/10/2014
-===============================================================================================================================
 Descrição---------: Rotina de definição automática do menu via MVC
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: aRotina - Definições do menu principal da Rotina.
 ===============================================================================================================================
 */
 Static Function MenuDef()
 
-//===========================================================================
-//| FWMVCMenu - Gera o menu padrão para o Modelo Informado (Inc/Alt/Vis/Exc) |
-//===========================================================================
+// FWMVCMenu - Gera o menu padrão para o Modelo Informado (Inc/Alt/Vis/Exc)
 
 Return( FWMVCMenu("ACFG001") )
 
@@ -65,15 +52,11 @@ Return( FWMVCMenu("ACFG001") )
 Programa----------: ModelDef
 Autor-------------: Lucas Crevilari
 Data da Criacao---: 24/10/2014
-===============================================================================================================================
 Descrição---------: Rotina de definição do Modelo de Dados do MVC
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: oModel - Objeto do modelo de dados do MVC
 ===============================================================================================================================
 */
-
 Static Function ModelDef()
 
 Local oStruZLH 	:= FWFormStruct( 1 , "ZLH" )
@@ -93,15 +76,11 @@ Return( oModel )
 Programa----------: ViewDef
 Autor-------------: Lucas Crevilari
 Data da Criacao---: 24/10/2014
-===============================================================================================================================
 Descrição---------: Rotina de definição da View do MVC
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: oView - Objeto de exibição do MVC
 ===============================================================================================================================
 */
-
 Static Function ViewDef()
 
 Local oModel   	:= FWLoadModel( "ACFG001" )
@@ -119,44 +98,39 @@ Return(oView)
 Programa----------: ITCTT
 Autor-------------: Lucas Crevilari
 Data da Criacao---: 24/10/2014
-===============================================================================================================================
 Descrição---------: Consulta específica usada no cadastro na ZLH. 
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: .T. - Compatibilidade com a utilização em F3
 ===============================================================================================================================
 */
-User Function ITCTT()
+User Function ITCTT
 
 Local nI			:= 0
 Private nTam		:= 1       
 Private nMaxSelect	:= 10
 Private aResAux		:= {}
-Private MvRet		:= Alltrim(ReadVar())
+Private MvRet		:= AllTrim(ReadVar())
 Private MvPar		:= ""
 Private cTitulo		:= "Consulta Centro de Custo"
 Private MvParDef	:= ""  
 
 #IFDEF WINDOWS
 	oWnd := GetWndDefault()
-#ENDIF
+#EndIf
 
 DBSelectArea("CTT")
 CTT->( DBSetOrder(1) )
 If CTT->( DBSeek(xFilial("CTT")) )
 
 	While CTT->(!Eof())
-		If !(SUBSTR(CTT->CTT_CUSTO,1,1) $ MvParDef)
+		If !(SubStr(CTT->CTT_CUSTO,1,1) $ MvParDef)
 			MvParDef += PadR( CTT->CTT_CUSTO , nTam ) 
 			aAdd( aResAux , "Centro de Custo iniciado em "+PadR( CTT->CTT_CUSTO , nTam ) )
-		Endif		
+		EndIf		
 		CTT->( DBSkip() )
 	EndDo
 
-	//===========================================================================
-	//| Mantém a marcação anterior                                              |
-	//===========================================================================
+	// Mantém a marcação anterior
    	If Len( AllTrim(&MvRet) ) == 0
 		MvPar	:= PadR( AllTrim( StrTran( &MvRet , ";" , "" ) ) , Len(aResAux) )
 		&MvRet	:= PadR( AllTrim( StrTran( &MvRet , ";" , "" ) ) , Len(aResAux) )
@@ -164,14 +138,10 @@ If CTT->( DBSeek(xFilial("CTT")) )
 		MvPar	:= AllTrim( StrTran( &MvRet , ";" , "" ) )
 	EndIf
 	
-	//===========================================================================
-	//| Monta a tela de Opções genérica do Sistema                              |
-	//===========================================================================
+	// Monta a tela de Opções genérica do Sistema
 	f_Opcoes( @MvPar , cTitulo , aResAux , MvParDef , 12 , 49 , .F. , nTam , nMaxSelect )
 
-	//===========================================================================
-	//| Tratamento do retorno para separação por ";"                            |
-	//===========================================================================
+	// Tratamento do retorno para separação por ";"
 	&MvRet := ""
 
 	If !Empty(MvPar)
@@ -182,9 +152,7 @@ If CTT->( DBSeek(xFilial("CTT")) )
 			EndIf
 		Next
 	
-		//===========================================================================
-		//| Retira separação do último registro                                     |
-		//===========================================================================
+		// Retira separação do último registro
 		&MvRet := SubStr(&MvRet,1,Len(&MvRet)-1)
 	
 	EndIf
@@ -200,25 +168,22 @@ Return(.T.)
 Programa----------: CFGFil
 Autor-------------: Lucas Crevilari
 Data da Criacao---: 24/10/2014
-===============================================================================================================================
 Descrição---------: Verifica se não está incluindo filial duplicada na ZLH.
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: .T. - Permite inclusão (Filial ainda não cadastrada)
 ===============================================================================================================================
 */
-
 User Function CFGFil(_cFil)
+
 Local lRet := .T.
-Local aSaveArea := GetArea()
+Local aSaveArea := FWGetArea()
 
 cQuery := " SELECT COUNT(ZLH.ZLH_FIL) AS CONT"
 cQuery += " FROM " + RetSqlName("ZLH") + " ZLH"
 cQuery += " WHERE ZLH.D_E_L_E_T_ = ' ' AND ZLH.ZLH_FIL = '" + _cFil + "'"
 
 If Select("cQuery") > 0
-	cQuery->( dbCloseArea() )
+	cQuery->( DBCloseArea() )
 EndIf
 
 DBUseArea(.T., "TOPCONN", TcGenQry(,,cQuery), "cQuery", .T., .F. )
@@ -226,10 +191,10 @@ DBUseArea(.T., "TOPCONN", TcGenQry(,,cQuery), "cQuery", .T., .F. )
 DBSelectArea("cQuery")
 If cQuery->(!Eof()) .And. cQuery->CONT <> 0
 	lRet := .F.
-Endif
-cQuery->( dbCloseArea() )                                                     
+EndIf
+cQuery->( DBCloseArea() )                                                     
         
-RestArea(aSaveArea)
+FWRestArea(aSaveArea)
 
 Return(lRet)
 
@@ -238,15 +203,11 @@ Return(lRet)
 Programa----------: CTTZLH
 Autor-------------: Lucas Crevilari
 Data da Criacao---: 24/10/2014
-===============================================================================================================================
 Descrição---------: Filtro utilizado na Consulta padrão CTTZLH
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------:
 ===============================================================================================================================
-*/          
-
+*/
 User Function CTTZLH()
 
 Local lOk 		:= .T.
@@ -257,29 +218,29 @@ Local nQtdReg	:= 0
 Local lPrim 	:= .T.
 Local x			:= 0
 
-dbSelectArea("ZLH")
-dbSetOrder(1)
-If dbSeek(xFilial("ZLH")+cFilAnt)
-	cCcusto := ALLTRIM(ZLH->ZLH_CCUSTO)
-	If !EMPTY(cCcusto)
+DBSelectArea("ZLH")
+DBSetOrder(1)
+If DBSeek(xFilial("ZLH")+cFilAnt)
+	cCcusto := AllTrim(ZLH->ZLH_CCUSTO)
+	If !Empty(cCcusto)
 		nQtdReg := Len(cCcusto)
 	Else
 		lOk := .F.
-	Endif
+	EndIf
 	
 	If lOk
 		For x := 1 To nQtdReg
-			If SUBSTR(cCcusto,x,1) <> ";"
-				cCustFil := SUBSTR(cCcusto,x,1)
+			If SubStr(cCcusto,x,1) <> ";"
+				cCustFil := SubStr(cCcusto,x,1)
 				If lPrim
-					cFiltro += "SUBSTR(CTT->CTT_CUSTO,1,1) == '"+cCustFil+"'"
+					cFiltro += "SubStr(CTT->CTT_CUSTO,1,1) == '"+cCustFil+"'"
 				Else
-					cFiltro += " .OR. SUBSTR(CTT->CTT_CUSTO,1,1) == '"+cCustFil+"'"
-				Endif
+					cFiltro += " .Or. SubStr(CTT->CTT_CUSTO,1,1) == '"+cCustFil+"'"
+				EndIf
 	            lPrim := .F.
-			Endif
+			EndIf
 		Next x
-	Endif    
-Endif
+	EndIf    
+EndIf
 
 Return(cFiltro)

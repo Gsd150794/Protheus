@@ -10,8 +10,8 @@ Lucas Borges  	  | 17/10/2019 | Removidos os Warning na compilação da release 12
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
-#Include 'Protheus.ch'
-#INCLUDE 'TOPCONN.CH'
+#Include "TOTVS.ch"
+#Include 'TOPCONN.CH'
 
 /*
 ===============================================================================================================================
@@ -32,7 +32,7 @@ Private cPerg	:= "ROMS049"
 Private aOrd	:= {"Filial","Pedido","Cliente","Rede","Estado"} 
 
 If !Pergunte(cPerg,.T.)
-     return
+     Return
 EndIf
 
 oReport := ROMS049P(cPerg)
@@ -98,53 +98,53 @@ Private aheader := {}
 Private acols := {}
 
 cQry1 := "SELECT C5_FILIAL, C5_NUM,C5_CLIENTE,C5_LOJACLI,C5_EMISSAO,C5_I_EST,C5_I_GRPVE,C5_I_DTENT,C5_I_NOME,C5_I_NOMRD, "
-cQry1 += "NVL((SELECT F2_EMISSAO FROM " + RetSqlName("SF2") + " F2 WHERE F2.D_E_L_E_T_ <> '*' AND F2.F2_FILIAL = SC5.C5_FILIAL AND F2.F2_I_PEDID = SC5.C5_NUM ),'N/C') AS F2_EMISSAO, "
-cQry1 += "NVL((SELECT DAI_DATA FROM " + RetSqlName("DAI") + " DAI WHERE DAI.D_E_L_E_T_ <> '*' AND DAI.DAI_FILIAL = SC5.C5_FILIAL AND DAI.DAI_PEDIDO = SC5.C5_NUM),'N/C') AS DAK_DATA "
+cQry1 += "NVL((SELECT F2_EMISSAO FROM " + RetSqlName("SF2") + " F2 WHERE F2.D_E_L_E_T_ = ' ' AND F2.F2_FILIAL = SC5.C5_FILIAL AND F2.F2_I_PEDID = SC5.C5_NUM ),'N/C') AS F2_EMISSAO, "
+cQry1 += "NVL((SELECT DAI_DATA FROM " + RetSqlName("DAI") + " DAI WHERE DAI.D_E_L_E_T_ = ' ' AND DAI.DAI_FILIAL = SC5.C5_FILIAL AND DAI.DAI_PEDIDO = SC5.C5_NUM),'N/C') AS DAK_DATA "
 cQry1 += "FROM " + RetSqlName("SC5") + " SC5 "
 	
 cQry1 += "WHERE SC5.D_E_L_E_T_ = ' ' "
 
-If !EMPTY(MV_PAR01)
+If !Empty(MV_PAR01)
 
 	cQry1 += "  AND C5_I_EST IN " +  FormatIn(MV_PAR01,";")  + " "
 
 EndIf
 
-If !EMPTY(MV_PAR02) .AND. !EMPTY(MV_PAR03)
+If !Empty(MV_PAR02) .And. !Empty(MV_PAR03)
 
 	cQry1 += " AND C5_FILIAL >= '" + MV_PAR02 + "' AND C5_FILIAL <= '" + MV_PAR03 + "' "
 	
-Endif
+EndIf
 
-If !EMPTY(MV_PAR04) .AND. !EMPTY(MV_PAR06)
+If !Empty(MV_PAR04) .And. !Empty(MV_PAR06)
 
 	cQry1 += " AND C5_CLIENTE >= '" + MV_PAR04 + "' AND C5_CLIENTE <= '" + MV_PAR06 + "' "
 	
-Endif
+EndIf
 
-If !EMPTY(MV_PAR05) .AND. !EMPTY(MV_PAR07)
+If !Empty(MV_PAR05) .And. !Empty(MV_PAR07)
 
 	cQry1 += " AND C5_LOJACLI >= '" + MV_PAR05 + "' AND C5_LOJACLI <= '" + MV_PAR07 + "' "
 	
-Endif
+EndIf
 
-If !EMPTY(MV_PAR08) .AND. !EMPTY(MV_PAR09)
+If !Empty(MV_PAR08) .And. !Empty(MV_PAR09)
 
 	cQry1 += " AND C5_I_GRPVE >= '" + MV_PAR08 + "' AND C5_I_GRPVE <= '" + MV_PAR09 + "' "
 	
-Endif
+EndIf
 
-If !EMPTY(MV_PAR10) .AND. !EMPTY(MV_PAR11)
+If !Empty(MV_PAR10) .And. !Empty(MV_PAR11)
 
-	cQry1 += " AND C5_EMISSAO >= '" + DTOS(MV_PAR10) + "' AND C5_EMISSAO <= '" + DTOS(MV_PAR11) + "' "
+	cQry1 += " AND C5_EMISSAO >= '" + DToS(MV_PAR10) + "' AND C5_EMISSAO <= '" + DToS(MV_PAR11) + "' "
 	
-Endif
+EndIf
 
-If !EMPTY(MV_PAR12) .AND. !EMPTY(MV_PAR13)
+If !Empty(MV_PAR12) .And. !Empty(MV_PAR13)
 
 	cQry1 += " AND C5_NUM >= '" + MV_PAR12 + "' AND C5_NUM <= '" + MV_PAR13 + "' "
 	
-Endif
+EndIf
 
 If oReport:nOrder == 1
 	cQry1 += "	ORDER BY C5_FILIAL,C5_NUM "
@@ -159,14 +159,14 @@ ElseIf oReport:nOrder == 3
 EndIf
 
 If Select("TRBPED") <> 0
-	DbSelectArea("TRBPED")
-	DbCloseArea()
+	DBSelectArea("TRBPED")
+	DBCloseArea()
 EndIf
 
 TCQUERY cQry1 NEW ALIAS "TRBPED"
 	
-dbSelectArea("TRBPED")
-TRBPED->(dbGoTop())
+DBSelectArea("TRBPED")
+TRBPED->(DBGoTop())
 		
 oReport:SetMeter(TRBPED->(LastRec()))
 
@@ -180,32 +180,32 @@ While !TRBPED->(Eof())
 
 	oReport:IncMeter()
 	
-	IncProc("Imprimindo Filial " + Alltrim(TRBPED->C5_FILIAL) + " - " + AllTrim(FWFilialName(cEmpAnt,TRBPED->C5_FILIAL)))
+	IncProc("Imprimindo Filial " + AllTrim(TRBPED->C5_FILIAL) + " - " + AllTrim(FWFilialName(cEmpAnt,TRBPED->C5_FILIAL)))
 	
 	//Análise de transit time
 	//Calcula data de faturamento necessária para atender a entrega com base no transit time
 	//Prepara aheader e acols para a função omsvldent
 	aheader := {}
-	aadd(aheader,{1,"C6_ITEM"})
-	aadd(aheader,{2,"C6_PRODUTO"})
-	aadd(aheader,{3,"C6_LOCAL"})
+	aAdd(aheader,{1,"C6_ITEM"})
+	aAdd(aheader,{2,"C6_PRODUTO"})
+	aAdd(aheader,{3,"C6_LOCAL"})
 
-	SC6->(Dbsetorder(1))
-	SC6->(Dbgotop())
-	SC6->(Dbseek(TRBPED->C5_FILIAL+TRBPED->C5_NUM))
+	SC6->(DBSetOrder(1))
+	SC6->(DBGoTop())
+	SC6->(DBSeek(TRBPED->C5_FILIAL+TRBPED->C5_NUM))
 	
 	acols := {}
 		
-	Do while SC6->(!EOF()) .AND. TRBPED->C5_FILIAL == SC6->C6_FILIAL .AND. TRBPED->C5_NUM == SC6->C6_NUM
+	While SC6->(!Eof()) .And. TRBPED->C5_FILIAL == SC6->C6_FILIAL .And. TRBPED->C5_NUM == SC6->C6_NUM
 		
-			aadd(acols,{SC6->C6_ITEM,SC6->C6_PRODUTO,SC6->C6_LOCAL})
+			aAdd(acols,{SC6->C6_ITEM,SC6->C6_PRODUTO,SC6->C6_LOCAL})
 		
-			SC6->(Dbskip())
+			SC6->(DBSkip())
 			
-	Enddo
+	EndDo
 		
 	
-	_ndias :=  u_omsvldent(stod(TRBPED->C5_I_DTENT), TRBPED->C5_CLIENTE, TRBPED->C5_LOJACLI, TRBPED->C5_FILIAL, TRBPED->C5_NUM,1) //Carrega dias de transit time
+	_ndias :=  u_omsvldent(SToD(TRBPED->C5_I_DTENT), TRBPED->C5_CLIENTE, TRBPED->C5_LOJACLI, TRBPED->C5_FILIAL, TRBPED->C5_NUM,1) //Carrega dias de transit time
 	
 	If _ndias == -1
 	
@@ -213,17 +213,17 @@ While !TRBPED->(Eof())
 		
 	Else
 	
-		_cprz := strzero(_ndias,3)
+		_cprz := StrZero(_ndias,3)
 	
-	Endif
+	EndIf
 	
-	If alltrim(TRBPED->F2_EMISSAO) == "N/C"
+	If AllTrim(TRBPED->F2_EMISSAO) == "N/C"
 		_cemissao := "N/C"
 		_dprevisao := "N/C"
 		
 		If _ndias > -1  
 			
-			If STOD(TRBPED->C5_I_DTENT) - _ndias > date()
+			If SToD(TRBPED->C5_I_DTENT) - _ndias > Date()
 			
 				_cstatus := "AGUARDANDO FATURAMENTO NO PRAZO"
 				
@@ -231,22 +231,22 @@ While !TRBPED->(Eof())
 			
 				_cstatus := "AGUARDANDO FATURAMENTO ATRASADO"
 				
-			Endif
+			EndIf
 			
 		Else
 		
 			_cstatus := "AGUARDANDO FATURAMENTO"
 			
-		Endif
+		EndIf
 		
 	Else
-		_cemissao := dtoc(stod(TRBPED->F2_EMISSAO))
+		_cemissao := DToC(SToD(TRBPED->F2_EMISSAO))
 
 		If _ndias > 0
 		
-			_dprevisao := dtoc(stod(TRBPED->F2_EMISSAO)+_ndias)
+			_dprevisao := DToC(SToD(TRBPED->F2_EMISSAO)+_ndias)
 			
-			If STOD(TRBPED->C5_I_DTENT)  > stod(TRBPED->F2_EMISSAO)+_ndias
+			If SToD(TRBPED->C5_I_DTENT)  > SToD(TRBPED->F2_EMISSAO)+_ndias
 			
 				_cstatus := "FATURADO NO PRAZO"
 				
@@ -254,7 +254,7 @@ While !TRBPED->(Eof())
 			
 				_cstatus := "FATURADO ATRASADO"
 				
-			Endif
+			EndIf
 			
 			
 		Else
@@ -262,15 +262,15 @@ While !TRBPED->(Eof())
 			_dprevisao := "N/C"
 			_cstatus := "FATURADO"
 		
-		Endif
+		EndIf
 		
-	Endif
+	EndIf
 	
-	If alltrim(TRBPED->DAK_DATA) == "N/C"
+	If AllTrim(TRBPED->DAK_DATA) == "N/C"
 		_ccarga := "N/C"
 	Else
-		_ccarga := dtoc(stod(TRBPED->DAK_DATA))
-	Endif
+		_ccarga := DToC(SToD(TRBPED->DAK_DATA))
+	EndIf
 	
 	
 	
@@ -279,15 +279,15 @@ While !TRBPED->(Eof())
 	oSection1:Cell("C5_NUM")		:SetValue(TRBPED->C5_NUM)
 	oSection1:Cell("C5_CLIENTE")	:SetValue(TRBPED->C5_CLIENTE + "/" + TRBPED->C5_LOJACLI + " - " + TRBPED->C5_I_NOME)
 	oSection1:Cell("C5_I_GRPVE")    :SetValue(TRBPED->C5_I_GRPVE + " - " + TRBPED->C5_I_NOMRD)
-	oSection1:Cell("C5_I_DTENT")	:SetValue(STOD(TRBPED->C5_I_DTENT))
+	oSection1:Cell("C5_I_DTENT")	:SetValue(SToD(TRBPED->C5_I_DTENT))
 	oSection1:Cell("DAK_DATA")		:SetValue(_ccarga)
 	oSection1:Cell("F2_EMISSAO")	:SetValue(_cemissao)
 	oSection1:Cell("TRANSIT")		:SetValue(_cprz)
 	oSection1:Cell("PREVISAO")		:SetValue(_dprevisao)
 	oSection1:Cell("STATUS")		:SetValue(_cstatus)
-	oSection1:Printline()
+	oSection1:PrintLine()
 
-	TRBPED->(dbSkip())
+	TRBPED->(DBSkip())
 End
 oSection1:Finish()
 oSection1:Enable()

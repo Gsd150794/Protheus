@@ -8,8 +8,8 @@ Igor Melgaço  |09/06/2021| Chamado 36726. Ajuste registros qdo F2_TIPO = D ou B 
 Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
-#Include 'Protheus.ch'
-#INCLUDE 'TOPCONN.CH'
+#Include "TOTVS.ch"
+#Include 'TOPCONN.CH'
 /*
 ===============================================================================================================================
 Programa----------: ROMS056
@@ -22,21 +22,21 @@ Retorno-----------: Nenhum
 */
 User Function ROMS056()
 
-DO WHILE .T.
+While .T.
    If !Pergunte("ROMS056",.T.)
-      return
+      Return
    EndIf
 
-    IF EMPTY(MV_PAR02) .OR. EMPTY(MV_PAR03) .OR. MV_PAR03 < MV_PAR02
-       U_ITMSG("Datas invalidas ou não preenchidas",'Atenção!',"Preencha as 2 datas e a final maior ou igual a inicial",1)
-       LOOP
-    ENDIF
+    If Empty(MV_PAR02) .Or. Empty(MV_PAR03) .Or. MV_PAR03 < MV_PAR02
+       U_ITMsg("Datas invalidas ou não preenchidas",'Atenção!',"Preencha as 2 datas e a final maior ou igual a inicial",1)
+       Loop
+    EndIf
 
-   cTimeInicial:=TIME()
+   cTimeInicial:=Time()
 
-   FWMSGRUN( ,{|oProc|  ROMS056R(oProc) } , "Processando - Hora Inicial: "+cTimeInicial+", Aguarde...",  )
+   FWMsgRun( ,{|oProc|  ROMS056R(oProc) } , "Processando - Hora Inicial: "+cTimeInicial+", Aguarde...",  )
 
-  ENDDO 
+  EndDo 
 
 U_ITLOGACS( "ROMS056" )
 
@@ -55,15 +55,15 @@ Retorno-----------: Nenhum
 */
 Static Function ROMS056R(oProc)
 Local cQuery := "" 
-LOCAL cFiltro := ""
+Local cFiltro := ""
 Local _aCampos := {} // Array com os campos da tabela temporária.
 Local _cDir := GetTempPath()  // Diretório de Geração das planilhas.
-Local _cArq := "_"+Dtos(Date())+"_"+StrTran(Time(),":","")+".xml"  // Nome da planilha a ser gerada.   
+Local _cArq := "_"+DToS(Date())+"_"+StrTran(Time(),":","")+".xml"  // Nome da planilha a ser gerada.   
 Local _aCabecalho := {} // Array com o cabeçalho das colunas do relatório.
 Local _cTitulo
-PRIVATE _cAlias:= GetNextAlias()
-PRIVATE _aDadosPar:={}
-PRIVATE _aPergunte:={}
+Private _cAlias:= GetNextAlias()
+Private _aDadosPar:={}
+Private _aPergunte:={}
 
 oProc:cCaption :=  "Selecionando Dados, Aguarde... "
 ProcessMessages()
@@ -95,124 +95,124 @@ EndIf
 //====================================================================================================
 // Filtra Emissao da SF2
 //====================================================================================================
-If !Empty(MV_PAR02) .and. !empty(MV_PAR03)
-	cFiltro += " AND SF2.F2_EMISSAO BETWEEN '" + dtos(MV_PAR02) + "' AND '" + dtos(MV_PAR03) + "'"
+If !Empty(MV_PAR02) .And. !Empty(MV_PAR03)
+	cFiltro += " AND SF2.F2_EMISSAO BETWEEN '" + DToS(MV_PAR02) + "' AND '" + DToS(MV_PAR03) + "'"
 EndIf
 
 //====================================================================================================
 // Filtra Produto
 //====================================================================================================
-if !empty(MV_PAR04) .and. !empty(MV_PAR05)
+If !Empty(MV_PAR04) .And. !Empty(MV_PAR05)
 	cFiltro += " AND SD2.D2_COD BETWEEN '" + MV_PAR04 + "' AND '" + MV_PAR05 + "'"
-endif
+EndIf
 
 //====================================================================================================
 // Filtra Armazém
 //====================================================================================================
-if !empty(MV_PAR27) 
+If !Empty(MV_PAR27) 
 	cFiltro += " AND SD2.D2_LOCAL IN " + FormatIn(MV_PAR27,";")
-endif
+EndIf
 
 //====================================================================================================
 // Filtra Cliente
 //====================================================================================================
-if !empty(MV_PAR06) .and. !empty(MV_PAR08)
+If !Empty(MV_PAR06) .And. !Empty(MV_PAR08)
 	cFiltro += " AND SD2.D2_CLIENTE BETWEEN '" + MV_PAR06 + "' AND '" + MV_PAR08 + "'"
-endif
+EndIf
 
 //====================================================================================================
 // Filtra Loja Cliente
 //====================================================================================================
-if !empty(MV_PAR07) .and. !empty(MV_PAR09)
+If !Empty(MV_PAR07) .And. !Empty(MV_PAR09)
 	cFiltro += " AND SD2.D2_LOJA BETWEEN '" + MV_PAR07 + "' AND '" + MV_PAR09 + "'"
-endif
+EndIf
 
 //====================================================================================================
 // Filtra Rede Cliente
 //====================================================================================================
-if !empty(MV_PAR10)
+If !Empty(MV_PAR10)
 	cFiltro += " AND SA1.A1_GRPVEN IN " + FormatIn(MV_PAR10,";")
-endif
+EndIf
 
 //====================================================================================================
 // Filtra Estado Cliente
 //====================================================================================================
-if !empty(MV_PAR11) 
+If !Empty(MV_PAR11) 
 	cFiltro += " AND SA1.A1_EST IN " + FormatIn(MV_PAR11,";")
-endif
+EndIf
 
 //====================================================================================================
 // Filtra Cod Municipio Cliente
 //====================================================================================================
-if !empty(MV_PAR12) 
+If !Empty(MV_PAR12) 
 	cFiltro += " AND SA1.A1_COD_MUN IN " + FormatIn(MV_PAR12,";")
-endif
+EndIf
 
 //====================================================================================================
 // Filtra Vendedor
 //====================================================================================================
-if !empty(MV_PAR13) 
+If !Empty(MV_PAR13) 
 	cFiltro += " AND SA3.A3_COD IN " + FormatIn(MV_PAR13,";")
-endif
+EndIf
 
 //====================================================================================================
 // Filtra Supervisor
 //====================================================================================================
-if !empty(MV_PAR14)
+If !Empty(MV_PAR14)
 	cFiltro += " AND SA3.A3_SUPER IN " + FormatIn(MV_PAR14,";")
-endif
+EndIf
 
 //====================================================================================================
 // Filtra Grupo de Produtos
 //====================================================================================================
-if !empty(MV_PAR15)
+If !Empty(MV_PAR15)
 	cFiltro += " AND SB1.B1_GRUPO IN " + FormatIn(MV_PAR15,";")
-endif
+EndIf
 
 //====================================================================================================
 // Filtra Produto Nivel 2
 //====================================================================================================
-if !empty(MV_PAR16)
+If !Empty(MV_PAR16)
 	cFiltro += " AND SB1.B1_I_NIV2 IN " + FormatIn(MV_PAR16,";")
-endif
+EndIf
 
 //====================================================================================================
 // Filtra Produto Nivel 3
 //====================================================================================================
-if !empty(MV_PAR17)
+If !Empty(MV_PAR17)
 	cFiltro += " AND SB1.B1_I_NIV3 IN " + FormatIn(MV_PAR17,";")
-endif
+EndIf
 
 //====================================================================================================
 // Filtra Produto Nivel 4
 //====================================================================================================
-if !empty(MV_PAR18)
+If !Empty(MV_PAR18)
 	cFiltro += " AND SB1.B1_I_NIV4 IN " + FormatIn(MV_PAR18,";")
-endif 
+EndIf 
 
 //====================================================================================================
 // Filtra Transportadoras
 //====================================================================================================
-if !empty(MV_PAR20)
+If !Empty(MV_PAR20)
 	cFiltro += " AND SA2.A2_COD IN " + FormatIn(MV_PAR20,";")
-endif 
+EndIf 
 
 //====================================================================================================
 // Filtra tipo do Fornecedor
 //====================================================================================================
-if !empty(MV_PAR25)
+If !Empty(MV_PAR25)
 	cFiltro    += " AND SA2.A2_I_CLASS IN " + FormatIn(MV_PAR25,";")
-endif
+EndIf
 
 //====================================================================================================
 // Filtra Transportadoras por averbacao
 //====================================================================================================
-if MV_PAR28 == 1
+If MV_PAR28 == 1
 	cFiltro += " AND SA2.A2_I_AVERB = '1'"
-endif 
-if MV_PAR28 == 2
+EndIf 
+If MV_PAR28 == 2
 	cFiltro += " AND SA2.A2_I_AVERB = '2'"
-endif
+EndIf
 
 //====================================================================================================
 // busca CFOPS de acordo com parametro definido por usuario
@@ -235,7 +235,7 @@ If MV_PAR22 == 1
 
 	cFiltro += " AND SF2.F2_I_FRET > 0 "
 
-Elseif MV_PAR22 == 2
+ElseIf MV_PAR22 == 2
 
 	cFiltro += " AND SF2.F2_I_FRET = 0 "
 
@@ -244,41 +244,41 @@ EndIf
 //====================================================================================================
 // Sub Grupo de Produtos
 //====================================================================================================
-if !empty(MV_PAR23)
+If !Empty(MV_PAR23)
 	cFiltro += " AND SB1.B1_I_SUBGR IN " + FormatIn(MV_PAR23,";")
-endif 
+EndIf 
 
 //====================================================================================================
 // Filtra Tipo da carga
 //====================================================================================================
-if !empty(MV_PAR24)
+If !Empty(MV_PAR24)
 	cFiltro += " AND DAK.DAK_I_TPCA IN " + FormatIn(MV_PAR24,";")
-endif           
+EndIf           
 
 //====================================================================================================
 // Filtra Transportadoras por averbacao
 //====================================================================================================
-if !empty(MV_PAR29)
+If !Empty(MV_PAR29)
 	cFiltro += " AND SC5.C5_TPFRETE IN"+ FormatIn( MV_PAR29 , ";" )
-endif 
+EndIf 
 
-IF MV_PAR30 = 1
+If MV_PAR30 = 1
    nOrdem:=8
-ElseIF MV_PAR30 = 2
+ElseIf MV_PAR30 = 2
    nOrdem:=9
-ENDIF   
+EndIf   
 
 
    cQuery := " SELECT "
-   cQuery += " CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END AS A2_COD,"
-   cQuery += " CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END AS A2_NREDUZ,"
+   cQuery += " Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END AS A2_COD,"
+   cQuery += " Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END AS A2_NREDUZ,"
    cQuery += " SA2.A2_EST, "
-    IF MV_PAR19 = 1
+    If MV_PAR19 = 1
        cQuery += " SA1.A1_COD,"
        cQuery += " SA1.A1_NREDUZ,"
        cQuery += " SA1.A1_EST,"
        cQuery += " DAK.DAK_COD,"
-	ENDIF   
+	EndIf   
    cQuery += " SUM(SD2.D2_QUANT)   AS D2_QUANT,"
    cQuery += " SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,"
    cQuery += " SUM(SD2.D2_I_FRET)  AS D2_I_FRET,"        
@@ -287,7 +287,7 @@ ENDIF
       cQuery += " SB1.B1_I_DESCD DESCR,"		
    ElseIf nOrdem == 9
 	  cQuery += " SB1.B1_I_SUBGR PRODUTO,"
-   Endif
+   EndIf
    cQuery += " SD2.D2_UM,"		
    cQuery += " SD2.D2_SEGUM,"		
    cQuery += " SUM(SD2.D2_VALBRUT) AS VLBRUT " 
@@ -323,15 +323,15 @@ ENDIF
    cQuery += " AND SD2.D2_CF <> '5927' "
    cQuery +=  cFiltro
    cQuery += "GROUP BY" 
-   cQuery += " CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD WHEN SA2.A2_I_CLASS = 'A' THEN '999999' END,"
-   cQuery += " CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END,"
+   cQuery += " Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD WHEN SA2.A2_I_CLASS = 'A' THEN '999999' END,"
+   cQuery += " Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END,"
    cQuery += " SA2.A2_EST, "
-   IF MV_PAR19 = 1
+   If MV_PAR19 = 1
       cQuery += " SA1.A1_COD,"
       cQuery += " SA1.A1_NREDUZ,"
       cQuery += " SA1.A1_EST,"
       cQuery += " DAK.DAK_COD,"
-	ENDIF   
+	EndIf   
    If nOrdem == 8
       cQuery += " SB1.B1_COD,SB1.B1_I_DESCD,SD2.D2_UM,SD2.D2_SEGUM "
    ElseIf nOrdem == 9
@@ -343,14 +343,14 @@ ENDIF
 MPSysOpenQuery( cQuery, _cAlias ) 
 
 nTotal:=nConta:=0
-dbSelectArea(_cAlias)
+DBSelectArea(_cAlias)
 COUNT TO nTotal
-(_cAlias)->(dbGoTop())
+(_cAlias)->(DBGoTop())
 
-IF nTotal = 0 
-   U_ITMSG("Não há dados para essa seleção",'Atenção!',,3)
-   RETURN .F.
-ENDIF
+If nTotal = 0 
+   U_ITMsg("Não há dados para essa seleção",'Atenção!',,3)
+   Return .F.
+EndIf
 
 
 If MV_PAR26 = 1 //Excel
@@ -384,31 +384,31 @@ If MV_PAR26 = 1 //Excel
                    '(_cAlias)->D2_I_FRET / (_cAlias)->D2_QUANT',;                                         // "MÉDIA"
                    '(_cAlias)->VLBRUT'}                                                                   // "VALOR BRUTO"
    EndIf
-   IF MV_PAR19 = 1
-      AADD(_aCampos,'(_cAlias)->DAK_COD')								                                     // CARGA
-      AADD(_aCampos,'(_cAlias)->A1_COD +"-"+ (_cAlias)->A1_NREDUZ')                                 // CLIENTE
-      AADD(_aCampos,'(_cAlias)->A1_EST')                                                            // "UF CLIENTE
-   ENDIF
+   If MV_PAR19 = 1
+      aAdd(_aCampos,'(_cAlias)->DAK_COD')								                                     // CARGA
+      aAdd(_aCampos,'(_cAlias)->A1_COD +"-"+ (_cAlias)->A1_NREDUZ')                                 // CLIENTE
+      aAdd(_aCampos,'(_cAlias)->A1_EST')                                                            // "UF CLIENTE
+   EndIf
    _aCabecalho := {} // Array com o cabeçalho das colunas do relatório. 
    // Alinhamento( 1-Left,2-Center,3-Right )
    // Formatação( 1-General,2-Number,3-Monetário,4-DateTime )
    //                Titulo das Colunas ,Alinhamento ,Formatação, Totaliza?  
-   Aadd(_aCabecalho,{"COD.PRODUTO"      ,1           ,1         ,.F.}) 
-   Aadd(_aCabecalho,{"DESCR.PRODUTO"    ,1           ,1         ,.F.})    
-   Aadd(_aCabecalho,{"TRANSPORTADORA"   ,1           ,1         ,.F.}) 
-   Aadd(_aCabecalho,{"UF"               ,1           ,1         ,.F.}) 
-   Aadd(_aCabecalho,{"QUANTIDADE"       ,3           ,1         ,.F.}) 
-   Aadd(_aCabecalho,{"U.M."             ,2           ,1         ,.F.}) 
-   Aadd(_aCabecalho,{"QUANT.2a U.M."    ,3           ,1         ,.F.}) 
-   Aadd(_aCabecalho,{"2a U.M."          ,2           ,1         ,.F.}) 
-   Aadd(_aCabecalho,{"FRETE"            ,3           ,3         ,.F.}) 
-   Aadd(_aCabecalho,{"MÉDIA"            ,3           ,3         ,.F.}) 
-   Aadd(_aCabecalho,{"VALOR BRUTO"      ,3           ,3         ,.F.}) 
-   IF MV_PAR19 = 1
-      Aadd(_aCabecalho,{"CARGA"            ,1           ,1         ,.F.}) 
-      Aadd(_aCabecalho,{"CLIENTE"          ,1           ,1         ,.F.}) 
-      Aadd(_aCabecalho,{"UF"               ,1           ,1         ,.F.}) 
-   ENDIF
+   aAdd(_aCabecalho,{"COD.PRODUTO"      ,1           ,1         ,.F.}) 
+   aAdd(_aCabecalho,{"DESCR.PRODUTO"    ,1           ,1         ,.F.})    
+   aAdd(_aCabecalho,{"TRANSPORTADORA"   ,1           ,1         ,.F.}) 
+   aAdd(_aCabecalho,{"UF"               ,1           ,1         ,.F.}) 
+   aAdd(_aCabecalho,{"QUANTIDADE"       ,3           ,1         ,.F.}) 
+   aAdd(_aCabecalho,{"U.M."             ,2           ,1         ,.F.}) 
+   aAdd(_aCabecalho,{"QUANT.2a U.M."    ,3           ,1         ,.F.}) 
+   aAdd(_aCabecalho,{"2a U.M."          ,2           ,1         ,.F.}) 
+   aAdd(_aCabecalho,{"FRETE"            ,3           ,3         ,.F.}) 
+   aAdd(_aCabecalho,{"MÉDIA"            ,3           ,3         ,.F.}) 
+   aAdd(_aCabecalho,{"VALOR BRUTO"      ,3           ,3         ,.F.}) 
+   If MV_PAR19 = 1
+      aAdd(_aCabecalho,{"CARGA"            ,1           ,1         ,.F.}) 
+      aAdd(_aCabecalho,{"CLIENTE"          ,1           ,1         ,.F.}) 
+      aAdd(_aCabecalho,{"UF"               ,1           ,1         ,.F.}) 
+   EndIf
    If nOrdem == 8 //Fechamento x Produto
       _cArq := "Fechamento_x_Produto"+_cArq // Nome da planilha a ser gerada.   
       _cTitulo := "RELATÓRIO DE FRETE POR TRANSPORTADOR (FECHAMENTO X PRODUTO)" 
@@ -420,121 +420,121 @@ If MV_PAR26 = 1 //Excel
    ROMS056Z()
    U_ITGEREXCEL(_cArq,_cDir,_cTitulo,"Relatorio",_aCabecalho,,.T.,_cAlias,_aCampos,,,_aPergunte)
  
-ELSEIf MV_PAR26 = 2//Tela
+ElseIf MV_PAR26 = 2//Tela
 
-   nTotal:=ALLTRIM(STR(nTotal))
-   nTam:=LEN(nTotal)+1   
+   nTotal:=AllTrim(Str(nTotal))
+   nTam:=Len(nTotal)+1   
    _aDados:={}
-   SCR->(DBSETORDER(1))
+   SCR->(DBSetOrder(1))
    _cPicQ:=PESQPICT("SD2","D2_QUANT")
    _cPic2:=PESQPICT("SD2","D2_QTSEGUM")
    _cPicF:=PESQPICT("SD2","D2_I_FRET")
    _cPicB:=PESQPICT("SD2","D2_VALBRUT")
    
-   DO While !(_cAlias)->(Eof())
+   While !(_cAlias)->(Eof())
    
       nConta++
-      oProc:cCaption :=  "Lendo "+STRZERO(nConta,nTam)+" de "+nTotal +" - Lendo Item: " +(_cAlias)->PRODUTO
+      oProc:cCaption :=  "Lendo "+StrZero(nConta,nTam)+" de "+nTotal +" - Lendo Item: " +(_cAlias)->PRODUTO
       ProcessMessages()
       
       _aItens:={}
-      AADD(_aItens,(_cAlias)->PRODUTO)                                                                    //"COD.PRODUTO"
+      aAdd(_aItens,(_cAlias)->PRODUTO)                                                                    //"COD.PRODUTO"
       If nOrdem == 8 //Fechamento x Produto
-         AADD(_aItens,ALLTRIM((_cAlias)->DESCR))                                                          //"DESCR.PRODUTO"
+         aAdd(_aItens,AllTrim((_cAlias)->DESCR))                                                          //"DESCR.PRODUTO"
       Else//nOrdem == 9 
-         AADD(_aItens,ALLTRIM(Posicione("ZB9",1,xFilial("ZB9")+AllTrim((_cAlias)->PRODUTO),"ZB9_DESSUB")))// "DESCR.PRODUTO"
+         aAdd(_aItens,AllTrim(Posicione("ZB9",1,xFilial("ZB9")+AllTrim((_cAlias)->PRODUTO),"ZB9_DESSUB")))// "DESCR.PRODUTO"
       EndIf
-      AADD(_aItens,(_cAlias)->A2_COD +"-"+ (_cAlias)->A2_NREDUZ)                   // "TRANSPORTADORA"   
-      AADD(_aItens,(_cAlias)->A2_EST)                                              // "UF TRANSPORTADORA"   
-      AADD(_aItens,(Transform((_cAlias)->D2_QUANT,_cPicQ)))                        // "QUANTIDADE"
-      AADD(_aItens,(_cAlias)->D2_UM)                                               // "U.M."
-      AADD(_aItens,(Transform((_cAlias)->D2_QTSEGUM,_cPic2)))                      // "QUANT.2a U.M." 
-      AADD(_aItens,(_cAlias)->D2_SEGUM)                                            // "2a U.M."
-      AADD(_aItens,(Transform((_cAlias)->D2_I_FRET,_cPicF)))                       // "FRETE"
-      AADD(_aItens,(Transform((_cAlias)->D2_I_FRET / (_cAlias)->D2_QUANT,_cPicQ))) // "MÉDIA"
-      AADD(_aItens,(Transform((_cAlias)->VLBRUT,_cPicB)))                          // "VALOR BRUTO"
-      IF MV_PAR19 = 1
-         AADD(_aItens,(_cAlias)->DAK_COD)								                    // CARGA
-         AADD(_aItens,(_cAlias)->A1_COD +"-"+ (_cAlias)->A1_NREDUZ)                // CLIENTE
-         AADD(_aItens,(_cAlias)->A1_EST)                                           // "UF CLIENTE
-   	ENDIF	 
+      aAdd(_aItens,(_cAlias)->A2_COD +"-"+ (_cAlias)->A2_NREDUZ)                   // "TRANSPORTADORA"   
+      aAdd(_aItens,(_cAlias)->A2_EST)                                              // "UF TRANSPORTADORA"   
+      aAdd(_aItens,(Transform((_cAlias)->D2_QUANT,_cPicQ)))                        // "QUANTIDADE"
+      aAdd(_aItens,(_cAlias)->D2_UM)                                               // "U.M."
+      aAdd(_aItens,(Transform((_cAlias)->D2_QTSEGUM,_cPic2)))                      // "QUANT.2a U.M." 
+      aAdd(_aItens,(_cAlias)->D2_SEGUM)                                            // "2a U.M."
+      aAdd(_aItens,(Transform((_cAlias)->D2_I_FRET,_cPicF)))                       // "FRETE"
+      aAdd(_aItens,(Transform((_cAlias)->D2_I_FRET / (_cAlias)->D2_QUANT,_cPicQ))) // "MÉDIA"
+      aAdd(_aItens,(Transform((_cAlias)->VLBRUT,_cPicB)))                          // "VALOR BRUTO"
+      If MV_PAR19 = 1
+         aAdd(_aItens,(_cAlias)->DAK_COD)								                    // CARGA
+         aAdd(_aItens,(_cAlias)->A1_COD +"-"+ (_cAlias)->A1_NREDUZ)                // CLIENTE
+         aAdd(_aItens,(_cAlias)->A1_EST)                                           // "UF CLIENTE
+   	EndIf	 
            
-      AADD(_aDados,ACLONE(_aItens))
+      aAdd(_aDados,ACLONE(_aItens))
    
-      (_cAlias)->(dbSkip())
+      (_cAlias)->(DBSkip())
    	
-   ENDDO
+   EndDo
    
-   IF LEN(_aDados) = 0 
-       U_ITMSG("Não há dados para essa seleção",'Atenção!',,3)
-   ENDIF
+   If Len(_aDados) = 0 
+       U_ITMsg("Não há dados para essa seleção",'Atenção!',,3)
+   EndIf
    
-   DO WHILE LEN(_aDados) > 0 
+   While Len(_aDados) > 0 
       _aTit:={}
       _aSiz:={}
-      AADD(_aTit,"Codigo") 
-      AADD(_aSiz,30)
+      aAdd(_aTit,"Codigo") 
+      aAdd(_aSiz,30)
       If nOrdem == 8 //Fechamento x Produto
-         AADD(_aTit,"Descricao do Produto")
+         aAdd(_aTit,"Descricao do Produto")
       Else
-         AADD(_aTit,"Descricao do Grupo")
-      ENDIF   
-      AADD(_aSiz,40)
-      AADD(_aTit,"TRANSPORTADORA" )
-      AADD(_aSiz,90)
-      AADD(_aTit,"UF")
-      AADD(_aSiz,20)
-      AADD(_aTit,"QUANTIDADE" )
-      AADD(_aSiz,45)
-      AADD(_aTit,"U.M.")
-      AADD(_aSiz,20)
-      AADD(_aTit,"QUANT.2a U.M." )
-      AADD(_aSiz,45)
-      AADD(_aTit,"2a U.M.")
-      AADD(_aSiz,20)
-      AADD(_aTit,"FRETE" )
-      AADD(_aSiz,45)
-      AADD(_aTit,"MÉDIA" )
-      AADD(_aSiz,45)
-      AADD(_aTit,"VALOR BRUTO" )
-      AADD(_aSiz,45)
-      IF MV_PAR19 = 1
-         AADD(_aTit,"CARGA" )
-         AADD(_aSiz,25)
-         AADD(_aTit,"CLIENTE")
-         AADD(_aSiz,100)
-         AADD(_aTit,"UF" )
-         AADD(_aSiz,20)
-      ENDIF
+         aAdd(_aTit,"Descricao do Grupo")
+      EndIf   
+      aAdd(_aSiz,40)
+      aAdd(_aTit,"TRANSPORTADORA" )
+      aAdd(_aSiz,90)
+      aAdd(_aTit,"UF")
+      aAdd(_aSiz,20)
+      aAdd(_aTit,"QUANTIDADE" )
+      aAdd(_aSiz,45)
+      aAdd(_aTit,"U.M.")
+      aAdd(_aSiz,20)
+      aAdd(_aTit,"QUANT.2a U.M." )
+      aAdd(_aSiz,45)
+      aAdd(_aTit,"2a U.M.")
+      aAdd(_aSiz,20)
+      aAdd(_aTit,"FRETE" )
+      aAdd(_aSiz,45)
+      aAdd(_aTit,"MÉDIA" )
+      aAdd(_aSiz,45)
+      aAdd(_aTit,"VALOR BRUTO" )
+      aAdd(_aSiz,45)
+      If MV_PAR19 = 1
+         aAdd(_aTit,"CARGA" )
+         aAdd(_aSiz,25)
+         aAdd(_aTit,"CLIENTE")
+         aAdd(_aSiz,100)
+         aAdd(_aTit,"UF" )
+         aAdd(_aSiz,20)
+      EndIf
       If nOrdem == 8 //Fechamento x Produto
          _cTitulo := "RELATÓRIO DE FRETE; POR TRANSPORTADOR (FECHAMENTO X PRODUTO)" 
       Else           //Fechamento x SubGrupo // nOrdem == 9 
          _cTitulo := "RELATÓRIO DE FRETE; POR TRANSPORTADOR (FECHAMENTO X SUB-GRUPO)"
       EndIf
    
-      _cMsgTop:="Produtos encontrados - H.I.: "+cTimeInicial+" H.F.: "+TIME()
+      _cMsgTop:="Produtos encontrados - H.I.: "+cTimeInicial+" H.F.: "+Time()
    
       _aDadosPar:=ACLONE(_aDados)
       ROMS056Z()
    
-   //   _cTitulo:="Par. 1 : "+DTOC(MV_PAR01)+"; Par. 2 : "+DTOC(MV_PAR02)+"; Par. 3 : "+ALLTRIM(MV_PAR03)+"; Par. 4 : "+ALLTRIM(STR(MV_PAR04))+;
-              //"; Par. 5 : "+ALLTRIM(MV_PAR05)
+   //   _cTitulo:="Par. 1 : "+DToC(MV_PAR01)+"; Par. 2 : "+DToC(MV_PAR02)+"; Par. 3 : "+AllTrim(MV_PAR03)+"; Par. 4 : "+AllTrim(Str(MV_PAR04))+;
+              //"; Par. 5 : "+AllTrim(MV_PAR05)
               
-      bOk:={|| IF(U_ITMSG("Confirma Gerar EXCEL ?",'Atenção!',,2,2,2) , DlgToExcel( { { "ARRAY" , _cTitulo , _aTit , _aDadosPar } } )  ,.F. )   }
+      bOk:={|| If(U_ITMsg("Confirma Gerar EXCEL ?",'Atenção!',,2,2,2) , DlgToExcel( { { "ARRAY" , _cTitulo , _aTit , _aDadosPar } } )  ,.F. )   }
    
       //                           , _aCols  ,_lMaxSiz,_nTipo,_cMsgTop, _lSelUnc ,_aSizes , _nCampo , bOk , bCancel, _abuttons )
          U_ITListBox(_cTitulo,_aTit,_aDados  , .T.    , 3    ,_cMsgTop,          ,_aSiz   ,         , bOk ,        , )
                                                                                                      
    
-      IF  !U_ITMSG("Confirma Sair ?",'Atenção!',,3,2,2)
-          LOOP
-      ENDIF
+      If  !U_ITMsg("Confirma Sair ?",'Atenção!',,3,2,2)
+          Loop
+      EndIf
    
-      EXIT
+      Exit
    
-   ENDDO
+   EndDo
 
-ELSEIf MV_PAR26 = 3//Impressora
+ElseIf MV_PAR26 = 3//Impressora
 
    Private nPagina     := 1
    Private nLinha      := 0100
@@ -571,7 +571,7 @@ ELSEIf MV_PAR26 = 3//Impressora
 	   oPrint:SetLandscape() 	// Paisagem    
 	   nColFinal   := 3360
 	   nqbrPagina  := 2200
-   ELSE
+   Else
       oPrint:SetPortrait() 	// Retrato
       nColFinal   := 2360
       nqbrPagina  := 2200 
@@ -586,17 +586,17 @@ ELSEIf MV_PAR26 = 3//Impressora
 
    If nTotal > 0  
 
-      nTotal:=ALLTRIM(STR(nTotal))
-      nTam:=LEN(nTotal)+1   
+      nTotal:=AllTrim(Str(nTotal))
+      nTam:=Len(nTotal)+1   
 
 	  ROMS056C(1) // Imprime cabecalho
 	
 	  DBSelectArea(_cAlias)
-	  (_cAlias)->( DBGotop() )
-	  DO While (_cAlias)->( !Eof() )
+	  (_cAlias)->( DBGoTop() )
+	  While (_cAlias)->( !Eof() )
 	
       nConta++
-      oProc:cCaption :=  "Lendo "+STRZERO(nConta,nTam)+" de "+nTotal +" - Lendo Item: " +(_cAlias)->PRODUTO
+      oProc:cCaption :=  "Lendo "+StrZero(nConta,nTam)+" de "+nTotal +" - Lendo Item: " +(_cAlias)->PRODUTO
       ProcessMessages()
 		
 		 //Incremente as variaves de somatorio geral
@@ -644,7 +644,7 @@ ELSEIf MV_PAR26 = 3//Impressora
 				
 			EndIf
 			
-			Aadd( aProduto , { AllTrim( (_cAlias)->PRODUTO ) } )
+			aAdd( aProduto , { AllTrim( (_cAlias)->PRODUTO ) } )
 				
 			nlinha += nSaltoLinha
 			
@@ -718,7 +718,7 @@ ELSEIf MV_PAR26 = 3//Impressora
    EndIf
 
 
-ENDIF
+EndIf
 
 Return
 
@@ -739,9 +739,9 @@ Local cTitulo     := ""
 Local nDiferLay   := 0
 
 If nOrdem == 8 //Fechamento x Produto
-   cTitulo := "Relatorio de Frete por Transportador (Fechamento x Produto) De: "+ DtoC(MV_PAR02) +" Até "+ DtoC(MV_PAR03)
+   cTitulo := "Relatorio de Frete por Transportador (Fechamento x Produto) De: "+ DToC(MV_PAR02) +" Até "+ DToC(MV_PAR03)
 Else           //Fechamento x SubGrupo // nOrdem == 9 
-   cTitulo := "Relatorio de Frete por Transportador (Fechamento x Sub-Grupo) De: "+ DtoC(MV_PAR02) +" Até "+ DtoC(MV_PAR03)
+   cTitulo := "Relatorio de Frete por Transportador (Fechamento x Sub-Grupo) De: "+ DToC(MV_PAR02) +" Até "+ DToC(MV_PAR03)
 EndIf
 
 nLinha := 0070
@@ -764,7 +764,7 @@ Else
 	
 EndIf
 
-oPrint:Say( nlinha + 50			, ( nColInic + 2750 ) - nDiferLay , "DATA DE EMISSÃO: "+ DtoC( DATE() )									, oFont12b )
+oPrint:Say( nlinha + 50			, ( nColInic + 2750 ) - nDiferLay , "DATA DE EMISSÃO: "+ DToC( Date() )									, oFont12b )
 
 nlinha += ( nSaltoLinha * 3 )
 
@@ -775,7 +775,7 @@ nlinha += ( nSaltoLinha * 3 )
 	
 	oPrint:Line(nLinha,nColInic,nLinha,nColFinal) 
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -807,7 +807,7 @@ If nLinha > nqbrPagina
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -829,10 +829,10 @@ oPrint:Line( nLinInBox , 2000 , nLinha , 2000 ) // VALOR BRUTO
 If MV_PAR19 == 1 // Com Carga   (_cAlias)->DAK_COD
    oPrint:Line( nLinInBox , 2380 , nLinha , 2380 ) // CARGA
    oPrint:Line( nLinInBox , 2600 , nLinha , 2600 ) // Cliente  
-ENDIF
+EndIf
 oPrint:Box( nLinInBox , nColInic , nLinha , nColFinal )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -869,9 +869,9 @@ oPrint:Say( nlinha + 10 , nColInic + 2050 , "VALOR BRUTO"		, oFont12b )
 If MV_PAR19 == 1 // Com Carga   (_cAlias)->DAK_COD
    oPrint:Say( nlinha + 10 , nColInic + 2410, "CARGA"		, oFont12b )
    oPrint:Say( nlinha + 10 , nColInic + 2590, "CLIENTE"	, oFont12b )
-ENDIF
+EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -884,21 +884,21 @@ Retorno---------: Nenhum
 ===============================================================================================================================
 */
 Static Function ROMS0563( cTransport , nqtde1 , cum1 , nqtde2 , cum2 , nFrete , nValBrut )
-LOCAL nColAux:=nColInic
+Local nColAux:=nColInic
 oPrint:Say( nlinha + 10 , nColInic + 0010 , SubStr(cTransport,1,46)											, oFont10 )
 nColInic:=nColInic-30
-oPrint:Say( nlinha + 10 , nColInic + 0765 , Transform(nqtde1,"@E 999,999,999.99") + "-"+ PADR(cum1,2," ")	, oFont10 )
-oPrint:Say( nlinha + 10 , nColInic + 1180 , Transform(nqtde2,"@E 999,999,999.99") + "-"+ PADR(cum2,2," ")	, oFont10 )
+oPrint:Say( nlinha + 10 , nColInic + 0765 , Transform(nqtde1,"@E 999,999,999.99") + "-"+ PadR(cum1,2," ")	, oFont10 )
+oPrint:Say( nlinha + 10 , nColInic + 1180 , Transform(nqtde2,"@E 999,999,999.99") + "-"+ PadR(cum2,2," ")	, oFont10 )
 oPrint:Say( nlinha + 10 , nColInic + 1510 , 'R$ ' + Transform(nFrete,"@E 999,999,999.99")					, oFont10 )
 oPrint:Say( nlinha + 10 , nColInic + 1700 , Transform(nFrete / nqtde1 ,"@E 999,999,999.99999")				, oFont10 )
 oPrint:Say( nlinha + 10 , nColInic + 2040 , 'R$ ' + Transform(nValBrut,"@E 999,999,999.99")				, oFont10 )
 If MV_PAR19 == 1 // Com Carga   
    oPrint:Say( nlinha + 10 , nColInic + 2440 , (_cAlias)->DAK_COD					, oFont10  )
    oPrint:Say( nlinha + 10 , nColInic + 2620 , (_cAlias)->A1_COD +"-"+ (_cAlias)->A1_NREDUZ+"  ( "+(_cAlias)->A1_EST+" )", oFont10  )
-ENDIF
+EndIf
 nColInic:=nColAux
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -911,17 +911,17 @@ Retorno---------: Nenhum
 ===============================================================================================================================
 */
 Static Function ROMS0564( nTotqtde1 , nTotqtde2 , nTotvlrFre , nTotValBr )
-LOCAL nColAux:=nColInic
+Local nColAux:=nColInic
 oPrint:Say( nlinha + 10 , nColInic + 0010 , 'TOTAL:'															, oFont10b )
 nColInic:=nColInic-30
-oPrint:Say( nlinha + 10 , nColInic + 0765 , Transform(nTotqtde1,"@E 999,999,999.99") + " "+ PADR("",2," ")	, oFont10b )
-oPrint:Say( nlinha + 10 , nColInic + 1180 , Transform(nTotqtde2,"@E 999,999,999.99") + " "+ PADR("",2," ")	, oFont10b )
+oPrint:Say( nlinha + 10 , nColInic + 0765 , Transform(nTotqtde1,"@E 999,999,999.99") + " "+ PadR("",2," ")	, oFont10b )
+oPrint:Say( nlinha + 10 , nColInic + 1180 , Transform(nTotqtde2,"@E 999,999,999.99") + " "+ PadR("",2," ")	, oFont10b )
 oPrint:Say( nlinha + 10 , nColInic + 1510 , 'R$ ' + Transform(nTotvlrFre,"@E 999,999,999.99")					, oFont10b )
 oPrint:Say( nlinha + 10 , nColInic + 1700 , Transform(nTotvlrFre / nTotqtde1 ,"@E 999,999,999.99999")			, oFont10b ) 
 oPrint:Say( nlinha + 10 , nColInic + 2040 , 'R$ ' + Transform(nTotValBr,"@E 999,999,999.99")					, oFont10b )
 nColInic:=nColAux
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -934,7 +934,7 @@ Retorno---------: Nenhum
 ===============================================================================================================================
 */
 Static Function ROMS0565( nTotqtde1 , nTotqtde2 , nTotvlrFre , nTotValBr )
-LOCAL nColAux:=nColInic
+Local nColAux:=nColInic
 
 nLinInBox := nLinha
 
@@ -942,14 +942,14 @@ oPrint:Box( nlinha,nColInic,nLinha + nSaltoLinha,nColFinal)
 
 oPrint:Say( nlinha + 10 , nColInic + 0010 , 'TOTAL GERAL:'														, oFont10b )
 nColInic:=nColInic-30
-oPrint:Say( nlinha + 10 , nColInic + 0765 , Transform(nTotqtde1,"@E 9,999,999,999.99") + " "+ PADR("",2," "), oFont10b )
-oPrint:Say( nlinha + 10 , nColInic + 1180 , Transform(nTotqtde2,"@E 9,999,999,999.99") + " "+ PADR("",2," "), oFont10b )
+oPrint:Say( nlinha + 10 , nColInic + 0765 , Transform(nTotqtde1,"@E 9,999,999,999.99") + " "+ PadR("",2," "), oFont10b )
+oPrint:Say( nlinha + 10 , nColInic + 1180 , Transform(nTotqtde2,"@E 9,999,999,999.99") + " "+ PadR("",2," "), oFont10b )
 oPrint:Say( nlinha + 10 , nColInic + 1510 , 'R$' + Transform(nTotvlrFre,"@E 9999,999,999.99")					, oFont10b )
 oPrint:Say( nlinha + 10 , nColInic + 1700 , Transform(nTotvlrFre / nTotqtde1 ,"@E 999,999,999.99999")			, oFont10b )
 oPrint:Say( nlinha + 10 , nColInic + 2040 , 'R$ ' + Transform(nTotValBr,"@E 9,999,999,999.99")					, oFont10b )
 nColInic:=nColAux
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -966,42 +966,42 @@ Local _aDadosPegunte := {}
 Local _nI
 Local _cTexto
 
-Aadd(_aDadosPegunte,{"01", "Filial ?"               , "MV_PAR01"})       
-Aadd(_aDadosPegunte,{"02", "De Emissao ? "          , "MV_PAR02"})           
-Aadd(_aDadosPegunte,{"03", "Ate Emissao ?"          , "MV_PAR03"})
-Aadd(_aDadosPegunte,{"04", "De Produto ? "          , "MV_PAR04"})           
-Aadd(_aDadosPegunte,{"05", "Ate Produto ?"          , "MV_PAR05"})
-Aadd(_aDadosPegunte,{"06", "De Cliente ? "          , "MV_PAR06"})
-Aadd(_aDadosPegunte,{"07", "Loja ?   "              , "MV_PAR07"})  
-Aadd(_aDadosPegunte,{"08", "Ate Cliente ? "         , "MV_PAR08"})  
-Aadd(_aDadosPegunte,{"09", "Loja ?"                 , "MV_PAR09"})       
-Aadd(_aDadosPegunte,{"10", "Rede ?"                 , "MV_PAR10"})           
-Aadd(_aDadosPegunte,{"11", "Estado ?"               , "MV_PAR11"})
-Aadd(_aDadosPegunte,{"12", "Municipio ?"            , "MV_PAR12"})           
-Aadd(_aDadosPegunte,{"13", "Vendedor ?  "           , "MV_PAR13"})          
-Aadd(_aDadosPegunte,{"14", "Supervisor ? "          , "MV_PAR14"})
-Aadd(_aDadosPegunte,{"15", "Grupo Produto ? "       , "MV_PAR15"})
-Aadd(_aDadosPegunte,{"16", "Produto Nivel 2 ?"      , "MV_PAR16"})  
-Aadd(_aDadosPegunte,{"17", "Produto Nivel 3 ?"      , "MV_PAR17"})  
-Aadd(_aDadosPegunte,{"18", "Produto Nivel 4 ?"      , "MV_PAR18"})
-Aadd(_aDadosPegunte,{"19", "Considerar Carga ?"     , "MV_PAR19"})
-Aadd(_aDadosPegunte,{"20", "Transportaodora ?"      , "MV_PAR20"})
-Aadd(_aDadosPegunte,{"21", "CFOP's ? "              , "MV_PAR21"})
-Aadd(_aDadosPegunte,{"22", "Possui Frete ?"         , "MV_PAR22"})
-Aadd(_aDadosPegunte,{"23", "Sub Grupo Produto ? "   , "MV_PAR23"})
-Aadd(_aDadosPegunte,{"24", "Tipo de Carga ?  "      , "MV_PAR24"})
-Aadd(_aDadosPegunte,{"25", "Tipo de Fornecedor ? "  , "MV_PAR25"})
-Aadd(_aDadosPegunte,{"26", "Rel Excel / Tela / Imp ?","MV_PAR26"})
-Aadd(_aDadosPegunte,{"27", "Armazéns ?"             , "MV_PAR27"})
-Aadd(_aDadosPegunte,{"28", "Averbacao Forn ?"       , "MV_PAR28"})
-Aadd(_aDadosPegunte,{"29", "Tipo de frete ?"        , "MV_PAR29"})
-Aadd(_aDadosPegunte,{"30", "Ordem do Relatorio ?"   , "MV_PAR30"})
+aAdd(_aDadosPegunte,{"01", "Filial ?"               , "MV_PAR01"})       
+aAdd(_aDadosPegunte,{"02", "De Emissao ? "          , "MV_PAR02"})           
+aAdd(_aDadosPegunte,{"03", "Ate Emissao ?"          , "MV_PAR03"})
+aAdd(_aDadosPegunte,{"04", "De Produto ? "          , "MV_PAR04"})           
+aAdd(_aDadosPegunte,{"05", "Ate Produto ?"          , "MV_PAR05"})
+aAdd(_aDadosPegunte,{"06", "De Cliente ? "          , "MV_PAR06"})
+aAdd(_aDadosPegunte,{"07", "Loja ?   "              , "MV_PAR07"})  
+aAdd(_aDadosPegunte,{"08", "Ate Cliente ? "         , "MV_PAR08"})  
+aAdd(_aDadosPegunte,{"09", "Loja ?"                 , "MV_PAR09"})       
+aAdd(_aDadosPegunte,{"10", "Rede ?"                 , "MV_PAR10"})           
+aAdd(_aDadosPegunte,{"11", "Estado ?"               , "MV_PAR11"})
+aAdd(_aDadosPegunte,{"12", "Municipio ?"            , "MV_PAR12"})           
+aAdd(_aDadosPegunte,{"13", "Vendedor ?  "           , "MV_PAR13"})          
+aAdd(_aDadosPegunte,{"14", "Supervisor ? "          , "MV_PAR14"})
+aAdd(_aDadosPegunte,{"15", "Grupo Produto ? "       , "MV_PAR15"})
+aAdd(_aDadosPegunte,{"16", "Produto Nivel 2 ?"      , "MV_PAR16"})  
+aAdd(_aDadosPegunte,{"17", "Produto Nivel 3 ?"      , "MV_PAR17"})  
+aAdd(_aDadosPegunte,{"18", "Produto Nivel 4 ?"      , "MV_PAR18"})
+aAdd(_aDadosPegunte,{"19", "Considerar Carga ?"     , "MV_PAR19"})
+aAdd(_aDadosPegunte,{"20", "Transportaodora ?"      , "MV_PAR20"})
+aAdd(_aDadosPegunte,{"21", "CFOP's ? "              , "MV_PAR21"})
+aAdd(_aDadosPegunte,{"22", "Possui Frete ?"         , "MV_PAR22"})
+aAdd(_aDadosPegunte,{"23", "Sub Grupo Produto ? "   , "MV_PAR23"})
+aAdd(_aDadosPegunte,{"24", "Tipo de Carga ?  "      , "MV_PAR24"})
+aAdd(_aDadosPegunte,{"25", "Tipo de Fornecedor ? "  , "MV_PAR25"})
+aAdd(_aDadosPegunte,{"26", "Rel Excel / Tela / Imp ?","MV_PAR26"})
+aAdd(_aDadosPegunte,{"27", "Armazéns ?"             , "MV_PAR27"})
+aAdd(_aDadosPegunte,{"28", "Averbacao Forn ?"       , "MV_PAR28"})
+aAdd(_aDadosPegunte,{"29", "Tipo de frete ?"        , "MV_PAR29"})
+aAdd(_aDadosPegunte,{"30", "Ordem do Relatorio ?"   , "MV_PAR30"})
 
-IF oPrint <> NIL	
+If oPrint <> NIL	
    nLinha+= 080                                    
    oPrint:Line(nLinha,nColInic,nLinha,nColFinal)
    nLinha+= 60
-ENDIF
+EndIf
 For _nI := 1 To Len(_aDadosPegunte)          
 	    
 	If _aDadosPegunte[_nI,3] == "MV_PAR19"
@@ -1054,28 +1054,28 @@ For _nI := 1 To Len(_aDadosPegunte)
     Else
        _cTexto := &(_aDadosPegunte[_nI,3])
        If ValType(_cTexto) == "D"
-          _cTexto := Dtoc(_cTexto)
+          _cTexto := DToC(_cTexto)
        EndIf   
 		
     EndIf	
 
-   IF oPrint <> NIL	
+   If oPrint <> NIL	
        oPrint:Say (nLinha,nColInic + 10,"Pergunta " + _aDadosPegunte[_nI,1] + ':  ' +  _aDadosPegunte[_nI,2] , oFont14Prb)    
        oPrint:Say (nLinha,1050,_cTexto,oFont14Prb)  			    
    	 nLinha+= 60
-   ELSE    
+   Else    
 
-      AADD(_aDadosPar,{"Pergunta " + _aDadosPegunte[_nI,1] + ':',_aDadosPegunte[_nI,2],_cTexto, , , , , , , , , , , , })
-      AADD(_aPergunte,{"Pergunta " + _aDadosPegunte[_nI,1] + ':',_aDadosPegunte[_nI,2],_cTexto })
+      aAdd(_aDadosPar,{"Pergunta " + _aDadosPegunte[_nI,1] + ':',_aDadosPegunte[_nI,2],_cTexto, , , , , , , , , , , , })
+      aAdd(_aPergunte,{"Pergunta " + _aDadosPegunte[_nI,1] + ':',_aDadosPegunte[_nI,2],_cTexto })
 
-   ENDIF
+   EndIf
 
 Next
 
-IF oPrint <> NIL	
+If oPrint <> NIL	
    nLinha+= 60
    oPrint:Line(nLinha,nColInic,nLinha,nColFinal)
    oPrint:EndPage()     // Finaliza a página
-ENDIF
+EndIf
 
 Return

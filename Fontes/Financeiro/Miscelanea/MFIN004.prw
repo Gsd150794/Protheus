@@ -2,17 +2,16 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 08/05/2019 | Chamado 28346. Revisão de fontes
-Lucas Borges  | 10/10/2019 | Chamado 28346. Removidos os Warning na compilação da release 12.1.25
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Lucas Borges  |08/05/2019| Chamado 28346. Revisão de fontes
+Lucas Borges  |10/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "RWMAKE.CH"
-#INCLUDE "Colors.ch"
+#Include "TOTVS.ch"
+#Include "RWMAKE.CH"
 
 /*
 ===============================================================================================================================
@@ -88,36 +87,36 @@ Private oFont12b
 Define Font oFont12b   Name "Courier New"       Size 0,-12 Bold  // Tamanho 12 Negrito   
 
 //Criando estrutura da tabela temporaria
-AAdd(_aStru,{"E5_STATUS","C",02,00})
-AAdd(_aStru,{"E5_PREFIXO","C",GetSX3Cache("E5_PREFIXO","X3_TAMANHO"),00})
-AAdd(_aStru,{"E5_TIPO","C",GetSX3Cache("E5_TIPO","X3_TAMANHO"),00})
-AAdd(_aStru,{"E5_NUMERO","C",GetSX3Cache("E5_NUMERO","X3_TAMANHO"),00})
-AAdd(_aStru,{"E5_PARCELA","C",GetSX3Cache("E5_PARCELA","X3_TAMANHO"),00})
-AAdd(_aStru,{"E5_CLIFOR","C",GetSX3Cache("E5_CLIFOR","X3_TAMANHO"),00})
-AAdd(_aStru,{"E5_LOJA","C",GetSX3Cache("E5_LOJA","X3_TAMANHO"),00})
-AAdd(_aStru,{"E5_BENEF","C",GetSX3Cache("E5_BENEF","X3_TAMANHO"),00})
-AAdd(_aStru,{"A2_CGC","C",GetSX3Cache("A2_CGC","X3_TAMANHO"),00})
-AAdd(_aStru,{"E5_VALOR","N",GetSX3Cache("E2_VALOR","X3_TAMANHO"),GetSX3Cache("E2_VALOR","X3_DECIMAL")})
-AAdd(_aStru,{"E5_DATA","D",GetSX3Cache("E5_DATA","X3_TAMANHO"),00})
-AAdd(_aStru,{"E5_NUMCHEQ","C",GetSX3Cache("E5_NUMCHEQ","X3_TAMANHO"),00})
-AAdd(_aStru,{"E5_REFER","C",350,00  })
+aAdd(_aStru,{"E5_STATUS","C",02,00})
+aAdd(_aStru,{"E5_PREFIXO","C",GetSX3Cache("E5_PREFIXO","X3_TAMANHO"),00})
+aAdd(_aStru,{"E5_TIPO","C",GetSX3Cache("E5_TIPO","X3_TAMANHO"),00})
+aAdd(_aStru,{"E5_NUMERO","C",GetSX3Cache("E5_NUMERO","X3_TAMANHO"),00})
+aAdd(_aStru,{"E5_PARCELA","C",GetSX3Cache("E5_PARCELA","X3_TAMANHO"),00})
+aAdd(_aStru,{"E5_CLIFOR","C",GetSX3Cache("E5_CLIFOR","X3_TAMANHO"),00})
+aAdd(_aStru,{"E5_LOJA","C",GetSX3Cache("E5_LOJA","X3_TAMANHO"),00})
+aAdd(_aStru,{"E5_BENEF","C",GetSX3Cache("E5_BENEF","X3_TAMANHO"),00})
+aAdd(_aStru,{"A2_CGC","C",GetSX3Cache("A2_CGC","X3_TAMANHO"),00})
+aAdd(_aStru,{"E5_VALOR","N",GetSX3Cache("E2_VALOR","X3_TAMANHO"),GetSX3Cache("E2_VALOR","X3_DECIMAL")})
+aAdd(_aStru,{"E5_DATA","D",GetSX3Cache("E5_DATA","X3_TAMANHO"),00})
+aAdd(_aStru,{"E5_NUMCHEQ","C",GetSX3Cache("E5_NUMCHEQ","X3_TAMANHO"),00})
+aAdd(_aStru,{"E5_REFER","C",350,00  })
 aAdd(_aStru,{"SE5RECNO","N",08,00})
                            
 //Armazena no array aCampos o nome, descricao dos campos e picture
-AAdd(aTitulo,{"E5_STATUS"  ,"  "," "})  
-AAdd(aTitulo,{"E5_PREFIXO"  ,"PREFIXO"		,GetSX3Cache("E2_PREFIXO","X3_PICTURE")})
-AAdd(aTitulo,{"E5_TIPO"    ,"TIPO"			,GetSX3Cache("E2_PREFIXO","X3_PICTURE")})
-AAdd(aTitulo,{"E5_NUMERO"  ,"TITULO"		,GetSX3Cache("E2_PREFIXO","X3_PICTURE")})
-AAdd(aTitulo,{"E5_PARCELA"  ,"PARCELA"		,GetSX3Cache("E2_PREFIXO","X3_PICTURE")})
-AAdd(aTitulo,{"E5_CLIFOR"  ,"FORNECEDOR"	,GetSX3Cache("E2_PREFIXO","X3_PICTURE")})
-AAdd(aTitulo,{"E5_LOJA"    ,"LOJA"			,GetSX3Cache("E2_PREFIXO","X3_PICTURE")})
-AAdd(aTitulo,{"E5_BENEF"   ,"BENEFICIADO"	,"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"})//Picture passada desta forma para que o espacamento seja respeitado 
-AAdd(aTitulo,{"A2_CGC"     ,"CPF/CNPJ"		,GetSX3Cache("A2_CGC","X3_PICTURE")})
-AAdd(aTitulo,{"E5_VALOR"   ,"VALOR"			,"@E 999,999,999,999.99"})
-AAdd(aTitulo,{"E5_DATA"  ,"DATA BAIXA"		,GetSX3Cache("E2_PREFIXO","X3_PICTURE")})
-AAdd(aTitulo,{"E5_NUMCHEQ"  ,"NUM. CHEQUE"	,GetSX3Cache("E2_PREFIXO","X3_PICTURE")})
-AAdd(aTitulo,{"E5_REFER"   ,"REFERENTE A"	,"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" }) 
-AAdd(aTitulo,{"SE5RECNO"	,"RECNO"		,"@!"})
+aAdd(aTitulo,{"E5_STATUS"  ,"  "," "})  
+aAdd(aTitulo,{"E5_PREFIXO"  ,"PREFIXO"		,GetSX3Cache("E2_PREFIXO","X3_PICTURE")})
+aAdd(aTitulo,{"E5_TIPO"    ,"TIPO"			,GetSX3Cache("E2_PREFIXO","X3_PICTURE")})
+aAdd(aTitulo,{"E5_NUMERO"  ,"TITULO"		,GetSX3Cache("E2_PREFIXO","X3_PICTURE")})
+aAdd(aTitulo,{"E5_PARCELA"  ,"PARCELA"		,GetSX3Cache("E2_PREFIXO","X3_PICTURE")})
+aAdd(aTitulo,{"E5_CLIFOR"  ,"FORNECEDOR"	,GetSX3Cache("E2_PREFIXO","X3_PICTURE")})
+aAdd(aTitulo,{"E5_LOJA"    ,"LOJA"			,GetSX3Cache("E2_PREFIXO","X3_PICTURE")})
+aAdd(aTitulo,{"E5_BENEF"   ,"BENEFICIADO"	,"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"})//Picture passada desta forma para que o espacamento seja respeitado 
+aAdd(aTitulo,{"A2_CGC"     ,"CPF/CNPJ"		,GetSX3Cache("A2_CGC","X3_PICTURE")})
+aAdd(aTitulo,{"E5_VALOR"   ,"VALOR"			,"@E 999,999,999,999.99"})
+aAdd(aTitulo,{"E5_DATA"  ,"DATA BAIXA"		,GetSX3Cache("E2_PREFIXO","X3_PICTURE")})
+aAdd(aTitulo,{"E5_NUMCHEQ"  ,"NUM. CHEQUE"	,GetSX3Cache("E2_PREFIXO","X3_PICTURE")})
+aAdd(aTitulo,{"E5_REFER"   ,"REFERENTE A"	,"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" }) 
+aAdd(aTitulo,{"SE5RECNO"	,"RECNO"		,"@!"})
 
 //===================================================================
 // Seleciona os dados das baixas na tabela SE5                     
@@ -134,7 +133,7 @@ _cQuery += " AND E5.E5_SITUACA <> 'C'"
 _cQuery += " AND E5.E5_FILIAL = '" + xFilial("SE5") + "'"
 _cQuery += " AND A2.A2_FILIAL = '" + xFilial("SA2") + "'"	
 _cQuery += " AND E5.E5_MOTBX = '"    + IIf(MV_PAR04 == 1,"NOR","DEB") +  "'" 
-_cQuery += " AND E5.E5_DATA BETWEEN '"   + DtoS(MV_PAR05) + "' AND '" + DtoS(MV_PAR06) + "'" 	  
+_cQuery += " AND E5.E5_DATA BETWEEN '"   + DToS(MV_PAR05) + "' AND '" + DToS(MV_PAR06) + "'" 	  
 _cQuery += " AND E5.E5_CLIFOR BETWEEN '" + MV_PAR07        + "' AND '" + MV_PAR09         + "'" 
 _cQuery += " AND E5.E5_LOJA BETWEEN '"   + MV_PAR08       + "' AND '" + MV_PAR10        + "'" 
 If !Empty(MV_PAR01)  
@@ -161,16 +160,16 @@ SQLToTrb(_cQuery, _aStru, _cAlias)
 aSize := MSADVSIZE()                    
 
 //Obtem tamanhos das telas
-AAdd( aObjects, { 0, 0, .t., .t., .t. } )
+aAdd( aObjects, { 0, 0, .T., .T., .T. } )
 
 aInfo    := { aSize[ 1 ], aSize[ 2 ], aSize[ 3 ], aSize[ 4 ], 3, 3 } 
 aPosObj1 := MsObjSize( aInfo, aObjects,  , .T. ) 
 			
 //Botoes da tela
-Aadd( aBotoes, {"PESQUISA" ,{||xPesqTRB(_cAlias)},"Pesquisar...","Pesquisar"})
-Aadd( aBotoes, {"S4WB005N" ,{||xVisuTRB(_cAlias)},"Visualizar Baixa..." ,"Baixa"})
+aAdd( aBotoes, {"PESQUISA" ,{||xPesqTRB(_cAlias)},"Pesquisar...","Pesquisar"})
+aAdd( aBotoes, {"S4WB005N" ,{||xVisuTRB(_cAlias)},"Visualizar Baixa..." ,"Baixa"})
 aAdd( aBotoes, {'RELATORIO',{||MsgRun("Imprimindo Relatório Aguarde...",,{||CursorWait(),RelatSE5(_cAlias),CursorArrow()})},"Imprimir"})    
-Aadd( aBotoes, {"RESPONSA" ,{||AtualzBaix(_cAlias)},"Alterar Dados para impressao...","Alterar"})
+aAdd( aBotoes, {"RESPONSA" ,{||AtualzBaix(_cAlias)},"Alterar Dados para impressao...","Alterar"})
 
 //Cria a tela para selecao dos Titulos                            
 DEFINE MSDIALOG oDlg1 TITLE OemToAnsi("ROTINA DE IMPRESSÃO DE RECIBO(S) DE PAGAMENTO") From 0,0 To aSize[6],aSize[5] OF oMainWnd PIXEL
@@ -197,7 +196,7 @@ For _nX:=1 to Len(_aStru)
 	If _aStru[_nX,1] == "E5_STATUS" 
 		oBrowse:AddColumn(TCColumn():New("",{|| IIf((_cAlias)->E5_STATUS == Space(2),oNO,oOK)},,,,"CENTER",,.T.,.F.,,,,.F.,))
 	Else
-		oBrowse:AddColumn(TCColumn():New(OemToAnsi(aTitulo[_nX,2]),&("{ || " + (_cAlias) + '->' + _aStru[_nX,1]+"}"),aTitulo[_nX,3],,,if(_aStru[_nX,2]=="N","RIGHT","LEFT"),,.F.,.F.,,,,.F.,))
+		oBrowse:AddColumn(TCColumn():New(OemToAnsi(aTitulo[_nX,2]),&("{ || " + (_cAlias) + '->' + _aStru[_nX,1]+"}"),aTitulo[_nX,3],,,If(_aStru[_nX,2]=="N","RIGHT","LEFT"),,.F.,.F.,,,,.F.,))
 	EndIf
 Next _nX
 
@@ -210,7 +209,7 @@ oBrowse:bLDblClick   := {|| setStatus(_cAlias,(_cAlias)->E5_STATUS)}
 //Evento quando o usuario clica na coluna desejada
 oBrowse:bHeaderClick := { |oBrowse, nCol| nColuna:= nCol,MsgRun("FAVOR AGUARDE, REALIZANDO OPERAÇÃO...",,{|| ordenaDado(_cAlias,nColuna) }) }
 
-ACTIVATE MSDIALOG oDlg1 ON INIT (EnchoiceBar(oDlg1,{|| IIF(vldImpr(),Eval({|| nOpca := 1,oDlg1:End(),MsgRun("Imprimindo Relatório Aguarde...",,{||CursorWait(),RelatSE5(_cAlias),CursorArrow()})}),) },{|| nOpca := 2,oDlg1:End()},,aBotoes),oBrowse:Refresh())
+ACTIVATE MSDIALOG oDlg1 ON INIT (EnchoiceBar(oDlg1,{|| IIf(vldImpr(),Eval({|| nOpca := 1,oDlg1:End(),MsgRun("Imprimindo Relatório Aguarde...",,{||CursorWait(),RelatSE5(_cAlias),CursorArrow()})}),) },{|| nOpca := 2,oDlg1:End()},,aBotoes),oBrowse:Refresh())
 
 //Fecha a area de uso do arquivo temporario no Protheus
 (_cAlias)->(DBCloseArea())
@@ -234,12 +233,12 @@ If _cStatus == Space(2)
 	RecLock(_cAlias,.F.)
 	(_cAlias)->E5_STATUS:= 'XX'
 	nQtdTit++
-	(_cAlias)->(MsUnlock())
+	(_cAlias)->(MSUnLock())
 Else
 	RecLock(_cAlias,.F.)
 	(_cAlias)->E5_STATUS:= Space(2)
 	nQtdTit--
-	(_cAlias)->(MsUnlock())
+	(_cAlias)->(MSUnLock())
 EndIf
 
 nQtdTit:= IIf(nQtdTit<0,0,nQtdTit)
@@ -262,49 +261,49 @@ Retorno-----------: Nenhum
 */
 Static Function ordenaDado(_cAlias,nColuna)
 
-Local _aArea:= GetArea()
+Local _aArea:= FWGetArea()
 
 Do Case
 	//Marca ou desmarca todos os titulos selecionados
 	Case nColuna == 1
-		(_cAlias)->(dbGotop())
+		(_cAlias)->(DBGoTop())
 		While (_cAlias)->(!Eof())   
 			//Se o titulo nao estiver selecionado
 			If (_cAlias)->E5_STATUS == Space(2) 
 				RecLock(_cAlias,.F.)	   		
 				(_cAlias)->E5_STATUS:= 'XX'
 				nQtdTit++
-				(_cAlias)->(MsUnlock())  
+				(_cAlias)->(MSUnLock())  
 			//Titulo selecionado
 			Else
 				RecLock(_cAlias,.F.)
 				(_cAlias)->E5_STATUS:= Space(2)
 				nQtdTit--
-				(_cAlias)->(MsUnlock())
+				(_cAlias)->(MSUnLock())
 			EndIf      
-      		(_cAlias)->(dbSkip())
+      		(_cAlias)->(DBSkip())
 		EndDo
-   		nQtdTit:= Iif(nQtdTit<0,0,nQtdTit)        
+   		nQtdTit:= IIf(nQtdTit<0,0,nQtdTit)        
 		oQtda:Refresh()	   
-		restArea(_aArea)
+		FWRestArea(_aArea)
 	// Numero do Titulo  + Parcela
 	Case nColuna == 4
-		(_cAlias)->(dbSetOrder(1))
+		(_cAlias)->(DBSetOrder(1))
 	// Codigo do Fornecedor + Loja
 	Case nColuna == 6
-		(_cAlias)->(dbSetOrder(2))
+		(_cAlias)->(DBSetOrder(2))
 	// Nome do Fornecedor
 	Case nColuna == 8
-		(_cAlias)->(dbSetOrder(3))
+		(_cAlias)->(DBSetOrder(3))
 	// valor da baixa
 	Case nColuna == 10
-		(_cAlias)->(dbSetOrder(4))
+		(_cAlias)->(DBSetOrder(4))
 	// Data da baixa
 	Case nColuna == 11
-		(_cAlias)->(dbSetOrder(5))
+		(_cAlias)->(DBSetOrder(5))
 EndCase
 
-(_cAlias)->(dbGoTop())      
+(_cAlias)->(DBGoTop())      
 inserPNG(nColuna)                 
 	
 oBrowse:DrawSelect()   
@@ -372,8 +371,8 @@ Private cComboBx1:= ""
 @ 004,003 ComboBox cComboBx1 Items aComboBx1 Size 213,010 PIXEL OF oDlg ON CHANGE alteraMasc()
 @ 020,003 MsGet oGet1 Var cGet1 Size 212,009 COLOR CLR_BLACK Picture "99999999999" PIXEL OF oDlg
 
-DEFINE SBUTTON FROM 004,227 TYPE 1 ENABLE ACTION (nOpca:=1,oDlg:End()) OF oDlg
-DEFINE SBUTTON FROM 021,227 TYPE 2 ENABLE ACTION (nOpca:=0,oDlg:End()) OF oDlg
+DEFINE SBUTTON FROM 004,227 Type 1 ENABLE ACTION (nOpca:=1,oDlg:End()) OF oDlg
+DEFINE SBUTTON FROM 021,227 Type 2 ENABLE ACTION (nOpca:=0,oDlg:End()) OF oDlg
 
 ACTIVATE MSDIALOG oDlg CENTERED
 
@@ -381,8 +380,8 @@ If nOpca == 1
 	If (Len(AllTrim(cGet1)) > 0 .And. Type("cGet1") == 'C') .Or. (Type("cGet1") == 'N' .And. cGet1 > 0 ) .Or. (Type("cGet1") == 'D' .And. cGet1 <> CtoD(" ") )
 		For nI := 1 To Len(aComboBx1)
 			If cComboBx1 == aComboBx1[nI]
-				dbSelectArea(_cAlias)
-				(_cAlias)->(dbSetOrder(nI))
+				DBSelectArea(_cAlias)
+				(_cAlias)->(DBSetOrder(nI))
 				MsSeek(cGet1,.T.)
 				oBrowse:DrawSelect()   
 				oBrowse:Refresh(.T.)					 
@@ -393,7 +392,7 @@ If nOpca == 1
 	EndIf
 EndIf
 
-Return Nil
+Return
 
 Static Function alteraMasc()
 
@@ -429,15 +428,15 @@ Retorno-----------: Nenhum
 */
 Static Function xVisuTRB(_cAlias)
 
-Local _aArea   := GetArea() 
+Local _aArea   := FWGetArea() 
 
-dbSelectArea("SE2")
-SE2->(dbSetOrder(1))
-If SE2->(dbSeek(xFilial("SE2") + (_cAlias)->(E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA)))
+DBSelectArea("SE2")
+SE2->(DBSetOrder(1))
+If SE2->(DBSeek(xFilial("SE2") + (_cAlias)->(E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA)))
 	Fc050Con()
 EndIf
 
-restArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -458,7 +457,7 @@ Local nopc     := 0
 Local _aTxtDet := {}   
 Local _cNomeFor:= Space(30)   
 Local _cCPFCNPJ:= Space(18)   
-Local _aArea   := GetArea()
+Local _aArea   := FWGetArea()
 Local _nValor	:= (_cAlias)->E5_VALOR
 Private cObs   := (_cAlias)->E5_REFER
 
@@ -467,31 +466,31 @@ DEFINE MSDIALOG oDlg FROM	08,0 TO 33,75 TITLE "ALTERAR DADOS DA BAIXA PARA IMPRE
 _cNomeFor:= (_cAlias)->E5_BENEF
 _cCPFCNPJ:= IIf(Len(AllTrim((_cAlias)->A2_CGC)) == 11,Transform((_cAlias)->A2_CGC,"@R 999.999.999-99"),Transform((_cAlias)->A2_CGC,"@R! NN.NNN.NNN/NNNN-99"))
 
-@ 34, 003 SAY  	"Prf"						SIZE 16, 07						OF oDlg PIXEL
+@ 34, 003 Say  	"Prf"						SIZE 16, 07						OF oDlg PIXEL
 @ 41, 003 MSGET (_cAlias)->E5_PREFIXO		SIZE 16, 09 When .F. 			OF oDlg PIXEL 
-@ 34, 023 SAY  	"Titulo"    				SIZE 21, 07						OF oDlg PIXEL  //"T¡tulo"
+@ 34, 023 Say  	"Titulo"    				SIZE 21, 07						OF oDlg PIXEL  //"T¡tulo"
 @ 41, 023 MSGET (_cAlias)->E5_NUMERO 		SIZE 46, 09 When .F. 			OF oDlg PIXEL
-@ 34, 073 SAY  	"Parc"    					SIZE 16, 07						OF oDlg PIXEL  //"Parc"
+@ 34, 073 Say  	"Parc"    					SIZE 16, 07						OF oDlg PIXEL  //"Parc"
 @ 41, 073 MSGET (_cAlias)->E5_PARCELA 		SIZE 11, 09 When .F. 			OF oDlg PIXEL
-@ 34, 087 SAY  "Tipo"    					SIZE 16, 07						OF oDlg PIXEL  //"Tipo"
+@ 34, 087 Say  "Tipo"    					SIZE 16, 07						OF oDlg PIXEL  //"Tipo"
 @ 41, 087 MSGET (_cAlias)->E5_TIPO 			SIZE 13, 09 When .F. 			OF oDlg PIXEL
 
-@ 54, 003 SAY   "Fornecedor"				SIZE 030, 07 					OF oDlg PIXEL  //"Fornec."
+@ 54, 003 Say   "Fornecedor"				SIZE 030, 07 					OF oDlg PIXEL  //"Fornec."
 @ 61, 003 MSGET (_cAlias)->E5_CLIFOR 		SIZE 070, 09 When .F.       	OF oDlg PIXEL 
-@ 54, 078 SAY   "Loja"						SIZE 016, 07 					OF oDlg PIXEL  //"Loja"
+@ 54, 078 Say   "Loja"						SIZE 016, 07 					OF oDlg PIXEL  //"Loja"
 @ 61, 078 MSGET (_cAlias)->E5_LOJA 			SIZE 021, 09 When .F. 			OF oDlg PIXEL
-@ 54, 108 SAY   "Nome"	     				SIZE 030, 07 					OF oDlg PIXEL  //"Nome"
+@ 54, 108 Say   "Nome"	     				SIZE 030, 07 					OF oDlg PIXEL  //"Nome"
 @ 61, 108 MSGET oNomFor VAR _cNomeFor       SIZE 103, 09 When .T. 			OF oDlg PIXEL PICTURE "@!"  
-@ 54, 220 SAY   "CPF/CNPJ"	     			SIZE 030, 07 					OF oDlg PIXEL  //"CPF/CNPJ"
+@ 54, 220 Say   "CPF/CNPJ"	     			SIZE 030, 07 					OF oDlg PIXEL  //"CPF/CNPJ"
 @ 61, 220 MSGET oCPFCNPJ  VAR _cCPFCNPJ     SIZE 68, 09  When .T. 			OF oDlg PIXEL PICTURE "@!"  
 
-@ 75, 003 SAY  "Data da Baixa" 		        SIZE 42, 07						OF oDlg PIXEL  //"Data da baixa" 
+@ 75, 003 Say  "Data da Baixa" 		        SIZE 42, 07						OF oDlg PIXEL  //"Data da baixa" 
 @ 82, 003 MSGET DToC((_cAlias)->E5_DATA) 	SIZE 68, 09  When .F.       	OF oDlg PIXEL PICTURE PesqPict("SE5","E5_DATA")        
-@ 75, 073 SAY  "Valor da Baixa" 	     	SIZE 45, 07						OF oDlg PIXEL  //"Juros Devidos"
+@ 75, 073 Say  "Valor da Baixa" 	     	SIZE 45, 07						OF oDlg PIXEL  //"Juros Devidos"
 @ 82, 073 MSGET _nValor 					SIZE 68, 09 PICTURE Tm(_nValor,17,2)  When .F.	OF oDlg PIXEL   		
-@ 75, 143 SAY  "Numero Cheque" 	     		SIZE 45, 07						      OF oDlg PIXEL  //"Numero do Cheque"
+@ 75, 143 Say  "Numero Cheque" 	     		SIZE 45, 07						      OF oDlg PIXEL  //"Numero do Cheque"
 @ 82, 143 MSGET (_cAlias)->E5_NUMCHEQ 		SIZE 68, 09 PICTURE "@!" When .F. OF oDlg PIXEL		
-@ 111, 003 SAY  "Referente a:" 	     	    SIZE 45, 07						  OF oDlg PIXEL  //"Numero do Cheque"                      	
+@ 111, 003 Say  "Referente a:" 	     	    SIZE 45, 07						  OF oDlg PIXEL  //"Numero do Cheque"                      	
 @ 118, 003 GET oObs VAR cObs OF oDlg MULTILINE SIZE 210, 058 COLORS 0, 16777215 HSCROLL PIXEL
 
 ACTIVATE MSDIALOG oDlg CENTERED ON INIT EnchoiceBar(oDlg,{||nopc:=1,oDlg:End()}, {||oDlg:End()},,)  
@@ -515,10 +514,10 @@ If nopc == 1
 	(_cAlias)->E5_BENEF  := _cNomeFor
 	(_cAlias)->A2_CGC    := _cCPFCNPJ
 	(_cAlias)->E5_REFER  := _cDadosMemo
-	(_cAlias)->(MsUnlock())
+	(_cAlias)->(MSUnLock())
 EndIf
 
-restArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -534,7 +533,7 @@ Retorno-----------: Nenhum
 */
 Static Function RelatSE5(_cAlias)     
 
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
 Local nImpres		:= 2
 Local lImpres
 Local _nNumLinh		:= 1
@@ -627,7 +626,7 @@ If vldImpr()
 	
 EndIf	
 
-restArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -654,7 +653,7 @@ oPrint:Line(nLinha,nColInic,nLinha,nColFinal)
 
 nlinha+=nSaltoLinha
 oPrint:Say (nlinha,nColInic + 10 ,"Titulo/Parcela:",oFont12b)
-oPrint:Say (nlinha,nColInic + 350,IIF(_aDadosAgl[n,13],"",_aDadosAgl[n,3] + '/' + _aDadosAgl[n,4]),oFont12)
+oPrint:Say (nlinha,nColInic + 350,IIf(_aDadosAgl[n,13],"",_aDadosAgl[n,3] + '/' + _aDadosAgl[n,4]),oFont12)
 nlinha+=nSaltoLinha
 
 If Len(AllTrim(_aDadosAgl[n,11])) > 0
@@ -694,7 +693,7 @@ oPrint:Box(nlinha - 50 ,nColInic +300,nLinFinBox - 50,nColFinal - 300)
 oPrint:Say (nlinha,nColInic + 315 ,"E por ser verdade firmamos o presente recibo.",oFont12)
 
 nlinha+=nSaltoLinha
-oPrint:Say (nlinha,nColFinal / 2,AllTrim(SM0->M0_CIDENT) + ' - ' + SM0->M0_ESTENT + ', ' + AllTrim(STR(DAY(_aDadosAgl[n,10]))) + ' de ' + AllTrim(MesExtenso(Month(_aDadosAgl[n,10])))+ " de " + AllTrim(STR(YEAR(_aDadosAgl[n,10]))),oFont12,nColFinal,,,2)
+oPrint:Say (nlinha,nColFinal / 2,AllTrim(SM0->M0_CIDENT) + ' - ' + SM0->M0_ESTENT + ', ' + AllTrim(Str(DAY(_aDadosAgl[n,10]))) + ' de ' + AllTrim(MesExtenso(Month(_aDadosAgl[n,10])))+ " de " + AllTrim(Str(YEAR(_aDadosAgl[n,10]))),oFont12,nColFinal,,,2)
 
 nlinha+=nSaltoLinha
 nlinha+=nSaltoLinha
@@ -710,7 +709,7 @@ nlinha+=nSaltoLinha
 oPrint:Say (nlinha,nColInic + 315 ,"CPF/CNPJ....:",oFont12b)
 
 //Se caso tenha sido aglutinado verifica se o CPF/CNPJ dos titulos aglutinados sao os mesmos para todos os titulos
-oPrint:Say (nlinha,nColInic + 615 ,IIF(_aDadosAgl[n,13],IIF(_aDadosAgl[n,14],_aDadosAgl[n,8],""),_aDadosAgl[n,8]),oFont12)
+oPrint:Say (nlinha,nColInic + 615 ,IIf(_aDadosAgl[n,13],IIf(_aDadosAgl[n,14],_aDadosAgl[n,8],""),_aDadosAgl[n,8]),oFont12)
 nlinha+=nSaltoLinha
 
 oPrint:Say (nlinha,nColInic + 315 ,"Endereço....:",oFont12b)
@@ -719,9 +718,9 @@ oPrint:Say (nlinha,nColInic + 315 ,"Endereço....:",oFont12b)
 // todos os titulos aglutinados
 If !_aDadosAgl[n,13] .Or. _aDadosAgl[n,15]
 	// Obtem dados do Endereco
-	DbSelectArea("SA2")
-	SA2->(dbSetOrder(1))
-	If SA2->(dbSeek(xFilial("SA2") + _aDadosAgl[n,5] + _aDadosAgl[n,6]))
+	DBSelectArea("SA2")
+	SA2->(DBSetOrder(1))
+	If SA2->(DBSeek(xFilial("SA2") + _aDadosAgl[n,5] + _aDadosAgl[n,6]))
 		_cDadosEnd:= AllTrim(SA2->A2_END) + ' - ' + AllTrim(SA2->A2_MUN) + ' ' + SA2->A2_EST
 		impRefer(AllTrim(_cDadosEnd),oFont12,615,60)
 	EndIf
@@ -745,14 +744,14 @@ Retorno-----------: lRet = .T. = recibo Ok para impressão.
 Static Function vldImpr() 
 
 Local lRet   := .T.  
-Local _aArea := GetArea()
+Local _aArea := FWGetArea()
 
 If nQtdTit == 0 
 	MsgStop("Não foram selecionadas baixas para impressão do recibo de pagamento. Favor selecionar uma ou mais baixas para impressão.","MFIN00401")
 	lRet:= .F.
 EndIf        
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return lRet                        
 
@@ -794,7 +793,7 @@ Retorno-----------: Nenhum
 */
 Static Function impRefer(cReferente,oFont,nAlinham,nCaract)
 
-Local _aDadosRef:= strtokarr(cReferente," ")  
+Local _aDadosRef:= StrTokArr(cReferente," ")  
 Local _cAux		:= ""
 Local _nCaracCol:= nCaract 
 Local _cTextImpr:= ""
@@ -833,7 +832,7 @@ Static Function aglutDados(_cAlias)
 Local _aDadosAgl:= {}
 Local nPosCheque:= 0
 
-(_cAlias)->(DBGotop())
+(_cAlias)->(DBGoTop())
 
 // Percorre todos os registros da tela para verificar quais foram selecionados para impressao
 While (_cAlias)->(!Eof())
@@ -871,7 +870,7 @@ While (_cAlias)->(!Eof())
 		EndIf
 	EndIf
 
-	(_cAlias)->(dbSkip())		
+	(_cAlias)->(DBSkip())		
 EndDo
 
 Return _aDadosAgl

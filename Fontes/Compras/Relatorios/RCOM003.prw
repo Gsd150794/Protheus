@@ -10,7 +10,7 @@ Lucas Borges  |29/05/2025| Chamado 50833. Inclusão de novos campos
 ===============================================================================================================================
 */
 
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -120,10 +120,10 @@ Local _nCountRec:= 0 As Logical
 If MV_PAR01 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"SF1")
-	Endif
+	EndIf
 Else
-  Aadd(_aSelFil,cFilAnt)
-Endif
+  aAdd(_aSelFil,cFilAnt)
+EndIf
 _cQryFil := GetRngFil( _aSelFil, "SF1", .T.,)
 
 //=====================================================
@@ -169,7 +169,7 @@ EndIf
 _cFilC00+=" AND C00.C00_DTEMI BETWEEN '"+ DToS(MV_PAR02) + "' AND '" + DToS(MV_PAR03) + "'"
 If !Empty(MV_PAR07)
 	_cFilCKO+=" AND CKO.CKO_I_EMIT BETWEEN '"+ MV_PAR06 + "' AND '" + MV_PAR07 + "'"
-	_cFilSF1+=" AND SUBSTR(SF1.F1_CHVNFE,7,14) BETWEEN '"+ MV_PAR06 + "' AND '" + MV_PAR07 + "'"
+	_cFilSF1+=" AND SubStr(SF1.F1_CHVNFE,7,14) BETWEEN '"+ MV_PAR06 + "' AND '" + MV_PAR07 + "'"
     _cFilC00+=" AND C00.C00_CNPJEM BETWEEN '"+ MV_PAR06 + "' AND '" + MV_PAR07 + "'"
 EndIf
 _cFilCKO+=" AND RTRIM(CKO.CKO_FILPRO) " +_cQryFil +"%"
@@ -177,10 +177,10 @@ _cFilSF1+=" AND SF1.F1_FILIAL " +_cQryFil +"%"
 _cFilC00+=" AND C00.C00_FILIAL " +_cQryFil +"%"
 
 If !Empty(MV_PAR08)
-	_cQuery+=" AND TPEVENTO IN "+StrTran(FormatIn(Alltrim(MV_PAR08),";"),"'","")
+	_cQuery+=" AND TPEVENTO IN "+StrTran(FormatIn(AllTrim(MV_PAR08),";"),"'","")
 EndIf
 If !Empty(MV_PAR09)
-	_cQuery+=" AND STATUS_154 IN "+StrTran(FormatIn(Alltrim(MV_PAR09),";"),"'","")
+	_cQuery+=" AND STATUS_154 IN "+StrTran(FormatIn(AllTrim(MV_PAR09),";"),"'","")
 EndIf
 _cQuery+=" %"
 
@@ -195,76 +195,76 @@ oReport:SetMeter(0)
 
 BeginSql Alias _cAlias
 SELECT F1_FILIAL, F1_DOC, F1_SERIE,
-       CASE
+       Case
          WHEN F1_EMISSAO IS NOT NULL THEN F1_EMISSAO
          WHEN DS_EMISSA IS NOT NULL THEN DS_EMISSA
          WHEN C00_DTEMI IS NOT NULL THEN C00_DTEMI
-         ELSE CKO_I_EMIS
+         Else CKO_I_EMIS
        END F1_EMISSAO,
        F1_DTDIGIT, F1_EST, F1_FORNECE, F1_LOJA,
-       CASE WHEN A2_NOME IS NOT NULL THEN A2_NOME 
+       Case WHEN A2_NOME IS NOT NULL THEN A2_NOME 
          WHEN A1_NOME IS NOT NULL THEN A1_NOME
-         ELSE UPPER(CKO_NOMFOR) END A2_NOME,
-       CASE WHEN A2_CGC IS NOT NULL THEN A2_CGC 
+         Else Upper(CKO_NOMFOR) END A2_NOME,
+       Case WHEN A2_CGC IS NOT NULL THEN A2_CGC 
          WHEN A1_CGC IS NOT NULL THEN A1_CGC
-          ELSE CKO_I_EMIT END A2_CGC,
-       CASE
+          Else CKO_I_EMIT END A2_CGC,
+       Case
          WHEN F1_ESPECIE = 'NFE' THEN
-          CASE
+          Case
             WHEN EST_FIL = 'RO' AND F1_EST = 'RO' THEN 20
             WHEN EST_FIL = 'RO' AND F1_EST <> 'RO' THEN 35
-            ELSE 180
-          END - ROUND(SYSDATE - TO_DATE(CASE
+            Else 180
+          END - Round(SYSDATE - TO_DATE(Case
                                           WHEN F1_EMISSAO IS NOT NULL THEN F1_EMISSAO
                                           WHEN DS_EMISSA IS NOT NULL THEN DS_EMISSA
                                           WHEN C00_DTEMI IS NOT NULL THEN C00_DTEMI
-                                          ELSE CKO_I_EMIS END,'YYYYMMDD'),
+                                          Else CKO_I_EMIS END,'YYYYMMDD'),
                       0)
        END CONF_NREAL,
-       CASE
+       Case
          WHEN F1_ESPECIE = 'NFE' THEN
-          CASE
+          Case
             WHEN EST_FIL = 'RO' AND F1_EST = 'RO' THEN 10
             WHEN EST_FIL = 'RO' AND F1_EST <> 'RO' THEN 15
-            ELSE 180 END
-         ELSE 45
-       END - ROUND(SYSDATE - TO_DATE(CASE
+            Else 180 END
+         Else 45
+       END - Round(SYSDATE - TO_DATE(Case
                                        WHEN F1_EMISSAO IS NOT NULL THEN F1_EMISSAO
                                        WHEN DS_EMISSA IS NOT NULL THEN DS_EMISSA
                                        WHEN C00_DTEMI IS NOT NULL THEN C00_DTEMI
-                                       ELSE CKO_I_EMIS END, 'YYYYMMDD'),
+                                       Else CKO_I_EMIS END, 'YYYYMMDD'),
                    0) REST_DESC,
        F1_CHVNFE,
        F1_ESPECIE,
-       CASE
+       Case
          WHEN F1_TIPO IS NOT NULL THEN
           DECODE(F1_TIPO, 'N', 'Normal', 'D', 'Devolucao', 'I', 'Compl. ICMS', 'P', 'Compl. IPI', 'B', 'Beneficiamento', 'C', 'Compl. Preco')
-         ELSE
+         Else
           DECODE(DS_TIPO, 'N', 'Normal', 'O', 'Bonificacao', 'D', 'Devolucao', 'B', 'Beneficiamento', 'C', 'Compl. Preco', 'T', 'Transporte','')
        END TIPO,
-       CASE WHEN SUBSTR(F1_CHVNFE,21,2) = '55' THEN
+       Case WHEN SubStr(F1_CHVNFE,21,2) = '55' THEN
          DECODE (CKO_I_FINA,1,'Normal',2,'Complementar',3,'Ajuste',4,'Devolucao')
-         WHEN SUBSTR(F1_CHVNFE,21,2) = '57' OR SUBSTR(F1_CHVNFE,21,2) = '67' THEN
+         WHEN SubStr(F1_CHVNFE,21,2) = '57' OR SubStr(F1_CHVNFE,21,2) = '67' THEN
          DECODE (CKO_I_FINA,0,'Normal',1,'Complemento de Valores',2,'Anulacaoo de Valores',3,'Substituto',5,'Simplificado',6,'Substituto Simplificado','Acionar TI')
-        ELSE 'Acionar a TI' END FINALIDADE,
+        Else 'Acionar a TI' END FINALIDADE,
        ENT_FOR,
-       CASE
+       Case
          WHEN F1_VALBRUT IS NOT NULL THEN F1_VALBRUT
          WHEN DS_TOTAL IS NOT NULL THEN DS_TOTAL
          WHEN C00_VLDOC IS NOT NULL THEN C00_VLDOC
-         ELSE 0
+         Else 0
        END F1_VALBRUT,
-       CASE
+       Case
          WHEN F1_STATUS = 'A' THEN 'Classificado'
          WHEN F1_STATUS = ' ' THEN 'Pre-nota'
          WHEN DS_TIPO IS NOT NULL THEN 'Monitor'
          WHEN CKO_I_EMIS IS NOT NULL THEN 'Reprocessamento'
-         ELSE 'Manifestacao'
+         Else 'Manifestacao'
        END STATUS_ESCRITURACAO,
        DECODE(CKO_FLAG, '1', 'Processado', '2', 'Inconsistencia', '3','Documento duplicado, mesma chave porém em XMLs diferentes',
               '0', 'Pendente', '9','Excluido_Fiscal') STATUS_REPROCESSAMENTO,
        CKO_CODERR,
-       CASE
+       Case
          WHEN F1_ESPECIE = 'CTE' THEN 'Inexistente p/CTe'
          WHEN F1_ESPECIE = 'CTEOS' THEN 'Inexistente p/CTeOS'
          WHEN C00_STATUS = '0' THEN 'Sem Manif.'
@@ -275,7 +275,7 @@ SELECT F1_FILIAL, F1_DOC, F1_SERIE,
          WHEN C00_STATUS IS NULL THEN 'NF-e inexistente'
        End MANIFESTACAO,
        TO_DATE(DATA_EVENTO, 'YYYYMMDD') DATA_EVENTO,
-       CASE
+       Case
          WHEN F1_ESPECIE = 'CTE' THEN 'Inexistente p/CTe'
          WHEN F1_ESPECIE = 'CTEOS' THEN 'Inexistente p/CTeOS'
          WHEN C00_CODEVE = '1' THEN 'Nao Transmit.'
@@ -284,7 +284,7 @@ SELECT F1_FILIAL, F1_DOC, F1_SERIE,
          WHEN C00_CODEVE = '4' THEN 'Manif. Problema'
          WHEN C00_CODEVE IS NULL THEN 'NF-e inexistente'
        END STATUS_TRANS,
-       CASE
+       Case
          WHEN TPEVENTO = 999999 THEN 'Nao Transmitido'
          WHEN TPEVENTO = 610110 THEN 'Prest. Serv. Desac.'
          WHEN TPEVENTO = 610111 THEN 'Canc. Prest. Serv. Desac.'
@@ -294,16 +294,16 @@ SELECT F1_FILIAL, F1_DOC, F1_SERIE,
          WHEN TPEVENTO = 210210 THEN 'Ciencia'
          WHEN TPEVENTO = 110111 THEN 'Cancelamento'
          WHEN TPEVENTO = 888888 THEN 'Nao Transmitido'
-         ELSE 'Acionar TI'
+         Else 'Acionar TI'
        END TP_TRANS,
-       CASE
+       Case
          WHEN STATUS_154 = 9 THEN 'Nao Transmitido'
          WHEN STATUS_154 = 6 THEN 'OK'
          WHEN STATUS_154 = 5 THEN 'Erro'
          WHEN STATUS_154 = 8 THEN 'Nao Transmitido'
-         ELSE 'Acionar TI'
+         Else 'Acionar TI'
        END STATUS_TRANS_TSS,
-       CASE
+       Case
          WHEN CKO_CODERR = 'MCOM01' THEN 'MD-e com 210220-Operação Desconhecida'
          WHEN CKO_CODERR = 'MCOM02' THEN 'MD-e com 21040-Operação Não realizada'
          WHEN CKO_CODERR = 'MCOM03' THEN 'CT-e com 610110-Prestação de Serviço em Desacordo'
@@ -311,65 +311,65 @@ SELECT F1_FILIAL, F1_DOC, F1_SERIE,
          WHEN CKO_CODERR = 'MCOM05' THEN 'Excluído Fiscal Com validação'
          WHEN CKO_CODERR = 'MCOM06' THEN 'Excluído Fiscal Sem validação'
          WHEN CKO_CODERR = 'MCOM07' THEN 'Manutenção Automática XML'
-         ELSE RTRIM(UTL_RAW.CAST_TO_VARCHAR2(DBMS_LOB.SUBSTR(CKO_MSGERR, 300, 1)))
+         Else RTRIM(UTL_RAW.CAST_TO_VARCHAR2(DBMS_LOB.SubStr(CKO_MSGERR, 300, 1)))
        END CKO_MSGERR
   FROM (SELECT BASE.F1_FILIAL,
                SY.M0_ESTENT EST_FIL,
-               CASE WHEN SF11.F1_DOC IS NOT NULL THEN SF11.F1_DOC
+               Case WHEN SF11.F1_DOC IS NOT NULL THEN SF11.F1_DOC
                  WHEN SDS1.DS_DOC IS NOT NULL THEN SDS1.DS_DOC 
-                 ELSE SUBSTR(CKO1.CKO_CHVDOC,26,9) END F1_DOC,
-               CASE WHEN SF11.F1_SERIE IS NOT NULL THEN SF11.F1_SERIE
+                 Else SubStr(CKO1.CKO_CHVDOC,26,9) END F1_DOC,
+               Case WHEN SF11.F1_SERIE IS NOT NULL THEN SF11.F1_SERIE
                  WHEN SDS1.DS_FORNEC IS NOT NULL THEN SDS1.DS_FORNEC 
-                 ELSE CKO1.CKO_SERIE END F1_SERIE,
+                 Else CKO1.CKO_SERIE END F1_SERIE,
                SF11.F1_EMISSAO,
                SF11.F1_DTDIGIT,
                C001.C00_DTEMI,
                SDS1.DS_EMISSA,
                CKO1.CKO_I_EMIS,
                CKO1.CKO_NOMFOR,
-               CASE WHEN SF11.F1_EST IS NOT NULL THEN SF11.F1_FORNECE
+               Case WHEN SF11.F1_EST IS NOT NULL THEN SF11.F1_FORNECE
                  WHEN SDS1.DS_FORNEC IS NOT NULL THEN SDS1.DS_FORNEC END F1_FORNECE,
-               CASE WHEN SF11.F1_EST IS NOT NULL THEN SF11.F1_LOJA
+               Case WHEN SF11.F1_EST IS NOT NULL THEN SF11.F1_LOJA
                  WHEN SDS1.DS_LOJA IS NOT NULL THEN SDS1.DS_LOJA END F1_LOJA,
                CKO1.CKO_I_EMIT,
-               CASE
+               Case
                  WHEN SF11.F1_EST IS NOT NULL THEN SF11.F1_EST
-                 ELSE
-                  DECODE(SUBSTR(BASE.F1_CHVNFE, 1, 2),
+                 Else
+                  DECODE(SubStr(BASE.F1_CHVNFE, 1, 2),
                          '11','RO','12','AC','13','AM','14','RR','15','PA','16','AP','17','TO','21','MA','22','PI','23','CE',
                          '24','RN','25','PB','26','PE','27','AL','31','MG','32','ES','33','RJ','35','SP','41','PR','42','SC',
                          '43','RS','50','MS','51','MT','52','GO','53','DF','28','SE','29','BA','99','EX')
                END F1_EST,
-               CASE WHEN SF11.F1_TIPO IS NOT NULL THEN SF11.F1_TIPO ELSE SDS1.DS_TIPO END F1_TIPO,
+               Case WHEN SF11.F1_TIPO IS NOT NULL THEN SF11.F1_TIPO Else SDS1.DS_TIPO END F1_TIPO,
                SDS1.DS_TIPO,
                CKO1.CKO_I_FINA,
-               CASE
+               Case
                  WHEN (SELECT COUNT(1)
                          FROM SPED156
                         WHERE SPED156.D_E_L_E_T_ = ' '
                           AND BASE.F1_CHVNFE = DOCCHV
                           AND DOCTPOP = '0') = 1 THEN 'Sim'
-                 ELSE 'Nao' END ENT_FOR,
+                 Else 'Nao' END ENT_FOR,
                BASE.F1_CHVNFE,
-               DECODE(SUBSTR(BASE.F1_CHVNFE, 21, 2),'55','NFE','57','CTE','67','CTEOS') F1_ESPECIE,
+               DECODE(SubStr(BASE.F1_CHVNFE, 21, 2),'55','NFE','57','CTE','67','CTEOS') F1_ESPECIE,
                SF11.F1_STATUS,
                SF11.F1_VALBRUT,
                C001.C00_VLDOC,
                SDS1.DS_TOTAL,
                C001.C00_STATUS,
                CKO1.CKO_FLAG,
-               CASE
+               Case
                  WHEN CKO1.CKO_CODERR IS NULL THEN DECODE(C001.C00_SITDOC, '3', 'COM040')
-                 ELSE CKO1.CKO_CODERR
+                 Else CKO1.CKO_CODERR
                END CKO_CODERR,
                CKO1.CKO_MSGERR,
                C001.C00_CODEVE,
                SF11.F1_IDDES,
-               DECODE(SUBSTR(BASE.F1_CHVNFE, 21, 2),'55', NVL(SPED154T.TPEVENTO, 888888), NVL(SPED154T.TPEVENTO, 999999)) TPEVENTO,
-               DECODE(SUBSTR(BASE.F1_CHVNFE, 21, 2),'55', NVL(SPED154T.STATUS_154, 8), NVL(SPED154T.STATUS_154, 9)) STATUS_154,
+               DECODE(SubStr(BASE.F1_CHVNFE, 21, 2),'55', NVL(SPED154T.TPEVENTO, 888888), NVL(SPED154T.TPEVENTO, 999999)) TPEVENTO,
+               DECODE(SubStr(BASE.F1_CHVNFE, 21, 2),'55', NVL(SPED154T.STATUS_154, 8), NVL(SPED154T.STATUS_154, 9)) STATUS_154,
                SPED154T.DATA_EVENTO
           FROM (SELECT RTRIM(CKO.CKO_FILPRO) F1_FILIAL,
-                       SUBSTR(CKO.CKO_ARQUIV, 4, 44) F1_CHVNFE
+                       SubStr(CKO.CKO_ARQUIV, 4, 44) F1_CHVNFE
                   FROM %Table:CKO% CKO
                  WHERE CKO.D_E_L_E_T_ = ' '
                    %exp:_cFilCKO%
@@ -433,13 +433,13 @@ SELECT F1_FILIAL, F1_DOC, F1_SERIE,
             AND SPED154T.F1_CHVNFE (+)= BASE.F1_CHVNFE)
             LEFT JOIN %Table:SA1% SA1 
                 ON((F1_TIPO IN ('B', 'D')) OR 
-                   (F1_TIPO IS NULL AND SUBSTR(F1_CHVNFE,21,2) = '55' AND CKO_I_FINA = 4))
+                   (F1_TIPO IS NULL AND SubStr(F1_CHVNFE,21,2) = '55' AND CKO_I_FINA = 4))
                 AND F1_FORNECE = SA1.A1_COD
                 AND F1_LOJA = SA1.A1_LOJA
                 AND SA1.D_E_L_E_T_ = ' '
             LEFT JOIN %Table:SA2% SA2
                  ON((F1_TIPO NOT IN ('B', 'D')) OR 
-                   (F1_TIPO IS NULL AND NOT (SUBSTR(F1_CHVNFE,21,2) = '55' AND CKO_I_FINA = 4)))
+                   (F1_TIPO IS NULL AND NOT (SubStr(F1_CHVNFE,21,2) = '55' AND CKO_I_FINA = 4)))
                 AND F1_FORNECE = SA2.A2_COD
                 AND F1_LOJA = SA2.A2_LOJA
                 AND SA2.D_E_L_E_T_ = ' '
@@ -463,14 +463,14 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 Return

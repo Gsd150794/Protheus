@@ -12,7 +12,7 @@
 //====================================================================================================
 
 
-#INCLUDE "Protheus.ch"
+#Include "TOTVS.ch"
 #Include "FwMVCDef.ch"
 #Include "RWMAKE.CH"
 #Include "TopConn.ch"
@@ -33,7 +33,7 @@ Retorno---------: Nenhum
 */
 User Function AOMS005()
 
-Local _aArea   := GetArea()
+Local _aArea   := FWGetArea()
 Local _oBrowse
      
     //Instânciando FWMBrowse - Somente com dicionário de dados
@@ -48,9 +48,9 @@ Local _oBrowse
     //Ativa a Browse
     _oBrowse:Activate()
      
-    RestArea(_aArea)
+    FWRestArea(_aArea)
     
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -100,7 +100,7 @@ Local _oModel := Nil
 //Criação da estrutura de dados utilizada na interface
 Local _oStZFC := FWFormStruct(1, "ZFC")
      
-//Instanciando o modelo, não é recomendado colocar nome da user function (por causa do u_), respeitando 10 caracteres
+//Instanciando o modelo, não é recomendado colocar nome da User Function (por causa do u_), respeitando 10 caracteres
 _oModel := MPFormModel():New("AOMS005M",/*bPre*/, {|| U_ITLOGACS(),.T. }/*bPos*/,/*bCommit*/,/*bCancel*/) 
      
 //Atribuindo formulários para o modelo
@@ -180,21 +180,21 @@ Retorno---------: _ccod - próximo código de tipo de ocorrência
 User Function AOMS005I()
 
 Local _ccod := "000001"
-Local _cquery := ""
+Local _cQuery := ""
 
-_cquery += " SELECT MAX(ZFC_CODIGO) MAXIMO FROM " + Retsqlname("ZFC") 
-_cquery += " WHERE D_E_L_E_T_ <> '*' AND ZFC_FILIAL = '" + xfilial("ZFC") + "'"
+_cQuery += " SELECT MAX(ZFC_CODIGO) MAXIMO FROM " + Retsqlname("ZFC") 
+_cQuery += " WHERE D_E_L_E_T_ = ' ' AND ZFC_FILIAL = '" + xFilial("ZFC") + "'"
 
 TCQUERY _cQuery New Alias "ZFCT"
-dbSelectArea("ZFCT")
+DBSelectArea("ZFCT")
 
-If  !(ZFCT->( EOF() )) 
+If  !(ZFCT->( Eof() )) 
 
- _ccod := strzero((val(ZFCT->MAXIMO)+1),6)
+ _ccod := StrZero((Val(ZFCT->MAXIMO)+1),6)
 	
-Endif
+EndIf
 
-ZFCT->( Dbclosearea() )
+ZFCT->( DBCloseArea() )
 
 
 Return _ccod

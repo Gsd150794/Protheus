@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 24/06/2019 | Revisão de fontes. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 29/08/2019 | Correção da barra de progresso. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 11/11/2019 | Ajuste nos campos de hora. Chamado 31136
+Lucas Borges  |24/06/2019| Chamado 28346. Revisão de fontes.
+Lucas Borges  |29/08/2019| Chamado 28346. Correção da barra de progresso.
+Lucas Borges  |11/11/2019| Chamado 31136. Ajuste nos campos de hora.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT058
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 11/08/2015
-===============================================================================================================================
 Descrição---------: Relatório de tempo de veículos na fábrica
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -45,11 +37,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 23/04/2019
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -97,11 +86,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 23/04/2019
-===============================================================================================================================
 Descrição---------: Relacao de movimentos
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -120,10 +106,10 @@ Local _nCountRec	:= 0
 If MV_PAR01 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZLX")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -138,9 +124,9 @@ MakeSqlExpr(oReport:uParam)
 //==========================================================================
 // Difine Células que não serão impressas
 //==========================================================================
-oReport:Section(1):Cell("ENTRADA"):SetBlock({||DTOC((_cAlias)->ZLX_DATAEN)+ ' - ' + (_cAlias)->ZLX_HRENTR})
+oReport:Section(1):Cell("ENTRADA"):SetBlock({||DToC((_cAlias)->ZLX_DATAEN)+ ' - ' + (_cAlias)->ZLX_HRENTR})
 //Necessário incluir os : porque o gênio que criou a rotina não conseguiu seguir um padrão. Tratar no futuro.
-oReport:Section(1):Cell("SAIDA"):SetBlock({||DTOC((_cAlias)->ZLX_DTSAID)+ ' - ' + (_cAlias)->ZLX_HRSAID})
+oReport:Section(1):Cell("SAIDA"):SetBlock({||DToC((_cAlias)->ZLX_DTSAID)+ ' - ' + (_cAlias)->ZLX_HRSAID})
 oReport:Section(1):Cell("MEDPERM"):SetBlock({||(_cAlias)->PERMANENCIA})
 
 //================================================================================
@@ -223,9 +209,9 @@ BeginSql alias _cAlias
 	       SA2F.A2_NREDUZ A2_NREDUZ_F, ZLX.ZLX_NRONF, ZLX.ZLX_DATAEN, ZLX.ZLX_HRENTR, ZLX.ZLX_DTSAID,
 	       ZLX.ZLX_HRSAID, LPAD(TRUNC((TO_DATE(ZLX.ZLX_DTSAID || ZLX.ZLX_HRSAID,'YYYYMMDDhh24:mi') -
 	       TO_DATE(ZLX.ZLX_DATAEN || ZLX.ZLX_HRENTR,'YYYYMMDDhh24:mi')) * 24),4,'0') || ':' ||
-	       LPAD(ROUND(MOD((TO_DATE(ZLX.ZLX_DTSAID || ZLX.ZLX_HRSAID,'YYYYMMDDhh24:mi') - TO_DATE(ZLX.ZLX_DATAEN || ZLX.ZLX_HRENTR,
+	       LPAD(Round(MOD((TO_DATE(ZLX.ZLX_DTSAID || ZLX.ZLX_HRSAID,'YYYYMMDDhh24:mi') - TO_DATE(ZLX.ZLX_DATAEN || ZLX.ZLX_HRENTR,
 	       'YYYYMMDDhh24:mi')) * 24,1) * 60,2),2,'0') PERMANENCIA
-	  FROM %table:ZLX% ZLX, %table:SA2% SA2T, %table:SA2% SA2F, %table:ZZX% ZZX, %table:ZZV% ZZV, %table:SX5% SX5
+	  FROM %Table:ZLX% ZLX, %Table:SA2% SA2T, %Table:SA2% SA2F, %Table:ZZX% ZZX, %Table:ZZV% ZZV, %Table:SX5% SX5
 	 WHERE ZLX.D_E_L_E_T_ = ' '
 	   AND SA2T.D_E_L_E_T_ = ' '
 	   AND SA2F.D_E_L_E_T_ = ' '
@@ -275,19 +261,19 @@ oReport:Section(1):Cell("MEDPERM"):HideHeader()
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
   	_cFilial := (_cAlias)->ZZX_FILIAL
 	_cProd := (_cAlias)->ZZX_CODPRD + ' - ' + (_cAlias)->DESCRI
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

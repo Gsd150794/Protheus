@@ -2,33 +2,25 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 03/08/2018 | Incluído MenuDef para padronização - Chamado 25767
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 29/06/2021 | Criada função para replicar cadastro para outras filiais. Chamado 37004
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 29/12/2022 | Tratamento para incluir mais de 999 faixas. Chamado 42208
+Lucas Borges  |03/08/2018| Chamado 25767. Incluído MenuDef para padronização
+Lucas Borges  |29/06/2021| Chamado 37004. Criada função para replicar cadastro para outras filiais.
+Lucas Borges  |29/12/2022| Chamado 42208. Tratamento para incluir mais de 999 faixas.
 ===============================================================================================================================
 */
 
-//===========================================================================
-//| Definições de Includes                                                  |
-//===========================================================================
-#INCLUDE 'Protheus.ch' 
+#Include "TOTVS.ch" 
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT014
 Autor-------------: Wodson Reis
 Data da Criacao---: 02/10/2008
-===============================================================================================================================
 Descrição---------: Rotina desenvolvida para possibilitar o cadastramento de Faixas de Analises do Leite Toda Faixa de Analise 
 					possui um codigo de Tipo de Analise, as faixas sao utilizadas para bonificar ou penalizar os produtores de 
 					acordo com a Analise de Qualidade do Leite.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -47,9 +39,7 @@ Return
 Programa----------: MenuDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 02/08/2018
-===============================================================================================================================
 Descrição---------: Utilizacao de Menu Funcional
-===============================================================================================================================
 Parametros--------: aRotina
 					1. Nome a aparecer no cabecalho
 					2. Nome da Rotina associada
@@ -62,7 +52,6 @@ Parametros--------: aRotina
 						5 - Remove o registro corrente do Banco de Dados
 					5. Nivel de acesso
 					6. Habilita Menu Funcional
-===============================================================================================================================
 Retorno-----------: Array com opcoes da rotina
 ===============================================================================================================================
 */
@@ -82,17 +71,14 @@ Return( aRotina )
 Programa----------: AGLT014R
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 29/06/2021
-===============================================================================================================================
 Descrição---------: Função usada para replicar o evento para todas as filiais
-===============================================================================================================================
 Parametros--------: cAlias,nReg,nOpc
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AGLT014R(cAlias,nReg,nOpc)
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _aSelFil	:= AdmGetFil(.F.,.F.,cAlias)
 Local _nX, _nI	:= 0
 Local _aFields	:= FWSX3Util():GetAllFields( cAlias , .F. )
@@ -123,7 +109,7 @@ If Len(_aSelFil) > 0
 			While ZL2->(!Eof()) .And. ZL2->ZL2_FILIAL == _aSelFil[_nX]
 				(_cAlias)->(DBGoTop())
 				While (_cAlias)->(!Eof())
-					If !(cAlias)->(DbSeek(_aSelFil[_nX] + ZL2->ZL2_COD + (_cAlias)->(ZLA_COD+ZLA_SEQ)))
+					If !(cAlias)->(DBSeek(_aSelFil[_nX] + ZL2->ZL2_COD + (_cAlias)->(ZLA_COD+ZLA_SEQ)))
 						(cAlias)->(RecLock(cAlias, .T.))
 							For _nI := 1 To Len(_aFields)
 								If "FILIAL" $ _aFields[_nI]
@@ -136,7 +122,7 @@ If Len(_aSelFil) > 0
 									(cAlias)->&(_aFields[_nI]) := (_cAlias)->&(_aFields[_nI])
 								EndIf
 							Next _nI
-						(cAlias)->(MsUnLock())
+						(cAlias)->(MSUnLock())
 						_lRet := .T.
 					EndIf
 					(_cAlias)->(DBSkip())
@@ -153,7 +139,7 @@ Else
 	MsgAlert("Não foram identificadas filiais aptas para a réplica do registro.","AGLT01402")
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 Return
 
 /*
@@ -161,17 +147,14 @@ Return
 Programa----------: AGLT014S
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 26/12/2022
-===============================================================================================================================
 Descrição---------: Gera próximo sequencial na ZLA. Utilizado no gatilho do ZLA_COD -> ZLA_SEQ
-===============================================================================================================================
 Parametros--------: _cFilial, _cSetor, _cCod
-===============================================================================================================================
 Retorno-----------: _cSeq
 ===============================================================================================================================
 */
 User Function AGLT014S(_cFilial, _cSetor, _cCod)
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cSeq		:= ""
 Local _cAlias	:= GetNextAlias()
 
@@ -187,6 +170,6 @@ EndSql
 _cSeq := Soma1((_cAlias)->SEQ)
 (_cAlias)->(DBCloseArea())
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return(_cSeq)

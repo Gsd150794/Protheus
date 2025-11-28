@@ -14,7 +14,7 @@ Lucas Borges  | 16/10/2019 | Removidos os Warning na compilação da release 12.1.
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
                                
 /*
 ===============================================================================================================================
@@ -28,26 +28,26 @@ Parametros--------: Nenhum
 ===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================*/
-User function ROMS007()  
+User Function ROMS007()  
 
 Local oReport		:= Nil
 
-private cPerg		:= "ROMS007"   
-private cComboTpCa	:= {}
-private _aTpCarga 	:= {}
+Private cPerg		:= "ROMS007"   
+Private cComboTpCa	:= {}
+Private _aTpCarga 	:= {}
 
 //Utilizado para pegar dinamicamento o tipo da carga
-dbSelectArea("SX3")
-SX3->(dbSetOrder(2))
-if SX3->(dbSeek("DAK_I_TPCA"))
+DBSelectArea("SX3")
+SX3->(DBSetOrder(2))
+If SX3->(DBSeek("DAK_I_TPCA"))
 		cComboTpCa := X3Cbox()
-endif     
+EndIf     
 		
-_aTpCarga := STRTOKARR(cComboTpCa, ';')  
+_aTpCarga := StrTokArr(cComboTpCa, ';')  
                 
-fwMsgRun( , {|| oReport := U_ROMS007R(),oReport:PrintDialog() }, "Impressão da Pré-Nota", "Aguarde! Iniciando o processo..."  )
+FWMsgRun( , {|| oReport := U_ROMS007R(),oReport:PrintDialog() }, "Impressão da Pré-Nota", "Aguarde! Iniciando o processo..."  )
 
-Return()
+Return
 /*
 ===============================================================================================================================
 Programa--------: ROMS007R()
@@ -69,14 +69,14 @@ Local nUltLib  	:= 0
 Local aCabPed	:= {}
 Local aItemPed  := {}
 Local nItem 	:= 0
-Local nTamData  := Len( DTOC( MsDate() ) )
+Local nTamData  := Len( DToC( MsDate() ) )
 Local aOrdem    :={}
 
 Private aCodImps:= {}
 Private nI		:= 0
 
-Aadd( aOrdem, "CEP + Pedido + Item" )
-Aadd( aOrdem, "Pedido + Item" )
+aAdd( aOrdem, "CEP + Pedido + Item" )
+aAdd( aOrdem, "Pedido + Item" )
 
 Pergunte( cPerg , .F. )
 
@@ -85,14 +85,14 @@ If FunName() == "MATA410"
 	cPerg		:= ""
 	MV_PAR01	:= SC5->C5_NUM
 	MV_PAR02	:= SC5->C5_NUM
-	MV_PAR03	:= STOD('')
-	MV_PAR04	:= STOD('')
+	MV_PAR03	:= SToD('')
+	MV_PAR04	:= SToD('')
 	MV_PAR05	:= ""
 	MV_PAR06	:= ""
 	MV_PAR07	:= ""
 	MV_PAR08	:= ""
-	MV_PAR09	:= STOD('')
-	MV_PAR10	:= STOD('')
+	MV_PAR09	:= SToD('')
+	MV_PAR10	:= SToD('')
 	MV_PAR11	:= ""
 	MV_PAR12	:= ""
 	MV_PAR13	:= 2
@@ -104,14 +104,14 @@ If FunName() == "AOMS109"
 	cPerg		:= ""
 	MV_PAR01	:= ""
 	MV_PAR02	:= ""
-	MV_PAR03	:= STOD('')
-	MV_PAR04	:= STOD('')
+	MV_PAR03	:= SToD('')
+	MV_PAR04	:= SToD('')
 	MV_PAR05	:= ""
 	MV_PAR06	:= ""
 	MV_PAR07	:= ""
 	MV_PAR08	:= ""
-	MV_PAR09	:= STOD('')
-	MV_PAR10	:= STOD('')
+	MV_PAR09	:= SToD('')
+	MV_PAR10	:= SToD('')
 	MV_PAR11	:= ""
 	MV_PAR12	:= ""
 	MV_PAR13	:= 2
@@ -132,24 +132,24 @@ oReport:SetTotalInLine(.F.)
 oPreNota := TRSection():New(oReport,"Emissao da Confirmacao do Pedido",{"SC5","SC6"},aOrdem/*{Array com as ordens do relatório}*/,/*Campos do SX3*/,/*Campos do SIX*/)	// 
 oPreNota:SetTotalInLine(.F.)
 
-TRCell():New(oPreNota,"AITEM01",/*Tabela*/,"IT"						 ,PesqPict("SC6","C6_ITEM"		),TamSx3("C6_ITEM"		)[1],/*lPixel*/,{|| aItemPed[nItem][01] 																	})	// "IT"
-TRCell():New(oPreNota,"AITEM02",/*Tabela*/,RetTitle("C6_PRODUTO"	),PesqPict("SC6","C6_PRODUTO"	),TamSx3("C6_PRODUTO"	)[1],/*lPixel*/,{|| aItemPed[nItem][02] 																	})	// Codigo do Produto
-TRCell():New(oPreNota,"AITEM03",/*Tabela*/,RetTitle("C6_DESCRI"  	),PesqPict("SC6","C6_DESCRI"	),TamSx3("C6_DESCRI"	)[1],/*lPixel*/,{|| IIF(Empty(aItemPed[nItem][03]),SB1->B1_DESC, aItemPed[nItem][03])						})	// Descricao do Produto
-TRCell():New(oPreNota,"AITEM04",/*Tabela*/,"TES"					 ,PesqPict("SC6","C6_TES"		),TamSx3("C6_TES"		)[1],/*lPixel*/,{|| aItemPed[nItem][04] 																	})	// "TES"
-TRCell():New(oPreNota,"AITEM05",/*Tabela*/,"CF"					 	,PesqPict("SC6","C6_CF"		),TamSx3("C6_CF"		)[1],/*lPixel*/,{|| aItemPed[nItem][05] 																	})	// "CF"
-TRCell():New(oPreNota,"AITEM06",/*Tabela*/,"UM"					 	,PesqPict("SC6","C6_UM"		),TamSx3("C6_UM"		)[1],/*lPixel*/,{|| aItemPed[nItem][06] 																	})	// "UM"
-TRCell():New(oPreNota,"AITEM07",/*Tabela*/,"QTDE"					 ,PesqPictQt("C6_QTDVEN"	    ),TamSx3("C6_QTDVEN"	)[1],/*lPixel*/,{|| aItemPed[nItem][07] 																	})	// "Quant."
-TRCell():New(oPreNota,"C6_SEGUM",/*Tabela*/,RetTitle("C6_SEGUM" 	),PesqPict("SC6","C6_SEGUM"		),TamSx3("C6_SEGUM"		)[1],/*lPixel*/,{|| aItemPed[nItem][20] 																	})	// "UM"
-TRCell():New(oPreNota,"C6_UNSVEN",/*Tabela*/,RetTitle("C6_UNSVEN"	),PesqPict("SC6","C6_UNSVEN"		),TamSx3("C6_UNSVEN"		)[1],/*lPixel*/,{|| aItemPed[nItem][21] 																	})	// "QTD ENT 2"
-TRCell():New(oPreNota,"AITEM08",/*Tabela*/,RetTitle("C6_PRCVEN"	    ),PesqPict("SC6","C6_PRCVEN"	),TamSx3("C6_PRCVEN"	)[1],/*lPixel*/,{|| aItemPed[nItem][08] 																	})	// Preco Unitario
+TRCell():New(oPreNota,"AITEM01",/*Tabela*/,"IT"						 ,PesqPict("SC6","C6_ITEM"		),TamSX3("C6_ITEM"		)[1],/*lPixel*/,{|| aItemPed[nItem][01] 																	})	// "IT"
+TRCell():New(oPreNota,"AITEM02",/*Tabela*/,RetTitle("C6_PRODUTO"	),PesqPict("SC6","C6_PRODUTO"	),TamSX3("C6_PRODUTO"	)[1],/*lPixel*/,{|| aItemPed[nItem][02] 																	})	// Codigo do Produto
+TRCell():New(oPreNota,"AITEM03",/*Tabela*/,RetTitle("C6_DESCRI"  	),PesqPict("SC6","C6_DESCRI"	),TamSX3("C6_DESCRI"	)[1],/*lPixel*/,{|| IIf(Empty(aItemPed[nItem][03]),SB1->B1_DESC, aItemPed[nItem][03])						})	// Descricao do Produto
+TRCell():New(oPreNota,"AITEM04",/*Tabela*/,"TES"					 ,PesqPict("SC6","C6_TES"		),TamSX3("C6_TES"		)[1],/*lPixel*/,{|| aItemPed[nItem][04] 																	})	// "TES"
+TRCell():New(oPreNota,"AITEM05",/*Tabela*/,"CF"					 	,PesqPict("SC6","C6_CF"		),TamSX3("C6_CF"		)[1],/*lPixel*/,{|| aItemPed[nItem][05] 																	})	// "CF"
+TRCell():New(oPreNota,"AITEM06",/*Tabela*/,"UM"					 	,PesqPict("SC6","C6_UM"		),TamSX3("C6_UM"		)[1],/*lPixel*/,{|| aItemPed[nItem][06] 																	})	// "UM"
+TRCell():New(oPreNota,"AITEM07",/*Tabela*/,"QTDE"					 ,PesqPictQt("C6_QTDVEN"	    ),TamSX3("C6_QTDVEN"	)[1],/*lPixel*/,{|| aItemPed[nItem][07] 																	})	// "Quant."
+TRCell():New(oPreNota,"C6_SEGUM",/*Tabela*/,RetTitle("C6_SEGUM" 	),PesqPict("SC6","C6_SEGUM"		),TamSX3("C6_SEGUM"		)[1],/*lPixel*/,{|| aItemPed[nItem][20] 																	})	// "UM"
+TRCell():New(oPreNota,"C6_UNSVEN",/*Tabela*/,RetTitle("C6_UNSVEN"	),PesqPict("SC6","C6_UNSVEN"		),TamSX3("C6_UNSVEN"		)[1],/*lPixel*/,{|| aItemPed[nItem][21] 																	})	// "QTD ENT 2"
+TRCell():New(oPreNota,"AITEM08",/*Tabela*/,RetTitle("C6_PRCVEN"	    ),PesqPict("SC6","C6_PRCVEN"	),TamSX3("C6_PRCVEN"	)[1],/*lPixel*/,{|| aItemPed[nItem][08] 																	})	// Preco Unitario
 TRCell():New(oPreNota,"NALIQICM",/*Tabela*/	,"ICM","@e 99.99"				,5,/*lPixel*/,{|| MaFisRet(nItem,"IT_ALIQICM") 																											})	// "ICM"
-TRCell():New(oPreNota,"AITEM13",/*Tabela*/, "Vlr Total"				,PesqPict("SC6","C6_VALOR")		,TamSx3("C6_VALOR")[1]		,/*lPixel*/,{|| aItemPed[nItem][13]+nValImp 														})	// "Vl.Tot.C/IPI"
+TRCell():New(oPreNota,"AITEM13",/*Tabela*/, "Vlr Total"				,PesqPict("SC6","C6_VALOR")		,TamSX3("C6_VALOR")[1]		,/*lPixel*/,{|| aItemPed[nItem][13]+nValImp 														})	// "Vl.Tot.C/IPI"
 TRCell():New(oPreNota,"AITEM14",/*Tabela*/,RetTitle("C6_ENTREG")	,PesqPict("SC6","C6_ENTREG"	)	,nTamData					,/*lPixel*/,{|| aItemPed[nItem][14] 																},,,,,,.F.)	// Data de Entrega
-TRCell():New(oPreNota,"AITEM15",/*Tabela*/,RetTitle("C6_DESCONT")	,PesqPict("SC6","C6_DESCONT")	,TamSx3("C6_DESCONT")[1]	,/*lPixel*/,{|| aItemPed[nItem][15] 																})	// % Desconto
-TRCell():New(oPreNota,"AITEM16",/*Tabela*/,"Armazem"				,PesqPict("SC6","C6_LOCAL")		,TamSx3("C6_LOCAL")[1]		,/*lPixel*/,{|| aItemPed[nItem][16] 																})	// "Loc."
-TRCell():New(oPreNota,"AITEM17",/*Tabela*/,'Qtd.a Fat.'				,PesqPictQt("C6_QTDLIB")		,TamSx3("C6_QTDLIB"	)[1]	,/*lPixel*/,{|| aItemPed[nItem][17] 												  				})	// "Qtd.a Fat."
-TRCell():New(oPreNota,"NSALDO" ,/*Tabela*/,'Saldo'					,PesqPictQt("C6_QTDLIB")		,TamSx3("C6_QTDLIB"	)[1]	,/*lPixel*/,{|| aItemPed[nItem][07]-aItemPed[nItem][17]+aItemPed[nItem][18]-aItemPed[nItem][19]	})	// "Saldo"
-TRCell():New(oPreNota,"NULTLIB",/*Tabela*/,'Ult.Fat.'				,PesqPict("SD2","D2_QUANT")		,TamSx3("D2_QUANT")[1]		,/*lPixel*/,{|| nUltLib 																			})	// "Ult.Fat." // Ajuste na Picture do Campo [Chamado: 5490]
+TRCell():New(oPreNota,"AITEM15",/*Tabela*/,RetTitle("C6_DESCONT")	,PesqPict("SC6","C6_DESCONT")	,TamSX3("C6_DESCONT")[1]	,/*lPixel*/,{|| aItemPed[nItem][15] 																})	// % Desconto
+TRCell():New(oPreNota,"AITEM16",/*Tabela*/,"Armazem"				,PesqPict("SC6","C6_LOCAL")		,TamSX3("C6_LOCAL")[1]		,/*lPixel*/,{|| aItemPed[nItem][16] 																})	// "Loc."
+TRCell():New(oPreNota,"AITEM17",/*Tabela*/,'Qtd.a Fat.'				,PesqPictQt("C6_QTDLIB")		,TamSX3("C6_QTDLIB"	)[1]	,/*lPixel*/,{|| aItemPed[nItem][17] 												  				})	// "Qtd.a Fat."
+TRCell():New(oPreNota,"NSALDO" ,/*Tabela*/,'Saldo'					,PesqPictQt("C6_QTDLIB")		,TamSX3("C6_QTDLIB"	)[1]	,/*lPixel*/,{|| aItemPed[nItem][07]-aItemPed[nItem][17]+aItemPed[nItem][18]-aItemPed[nItem][19]	})	// "Saldo"
+TRCell():New(oPreNota,"NULTLIB",/*Tabela*/,'Ult.Fat.'				,PesqPict("SD2","D2_QUANT")		,TamSX3("D2_QUANT")[1]		,/*lPixel*/,{|| nUltLib 																			})	// "Ult.Fat." // Ajuste na Picture do Campo [Chamado: 5490]
 
 TRFunction():New(oPreNota:Cell("AITEM07"),/* cID */,"SUM",/*oBreak*/,/*cTitle*/,PesqPict("SC6","C6_QTDVEN",20),/*uFormula*/,.T./*lEndSection*/,.F./*lEndReport*/,/*lEndPage*/)
 TRFunction():New(oPreNota:Cell("AITEM13"),/* cID */,"SUM",/*oBreak*/,/*cTitle*/,/*cPicture*/,/*uFormula*/,.T./*lEndSection*/,.F./*lEndReport*/,/*lEndPage*/)
@@ -162,11 +162,11 @@ oImpostos := TRSection():New(oReport,"Emissao da Confirmacao do Pedido",{"SC5","
 															aOrdem/*{Array com as ordens do relatório}*/,/*Campos do SX3*/,/*Campos do SIX*/)	// 
 oImpostos:SetTotalInLine(.F.)
 
-	TRCell():New(oImpostos,"NF_BASEICM"	,/*Tabela*/,"Base Icms"		,PesqPict("SF2","F2_BASEICM"),TamSx3("F2_BASEICM"		)[1],/*lPixel*/,{|| MaFisRet(,"NF_BASEICM") 	})	// "Base Icms"
-	TRCell():New(oImpostos,"NF_VALICM"	,/*Tabela*/,"Valor Icms"	,PesqPict("SF2","F2_VALICM") ,TamSx3("F2_VALICM"		)[1],/*lPixel*/,{|| MaFisRet(,"NF_VALICM"	) 	})	// "Valor Icms"
-	TRCell():New(oImpostos,"NF_BASESOL"	,/*Tabela*/,"Base Retido"	,PesqPict("SF2","F2_BRICMS") ,TamSx3("F2_BRICMS"		)[1],/*lPixel*/,{|| MaFisRet(,"NF_BASESOL") 	})	// "Base Retido"
-	TRCell():New(oImpostos,"NF_VALSOL"	,/*Tabela*/,"Valor Retido"	,PesqPict("SF2","F2_ICMSRET"),TamSx3("F2_ICMSRET"		)[1],/*lPixel*/,{|| MaFisRet(,"NF_VALSOL"	) 	})	// "Valor Retido"
-	TRCell():New(oImpostos,"NF_TOTAL"	,/*Tabela*/,"Valor Total"	,PesqPict("SF2","F2_VALBRUT"),TamSx3("F2_VALBRUT"	    	)[1],/*lPixel*/,{|| MaFisRet(,"NF_TOTAL"	) 	})	// "Valor Total"
+	TRCell():New(oImpostos,"NF_BASEICM"	,/*Tabela*/,"Base Icms"		,PesqPict("SF2","F2_BASEICM"),TamSX3("F2_BASEICM"		)[1],/*lPixel*/,{|| MaFisRet(,"NF_BASEICM") 	})	// "Base Icms"
+	TRCell():New(oImpostos,"NF_VALICM"	,/*Tabela*/,"Valor Icms"	,PesqPict("SF2","F2_VALICM") ,TamSX3("F2_VALICM"		)[1],/*lPixel*/,{|| MaFisRet(,"NF_VALICM"	) 	})	// "Valor Icms"
+	TRCell():New(oImpostos,"NF_BASESOL"	,/*Tabela*/,"Base Retido"	,PesqPict("SF2","F2_BRICMS") ,TamSX3("F2_BRICMS"		)[1],/*lPixel*/,{|| MaFisRet(,"NF_BASESOL") 	})	// "Base Retido"
+	TRCell():New(oImpostos,"NF_VALSOL"	,/*Tabela*/,"Valor Retido"	,PesqPict("SF2","F2_ICMSRET"),TamSX3("F2_ICMSRET"		)[1],/*lPixel*/,{|| MaFisRet(,"NF_VALSOL"	) 	})	// "Valor Retido"
+	TRCell():New(oImpostos,"NF_TOTAL"	,/*Tabela*/,"Valor Total"	,PesqPict("SF2","F2_VALBRUT"),TamSX3("F2_VALBRUT"	    	)[1],/*lPixel*/,{|| MaFisRet(,"NF_TOTAL"	) 	})	// "Valor Total"
 
 //==========================================================================
 // Troca descricao do total dos itens                                     
@@ -269,53 +269,53 @@ lQuery    := .T.
 cFiltro :=  "%"
         
 //Filtra Emissao 
-if !empty(mv_par03) .and. !empty(mv_par04)
-    cFiltro += " AND SC5.C5_EMISSAO BETWEEN '" + dtos(mv_par03) + "' AND '"  + dtos(mv_par04) + "' "
-endif
+If !Empty(MV_PAR03) .And. !Empty(MV_PAR04)
+    cFiltro += " AND SC5.C5_EMISSAO BETWEEN '" + DToS(MV_PAR03) + "' AND '"  + DToS(MV_PAR04) + "' "
+EndIf
         
 //Filtra só pendentes
-IF MV_PAR13 = 1
+If MV_PAR13 = 1
 	cFiltro += " AND SC5.C5_NOTA = ' ' "
-endif
+EndIf
    
 //Filtra Vendedor
-if !empty(mv_par05) 
-	cFiltro += " AND SA3.A3_COD IN " + FormatIn(mv_par05,";")
-endif   	
+If !Empty(MV_PAR05) 
+	cFiltro += " AND SA3.A3_COD IN " + FormatIn(MV_PAR05,";")
+EndIf   	
 
 //Filtra Coordenador
-if !empty(mv_par06)
-	cFiltro += " AND SA3.A3_SUPER IN " + FormatIn(mv_par06,";")
-endif
+If !Empty(MV_PAR06)
+	cFiltro += " AND SA3.A3_SUPER IN " + FormatIn(MV_PAR06,";")
+EndIf
 		
 //Filtra usuario filial + matricula
-if !empty(mv_par07)
-	cFiltro += " AND SC5.C5_I_CDUSU = '" + mv_par07 + "' "
-endif
+If !Empty(MV_PAR07)
+	cFiltro += " AND SC5.C5_I_CDUSU = '" + MV_PAR07 + "' "
+EndIf
 
 //busca CFOPS de acordo com parametro definido por usuario	
-if !empty(mv_par08)
+If !Empty(MV_PAR08)
 	//Senao tiver escolhido 'A' opcao todos
-	if !("A" $ mv_par08 )			 
-		cCfops := U_ITCFOPS(alltrim(upper(mv_par08)))
+	If !("A" $ MV_PAR08 )			 
+		cCfops := U_ITCFOPS(AllTrim(Upper(MV_PAR08)))
 		cFiltro += " AND SC6.C6_CF IN " + FormatIn(cCfops,";")			
-	endif
-endif        
+	EndIf
+EndIf        
 		
 //Filtra data de Entrega
-if !empty(mv_par09) .and. !empty(mv_par10)
-     cFiltro += " AND SC5.C5_I_DTENT BETWEEN '" + dtos(mv_par09) + "' AND '"  + dtos(mv_par10) + "' "
-endif
+If !Empty(MV_PAR09) .And. !Empty(MV_PAR10)
+     cFiltro += " AND SC5.C5_I_DTENT BETWEEN '" + DToS(MV_PAR09) + "' AND '"  + DToS(MV_PAR10) + "' "
+EndIf
         
 //Filtra grupo de produtos
-if !empty(mv_par11)
-	cFiltro += " AND SB1.B1_GRUPO IN " + FormatIn(mv_par11,";")
-endif
+If !Empty(MV_PAR11)
+	cFiltro += " AND SB1.B1_GRUPO IN " + FormatIn(MV_PAR11,";")
+EndIf
 
 //Filtra armazéns
-if !empty(mv_par14)
-	cFiltro += " AND SC6.C6_LOCAL IN " + FormatIn(mv_par14,";")
-endif
+If !Empty(MV_PAR14)
+	cFiltro += " AND SC6.C6_LOCAL IN " + FormatIn(MV_PAR14,";")
+EndIf
 
 //Filtra pedidos
 If funname() == "AOMS109"  //Relatório chamado a partir da tela de central de logistica
@@ -327,7 +327,7 @@ If funname() == "AOMS109"  //Relatório chamado a partir da tela de central de lo
 	// Armazena todos os pedidos selecionados pelo usuario
 	//================================================================================
 	_cNumPed := ""
-	While TRBF->(!EOF())
+	While TRBF->(!Eof())
 	
 		//================================================================================
 		// Somente pedidos selecionados pelo usuario
@@ -341,7 +341,7 @@ If funname() == "AOMS109"  //Relatório chamado a partir da tela de central de lo
      	TRBF->( DBSkip() )
 	EndDo
 	
-	If !empty(_cnumped)
+	If !Empty(_cnumped)
 		
 		cFiltro += " AND SC5.C5_NUM IN (" + SubStr(_cNumPed,1,Len(_cNumPed) - 1) + ") "
 	
@@ -349,22 +349,22 @@ If funname() == "AOMS109"  //Relatório chamado a partir da tela de central de lo
 		
 		cFiltro += " AND SC5.C5_NUM = 'ZZ!!' "  //para não trazer nenhum pedido
 		
-	Endif
+	EndIf
 
-Elseif !empty(mv_par02)
+ElseIf !Empty(MV_PAR02)
 
-	cFiltro += " AND SC5.C5_NUM >= '" + mv_par01 + "' "
-	cFiltro += " AND SC5.C5_NUM <= '" + mv_par02 + "' "
+	cFiltro += " AND SC5.C5_NUM >= '" + MV_PAR01 + "' "
+	cFiltro += " AND SC5.C5_NUM <= '" + MV_PAR02 + "' "
 	
-Endif
+EndIf
 
 
 
-IF nOrdem = 1 
+If nOrdem = 1 
 	cFiltro += " ORDER BY SC5.C5_I_CEP,SC5.C5_NUM,SC6.C6_ITEM "
-ELSE
+Else
 	cFiltro += " ORDER BY SC5.C5_NUM,SC6.C6_ITEM "
-ENDIF
+EndIf
 
 cFiltro += "%"
 
@@ -389,7 +389,7 @@ BeginSql Alias cAliasSC5
 		SC6.C6_QTDEMP,SC6.C6_QTDLIB,SC6.C6_QTDENT,SC6.C6_NFORI,SC6.C6_SERIORI,SC6.C6_ITEMORI,
 		SC6.C6_SEGUM,SC6.C6_UNSVEN,SC5.C5_I_CDUSU,C5_I_CEP , A1_I_HORP, C5_I_OBPED
 		%Exp:cQryAd%
-		FROM %Table:SC5% SC5, %Table:SC6% SC6,%table:SA3% SA3, %table:SB1% SB1, %table:SA1% SA1
+		FROM %Table:SC5% SC5, %Table:SC6% SC6,%table:SA3% SA3, %Table:SB1% SB1, %Table:SA1% SA1
 		WHERE
 	   	SC5.C5_FILIAL = %xFilial:SC5% AND
 		SC5.%notdel% 
@@ -410,7 +410,7 @@ BeginSql Alias cAliasSC5
 
 EndSql
 
-oReport:section(1):endQuery()
+oReport:Section(1):EndQuery()
 
 DBSelectArea(cAliasSC5)
 
@@ -432,7 +432,7 @@ While !oReport:Cancel() .And. !((cAliasSC5)->(Eof()))
 	//================================================================
 	// Executa a validacao dos filtros do usuario           	     
 	//================================================================
-	dbSelectArea(cAliasSC5)                                            
+	DBSelectArea(cAliasSC5)                                            
 	     
 	//================================================================
 	// Filtro por carga 
@@ -443,8 +443,8 @@ While !oReport:Cancel() .And. !((cAliasSC5)->(Eof()))
 		
 		If !(MV_PAR12 $ _cCodCarga) 
 		
-			dbSelectArea(cAliasSC5)
-			(cAliasSC5)->(dbSkip())
+			DBSelectArea(cAliasSC5)
+			(cAliasSC5)->(DBSkip())
 			Loop
 		
 		EndIf
@@ -518,36 +518,36 @@ While !oReport:Cancel() .And. !((cAliasSC5)->(Eof()))
 	nPesLiq	:= 0
 	aPedCli	:= {}
 	If !lQuery
-		dbSelectArea(cAliasSC6)
-		dbSetOrder(1)
-		dbSeek(xFilial("SC6")+(cAliasSC5)->C5_NUM)
+		DBSelectArea(cAliasSC6)
+		DBSetOrder(1)
+		DBSeek(xFilial("SC6")+(cAliasSC5)->C5_NUM)
 	EndIf
 	cPedido    := (cAliasSC5)->C5_NUM
 	aC5Rodape  := {}
 	
 	cMensNF:=(cAliasSC5)->C5_MENNOTA
 	
-	if !empty(alltrim((cAliasSC5)->C5_NOTA))
-		DbSelectarea("SF2")
-		DbSetOrder(1)
-		if DbSeek(xfilial("SF2")+(cAliasSC5)->C5_NOTA+(cAliasSC5)->C5_SERIE+(cAliasSC5)->C5_CLIENTE+(cAliasSC5)->C5_LOJACLI)
+	If !Empty(AllTrim((cAliasSC5)->C5_NOTA))
+		DBSelectArea("SF2")
+		DBSetOrder(1)
+		If DBSeek(xFilial("SF2")+(cAliasSC5)->C5_NOTA+(cAliasSC5)->C5_SERIE+(cAliasSC5)->C5_CLIENTE+(cAliasSC5)->C5_LOJACLI)
 			cMensNF:=SF2->F2_I_MENSA
-		Endif
-	Endif
+		EndIf
+	EndIf
 
-	aadd(aC5Rodape,{(cAliasSC5)->C5_PBRUTO,(cAliasSC5)->C5_PESOL,(cAliasSC5)->C5_DESC1,(cAliasSC5)->C5_DESC2,;
+	aAdd(aC5Rodape,{(cAliasSC5)->C5_PBRUTO,(cAliasSC5)->C5_PESOL,(cAliasSC5)->C5_DESC1,(cAliasSC5)->C5_DESC2,;
 		(cAliasSC5)->C5_DESC3,(cAliasSC5)->C5_DESC4,cMensNF,(cAliasSC5)->C5_I_OBPED, (cAliasSC5)->A1_I_HORP})
 
 	aPedCli := ROMS007L(cPedido)
 
-	dbSelectArea(cAliasSC5)
+	DBSelectArea(cAliasSC5)
 	For nY := 1 to Len(aFisGetSC5)
 		If !Empty(&(aFisGetSC5[ny][2]))
 			If aFisGetSC5[ny][1] == "NF_SUFRAMA"
-				MaFisAlt(aFisGetSC5[ny][1],Iif(&(aFisGetSC5[ny][2]) == "1",.T.,.F.),Len(aItemPed),.T.)		
+				MaFisAlt(aFisGetSC5[ny][1],IIf(&(aFisGetSC5[ny][2]) == "1",.T.,.F.),Len(aItemPed),.T.)		
 			Else
 				MaFisAlt(aFisGetSC5[ny][1],&(aFisGetSC5[ny][2]),Len(aItemPed),.T.)
-			Endif	
+			EndIf	
 		EndIf
 	Next nY
 
@@ -561,15 +561,15 @@ While !oReport:Cancel() .And. !((cAliasSC5)->(Eof()))
 		nDesconto  := 0
 
 		If !Empty((cAliasSC6)->C6_NFORI)
-			dbSelectArea("SD1")
-			dbSetOrder(1)
-			dbSeek(xFilial("SC6")+(cAliasSC6)->C6_NFORI+(cAliasSC6)->C6_SERIORI+(cAliasSC6)->C6_CLI+(cAliasSC6)->C6_LOJA+;
+			DBSelectArea("SD1")
+			DBSetOrder(1)
+			DBSeek(xFilial("SC6")+(cAliasSC6)->C6_NFORI+(cAliasSC6)->C6_SERIORI+(cAliasSC6)->C6_CLI+(cAliasSC6)->C6_LOJA+;
 				(cAliasSC6)->C6_PRODUTO+(cAliasSC6)->C6_ITEMORI)
 			cNfOri     := (cAliasSC6)->C6_NFORI
 			cSeriOri   := (cAliasSC6)->C6_SERIORI
 			nRecnoSD1  := SD1->(RECNO())
 		EndIf
-		dbSelectArea(cAliasSC6)
+		DBSelectArea(cAliasSC6)
 
 		//===============================================
 		//Calcula o preco de lista                     
@@ -606,7 +606,7 @@ While !oReport:Cancel() .And. !((cAliasSC5)->(Eof()))
 			0								,;	// 15-RecNo do SB1
 			0								)	// 16-RecNo do SF4
 	
-		aadd(aItemPed,	{	(cAliasSC6)->C6_ITEM	,;
+		aAdd(aItemPed,	{	(cAliasSC6)->C6_ITEM	,;
 			(cAliasSC6)->C6_PRODUTO					,;
 			(cAliasSC6)->C6_DESCRI					,;
 			(cAliasSC6)->C6_TES						,;
@@ -632,7 +632,7 @@ While !oReport:Cancel() .And. !((cAliasSC5)->(Eof()))
 		//=========================================================================
 		//Forca os valores de impostos que foram informados no SC6.              
 		//=========================================================================
-		dbSelectArea(cAliasSC6)
+		DBSelectArea(cAliasSC6)
 		For nY := 1 to Len(aFisGet)
 			If !Empty(&(aFisGet[ny][2]))
 				MaFisAlt(aFisGet[ny][1],&(aFisGet[ny][2]),Len(aItemPed))
@@ -642,7 +642,7 @@ While !oReport:Cancel() .And. !((cAliasSC5)->(Eof()))
 		//===============================================
 		//Calculo do ISS                               
 		//===============================================
-		SF4->(dbSetOrder(1))
+		SF4->(DBSetOrder(1))
 		SF4->(MsSeek(xFilial("SF4")+(cAliasSC6)->C6_TES))
 		If ( (cAliasSC5)->C5_INCISS == "N" .And. (cAliasSC5)->C5_TIPO == "N")
 			If ( SF4->F4_ISS=="S" )
@@ -656,17 +656,17 @@ While !oReport:Cancel() .And. !((cAliasSC5)->(Eof()))
 		//===============================================
 		//Altera peso para calcular frete              
 		//===============================================
-		SB1->(dbSetOrder(1))
+		SB1->(DBSetOrder(1))
 		SB1->(MsSeek(xFilial("SB1")+(cAliasSC6)->C6_PRODUTO))			
 		MaFisAlt("IT_PESO",(cAliasSC6)->C6_QTDVEN*SB1->B1_PESO,Len(aItemPed))
 		MaFisAlt("IT_PRCUNI",nPrcLista,Len(aItemPed))
 		MaFisAlt("IT_VALMERC",nValMerc,Len(aItemPed))
 			
 		If !lQuery
-			dbSelectArea(cAliasSC6)
+			DBSelectArea(cAliasSC6)
 		EndIf
 
-		(cAliasSC6)->(dbSkip())
+		(cAliasSC6)->(DBSkip())
 	EndDo
 	MaFisAlt("NF_FRETE"   ,nFrete)
 	MaFisAlt("NF_SEGURO"  ,nSeguro)
@@ -692,7 +692,7 @@ While !oReport:Cancel() .And. !((cAliasSC5)->(Eof()))
 			oReport:EndPage(.T.)
 			oReport:Section(1):Init()
 		 	ROMS007C4(aPedCli,oReport,aCabPed)
-		Endif
+		EndIf
 		ROMD007I4(nItem,@nPesLiq,@nPesBru,oReport,oPreNota,aCabPed,aItemPed)
 	Next
 	oReport:Section(1):Finish()
@@ -702,9 +702,9 @@ While !oReport:Cancel() .And. !((cAliasSC5)->(Eof()))
 	MaFisEnd()
 
 	If !lQuery
-		dbSelectArea(cAliasSC5)
-		dbSkip()
-	Endif
+		DBSelectArea(cAliasSC5)
+		DBSkip()
+	EndIf
 
 EndDo
 
@@ -749,22 +749,22 @@ Local _cTpCarga  := ""
 //  09 C5_VEND2          18 C5_FRETE     	27 C5_ACRSFIN  
      
 // Posiciona registro no cliente do pedido                     
-IF !(aCabPed[1]$"DB")   //C5_TIPO
-	dbSelectArea("SA1")
-	dbSeek(xFilial("SA1")+aCabped[2]+aCabped[3])  //C5_CLIENTE + C5_LOJACLI
+If !(aCabPed[1]$"DB")   //C5_TIPO
+	DBSelectArea("SA1")
+	DBSeek(xFilial("SA1")+aCabped[2]+aCabped[3])  //C5_CLIENTE + C5_LOJACLI
 	cPictCgc := PesqPict("SA1","A1_CGC")	
 Else
-	dbSelectArea("SA2")
-	dbSeek(xFilial("SA2")+aCabPed[2]+aCabPed[3])  // C5_CLIENTE + C5_LOJACLI
+	DBSelectArea("SA2")
+	DBSeek(xFilial("SA2")+aCabPed[2]+aCabPed[3])  // C5_CLIENTE + C5_LOJACLI
 	cPictCgc := PesqPict("SA2","A2_CGC")	
-Endif
+EndIf
 
-dbSelectArea("SA4")
-dbSetOrder(1)
-dbSeek(xFilial("SA4")+aCabPed[4])	   				// C5_TRANSP
-dbSelectArea("SE4")
-dbSetOrder(1)
-dbSeek(xFilial("SE4")+aCabPed[5])	  				// C5_CONDPAG
+DBSelectArea("SA4")
+DBSetOrder(1)
+DBSeek(xFilial("SA4")+aCabPed[4])	   				// C5_TRANSP
+DBSelectArea("SE4")
+DBSetOrder(1)
+DBSeek(xFilial("SE4")+aCabPed[5])	  				// C5_CONDPAG
 aSort(aPedCli)
 
 //===============================================================
@@ -781,7 +781,7 @@ oReport:Box(20,750,200,1800,oBox)
 oReport:Box(20,1800,200,3000,oBox)
 oReport:Box(20,2550,200,3000,oBox)
 
-IF !(aCabPed[1]$"DB")		//C5_TIPO
+If !(aCabPed[1]$"DB")		//C5_TIPO
    nPrinLin := nInicio
 	//===============================================================
 	// Informacoes do Quadro 1: Dados da Empresa                   
@@ -793,7 +793,7 @@ IF !(aCabPed[1]$"DB")		//C5_TIPO
 	nPrinLin += 30
 	oReport:PrintText("TEL: "+SM0->M0_TEL,nPrinLin,20)	
 	nPrinLin += 30
-	oReport:PrintText(Iif(cPaisLoc=="BRA","CGC: ",Alltrim(Posicione('SX3',2,'A1_CGC','SX3->X3_TITULO'))+":")+;	
+	oReport:PrintText(IIf(cPaisLoc=="BRA","CGC: ",AllTrim(Posicione('SX3',2,'A1_CGC','SX3->X3_TITULO'))+":")+;	
 						Transform(SM0->M0_CGC,cPictCgc)+ " " +Subs(SM0->M0_CIDCOB,1,15),nPrinLin,20)
 	
 	//===============================================================
@@ -802,16 +802,16 @@ IF !(aCabPed[1]$"DB")		//C5_TIPO
     nPrinLin := nInicio
 	oReport:PrintText(SA1->A1_COD+"/"+SA1->A1_LOJA+" "+SA1->A1_NOME,nPrinLin,760)	
 	nPrinLin += 30
-	oReport:PrintText(IF( !Empty(SA1->A1_ENDENT) .And. SA1->A1_ENDENT # SA1->A1_END,SA1->A1_ENDENT, SA1->A1_END ),nPrinLin,760)
+	oReport:PrintText(If( !Empty(SA1->A1_ENDENT) .And. SA1->A1_ENDENT # SA1->A1_END,SA1->A1_ENDENT, SA1->A1_END ),nPrinLin,760)
 	nPrinLin += 30
-	oReport:PrintText(IF( !Empty(SA1->A1_CEPE) .And. SA1->A1_CEPE # SA1->A1_CEP,AllTrim(SA1->A1_CEPE), AllTrim(SA1->A1_CEP) )+" "+;
-						IF( !Empty(SA1->A1_MUNE) .And. SA1->A1_MUNE # SA1->A1_MUN,AllTrim(SA1->A1_MUNE),AllTrim(SA1->A1_MUN) )+" "+;
-						IF( !Empty(SA1->A1_ESTE) .And. SA1->A1_ESTE # SA1->A1_EST,AllTrim(SA1->A1_ESTE),AllTrim(SA1->A1_EST) ),nPrinLin,760)
+	oReport:PrintText(If( !Empty(SA1->A1_CEPE) .And. SA1->A1_CEPE # SA1->A1_CEP,AllTrim(SA1->A1_CEPE), AllTrim(SA1->A1_CEP) )+" "+;
+						If( !Empty(SA1->A1_MUNE) .And. SA1->A1_MUNE # SA1->A1_MUN,AllTrim(SA1->A1_MUNE),AllTrim(SA1->A1_MUN) )+" "+;
+						If( !Empty(SA1->A1_ESTE) .And. SA1->A1_ESTE # SA1->A1_EST,AllTrim(SA1->A1_ESTE),AllTrim(SA1->A1_EST) ),nPrinLin,760)
 	nPrinLin += 30
 	oReport:PrintText(subs(transform(SA1->A1_CGC,PicPesFJ(RetPessoa(SA1->A1_CGC))),1,at("%",transform(SA1->A1_CGC,PicPes(RetPessoa(SA1->A1_CGC))))-1),nPrinLin,760)
 	If cPaisLoc == "BRA"	
 		oReport:PrintText("IE: "+SA1->A1_INSCR,nPrinLin,1050)		
-	Endif                 
+	EndIf                 
 	nPrinLin += 30
 	oReport:PrintText("Bairro: "   + SA1->A1_BAIRRO,nPrinLin,760)		
 	nPrinLin += 30
@@ -823,7 +823,7 @@ IF !(aCabPed[1]$"DB")		//C5_TIPO
     nPrinLin := nInicio
 	oReport:PrintText("CONFIRMACAO DO PEDIDO",nPrinLin,1810)							
 	nPrinLin += 60
-	oReport:PrintText("EMISSAO: "+DTOC(aCabPed[6]),nPrinLin,1810)		    
+	oReport:PrintText("EMISSAO: "+DToC(aCabPed[6]),nPrinLin,1810)		    
 	
 	nPrinLin += 30
 	oReport:PrintText("PEDIDO N. " +aCabPed[7],nPrinLin,1810)			         
@@ -835,7 +835,7 @@ IF !(aCabPed[1]$"DB")		//C5_TIPO
 				
 		If Len(AllTrim(_cTpCarga)) > 0
 		
-			_cTpCarga:= AllTrim(_aTpCarga[val(_cTpCarga)])     
+			_cTpCarga:= AllTrim(_aTpCarga[Val(_cTpCarga)])     
 			_cTpCarga:= SubStr(_cTpCarga,AT("=",_cTpCarga)+2,Len(SubStr(_cTpCarga,AT("=",_cTpCarga)+2,Len(_cTpCarga)-1))-1)
 			
 				Else
@@ -856,14 +856,14 @@ IF !(aCabPed[1]$"DB")		//C5_TIPO
 	oReport:PrintText("DADOS DA NOTA FISCAL",nPrinLin,2560)							// "CONFIRMACAO DO PEDIDO"
 	nPrinLin += 60	
 	
-	if !Empty(alltrim(aCabPed[28]))
-		oReport:PrintText("EMISSÃO N.F.: " + DtoC(Posicione("SF2",1,xFilial("SF2") + aCabPed[28] + aCabPed[29] + aCabPed[2] + aCabPed[3],"SF2->F2_EMISSAO")),nPrinLin,2560)
-	Endif   
+	If !Empty(AllTrim(aCabPed[28]))
+		oReport:PrintText("EMISSÃO N.F.: " + DToC(Posicione("SF2",1,xFilial("SF2") + aCabPed[28] + aCabPed[29] + aCabPed[2] + aCabPed[3],"SF2->F2_EMISSAO")),nPrinLin,2560)
+	EndIf   
 	
 	nPrinLin += 30
-	if !Empty(alltrim(aCabPed[28]))
+	If !Empty(AllTrim(aCabPed[28]))
 		oReport:PrintText("Nota:"+aCabPed[28]+" Serie:"+aCabPed[29],nPrinLin,2560)
-	Endif 
+	EndIf 
 		
 Else
 
@@ -878,7 +878,7 @@ Else
 	nPrinLin += 30
 	oReport:PrintText("TEL: "+SM0->M0_TEL,nPrinLin,20)														
 	nPrinLin += 30
-	oReport:PrintText(Iif(cPaisLoc=="BRA","CGC: ",Alltrim(Posicione('SX3',2,'A1_CGC','SX3->X3_TITULO'))+":")+;	
+	oReport:PrintText(IIf(cPaisLoc=="BRA","CGC: ",AllTrim(Posicione('SX3',2,'A1_CGC','SX3->X3_TITULO'))+":")+;	
 						Transform(SM0->M0_CGC,cPictCgc)+ " " +Subs(SM0->M0_CIDCOB,1,15),nPrinLin,20)
 	
 	//===============================================================
@@ -895,7 +895,7 @@ Else
 	nPrinLin += 30
 	If cPaisLoc == "BRA"	
 		oReport:PrintText("IE: "+SA2->A2_INSCR,nPrinLin,1050)		
-	Endif                                               
+	EndIf                                               
 	nPrinLin += 30
 	oReport:PrintText("Bairro: "   + SA1->A1_BAIRRO,nPrinLin,760)		// BAIRRO
 	nPrinLin += 30
@@ -907,21 +907,21 @@ Else
 	nPrinLin := nInicio
 	oReport:PrintText("CONFIRMACAO DO PEDIDO",nPrinLin,1810)							
 	nPrinLin += 60
-	oReport:PrintText("EMISSAO: "+DTOC(aCabPed[6]),nPrinLin,1810)		    
+	oReport:PrintText("EMISSAO: "+DToC(aCabPed[6]),nPrinLin,1810)		    
 	
-	if !Empty(alltrim(aCabPed[28]))
-		oReport:PrintText("EMISSÃO N.F.: " + DtoC(Posicione("SF2",1,xFilial("SF2") + aCabPed[28] + aCabPed[29] + aCabPed[2] + aCabPed[3],"SF2->F2_EMISSAO")),nPrinLin,2200)
-	Endif        
+	If !Empty(AllTrim(aCabPed[28]))
+		oReport:PrintText("EMISSÃO N.F.: " + DToC(Posicione("SF2",1,xFilial("SF2") + aCabPed[28] + aCabPed[29] + aCabPed[2] + aCabPed[3],"SF2->F2_EMISSAO")),nPrinLin,2200)
+	EndIf        
 	
 	nPrinLin += 30
 	oReport:PrintText("PEDIDO N. "+aCabPed[7],nPrinLin,1810)		
 	oReport:PrintText("USUÁRIO: "+Posicione("SRA",1,aCabPed[30],"RA_NOME"),nPrinLin+30,1810)			
 	
-	if !Empty(alltrim(aCabPed[28]))
+	If !Empty(AllTrim(aCabPed[28]))
 		oReport:PrintText("Nota:"+aCabPed[28]+" Serie:"+aCabPed[29]+ " Carga:"+Posicione("DAI",4,xFilial("DAI")+ aCabPed[7],"DAI_COD"),nPrinLin,2200)
-	Endif
+	EndIf
 
-Endif 
+EndIf 
 
 //===============================================================
 // Pedidos do Cliente                                          
@@ -932,14 +932,14 @@ If Len(aPedCli) > 0
 	cPedCli:=""
 	For nPed := 1 To Len(aPedCli)
 		cPedCli += aPedCli[nPed]+Space(02)
-		If Len(cPedCli) > 100 .or. nPed == Len(aPedCli)
+		If Len(cPedCli) > 100 .Or. nPed == Len(aPedCli)
 			oReport:PrintText(cPedCli,oReport:Row(),350)
 			cPedCli:=""
  		   oReport:SkipLine(2)
-		Endif
+		EndIf
 	Next
 	oReport:Line(oReport:Row(),10,oReport:Row()+5,3000)
-Endif
+EndIf
 
 //===============================================================
 // Transportadora                                              
@@ -958,9 +958,9 @@ oReport:PrintText("PLACA: "+ cPlaca,oReport:Row(),1000)
 //===============================================================
 oReport:SkipLine()
 For i := 8 to 12
-	dbSelectArea("SA3")
-	dbSetOrder(1)
-	If dbSeek(xFilial("SA3")+aCabPed[i])														// C5_VENDi
+	DBSelectArea("SA3")
+	DBSetOrder(1)
+	If DBSeek(xFilial("SA3")+aCabPed[i])														// C5_VENDi
 		If i == 8
 			oReport:PrintText("VENDEDOR.: ",oReport:Row(),20)										
 			oReport:PrintText("COMISSAO: ",oReport:Row(),1000)										
@@ -977,7 +977,7 @@ Next
 oReport:PrintText("COND.PGTO: "+aCabPed[5]+" - "+SE4->E4_DESCRI,oReport:Row(),20)							//C5_CONDPAG
 oReport:PrintText("FRETE...: ",oReport:Row(),1000)													 
 oReport:PrintText(Transform(aCabPed[18],"@EZ 999,999,999.99"),oReport:Row(),1010)				// C5_FRETE
-oReport:PrintText(IIF(aCabPed[19]="C","(CIF)","(FOB)"),oReport:Row(),1200)					// C5_TPFRETE 
+oReport:PrintText(IIf(aCabPed[19]="C","(CIF)","(FOB)"),oReport:Row(),1200)					// C5_TPFRETE 
 oReport:PrintText("Vlr.Desconto: ",oReport:Row(),1350)
 oReport:PrintText(Transform(aCabPed[31],"@EZ 999,999,999.99"),oReport:Row(),1445)
 oReport:PrintText("SEGURO: ",oReport:Row(),2000)													
@@ -996,8 +996,8 @@ oReport:SkipLine()
 //===============================================================
 // Reajuste, Moeda, Banco e Acrescimo Financeiro               
 //===============================================================
-cMoeda:=Strzero(aCabPed[24],1,0)																// C5_MOEDA
-oReport:PrintText("REAJUSTE.: "+aCabPed[25]+"   Moeda : " +IIF(cMoeda < "2","1",cMoeda),oReport:Row(),20)		//C5_REAJUST
+cMoeda:=StrZero(aCabPed[24],1,0)																// C5_MOEDA
+oReport:PrintText("REAJUSTE.: "+aCabPed[25]+"   Moeda : " +IIf(cMoeda < "2","1",cMoeda),oReport:Row(),20)		//C5_REAJUST
 oReport:PrintText("BANCO: " + aCabPed[26],oReport:Row(),1000)				   					// 		//C5_BANCO
 oReport:PrintText("ACRES.FIN.: " + Str(aCabPed[27],6,2),oReport:Row(),2000)							// 	//C5_ACRSFIN
 oReport:SkipLine()
@@ -1006,8 +1006,8 @@ oReport:SkipLine()
 //============================================================================================================================
 // Data de Entrega, Tipo de Carga, Chapa, Hora de Descarga, Senha de Descarga, Custo de Descarga, Mensagem para nota        
 //============================================================================================================================
-oReport:PrintText("DATA DE ENTREGA: "	+DTOC(aCabPed[32]),oReport:Row(),20)											// C5_I_DTENT
-oReport:PrintText("TIPO DE CARGA: "		+IIF(aCabPed[33]="1","PALETIZADA","BATIDA"),oReport:Row(),500)				// C5_I_TIPCA (1-Paletizada ou 2-Batida) 
+oReport:PrintText("DATA DE ENTREGA: "	+DToC(aCabPed[32]),oReport:Row(),20)											// C5_I_DTENT
+oReport:PrintText("TIPO DE CARGA: "		+IIf(aCabPed[33]="1","PALETIZADA","BATIDA"),oReport:Row(),500)				// C5_I_TIPCA (1-Paletizada ou 2-Batida) 
 oReport:PrintText("QUANT DE CHAPA: "	+aCabPed[34],oReport:Row(),1000) 										   		// C5_I_CHAPA 
 oReport:PrintText("HORA DA DESCARGA: "	+aCabPed[35],oReport:Row(),1500) 									   			// C5_I_HORDE  
 oReport:PrintText("SENHA DA DESCARGA: "	+aCabPed[36],oReport:Row(),2000)   									   			// C5_I_SENHA 
@@ -1038,7 +1038,7 @@ Static Function ROMD007I4(nItem,nPesLiq,nPesBru,oReport,oPreNota,aCabPed,aItemPe
 //  array aitemped                                             
 //  --------------                                             
 //  01 c6_item           08 c6_prcven         15 c6_descont    
-//  02 c6_produto        09 c6_nota           16 c6_local      
+//  02 c6_produto        09 c6_nota           16 c6_LOCAL      
 //  03 c6_descri         10 c6_serie          17 c6_qtdemp     
 //  04 c6_tes            11 c6_cli            18 c6_qtdlib     
 //  05 c6_cf             12 c6_loja           19 c6_qtdent     
@@ -1056,22 +1056,22 @@ If cPaisLoc == "BRA"
 		nValImp := 0
 	Else
 		nValImp	:=	MaFisRet(nItem,"IT_VALIPI")
-	Endif
+	EndIf
 Else
 	nValImp	:=	MaRetIncIV(nItem,"2")
-Endif
+EndIf
 
-dbSelectArea("SB1")
-dbSeek(xFilial("SB1")+aItemPed[nItem][2])  //C6_PRODUTO
+DBSelectArea("SB1")
+DBSeek(xFilial("SB1")+aItemPed[nItem][2])  //C6_PRODUTO
 
 //c6_nota c6_serie c6_cli c6_loja c6_produto
 cChaveD2 := xFilial("SD2")+aItemPed[nItem][09]+aItemPed[nItem][10]+aItemPed[nItem][11]+aItemPed[nItem][12]+aItemPed[nItem][02]
-dbSelectArea("SD2")
-dbSetOrder(3)
-dbSeek(cChaveD2)
-While !Eof() .and. cChaveD2 = xFilial("SD2")+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA+D2_COD
+DBSelectArea("SD2")
+DBSetOrder(3)
+DBSeek(cChaveD2)
+While !Eof() .And. cChaveD2 = xFilial("SD2")+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA+D2_COD
 	nUltLib := D2_QUANT
-	dbSkip()
+	DBSkip()
 EndDo
 
 oReport:Section(1):PrintLine()
@@ -1109,21 +1109,21 @@ If lFinal
 	oReport:Section(2):PrintLine()
 	oReport:Section(2):Finish()
 
-Endif	
+EndIf	
 
 oReport:SkipLine()
-oReport:PrintText("PESO BRUTO ------------->"+STR(If(aC5Rodape[1][1] > 0,aC5Rodape[1][1],nPesBru)),1880,30)	 
-oReport:PrintText("PESO LIQUIDO ----------->"+STR(If(aC5Rodape[1][2] > 0,aC5Rodape[1][2],nPesLiq)),1910,30)	 
+oReport:PrintText("PESO BRUTO ------------->"+Str(If(aC5Rodape[1][1] > 0,aC5Rodape[1][1],nPesBru)),1880,30)	 
+oReport:PrintText("PESO LIQUIDO ----------->"+Str(If(aC5Rodape[1][2] > 0,aC5Rodape[1][2],nPesLiq)),1910,30)	 
 oReport:PrintText("VOLUMES ---------------->",1940,30)															 
 oReport:PrintText("SEPARADO  POR ---------->",1970,30)															 
 oReport:PrintText("CONFERIDO POR ---------->",2000,30)															 
 oReport:PrintText("D A T A ---------------->",2030,30)															 
                             
-If !Empty(Alltrim((aC5Rodape[1][8])))
-oReport:PrintText("O B S COMERCIAL --------> "+Alltrim((aC5Rodape[1][8])) ,2060,30)
-EndIF																 
-If !Empty(Alltrim((aC5Rodape[1][9])))
-oReport:PrintText("RECEBIMENTO NO CLIENTE -> "+Alltrim((aC5Rodape[1][9])),2090,30)															 
+If !Empty(AllTrim((aC5Rodape[1][8])))
+oReport:PrintText("O B S COMERCIAL --------> "+AllTrim((aC5Rodape[1][8])) ,2060,30)
+EndIf																 
+If !Empty(AllTrim((aC5Rodape[1][9])))
+oReport:PrintText("RECEBIMENTO NO CLIENTE -> "+AllTrim((aC5Rodape[1][9])),2090,30)															 
 EndIf
 
 oReport:PrintText("DESCONTOS: ",2120,30)															 
@@ -1132,9 +1132,9 @@ oReport:PrintText(Transform(aC5Rodape[1][4],"99.99"),2120,300)
 oReport:PrintText(Transform(aC5Rodape[1][5],"99.99"),2120,400)
 oReport:PrintText(Transform(aC5Rodape[1][6],"99.99"),2120,500)
 
-aAux:=strtokarr(aC5Rodape[1][7],";")
+aAux:=StrTokArr(aC5Rodape[1][7],";")
 nXLinha:=2150
-for nx:=1 to len(aAux)
+For nx:=1 to Len(aAux)
 	oReport:PrintText(aAux[nx],nXLinha,30)
 	nXLinha+=30
 Next nx
@@ -1156,24 +1156,24 @@ Retorno-----------: Nenhum
 Static Function ROMS007L(cPedido)
 
 Local aPedidos := {}
-Local aArea    := GetArea()
+Local aArea    := FWGetArea()
 Local aAreaSC6 := SC6->(GetArea())
 
-SC6->(dbSetOrder(1))
+SC6->(DBSetOrder(1))
 SC6->(MsSeek(xFilial("SC6")+cPedido))
 
 While !(SC6->(Eof())) .And. xFilial("SC6")==SC6->C6_FILIAL .And.;
 		SC6->C6_NUM == cPedido
 
-	If !Empty(SC6->C6_PEDCLI) .and. Ascan(aPedidos,SC6->C6_PEDCLI) = 0
-		Aadd(aPedidos, SC6->C6_PEDCLI )
-	Endif		
+	If !Empty(SC6->C6_PEDCLI) .And. aScan(aPedidos,SC6->C6_PEDCLI) = 0
+		aAdd(aPedidos, SC6->C6_PEDCLI )
+	EndIf		
 
-	SC6->(dbSkip())
-Enddo
+	SC6->(DBSkip())
+EndDo
 
-RestArea(aAreaSC6)
-RestArea(aArea)
+FWRestArea(aAreaSC6)
+FWRestArea(aArea)
 
 Return(aPedidos)
 
@@ -1203,21 +1203,21 @@ If aFisGet == Nil
 
 	_acamps := SC6->(Dbstruct())
 
-	For _nni := 1 to len(_acamps)
+	For _nni := 1 to Len(_acamps)
 
 		_x3valid := GetSx3Cache( _acamps[_nni][1], "X3_VALID" )
 		_x3vlduser := GetSx3Cache( _acamps[_nni][1], "X3_VLDUSER" )
-		cValid := UPPER(_x3valid+_x3vlduser)
+		cValid := Upper(_x3valid+_x3vlduser)
 
 		If 'MAFISGET("'$cValid
 			nPosIni 	:= AT('MAFISGET("',cValid)+10
-			nLen		:= AT('")',Substr(cValid,nPosIni,Len(cValid)-nPosIni))-1
-			cReferencia := Substr(cValid,nPosIni,nLen)
+			nLen		:= AT('")',SubStr(cValid,nPosIni,Len(cValid)-nPosIni))-1
+			cReferencia := SubStr(cValid,nPosIni,nLen)
 			aAdd(aFisGet,{cReferencia,_acamps[_nni][1],MaFisOrdem(cReferencia)})
 		EndIf
 		If 'MAFISREF("'$cValid
 			nPosIni		:= AT('MAFISREF("',cValid) + 10
-			cReferencia	:=Substr(cValid,nPosIni,AT('","MT410",',cValid)-nPosIni)
+			cReferencia	:=SubStr(cValid,nPosIni,AT('","MT410",',cValid)-nPosIni)
 			aAdd(aFisGet,{cReferencia,_acamps[_nni][1],MaFisOrdem(cReferencia)})
 		EndIf
 
@@ -1234,24 +1234,24 @@ If aFisGetSC5 == Nil
 	aFisGetSC5	:= {}
 	_nni := 1
 
-	For _nni := 1 to len(_acamps2)
+	For _nni := 1 to Len(_acamps2)
 
 		_x3valid := GetSx3Cache( _acamps2[_nni][1], "X3_VALID" )
 		_x3vlduser := GetSx3Cache( _acamps2[_nni][1], "X3_VLDUSER" )
-		cValid := UPPER(_x3valid+_x3vlduser)
+		cValid := Upper(_x3valid+_x3vlduser)
 
 		If 'MAFISGET("'$cValid
 			nPosIni 	:= AT('MAFISGET("',cValid)+10
-			nLen		:= AT('")',Substr(cValid,nPosIni,Len(cValid)-nPosIni))-1
-			cReferencia := Substr(cValid,nPosIni,nLen)
+			nLen		:= AT('")',SubStr(cValid,nPosIni,Len(cValid)-nPosIni))-1
+			cReferencia := SubStr(cValid,nPosIni,nLen)
 			aAdd(aFisGetSC5,{cReferencia,_acamps2[_nni][1],MaFisOrdem(cReferencia)})
 		EndIf
 		If 'MAFISREF("'$cValid
 			nPosIni		:= AT('MAFISREF("',cValid) + 10
-			cReferencia	:=Substr(cValid,nPosIni,AT('","MT410",',cValid)-nPosIni)
+			cReferencia	:=SubStr(cValid,nPosIni,AT('","MT410",',cValid)-nPosIni)
 			aAdd(aFisGetSC5,{cReferencia,_acamps2[_nni][1],MaFisOrdem(cReferencia)})
 		EndIf
-		dbSkip()
+		DBSkip()
 	
 	Next
 	aSort(aFisGetSC5,,,{|x,y| x[3]<y[3]})
@@ -1272,12 +1272,12 @@ Parametros------: _cFil,_cPedido
 ===============================================================================================================================
 Retorno---------: _cCargas
 ===============================================================================================================================*/
-STATIC FUNCTION ROMS007A(_cFil,_cPedido)
+Static Function ROMS007A(_cFil,_cPedido)
  
 Local _cQuery   := '' 
 Local _cAliasCar:= GetNextAlias() 
 Local _cCargas  := ''    
-Local _aArea    := GetArea()
+Local _aArea    := FWGetArea()
 
 
 	_cQuery := "SELECT"  
@@ -1289,19 +1289,19 @@ Local _aArea    := GetArea()
 	_cQuery += " AND DAI.DAI_PEDIDO = '" + _cPedido + "'" 
     
 	If Select(_cAliasCar) > 0
-		(_cAliasCar)->(dbCloseArea())
+		(_cAliasCar)->(DBCloseArea())
 	EndIf                                                     
 	
 	dbUseArea( .T., "TOPCONN",TcGenQry(,,_cQuery),_cAliasCar,.T.,.T.)
 	
-	dbSelectArea(_cAliasCar)
-	(_cAliasCar)->(dbGotop())  
+	DBSelectArea(_cAliasCar)
+	(_cAliasCar)->(DBGoTop())  
 	
 	While (_cAliasCar)->(!Eof())  
 	         
 		_cCargas+= AllTrim((_cAliasCar)->DAI_COD) + '/'
 	
-	(_cAliasCar)->(dbSkip())
+	(_cAliasCar)->(DBSkip())
 	EndDo 
 	                              
 	If Len(AllTrim(_cCargas)) > 6  
@@ -1311,9 +1311,9 @@ Local _aArea    := GetArea()
 	
 	EndIf
 	
-	dbSelectArea(_cAliasCar)     
-	(_cAliasCar)->(dbCloseArea())               
+	DBSelectArea(_cAliasCar)     
+	(_cAliasCar)->(DBCloseArea())               
 	
-	restArea(_aArea)
+	FWRestArea(_aArea)
 
 Return _cCargas

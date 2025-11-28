@@ -2,17 +2,17 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 08/10/2024 | Chamado 48465. Retirada manipulação do SX1
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Lucas Borges  |08/10/2024| Chamado 48465. Retirada manipulação do SX1
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
 ===============================================================================================================================
 */
 
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 #Include "FWPrintSetup.ch"
-#include "ap5mail.ch"
-#INCLUDE "RPTDEF.CH"
+#Include "ap5mail.ch"
+#Include "RPTDEF.CH"
 
 Static nLimite_Dias_Epi
 Static nDiaAntAdm
@@ -45,14 +45,14 @@ User Function RMDT006()
 	Private cPerg
 	Private cabec1, cabec2
 	Private cEmpPPP 	:= cEmpAnt
-	Private nSizeSI3 	:= IIf( ( TAMSX3( "I3_CUSTO" )[1] ) < 1, 9, ( TAMSX3( "I3_CUSTO" )[1] ) )
-	Private nSizeSRJ 	:= IIf( ( TAMSX3( "RJ_FUNCAO" )[1] ) < 1, 5, ( TAMSX3( "RJ_FUNCAO" )[1] ) )
-	Private nSizeTN5 	:= IIf( ( TAMSX3( "TN5_CODTAR" )[1] ) < 1, 6, ( TAMSX3( "TN5_CODTAR" )[1] ) )
-	Private nSizeSQB 	:= IIf( ( TAMSX3( "QB_DEPTO" )[1] ) < 1, 6, ( TAMSX3( "QB_DEPTO" )[1] ) )
+	Private nSizeSI3 	:= IIf( ( TamSX3( "I3_CUSTO" )[1] ) < 1, 9, ( TamSX3( "I3_CUSTO" )[1] ) )
+	Private nSizeSRJ 	:= IIf( ( TamSX3( "RJ_FUNCAO" )[1] ) < 1, 5, ( TamSX3( "RJ_FUNCAO" )[1] ) )
+	Private nSizeTN5 	:= IIf( ( TamSX3( "TN5_CODTAR" )[1] ) < 1, 6, ( TamSX3( "TN5_CODTAR" )[1] ) )
+	Private nSizeSQB 	:= IIf( ( TamSX3( "QB_DEPTO" )[1] ) < 1, 6, ( TamSX3( "QB_DEPTO" )[1] ) )
 	Private nSizeTD 	:= 6
 	Private lNGMDTPS 	:= .F.
 	Private lSigaMdtps 	:= .F.
-	Private lEpiCompl  	:= .F.  // Indica se a empresa utiliza EPI em carater complementar, mesmo quando o EPC for eficaz.
+	Private lEpiCompl  	:= .F.  // Indica se a empresa utiliza EPI em carater complementar, mesmo quando o EPC For eficaz.
 	Private lMV_PPPRISC := .F.
 	Private nTamanRES 	:= 6
 	Private lNG2M400  	:= .F.
@@ -94,14 +94,14 @@ User Function RMDT006()
 	Private cAlias    := "CTT"
 	Private cDescr    := "CTT->CTT_DESC01"
 	Private cF3CC     := "CTT"
-	Private nSizeCC   := IIf( ( TAMSX3( "CTT_CUSTO" )[1] ) < 1, 9, ( TAMSX3( "CTT_CUSTO" )[1] ) )
+	Private nSizeCC   := IIf( ( TamSX3( "CTT_CUSTO" )[1] ) < 1, 9, ( TamSX3( "CTT_CUSTO" )[1] ) )
 
 	//Variaveis relacionadas a pergunta Representante Empresa?
 	Private cNumSX1 	:= IIf( lSigaMDTPs, "13", "09" )
 	Private cAliasRES 	:= "SRA" //Representante Funcionario
 	Private cCNomeRES 	:= "SRA->RA_NOME"
 	Private cCpfRes 	:= 'SRA->RA_CIC'
-	Private cValRES		:= "ExCpoMDT('SRA',mv_par" + cNumSX1 + ")" //Valid da Consulta
+	Private cValRES		:= "ExCpoMDT('SRA',MV_PAR" + cNumSX1 + ")" //Valid da Consulta
 	Private cRetF3		:= ""
 	Private cMdtGenFun	:= "MDT700SXB()"
 	Private cMdtGenRet	:= "MDT700RSXB()"
@@ -122,7 +122,7 @@ User Function RMDT006()
 		//Indica se o cliente e um prestador de servico de medicina. S-SIM N-NAO
 		lSigaMdtPS := SuperGetMv( "MV_MDTPS", .F., "N" ) == "S"
 
-		//Indica se a empresa utiliza EPI em carater complementar, mesmo quando o EPC for eficaz. S=Sim ou N=Nao
+		//Indica se a empresa utiliza EPI em carater complementar, mesmo quando o EPC For eficaz. S=Sim ou N=Nao
 		lEpiCompl  := SuperGetMv( "MV_NG2KEPI", .F., "N" ) == "S"
 
 		//Indica se a descricao das atividades do cargo tera todo o seu conteudo impresso no PPP ou apenas sera impresso os 400 primeiros caracteres. S=Sim;N=Nao
@@ -159,8 +159,8 @@ User Function RMDT006()
 			lCposTNX := .F.
 		EndIf
 
-		//cPerg := PADR( "MDT700", 10 )
-		cPerg := PADR( "RMDT006", 10 )
+		//cPerg := PadR( "MDT700", 10 )
+		cPerg := PadR( "RMDT006", 10 )
 
 		/* Perguntas
 		MDT700    ¦01      ¦De Matricula ?
@@ -242,7 +242,7 @@ User Function RMDT006()
 			MDT700PS    ¦37      ¦Imp. Título Atividade ?
 			*/
 
-			cPerg    :=  PADR( "MDT700PS", 10 )
+			cPerg    :=  PadR( "MDT700PS", 10 )
 		EndIf
 
 		nProcessa := 1
@@ -250,87 +250,87 @@ User Function RMDT006()
 		If Pergunte( cPerg, .T. )
 
 			// Mapeamento das perguntas comuns às empresas "Prestadoras de Serviço" e às empresas "Não-Prestadoras de Serviço"
-			// As variáveis mv_par01 até mv_par04 só devem ser usadas em "Prestadoras de Serviço"
+			// As variáveis MV_PAR01 até MV_PAR04 só devem ser usadas em "Prestadoras de Serviço"
 			If lSigaMdtps
-				xm_par01 := mv_par05
-				xm_par02 := mv_par06
-				xm_par03 := mv_par07
-				xm_par04 := mv_par08
-				xm_par05 := mv_par09
-				xm_par06 := mv_par10
-				xm_par07 := mv_par11
-				xm_par08 := mv_par12
-				xm_par09 := mv_par13
-				xm_par10 := mv_par14
-				xm_par11 := mv_par15
-				xm_par12 := mv_par16
-				xm_par13 := mv_par17
-				xm_par14 := mv_par18
-				xm_par15 := mv_par19
-				xm_par16 := mv_par20
-				xm_par17 := mv_par21
-				xm_par18 := mv_par22
-				xm_par19 := mv_par23
-				xm_par20 := mv_par24
-				xm_par21 := mv_par25
-				xm_par22 := mv_par26
-				xm_par23 := mv_par27
-				xm_par24 := mv_par28
-				xm_par25 := mv_par29
-				xm_par26 := mv_par30
-				xm_par27 := mv_par31
-				xm_par28 := mv_par32
-				xm_par29 := mv_par33
-				xm_par30 := mv_par34
-				xm_par31 := mv_par35
-				xm_par32 := mv_par36
-				xm_par33 := mv_par37
+				xm_par01 := MV_PAR05
+				xm_par02 := MV_PAR06
+				xm_par03 := MV_PAR07
+				xm_par04 := MV_PAR08
+				xm_par05 := MV_PAR09
+				xm_par06 := MV_PAR10
+				xm_par07 := MV_PAR11
+				xm_par08 := MV_PAR12
+				xm_par09 := MV_PAR13
+				xm_par10 := MV_PAR14
+				xm_par11 := MV_PAR15
+				xm_par12 := MV_PAR16
+				xm_par13 := MV_PAR17
+				xm_par14 := MV_PAR18
+				xm_par15 := MV_PAR19
+				xm_par16 := MV_PAR20
+				xm_par17 := MV_PAR21
+				xm_par18 := MV_PAR22
+				xm_par19 := MV_PAR23
+				xm_par20 := MV_PAR24
+				xm_par21 := MV_PAR25
+				xm_par22 := MV_PAR26
+				xm_par23 := MV_PAR27
+				xm_par24 := MV_PAR28
+				xm_par25 := MV_PAR29
+				xm_par26 := MV_PAR30
+				xm_par27 := MV_PAR31
+				xm_par28 := MV_PAR32
+				xm_par29 := MV_PAR33
+				xm_par30 := MV_PAR34
+				xm_par31 := MV_PAR35
+				xm_par32 := MV_PAR36
+				xm_par33 := MV_PAR37
 				xm_par34 := 1
 				xm_par35 := 2
 			Else
-				xm_par01 := mv_par01
-				xm_par02 := mv_par02
-				xm_par03 := mv_par03
-				xm_par04 := mv_par04
-				xm_par05 := mv_par05
-				xm_par06 := mv_par06
-				xm_par07 := mv_par07
-				xm_par08 := mv_par08
-				xm_par09 := mv_par09
-				xm_par10 := mv_par10
-				xm_par11 := mv_par11
-				xm_par12 := mv_par12
-				xm_par13 := mv_par13
-				xm_par14 := mv_par14
-				xm_par15 := mv_par15
-				xm_par16 := mv_par16
-				xm_par17 := mv_par17
-				xm_par18 := mv_par18
-				xm_par19 := mv_par19
-				xm_par20 := mv_par20
-				xm_par21 := mv_par21
-				xm_par22 := mv_par22
-				xm_par23 := mv_par23
-				xm_par24 := mv_par24
-				xm_par25 := mv_par25
-				xm_par26 := mv_par26
-				xm_par27 := mv_par27
-				xm_par28 := mv_par28
-				xm_par29 := mv_par29
-				xm_par30 := mv_par30
-				xm_par31 := mv_par31
-				xm_par32 := mv_par32
-				xm_par33 := mv_par33
-				xm_par34 := mv_par34
-				xm_par35 := mv_par35
-				xm_par36 := mv_par36
+				xm_par01 := MV_PAR01
+				xm_par02 := MV_PAR02
+				xm_par03 := MV_PAR03
+				xm_par04 := MV_PAR04
+				xm_par05 := MV_PAR05
+				xm_par06 := MV_PAR06
+				xm_par07 := MV_PAR07
+				xm_par08 := MV_PAR08
+				xm_par09 := MV_PAR09
+				xm_par10 := MV_PAR10
+				xm_par11 := MV_PAR11
+				xm_par12 := MV_PAR12
+				xm_par13 := MV_PAR13
+				xm_par14 := MV_PAR14
+				xm_par15 := MV_PAR15
+				xm_par16 := MV_PAR16
+				xm_par17 := MV_PAR17
+				xm_par18 := MV_PAR18
+				xm_par19 := MV_PAR19
+				xm_par20 := MV_PAR20
+				xm_par21 := MV_PAR21
+				xm_par22 := MV_PAR22
+				xm_par23 := MV_PAR23
+				xm_par24 := MV_PAR24
+				xm_par25 := MV_PAR25
+				xm_par26 := MV_PAR26
+				xm_par27 := MV_PAR27
+				xm_par28 := MV_PAR28
+				xm_par29 := MV_PAR29
+				xm_par30 := MV_PAR30
+				xm_par31 := MV_PAR31
+				xm_par32 := MV_PAR32
+				xm_par33 := MV_PAR33
+				xm_par34 := MV_PAR34
+				xm_par35 := MV_PAR35
+				xm_par36 := MV_PAR36
 			EndIf
 
 			// Define o tamanho correto da informação de acordo com o tipo de representante, funcionario ou usuario
-			If Alltrim( GetMV( "MV_MDTRESP" ) ) == "1"
-				nTamMvPar09 := TAMSX3( "RA_MAT" )[1]
+			If AllTrim( GetMV( "MV_MDTRESP" ) ) == "1"
+				nTamMvPar09 := TamSX3( "RA_MAT" )[1]
 			Else
-				nTamMvPar09 := TAMSX3( "TMK_CODUSU" )[1]
+				nTamMvPar09 := TamSX3( "TMK_CODUSU" )[1]
 			EndIf
 
 			xm_par09 := SubStr( xm_par09, 1, nTamMvPar09 )
@@ -345,19 +345,19 @@ User Function RMDT006()
 
 		EndIf
 
-		cArqTab := __cArqTab    // Devolve o valor original por Variavel Estatica
+		cArqTab := __cArqTab    // Devolve o valor original por Variavel EStatica
 
 		cEmpAnt := cSvEmpAnt
 		cFilAnt := cSvFilAnt
 
-		dbSelectArea( "SM0" )
-		dbSeek( cSvEmpAnt + cSvFilAnt )
+		DBSelectArea( "SM0" )
+		DBSeek( cSvEmpAnt + cSvFilAnt )
 
 		NGRETURNPRM( aNGBEGINPRM ) // Devolve variaveis armazenadas (NGRIGHTCLICK)
 
 	EndIf
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -370,7 +370,7 @@ Parametros------------: lEnd    , Logico   - Controle de Encerramento do Relatór
                         wnRel   , Caracter - Arquivo de saida do relatorio          
                         titulo  , Caracter - Titulo do relatorio
                         tamanho , Caracter - Tamanho do relatorio
-Retorno---------------: @return Logico, .F. se a geração do relatorio foi cancelada
+Retorno---------------: @Return Logico, .F. se a geração do relatorio foi cancelada
 ===============================================================================================================================
 */
 Static Function R700Imp( lEnd, wnRel, titulo, tamanho )
@@ -380,13 +380,13 @@ Static Function R700Imp( lEnd, wnRel, titulo, tamanho )
 	Local aDBF := {}
 
 	Local aTamCpo  := TamSX3( "TN0_QTAGEN" )
-	Local nSizeCod := IIf( ( TAMSX3( "B1_COD" )[1] ) < 1, 15, ( TAMSX3( "B1_COD" )[1] ) )
-	Local nTamExa  := IIf( TAMSX3( "TM4_EXAME" )[1] < 1, 6, TAMSX3( "TM4_EXAME" )[1] )
+	Local nSizeCod := IIf( ( TamSX3( "B1_COD" )[1] ) < 1, 15, ( TamSX3( "B1_COD" )[1] ) )
+	Local nTamExa  := IIf( TamSX3( "TM4_EXAME" )[1] < 1, 6, TamSX3( "TM4_EXAME" )[1] )
 	Local oTempTN0, oTempPPP, oTempTMK, oTempTNF
 	Local lRet := .T.
 	Local cBarraRem := "\"
 
-	Private cPathEst := Alltrim( GetMv( "MV_DIREST" ) ) // PATH DO ARQUIVO A SER ARMAZENADO NA ESTACAO DE TRABALHOZ
+	Private cPathEst := AllTrim( GetMv( "MV_DIREST" ) ) // PATH DO ARQUIVO A SER ARMAZENADO NA ESTACAO DE TRABALHOZ
 	Private nSizeFil := IIf( lMudEmpr, NGMTAMFIL(), FwSizeFilial() )
 
 	Private aVETINR   := {} // Usado pela funcao que cria arq. temporario
@@ -428,9 +428,9 @@ Static Function R700Imp( lEnd, wnRel, titulo, tamanho )
 
 		If GetRemoteType() == 2  //estacao com sistema operacional unix
 			cBarraRem := "/"
-		Endif
+		EndIf
 
-		cPathEst += IIf( Substr( cPathEst, Len( cPathEst ), 1 ) != cBarraRem, cBarraRem, "" )
+		cPathEst += IIf( SubStr( cPathEst, Len( cPathEst ), 1 ) != cBarraRem, cBarraRem, "" )
 		//Cria diretorio se nao existir
 		MontaDir( cPathEst )
 		//Força a geração de PDF para envio no e-mail
@@ -442,10 +442,10 @@ Static Function R700Imp( lEnd, wnRel, titulo, tamanho )
 		oPrintPPP := FwMsPrinter():New("Perfil Profissiografico Previdenciario"  ) // OemToAnsi( STR0006 )
 	EndIf
 
-	// Se a geração do relatorio for cancelada
+	// Se a geração do relatorio For cancelada
 	If oPrintPPP:nModalResult != PD_OK
 		lRet := .F.
-	ElseIf oPrintPPP:GetOrientation() == 1 //Caso o tipo de impressão for igual a 'Retrato'
+	ElseIf oPrintPPP:GetOrientation() == 1 //Caso o tipo de impressão For igual a 'Retrato'
 		Help( ' ', 1, "ATENÇÃO", , "O tipo de impressão 'Retrato' não está disponível para o PPP", 2, 0, , , , , , { "Favor selecionar o tipo de impressão 'Paisagem'"} ) //"O tipo de impressão 'Retrato' não está disponível para o PPP"##"Favor selecionar o tipo de impressão 'Paisagem'" STR0322 / STR0323
 
 		lRet := .F.
@@ -458,7 +458,7 @@ Static Function R700Imp( lEnd, wnRel, titulo, tamanho )
 			nQTAGENt := 12
 		Else
 			nQTAGENt := aTamCpo[1]
-		Endif
+		EndIf
 
 		nQTAGENd := aTamCpo[2]
 		cQTAGtra := "@E "+Replicate( "9", nQTAGENt - nQTAGENd - 1 ) + "." + Replicate( "9", nQTAGENd )
@@ -467,7 +467,7 @@ Static Function R700Imp( lEnd, wnRel, titulo, tamanho )
 		aAdd( aDBF, { "NUMRIS", "C", 09, 0 } )
 		aAdd( aDBF, { "CODAGE", "C", 06, 0 } )
 		aAdd( aDBF, { "AGENTE", "C", 40, 0 } )
-		aAdd( aDBF, { "MAT", "C", TamSx3( 'RA_MAT' )[ 1 ], 0 } )
+		aAdd( aDBF, { "MAT", "C", TamSX3( 'RA_MAT' )[ 1 ], 0 } )
 		aAdd( aDBF, { "DT_DE", "D", 08, 0 } )
 		aAdd( aDBF, { "DT_ATE", "D", 08, 0 } )
 		aAdd( aDBF, { "SETOR", "C", nSizeSI3, 0 } )
@@ -509,7 +509,7 @@ Static Function R700Imp( lEnd, wnRel, titulo, tamanho )
 		aAdd( aDBF, { "CUSTO", "C", nSizeSI3, 0 } )
 		aAdd( aDBF, { "DEPTO", "C", nSizeSQB, 0 } )
 		aAdd( aDBF, { "FILIAL", "C", nSizeFil, 0 } )
-		aAdd( aDBF, { "MAT", "C", TamSx3( 'RA_MAT' )[ 1 ], 0 } )
+		aAdd( aDBF, { "MAT", "C", TamSX3( 'RA_MAT' )[ 1 ], 0 } )
 		aAdd( aDBF, { "CARGO", "C", 5, 0 } )
 		aAdd( aDBF, { "CODFUN", "C", nSizeSRJ, 0 } )
 		aAdd( aDBF, { "DESFUN", "C", 30, 0 } )
@@ -527,11 +527,11 @@ Static Function R700Imp( lEnd, wnRel, titulo, tamanho )
 		aAdd( aDBF, { "DTFIM", "D", 08, 0 } )
 		aAdd( aDBF, { "FILIAL", "C", nSizeFil, 0 } )
 		aAdd( aDBF, { "CODIGO", "C", 12, 0 } )
-		aAdd( aDBF, { "NOME", "C", TAMSX3( "TMK_NOMUSU" )[1], 0 } )
+		aAdd( aDBF, { "NOME", "C", TamSX3( "TMK_NOMUSU" )[1], 0 } )
 		aAdd( aDBF, { "NIT", "C", 11, 0 } )
 		aAdd( aDBF, { "INDFUN", "C", 01, 0 } )
 		aAdd( aDBF, { "REGNUM", "C", 12, 0 } )
-		aAdd( aDBF, { "MAT", "C", TamSx3( 'RA_MAT' )[ 1 ], 0 } )
+		aAdd( aDBF, { "MAT", "C", TamSX3( 'RA_MAT' )[ 1 ], 0 } )
 		aAdd( aDBF, { "RESAMB", "C", 01, 0 } )
 		aAdd( aDBF, { "MONBIO", "C", 01, 0 } )
 		aAdd( aDBF, { 'CIC', 'C', TamSX3( 'TMK_CIC' )[1], 0 } )
@@ -585,12 +585,12 @@ Static Function R700Imp( lEnd, wnRel, titulo, tamanho )
 		cSQLPrest := "%%"
 		If lSigaMdtps
 			cSQLPrest := "%SUBSTRING( RA_CC, 1, " + ValToSQL( nSizeTD ) + " ) BETWEEN " + ;
-							ValToSQL( mv_par01+mv_par02 ) + " AND " + ValToSQL( mv_par03+mv_par04 ) + " AND%"
+							ValToSQL( MV_PAR01+MV_PAR02 ) + " AND " + ValToSQL( MV_PAR03+MV_PAR04 ) + " AND%"
 		EndIf
 
-		BeginSQL Alias cTRBSRA
+		BeginSql Alias cTRBSRA
 			SELECT SRA.RA_FILIAL, SRA.RA_MAT, SRA.RA_NOME, SRA.RA_CC
-				FROM %table:SRA% SRA
+				FROM %Table:SRA% SRA
 				WHERE
 					RA_FILIAL = %xFilial:SRA% AND
 					RA_MAT BETWEEN %exp:xm_par01% AND %exp:xm_par02% AND
@@ -599,15 +599,15 @@ Static Function R700Imp( lEnd, wnRel, titulo, tamanho )
 					%exp:cSQLPrest%
 					SRA.%notDel%
 				ORDER BY %exp:cOrdem%
-		EndSQL
+		EndSql
 
 		ProcRegua( RecCount() ) // MONTA A REGUA DE ACOMPANHAMENTO
 
 		While ( cTRBSRA )->( !Eof() )
 
-			dbSelectArea( "SRA" )
-			dbSetOrder( 1 )
-			dbSeek( ( cTRBSRA )->RA_FILIAL + ( cTRBSRA )->RA_MAT )
+			DBSelectArea( "SRA" )
+			DBSetOrder( 1 )
+			DBSeek( ( cTRBSRA )->RA_FILIAL + ( cTRBSRA )->RA_MAT )
 
 			IncProc()  // INCREMENTO DA REGUA DE ACOMPAHAMENTO.
 			dDtAdmiss := CToD( "//" )
@@ -637,30 +637,30 @@ Static Function R700Imp( lEnd, wnRel, titulo, tamanho )
 				If xm_par18 == 1 //Situacao Funcionario ?
 
 					If !Empty( SRA->RA_SITFOLH ) .Or. lDemitido
-						dbSelectArea( cTRBSRA )
-						dbSkip()
+						DBSelectArea( cTRBSRA )
+						DBSkip()
 						Loop
 					EndIf
 
 				ElseIf xm_par18 == 2 //Situacao Funcionario ?
 
 					If lDemitido .Or. SRA->RA_SITFOLH == "D"
-						dbSelectArea( cTRBSRA )
-						dbSkip()
+						DBSelectArea( cTRBSRA )
+						DBSkip()
 						Loop
 					EndIf
 
 				ElseIf xm_par18 == 3 //Situacao Funcionario ?
 
 					If !lDemitido .Or. SRA->RA_SITFOLH != "D"
-						dbSelectArea( cTRBSRA )
-						dbSkip()
+						DBSelectArea( cTRBSRA )
+						DBSkip()
 						Loop
 					EndIf
 
 					If dDtDemiss < xm_par19 .Or. dDtDemiss > xm_par20 // De Data Demissao ? // Ate Data Demissao ?
-						dbSelectArea( cTRBSRA )
-						dbSkip()
+						DBSelectArea( cTRBSRA )
+						DBSkip()
 						Loop
 					EndIf
 
@@ -669,8 +669,8 @@ Static Function R700Imp( lEnd, wnRel, titulo, tamanho )
 					If lDemitido .And. SRA->RA_SITFOLH == "D"
 
 						If dDtDemiss < xm_par19 .Or. dDtDemiss > xm_par20 // De Data Demissao ? // Ate Data Demissao ?
-							dbSelectArea( cTRBSRA )
-							dbSkip()
+							DBSelectArea( cTRBSRA )
+							DBSkip()
 							Loop
 						EndIf
 
@@ -680,17 +680,17 @@ Static Function R700Imp( lEnd, wnRel, titulo, tamanho )
 
 			EndIf
 
-			dbSelectArea( cTRBTN0 )
+			DBSelectArea( cTRBTN0 )
 			Zap
-			dbSelectArea( cTRBPPP )
+			DBSelectArea( cTRBPPP )
 			Zap
-			dbSelectArea( cTRBTMK )
+			DBSelectArea( cTRBTMK )
 			Zap
-			dbSelectArea( cTRBTNF )
+			DBSelectArea( cTRBTNF )
 			Zap
 
 			nPaginaPPP := 1
-			dbSelectArea( "SRA" )
+			DBSelectArea( "SRA" )
 			nRecnoSRA := Recno()
 
 			NGMDT700() // Chamada da funcao que imprime o PPP
@@ -699,10 +699,10 @@ Static Function R700Imp( lEnd, wnRel, titulo, tamanho )
 				MDTERMO700()
 			EndIf
 
-			dbSelectArea( "SRA" )
-			dbGoTo( nRecnoSRA )
+			DBSelectArea( "SRA" )
+			DBGoTo( nRecnoSRA )
 
-			( cTRBSRA )->( dbSkip() )
+			( cTRBSRA )->( DBSkip() )
 		End
 
 		// Deleta o arquivo temporario fisicamente
@@ -718,15 +718,15 @@ Static Function R700Imp( lEnd, wnRel, titulo, tamanho )
 			PPPSENDMAIL()
 		EndIf
 
-		dbSelectArea( "TM0" )
-		dbSetorder( 1 )
-		dbSelectArea( "TM5" )
-		dbSetorder( 1 )
-		dbSelectArea( "TMY" )
-		dbSetorder( 1 )
+		DBSelectArea( "TM0" )
+		DBSetOrder( 1 )
+		DBSelectArea( "TM5" )
+		DBSetOrder( 1 )
+		DBSelectArea( "TMY" )
+		DBSetOrder( 1 )
 	EndIf
 
-Return NIL
+Return
 
 /*
 ===============================================================================================================================
@@ -798,26 +798,26 @@ Static Function NGMDT700()
 		lHigiene  := .T.  // Nao foi observada a higienizacao pois nenhum EPI foi entregue
 	EndIf
 
-	RestArea( aAREASRA )
+	FWRestArea( aAREASRA )
 
 	If lMV_PPPRISC
-		dbSelectArea( cTRBTN0 )
-		dbSetOrder( 1 )
-		dbGoTop()
+		DBSelectArea( cTRBTN0 )
+		DBSetOrder( 1 )
+		DBGoTop()
 
-		If (cTRBTN0)->(RECCOUNT()) == 0
+		If (cTRBTN0)->(RecCount()) == 0
 			Return .F.
 		EndIf
 
 	EndIf
 
-	dbSelectArea( "TM0" )
-	dbSetOrder( 3 )
-	dbSeek( xFilial( "SRA" ) + SRA->RA_MAT )
+	DBSelectArea( "TM0" )
+	DBSetOrder( 3 )
+	DBSeek( xFilial( "SRA" ) + SRA->RA_MAT )
 
-	dbSelectArea( "SR6" )
-	dbSetOrder( 1 )
-	dbSeek( xFilial( "SR6" ) + SRA->RA_TNOTRAB )
+	DBSelectArea( "SR6" )
+	DBSetOrder( 1 )
+	DBSeek( xFilial( "SR6" ) + SRA->RA_TNOTRAB )
 
 	NG700SESMT() // Busca os Usuarios do SESMT
 
@@ -887,7 +887,7 @@ Static Function NGMDT700()
 	EndIf
 
 	oPrintPPP:Say( lin + 50, 1010, "2-Nome Empresarial", oFont09n ) // STR0152 = "2-Nome Empresarial"	
-	oPrintPPP:Say( lin + 110, 1010, Substr( SM0->M0_NOMECOM, 1, 40 ), oFont10 )
+	oPrintPPP:Say( lin + 110, 1010, SubStr( SM0->M0_NOMECOM, 1, 40 ), oFont10 )
 	oPrintPPP:Say( lin + 50, 2210, "3-CNAE" , oFont09n ) // "3-CNAE" // STR0153
 	
 	If !Empty( SM0->M0_CNAE )
@@ -949,8 +949,8 @@ Static Function NGMDT700()
 	oPrintPPP:Say( lin + 310, 1380, NGPPPDATE( SRA->RA_ADMISSA ), oFont10 )
 	oPrintPPP:Say( lin + 250, 1770, "11-Regime Revezamento", oFont09n ) //"11-Regime Revezamento" STR0161
 
-	If !Empty( Substr( SR6->R6_REVEZAM, 1, 20 ) )
-		oPrintPPP:Say( lin + 310, 1770, Substr( SR6->R6_REVEZAM, 1, 20 ), oFont09 )
+	If !Empty( SubStr( SR6->R6_REVEZAM, 1, 20 ) )
+		oPrintPPP:Say( lin + 310, 1770, SubStr( SR6->R6_REVEZAM, 1, 20 ), oFont09 )
 	Else
 		oPrintPPP:Say( lin + 310, 1770, "NA", oFont10 )
 	EndIf
@@ -981,7 +981,7 @@ Static Function NGMDT700()
 
 		For nX := 1 To Len( aCat )
 
-			If len( aCat ) == nx
+			If Len( aCat ) == nx
 				lLen := .T.
 			EndIf
 
@@ -1185,7 +1185,7 @@ Static Function NGMDT700()
 						EndIf
 
 						// Imprime CBO
-						cCBO := Strzero( Val( aHist[i][8] ), 6 )
+						cCBO := StrZero( Val( aHist[i][8] ), 6 )
 
 						If Empty( cCBO )
 							oPrintPPP:Say( nLinSalva + 30, 1720, "NA", oFont10 ) // CBO
@@ -1387,15 +1387,15 @@ Static Function NGMDT700()
 	RECLASS_RISCOS() // Reclassifica os riscos
 	lNot := .T.
 	lEPIefic := .F.  // Indica se há pelo menos um EPI necessario que nao foi entregue.
-	dbSelectArea( cTRBTN0 )
-	dbSetOrder( 1 )
-	dbGoTop()
+	DBSelectArea( cTRBTN0 )
+	DBSetOrder( 1 )
+	DBGoTop()
 
 	While !Eof()
 
 		If (cTRBTN0)->ATIVO != "S"
-			dbSelectArea( cTRBTN0 )
-			dbSkip()
+			DBSelectArea( cTRBTN0 )
+			DBSkip()
 			Loop
 		EndIf
 
@@ -1417,8 +1417,8 @@ Static Function NGMDT700()
 				Case (cTRBTN0)->GRISCO == "5" ; cGrau_Risco := "A"
 				Case (cTRBTN0)->GRISCO == "6" ; cGrau_Risco := "M"
 				End Case
-			ElseIf ( nIND := aScan( aTMAcombo, { |x| Upper( Substr( x, 1, 1 ) ) == Substr( (cTRBTN0)->GRISCO, 1, 1 ) } ) ) > 0
-				cGrau_Risco := Upper( Substr( aTMAcombo[nIND], 3, 1 ) )
+			ElseIf ( nIND := aScan( aTMAcombo, { |x| Upper( SubStr( x, 1, 1 ) ) == SubStr( (cTRBTN0)->GRISCO, 1, 1 ) } ) ) > 0
+				cGrau_Risco := Upper( SubStr( aTMAcombo[nIND], 3, 1 ) )
 			EndIf
 
 			// EPC Eficaz
@@ -1428,7 +1428,7 @@ Static Function NGMDT700()
 				// ou Medida de controle de riscos administrativas
 				lEPCefic := .F.
 
-				If ( nIND := aScan( aTN0combo, { |x| Upper( Substr( x, 1, 1 ) ) == Substr( (cTRBTN0)->EPC, 1, 1 ) } ) ) > 0
+				If ( nIND := aScan( aTN0combo, { |x| Upper( SubStr( x, 1, 1 ) ) == SubStr( (cTRBTN0)->EPC, 1, 1 ) } ) ) > 0
 					cEPCefic := SubStr( aTN0combo[nIND], 1, 1 )
 
 					If cEPCefic == "2"
@@ -1448,7 +1448,7 @@ Static Function NGMDT700()
 						cEPCefic := "S"
 						lEPCprot := .T.
 
-						//Indica que empresa utiliza EPI em carater complementar mesmo quando o EPC for eficaz
+						//Indica que empresa utiliza EPI em carater complementar mesmo quando o EPC For eficaz
 						If lEpiCompl .And. !lEPCefic
 
 							// Tipo da Medida de Controle = "2" (Protecao Coletiva) ou Medida de Controle = "4" ( Administrativas )
@@ -1484,8 +1484,8 @@ Static Function NGMDT700()
 			If Empty( (cTRBTN0)->INTENS ) .And. (cTRBTN0)->AVALIA <> "1" .And. !Empty( (cTRBTN0)->OBSINT )
 				cIntens := AllTrim( cValToChar( (cTRBTN0)->OBSINT ) )
 			ElseIf !Empty( (cTRBTN0)->INTENS )
-				cIntens := AllTrim( Substr( Transform( (cTRBTN0)->INTENS, cQTAGtra ), 1, IIf( "," $ cQTAGtra, nQTAGENt + 1, nQTAGENt ) ) +;
-								    " " + Alltrim( (cTRBTN0)->UNIDAD ) )
+				cIntens := AllTrim( SubStr( Transform( (cTRBTN0)->INTENS, cQTAGtra ), 1, IIf( "," $ cQTAGtra, nQTAGENt + 1, nQTAGENt ) ) +;
+								    " " + AllTrim( (cTRBTN0)->UNIDAD ) )
 			Else
 				cIntens := "NA"
 			EndIf
@@ -1595,8 +1595,8 @@ Static Function NGMDT700()
 
 		Next nX
 
-		dbSelectArea( cTRBTN0 )
-		dbSkip()
+		DBSelectArea( cTRBTN0 )
+		DBSkip()
 
 	End
 
@@ -1633,13 +1633,13 @@ Static Function NGMDT700()
 			oPrintPPP:Say( lin + 35, 1170, "NA", oFont10 ) // 15.7 - EPI Eficaz
 			oPrintPPP:Say( lin + 35, 1300, "NA", oFont10 ) // 15.8 - C.A. EPI
 		Else
-			oPrintPPP:Say( lin + 35, 310, Substr( cSRisc, 1, 4 ), oFont11 )
-			oPrintPPP:Say( lin + 35, 420, Substr( cSRisc, 1, 11 ), oFont11 )
-			oPrintPPP:Say( lin + 35, 610, Substr( cSRisc, 1, 15 ), oFont11 )
-			oPrintPPP:Say( lin + 35, 860, Substr( cSRisc, 1, 10 ), oFont11 )
-			oPrintPPP:Say( lin + 35, 1040, Substr( cSRisc, 1, 7 ), oFont11 )
-			oPrintPPP:Say( lin + 35, 1170, Substr( cSRisc, 1, 7 ), oFont11 )
-			oPrintPPP:Say( lin + 35, 1300, Substr( cSRisc, 1, 12 ), oFont11 )
+			oPrintPPP:Say( lin + 35, 310, SubStr( cSRisc, 1, 4 ), oFont11 )
+			oPrintPPP:Say( lin + 35, 420, SubStr( cSRisc, 1, 11 ), oFont11 )
+			oPrintPPP:Say( lin + 35, 610, SubStr( cSRisc, 1, 15 ), oFont11 )
+			oPrintPPP:Say( lin + 35, 860, SubStr( cSRisc, 1, 10 ), oFont11 )
+			oPrintPPP:Say( lin + 35, 1040, SubStr( cSRisc, 1, 7 ), oFont11 )
+			oPrintPPP:Say( lin + 35, 1170, SubStr( cSRisc, 1, 7 ), oFont11 )
+			oPrintPPP:Say( lin + 35, 1300, SubStr( cSRisc, 1, 12 ), oFont11 )
 		EndIf
 
 		SomaLinha( 115 )
@@ -1760,9 +1760,9 @@ Static Function NGMDT700()
 
 	lFirst := .T.
 
-	dbSelectArea( cTRBTMK )
-	dbSetOrder( 1 )
-	dbGoTop()
+	DBSelectArea( cTRBTMK )
+	DBSetOrder( 1 )
+	DBGoTop()
 
 	// Verifica o conteudo da pergunta "Reponsavel Ambiental ?"
 	If xm_par31 == 1 // Somente Médicos
@@ -1779,18 +1779,18 @@ Static Function NGMDT700()
 			lRespAmb := ( (cTRBTMK)->RESAMB == "1" ) // Verifica se e Responsavel Ambiental
 		EndIf
 
-		// Se nao for Responsavel Ambiental ou nao for da funcao definida pela pergunta Mv_Par31 pula o registro
+		// Se nao For Responsavel Ambiental ou nao For da funcao definida pela pergunta MV_PAR31 pula o registro
 		If (!Empty( cCondInd ) .And. !( (cTRBTMK)->INDFUN $ cCondInd )) .Or. !lRespAmb
-			dbSelectArea( cTRBTMK )
-			dbSkip()
+			DBSelectArea( cTRBTMK )
+			DBSkip()
 			Loop
 		EndIf
 
 		If ((cTRBTMK)->DTINI > (IIf( !lDemitido, dDataBase, dDtDemiss ))) .Or. ;
 			(!Empty( (cTRBTMK)->DTFIM ) .And. (cTRBTMK)->DTFIM < dDtAdmiss)
 
-			dbselectArea( cTRBTMK )
-			dbSkip()
+			DBSelectArea( cTRBTMK )
+			DBSkip()
 			Loop
 		EndIf
 
@@ -1840,13 +1840,13 @@ Static Function NGMDT700()
 			EndIf
 
 			oPrintPPP:Line( lin, 1350, lin + 50, 1350 )
-			oPrintPPP:Say( lin + 35, 1360, Substr( (cTRBTMK)->NOME, 1, 40 ), oFont09 ) // Nome
+			oPrintPPP:Say( lin + 35, 1360, SubStr( (cTRBTMK)->NOME, 1, 40 ), oFont09 ) // Nome
 			oPrintPPP:Line( lin, 2940, lin + 50, 2940 )
 			oPrintPPP:Line( lin + 50, 50, lin + 50, 2940 )
 		Next nX
 
-		dbSelectArea( cTRBTMK )
-		dbSkip()
+		DBSelectArea( cTRBTMK )
+		DBSkip()
 	End
 
 	If lFirst
@@ -1893,9 +1893,9 @@ Static Function NGMDT700()
 
 	fImpMemo( txtPPP )
 
-	dbSelectArea( cAliasRES )
-	dbSetOrder( 1 )
-	dbSeek( xFilial( cAliasRES, cFilRES ) + xm_par09 ) // Representante Empresa ?
+	DBSelectArea( cAliasRES )
+	DBSetOrder( 1 )
+	DBSeek( xFilial( cAliasRES, cFilRES ) + xm_par09 ) // Representante Empresa ?
 
 	SomaLinha( 55 )
 	oPrintPPP:Line( lin, 50, lin + 60, 50 )
@@ -1929,10 +1929,10 @@ Static Function NGMDT700()
 		oPrintPPP:Say( lin + 30, 1310, "18.2-Nome do Representante Legal", oFont09 ) // "18.2-Nome do Representante Legal" STR0231
 
 
-		If	( !Empty( SRA->RA_NOMECMP ) ) .And. ( Alltrim( GETMV( "MV_MDTRESP" ) ) == "1" )
-			oPrintPPP:Say( lin + 90, 1310, AllTrim( SubSTR( SRA->RA_NOMECMP, 1, 45 ) ), oFont10 )
+		If	( !Empty( SRA->RA_NOMECMP ) ) .And. ( AllTrim( GETMV( "MV_MDTRESP" ) ) == "1" )
+			oPrintPPP:Say( lin + 90, 1310, AllTrim( SubStr( SRA->RA_NOMECMP, 1, 45 ) ), oFont10 )
 		Else
-			oPrintPPP:Say( lin + 90, 1310, Substr( &cCNomeRES, 1, 40 ), oFont10 )
+			oPrintPPP:Say( lin + 90, 1310, SubStr( &cCNomeRES, 1, 40 ), oFont10 )
 		EndIf
 
 		oPrintPPP:Say( lin + 210, 150, NGPPPDATE( IIf( xm_par21 == 3, xm_par22, IIf( xm_par21 == 2, dDtDemiss, dDataBase ) ), .T. ), oFont10 ) //Data Emissao PPP ?//Informe a Data ?
@@ -1949,9 +1949,9 @@ Static Function NGMDT700()
 	oPrintPPP:Say( lin + 60, 60, "OBSERVAÇÕES", oFont13 ) // "OBSERVAÇÕES" STR0234
 	SomaLinha( 80 )
 
-	dbSelectArea( "TMZ" )
-	dbSetOrder( 1 )
-	dbSeek( xFilial( "TMZ" ) + xm_par14 ) // Observacao ?
+	DBSelectArea( "TMZ" )
+	DBSetOrder( 1 )
+	DBSeek( xFilial( "TMZ" ) + xm_par14 ) // Observacao ?
 
 	If !Empty( xm_par14 ) .And. !Empty( TMZ->TMZ_DESCRI ) // Se a pergunta de Observações está vazia não imprime
 		fImpMemo( TMZ->TMZ_DESCRI )
@@ -1973,7 +1973,7 @@ Static Function NGMDT700()
 		For nInd := 1 To Len( aNUMCAPS )
 			oPrintPPP:Line( lin, 50, lin + 40, 50 )
 			oPrintPPP:Line( lin, 2940, lin + 40, 2940 )
-			oPrintPPP:Say( lin + 40, 60, Substr( "C.A.:" + Alltrim( aNUMCAPS[nInd, 1] ) + " - " + aNUMCAPS[nInd, 2], 1, 105 ), oFont09 ) //"C.A.: " STR0236
+			oPrintPPP:Say( lin + 40, 60, SubStr( "C.A.:" + AllTrim( aNUMCAPS[nInd, 1] ) + " - " + aNUMCAPS[nInd, 2], 1, 105 ), oFont09 ) //"C.A.: " STR0236
 
 			If nInd == Len( aNUMCAPS )
 				oPrintPPP:Line( lin + 40, 50, lin + 55, 50 )
@@ -1994,16 +1994,16 @@ Static Function NGMDT700()
 		oPrintPPP:Line( lin, 2940, lin + 60, 2940 )
 		oPrintPPP:Line( lin + 60, 50, lin + 60, 2940 )
 		SomaLinha( 60 )
-		dbSelectArea( "TMZ" )
-		dbSetOrder( 1 )
-		dbSeek( xFilial( "TMZ" ) + xm_par24 ) // Observacao EPI \ EPC. ?
+		DBSelectArea( "TMZ" )
+		DBSetOrder( 1 )
+		DBSeek( xFilial( "TMZ" ) + xm_par24 ) // Observacao EPI \ EPC. ?
 
 		fImpMemo( TMZ->TMZ_DESCRI )
 
 	EndIf
 
-	RestArea( aAreaSRA )
-	RestArea( aSM0Area )
+	FWRestArea( aAreaSRA )
+	FWRestArea( aSM0Area )
 
 	oPrintPPP:SayAlign( 2200, 50, Str( nPaginaPPP, 3 ), oFont09n, 2940, 280, CLR_BLACK, 2, 1 )
 	oPrintPPP:EndPage()
@@ -2031,16 +2031,16 @@ Static Function fVerAte()
 
 	If SuperGetMv( 'MV_NG2GS', .F., .F. ) // Integração com o módulo prestador de serviço (SIGATEC)
 
-		DbSelectArea( 'AA1' )
-		DbSetOrder( 7 )
+		DBSelectArea( 'AA1' )
+		DBSetOrder( 7 )
 
-		If DbSeek( xFilial( 'AA1' ) + SRA->RA_MAT + SRA->RA_FILIAL ) // Caso o funcionário seja um atendente
+		If DBSeek( xFilial( 'AA1' ) + SRA->RA_MAT + SRA->RA_FILIAL ) // Caso o funcionário seja um atendente
 			lAtendente := .T.
 		EndIf
 
 	EndIf
 
-	RestArea( aArea )
+	FWRestArea( aArea )
 
 Return lAtendente
 
@@ -2063,10 +2063,10 @@ Static Function fVerBusHis()
 
 	If SuperGetMv( 'MV_NG2GS', .F., .F. ) // Integração com o módulo prestador de serviço (SIGATEC)
 
-		DbSelectArea( 'AA1' )
-		DbSetOrder( 7 )
+		DBSelectArea( 'AA1' )
+		DBSetOrder( 7 )
 
-		If DbSeek( xFilial( 'AA1' ) + SRA->RA_MAT + SRA->RA_FILIAL ) // Caso o funcionário seja um atendente
+		If DBSeek( xFilial( 'AA1' ) + SRA->RA_MAT + SRA->RA_FILIAL ) // Caso o funcionário seja um atendente
 			aHistorico := aClone( fHisPreSer( AA1->AA1_CODTEC ) )
 		Else // Caso o funcionário não seja um atendente
 			aHistorico := aClone( NG700HISTO() )
@@ -2078,7 +2078,7 @@ Static Function fVerBusHis()
 
 	EndIf
 
-	RestArea( aArea )
+	FWRestArea( aArea )
 
 Return aHistorico
 
@@ -2122,12 +2122,12 @@ Static Function fHisPreSer( cAtendente )
 	Local cAliasSRE 	:= ''
 	Local cEmpBackup	:= cEmpAnt
 	Local cFilBackup	:= cFilAnt
-	Local cR7CARGO		:= Space( TamSx3( 'R7_CARGO' 	)[ 1 ] )
-	Local cRJCARGO		:= Space( TamSx3( 'RJ_CARGO' 	)[ 1 ] )
-	Local cR7FUNCAO		:= Space( TamSx3( 'R7_FUNCAO' 	)[ 1 ] )
-	Local cTFFCARGO		:= Space( TamSx3( 'TFF_CARGO' 	)[ 1 ] )
-	Local cABSCCUSTO	:= Space( TamSx3( 'ABS_CCUSTO' 	)[ 1 ] )
-	Local cTFFFUNCAO	:= Space( TamSx3( 'TFF_FUNCAO' 	)[ 1 ] )
+	Local cR7CARGO		:= Space( TamSX3( 'R7_CARGO' 	)[ 1 ] )
+	Local cRJCARGO		:= Space( TamSX3( 'RJ_CARGO' 	)[ 1 ] )
+	Local cR7FUNCAO		:= Space( TamSX3( 'R7_FUNCAO' 	)[ 1 ] )
+	Local cTFFCARGO		:= Space( TamSX3( 'TFF_CARGO' 	)[ 1 ] )
+	Local cABSCCUSTO	:= Space( TamSX3( 'ABS_CCUSTO' 	)[ 1 ] )
+	Local cTFFFUNCAO	:= Space( TamSX3( 'TFF_FUNCAO' 	)[ 1 ] )
 
 	Local dCorte 		:= fBusDatCor() // Data de corde do PPP
 	Local dInicio		:= CtoD( '//' )
@@ -2139,27 +2139,27 @@ Static Function fHisPreSer( cAtendente )
 	Local nReg			:= 1
 	Local nDado 		:= 0
 
-	If mv_par37 == 2 .And. cVerFil == 'S' // Busca as empresas e filiais em que o funcionário trabalhou
+	If MV_PAR37 == 2 .And. cVerFil == 'S' // Busca as empresas e filiais em que o funcionário trabalhou
 
 		While lVerTra
 
 			cAliasSRE := GetNextAlias()
 
-			BeginSQL Alias cAliasSRE
+			BeginSql Alias cAliasSRE
 				SELECT
 					RE_EMPD, RE_FILIALD, RE_MATD
 				FROM
-					%table:SRE% SRE
+					%Table:SRE% SRE
 				WHERE
 					RE_EMPP = %exp:cBusEmp%
 					AND RE_FILIALP = %exp:cBusFil%
 					AND RE_MATP = %exp:cBusMat%
 					AND %notDel%
-			EndSQL
+			EndSql
 
-			( cAliasSRE )->( DbGoTop() )
+			( cAliasSRE )->( DBGoTop() )
 
-			If ( cAliasSRE )->( !EoF() )
+			If ( cAliasSRE )->( !Eof() )
 
 				If ( cVerEmp == 'S' .Or. cEmpAnt == ( cAliasSRE )->RE_EMPD )
 
@@ -2181,7 +2181,7 @@ Static Function fHisPreSer( cAtendente )
 
 			EndIf
 
-			( cAliasSRE )->( DbCloseArea() )
+			( cAliasSRE )->( DBCloseArea() )
 
 		End
 
@@ -2195,64 +2195,64 @@ Static Function fHisPreSer( cAtendente )
 			fOpenSX( { 'SX3' }, aDados[ nDado, 1 ] )
 			NGPrepTBL( aTabelas, aDados[ nDado, 1 ], aDados[ nDado, 2 ] )
 			cEmpAnt 	:= aDados[ nDado, 1 ]
-			cR7CARGO	:= Space( TamSx3( 'R7_CARGO' 	)[ 1 ] )
-			cRJCARGO	:= Space( TamSx3( 'RJ_CARGO' 	)[ 1 ] )
-			cABSCUSTO	:= Space( TamSx3( 'ABS_CCUSTO' 	)[ 1 ] )
-			cR7FUNCAO	:= Space( TamSx3( 'R7_FUNCAO' 	)[ 1 ] )
-			cTFFCARGO	:= Space( TamSx3( 'TFF_CARGO' 	)[ 1 ] )
-			cTFFFUNCAO	:= Space( TamSx3( 'TFF_FUNCAO' 	)[ 1 ] )
+			cR7CARGO	:= Space( TamSX3( 'R7_CARGO' 	)[ 1 ] )
+			cRJCARGO	:= Space( TamSX3( 'RJ_CARGO' 	)[ 1 ] )
+			cABSCUSTO	:= Space( TamSX3( 'ABS_CCUSTO' 	)[ 1 ] )
+			cR7FUNCAO	:= Space( TamSX3( 'R7_FUNCAO' 	)[ 1 ] )
+			cTFFCARGO	:= Space( TamSX3( 'TFF_CARGO' 	)[ 1 ] )
+			cTFFFUNCAO	:= Space( TamSX3( 'TFF_FUNCAO' 	)[ 1 ] )
 		EndIf
 
 		If cFilAnt != aDados[ nDado, 2 ] // Posiciona em outra filial caso necessário
 			cFilAnt := aDados[ nDado, 2 ]
 		EndIf
 
-		BeginSQL Alias cAliasTGY
+		BeginSql Alias cAliasTGY
 			SELECT
 				SRA.RA_FILIAL, SRA.RA_MAT, TGY.TGY_DTINI, TGY.TGY_DTFIM, SA1.A1_CGC, CTT.CTT_DESC01, SQ3.Q3_DESCSUM,
 				SRJ.RJ_DESC, SRJ.RJ_CODCBO, SR9.R9_DESC, CTT.CTT_OCORRE, SRA.RA_OCORREN, CTT.CTT_CUSTO, SRA.RA_DEPTO,
 				SQ3.Q3_CARGO, SRJ.RJ_FUNCAO, TM0.TM0_NUMFIC
 			FROM
-				%table:SRA% SRA
+				%Table:SRA% SRA
 				INNER JOIN
-					%table:AA1% AA1 ON
+					%Table:AA1% AA1 ON
 						AA1.AA1_FUNFIL = SRA.RA_FILIAL
 						AND AA1.AA1_CDFUNC = SRA.RA_MAT
 						AND AA1.%notDel%
 				INNER JOIN
-					%table:TGY% TGY ON
+					%Table:TGY% TGY ON
 						TGY.TGY_FILIAL = %xFilial:TGY%
 						AND TGY.TGY_ATEND = AA1.AA1_CODTEC
 						AND TGY.%notDel%
 				INNER JOIN
-					%table:TFF% TFF ON
+					%Table:TFF% TFF ON
 						TFF.TFF_FILIAL = %xFilial:TFF%
 						AND TFF.TFF_COD = TGY.TGY_CODTFF
 						AND TFF.%notDel%
 				INNER JOIN
-					%table:ABS% ABS ON
+					%Table:ABS% ABS ON
 						ABS.ABS_FILIAL = %xFilial:ABS%
 						AND ABS.ABS_LOCAL = TFF.TFF_LOCAL
 						AND ABS.%notDel%
 				INNER JOIN
-					%table:SA1% SA1 ON
+					%Table:SA1% SA1 ON
 						SA1.A1_FILIAL = %xFilial:SA1%
 						AND SA1.A1_COD = ABS.ABS_CODIGO
 						AND SA1.A1_LOJA = ABS.ABS_LOJA
 						AND SA1.%notDel%
 				INNER JOIN
-					%table:CTT% CTT ON
+					%Table:CTT% CTT ON
 						CTT.CTT_FILIAL = %xFilial:CTT%
 						AND CTT.CTT_CUSTO = 
-							CASE
+							Case
 								WHEN ABS.ABS_CCUSTO != %exp:cABSCCUSTO% THEN
 									ABS.ABS_CCUSTO
-								ELSE
+								Else
 									SRA.RA_CC
 							END
 						AND CTT.%notDel%
 				LEFT JOIN
-					%table:SR9% SR9 ON
+					%Table:SR9% SR9 ON
 						SR9.R9_FILIAL = SRA.RA_FILIAL
 						AND SR9.R9_MAT = SRA.RA_MAT
 						AND SR9.R9_CAMPO = "RA_OCORREN"
@@ -2260,43 +2260,43 @@ Static Function fHisPreSer( cAtendente )
 						AND SR9.R9_DATA <= TGY.TGY_DTFIM
 						AND SR9.%notDel%
 				LEFT JOIN
-					%table:SR7% SR7 ON
+					%Table:SR7% SR7 ON
 						SR7.R7_FILIAL = SRA.RA_FILIAL
 						AND SR7.R7_MAT = SRA.RA_MAT
 						AND SR7.R7_DATA >= TGY.TGY_DTINI
 						AND SR7.R7_DATA <= TGY.TGY_DTFIM
 						AND SR7.%notDel%
 				LEFT JOIN
-					%table:SRJ% SRJ ON
+					%Table:SRJ% SRJ ON
 						SRJ.RJ_FILIAL = %xFilial:SRJ%
 						AND SRJ.RJ_FUNCAO = 
-							CASE 
+							Case 
 								WHEN TFF.TFF_FUNCAO != %exp:cTFFCARGO% THEN
 									TFF.TFF_FUNCAO
 								WHEN SR7.R7_FUNCAO != %exp:cR7FUNCAO% THEN
 									SR7.R7_FUNCAO
-								ELSE
+								Else
 									SRA.RA_CODFUNC
 							END
 						AND SRJ.%notDel%
 				LEFT JOIN
-					%table:SQ3% SQ3 ON
+					%Table:SQ3% SQ3 ON
 						SQ3.Q3_FILIAL = %xFilial:SQ3%
 						AND SQ3.Q3_CARGO = 
-							CASE
+							Case
 								WHEN TFF.TFF_CARGO != %exp:cTFFFUNCAO% THEN
 									TFF.TFF_CARGO
 								WHEN SR7.R7_CARGO != %exp:cR7CARGO% THEN
 									SR7.R7_CARGO
 								WHEN SRJ.RJ_CARGO != %exp:cRJCARGO% THEN
 									SRJ.RJ_CARGO
-								ELSE
+								Else
 									SRA.RA_CARGO
 							END
 						AND SQ3.Q3_CC = CTT.CTT_CUSTO
 						AND SQ3.%notDel%
 				LEFT JOIN
-					%table:TM0% TM0 ON
+					%Table:TM0% TM0 ON
 						TM0.TM0_FILFUN = SRA.RA_FILIAL
 						AND TM0.TM0_MAT = SRA.RA_MAT
 						AND TM0.%notDel%
@@ -2310,11 +2310,11 @@ Static Function fHisPreSer( cAtendente )
 				SQ3.Q3_CARGO, SRJ.RJ_FUNCAO, TM0.TM0_NUMFIC
 			ORDER BY
 				TGY.TGY_DTINI, TGY.TGY_DTFIM
-		EndSQL
+		EndSql
 
-		( cAliasTGY )->( DbGoTop() )
+		( cAliasTGY )->( DBGoTop() )
 
-		While ( cAliasTGY )->( !EoF() )
+		While ( cAliasTGY )->( !Eof() )
 
 			fRedDat( cAliasTGY, @dInicio, @dFim )
 
@@ -2326,15 +2326,15 @@ Static Function fHisPreSer( cAtendente )
 					If dCorte > dInicio .And. !Empty( dInicio ) // Pula para o próximo registro
 
 						nReg := ( cAliasTGY )->( Recno() )
-						( cAliasTGY )->( DbSkip() )
+						( cAliasTGY )->( DBSkip() )
 						fRedDat( cAliasTGY, @dInicio, @dFim )
 
 					Else
 
 						If dCorte != dInicio // Volta para o registro anterior
 
-							( cAliasTGY )->( DbGoTop() )
-							( cAliasTGY )->( DbGoTo( nReg ) )
+							( cAliasTGY )->( DBGoTop() )
+							( cAliasTGY )->( DBGoTo( nReg ) )
 							fRedDat( cAliasTGY, @dInicio, @dFim )
 
 							If dCorte > dInicio // Define a data de início com o valor da data de corte
@@ -2395,7 +2395,7 @@ Static Function fHisPreSer( cAtendente )
 					( cTrbPPP )->GFIP   := cGFIP
 					( cTrbPPP )->EMP    := aDados[ nDado, 1 ]
 
-				( cTrbPPP )->( MsUnlock() )
+				( cTrbPPP )->( MSUnLock() )
 
 				aAdd( aMatriculas, {;
 					( cAliasTGY )->RA_FILIAL,;
@@ -2418,11 +2418,11 @@ Static Function fHisPreSer( cAtendente )
 			EndIf
 
 			nReg := ( cAliasTGY )->( Recno() )
-			( cAliasTGY )->( DbSkip() )
+			( cAliasTGY )->( DBSkip() )
 
 		End
 
-		( cAliasTGY )->( DbCloseArea() )
+		( cAliasTGY )->( DBCloseArea() )
 
 	Next nDado
 
@@ -2451,8 +2451,8 @@ Retorno---------------: Nenhum
 */
 Static Function fRedDat( cAliasTGY, dInicio, dFim )
 
-	dInicio := StoD( ( cAliasTGY )->TGY_DTINI )
-	dFim 	:= StoD( ( cAliasTGY )->TGY_DTFIM )
+	dInicio := SToD( ( cAliasTGY )->TGY_DTINI )
+	dFim 	:= SToD( ( cAliasTGY )->TGY_DTFIM )
 
 Return
 
@@ -2509,10 +2509,10 @@ Static Function NG700VECAT( cFilialTM0, nFicha, cEmpTM0 )
 	EndIf
 
 	cModoCom := f700RetCom( "TNC" )
-	cFilTNC := FwxFilial( "TNC", cFilialTM0, Substr( cModoCom, 1, 1 ), Substr( cModoCom, 2, 1 ), Substr( cModoCom, 3, 1 ) )
-	dbSelectArea( "TNC" )
-	dbSetOrder( 7 )
-	dbSeek( cFilTNC + nFicha)
+	cFilTNC := FwxFilial( "TNC", cFilialTM0, SubStr( cModoCom, 1, 1 ), SubStr( cModoCom, 2, 1 ), SubStr( cModoCom, 3, 1 ) )
+	DBSelectArea( "TNC" )
+	DBSetOrder( 7 )
+	DBSeek( cFilTNC + nFicha)
 
 	While !Eof() .And. cFilTNC == TNC->TNC_FILIAL
 
@@ -2527,11 +2527,11 @@ Static Function NG700VECAT( cFilialTM0, nFicha, cEmpTM0 )
 			
 			 // Busca o retorno do eSocial
 			//If !Empty( TNC->TNC_RECIBO ) .Or. !Empty( TNC->TNC_RECORI ) .And.;
-			//	aScan( aCat, { |x| Dtos( x[1] ) == Dtos( TNC->TNC_DTEMIS ) .And. AllTrim(x[2]) == AllTrim(TNC->TNC_RECIBO) } ) <= 0  // aScan( aCat, { |x| Dtos( x[1] ) + x[2] == Dtos( TNC->TNC_DTEMIS ) + TNC->TNC_RECIBO } ) <= 0
+			//	aScan( aCat, { |x| DToS( x[1] ) == DToS( TNC->TNC_DTEMIS ) .And. AllTrim(x[2]) == AllTrim(TNC->TNC_RECIBO) } ) <= 0  // aScan( aCat, { |x| DToS( x[1] ) + x[2] == DToS( TNC->TNC_DTEMIS ) + TNC->TNC_RECIBO } ) <= 0
 			//		aAdd( aCat, { TNC->TNC_DTEMIS, TNC->TNC_RECIBO, TNC->TNC_RECORI, .T. } )
 			//Else // Busca da maneira antiga
 					
-			//	If aScan( aCat, { |x| Dtos( x[1] ) + x[2] == Dtos( TNC->TNC_DTEMIS ) + SubStr( cCat, 1, 13 ) } ) <= 0
+			//	If aScan( aCat, { |x| DToS( x[1] ) + x[2] == DToS( TNC->TNC_DTEMIS ) + SubStr( cCat, 1, 13 ) } ) <= 0
 			//		aAdd( aCat, { TNC->TNC_DTEMIS, SubStr( cCat, 1, 13 ), .F. } )
 			//	EndIf
 
@@ -2539,7 +2539,7 @@ Static Function NG700VECAT( cFilialTM0, nFicha, cEmpTM0 )
 
 			If !Empty( TNC->TNC_RECIBO ) .Or. !Empty( TNC->TNC_RECORI ) 
 			   
-			   _nI := aScan( aCat, { |x| Dtos( x[1] ) == Dtos( TNC->TNC_DTEMIS ) .And. AllTrim(x[2]) == AllTrim(TNC->TNC_RECIBO) } )
+			   _nI := aScan( aCat, { |x| DToS( x[1] ) == DToS( TNC->TNC_DTEMIS ) .And. AllTrim(x[2]) == AllTrim(TNC->TNC_RECIBO) } )
 			   If _nI == 0
 				  aAdd( aCat, { TNC->TNC_DTEMIS, TNC->TNC_RECIBO, TNC->TNC_RECORI, .T. } )
 			   EndIf 
@@ -2548,7 +2548,7 @@ Static Function NG700VECAT( cFilialTM0, nFicha, cEmpTM0 )
 
 		EndIf
 
-		dbSkip()
+		DBSkip()
 
 	End
 
@@ -2575,7 +2575,7 @@ Static Function NG700HISTO( lMDTA102 )
 	Local nWWW
 	Local nXYZ
 	Local nBeg
-	Local nSizeSRE    := IIf( TAMSX3( "RE_FILIALD" )[1] > 0, TAMSX3( "RE_FILIALD" )[1], Len( SRE->RE_FILIALD ) )
+	Local nSizeSRE    := IIf( TamSX3( "RE_FILIALD" )[1] > 0, TamSX3( "RE_FILIALD" )[1], Len( SRE->RE_FILIALD ) )
 	Local cCBO        := " " // Guarda o CBO da Funcao
 	Local lFimPPP     := .F. // Verifica se acabou o historico de setores
 	Local dINITMP     := SRA->RA_ADMISSA //Data Admissao
@@ -2598,7 +2598,7 @@ Static Function NG700HISTO( lMDTA102 )
 	Local lTemSR7     := .F. //Variavel de Controle
 	Local dDataFOR    := CToD( "  /  /  " )
 	Local cKeyEmp     := SM0->M0_CODIGO // Empresa origem
-	Local cKeyFil     := Padr( SRA->RA_FILIAL, nSizeSRE )// Filial origem
+	Local cKeyFil     := PadR( SRA->RA_FILIAL, nSizeSRE )// Filial origem
 	Local cKeyMat     := SRA->RA_MAT // Matricula origem
 	Local cKeyCus     := SRA->RA_CC // Centro Custo origem
 	Local cKeyDep     := SRA->RA_DEPTO // Departamento origem
@@ -2656,35 +2656,35 @@ Static Function NG700HISTO( lMDTA102 )
 			cCondDep  := cKeyDep
 			cCondALL  := cKeyEmp + cKeyFil + cKeyMat
 
-			dbSelectArea( "SRE" )
-			dbSetOrder( 1 )
-			dbSeek( cCondALL )
+			DBSelectArea( "SRE" )
+			DBSetOrder( 1 )
+			DBSeek( cCondALL )
 
 			While !Eof() .And. cCondALL == SRE->RE_EMPD + SRE->RE_FILIALD + SRE->RE_MATD
 
 				If SRE->RE_DATA < dDataSRE
-					dbSelectArea( "SRE" )
-					dbSkip()
+					DBSelectArea( "SRE" )
+					DBSkip()
 					Loop
 				EndIf
 
 				If SRE->RE_EMPP == SRE->RE_EMPD .And. SRE->RE_FILIALP == SRE->RE_FILIALD .And. ;
 				   SRE->RE_MATP == SRE->RE_MATD .And. SRE->RE_CCP == SRE->RE_CCD .And. SRE->RE_DEPTOP == SRE->RE_DEPTOD
-					dbSelectArea( "SRE" )
-					dbSkip()
+					DBSelectArea( "SRE" )
+					DBSkip()
 					Loop
 				EndIf
 
 				If (IIf( lFirstSRE, SRE->RE_DATA > dDataBase, SRE->RE_DATA >= dDataBase )) .Or. ;
 					SRE->RE_DATA < dINITMP
-					dbSelectArea( "SRE" )
-					dbSkip()
+					DBSelectArea( "SRE" )
+					DBSkip()
 					Loop
 				EndIf
 
 				If SRE->RE_CCD <> cCondCus .Or. SRE->RE_DEPTOD <> cCondDep
-					dbSelectArea( "SRE" )
-					dbSkip()
+					DBSelectArea( "SRE" )
+					DBSkip()
 					Loop
 				EndIf
 
@@ -2736,8 +2736,8 @@ Static Function NG700HISTO( lMDTA102 )
 				// O funcionario esta mudando de Empresa/Filial, portanto, o processo para aqui
 				lFimPPP := (SRE->RE_EMPP != cEmpPPP .And. !lMudEmpr ) .Or. (SRE->RE_EMPP+SRE->RE_FILIALP != cSvEmpAnt+cSvFilAnt .And. !lMudFilial)
 
-				dbSelectArea( "SRE" )
-				dbSkip()
+				DBSelectArea( "SRE" )
+				DBSkip()
 
 			End
 
@@ -2764,14 +2764,14 @@ Static Function NG700HISTO( lMDTA102 )
 
 			If lMudEmpr .And. cKeyEmp != cEmpPPP .And. !Empty( cKeyEmp )
 				cModo := FWModeAccess( "SRA" )
-				EMP700OPEN( "SRA", "SRA", 1, cKeyEmp, @cModo, Substr( cKeyFil, 1, Len( SRA->RA_FILIAL ) ) )
+				EMP700OPEN( "SRA", "SRA", 1, cKeyEmp, @cModo, SubStr( cKeyFil, 1, Len( SRA->RA_FILIAL ) ) )
 			EndIf
 
 			cModoSRA := f700RetCom( "SRA" )
-			cFilSRA := FwxFilial( "SRA", Substr( cKeyFil, 1, Len( SRA->RA_FILIAL ) ), Substr( cModoSRA, 1, 1 ), Substr( cModoSRA, 2, 1 ), Substr( cModoSRA, 3, 1 ) )
-			dbSelectArea( "SRA" )
-			dbSetOrder( 1 )
-			dbSeek( cFilSRA + cKeyMat )
+			cFilSRA := FwxFilial( "SRA", SubStr( cKeyFil, 1, Len( SRA->RA_FILIAL ) ), SubStr( cModoSRA, 1, 1 ), SubStr( cModoSRA, 2, 1 ), SubStr( cModoSRA, 3, 1 ) )
+			DBSelectArea( "SRA" )
+			DBSetOrder( 1 )
+			DBSeek( cFilSRA + cKeyMat )
 			dFIMPPP   := IIf( Empty( SRA->RA_DEMISSA ), dDataBase, SRA->RA_DEMISSA ) // Data limite p/ uma transferencia
 			dDtDemiss := IIf( Empty( SRA->RA_DEMISSA ), PPPDTDEMIS(), SRA->RA_DEMISSA ) //Busca data demissao do SRG
 			lDemitido := !Empty( dDtDemiss )
@@ -2780,7 +2780,7 @@ Static Function NG700HISTO( lMDTA102 )
 				EMP700OPEN( "SRA", "SRA", 1, cEmpPPP, @cModo )
 			EndIf
 
-			RestArea( aSRArea )
+			FWRestArea( aSRArea )
 		EndIf
 
 	EndIf
@@ -2795,29 +2795,29 @@ Static Function NG700HISTO( lMDTA102 )
 		cCondCus  := cKeyCus
 		cCondDep  := cKeyDep
 		cCondALL  := cKeyEmp + cKeyFil + cKeyMat
-		dbSelectArea( "SRE" )
-		dbSetOrder( 2 )
-		dbSeek( cCondALL )
+		DBSelectArea( "SRE" )
+		DBSetOrder( 2 )
+		DBSeek( cCondALL )
 
 		While !Eof() .And. cCondALL == SRE->RE_EMPP + SRE->RE_FILIALP + SRE->RE_MATP
 
 			If SRE->RE_EMPP == SRE->RE_EMPD .And. SRE->RE_FILIALP == SRE->RE_FILIALD .And. ;
 			   SRE->RE_MATP == SRE->RE_MATD .And. SRE->RE_CCP == SRE->RE_CCD .And. SRE->RE_DEPTOP == SRE->RE_DEPTOD
-				dbSelectArea( "SRE" )
-				dbSkip()
+				DBSelectArea( "SRE" )
+				DBSkip()
 				Loop
 			EndIf
 
 			If (IIf( lFirstSRE, SRE->RE_DATA > dFIMPPP, SRE->RE_DATA >= dFIMPPP )) .Or. ;
 				SRE->RE_DATA < dINITMP
-				dbSelectArea( "SRE" )
-				dbSkip()
+				DBSelectArea( "SRE" )
+				DBSkip()
 				Loop
 			EndIf
 
-			If Alltrim( SRE->RE_CCP ) <> Alltrim( cCondCus ) .Or. ( Alltrim( SRE->RE_DEPTOP ) <> Alltrim( cCondDep ) )
-				dbSelectArea( "SRE" )
-				dbSkip()
+			If AllTrim( SRE->RE_CCP ) <> AllTrim( cCondCus ) .Or. ( AllTrim( SRE->RE_DEPTOP ) <> AllTrim( cCondDep ) )
+				DBSelectArea( "SRE" )
+				DBSkip()
 				Loop
 			EndIf
 
@@ -2872,8 +2872,8 @@ Static Function NG700HISTO( lMDTA102 )
 			// O funcionario esta mudando de Empresa/Filial, portanto, o processo para aqui
 			lFimPPP := (SRE->RE_EMPD != cEmpPPP .And. !lMudEmpr) .Or. ;
 					(SRE->RE_EMPD+SRE->RE_FILIALD != cSvEmpAnt+cSvFilAnt .And. !lMudFilial)
-			dbSelectArea( "SRE" )
-			dbSkip()
+			DBSelectArea( "SRE" )
+			DBSkip()
 
 		End
 
@@ -2896,7 +2896,7 @@ Static Function NG700HISTO( lMDTA102 )
 
 	// Busca pelas informações de função e cargo (SRA ou SR7) que serão utilizadas como referência na construção da TRB
 	For nWWW := 1 To Len( aDadosPPP )
-		cFilSR7 := Substr( aDadosPPP[nWWW][3], 1, FwSizeFilial( aDadosPPP[nWWW][6] ) )
+		cFilSR7 := SubStr( aDadosPPP[nWWW][3], 1, FwSizeFilial( aDadosPPP[nWWW][6] ) )
 
 		If lMudEmpr .And. aDadosPPP[nWWW][6] != cEmpPPP
 			cModo := FWModeAccess( "SR7" )
@@ -2904,15 +2904,15 @@ Static Function NG700HISTO( lMDTA102 )
 		EndIf
 
 		cModoSR7 := f700RetCom( "SR7" )
-		cXFilSR7 := FwxFilial( "SR7", cFilSR7, Substr( cModoSR7, 1, 1 ), Substr( cModoSR7, 2, 1 ), Substr( cModoSR7, 3, 1 ) )
+		cXFilSR7 := FwxFilial( "SR7", cFilSR7, SubStr( cModoSR7, 1, 1 ), SubStr( cModoSR7, 2, 1 ), SubStr( cModoSR7, 3, 1 ) )
 		lTemSR7 := .F.
 		cSeqSR7 := "Z"
-		dbSelectArea( "SR7" )
-		dbSetOrder( 1 ) // R7_FILIAL + R7_MAT + DTOS(R7_DATA) + R7_TIPO
+		DBSelectArea( "SR7" )
+		DBSetOrder( 1 ) // R7_FILIAL + R7_MAT + DToS(R7_DATA) + R7_TIPO
 
 		// Se não encontrar, pode ser devido a uma restrição criada na busca por transferências de filial/empresa
-		If !dbSeek( cXFilSR7 + aDadosPPP[nWWW][4] + DTOS( aDadosPPP[nWWW][1] ), .T. ) .And. (!lMudEmpr .Or. !lMudFilial)
-			dbSkip( -1 ) // Volta um registro e verifica se ainda é do funcionário em questão
+		If !DBSeek( cXFilSR7 + aDadosPPP[nWWW][4] + DToS( aDadosPPP[nWWW][1] ), .T. ) .And. (!lMudEmpr .Or. !lMudFilial)
+			DBSkip( -1 ) // Volta um registro e verifica se ainda é do funcionário em questão
 
 			If SR7->R7_MAT == aDadosPPP[nWWW][4]
 				cFuncaoPPP := SR7->R7_FUNCAO
@@ -2945,17 +2945,17 @@ Static Function NG700HISTO( lMDTA102 )
 					lTemSR7 := .T.
 				EndIf
 
-				dbselectArea( "SR7" )
-				dbSkip()
+				DBSelectArea( "SR7" )
+				DBSkip()
 			End
 
 		EndIf
 
 		If !lTemSR7 // Caso não ocorreu mudança de função (SR7) busca informações na função atual.
-			dbSelectArea( "SRA" )
-			dbSetOrder( 1 ) // RA_FILIAL + RA_MAT
+			DBSelectArea( "SRA" )
+			DBSetOrder( 1 ) // RA_FILIAL + RA_MAT
 
-			If dbSeek( xFilial( "SRA", Substr( aDadosPPP[nWWW][3], 1, FwSizeFilial() ) )  + aDadosPPP[nWWW, 4] )
+			If DBSeek( xFilial( "SRA", SubStr( aDadosPPP[nWWW][3], 1, FwSizeFilial() ) )  + aDadosPPP[nWWW, 4] )
 				cFuncaoPPP	:= SRA->RA_CODFUNC
 				cDesFunPPP	:= Posicione( "SRJ", 1, xFilial( "SRJ" ) + cFuncaoPPP, "RJ_DESC" )
 
@@ -2997,7 +2997,7 @@ Static Function NG700HISTO( lMDTA102 )
 
 		EndIf
 
-		cFilMat := Substr( aDadosPPP[nXYZ][3], 1, FwSizeFilial( aDadosPPP[nXYZ][6] ) )
+		cFilMat := SubStr( aDadosPPP[nXYZ][3], 1, FwSizeFilial( aDadosPPP[nXYZ][6] ) )
 
 		If (aScan( aMatriculas, { |x| x[1] + x[2] + x[3] == cFilMat+aDadosPPP[nXYZ][4] + aDadosPPP[nXYZ][6] } )) <= 0
 			aAdd( aMatriculas, { cFilMat, aDadosPPP[nXYZ][4], aDadosPPP[nXYZ][6] } ) // MAtriculas Utilizadas pelo funcionario na empresa
@@ -3020,24 +3020,24 @@ Static Function NG700HISTO( lMDTA102 )
 		EndIf
 
 		cModoSR7 := f700RetCom( "SR7" )
-		cXFilSR7 := FwxFilial( "SR7", cFilMat, Substr( cModoSR7, 1, 1 ), Substr( cModoSR7, 2, 1 ), Substr( cModoSR7, 3, 1 ) )
+		cXFilSR7 := FwxFilial( "SR7", cFilMat, SubStr( cModoSR7, 1, 1 ), SubStr( cModoSR7, 2, 1 ), SubStr( cModoSR7, 3, 1 ) )
 
 		cModoSRJ := f700RetCom( "SRJ" )
-		cXFilSRJ := FwxFilial( "SRJ", cFilMat, Substr( cModoSRJ, 1, 1 ), Substr( cModoSRJ, 2, 1 ), Substr( cModoSRJ, 3, 1 ) )
+		cXFilSRJ := FwxFilial( "SRJ", cFilMat, SubStr( cModoSRJ, 1, 1 ), SubStr( cModoSRJ, 2, 1 ), SubStr( cModoSRJ, 3, 1 ) )
 
 		cModoSQ3 := f700RetCom( "SQ3" )
-		cXFilSQ3 := FwxFilial( "SQ3", cFilMat, Substr( cModoSQ3, 1, 1 ), Substr( cModoSQ3, 2, 1 ), Substr( cModoSQ3, 3, 1 ) )
+		cXFilSQ3 := FwxFilial( "SQ3", cFilMat, SubStr( cModoSQ3, 1, 1 ), SubStr( cModoSQ3, 2, 1 ), SubStr( cModoSQ3, 3, 1 ) )
 
-		dbSelectArea( "SR7" )
-		dbSetOrder( 1 )
-		dbSeek( cFilMat + aDadosPPP[nXYZ][4] + Dtos( aDadosPPP[nXYZ][1] ), .T. )
+		DBSelectArea( "SR7" )
+		DBSetOrder( 1 )
+		DBSeek( cFilMat + aDadosPPP[nXYZ][4] + DToS( aDadosPPP[nXYZ][1] ), .T. )
 
 		While !Eof() .And. cFilMat+aDadosPPP[nXYZ][4] == SR7->R7_FILIAL+SR7->R7_MAT .And.;
 			  (IIf( nXYZ != 1, SR7->R7_DATA < aDadosPPP[nXYZ][2], SR7->R7_DATA <= aDadosPPP[nXYZ][2] ))
 
 			cCNPJ := Space( 10 )
 			nTIPINS := 2
-			aAreaEMP := SM0->( GetArea() )
+			aAreaEMP := SM0->( FWGetArea() )
 
 			If lNGMDTPS .Or. lSigaMdtps
 
@@ -3047,39 +3047,39 @@ Static Function NG700HISTO( lMDTA102 )
 				EndIf
 
 				cModoSA1 := f700RetCom( "SA1" )
-				cXFilSA1 := FwxFilial( "SA1", cFilMat, Substr( cModoSA1, 1, 1 ), Substr( cModoSA1, 2, 1 ), Substr( cModoSA1, 3, 1 ) )
+				cXFilSA1 := FwxFilial( "SA1", cFilMat, SubStr( cModoSA1, 1, 1 ), SubStr( cModoSA1, 2, 1 ), SubStr( cModoSA1, 3, 1 ) )
 
-				dbSelectArea( "SA1" )
-				dbSetOrder( 1 )
-				dbSeek( cXFilSA1 + Substr( aDadosPPP[nXYZ][5], 1, nSizeTD ) )
+				DBSelectArea( "SA1" )
+				DBSetOrder( 1 )
+				DBSeek( cXFilSA1 + SubStr( aDadosPPP[nXYZ][5], 1, nSizeTD ) )
 				cCNPJ := SA1->A1_CGC
 
 				If lMudEmpr .And. aDadosPPP[nXYZ][6] != cEmpPPP
 					EMP700OPEN( "SA1", "SA1", 1, cEmpPPP, @cModo )
 				EndIf
 			Else
-				dbSelectArea( "SM0" )
-				dbSeek( aDadosPPP[nXYZ][6] + cFilMat )
+				DBSelectArea( "SM0" )
+				DBSeek( aDadosPPP[nXYZ][6] + cFilMat )
 				cCNPJ := SM0->M0_CGC
 				nTIPINS := SM0->M0_TPINSC
 			EndIf
 
-			RestArea( aAreaEMP )
+			FWRestArea( aAreaEMP )
 
-			dbSelectArea( "SRJ" )
-			dbSetOrder( 1 )
-			dbSeek( cXFilSRJ + SR7->R7_FUNCAO )
+			DBSelectArea( "SRJ" )
+			DBSetOrder( 1 )
+			DBSeek( cXFilSRJ + SR7->R7_FUNCAO )
 
-			dbSelectArea( "SQ3" )
-			dbSetOrder( 1 )
-			dbSeek( cXFilSQ3 + IIf( lCposSR7, SR7->R7_CARGO, SRJ->RJ_CARGO ) )
+			DBSelectArea( "SQ3" )
+			DBSetOrder( 1 )
+			DBSeek( cXFilSQ3 + IIf( lCposSR7, SR7->R7_CARGO, SRJ->RJ_CARGO ) )
 
-			dbSelectArea( cTRBPPP )
-			dbSetOrder( 1 )
+			DBSelectArea( cTRBPPP )
+			DBSetOrder( 1 )
 
 			If (SR7->R7_FUNCAO != cFunAnter .Or. IIf( lCposSR7, SR7->R7_CARGO != cCarAnter, .F. ))
 				lAchouSRE := .T.
-				Reclock( cTRBPPP, .T. )
+				RecLock( cTRBPPP, .T. )
 					(cTRBPPP)->DTDE   := SR7->R7_DATA
 					(cTRBPPP)->DTATE  := aDadosPPP[nXYZ][2]
 					(cTRBPPP)->CNPJ   := cCNPJ
@@ -3093,7 +3093,7 @@ Static Function NG700HISTO( lMDTA102 )
 					(cTRBPPP)->CARGO  := IIf( lCposSR7, SR7->R7_CARGO, SRJ->RJ_CARGO )
 					(cTRBPPP)->CODFUN := SR7->R7_FUNCAO
 
-					If !Empty( SR7->R7_DESCFUN ) .And. (Len( Alltrim( SRJ->RJ_DESC ) ) <= 25 .Or. Len( Alltrim( SR7->R7_DESCFUN ) ) > 25)
+					If !Empty( SR7->R7_DESCFUN ) .And. (Len( AllTrim( SRJ->RJ_DESC ) ) <= 25 .Or. Len( AllTrim( SR7->R7_DESCFUN ) ) > 25)
 						(cTRBPPP)->DESFUN := SR7->R7_DESCFUN
 					Else
 						(cTRBPPP)->DESFUN := SRJ->RJ_DESC
@@ -3101,7 +3101,7 @@ Static Function NG700HISTO( lMDTA102 )
 
 					If lCposSR7
 
-						If !Empty( SR7->R7_DESCCAR ) .And. (Len( Alltrim( SQ3->Q3_DESCSUM ) ) <= 25 .Or. Len( Alltrim( SR7->R7_DESCCAR ) ) > 25)
+						If !Empty( SR7->R7_DESCCAR ) .And. (Len( AllTrim( SQ3->Q3_DESCSUM ) ) <= 25 .Or. Len( AllTrim( SR7->R7_DESCCAR ) ) > 25)
 							(cTRBPPP)->DESCAR := SR7->R7_DESCCAR
 						Else
 							(cTRBPPP)->DESCAR := SQ3->Q3_DESCSUM
@@ -3109,7 +3109,7 @@ Static Function NG700HISTO( lMDTA102 )
 
 					EndIf
 
-				(cTRBPPP)->( Msunlock())
+				(cTRBPPP)->( MSUnLock())
 				cFunAnter := SR7->R7_FUNCAO
 
 				If lCposSR7
@@ -3117,8 +3117,8 @@ Static Function NG700HISTO( lMDTA102 )
 				EndIf
 
 			Else
-				dbSelectArea( "SR7" )
-				dbSkip()
+				DBSelectArea( "SR7" )
+				DBSkip()
 				Loop
 			EndIf
 
@@ -3137,11 +3137,11 @@ Static Function NG700HISTO( lMDTA102 )
 
 			lVelha := .T.
 
-			If lFirst // Se for a primeira vez que entrou no laco
+			If lFirst // Se For a primeira vez que entrou no laco
 				dDataFOR := SR7->R7_DATA
 				lFirst := .F.
 			Else
-				RestArea( aAreaVelha )
+				FWRestArea( aAreaVelha )
 
 				If !Eof() .And. !Bof()
 
@@ -3152,16 +3152,16 @@ Static Function NG700HISTO( lMDTA102 )
 							cCarAnter := (cTRBPPP)->CARGO
 						EndIf
 
-						RestArea( aAreaAtual )
+						FWRestArea( aAreaAtual )
 						lVelha := .F.
 					EndIf
 
-					Reclock( cTRBPPP, .F. )
+					RecLock( cTRBPPP, .F. )
 						(cTRBPPP)->DTATE  := dDtTermino //Altera a data fim do registro anterior
-					(cTRBPPP)->( Msunlock())
+					(cTRBPPP)->( MSUnLock())
 				EndIf
 
-				RestArea( aAreaAtual )
+				FWRestArea( aAreaAtual )
 			EndIf
 
 			If lVelha
@@ -3176,20 +3176,20 @@ Static Function NG700HISTO( lMDTA102 )
 			// Variavel de controle. Para saber se houve mudanca de funcao
 			lAchou := .F.
 
-			dbSelectArea( "SR7" )
-			dbSkip()
+			DBSelectArea( "SR7" )
+			DBSkip()
 		End
 
 		// Verifica se existe registro do funcionário na SRE
 		aAreaSRE := SRE->(GetArea())
-		dbSelectArea( "SRE" )
-		dbSetOrder( 2 )
+		DBSelectArea( "SRE" )
+		DBSetOrder( 2 )
 
-		If dbSeek( cCondAll )
+		If DBSeek( cCondAll )
 			lAchouSRE := .T.
 		EndIf
 
-		RestArea( aAreaSRE )
+		FWRestArea( aAreaSRE )
 
 		If lMudEmpr .And. aDadosPPP[nXYZ][6] != cEmpPPP
 			EMP700OPEN( "SR7", "SR7", 1, cEmpPPP, @cModo )
@@ -3209,11 +3209,11 @@ Static Function NG700HISTO( lMDTA102 )
 				EndIf
 
 				cModoSA1 := f700RetCom( "SA1" )
-				cXFilSA1 := FwxFilial( "SA1", cFilMat, Substr( cModoSA1, 1, 1 ), Substr( cModoSA1, 2, 1 ), Substr( cModoSA1, 3, 1 ) )
+				cXFilSA1 := FwxFilial( "SA1", cFilMat, SubStr( cModoSA1, 1, 1 ), SubStr( cModoSA1, 2, 1 ), SubStr( cModoSA1, 3, 1 ) )
 
-				dbSelectArea( "SA1" )
-				dbSetOrder( 1 )
-				dbSeek( cXFilSA1 + Substr( aDadosPPP[nXYZ][5], 1, nSizeTD ) )
+				DBSelectArea( "SA1" )
+				DBSetOrder( 1 )
+				DBSeek( cXFilSA1 + SubStr( aDadosPPP[nXYZ][5], 1, nSizeTD ) )
 				cCNPJ := SA1->A1_CGC
 
 				If lMudEmpr .And. aDadosPPP[nXYZ][6] != cEmpPPP
@@ -3221,27 +3221,27 @@ Static Function NG700HISTO( lMDTA102 )
 				EndIf
 
 			Else
-				dbSelectArea( "SM0" )
-				dbSeek( aDadosPPP[nXYZ][6] + cFilMat )
+				DBSelectArea( "SM0" )
+				DBSeek( aDadosPPP[nXYZ][6] + cFilMat )
 				cCNPJ := SM0->M0_CGC
 				nTIPINS := SM0->M0_TPINSC
 			EndIf
 
-			RestArea( aAreaEMP )
+			FWRestArea( aAreaEMP )
 
-			dbSelectArea( "SRJ" )
-			dbSetOrder( 1 )
-			dbSeek( cXFilSRJ + cFuncaoPPP )
+			DBSelectArea( "SRJ" )
+			DBSetOrder( 1 )
+			DBSeek( cXFilSRJ + cFuncaoPPP )
 
-			dbSelectArea( "SQ3" )
-			dbSetOrder( 1 )
-			dbSeek( cXFilSQ3 + IIf( lCposSR7, cCargoPPP, SRJ->RJ_CARGO ) )
+			DBSelectArea( "SQ3" )
+			DBSetOrder( 1 )
+			DBSeek( cXFilSQ3 + IIf( lCposSR7, cCargoPPP, SRJ->RJ_CARGO ) )
 
-			dbSelectArea( cTRBPPP )
-			dbSetOrder( 1 )
+			DBSelectArea( cTRBPPP )
+			DBSetOrder( 1 )
 
-			If !dbSeek( DTOS( aDadosPPP[nXYZ][1] ) )
-				Reclock( cTRBPPP, .T. )
+			If !DBSeek( DToS( aDadosPPP[nXYZ][1] ) )
+				RecLock( cTRBPPP, .T. )
 					(cTRBPPP)->DTDE   := aDadosPPP[nXYZ][1]
 					(cTRBPPP)->DTATE  := aDadosPPP[nXYZ][2]
 					(cTRBPPP)->CNPJ   := cCNPJ
@@ -3278,10 +3278,10 @@ Static Function NG700HISTO( lMDTA102 )
 						cDesCarFOR := (cTRBPPP)->DESCAR
 					EndIf
 
-				(cTRBPPP)->( Msunlock())
+				(cTRBPPP)->( MSUnLock())
 			EndIf
 
-		Elseif lInicio // Se nao achou nenhuma mudanca de funcao no inicio da mudanca de setor
+		ElseIf lInicio // Se nao achou nenhuma mudanca de funcao no inicio da mudanca de setor
 			cCNPJ := Space( 10 )
 			nTIPINS := 2
 			aAreaEMP := SM0->(GetArea())
@@ -3294,11 +3294,11 @@ Static Function NG700HISTO( lMDTA102 )
 				EndIf
 
 				cModoSA1 := f700RetCom( "SA1" )
-				cXFilSA1 := FwxFilial( "SA1", cFilMat, Substr( cModoSA1, 1, 1 ), Substr( cModoSA1, 2, 1 ), Substr( cModoSA1, 3, 1 ) )
+				cXFilSA1 := FwxFilial( "SA1", cFilMat, SubStr( cModoSA1, 1, 1 ), SubStr( cModoSA1, 2, 1 ), SubStr( cModoSA1, 3, 1 ) )
 
-				dbSelectArea( "SA1" )
-				dbSetOrder( 1 )
-				dbSeek( cXFilSA1 + Substr( aDadosPPP[nXYZ][5], 1, nSizeTD ) )
+				DBSelectArea( "SA1" )
+				DBSetOrder( 1 )
+				DBSeek( cXFilSA1 + SubStr( aDadosPPP[nXYZ][5], 1, nSizeTD ) )
 				cCNPJ := SA1->A1_CGC
 
 				If lMudEmpr .And. aDadosPPP[nXYZ][6] != cEmpPPP
@@ -3306,27 +3306,27 @@ Static Function NG700HISTO( lMDTA102 )
 				EndIf
 
 			Else
-				dbSelectArea( "SM0" )
-				dbSeek( aDadosPPP[nXYZ][6] + cFilMat )
+				DBSelectArea( "SM0" )
+				DBSeek( aDadosPPP[nXYZ][6] + cFilMat )
 				cCNPJ := SM0->M0_CGC
 				nTIPINS := SM0->M0_TPINSC
 			EndIf
 
-			RestArea( aAreaEMP )
+			FWRestArea( aAreaEMP )
 
-			dbSelectArea( "SRJ" )
-			dbSetOrder( 1 )
-			dbSeek( cXFilSRJ + cFuncaoPPP )
+			DBSelectArea( "SRJ" )
+			DBSetOrder( 1 )
+			DBSeek( cXFilSRJ + cFuncaoPPP )
 
-			dbSelectArea( "SQ3" )
-			dbSetOrder( 1 )
-			dbSeek( cXFilSQ3 + IIf( lCposSR7, cCargoPPP, SRJ->RJ_CARGO ) )
+			DBSelectArea( "SQ3" )
+			DBSetOrder( 1 )
+			DBSeek( cXFilSQ3 + IIf( lCposSR7, cCargoPPP, SRJ->RJ_CARGO ) )
 
-			dbSelectArea( cTRBPPP )
-			dbSetOrder( 1 )
+			DBSelectArea( cTRBPPP )
+			DBSetOrder( 1 )
 
-			If !dbSeek( DTOS( aDadosPPP[nXYZ][1] ) )
-				Reclock( cTRBPPP, .T. )
+			If !DBSeek( DToS( aDadosPPP[nXYZ][1] ) )
+				RecLock( cTRBPPP, .T. )
 					(cTRBPPP)->DTDE   := aDadosPPP[nXYZ][1]
 					(cTRBPPP)->DTATE  := dDataFOR
 					(cTRBPPP)->CNPJ   := cCNPJ
@@ -3355,7 +3355,7 @@ Static Function NG700HISTO( lMDTA102 )
 
 					EndIf
 
-				(cTRBPPP)->( Msunlock())
+				(cTRBPPP)->( MSUnLock())
 			EndIf
 
 		EndIf
@@ -3374,24 +3374,24 @@ Static Function NG700HISTO( lMDTA102 )
 
 	Next
 
-	RestArea( aSRArea )
+	FWRestArea( aSRArea )
 
 	If !lAchouSRE
 
 		Begin Sequence
-			dbSelectArea( "SRJ" )
-			dbSetOrder( 1 )
+			DBSelectArea( "SRJ" )
+			DBSetOrder( 1 )
 
-			If dbSeek( xFilial( "SRJ" ) + cRA_CODFUNC )
+			If DBSeek( xFilial( "SRJ" ) + cRA_CODFUNC )
 
 				If lCposSR7
-					dbSelectArea( "SQ3" )
-					dbSetOrder( 1 )
-					dbSeek( xFilial( "SQ3" ) + cRA_CARGO )
+					DBSelectArea( "SQ3" )
+					DBSetOrder( 1 )
+					DBSeek( xFilial( "SQ3" ) + cRA_CARGO )
 				EndIf
 
-				dbSelectArea( cTRBPPP )
-				dbGoTop()
+				DBSelectArea( cTRBPPP )
+				DBGoTop()
 
 				While !Eof()
 					RecLock( cTRBPPP, .F. )
@@ -3404,8 +3404,8 @@ Static Function NG700HISTO( lMDTA102 )
 							(cTRBPPP)->DESCAR := SQ3->Q3_DESCSUM
 						EndIf
 
-					(cTRBPPP)->( MsUnlock())
-					dbskip()
+					(cTRBPPP)->( MSUnLock())
+					DBSkip()
 				End
 
 				Break
@@ -3418,20 +3418,20 @@ Static Function NG700HISTO( lMDTA102 )
 					EMP700OPEN( "SRJ", "SRJ", 1, aMatriculas[nBeg][3], @cModo, aMatriculas[nBeg][1] )
 				EndIf
 
-				dbSelectArea( "SRJ" )
-				dbSetOrder( 1 )
+				DBSelectArea( "SRJ" )
+				DBSetOrder( 1 )
 
-				If dbSeek( xFilial( "SRJ", aMatriculas[nBeg, 1] ) + cRA_CODFUNC )
-					dbSelectArea( cTRBPPP )
-					dbGoTop()
+				If DBSeek( xFilial( "SRJ", aMatriculas[nBeg, 1] ) + cRA_CODFUNC )
+					DBSelectArea( cTRBPPP )
+					DBGoTop()
 
 					While !Eof()
 						RecLock( cTRBPPP, .F. )
 							(cTRBPPP)->CODFUN := cRA_CODFUNC
 							(cTRBPPP)->DESFUN := SRJ->RJ_DESC
 							(cTRBPPP)->CARGO  := SRJ->RJ_CARGO
-						(cTRBPPP)->( Msunlock())
-						dbSkip()
+						(cTRBPPP)->( MSUnLock())
+						DBSkip()
 					End
 
 					Break
@@ -3449,37 +3449,37 @@ Static Function NG700HISTO( lMDTA102 )
 
 	If xm_par12 == 1 .Or. (xm_par12 == 2 .And. !Empty( dDatacorte ))//Somente a partir JAN/2004 ?
 		lDelBK := .F.
-		dbSelectArea( cTRBPPP )
-		dbSetOrder( 1 )
-		dbSeek( DToS( dINIPPP ), .T. )
+		DBSelectArea( cTRBPPP )
+		DBSetOrder( 1 )
+		DBSeek( DToS( dINIPPP ), .T. )
 
 		If dINIPPP == (cTRBPPP)->DTDE
 			lDelBK := .T.
 		Else
-			dbSkip( -1 )
+			DBSkip( -1 )
 
 			If !Eof() .And. !Bof() .And. dINIPPP > (cTRBPPP)->DTDE
 				lDelBK := .T.
-				Reclock( cTRBPPP, .F. )
+				RecLock( cTRBPPP, .F. )
 					(cTRBPPP)->DTDE := dINIPPP
-				(cTRBPPP)->( Msunlock())
+				(cTRBPPP)->( MSUnLock())
 			EndIf
 
 		EndIf
 
 		If lDelBK
-			dbSelectArea( cTRBPPP )
-			dbGoTop()
+			DBSelectArea( cTRBPPP )
+			DBGoTop()
 
 			While !Eof()
 
 				If (cTRBPPP)->DTDE < dINIPPP
 					RecLock( cTRBPPP, .F. )
 						dbDelete()
-					(cTRBPPP)->( MsUnlock())
+					(cTRBPPP)->( MSUnLock())
 				EndIf
 
-				dbSkip()
+				DBSkip()
 			End
 
 		EndIf
@@ -3490,16 +3490,16 @@ Static Function NG700HISTO( lMDTA102 )
 	cGFIPant := "  "
 	lGfipAll := .F. // Se achou alguma alteracao de GFIP
 
-	dbSelectArea( cTRBPPP )
-	nTotRegPPP := (cTRBPPP)->(Reccount())
-	dbSetOrder( 1 )
-	dbGoTop()
+	DBSelectArea( cTRBPPP )
+	nTotRegPPP := (cTRBPPP)->(RecCount())
+	DBSetOrder( 1 )
+	DBGoTop()
 
 	While !Eof()
 
 		If !Empty( (cTRBPPP)->GFIP )
-			dbSelectArea( cTRBPPP )
-			dbSkip()
+			DBSelectArea( cTRBPPP )
+			DBSkip()
 			Loop
 		EndIf
 
@@ -3507,7 +3507,7 @@ Static Function NG700HISTO( lMDTA102 )
 		aAreaAnt := {}
 		lAchou := .F.
 		nRegPPP++
-		cFilSR9 := Substr( (cTRBPPP)->FILIAL, 1, FwSizeFilial( (cTRBPPP)->EMP ) )
+		cFilSR9 := SubStr( (cTRBPPP)->FILIAL, 1, FwSizeFilial( (cTRBPPP)->EMP ) )
 
 		If lMudEmpr .And. (cTRBPPP)->EMP != cEmpPPP
 			cModo := FWModeAccess( "SR9" )
@@ -3515,15 +3515,15 @@ Static Function NG700HISTO( lMDTA102 )
 		EndIf
 
 		cModoSR9 := f700RetCom( "SR9" )
-		cXFilSR9 := FwxFilial( "SR9", cFilSR9, Substr( cModoSR9, 1, 1 ), Substr( cModoSR9, 2, 1 ), Substr( cModoSR9, 3, 1 ) )
+		cXFilSR9 := FwxFilial( "SR9", cFilSR9, SubStr( cModoSR9, 1, 1 ), SubStr( cModoSR9, 2, 1 ), SubStr( cModoSR9, 3, 1 ) )
 
 		cChavePPP := cXFilSR9+(cTRBPPP)->MAT
 		svDTDE    := (cTRBPPP)->DTDE
 		svDTATE   := (cTRBPPP)->DTATE
 
-		dbSelectArea( "SR9" )
-		dbSetOrder( 1 )
-		dbSeek( cXFilSR9 + (cTRBPPP)->MAT + "RA_OCORREN" )
+		DBSelectArea( "SR9" )
+		DBSetOrder( 1 )
+		DBSeek( cXFilSR9 + (cTRBPPP)->MAT + "RA_OCORREN" )
 
 		While !Eof() .And. cChavePPP == SR9->R9_FILIAL+SR9->R9_MAT .And.;
 			"RA_OCORREN" == SR9->R9_CAMPO
@@ -3533,17 +3533,17 @@ Static Function NG700HISTO( lMDTA102 )
 				// Validação para pegar o ultimo código antes de 01/01/2004
 				// e adicionar no TRB do GFIP
 				If xm_par12 == 1 .And. lEntra
-					dbSelectArea( "SR9" ) // Feito posicionamento para trazer as datas corretas
-					dbSetOrder( 2 ) // R9_FILIAL + R9_MAT + DTOS(R9_DATA) + R9_CAMPO
-					dbSeek( xFilial( "SR9" ) + SRA->RA_MAT )
+					DBSelectArea( "SR9" ) // Feito posicionamento para trazer as datas corretas
+					DBSetOrder( 2 ) // R9_FILIAL + R9_MAT + DToS(R9_DATA) + R9_CAMPO
+					DBSeek( xFilial( "SR9" ) + SRA->RA_MAT )
 					lEntra := .F.
 
 					While !Eof() .And. xFilial( "SR9" ) == SR9->R9_FILIAL
 
 						If SR9->R9_DATA < CTOD( "01/01/2004" )
-							cGFIP := Alltrim( SR9->R9_DESC ) // Ultimo código recebido antes de 01/01/2004
-							dbSelectArea( "SR9" )
-							dbSkip()
+							cGFIP := AllTrim( SR9->R9_DESC ) // Ultimo código recebido antes de 01/01/2004
+							DBSelectArea( "SR9" )
+							DBSkip()
 						Else
 							Exit
 						EndIf
@@ -3552,11 +3552,11 @@ Static Function NG700HISTO( lMDTA102 )
 
 				EndIf
 
-			RestArea( aAreaSR9 )
+			FWRestArea( aAreaSR9 )
 
 			If svDTDE > SR9->R9_DATA .Or. svDTATE <= SR9->R9_DATA
-				dbSelectArea( "SR9" )
-				dbSkip()
+				DBSelectArea( "SR9" )
+				DBSkip()
 				Loop
 			EndIf
 
@@ -3574,28 +3574,28 @@ Static Function NG700HISTO( lMDTA102 )
 			tmpEMP    := (cTRBPPP)->EMP
 
 			lInsertTRB := .F.
-			dbSelectArea( cTRBPPP )
+			DBSelectArea( cTRBPPP )
 
 			If !lAchou
 
 				If (cTRBPPP)->DTDE >= SR9->R9_DATA-5
 					RecLock( cTRBPPP, .F. )
 						(cTRBPPP)->GFIP  := AllTrim( SR9->R9_DESC )
-					(cTRBPPP)->( Msunlock())
+					(cTRBPPP)->( MSUnLock())
 				Else
 					RecLock( cTRBPPP, .F. )
 						(cTRBPPP)->DTATE := SR9->R9_DATA
 						(cTRBPPP)->GFIP  := IIf( !Empty( cGFIP ), cGFIP, cGFIPant )
-					(cTRBPPP)->( Msunlock())
+					(cTRBPPP)->( MSUnLock())
 					lInsertTRB := .T.
 				EndIf
 
 			Else
 				lInsertTRB := .T.
-				RestArea( aAreaAnt )
+				FWRestArea( aAreaAnt )
 				RecLock( cTRBPPP, .F. )
 					(cTRBPPP)->DTATE := SR9->R9_DATA
-				(cTRBPPP)->( Msunlock())
+				(cTRBPPP)->( MSUnLock())
 			EndIf
 
 			If lInsertTRB
@@ -3612,42 +3612,42 @@ Static Function NG700HISTO( lMDTA102 )
 					(cTRBPPP)->CODFUN := tmpCODFUN
 					(cTRBPPP)->DESFUN := tmpDESFUN
 					(cTRBPPP)->EMP    := tmpEMP
-					(cTRBPPP)->GFIP   := Alltrim( SR9->R9_DESC )
-				(cTRBPPP)->( Msunlock())
+					(cTRBPPP)->GFIP   := AllTrim( SR9->R9_DESC )
+				(cTRBPPP)->( MSUnLock())
 			EndIf
 
 			aAreaAnt := (cTRBPPP)->(GetArea())
 
 			lAchou     := .T. //Controle p/ ver se houve alguma alteracao de GFIP em cada periodo de trabalho
 			lGfipAll   := .T.
-			cGFIPant   := Alltrim( SR9->R9_DESC )
+			cGFIPant   := AllTrim( SR9->R9_DESC )
 
-			dbSelectArea( "SR9" )
-			dbSkip()
+			DBSelectArea( "SR9" )
+			DBSkip()
 		End
 
-		RestArea( aAreaSv )
+		FWRestArea( aAreaSv )
 
 		If lMudEmpr .And. (cTRBPPP)->EMP != cEmpPPP
 			EMP700OPEN( "SR9", "SR9", 1, cEmpPPP, @cModo )
 		EndIf
 
-		dbSelectArea( cTRBPPP )
+		DBSelectArea( cTRBPPP )
 
 		If !lAchou
 			RecLock( cTRBPPP, .F. )
 				(cTRBPPP)->GFIP := cGFIPant
-			(cTRBPPP)->( Msunlock())
+			(cTRBPPP)->( MSUnLock())
 		EndIf
 
-		RestArea( aAreaSv )
-		dbSelectArea( cTRBPPP )
-		dbSkip()
+		FWRestArea( aAreaSv )
+		DBSelectArea( cTRBPPP )
+		DBSkip()
 	End
 
-	dbSelectArea( cTRBPPP )
-	dbSetOrder( 1 )
-	dbGoTop()
+	DBSelectArea( cTRBPPP )
+	DBSetOrder( 1 )
+	DBGoTop()
 
 	While !Eof()
 
@@ -3655,32 +3655,32 @@ Static Function NG700HISTO( lMDTA102 )
 
 			If lMudEmpr .And. (cTRBPPP)->EMP != cEmpPPP
 				cModo := FWModeAccess( cAlias )
-				EMP700OPEN( cAlias, cAlias, 1, (cTRBPPP)->EMP, @cModo, Substr( (cTRBPPP)->FILIAL, 1, FwSizeFilial( (cTRBPPP)->EMP ) ) )
+				EMP700OPEN( cAlias, cAlias, 1, (cTRBPPP)->EMP, @cModo, SubStr( (cTRBPPP)->FILIAL, 1, FwSizeFilial( (cTRBPPP)->EMP ) ) )
 			EndIf
 
 			cModoCTT := f700RetCom( cAlias )
-			cXFilCTT := FwxFilial( cAlias, Substr( (cTRBPPP)->FILIAL, 1, FwSizeFilial( (cTRBPPP)->EMP ) ), Substr( cModoCTT, 1, 1 ),;
-				 Substr( cModoCTT, 2, 1 ), Substr( cModoCTT, 3, 1 ) )
+			cXFilCTT := FwxFilial( cAlias, SubStr( (cTRBPPP)->FILIAL, 1, FwSizeFilial( (cTRBPPP)->EMP ) ), SubStr( cModoCTT, 1, 1 ),;
+				 SubStr( cModoCTT, 2, 1 ), SubStr( cModoCTT, 3, 1 ) )
 
-			dbSelectArea( cAlias )
-			dbSetOrder( 1 )
+			DBSelectArea( cAlias )
+			DBSetOrder( 1 )
 
-			If dbSeek( cXFilCTT + (cTRBPPP)->CUSTO )
+			If DBSeek( cXFilCTT + (cTRBPPP)->CUSTO )
 
 				If cAlias == "SI3"
 
 					If !Empty( SI3->I3_OCORREN )
-						dbSelectArea( cTRBPPP )
+						DBSelectArea( cTRBPPP )
 						RecLock( cTRBPPP, .F. )
 							(cTRBPPP)->GFIP := SI3->I3_OCORREN
-						(cTRBPPP)->( Msunlock())
+						(cTRBPPP)->( MSUnLock())
 					EndIf
 
 				ElseIf !Empty( CTT->CTT_OCORRE )
-					dbSelectArea( cTRBPPP )
+					DBSelectArea( cTRBPPP )
 					RecLock( cTRBPPP, .F. )
 						(cTRBPPP)->GFIP := CTT->CTT_OCORRE
-					(cTRBPPP)->( Msunlock())
+					(cTRBPPP)->( MSUnLock())
 				EndIf
 
 			EndIf
@@ -3692,28 +3692,28 @@ Static Function NG700HISTO( lMDTA102 )
 			If !Empty( SRA->RA_OCORREN ) .And. (Empty( (cTRBPPP)->GFIP ) .Or. (cTRBPPP)->GFIP == "00" ) .And. !lGfipAll
 				RecLock( cTRBPPP, .F. )
 					(cTRBPPP)->GFIP := SRA->RA_OCORREN
-				(cTRBPPP)->( Msunlock())
+				(cTRBPPP)->( MSUnLock())
 			EndIf
 
 		EndIf
 
-		dbSelectArea( cTRBPPP )
-		dbSkip()
+		DBSelectArea( cTRBPPP )
+		DBSkip()
 	End
 
-	dbSelectArea( cTRBPPP )
-	dbSetOrder( 1 )
-	dbGoTop()
+	DBSelectArea( cTRBPPP )
+	DBSetOrder( 1 )
+	DBGoTop()
 
 	While !Eof() .And. lUpdDates
 		aAreaTmp := (cTRBPPP)->(GetArea())
 		dDtFimsv := CTOD( "  /  /  " )
 		svPPPchv := (cTRBPPP)->CNPJ+Str( (cTRBPPP)->TIPINS, 1 ) + (cTRBPPP)->CUSTO + (cTRBPPP)->DEPTO + (cTRBPPP)->FILIAL + (cTRBPPP)->MAT+;
 					(cTRBPPP)->CARGO + (cTRBPPP)->CODFUN + (cTRBPPP)->DESFUN + (cTRBPPP)->EMP + (cTRBPPP)->GFIP
-		dbSkip()
+		DBSkip()
 
 		If !Eof()
-			dbSelectArea( cTRBPPP )
+			DBSelectArea( cTRBPPP )
 			While !Eof() .And.;
 				svPPPchv == (cTRBPPP)->CNPJ+Str( (cTRBPPP)->TIPINS, 1 )+(cTRBPPP)->CUSTO+(cTRBPPP)->DEPTO+(cTRBPPP)->FILIAL+;
 				(cTRBPPP)->MAT+(cTRBPPP)->CARGO+(cTRBPPP)->CODFUN+(cTRBPPP)->DESFUN+(cTRBPPP)->EMP+(cTRBPPP)->GFIP
@@ -3724,36 +3724,36 @@ Static Function NG700HISTO( lMDTA102 )
 
 				RecLock( cTRBPPP, .F. )
 					dbDelete()
-				(cTRBPPP)->( Msunlock())
-				dbSelectArea( cTRBPPP )
-				dbSkip()
+				(cTRBPPP)->( MSUnLock())
+				DBSelectArea( cTRBPPP )
+				DBSkip()
 			End
 
 			If !Empty( dDtFimsv )
-				RestArea( aAreaTmp )
+				FWRestArea( aAreaTmp )
 				RecLock( cTRBPPP, .F. )
 					(cTRBPPP)->DTATE := dDtFimsv
-				(cTRBPPP)->( Msunlock())
+				(cTRBPPP)->( MSUnLock())
 			EndIf
 
 		EndIf
 
-		RestArea( aAreaTmp )
-		dbSelectArea( cTRBPPP )
-		dbSkip()
+		FWRestArea( aAreaTmp )
+		DBSelectArea( cTRBPPP )
+		DBSkip()
 	End
 
 	lTroca    := .T.
 	cTrocaFun := " "
 	// Executa os historicos
-	dbSelectArea( cTRBPPP )
+	DBSelectArea( cTRBPPP )
 	Pack
 
-	nRegTRB := (cTRBPPP)->(RECCOUNT())
+	nRegTRB := (cTRBPPP)->(RecCount())
 	nConTRB := 0
-	dbGoTop()
+	DBGoTop()
 
-	While !EoF()
+	While !Eof()
 		nConTRB++
 
 		If nConTRB > 1
@@ -3767,7 +3767,7 @@ Static Function NG700HISTO( lMDTA102 )
 			cFilTNF := (cTRBPPP)->EMP+(cTRBPPP)->FILIAL
 		EndIf
 
-		cFilFichas := Substr( (cTRBPPP)->FILIAL, 1, FwSizeFilial( (cTRBPPP)->EMP ) )
+		cFilFichas := SubStr( (cTRBPPP)->FILIAL, 1, FwSizeFilial( (cTRBPPP)->EMP ) )
 
 		If lMudEmpr .And. (cTRBPPP)->EMP != cEmpPPP
 			cModo := FWModeAccess( "TM0" )
@@ -3781,19 +3781,19 @@ Static Function NG700HISTO( lMDTA102 )
 		EndIf
 
 		cModoTM0 := f700RetCom( "TM0" )
-		cXFilTM0 := FwxFilial( "TM0", cFilFichas, Substr( cModoTM0, 1, 1 ), Substr( cModoTM0, 2, 1 ), Substr( cModoTM0, 3, 1 ) )
+		cXFilTM0 := FwxFilial( "TM0", cFilFichas, SubStr( cModoTM0, 1, 1 ), SubStr( cModoTM0, 2, 1 ), SubStr( cModoTM0, 3, 1 ) )
 
 		cModoSRA := f700RetCom( "SRA" )
-		cXFilSRA := FwxFilial( "SRA", cFilFichas, Substr( cModoSRA, 1, 1 ), Substr( cModoSRA, 2, 1 ), Substr( cModoSRA, 3, 1 ) )
+		cXFilSRA := FwxFilial( "SRA", cFilFichas, SubStr( cModoSRA, 1, 1 ), SubStr( cModoSRA, 2, 1 ), SubStr( cModoSRA, 3, 1 ) )
 
 		cModoSRJ := f700RetCom( "SRJ" )
-		cXFilSRJ := FwxFilial( "SRJ", cFilFichas, Substr( cModoSRJ, 1, 1 ), Substr( cModoSRJ, 2, 1 ), Substr( cModoSRJ, 3, 1 ) )
+		cXFilSRJ := FwxFilial( "SRJ", cFilFichas, SubStr( cModoSRJ, 1, 1 ), SubStr( cModoSRJ, 2, 1 ), SubStr( cModoSRJ, 3, 1 ) )
 
 		cModoSQ3 := f700RetCom( "SQ3" )
-		cXFilSQ3 := FwxFilial( "SQ3", cFilFichas, Substr( cModoSQ3, 1, 1 ), Substr( cModoSQ3, 2, 1 ), Substr( cModoSQ3, 3, 1 ) )
+		cXFilSQ3 := FwxFilial( "SQ3", cFilFichas, SubStr( cModoSQ3, 1, 1 ), SubStr( cModoSQ3, 2, 1 ), SubStr( cModoSQ3, 3, 1 ) )
 
 		cModoCTT := f700RetCom( cAlias )
-		cXFilCTT := FwxFilial( cAlias, cFilFichas, Substr( cModoCTT, 1, 1 ), Substr( cModoCTT, 2, 1 ), Substr( cModoCTT, 3, 1 ) )
+		cXFilCTT := FwxFilial( cAlias, cFilFichas, SubStr( cModoCTT, 1, 1 ), SubStr( cModoCTT, 2, 1 ), SubStr( cModoCTT, 3, 1 ) )
 
 		If (cTRBPPP)->DTDE == (cTRBPPP)->DTATE
 			dDateAte := (cTRBPPP)->DTATE
@@ -3802,13 +3802,13 @@ Static Function NG700HISTO( lMDTA102 )
 			dDateAte := ( cTRBPPP )->DTATE - IIf( nRegTRB == nConTRB, 0, 1 )
 		EndIf
 
-		dbSelectArea( "TM0" )
-		dbSetOrder( 3 )
+		DBSelectArea( "TM0" )
+		DBSetOrder( 3 )
 
-		If dbSeek( cXFilSRA + (cTRBPPP)->MAT )
+		If DBSeek( cXFilSRA + (cTRBPPP)->MAT )
 
-			If (aScan( aFichasUsa, { |x| x[5] + x[1] + x[2] + DTOS( x[3] ) + DTOS( x[4] ) == (cTRBPPP)->EMP + cFilFichas +;
-				 TM0->TM0_NUMFIC + DTOS( (cTRBPPP)->DTDE ) + DTOS( dDateAte ) } ) ) <= 0
+			If (aScan( aFichasUsa, { |x| x[5] + x[1] + x[2] + DToS( x[3] ) + DToS( x[4] ) == (cTRBPPP)->EMP + cFilFichas +;
+				 TM0->TM0_NUMFIC + DToS( (cTRBPPP)->DTDE ) + DToS( dDateAte ) } ) ) <= 0
 				aAdd( aFichasUsa, { cFilFichas, TM0->TM0_NUMFIC, (cTRBPPP)->DTDE, dDateAte, (cTRBPPP)->EMP } )//Fichas Utilizadas pelo funcionario na empresa
 				NG700VECAT( cFilFichas, TM0->TM0_NUMFIC, (cTRBPPP)->EMP ) //Verifica se existe CAT para a Ficha Medica do Funcionario
 			EndIf
@@ -3816,12 +3816,12 @@ Static Function NG700HISTO( lMDTA102 )
 		EndIf
 
 		strFuncao := (cTRBPPP)->DESFUN
-		dbSelectArea( "SRJ" )
-		dbSetOrder( 1 )
+		DBSelectArea( "SRJ" )
+		DBSetOrder( 1 )
 
 		// Determina se a descricao da funcao sera impressa no PPP verificando
 		// os campos "Impr. no PPP?" e "Func. Lider" no registro da função (SRJ)
-		If dbSeek( cXFilSRJ + (cTRBPPP)->CODFUN )
+		If DBSeek( cXFilSRJ + (cTRBPPP)->CODFUN )
 			nRJ_IMP := -1
 			nRJ_IMP := Val( SRJ->RJ_PPPIMP )
 
@@ -3857,13 +3857,13 @@ Static Function NG700HISTO( lMDTA102 )
 
 		cTrocaFun := (cTRBPPP)->CODFUN
 
-		dbSelectArea( "SQ3" )
-		dbSetOrder( 1 )
+		DBSelectArea( "SQ3" )
+		DBSetOrder( 1 )
 
-		If  !dbSeek( cXFilSQ3+(cTRBPPP)->CARGO + (cTRBPPP)->CUSTO )
-			dbSelectArea( "SQ3" )
-			dbSetOrder( 1 )
-			dbSeek( cXFilSQ3 + (cTRBPPP)->CARGO )
+		If  !DBSeek( cXFilSQ3+(cTRBPPP)->CARGO + (cTRBPPP)->CUSTO )
+			DBSelectArea( "SQ3" )
+			DBSetOrder( 1 )
+			DBSeek( cXFilSQ3 + (cTRBPPP)->CARGO )
 
 			If aScan( aCargoSv, { |x| x[1] + x[2] + x[4] == cFilFichas + (cTRBPPP)->CARGO + (cTRBPPP)->EMP } ) <= 0
 				aAdd( aCargoSv, { cFilFichas, (cTRBPPP)->CARGO, "", (cTRBPPP)->EMP } )
@@ -3884,10 +3884,10 @@ Static Function NG700HISTO( lMDTA102 )
 
 		cCNPJtrb := (cTRBPPP)->CNPJ
 		cTIPOtrb := (cTRBPPP)->TIPINS
-		dbSelectArea( cAlias )
-		dbSetOrder( 1 )
+		DBSelectArea( cAlias )
+		DBSetOrder( 1 )
 
-		If dbSeek( cXFilCTT + (cTRBPPP)->CUSTO ) .And. lCNPJCC
+		If DBSeek( cXFilCTT + (cTRBPPP)->CUSTO ) .And. lCNPJCC
 
 			If cAlias == "SI3" .And. !Empty( SI3->I3_CEI )
 				cTIPOtrb := IIf( SI3->I3_TIPO == "1", 2, 1 )
@@ -3902,18 +3902,18 @@ Static Function NG700HISTO( lMDTA102 )
 		If xm_par34 == 1 // Desc. da Lotação ?
 			strCCusto := IIf( xm_par35 == 1, AllTrim( (cTRBPPP)->CUSTO ) + " - ", "" ) + &cDescr
 		Else
-			dbSelectArea( "SQB" )
-			dbSetOrder( 1 )
-			dbSeek( xFilial( "SQB", (cTRBPPP)->FILIAL ) + (cTRBPPP)->DEPTO )
+			DBSelectArea( "SQB" )
+			DBSetOrder( 1 )
+			DBSeek( xFilial( "SQB", (cTRBPPP)->FILIAL ) + (cTRBPPP)->DEPTO )
 			strCCusto := IIf( xm_par35 == 1, (cTRBPPP)->DEPTO + " - ", "" ) + SQB->QB_DESCRIC
 		EndIf
 
 
 		// Adiciona dados para o Historico do Funcionario
 		nPosHist := aScan( aHistory, { | x | x[10] == cCNPJtrb                                 .And.;
-											 x[5] == Alltrim( strCCusto )                      .And.;
-											 x[IIf( lTrocaDes, 7, 6 )] == Alltrim( strCargo )  .And.;
-											 x[IIf( !lTrocaDes, 7, 6 )] == Alltrim( strFuncao ).And.;
+											 x[5] == AllTrim( strCCusto )                      .And.;
+											 x[IIf( lTrocaDes, 7, 6 )] == AllTrim( strCargo )  .And.;
+											 x[IIf( !lTrocaDes, 7, 6 )] == AllTrim( strFuncao ).And.;
 											 x[8] == cCBO                                      .And.;
 											 x[9] == (cTRBPPP)->GFIP                           .And.;
 											 x[1] == cFilFichas                                .And.;
@@ -3928,9 +3928,9 @@ Static Function NG700HISTO( lMDTA102 )
 								(cTRBPPP)->MAT          ,;
 								(cTRBPPP)->DTDE         ,;
 								dDateAte                ,;
-								Alltrim( strCCusto )    ,;
-								Alltrim( strCargo )     ,;
-								Alltrim( strFuncao )    ,;
+								AllTrim( strCCusto )    ,;
+								AllTrim( strCargo )     ,;
+								AllTrim( strFuncao )    ,;
 								cCBO                    ,;
 								(cTRBPPP)->GFIP         ,;
 								cCNPJtrb                ,;
@@ -3944,9 +3944,9 @@ Static Function NG700HISTO( lMDTA102 )
 					            (cTRBPPP)->MAT     ,;
 					            (cTRBPPP)->DTDE    ,;
 					            dDateAte           ,;
-					            Alltrim( strCCusto ) ,;
-					            Alltrim( strCargo )  ,;
-					            Alltrim( strFuncao ) ,;
+					            AllTrim( strCCusto ) ,;
+					            AllTrim( strCargo )  ,;
+					            AllTrim( strFuncao ) ,;
 					            cCBO               ,;
 					            (cTRBPPP)->GFIP    ,;
 					            cCNPJtrb           ,;
@@ -3972,8 +3972,8 @@ Static Function NG700HISTO( lMDTA102 )
 			EMP700OPEN( cAlias, cAlias, 1, cEmpPPP, @cModo )
 		EndIf
 
-		dbSelectArea( cTRBPPP )
-		dbSkip()
+		DBSelectArea( cTRBPPP )
+		DBSkip()
 	End
 
 Return aHistory
@@ -4053,25 +4053,25 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 	EndIf
 
 	cModoTN0 := f700RetCom( "TN0" )
-	cXFilTN0 := FwxFilial( "TN0", cFilFun, Substr( cModoTN0, 1, 1 ), Substr( cModoTN0, 2, 1 ), Substr( cModoTN0, 3, 1 ) )
+	cXFilTN0 := FwxFilial( "TN0", cFilFun, SubStr( cModoTN0, 1, 1 ), SubStr( cModoTN0, 2, 1 ), SubStr( cModoTN0, 3, 1 ) )
 
 	cModoTNX := f700RetCom( "TNX" )
-	cXFilTNX := FwxFilial( "TNX", cFilFun, Substr( cModoTNX, 1, 1 ), Substr( cModoTNX, 2, 1 ), Substr( cModoTNX, 3, 1 ) )
+	cXFilTNX := FwxFilial( "TNX", cFilFun, SubStr( cModoTNX, 1, 1 ), SubStr( cModoTNX, 2, 1 ), SubStr( cModoTNX, 3, 1 ) )
 
 	cModoTNF := f700RetCom( "TNF" )
-	cXFilTNF := FwxFilial( "TNF", cFilFun, Substr( cModoTNF, 1, 1 ), Substr( cModoTNF, 2, 1 ), Substr( cModoTNF, 3, 1 ) )
+	cXFilTNF := FwxFilial( "TNF", cFilFun, SubStr( cModoTNF, 1, 1 ), SubStr( cModoTNF, 2, 1 ), SubStr( cModoTNF, 3, 1 ) )
 
 	cModoTN3 := f700RetCom( "TN3" )
-	cXFilTN3 := FwxFilial( "TN3", cFilFun, Substr( cModoTN3, 1, 1 ), Substr( cModoTN3, 2, 1 ), Substr( cModoTN3, 3, 1 ) )
+	cXFilTN3 := FwxFilial( "TN3", cFilFun, SubStr( cModoTN3, 1, 1 ), SubStr( cModoTN3, 2, 1 ), SubStr( cModoTN3, 3, 1 ) )
 
 	cModoTL0 := f700RetCom( "TL0" )
-	cXFilTL0 := FwxFilial( "TL0", cFilFun, Substr( cModoTL0, 1, 1 ), Substr( cModoTL0, 2, 1 ), Substr( cModoTL0, 3, 1 ) )
+	cXFilTL0 := FwxFilial( "TL0", cFilFun, SubStr( cModoTL0, 1, 1 ), SubStr( cModoTL0, 2, 1 ), SubStr( cModoTL0, 3, 1 ) )
 
 	cModoTJF := f700RetCom( "TJF" )
-	cXFilTJF := FwxFilial( "TJF", cFilFun, Substr( cModoTJF, 1, 1 ), Substr( cModoTJF, 2, 1 ), Substr( cModoTJF, 3, 1 ) )
+	cXFilTJF := FwxFilial( "TJF", cFilFun, SubStr( cModoTJF, 1, 1 ), SubStr( cModoTJF, 2, 1 ), SubStr( cModoTJF, 3, 1 ) )
 
 	cModoTO4 := f700RetCom( "TO4" )
-	cXFilTO4 := FwxFilial( "TO4", cFilFun, Substr( cModoTO4, 1, 1 ), Substr( cModoTO4, 2, 1 ), Substr( cModoTO4, 3, 1 ) )
+	cXFilTO4 := FwxFilial( "TO4", cFilFun, SubStr( cModoTO4, 1, 1 ), SubStr( cModoTO4, 2, 1 ), SubStr( cModoTO4, 3, 1 ) )
 
 
 	If nParam > 0
@@ -4085,41 +4085,41 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 					_cFunccRis  := cFuncc
 					_cDeptoRis  := cDepto
 				ElseIf nx == 2
-					_centrCusto:= Padr( "*", nSizeSI3 )
+					_centrCusto:= PadR( "*", nSizeSI3 )
 					_cFunccRis := cFuncc
 					_cDeptoRis := cDepto
 				ElseIf nx == 3
 					_centrCusto := cCusto
-					_cFunccRis := Padr( "*", nSizeSRJ )
+					_cFunccRis := PadR( "*", nSizeSRJ )
 					_cDeptoRis := cDepto
 				ElseIf nx == 4
-					_centrCusto:= Padr( "*", nSizeSI3 )
-					_cFunccRis := Padr( "*", nSizeSRJ )
+					_centrCusto:= PadR( "*", nSizeSI3 )
+					_cFunccRis := PadR( "*", nSizeSRJ )
 					_cDeptoRis := cDepto
 				ElseIf nx == 5
 					_centrCusto := cCusto
 					_cFunccRis  := cFuncc
-					_cDeptoRis  := Padr( "*", nSizeSQB )
+					_cDeptoRis  := PadR( "*", nSizeSQB )
 				ElseIf nx == 6
-					_centrCusto:= Padr( "*", nSizeSI3 )
+					_centrCusto:= PadR( "*", nSizeSI3 )
 					_cFunccRis := cFuncc
-					_cDeptoRis := Padr( "*", nSizeSQB )
+					_cDeptoRis := PadR( "*", nSizeSQB )
 				ElseIf nx == 7
 					_centrCusto := cCusto
-					_cFunccRis := Padr( "*", nSizeSRJ )
-					_cDeptoRis := Padr( "*", nSizeSQB )
+					_cFunccRis := PadR( "*", nSizeSRJ )
+					_cDeptoRis := PadR( "*", nSizeSQB )
 				ElseIf nx == 8
-					_centrCusto:= Padr( "*", nSizeSI3 )
-					_cFunccRis := Padr( "*", nSizeSRJ )
-					_cDeptoRis := Padr( "*", nSizeSQB )
+					_centrCusto:= PadR( "*", nSizeSI3 )
+					_cFunccRis := PadR( "*", nSizeSRJ )
+					_cDeptoRis := PadR( "*", nSizeSQB )
 				EndIf
 
-				dbSelectArea( "TN0" )
-				dbSetOrder( 5 )
+				DBSelectArea( "TN0" )
+				DBSetOrder( 5 )
 
-				If dbSeek( cXFilTN0 + _centrCusto + _cFunccRis + _cTarefa + _cDeptoRis )
+				If DBSeek( cXFilTN0 + _centrCusto + _cFunccRis + _cTarefa + _cDeptoRis )
 
-					Do While !Eof() .And.AllTrim( TN0->TN0_CC ) == AllTrim( _centrCusto ) .And.;
+					While !Eof() .And.AllTrim( TN0->TN0_CC ) == AllTrim( _centrCusto ) .And.;
 						AllTrim( TN0->TN0_CODFUN ) == AllTrim( _cFunccRis ) .And.;
 						AllTrim( TN0->TN0_CODTAR ) == AllTrim( _cTarefa ) .And.;
 						AllTrim( TN0->TN0_DEPTO  ) == AllTrim( _cDeptoRis ) .And.;
@@ -4128,7 +4128,7 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 
 
 						If xm_par07 == 2 .And. TN0->TN0_LISASO $ "12" //Considerar Risco ?
-							TN0->( dbSkip() )
+							TN0->( DBSkip() )
 							Loop
 						EndIf
 
@@ -4173,13 +4173,13 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 								aTNFobr := {}
 								aTNFalt := {}
 								aTNFfam := {}
-								Dbselectarea( cTRBTNF )
+								DBSelectArea( cTRBTNF )
 								ZAP
 								lFirst     := .T.
 
-								dbSelectArea( "TNX" )
-								dbSetOrder( 1 )
-								dbSeek( cXFilTNX + TN0->TN0_NUMRIS )
+								DBSelectArea( "TNX" )
+								DBSetOrder( 1 )
+								DBSeek( cXFilTNX + TN0->TN0_NUMRIS )
 
 								While !Eof() .And. cXFilTNX == TNX->TNX_FILIAL .And. TN0->TN0_NUMRIS == TNX->TNX_NUMRIS
 
@@ -4196,8 +4196,8 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 
 									EndIf
 
-									dbSelectArea( "TNX" )
-									dbSkip()
+									DBSelectArea( "TNX" )
+									DBSkip()
 								End
 
 								// Epi nao esta previsto p/ funcionario
@@ -4210,31 +4210,31 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 									For nFor1 := 1 To Len( aTNFobr )
 										dDtEfica2 := dFimRis
 										lEpiSub := .F.
-										dbSelectArea( "TNF" )
-										dbSetOrder( 3 ) // TNF_FILIAL+TNF_MAT+TNF_CODEPI+DTOS(TNF_DTENTR)+TNF_HRENTR
+										DBSelectArea( "TNF" )
+										DBSetOrder( 3 ) // TNF_FILIAL+TNF_MAT+TNF_CODEPI+DToS(TNF_DTENTR)+TNF_HRENTR
 
-										If Dbseek( cXFilTNF + Mat + aTNFobr[nFor1] )
+										If DBSeek( cXFilTNF + Mat + aTNFobr[nFor1] )
 
 											While !Eof() .And. cXFilTNF+Mat+aTNFobr[nFor1] == TNF->(TNF_FILIAL+TNF_MAT+TNF_CODEPI)
 
 												cNUMCAP := Space( 12 )
 
 												If TNF->TNF_INDDEV == "3" .Or. TNF->TNF_DTENTR > dFimRis .Or. TNF->TNF_DTENTR < dDtTransf
-													dbSelectArea( "TNF" )
-													dbSkip()
+													DBSelectArea( "TNF" )
+													DBSkip()
 													Loop
 												EndIf
 
 												If TNF->TNF_DTDEVO < dInicioRis .And. !Empty( TNF->TNF_DTDEVO )
-													dbSelectArea( "TNF" )
-													dbSkip()
+													DBSelectArea( "TNF" )
+													DBSkip()
 													Loop
 												EndIf
 
 												cNUMCAP := TNF->TNF_NUMCAP
-												dbSelectArea( "TN3" )
-												dbSetOrder( 1 )
-												If dbSeek( cXFilTN3 + TNF->TNF_FORNEC + TNF->TNF_LOJA + TNF->TNF_CODEPI + TNF->TNF_NUMCAP )
+												DBSelectArea( "TN3" )
+												DBSetOrder( 1 )
+												If DBSeek( cXFilTN3 + TNF->TNF_FORNEC + TNF->TNF_LOJA + TNF->TNF_CODEPI + TNF->TNF_NUMCAP )
 
 													If aScan( aNUMCAPS, { |x| x[1] == TNF->TNF_NUMCAP } ) == 0 .And. !Empty( TN3->TN3_OBSAVA )
 														aAdd( aNUMCAPS, { TNF->TNF_NUMCAP, TN3->TN3_OBSAVA } )
@@ -4259,8 +4259,8 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 												If !Empty( TNF->TNF_DTDEVO ) .And. TNF->TNF_DTDEVO >= dInicioRis .And. TNF->TNF_DTDEVO < dFimRis
 													dDtDevo := TNF->TNF_DTDEVO
 												ElseIf Empty( TNF->TNF_DTDEVO )
-													dbSelectArea( "TNF" )  //TNF_FILIAL+TNF_MAT+TNF_CODEPI+DTOS(TNF_DTENTR)+TNF_HRENTR
-													dbSkip()
+													DBSelectArea( "TNF" )  //TNF_FILIAL+TNF_MAT+TNF_CODEPI+DToS(TNF_DTENTR)+TNF_HRENTR
+													DBSkip()
 
 													If cXFilTNF+Mat+aTNFobr[nFor1] == TNF->(TNF_FILIAL+TNF_MAT+TNF_CODEPI);
 															.And. TNF->(!Eof()) .And. TNF->TNF_INDDEV != "3"
@@ -4273,7 +4273,7 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 
 													EndIf
 
-													dbSkip( -1 )
+													DBSkip( -1 )
 												EndIf
 
 												If !( TNF->TNF_DTENTR <= TN3->TN3_DTVENC .And. dDtDevo <= TN3->TN3_DTVENC )
@@ -4308,10 +4308,10 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 												EndIf
 
 												lIncEpi := .F.
-												dbSelectArea( cTRBTNF )
-												dbSetOrder( 1 )
+												DBSelectArea( cTRBTNF )
+												DBSetOrder( 1 )
 
-												If !dbSeek( DTOS( dDtEntr ) + cNUMCAP + cPROTEC + DTOS( TNF->TNF_DTENTR ) )
+												If !DBSeek( DToS( dDtEntr ) + cNUMCAP + cPROTEC + DToS( TNF->TNF_DTENTR ) )
 													lIncEpi := .T.
 													RecLock( cTRBTNF, .T. )
 														(cTRBTNF)->DTINI  := dDtEntr
@@ -4323,54 +4323,54 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 														(cTRBTNF)->PRZTNF := cPrazoTNF
 														(cTRBTNF)->PRZDUR := cPrazoDur
 														(cTRBTNF)->HIGIEN := cHigiene
-													Msunlock()
+													MSUnLock()
 												ElseIf (cTRBTNF)->CODEPI == TNF->TNF_CODEPI .And. dDtDevo > (cTRBTNF)->DTDEVO
 													lIncEpi := .T.
 													RecLock( cTRBTNF, .F. )
 														(cTRBTNF)->DTDEVO := dDtDevo
-													Msunlock()
+													MSUnLock()
 												EndIf
 
 												If lIncEpi
 													lEpiEntregue := .T.
 												EndIf
 
-												dbSelectArea( "TNF" )
-												dbSkip()
+												DBSelectArea( "TNF" )
+												DBSkip()
 											End
 
 										ElseIf NGCADICBASE( "TN3_GENERI", "D", "TN3", .F. )
-											dbSelectArea( "TN3" )
-											dbSetOrder( 2 )
-											dbSeek( cXFilTN3 + aTNFobr[nFor1] )
+											DBSelectArea( "TN3" )
+											DBSetOrder( 2 )
+											DBSeek( cXFilTN3 + aTNFobr[nFor1] )
 
 											While TN3->(!Eof()) .And. TN3->TN3_CODEPI == aTNFobr[nFor1]
 
 												If TN3->TN3_GENERI == '2'
-													dbSelectArea( "TL0" )
-													dbSetOrder( 1 )
-													dbSeek( cXFilTL0 + aTNFobr[nFor1] + TN3->TN3_FORNEC + TN3->TN3_LOJA )
+													DBSelectArea( "TL0" )
+													DBSetOrder( 1 )
+													DBSeek( cXFilTL0 + aTNFobr[nFor1] + TN3->TN3_FORNEC + TN3->TN3_LOJA )
 
 													While TL0->(!Eof()) .And. TL0->TL0_EPIGEN == aTNFobr[nFor1] .And. ;
 														TL0->TL0_FORNEC = TN3->TN3_FORNEC .And. TL0->TL0_LOJA == TN3->TN3_LOJA
-														dbSelectArea( "TNF" )
-														dbSetOrder( 1 )
+														DBSelectArea( "TNF" )
+														DBSetOrder( 1 )
 
-														If dbSeek( cXFilTNF+TL0->TL0_FORNEC+TL0->TL0_LOJA+TL0->TL0_EPIFIL+TL0->TL0_NUMCAP+Mat )
+														If DBSeek( cXFilTNF+TL0->TL0_FORNEC+TL0->TL0_LOJA+TL0->TL0_EPIFIL+TL0->TL0_NUMCAP+Mat )
 
 															While TNF->(!Eof()) .And. cXFilTNF+Mat+TL0->TL0_EPIFIL == TNF->(TNF_FILIAL+TNF_MAT+TNF_CODEPI)
 
 																cNUMCAP := Space( 12 )
 
 																If TNF->TNF_INDDEV == "3" .Or. TNF->TNF_DTENTR > dFimRis .Or. TNF->TNF_DTENTR < dDtTransf
-																	dbSelectArea( "TNF" )
-																	dbSkip()
+																	DBSelectArea( "TNF" )
+																	DBSkip()
 																	Loop
 																EndIf
 
 																If TNF->TNF_DTDEVO < dInicioRis .And. !Empty( TNF->TNF_DTDEVO )
-																	dbSelectArea( "TNF" )
-																	dbSkip()
+																	DBSelectArea( "TNF" )
+																	DBSkip()
 																	Loop
 																EndIf
 
@@ -4396,9 +4396,9 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 
 																If !Empty( TNF->TNF_DTDEVO ) .And. TNF->TNF_DTDEVO >= dInicioRis .And. TNF->TNF_DTDEVO < dFimRis
 																	dDtDevo := TNF->TNF_DTDEVO
-																Elseif Empty( TNF->TNF_DTDEVO )
-																	dbSelectArea( "TNF" )  //TNF_FILIAL+TNF_MAT+TNF_CODEPI+DTOS(TNF_DTENTR)+TNF_HRENTR
-																	dbSkip()
+																ElseIf Empty( TNF->TNF_DTDEVO )
+																	DBSelectArea( "TNF" )  //TNF_FILIAL+TNF_MAT+TNF_CODEPI+DToS(TNF_DTENTR)+TNF_HRENTR
+																	DBSkip()
 
 																	If cXFilTNF+Mat+TL0->TL0_EPIFIL == TNF->(TNF_FILIAL+TNF_MAT+TNF_CODEPI) .And.;
 																	   TNF->(!Eof()) .And. TNF->TNF_INDDEV != "3"
@@ -4411,7 +4411,7 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 
 																	EndIf
 
-																	dbSkip( -1 )
+																	DBSkip( -1 )
 																EndIf
 
 																// Verifica se pelo menos um EPI foi entregue fora do prazo de validade
@@ -4450,10 +4450,10 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 																EndIf
 
 																lIncEpi := .F.
-																dbSelectArea( cTRBTNF )
-																dbSetOrder( 1 )
+																DBSelectArea( cTRBTNF )
+																DBSetOrder( 1 )
 
-																If !dbSeek( DTOS( dDtEntr ) + cNUMCAP + cPROTEC + DTOS( TNF->TNF_DTENTR ) )
+																If !DBSeek( DToS( dDtEntr ) + cNUMCAP + cPROTEC + DToS( TNF->TNF_DTENTR ) )
 																	lIncEpi := .T.
 																	RecLock( cTRBTNF, .T. )
 																		(cTRBTNF)->DTINI  := dDtEntr
@@ -4465,7 +4465,7 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 																		(cTRBTNF)->PRZTNF := cPrazoTNF
 																		(cTRBTNF)->PRZDUR := cPrazoDur
 																		(cTRBTNF)->HIGIEN := cHigiene
-																	MsUnlock()
+																	MSUnLock()
 																ElseIf (cTRBTNF)->CODEPI == TNF->TNF_CODEPI .And. dDtDevo > (cTRBTNF)->DTDEVO
 																	lIncEpi := .T.
 																	RecLock( cTRBTNF, .F. )
@@ -4473,27 +4473,27 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 																		/*(cTRBTNF)->PRZTNF := cPrazoTNF
 																		(cTRBTNF)->PRZDUR := cPrazoDur
 																		(cTRBTNF)->HIGIEN := cHigiene ****Condição não atendida no ADVPR*/
-																	MsUnlock()
+																	MSUnLock()
 																EndIf
 
 																If lIncEpi
 																	lEpiEntregue := .T.
 																EndIf
 
-																dbSelectArea( "TNF" )
-																dbSkip()
+																DBSelectArea( "TNF" )
+																DBSkip()
 															End
 
 														EndIf
 
-														dbSelectArea( "TL0" )
-														TL0->(dbSkip())
+														DBSelectArea( "TL0" )
+														TL0->(DBSkip())
 													End
 
 												EndIf
 
-												dbSelectArea( "TN3" )
-												TN3->(dbSkip())
+												DBSelectArea( "TN3" )
+												TN3->(DBSkip())
 											End
 
 										EndIf
@@ -4513,32 +4513,32 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 										dDtEfica2 := dFimRis
 
 										For nFor2 := 1 To Len( aTNFalt[nFor1] )
-											dbselectarea( "TNF" )
-											dbsetorder( 3 )  //TNF_FILIAL+TNF_MAT+TNF_CODEPI+DTOS(TNF_DTENTR)+TNF_HRENTR
+											DBSelectArea( "TNF" )
+											DBSetOrder( 3 )  //TNF_FILIAL+TNF_MAT+TNF_CODEPI+DToS(TNF_DTENTR)+TNF_HRENTR
 
-											If dbSeek( cXFilTNF+Mat+aTNFalt[nFor1, nFor2] )
+											If DBSeek( cXFilTNF+Mat+aTNFalt[nFor1, nFor2] )
 
 												While !Eof() .And. cXFilTNF+Mat+aTNFalt[nFor1, nFor2] == TNF->(TNF_FILIAL+TNF_MAT+TNF_CODEPI)
 
 													cNUMCAP := Space( 12 )
 
 													If TNF->TNF_INDDEV == "3" .Or. TNF->TNF_DTENTR > dFimRis .Or. TNF->TNF_DTENTR < dDtTransf
-														dbSelectArea( "TNF" )
-														dbSkip()
+														DBSelectArea( "TNF" )
+														DBSkip()
 														Loop
 													EndIf
 
 													If TNF->TNF_DTDEVO < dInicioRis .And. !Empty( TNF->TNF_DTDEVO )
-														dbSelectArea( "TNF" )
-														dbSkip()
+														DBSelectArea( "TNF" )
+														DBSkip()
 														Loop
 													EndIf
 
 													cNUMCAP := TNF->TNF_NUMCAP
-													dbSelectArea( "TN3" )
-													dbSetOrder( 1 )
+													DBSelectArea( "TN3" )
+													DBSetOrder( 1 )
 
-													If dbSeek( xFilial( "TN3", cFilFun ) + TNF->TNF_FORNEC + TNF->TNF_LOJA + TNF->TNF_CODEPI + TNF->TNF_NUMCAP ) .And.;
+													If DBSeek( xFilial( "TN3", cFilFun ) + TNF->TNF_FORNEC + TNF->TNF_LOJA + TNF->TNF_CODEPI + TNF->TNF_NUMCAP ) .And.;
 													   aScan( aNUMCAPS, { |x| x[1] == TNF->TNF_NUMCAP } ) == 0 .And. !Empty( TN3->TN3_OBSAVA )
 
 														aAdd( aNUMCAPS, { TNF->TNF_NUMCAP, TN3->TN3_OBSAVA } )
@@ -4560,9 +4560,9 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 
 													If !Empty( TNF->TNF_DTDEVO ) .And. TNF->TNF_DTDEVO >= dInicioRis .And. TNF->TNF_DTDEVO < dFimRis
 														dDtDevo := TNF->TNF_DTDEVO
-													Elseif Empty( TNF->TNF_DTDEVO )
-														dbSelectArea( "TNF" )  //TNF_FILIAL+TNF_MAT+TNF_CODEPI+DTOS(TNF_DTENTR)+TNF_HRENTR
-														dbSkip()
+													ElseIf Empty( TNF->TNF_DTDEVO )
+														DBSelectArea( "TNF" )  //TNF_FILIAL+TNF_MAT+TNF_CODEPI+DToS(TNF_DTENTR)+TNF_HRENTR
+														DBSkip()
 
 														If cXFilTNF + Mat + aTNFalt[nFor1, nFor2] == TNF->(TNF_FILIAL+TNF_MAT+TNF_CODEPI);
 																.And. TNF->(!Eof()) .And. TNF->TNF_INDDEV != "3"
@@ -4583,7 +4583,7 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 
 														EndIf
 
-														dbSkip( -1 )
+														DBSkip( -1 )
 													EndIf
 
 													// Verifica se pelo menos um EPI foi entregue fora do prazo de validade
@@ -4622,10 +4622,10 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 													EndIf
 
 													lIncEpi := .F.
-													dbSelectArea( cTRBTNF )
-													dbSetOrder( 1 )
+													DBSelectArea( cTRBTNF )
+													DBSetOrder( 1 )
 
-													If !dbSeek( DTOS( dDtEntr ) + cNUMCAP + cPROTEC + DTOS( TNF->TNF_DTENTR ) )
+													If !DBSeek( DToS( dDtEntr ) + cNUMCAP + cPROTEC + DToS( TNF->TNF_DTENTR ) )
 														lIncEpi := .T.
 														RecLock( cTRBTNF, .T. )
 															(cTRBTNF)->DTINI  := dDtEntr
@@ -4637,7 +4637,7 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 															(cTRBTNF)->PRZTNF := cPrazoTNF
 															(cTRBTNF)->PRZDUR := cPrazoDur
 															(cTRBTNF)->HIGIEN := cHigiene
-														MsUnlock()
+														MSUnLock()
 													ElseIf (cTRBTNF)->CODEPI == TNF->TNF_CODEPI .And. dDtDevo > (cTRBTNF)->DTDEVO
 														lIncEpi := .T.
 														RecLock( cTRBTNF, .F. )
@@ -4645,49 +4645,49 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 														/*	(cTRBTNF)->PRZTNF := cPrazoTNF
 															(cTRBTNF)->PRZDUR := cPrazoDur
 															(cTRBTNF)->HIGIEN := cHigiene*/
-														MsUnlock()
+														MSUnLock()
 													EndIf
 
 													If lIncEpi
 														lEpiEntregue := .T.
 													EndIf
 
-													dbSelectArea( "TNF" )
-													dbSkip()
+													DBSelectArea( "TNF" )
+													DBSkip()
 												End
 
 											ElseIf NGCADICBASE( "TN3_GENERI", "D", "TN3", .F. )
-												dbSelectArea( "TN3" )
-												dbSetOrder( 2 )
-												dbSeek( cXFilTN3 + aTNFalt[nFor1, nFor2] )
+												DBSelectArea( "TN3" )
+												DBSetOrder( 2 )
+												DBSeek( cXFilTN3 + aTNFalt[nFor1, nFor2] )
 
 												While TN3->(!Eof()) .And. TN3->TN3_CODEPI == aTNFalt[nFor1, nFor2]
 
 													If TN3->TN3_GENERI == '2'
-														dbSelectArea( "TL0" )
-														dbSetOrder( 1 )
-														dbSeek( cXFilTL0 + aTNFalt[nFor1, nFor2] + TN3->TN3_FORNEC + TN3->TN3_LOJA )
+														DBSelectArea( "TL0" )
+														DBSetOrder( 1 )
+														DBSeek( cXFilTL0 + aTNFalt[nFor1, nFor2] + TN3->TN3_FORNEC + TN3->TN3_LOJA )
 
 														While TL0->(!Eof()) .And. TL0->TL0_EPIGEN == aTNFalt[nFor1, nFor2] .And. ;
 															TL0->TL0_FORNEC = TN3->TN3_FORNEC .And. TL0->TL0_LOJA == TN3->TN3_LOJA
-															dbSelectArea( "TNF" )
-															dbSetOrder( 1 )
+															DBSelectArea( "TNF" )
+															DBSetOrder( 1 )
 
-															If dbSeek( cXFilTNF+TL0->TL0_FORNEC+TL0->TL0_LOJA+TL0->TL0_EPIFIL+TL0->TL0_NUMCAP+Mat )
+															If DBSeek( cXFilTNF+TL0->TL0_FORNEC+TL0->TL0_LOJA+TL0->TL0_EPIFIL+TL0->TL0_NUMCAP+Mat )
 
 																While TNF->(!Eof()) .And. cXFilTNF+Mat+TL0->TL0_EPIFIL == TNF->(TNF_FILIAL+TNF_MAT+TNF_CODEPI)
 
 																	cNUMCAP := Space( 12 )
 
 																	If TNF->TNF_INDDEV == "3" .Or. TNF->TNF_DTENTR > dFimRis .Or. TNF->TNF_DTENTR < dDtTransf
-																		dbSelectArea( "TNF" )
-																		dbSkip()
+																		DBSelectArea( "TNF" )
+																		DBSkip()
 																		Loop
 																	EndIf
 
 																	If TNF->TNF_DTDEVO < dInicioRis .And. !Empty( TNF->TNF_DTDEVO )
-																		dbSelectArea( "TNF" )
-																		dbSkip()
+																		DBSelectArea( "TNF" )
+																		DBSkip()
 																		Loop
 																	EndIf
 
@@ -4714,8 +4714,8 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 																	If !Empty( TNF->TNF_DTDEVO ) .And. TNF->TNF_DTDEVO >= dInicioRis .And. TNF->TNF_DTDEVO < dFimRis
 																		dDtDevo := TNF->TNF_DTDEVO
 																	ElseIf Empty( TNF->TNF_DTDEVO )
-																		dbSelectArea( "TNF" )  //TNF_FILIAL+TNF_MAT+TNF_CODEPI+DTOS(TNF_DTENTR)+TNF_HRENTR
-																		dbSkip()
+																		DBSelectArea( "TNF" )  //TNF_FILIAL+TNF_MAT+TNF_CODEPI+DToS(TNF_DTENTR)+TNF_HRENTR
+																		DBSkip()
 
 																		If cXFilTNF+Mat+TL0->TL0_EPIFIL == TNF->(TNF_FILIAL+TNF_MAT+TNF_CODEPI);
 																				.And. TNF->(!Eof()) .And. TNF->TNF_INDDEV != "3"
@@ -4736,7 +4736,7 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 
 																		EndIf
 
-																		dbSkip( -1 )
+																		DBSkip( -1 )
 																	EndIf
 
 																	lIncEpi := .F.
@@ -4771,10 +4771,10 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 																		cHigiene := 'S'
 																	EndIf
 
-																	dbSelectArea( cTRBTNF )
-																	dbSetOrder( 1 )
+																	DBSelectArea( cTRBTNF )
+																	DBSetOrder( 1 )
 
-																	If !dbSeek( DTOS( dDtEntr )+cNUMCAP+cPROTEC+DTOS( TNF->TNF_DTENTR ) )
+																	If !DBSeek( DToS( dDtEntr )+cNUMCAP+cPROTEC+DToS( TNF->TNF_DTENTR ) )
 																		lIncEpi := .T.
 	
 																		RecLock( cTRBTNF, .T. )
@@ -4787,14 +4787,14 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 																			(cTRBTNF)->PRZTNF := cPrazoTNF
 																			(cTRBTNF)->PRZDUR := cPrazoDur
 																			(cTRBTNF)->HIGIEN := cHigiene
-																		Msunlock()
+																		MSUnLock()
 
 																	ElseIf (cTRBTNF)->CODEPI == TNF->TNF_CODEPI .And. dDtDevo > (cTRBTNF)->DTDEVO
 																		lIncEpi := .T.
 
 																		RecLock( cTRBTNF, .F. )
 																			(cTRBTNF)->DTDEVO := dDtDevo
-																		Msunlock()
+																		MSUnLock()
 																		
 																	EndIf
 
@@ -4802,20 +4802,20 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 																		lEpiEntregue := .T.
 																	EndIf
 
-																	dbSelectArea( "TNF" )
-																	dbSkip()
+																	DBSelectArea( "TNF" )
+																	DBSkip()
 																End
 
 															EndIf
 
-															dbSelectArea( "TL0" )
-															TL0->(dbSkip())
+															DBSelectArea( "TL0" )
+															TL0->(DBSkip())
 														End
 
 													EndIf
 
-													dbSelectArea( "TN3" )
-													TN3->(dbSkip())
+													DBSelectArea( "TN3" )
+													TN3->(DBSkip())
 												End
 
 											EndIf
@@ -4844,9 +4844,9 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 										fPPP_EPI( dInicioRis )
 										aEPIS := {}
 
-										dbSelectArea( cTRBTNF )
-										dbSetOrder( 1 )
-										dbGoTop()
+										DBSelectArea( cTRBTNF )
+										DBSetOrder( 1 )
+										DBGoTop()
 										dDtTNFfi2 := (cTRBTNF)->DTDEVO
 
 										While !Eof()
@@ -4856,7 +4856,7 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 												dDtTNFfi2 := (cTRBTNF)->DTDEVO
 											EndIf
 
-											dbSkip()
+											DBSkip()
 
 											If !Eof()
 
@@ -4874,9 +4874,9 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 											EndIf
 										End
 
-										dbSelectArea( cTRBTNF )
-										dbSetOrder( 2 )
-										dbSeek( " " )
+										DBSelectArea( cTRBTNF )
+										DBSetOrder( 2 )
+										DBSeek( " " )
 
 										While !Eof() .And. (cTRBTNF)->SITUAC == " "
 
@@ -4895,8 +4895,8 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 													( cTRBTNF )->CODEPI, (cTRBTNF)->PRZTNF, (cTRBTNF)->PRZDUR, (cTRBTNF)->HIGIEN } )
 											EndIf
 
-											dbSelectArea( cTRBTNF )
-											dbSkip()
+											DBSelectArea( cTRBTNF )
+											DBSkip()
 										End
 
 										For xEpis := 1 to Len( aEPIS )
@@ -4923,8 +4923,8 @@ Static Function NG700RISCO( cFilFun, cFichaM, cTarefa, cCusto, cDepto, cFuncc, M
 
 						Next nW
 
-						dbSelectArea( "TN0" )
-						dbSkip()
+						DBSelectArea( "TN0" )
+						DBSkip()
 					EndDo
 
 				EndIf
@@ -4989,12 +4989,12 @@ Static Function NG700TAREF( Fil, Mat, dDTde, dDTate, cCusto, cDepto, cFuncc, cFi
 	EndIf
 
 	cModoTN6 := f700RetCom( "TN6" )
-	cXFilTN6 := FwxFilial( "TN6", _Fil, Substr( cModoTN6, 1, 1 ), Substr( cModoTN6, 2, 1 ), Substr( cModoTN6, 3, 1 ) )
+	cXFilTN6 := FwxFilial( "TN6", _Fil, SubStr( cModoTN6, 1, 1 ), SubStr( cModoTN6, 2, 1 ), SubStr( cModoTN6, 3, 1 ) )
 
 	// Busca os riscos que o funcinario esta exposto nessas condicoes
-	dbSelectArea( "TN6" )
-	dbSetOrder( 2 )
-	dbSeek( cXFilTN6 + _Mat )
+	DBSelectArea( "TN6" )
+	DBSetOrder( 2 )
+	DBSeek( cXFilTN6 + _Mat )
 
 	While !Eof() .And. cXFilTN6 == TN6->TN6_FILIAL .And. _Mat == TN6->TN6_MAT
 
@@ -5002,8 +5002,8 @@ Static Function NG700TAREF( Fil, Mat, dDTde, dDTate, cCusto, cDepto, cFuncc, cFi
 		_dDTfim := dDTate
 
 		If TN6->TN6_DTINIC > _dDTfim .Or. (TN6->TN6_DTTERM < _dDTinicio  .And. !Empty( TN6->TN6_DTTERM ))
-			dbSelectArea( "TN6" )
-			dbSkip()
+			DBSelectArea( "TN6" )
+			DBSkip()
 			Loop
 		EndIf
 
@@ -5031,15 +5031,15 @@ Static Function NG700TAREF( Fil, Mat, dDTde, dDTate, cCusto, cDepto, cFuncc, cFi
 			NG700RISCO( _Fil, _cFicha, cTarefa, _cCusto, _cDepto, _cFuncc, _Mat, _dDTinicio, _dDTfim, 1, _cEmpNG )
 		EndIf
 
-		dbSelectArea( "TN6" )
-		dbSkip()
+		DBSelectArea( "TN6" )
+		DBSkip()
 	EndDo
 
 	If lMudEmpr .And. _cEmpNG != cEmpPPP
 		EMP700OPEN( "TN6", "TN6", 1, cEmpPPP, @cModo )
 	EndIf
 
-	cTarefa := Padr( "*", nSizeTN5 )
+	cTarefa := PadR( "*", nSizeTN5 )
 	NG700RISCO( _Fil, _cFicha, cTarefa, _cCusto, _cDepto, _cFuncc, _Mat, _dDTinicio, _dDTfim, 1, _cEmpNG )
 
 Return
@@ -5082,16 +5082,16 @@ Static Function NGGRAVA700( cFilFun, cFichaM, cCusto, cDepto, cFuncc, Mat, dInic
 	Local nTotalAbr := 0
 	Local cUnidade := ""
 
-	Private lEpiFunc := Substr( cEpiFunc, 1, Len( cEpiFunc ) )
+	Private lEpiFunc := SubStr( cEpiFunc, 1, Len( cEpiFunc ) )
 	Private lEpcFunc := TN0->TN0_EPC
 	Private _cNUMCAP := cNUMCAP
 	Private cTECNICA := Space( 40 )
 	Default cCodEpi := ""
 	Private _cCodEpi := cCodEPI
 
-	cCondRis := cFilFun+TN0->TN0_NUMRIS+DTOS( dInicioRis )+DTOS( dFimRis )+cFichaM+cEmpFun
+	cCondRis := cFilFun+TN0->TN0_NUMRIS+DToS( dInicioRis )+DToS( dFimRis )+cFichaM+cEmpFun
 
-	If aScan( aRiscos, { |x| x[1]+x[2]+DTOS( x[3] )+DTOS( x[4] )+x[5]+x[7] == cCondRis } ) <= 0
+	If aScan( aRiscos, { |x| x[1]+x[2]+DToS( x[3] )+DToS( x[4] )+x[5]+x[7] == cCondRis } ) <= 0
 		aAdd( aRiscos, { cFilFun, TN0->TN0_NUMRIS, dInicioRis, dFimRis, cFichaM, TN0->TN0_AGENTE, cEmpFun } ) // Adiciona o numero do risco na array aRISCOS
 	EndIf
 
@@ -5099,37 +5099,37 @@ Static Function NGGRAVA700( cFilFun, cFichaM, cCusto, cDepto, cFuncc, Mat, dInic
 	cTECNICA := TN0->TN0_TECUTI+Space( 40 - Len( TN0->TN0_TECUTI ) )
 	cEpiant := " "
 	cModoTMA := f700RetCom( "TMA" )
-	cXFilTMA := FwxFilial( "TMA", cFilFun, Substr( cModoTMA, 1, 1 ), Substr( cModoTMA, 2, 1 ), Substr( cModoTMA, 3, 1 ) )
+	cXFilTMA := FwxFilial( "TMA", cFilFun, SubStr( cModoTMA, 1, 1 ), SubStr( cModoTMA, 2, 1 ), SubStr( cModoTMA, 3, 1 ) )
 
-	dbSelectArea( "TMA" )
-	dbSetOrder( 1 )
+	DBSelectArea( "TMA" )
+	DBSetOrder( 1 )
 
-	If !dbSeek( cXFilTMA+TN0->TN0_AGENTE )
+	If !DBSeek( cXFilTMA+TN0->TN0_AGENTE )
 		Return .T.
 	EndIf
 
 	cNOME_AGENTE := 'TMA->TMA_NOMAGE'
 
-	// Se for agente quimico, pegar a substancia ativa como descricao.
+	// Se For agente quimico, pegar a substancia ativa como descricao.
 	If TMA->TMA_GRISCO == "2" .And. !Empty( TMA->TMA_SUBATI )
-		cNOME_AGENTE := 'Substr(TMA->TMA_SUBATI,1,40)'
+		cNOME_AGENTE := 'SubStr(TMA->TMA_SUBATI,1,40)'
 	EndIf
 
 	cKeyRisco := 'TMA->TMA_GRISCO+'+cNOME_AGENTE+'+Str(TN0->TN0_QTAGEN,nQTAGENt,nQTAGENd)+'
 	cKeyRisco += 'cTECNICA+lEpcFunc+lEpiFunc+_cCodEpi+_cNUMCAP'
 
-	dbSelectArea( cTRBTN0 )
-	dbSetOrder( 2 )  // GRISCO + AGENTE + Str(INTENS,9,3) + TECNIC + EPC + PROTEC + CODEPI + NUMCAP
+	DBSelectArea( cTRBTN0 )
+	DBSetOrder( 2 )  // GRISCO + AGENTE + Str(INTENS,9,3) + TECNIC + EPC + PROTEC + CODEPI + NUMCAP
 
-	If !dbSeek( &cKeyRisco )
+	If !DBSeek( &cKeyRisco )
 		lSave  := .T.
 	Else
 		dtstart := dInicioRis
 		dtstop  := dFimRis
 		nRecOld := Nil
-		dbSelectArea( cTRBTN0 )
-		dbSetOrder( 2 )
-		dbSeek( &cKeyRisco )
+		DBSelectArea( cTRBTN0 )
+		DBSetOrder( 2 )
+		DBSeek( &cKeyRisco )
 		While !Eof() .And. &cKeyRisco == (cTRBTN0)->(GRISCO+AGENTE+Str( INTENS, nQTAGENt, nQTAGENd )+TECNIC+EPC+PROTEC+CODEPI+NUMCAP)
 
 
@@ -5139,20 +5139,20 @@ Static Function NGGRAVA700( cFilFun, cFichaM, cCusto, cDepto, cFuncc, Mat, dInic
 					RecLock( cTRBTN0, .F. )
 						(cTRBTN0)->DT_ATE := dtstop
 						dtstart := (cTRBTN0)->DT_DE
-					Msunlock()
+					MSUnLock()
 					aAreaTRB := (cTRBTN0)->(GetArea())
 
 					If nRecOld != nil
-						dbSelectArea( cTRBTN0 )
-						dbGoTo( nRecOld )
+						DBSelectArea( cTRBTN0 )
+						DBGoTo( nRecOld )
 						(cTRBTN0)->(Dbdelete())
 					EndIf
 
-					RestArea( aAreaTRB )
+					FWRestArea( aAreaTRB )
 				EndIf
 
 				lAchouRisco := .T.
-				nRecOld := recno()
+				nRecOld := Recno()
 
 			ElseIf (cTRBTN0)->DT_DE <= dtstop + 1 .And. (cTRBTN0)->DT_ATE >= dtstop
 
@@ -5160,40 +5160,40 @@ Static Function NGGRAVA700( cFilFun, cFichaM, cCusto, cDepto, cFuncc, Mat, dInic
 					RecLock( cTRBTN0, .F. )
 						(cTRBTN0)->DT_DE := dtstart
 						dtstop := (cTRBTN0)->DT_ATE
-					MsUnlock()
+					MSUnLock()
 					aAreaTRB := (cTRBTN0)->(GetArea())
 
 					If nRecOld != Nil
-						dbSelectArea( cTRBTN0 )
-						dbGoTo( nRecOld )
+						DBSelectArea( cTRBTN0 )
+						DBGoTo( nRecOld )
 						(cTRBTN0)->(Dbdelete())
 					EndIf
 
-					RestArea( aAreaTRB )
+					FWRestArea( aAreaTRB )
 				EndIf
 
 				lAchouRisco := .T.
-				nRecOld := recno()
+				nRecOld := Recno()
 
 			ElseIf (cTRBTN0)->DT_DE > dtstart .And. (cTRBTN0)->DT_ATE < dtstop
 				RecLock( cTRBTN0, .F. )
 					(cTRBTN0)->DT_DE := dtstart
 					(cTRBTN0)->DT_ATE := dtstop
-				MsUnlock()
+				MSUnLock()
 				aAreaTRB := (cTRBTN0)->(GetArea())
 
 				If nRecOld != nil
-					dbSelectArea( cTRBTN0 )
-					dbGoTo( nRecOld )
+					DBSelectArea( cTRBTN0 )
+					DBGoTo( nRecOld )
 					(cTRBTN0)->(dbDelete())
 				EndIf
 
-				RestArea( aAreaTRB )
+				FWRestArea( aAreaTRB )
 				lAchouRisco := .T.
 				nRecOld := Recno()
 			EndIf
 
-			dbSkip()
+			DBSkip()
 		End
 
 		If !lAchouRisco
@@ -5205,9 +5205,9 @@ Static Function NGGRAVA700( cFilFun, cFichaM, cCusto, cDepto, cFuncc, Mat, dInic
 	If lSave
 
 		// Procura pela sigla da Unidade de Medida (TN0 / V3F)
-		dbSelectArea( "V3F" )
-		dbSetOrder( 2 ) // V3F_FILIAL + V3F_CODIGO + DTOS(V3F_VALIDA)
-		dbSeek( xFilial( "V3F" ) + TN0->TN0_UNIMED )
+		DBSelectArea( "V3F" )
+		DBSetOrder( 2 ) // V3F_FILIAL + V3F_CODIGO + DToS(V3F_VALIDA)
+		DBSeek( xFilial( "V3F" ) + TN0->TN0_UNIMED )
 		cUnidade := AllTrim( SubStr( V3F->V3F_DESCRI, At( "-", V3F->V3F_DESCRI ) + 1, Len( V3F->V3F_DESCRI ) ) ) // Eliminacao do codigo na descricao
 
 		// Percorre todas as letras da palavra de tras pra frente a partir do ultimo ")"
@@ -5229,13 +5229,13 @@ Static Function NGGRAVA700( cFilFun, cFichaM, cCusto, cDepto, cFuncc, Mat, dInic
 
 		Next
 
-		dbSelectArea( cTRBTN0 )
+		DBSelectArea( cTRBTN0 )
 		(cTRBTN0)->(dbAppend())
 		(cTRBTN0)->NUMRIS := TN0->TN0_NUMRIS
 		(cTRBTN0)->CODAGE := TN0->TN0_AGENTE
 
 		If !Empty( TMA->TMA_SUBATI ) .And. TMA->TMA_GRISCO == "2"
-			(cTRBTN0)->AGENTE := Substr( TMA->TMA_SUBATI, 1, 40 )
+			(cTRBTN0)->AGENTE := SubStr( TMA->TMA_SUBATI, 1, 40 )
 		Else
 			(cTRBTN0)->AGENTE := TMA->TMA_NOMAGE
 		EndIf
@@ -5251,7 +5251,7 @@ Static Function NGGRAVA700( cFilFun, cFichaM, cCusto, cDepto, cFuncc, Mat, dInic
 		(cTRBTN0)->TAREFA := _cTarefa
 		(cTRBTN0)->INTENS := TN0->TN0_QTAGEN   //Transform(TN0->TN0_QTAGEN,cQTAGtra)
 		(cTRBTN0)->UNIDAD := IIf( !Empty( cUnidade ), cUnidade, TN0->TN0_UNIMED )
-		(cTRBTN0)->TECNIC := Substr( cTECNICA, 1, 40 )
+		(cTRBTN0)->TECNIC := SubStr( cTECNICA, 1, 40 )
 		(cTRBTN0)->PROTEC := lEpiFunc
 		(cTRBTN0)->EPC    := lEpcFunc
 		(cTRBTN0)->INDEXP := cEXPOSICAO
@@ -5272,16 +5272,16 @@ Static Function NGGRAVA700( cFilFun, cFichaM, cCusto, cDepto, cFuncc, Mat, dInic
 
 
 		// Verifica se existe algum EPI necessário
-		dbSelectArea( "TNX" )
-		dbSetOrder( 2 ) // TNX_FILIAL+TNX_NUMRIS
+		DBSelectArea( "TNX" )
+		DBSetOrder( 2 ) // TNX_FILIAL+TNX_NUMRIS
 
-		If dbSeek( xFilial( "TNX", cXFilTNX )+(cTRBTN0)->NUMRIS )
+		If DBSeek( xFilial( "TNX", cXFilTNX )+(cTRBTN0)->NUMRIS )
 			lEpiNec := .T.
 		EndIf
 
-		dbSelectArea( "TJF" )
-		dbSetOrder( 1 )
-		dbSeek( xFilial( "TJF", cXFilTJF ) + (cTRBTN0)->NUMRIS )
+		DBSelectArea( "TJF" )
+		DBSetOrder( 1 )
+		DBSeek( xFilial( "TJF", cXFilTJF ) + (cTRBTN0)->NUMRIS )
 		While TJF->( !Eof() ) .And. TJF->TJF_FILIAL == xFilial( "TJF", cXFilTJF ) .And. TJF->TJF_NUMRIS == (cTRBTN0)->NUMRIS
 
 			If NgSeek( "TO4", TJF->TJF_MEDCON, 1, "TO4_TIPCTR", cXFilTO4 ) == "2" .Or. NgSeek( "TO4", TJF->TJF_MEDCON, 1, "TO4_TIPCTR", cXFilTO4 ) == "1" 
@@ -5289,26 +5289,26 @@ Static Function NGGRAVA700( cFilFun, cFichaM, cCusto, cDepto, cFuncc, Mat, dInic
 				Exit
 			EndIf
 
-			TJF->( dbSkip() )
+			TJF->( DBSkip() )
 		End
 
 		If xm_par29 == 2 // Somente quem gerou o laudo para o risco
 			aRespLaudo := {}
-			dbSelectArea( "TO1" )
-			dbSetOrder( 2 ) // TO1->TO1_FILIAL+TO1->TO1_NUMRIS+TO1->TO1_LAUDO
-			dbSeek( xFilial( "TO1" ) + TN0->TN0_NUMRIS )
+			DBSelectArea( "TO1" )
+			DBSetOrder( 2 ) // TO1->TO1_FILIAL+TO1->TO1_NUMRIS+TO1->TO1_LAUDO
+			DBSeek( xFilial( "TO1" ) + TN0->TN0_NUMRIS )
 
 			While !Eof() .And. xFilial( "TO1" ) == TO1->TO1_FILIAL .And. TN0->TN0_NUMRIS == TO1->TO1_NUMRIS//Laudos X Risco
-				dbSelectArea( "TO0" )
-				dbSetOrder( 1 )
-				dbSeek( xFilial( "TO0" ) + TO1->TO1_LAUDO )
+				DBSelectArea( "TO0" )
+				DBSetOrder( 1 )
+				DBSeek( xFilial( "TO0" ) + TO1->TO1_LAUDO )
 
-				If aScan( aRespLaudo, { | x | x == TO0->TO0_CODUSU } ) == 0 // Se o código for diferente add no array
+				If aScan( aRespLaudo, { | x | x == TO0->TO0_CODUSU } ) == 0 // Se o código For diferente add no array
 					aAdd( aRespLaudo, TO0->TO0_CODUSU )
 				EndIf
 
-				dbSelectArea( "TO1" )
-				dbSkip()
+				DBSelectArea( "TO1" )
+				DBSkip()
 			End
 
 		EndIf
@@ -5428,25 +5428,25 @@ Static Function IMPTAR700()
 		cModoTN5 := f700RetCom( "TN5" )
 		cModoTN6 := f700RetCom( "TN6" )
 
-		cFilTN5 := FwxFilial( "TN5", aMatriculas[nTar, 1], Substr( cModoTN5, 1, 1 ), Substr( cModoTN5, 2, 1 ), Substr( cModoTN5, 3, 1 ) )
-		cFilTN6 := FwxFilial( "TN6", aMatriculas[nTar, 1], Substr( cModoTN6, 1, 1 ), Substr( cModoTN6, 2, 1 ), Substr( cModoTN6, 3, 1 ) )
+		cFilTN5 := FwxFilial( "TN5", aMatriculas[nTar, 1], SubStr( cModoTN5, 1, 1 ), SubStr( cModoTN5, 2, 1 ), SubStr( cModoTN5, 3, 1 ) )
+		cFilTN6 := FwxFilial( "TN6", aMatriculas[nTar, 1], SubStr( cModoTN6, 1, 1 ), SubStr( cModoTN6, 2, 1 ), SubStr( cModoTN6, 3, 1 ) )
 
-		dbSelectArea( "TN6" )
-		dbSetOrder( 2 )// TN6_FILIAL+TN6_MAT
-		dbSeek( cFilTN6+aMatriculas[nTar, 2] )
+		DBSelectArea( "TN6" )
+		DBSetOrder( 2 )// TN6_FILIAL+TN6_MAT
+		DBSeek( cFilTN6+aMatriculas[nTar, 2] )
 
 		While !Eof() .And. cFilTN6 == TN6->TN6_FILIAL .And. aMatriculas[nTar, 2] == TN6->TN6_MAT
 
 			If TN6->TN6_DTINIC > dDataBase .Or. (TN6->TN6_DTTERM < dDtAdmiss  .And. !Empty( TN6->TN6_DTTERM ))
-				dbSelectArea( "TN6" )
-				dbSkip()
+				DBSelectArea( "TN6" )
+				DBSkip()
 				Loop
 			EndIf
 
-			dbSelectArea( "TN5" )
-			dbSetOrder( 1 )
+			DBSelectArea( "TN5" )
+			DBSetOrder( 1 )
 
-			If dbSeek( cFilTN5+TN6->TN6_CODTAR )
+			If DBSeek( cFilTN5+TN6->TN6_CODTAR )
 
 				If &lDescriTN5
 					_dDTfim    := TN6->TN6_DTTERM
@@ -5465,8 +5465,8 @@ Static Function IMPTAR700()
 
 			EndIf
 
-			dbSelectArea( "TN6" )
-			dbSkip()
+			DBSelectArea( "TN6" )
+			DBSkip()
 		End
 
 		If lMudEmpr .And. aMatriculas[nTar, 3] != cEmpPPP
@@ -5502,12 +5502,12 @@ Static Function IMPTAR700()
 		EndIf
 
 		cModoTN5 := f700RetCom( "TN5" )
-		cFilTN5 := FwxFilial( "SQ3", aTarFunc[nTar, 3], Substr( cModoTN5, 1, 1 ), Substr( cModoTN5, 2, 1 ), Substr( cModoTN5, 3, 1 ) )
+		cFilTN5 := FwxFilial( "SQ3", aTarFunc[nTar, 3], SubStr( cModoTN5, 1, 1 ), SubStr( cModoTN5, 2, 1 ), SubStr( cModoTN5, 3, 1 ) )
 
-		dbSelectArea( "TN5" )
-		dbSetOrder( 1 )
+		DBSelectArea( "TN5" )
+		DBSetOrder( 1 )
 
-		If !dbSeek( cFilTN5+aTarFunc[nTar, 2] )
+		If !DBSeek( cFilTN5+aTarFunc[nTar, 2] )
 
 			If lMudEmpr .And. aTarFunc[nTar, 6] != cEmpPPP
 				EMP700OPEN( "TN5", "TN5", 1, cEmpPPP, @cModo )
@@ -5598,15 +5598,15 @@ Static Function IMPCGO700()
 	Local cModoSQ3
 	Local cFilSQ3
 
-	dbSelectArea( cTRBPPP )
-	dbGoTop()
+	DBSelectArea( cTRBPPP )
+	DBGoTop()
 
 	While !Eof()
 
 		Store CtoD( "  /  /    " ) to dIniCar, dFimCar
 		cCodCargo := (cTRBPPP)->CARGO
 		cEmpCargo := (cTRBPPP)->EMP
-		cFilialCar:= Substr( (cTRBPPP)->FILIAL, 1, FwSizeFilial( (cTRBPPP)->EMP ) )
+		cFilialCar:= SubStr( (cTRBPPP)->FILIAL, 1, FwSizeFilial( (cTRBPPP)->EMP ) )
 
 		If lMudEmpr .And. (cTRBPPP)->EMP != cEmpPPP
 			cModo := FWModeAccess( "SQ3" )
@@ -5614,7 +5614,7 @@ Static Function IMPCGO700()
 		EndIf
 
 		cModoSQ3 := f700RetCom( "SQ3" )
-		cFilCargo := FwxFilial( "SQ3", cFilialCar, Substr( cModoSQ3, 1, 1 ), Substr( cModoSQ3, 2, 1 ), Substr( cModoSQ3, 3, 1 ) )
+		cFilCargo := FwxFilial( "SQ3", cFilialCar, SubStr( cModoSQ3, 1, 1 ), SubStr( cModoSQ3, 2, 1 ), SubStr( cModoSQ3, 3, 1 ) )
 
 		If lMudEmpr .And. (cTRBPPP)->EMP != cEmpPPP
 			EMP700OPEN( "SQ3", "SQ3", 1, cEmpPPP, @cModo )
@@ -5637,8 +5637,8 @@ Static Function IMPCGO700()
 
 			EndIf
 
-			dbSelectArea( cTRBPPP )
-			dbSkip()
+			DBSelectArea( cTRBPPP )
+			DBSkip()
 		End
 
 		aAdd( aCargo, { dIniCar, dFimCar, cFilCargo, cCodCargo, cCusCargo, cEmpCargo, cCodCustoCar } )
@@ -5655,12 +5655,12 @@ Static Function IMPCGO700()
 		EndIf
 
 		cModoSQ3 := f700RetCom( "SQ3" )
-		cFilSQ3 := FwxFilial( "SQ3", aCargo[nFx][3], Substr( cModoSQ3, 1, 1 ), Substr( cModoSQ3, 2, 1 ), Substr( cModoSQ3, 3, 1 ) )
+		cFilSQ3 := FwxFilial( "SQ3", aCargo[nFx][3], SubStr( cModoSQ3, 1, 1 ), SubStr( cModoSQ3, 2, 1 ), SubStr( cModoSQ3, 3, 1 ) )
 
-		dbSelectArea( "SQ3" )
-		dbSetOrder( 1 )
+		DBSelectArea( "SQ3" )
+		DBSetOrder( 1 )
 
-		If dbSeek( cFilSQ3+aCargo[nFx][4]+aCargo[nFx][7] )
+		If DBSeek( cFilSQ3+aCargo[nFx][4]+aCargo[nFx][7] )
 
 			dDataIni := aCargo[nFx][1]
 
@@ -5747,7 +5747,7 @@ Static Function CARGOCC700(cEmpresa, cFilPar, cCargo, cCusto)
 	Local cRet := Space( nSizeSI3 )
 	Local aAreaTRBE := (cTRBPPP)->(GetArea())
 	Local aAreaSIX  := SIX->(GetArea())
-	Local aArea     := GetArea()
+	Local aArea     := FWGetArea()
 	Local lTemQ3CC  := .F.
 	Local cModoSQ3, cFilSQ3
 
@@ -5762,19 +5762,19 @@ Static Function CARGOCC700(cEmpresa, cFilPar, cCargo, cCusto)
 	EndIf
 
 	cModoSQ3 := f700RetCom( "SQ3" )
-	cFilSQ3  := FwxFilial( "SQ3", cFilPar, Substr( cModoSQ3, 1, 1 ), Substr( cModoSQ3, 2, 1 ), Substr( cModoSQ3, 3, 1 ) )
+	cFilSQ3  := FwxFilial( "SQ3", cFilPar, SubStr( cModoSQ3, 1, 1 ), SubStr( cModoSQ3, 2, 1 ), SubStr( cModoSQ3, 3, 1 ) )
 
-	dbSelectArea( "SIX" )
-	dbSetOrder( 1 )
+	DBSelectArea( "SIX" )
+	DBSetOrder( 1 )
 
-	IF dbSeek( "SQ31" )
+	If DBSeek( "SQ31" )
 
 		If "Q3_CARGO" $ SIX->CHAVE .And. "Q3_CC" $ SIX->CHAVE
-			dbselectArea( "SQ3" )
-			dbSetOrder( 1 )
+			DBSelectArea( "SQ3" )
+			DBSetOrder( 1 )
 
-			If dbSeek( cFilSQ3 + cCargo + cCusto )
-				cRet := cCusto + Alltrim( SQ3->Q3_DESCSUM )+Substr( Alltrim( MSMM( SQ3->Q3_DESCDET, , , , , , , , , "RDY" ) ), 1, 100 )
+			If DBSeek( cFilSQ3 + cCargo + cCusto )
+				cRet := cCusto + AllTrim( SQ3->Q3_DESCSUM )+SubStr( AllTrim( MSMM( SQ3->Q3_DESCDET, , , , , , , , , "RDY" ) ), 1, 100 )
 
 				If !lCusto
 					cCodCustoCar := SQ3->Q3_CC
@@ -5789,11 +5789,11 @@ Static Function CARGOCC700(cEmpresa, cFilPar, cCargo, cCusto)
 	EndIf
 
 	If !lTemQ3CC
-		dbSelectArea( "SQ3" )
-		dbSetOrder( 1 )
+		DBSelectArea( "SQ3" )
+		DBSetOrder( 1 )
 
-		If dbSeek( cFilSQ3+cCargo )
-			cRet += Alltrim( SQ3->Q3_DESCSUM ) + Substr( Alltrim( MSMM( SQ3->Q3_DESCDET, , , , , , , , , "RDY" ) ), 1, 100 )
+		If DBSeek( cFilSQ3+cCargo )
+			cRet += AllTrim( SQ3->Q3_DESCSUM ) + SubStr( AllTrim( MSMM( SQ3->Q3_DESCDET, , , , , , , , , "RDY" ) ), 1, 100 )
 
 			If !lCusto
 				cCodCustoCar := SQ3->Q3_CC
@@ -5809,9 +5809,9 @@ Static Function CARGOCC700(cEmpresa, cFilPar, cCargo, cCusto)
 		EMP700OPEN( "SYP", "SYP", 1, cEmpPPP, @cModo )
 	EndIf
 
-	RestArea( aAreaTRBE )
-	RestArea( aAreaSIX )
-	RestArea( aArea )
+	FWRestArea( aAreaTRBE )
+	FWRestArea( aAreaSIX )
+	FWRestArea( aArea )
 
 Return cRet
 
@@ -5849,12 +5849,12 @@ Static Function IMPFUN700()
 	Local cCodDepto  := ""
 	Local oFontPrint := oFont07_
 
-	dbSelectArea( cTRBPPP )
-	dbGoTop()
+	DBSelectArea( cTRBPPP )
+	DBGoTop()
 
 	While (cTRBPPP)->(!Eof())
 		lFlagEmp1 := .F.
-		cFilialFun := Substr( (cTRBPPP)->FILIAL, 1, FwSizeFilial( (cTRBPPP)->EMP ) )
+		cFilialFun := SubStr( (cTRBPPP)->FILIAL, 1, FwSizeFilial( (cTRBPPP)->EMP ) )
 
 		If lMudEmpr .And. (cTRBPPP)->EMP != cEmpPPP
 			lFlagEmp1 := .T.
@@ -5883,18 +5883,18 @@ Static Function IMPFUN700()
 			cFilAnt := (cTRBPPP)->FILIAL
 		EndIf
 
-		dbSelectArea( "SRJ" )
+		DBSelectArea( "SRJ" )
 		Store CtoD( "  /  /    " ) To dIniFun, dFimFun
 		cCodCC	   := (cTRBPPP)->CUSTO
 		cCodDepto  := (cTRBPPP)->DEPTO
 		cCodFuncao := (cTRBPPP)->CODFUN
-		cFilFuncao := FwxFilial( "SRJ", cFilialFun, Substr( cModoCom, 1, 1 ), Substr( cModoCom, 2, 1 ), Substr( cModoCom, 3, 1 ) )
+		cFilFuncao := FwxFilial( "SRJ", cFilialFun, SubStr( cModoCom, 1, 1 ), SubStr( cModoCom, 2, 1 ), SubStr( cModoCom, 3, 1 ) )
 		cEmpFuncao := (cTRBPPP)->EMP
 		lFirst := .T.
 
 		While (cTRBPPP)->(!Eof()) .And. cCodFuncao == (cTRBPPP)->CODFUN .And. cEmpFuncao == (cTRBPPP)->EMP .And. ;
-					FwxFilial( "SRJ", (cTRBPPP)->FILIAL, Substr( cModoCom, 1, 1 ), Substr( cModoCom, 2, 1 ), Substr( cModoCom, 3, 1 ) ) ==;
-					FwxFilial( "SRJ", cFilialFun, Substr( cModoCom, 1, 1 ), Substr( cModoCom, 2, 1 ), Substr( cModoCom, 3, 1 ) )
+					FwxFilial( "SRJ", (cTRBPPP)->FILIAL, SubStr( cModoCom, 1, 1 ), SubStr( cModoCom, 2, 1 ), SubStr( cModoCom, 3, 1 ) ) ==;
+					FwxFilial( "SRJ", cFilialFun, SubStr( cModoCom, 1, 1 ), SubStr( cModoCom, 2, 1 ), SubStr( cModoCom, 3, 1 ) )
 			If lFirst
 				dIniFun := (cTRBPPP)->DTDE
 				dFimFun := (cTRBPPP)->DTATE
@@ -5905,14 +5905,14 @@ Static Function IMPFUN700()
 				EndIf
 			EndIf
 
-			dbSelectArea( cTRBPPP )
-			(cTRBPPP)->(Dbskip())
+			DBSelectArea( cTRBPPP )
+			(cTRBPPP)->(DBSkip())
 		End
 
 		// Responsavel por buscar o valor do campo MEMO
-		dbSelectArea( "SRJ" )
-		dbSetOrder( 1 )
-		dbSeek( cFilFuncao + cCodFuncao )
+		DBSelectArea( "SRJ" )
+		DBSetOrder( 1 )
+		DBSeek( cFilFuncao + cCodFuncao )
 
 		If SRJ->(FieldPos( "RJ_MEMOATI" )) > 0
 			cMemo := SRJ->RJ_MEMOATI
@@ -5921,19 +5921,19 @@ Static Function IMPFUN700()
 		EndIf
 
 		If AliasInDic( "TYA" )
-			dbSelectArea( "TYA" )
-			dbSetOrder( 1 )
+			DBSelectArea( "TYA" )
+			DBSetOrder( 1 )
 
-			If dbSeek( cFilFuncao + cCodFuncao )
+			If DBSeek( cFilFuncao + cCodFuncao )
 
-				While TYA->( !EoF() ) .And. TYA->TYA_FILIAL == cFilFuncao .And. ;
+				While TYA->( !Eof() ) .And. TYA->TYA_FILIAL == cFilFuncao .And. ;
 					TYA->TYA_CODFUN == cCodFuncao .And. TYA->TYA_PERINI <= dFimFun //Caso tenha um periodo de função menor que o inicio da função.
 					lPerOk := .T.
 
 					If TYA->( ColumnPos( "TYA_CC" ) ) > 0
 
-						If ( !Empty( TYA->TYA_CC ) .And. Alltrim( TYA->TYA_CC ) <> Alltrim( cCodCC ) ) .Or. ;
-							( !Empty( TYA->TYA_DEPTO ) .And. Alltrim( TYA->TYA_DEPTO ) <> Alltrim( cCodDepto ) )
+						If ( !Empty( TYA->TYA_CC ) .And. AllTrim( TYA->TYA_CC ) <> AllTrim( cCodCC ) ) .Or. ;
+							( !Empty( TYA->TYA_DEPTO ) .And. AllTrim( TYA->TYA_DEPTO ) <> AllTrim( cCodDepto ) )
 							lPerOk := .F.
 						EndIf
 
@@ -5944,14 +5944,14 @@ Static Function IMPFUN700()
 						If TYA->TYA_PERINI > dIniFun
 							aAdd( aFuncao, { dIniFun, DaySub( TYA->TYA_PERINI, 1 ), cFilFuncao, cCodFuncao, cEmpFuncao, cMemo } )
 							dIniFun := TYA->TYA_PERINI
-							cMemo := MSMM( TYA->TYA_ODESFU, TAMSX3( "TYA_MDESFU" )[1] )
+							cMemo := MSMM( TYA->TYA_ODESFU, TamSX3( "TYA_MDESFU" )[1] )
 						Else
-							cMemo := MSMM( TYA->TYA_ODESFU, TAMSX3( "TYA_MDESFU" )[1] )
+							cMemo := MSMM( TYA->TYA_ODESFU, TamSX3( "TYA_MDESFU" )[1] )
 						EndIf
 
 					EndIf
 
-					TYA->(dbSkip())
+					TYA->(DBSkip())
 				End
 
 			EndIf
@@ -5994,10 +5994,10 @@ Static Function IMPFUN700()
 		EndIf
 
 		cModoCom := f700RetCom( "SRJ" )
-		dbSelectArea( "SRJ" )
-		dbSetOrder( 1 )
+		DBSelectArea( "SRJ" )
+		DBSetOrder( 1 )
 
-		If dbSeek( FwxFilial( "SRJ", aFuncao[nFx][3], Substr( cModoCom, 1, 1 ), Substr( cModoCom, 2, 1 ), Substr( cModoCom, 3, 1 ) )+aFuncao[nFx][4] )
+		If DBSeek( FwxFilial( "SRJ", aFuncao[nFx][3], SubStr( cModoCom, 1, 1 ), SubStr( cModoCom, 2, 1 ), SubStr( cModoCom, 3, 1 ) )+aFuncao[nFx][4] )
 
 			If Len( aFuncao ) > nFx
 				dDateAte :=  aFuncao[nFx + 1 ][1] - 1
@@ -6086,21 +6086,21 @@ Static Function MDTERMO700()
 
 	Local cCNPJ
 
-	dbSelectArea( "TM0" )
-	dbSetOrder( 3 )
-	dbSeek( xFilial( "SRA" ) + SRA->RA_MAT )
+	DBSelectArea( "TM0" )
+	DBSetOrder( 3 )
+	DBSeek( xFilial( "SRA" ) + SRA->RA_MAT )
 
-	dbSelectArea( cAlias )
-	dbSetOrder( 1 )
-	dbSeek( xFilial( cAlias ) + SRA->RA_CC )
+	DBSelectArea( cAlias )
+	DBSetOrder( 1 )
+	DBSeek( xFilial( cAlias ) + SRA->RA_CC )
 
-	dbSelectArea( "SRJ" )
-	dbSetOrder( 1 )
-	dbSeek( xFilial( "SRJ" ) + SRA->RA_CODFUNC )
+	DBSelectArea( "SRJ" )
+	DBSetOrder( 1 )
+	DBSeek( xFilial( "SRJ" ) + SRA->RA_CODFUNC )
 
-	dbSelectArea( "SR6" )
-	dbSetOrder( 1 )
-	dbSeek( xFilial( "SR6" ) + SRA->RA_TNOTRAB )
+	DBSelectArea( "SR6" )
+	DBSetOrder( 1 )
+	DBSeek( xFilial( "SR6" ) + SRA->RA_TNOTRAB )
 
 	oPrintPPP:StartPage()
 	lin := 180
@@ -6149,15 +6149,15 @@ Static Function MDTERMO700()
 	oPrintPPP:Say( lin + 310, 810, "Nome Empresarial", oFont09 ) // "Nome Empresarial" STR0241
 
 	If lNGMDTPS .Or. lSigaMdtps
-		oPrintPPP:Say( lin + 370, 810, Substr( SA1->A1_NOME, 1, 40 ), oFont10 )
+		oPrintPPP:Say( lin + 370, 810, SubStr( SA1->A1_NOME, 1, 40 ), oFont10 )
 	Else
-		oPrintPPP:Say( lin + 370, 810, Substr( SM0->M0_NOMECOM, 1, 40 ), oFont10 )
+		oPrintPPP:Say( lin + 370, 810, SubStr( SM0->M0_NOMECOM, 1, 40 ), oFont10 )
 	EndIf
 
 	oPrintPPP:Say( lin + 310, 2010, "CNAE", oFont09 )
 
 	If lNGMDTPS .Or. lSigaMdtps
-		nSizeCNAE := Len( alltrim( SA1->A1_ATIVIDA ) )
+		nSizeCNAE := Len( AllTrim( SA1->A1_ATIVIDA ) )
 
 		If nSizeCNAE > 5
 			oPrintPPP:Say( lin + 370, 2010, Transform( SA1->A1_ATIVIDA, "@R 99.99-9/99" ), oFont10 )
@@ -6224,8 +6224,8 @@ Static Function MDTERMO700()
 	oPrintPPP:Say( lin + 570, 1410, NGPPPDATE( SRA->RA_ADMISSA ), oFont10 )
 	oPrintPPP:Say( lin + 510, 1810, "Regime Revezamento", oFont09 ) // "Regime Revezamento" STR0246
 
-	If !Empty( Substr( SR6->R6_REVEZAM, 1, 20 ) )
-		oPrintPPP:Say( lin + 570, 1810, Substr( SR6->R6_REVEZAM, 1, 20 ), oFont09 )
+	If !Empty( SubStr( SR6->R6_REVEZAM, 1, 20 ) )
+		oPrintPPP:Say( lin + 570, 1810, SubStr( SR6->R6_REVEZAM, 1, 20 ), oFont09 )
 	Else
 		oPrintPPP:Say( lin + 570, 1810, "NA", oFont10 )
 	EndIf
@@ -6256,9 +6256,9 @@ Static Function MDTERMO700()
 		oPrintPPP:Line( lin, 2940, lin + 80, 2940 )
 		oPrintPPP:Line( lin + 80, 50, lin + 80, 2940 )
 		SomaLinha( 80 )
-		dbSelectArea( "TMZ" )
-		dbSetOrder( 1 )
-		dbSeek( xFilial( "TMZ" ) + xm_par11 ) // Termo Responsab. ?
+		DBSelectArea( "TMZ" )
+		DBSetOrder( 1 )
+		DBSeek( xFilial( "TMZ" ) + xm_par11 ) // Termo Responsab. ?
 		fImpMemo( TMZ->TMZ_DESCRI )
 
 		If Empty( TMZ->TMZ_DESCRI )
@@ -6329,9 +6329,9 @@ Static Function NGPPPDATE( dDtPPP, lDtAtual )
 	EndIf
 
 	If Empty( cRet )
-		cDia := Strzero( Day( dDtPPP ), 2 )
-		cMes := Strzero( Month( dDtPPP ), 2 )
-		cAno := Substr( Str( Year( dDtPPP ), 4 ), 1, 4 )
+		cDia := StrZero( Day( dDtPPP ), 2 )
+		cMes := StrZero( Month( dDtPPP ), 2 )
+		cAno := SubStr( Str( Year( dDtPPP ), 4 ), 1, 4 )
 
 		cRet := cDia + "/" + cMes + "/" + cAno
 	EndIf
@@ -6368,8 +6368,8 @@ Static Function NG700SESMT()
 	Private cCodUser
 	Private cFilMat
 
-	dbSelectArea( cTRBPPP )
-	dbGoTop()
+	DBSelectArea( cTRBPPP )
+	DBGoTop()
 
 	While ( cTRBPPP )->( !Eof() )
 
@@ -6378,56 +6378,56 @@ Static Function NG700SESMT()
 		If lMudEmpr .And. (cTRBPPP)->EMP != cEmpPPP
 			lFlagEmp1 := .T.
 			cModo := FWModeAccess( "TMK" )
-			EMP700OPEN( "TMK", "TMK", 1, (cTRBPPP)->EMP, @cModo, Substr( (cTRBPPP)->FILIAL, 1, FwSizeFilial( (cTRBPPP)->EMP ) ) )
+			EMP700OPEN( "TMK", "TMK", 1, (cTRBPPP)->EMP, @cModo, SubStr( (cTRBPPP)->FILIAL, 1, FwSizeFilial( (cTRBPPP)->EMP ) ) )
 			cModo := FWModeAccess( "TMW" )
-			EMP700OPEN( "TMW", "TMW", 1, (cTRBPPP)->EMP, @cModo, Substr( (cTRBPPP)->FILIAL, 1, FwSizeFilial( (cTRBPPP)->EMP ) ) )
+			EMP700OPEN( "TMW", "TMW", 1, (cTRBPPP)->EMP, @cModo, SubStr( (cTRBPPP)->FILIAL, 1, FwSizeFilial( (cTRBPPP)->EMP ) ) )
 		EndIf
 
 		cModoTMK := f700RetCom( "TMK" )
 		cModoTMW := f700RetCom( "TMW" )
 
-		cFilSESMT := Substr( ( cTRBPPP )->FILIAL, 1, FwSizeFilial( ( cTRBPPP )->EMP ) )
+		cFilSESMT := SubStr( ( cTRBPPP )->FILIAL, 1, FwSizeFilial( ( cTRBPPP )->EMP ) )
 		// Altera variaveis para o xFilial
-		dbSelectArea( "SM0" )
-		dbSeek( ( cTRBPPP )->EMP+cFilSESMT )
+		DBSelectArea( "SM0" )
+		DBSeek( ( cTRBPPP )->EMP+cFilSESMT )
 		cEmpAnt := ( cTRBPPP )->EMP
 		cFilAnt := cFilSESMT
 
-		cFilTMK := FwxFilial( "TMK", cFilSESMT, Substr( cModoTMK, 1, 1 ), Substr( cModoTMK, 2, 1 ), Substr( cModoTMK, 3, 1 ) )
-		cFilTMW := FwxFilial( "TMW", cFilSESMT, Substr( cModoTMW, 1, 1 ), Substr( cModoTMW, 2, 1 ), Substr( cModoTMW, 3, 1 ) )
+		cFilTMK := FwxFilial( "TMK", cFilSESMT, SubStr( cModoTMK, 1, 1 ), SubStr( cModoTMK, 2, 1 ), SubStr( cModoTMK, 3, 1 ) )
+		cFilTMW := FwxFilial( "TMW", cFilSESMT, SubStr( cModoTMW, 1, 1 ), SubStr( cModoTMW, 2, 1 ), SubStr( cModoTMW, 3, 1 ) )
 
-		dbSelectArea( "TMW" )
-		dbSetOrder( 1 )
-		dbSeek( cFilTMW )
+		DBSelectArea( "TMW" )
+		DBSetOrder( 1 )
+		DBSeek( cFilTMW )
 
-		dbSelectArea( "TMK" )
-		dbSetOrder( 1 )
-		dbSeek( cFilTMK )
+		DBSelectArea( "TMK" )
+		DBSetOrder( 1 )
+		DBSeek( cFilTMK )
 
 		While ( 'TMK' )->( !Eof() ) .And. cFilTMK == TMK->TMK_FILIAL
 
 			If TMK->TMK_DTINIC >= (cTRBPPP)->DTATE .Or. ( !Empty( TMK->TMK_DTTERM ) .And. TMK->TMK_DTTERM <= (cTRBPPP)->DTDE )
-				dbSelectArea( "TMK" )
-				dbSkip()
+				DBSelectArea( "TMK" )
+				DBSkip()
 				Loop
 			EndIf
 
 			If !Empty( TMK->TMK_CC ) .And. TMK->TMK_CC <> (cTRBPPP)->CUSTO .And. !fVlCCSRE()
-				dbSelectArea( "TMK" )
-				dbSkip()
+				DBSelectArea( "TMK" )
+				DBSkip()
 				Loop
 			EndIf
 
 			If xm_par32 == 1 .And. TMK->TMK_SESMT <> "1" // Se não Compoe SESMT
-				dbSelectArea( "TMK" )
-				dbSkip()
+				DBSelectArea( "TMK" )
+				DBSkip()
 				Loop
 			EndIf
 
 			// Somente quem gerou laudo.
 			If xm_par29 == 2 .And. aScan( aRespLaudo, { | x | x == TMK->TMK_CODUSU } ) == 0
-				dbSelectArea( "TMK" )
-				dbSkip()
+				DBSelectArea( "TMK" )
+				DBSkip()
 				Loop
 			EndIf
 
@@ -6449,8 +6449,8 @@ Static Function NG700SESMT()
 
 			EndIf
 
-			dbSelectArea( cTRBTMK )
-			dbSetOrder( 3 )
+			DBSelectArea( cTRBTMK )
+			DBSetOrder( 3 )
 
 			( cTRBTMK )->( dbAppend() )
 			( cTRBTMK )->DTINI  := dDtIni
@@ -6466,7 +6466,7 @@ Static Function NG700SESMT()
 			( cTRBTMK )->MONBIO := TMK->TMK_MONBIO
 			( cTRBTMK )->CIC    := TMK->TMK_CIC
 
-			( 'TMK' )->( dbSkip() )
+			( 'TMK' )->( DBSkip() )
 
 		End
 
@@ -6475,16 +6475,16 @@ Static Function NG700SESMT()
 			EMP700OPEN( "TMW", "TMW", 1, cEmpPPP, @cModo )
 		EndIf
 
-		( cTRBPPP )->( dbSkip() )
+		( cTRBPPP )->( DBSkip() )
 
 	End
 
 	// Verifica se os usuarios SESMT gravados na tabela cTRBTMK possuem registros reduntantes, rela-
 	// cionados 'a matricula do funcionario. Para cada usuario nesta tabela sera'
 	// mantido apenas um unico registro, com a menor data inicial e a maior data final do usuario.
-	dbSelectArea( cTRBTMK )
-	dbSetOrder( 4 ) //MAT + CODIGO + DTOS(DTINI) + DTOS(DTFIM)
-	dbGoTop()
+	DBSelectArea( cTRBTMK )
+	DBSetOrder( 4 ) //MAT + CODIGO + DToS(DTINI) + DToS(DTFIM)
+	DBGoTop()
 
 	While ( cTRBTMK )->( !Eof() )
 
@@ -6501,27 +6501,27 @@ Static Function NG700SESMT()
 		dDateFim := (cTRBTMK)->DTFIM
 		dbClearFilter()
 
-		dbGoTo( nRecnoTRB )
-		Reclock( cTRBTMK, .F. )
+		DBGoTo( nRecnoTRB )
+		RecLock( cTRBTMK, .F. )
 			(cTRBTMK)->DTFIM := dDateFim
-		MsUnLock()
-		dbSkip()
+		MSUnLock()
+		DBSkip()
 
 		While !Eof() .And. cFilial + cMat + cCodUser == (cTRBTMK)->FILIAL + (cTRBTMK)->MAT + (cTRBTMK)->CODIGO
-			Reclock( cTRBTMK, .F. )
+			RecLock( cTRBTMK, .F. )
 				dbDelete()
-			MsUnLock()
-			dbSkip()
+			MSUnLock()
+			DBSkip()
 			lEntrou := .T.
 		End
 
 		If !lEntrou
-			dbSkip()
+			DBSkip()
 		EndIf
 
 	End
 
-	RestArea( aArea )
+	FWRestArea( aArea )
 Return
 
 /*
@@ -6539,15 +6539,15 @@ Static Function RECLASS_RISCOS()
 	Local cChave
 
 	// Agrupa riscos que foram separados na mudanca de Filial/Matricula/Setor/Funcao
-	dbSelectArea( cTRBTN0 )
-	dbSetOrder( 3 )
-	dbGoTop()
+	DBSelectArea( cTRBTN0 )
+	DBSetOrder( 3 )
+	DBGoTop()
 
 	While !Eof()
 
 		If (cTRBTN0)->PROTEC != "S "
-			dbSelectArea( cTRBTN0 )
-			dbSkip()
+			DBSelectArea( cTRBTN0 )
+			DBSkip()
 			Loop
 		EndIf
 
@@ -6556,14 +6556,14 @@ Static Function RECLASS_RISCOS()
 		dtstop    := (cTRBTN0)->DT_ATE
 		nRecOld   := Recno()
 
-		dbSelectArea( cTRBTN0 )
-		dbSkip()
+		DBSelectArea( cTRBTN0 )
+		DBSkip()
 
 		While !Eof() .And. cChave == (cTRBTN0)->(GRISCO + AGENTE + Str( INTENS, nQTAGENt, nQTAGENd ) + TECNIC)
 
 			If (cTRBTN0)->PROTEC != "S "
-				dbSelectArea( cTRBTN0 )
-				dbSkip()
+				DBSelectArea( cTRBTN0 )
+				DBSkip()
 				Loop
 			EndIf
 
@@ -6571,36 +6571,36 @@ Static Function RECLASS_RISCOS()
 
 				RecLock( cTRBTN0, .F. )
 					(cTRBTN0)->ATIVO := "N"
-				MsUnlock()
+				MSUnLock()
 				aAreaTRB := (cTRBTN0)->(GetArea())
 				dtstop   := (cTRBTN0)->DT_ATE
 
-				dbSelectArea( cTRBTN0 )
-				dbGoTo( nRecOld )
+				DBSelectArea( cTRBTN0 )
+				DBGoTo( nRecOld )
 				RecLock( cTRBTN0, .F. )
 					(cTRBTN0)->DT_ATE := dtstop
-				Msunlock()
+				MSUnLock()
 
-				RestArea( aAreaTRB )
+				FWRestArea( aAreaTRB )
 			EndIf
 
-			dbSkip()
+			DBSkip()
 		End
 
-		dbSelectArea( cTRBTN0 )
-		dbGoTo( nRecOld )
-		dbSkip()
+		DBSelectArea( cTRBTN0 )
+		DBGoTo( nRecOld )
+		DBSkip()
 	End
 
-	dbSelectArea( cTRBTN0 )
-	dbSetOrder( 2 )
-	dbGoTop()
+	DBSelectArea( cTRBTN0 )
+	DBSetOrder( 2 )
+	DBGoTop()
 
 	While !Eof()
 
 		If (cTRBTN0)->ATIVO != "S"
-			dbSelectArea( cTRBTN0 )
-			dbSkip()
+			DBSelectArea( cTRBTN0 )
+			DBSkip()
 			Loop
 		EndIf
 
@@ -6612,36 +6612,36 @@ Static Function RECLASS_RISCOS()
 		While !Eof() .And. cKeyRisco == (cTRBTN0)->(GRISCO+AGENTE+Str( INTENS, nQTAGENt, nQTAGENd )+TECNIC+EPC+PROTEC+NUMCAP)
 
 			If (cTRBTN0)->ATIVO != "S"
-				dbSelectArea( cTRBTN0 )
-				dbSkip()
+				DBSelectArea( cTRBTN0 )
+				DBSkip()
 				Loop
 			EndIf
 
 			If (cTRBTN0)->DT_DE == dtstop+1
 				RecLock( cTRBTN0, .F. )
 					(cTRBTN0)->ATIVO := "N"
-				MsUnlock()
+				MSUnLock()
 				aAreaTRB := (cTRBTN0)->(GetArea())
 				dtstop   := (cTRBTN0)->DT_ATE
 
-				dbSelectArea( cTRBTN0 )
-				dbGoTo( nRecOld )
+				DBSelectArea( cTRBTN0 )
+				DBGoTo( nRecOld )
 				RecLock( cTRBTN0, .F. )
 					(cTRBTN0)->DT_ATE := dtstop
-				Msunlock()
+				MSUnLock()
 
-				RestArea( aAreaTRB )
+				FWRestArea( aAreaTRB )
 			EndIf
 
-			dbSkip()
+			DBSkip()
 		End
 
-		dbSelectArea( cTRBTN0 )
-		dbGoTo( nRecOld )
-		dbSkip()
+		DBSelectArea( cTRBTN0 )
+		DBGoTo( nRecOld )
+		DBSkip()
 	End
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -6653,22 +6653,22 @@ Descrição-------------: Monta Combo Box para exibir na tela
 Parametros------------: cCampo, Caracter, Campo que tera o Combo Box anex
                         cForaCombo, Caracter, String contendo item a nao ser apresentado "56
                         nLenGrava, Numerico, Tamanho a ser verificado a cada item da string
-Retorno---------------: return, return_type, Array com combo box
+Retorno---------------: Return, return_type, Array com combo box
 ===============================================================================================================================
 */
 Static Function PPPMDTCbox( cCampo, cForaCombo, nLenGrava )
 
 	Local aArray1	:= {}
 	Local aArray2	:= {}
-	Local aSaveArea	:= GetArea()
+	Local aSaveArea	:= FWGetArea()
 	Local cVar
 	Local nCont
 
 	Default cForaCombo := ""
 	Default nLenGrava  := 1
 
-	dbSelectArea( "SX3" )
-	dbSetOrder( 2 )
+	DBSelectArea( "SX3" )
+	DBSetOrder( 2 )
 	MsSeek( cCampo )
 
 	cVar := X3CBox()
@@ -6688,7 +6688,7 @@ Static Function PPPMDTCbox( cCampo, cForaCombo, nLenGrava )
 		aAdd( aArray2, aArray1[nCont][1] )
 	Next nCont
 
-	RestArea( aSaveArea )
+	FWRestArea( aSaveArea )
 
 Return aArray2
 
@@ -6706,12 +6706,12 @@ Retorno---------------: Nenhum
 Static Function SX6PPPRES()
 
 	// Representante Medico
-	If Alltrim( GetMV( "MV_MDTRESP" ) ) == "2"
+	If AllTrim( GetMV( "MV_MDTRESP" ) ) == "2"
 		cFilRES     := xFilial( "TMK" )
 		cAliasRES 	:= "TMK"
 		cCNomeRES 	:= "TMK->TMK_NOMUSU"
 		cCpfRes 	:= "TMK->TMK_CIC"
-		cValRES		:= "ExistCPO('TMK',mv_par" + cNumSX1 + ")"
+		cValRES		:= "ExistCPO('TMK',MV_PAR" + cNumSX1 + ")"
 	EndIf
 
 Return
@@ -6731,15 +6731,15 @@ Static Function MDT700SXB()
 
 	Local lRet	:= .F.
 
-	If Alltrim( GetMV( "MV_MDTRESP" ) ) == "2"
-		dbSelectArea( "TMK" )
-		dbSetOrder( 1 ) //TMK_FILIAL + TMK_CODUSU
+	If AllTrim( GetMV( "MV_MDTRESP" ) ) == "2"
+		DBSelectArea( "TMK" )
+		DBSetOrder( 1 ) //TMK_FILIAL + TMK_CODUSU
 		If (lRet := ConPad1( , , , "TMK", "cRetF3", , .F. ) )
 			cRetF3 := TMK->TMK_CODUSU
 		EndIf
 	Else
-		dbSelectArea( "SRA" )
-		dbSetOrder( 1 ) //RA_FILIAL + RA_MAT
+		DBSelectArea( "SRA" )
+		DBSetOrder( 1 ) //RA_FILIAL + RA_MAT
 		If (lRet := ConPad1( , , , "SRA", "cRetF3", , .F. ) )
 			cRetF3 := SRA->RA_MAT
 		EndIf
@@ -6759,7 +6759,7 @@ Retorno---------------: Caracter, Retorno da consulta de Representante Empresa?
 ===============================================================================================================================
 */
 Static Function MDT700RSXB()
-Return IIf( Type( 'cRetF3' ) != 'U' .And. !Empty( cRetF3 ), cRetF3, Space( TAMSX3( ReadVar() )[1] ) )
+Return IIf( Type( 'cRetF3' ) != 'U' .And. !Empty( cRetF3 ), cRetF3, Space( TamSX3( ReadVar() )[1] ) )
 
 /*
 ===============================================================================================================================
@@ -6790,8 +6790,8 @@ Static Function EMP700OPEN(cAlias1, cAlias2, nIndice, MvEmpresa, cMd, MvFilial)
 	Default MvFilial  := cSvFilAnt
 
 	// Restaura variaveis para alteracao da tabela
-	dbSelectArea( "SM0" )
-	dbSeek( cEmpPPP + cSvFilAnt )
+	DBSelectArea( "SM0" )
+	DBSeek( cEmpPPP + cSvFilAnt )
 	cEmpAnt := cEmpPPP
 	cFilAnt := cSvFilAnt
 
@@ -6806,12 +6806,12 @@ Static Function EMP700OPEN(cAlias1, cAlias2, nIndice, MvEmpresa, cMd, MvFilial)
 	cArqTab := Subs( cArqTab, 1, nTamTable )
 
 	// Altera variaveis para o xFilial
-	dbSelectArea( "SM0" )
-	dbSeek( MvEmpresa + MvFilial )
+	DBSelectArea( "SM0" )
+	DBSeek( MvEmpresa + MvFilial )
 	cEmpAnt := MvEmpresa
 	cFilAnt := MvFilial
 
-	RestArea( aArea )
+	FWRestArea( aArea )
 
 Return .T.
 
@@ -6828,12 +6828,12 @@ Retorno---------------: Date, Data de demissao do funcionario na tabela de Resci
 */
 Static Function PPPDTDEMIS()
 
-	Local dDtDem := Stod( Space( 8 ) )
-	Local aArea := GetArea()
+	Local dDtDem := SToD( Space( 8 ) )
+	Local aArea := FWGetArea()
 
-	Dbselectarea( "SRG" )
-	Dbsetorder( 1 )
-	Dbseek( SRA->RA_FILIAL+SRA->RA_MAT )
+	DBSelectArea( "SRG" )
+	DBSetOrder( 1 )
+	DBSeek( SRA->RA_FILIAL+SRA->RA_MAT )
 
 	While !Eof() .And. SRA->RA_FILIAL+SRA->RA_MAT == SRG->RG_FILIAL+SRG->RG_MAT
 
@@ -6841,10 +6841,10 @@ Static Function PPPDTDEMIS()
 			dDtDem := SRG->RG_DATADEM
 		EndIf
 
-		dbSkip()
+		DBSkip()
 	End
 
-	RestArea( aArea )
+	FWRestArea( aArea )
 Return dDtDem
 
 /*
@@ -6885,7 +6885,7 @@ Static Function MDT700MES()
 
 	nMes := GETMV( "MV_NG2MEAN" )
 
-	If Valtype( nMes ) == "N"
+	If ValType( nMes ) == "N"
 
 		If nMes == 0
 			nQtdMes := 0
@@ -6917,9 +6917,9 @@ Static Function fPPP_EPI(dInicio)
 	Local aRecnos := {}
 	Local nFor
 
-	dbSelectArea( cTRBTNF )
-	dbSetOrder( 1 )
-	dbSeek( DTOS( dInicio ) )
+	DBSelectArea( cTRBTNF )
+	DBSetOrder( 1 )
+	DBSeek( DToS( dInicio ) )
 
 	While !Eof() .And. dInicio == (cTRBTNF)->DTINI
 
@@ -6937,30 +6937,30 @@ Static Function fPPP_EPI(dInicio)
 
 			RecLock( cTRBTNF, .F. )
 				(cTRBTNF)->SITUAC := "S"
-			MsUnLock()
+			MSUnLock()
 
 			lFirstTRB := .F.
 
-			dbSelectArea( cTRBTNF )
-			dbSkip()
+			DBSelectArea( cTRBTNF )
+			DBSkip()
 		End
 
 		aAdd( aRecnos, nRecnoTRB )
 	End
 
 	For nFor := 1 To Len( aRecnos )
-		dbSelectArea( cTRBTNF )
-		dbGoTo( aRecnos[nFor] )
+		DBSelectArea( cTRBTNF )
+		DBGoTo( aRecnos[nFor] )
 
 		If !Eof() .And. !Bof()
 			RecLock( cTRBTNF, .F. )
 				(cTRBTNF)->SITUAC := " "
-			MsUnLock()
+			MSUnLock()
 		EndIf
 
 	Next nFor
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -6982,7 +6982,7 @@ Static Function PPPSENDMAIL(cPrefixo)
 
 	If isSRVunix()  //servidor eh da familia Unix (linux, solaris, free-bsd, hp-ux, etc.)
 		cBarraSrv := "/"
-	Endif
+	EndIf
 
 	If nProcessa == 1
 
@@ -7029,9 +7029,9 @@ Static Function PPPSENDMAIL(cPrefixo)
 		If lOk .And. lAutOk
 
 			If !Empty( cCC )
-				SEND MAIL FROM cFrom To cTo CC cCC SUBJECT Alltrim( cSubject ) BODY cBody ATTACHMENT cAnexos Result lOk
+				SEND MAIL FROM cFrom To cTo CC cCC SUBJECT AllTrim( cSubject ) BODY cBody ATTACHMENT cAnexos Result lOk
 			Else
-				SEND MAIL FROM cFrom To cTo SUBJECT Alltrim( cSubject ) BODY cBody ATTACHMENT cAnexos Result lOk
+				SEND MAIL FROM cFrom To cTo SUBJECT AllTrim( cSubject ) BODY cBody ATTACHMENT cAnexos Result lOk
 			EndIf
 
 			If lOk
@@ -7099,7 +7099,7 @@ Static Function PPPCONFMAIL()
 	EndIf
 
 	PswOrder( 1 )
-	PswSeek( __CUSERID, .T. )
+	PswSeek( __cUserId, .T. )
 	aUsuario := PswRet( 1 )
 
 	DEFINE MSDIALOG oDlgMail OF oMainWnd FROM 0, 0 To 200, 544 PIXEL TITLE "Dados do E-mail" // STR0265 // "Dados do E-mail"
@@ -7115,8 +7115,8 @@ Static Function PPPCONFMAIL()
 		@ 48, 33 MSGet cCC      Size 233, 10          OF oDlgMail PIXEL
 		@ 63, 33 MSGet cSubject Size 233, 10          OF oDlgMail PIXEL
 
-		DEFINE SBUTTON FROM 85, 100 TYPE 1 ACTION (IIf( !Empty( cTo ), IIf( oDlgMail:End(), nOpca:=1, nOpca:=1 ), Help( "", 1, "AVG0001054" ) ) ) ENABLE OF oDlgMail PIXEL
-		DEFINE SBUTTON FROM 85, 140 TYPE 2 ACTION ( oDlgMail:End() ) ENABLE OF oDlgMail PIXEL
+		DEFINE SBUTTON FROM 85, 100 Type 1 ACTION (IIf( !Empty( cTo ), IIf( oDlgMail:End(), nOpca:=1, nOpca:=1 ), Help( "", 1, "AVG0001054" ) ) ) ENABLE OF oDlgMail PIXEL
+		DEFINE SBUTTON FROM 85, 140 Type 2 ACTION ( oDlgMail:End() ) ENABLE OF oDlgMail PIXEL
 
 	ACTIVATE MSDIALOG oDlgMail CENTERED
 
@@ -7137,9 +7137,9 @@ Static Function R700VL19()
 
 	If lSigaMdtps
 
-		If mv_par22==3 .Or. mv_par22==4
+		If MV_PAR22==3 .Or. MV_PAR22==4
 
-			If Empty( mv_par23 )
+			If Empty( MV_PAR23 )
 				HELP( " ", 1, "NVAZIO" )
 				Return .F.
 			EndIf
@@ -7149,7 +7149,7 @@ Static Function R700VL19()
 	Else
 
 		// Situacao e data de demissao dos funcionarios
-		If (mv_par18==3 .Or. mv_par18==4) .And. Empty( mv_par19 )
+		If (MV_PAR18==3 .Or. MV_PAR18==4) .And. Empty( MV_PAR19 )
 			Help( " ", 1, "NVAZIO" )
 			Return .F.
 		EndIf
@@ -7175,9 +7175,9 @@ Static Function R700VL20()
 
 	If lSigaMdtps
 
-		If mv_par22==3 .Or. mv_par22==4
+		If MV_PAR22==3 .Or. MV_PAR22==4
 
-			If mv_par23 > mv_par24
+			If MV_PAR23 > MV_PAR24
 				Help( " ", 1, "DEATEINVAL" )
 				lRet := .F.
 			EndIf
@@ -7187,7 +7187,7 @@ Static Function R700VL20()
 	Else
 
 		// Situacao e data de demissao dos funcionarios
-		If ( mv_par18==3 .Or. mv_par18==4 ) .And. mv_par19 > mv_par20
+		If ( MV_PAR18==3 .Or. MV_PAR18==4 ) .And. MV_PAR19 > MV_PAR20
 			Help( " ", 1, "DEATEINVAL" )
 			lRet := .F.
 		EndIf
@@ -7218,19 +7218,19 @@ Static Function fQtdeAfast( cFilFun, cMatric, _dtIniRis, _dtFimRis )
 	Local lMudou  := .F.
 	Local nDias   := 0
 	Local nVetID  := 0
-	Local dTmpSR8 := StoD( "" )
-	Local dIniAfa := StoD( "" )
-	Local dFimAfa := StoD( "" )
+	Local dTmpSR8 := SToD( "" )
+	Local dIniAfa := SToD( "" )
+	Local dFimAfa := SToD( "" )
 	Local aAfasta := {}
 	Local cModoSR8
 	Local cXFilSR8
 
 	cModoSR8 := f700RetCom( "SR8" )
-	cXFilSR8 := FwxFilial( "SR8", cFilFun, Substr( cModoSR8, 1, 1 ), Substr( cModoSR8, 2, 1 ), Substr( cModoSR8, 3, 1 ) )
+	cXFilSR8 := FwxFilial( "SR8", cFilFun, SubStr( cModoSR8, 1, 1 ), SubStr( cModoSR8, 2, 1 ), SubStr( cModoSR8, 3, 1 ) )
 
-	dbSelectArea( "SR8" )
-	dbSetOrder( 1 )
-	dbSeek( cXFilSR8 + cMatric )
+	DBSelectArea( "SR8" )
+	DBSetOrder( 1 )
+	DBSeek( cXFilSR8 + cMatric )
 
 	While !Eof(  ) .And. SR8->R8_FILIAL + SR8->R8_MAT == cXFilSR8 + cMatric
 		dTmpSR8 := IIf( Empty( SR8->R8_DATAFIM ), _dtFimRis, SR8->R8_DATAFIM )
@@ -7242,8 +7242,8 @@ Static Function fQtdeAfast( cFilFun, cMatric, _dtIniRis, _dtFimRis )
 			aAdd( aAfasta, { dIniAfa, dFimAfa, .T., nVetID } )
 		EndIf
 
-		dbSelectArea( "SR8" )
-		dbSkip()
+		DBSelectArea( "SR8" )
+		DBSkip()
 	EndDo
 
 	While nCont < 1000
@@ -7296,9 +7296,9 @@ Retorno---------------: SX2->(X2_MODOEMP+X2_MODOUN+X2_MODO
 */
 Static Function f700RetCom(cAlias)
 
-	dbSelectArea( "SX2" )
-	dbSetOrder( 1 )
-	dbSeek( cAlias )
+	DBSelectArea( "SX2" )
+	DBSetOrder( 1 )
+	DBSeek( cAlias )
 
 Return FWModeAccess( cAlias, 1 ) + FWModeAccess( cAlias, 2 ) + FWModeAccess( cAlias, 3 )
 
@@ -7322,7 +7322,7 @@ Static Function RMDT006ATE( cTabela, cMvParDe, cMvParAte, nTam )
 	If Empty( cMvParAte )
 		ShowHelpDlg( "ATENÇÃO", {"Para opção de parâmetro Até no arquivo de perguntas esta opção é inválida." }, 2, { "Informe uma opção válida para este parâmetro." }, 2 ) // STR0273 // STR0275
 		Return .F.
-	Elseif cMvParAte < cMvParDe
+	ElseIf cMvParAte < cMvParDe
 		ShowHelpDlg( "ATENÇÃO", {"Para opção de parâmetro De/Até no arquivo de perguntas esta opção é inválida."}, 2, { "Informe uma opção válida para este parâmetro." }, 2 ) // STR0274 // STR0275
 		Return .F.
 	EndIf
@@ -7381,12 +7381,12 @@ Static Function fDesagData( dDtIni, dDtFim )
 	If xm_par30 == 1
 
 		If Year( dDtIni ) < 2004
-			aAdd( aBloco, NGPPPDATE( dDtIni ) + " a " + IIf( !Empty( dDtFim ) .And. dDtFim < StoD( "20031231" ), NGPPPDATE( dDtFim ), NGPPPDATE( StoD( "20031231" ) ) ) ) //" a " STR0173
+			aAdd( aBloco, NGPPPDATE( dDtIni ) + " a " + IIf( !Empty( dDtFim ) .And. dDtFim < SToD( "20031231" ), NGPPPDATE( dDtFim ), NGPPPDATE( SToD( "20031231" ) ) ) ) //" a " STR0173
 
-			If !Empty( dDtFim ) .And. dDtFim < StoD( "20040101" )
+			If !Empty( dDtFim ) .And. dDtFim < SToD( "20040101" )
 				dDtIni := dDtFim
 			Else
-				dDtIni := StoD( "20040101" )
+				dDtIni := SToD( "20040101" )
 			EndIf
 
 		EndIf
@@ -7437,13 +7437,13 @@ Static Function MDT700AFAS( cMat, dIniRis, dFimRis  )
 
 	While !Empty( cVarAfas )
 		aAdd( aVarFas, SubStr( cVarAfas, 1, 3 ) )
-		cVarAfas := SubSTr( cVarAfas, 4 )
+		cVarAfas := SubStr( cVarAfas, 4 )
 	End
 
-	dbSelectArea( "SR8" )
-	dbSetOrder( 1 )//R8_FILIAL+R8_MAT+DTOS( R8_DATAINI )+R8_TIPO
+	DBSelectArea( "SR8" )
+	DBSetOrder( 1 )//R8_FILIAL+R8_MAT+DToS( R8_DATAINI )+R8_TIPO
 
-	If dbSeek( xFilial( "SR8" )+cMat )//Verifica se houve algum afastamento para o funcionário.
+	If DBSeek( xFilial( "SR8" )+cMat )//Verifica se houve algum afastamento para o funcionário.
 
 		While !Eof() .And. SR8->R8_MAT == cMat
 
@@ -7452,7 +7452,7 @@ Static Function MDT700AFAS( cMat, dIniRis, dFimRis  )
 				aAdd( aAfasta, { SR8->R8_DATAINI, SR8->R8_DATAFIM } ) // Adiciona o período de afastado.
 			EndIf
 
-			SR8->(dbSkip())
+			SR8->(DBSkip())
 		End
 
 	EndIf
@@ -7505,7 +7505,7 @@ Retorno---------------: lRet,Lógico, Retorna verdadeiro quando função estiver co
 */
 Static Function MDT700FAST()
 
-	Local aArea := GetArea()
+	Local aArea := FWGetArea()
 	// Variaveis para montar TRB
 	Local aDBF, aTRBSX5
 	// Variaveis de Tela
@@ -7549,12 +7549,12 @@ Static Function MDT700FAST()
 	oTemp700:Create()
 
 	Processa( {|lEnd| FSeachAfas( cTRB700 )}, "Buscando Afastamentos..." , "Espere" )//"Buscando Afastamentos..."//"Espere" / STR0307 / STR0308
-	dbSelectArea( cTRB700 )
-	dbGoTop()
+	DBSelectArea( cTRB700 )
+	DBGoTop()
 
-	If (cTRB700)->(Reccount()) <= 0
+	If (cTRB700)->(RecCount()) <= 0
 		oTemp700:Delete()
-		RestArea( aArea )
+		FWRestArea( aArea )
 		Msgstop( "Não existem Afastamentos cadastrados" , "ATENÇÃO" )  //"Não existem Afastamentos cadastrados" //"ATENÇÃO" //STR0306
 		Return .T.
 	EndIf
@@ -7593,8 +7593,8 @@ Static Function MDT700FAST()
 	lRet := ( nOpcao == 1 )
 
 	If lRet //Caso seja confirmado
-		dbSelectArea( cTRB700 )
-		dbGoTop()
+		DBSelectArea( cTRB700 )
+		DBGoTop()
 
 		While !Eof()
 
@@ -7604,20 +7604,20 @@ Static Function MDT700FAST()
 				cAfasta += "***"
 			EndIf
 
-			dbSkip()
+			DBSkip()
 		End
 
 		If !Empty( cAfasta )
-			mv_par36 := cAfasta
+			MV_PAR36 := cAfasta
 		EndIf
 
-	ElseIf Empty( Mv_par36 )
-		Mv_par36 := cAfasta
+	ElseIf Empty( MV_PAR36 )
+		MV_PAR36 := cAfasta
 	EndIf
 
 	oTemp700:Delete()
 
-	RestArea( aArea )
+	FWRestArea( aArea )
 
 Return .T.
 
@@ -7635,32 +7635,32 @@ Retorno---------------: Nil, vazio.
 ===============================================================================================================================
 */
 Static Function FSeachAfas( cAliasTRB )
-	Local aArea   := GetArea()
+	Local aArea   := FWGetArea()
 
 	//----------------------------------------
 	//| Adiciona os tipos de Afastamentos.   |
 	//----------------------------------------
-	dbSelectArea( "RCM" )
-	dbSetOrder( 1 )
-	dbSeek( xFilial( "RCM" ) )
+	DBSelectArea( "RCM" )
+	DBSetOrder( 1 )
+	DBSeek( xFilial( "RCM" ) )
 
 	While RCM->(!Eof()) .And. xFilial( "RCM" ) == RCM->RCM_FILIAL
 
 		If RCM->RCM_TIPOAF == "1" //Afastamentos
 			RecLock( cAliasTRB, .T. )
-				(cAliasTRB)->TRB_OK := IIf( Len( AllTrim( Mv_par36 ) ) > 1, IIf( AllTrim( RCM->RCM_TIPO ) $ Mv_par36, cMarca, "" ),;
-				 IIf( Alltrim( RCM->RCM_TIPO ) $ "003,004,010,011,012", cMarca, "" ) )
+				(cAliasTRB)->TRB_OK := IIf( Len( AllTrim( MV_PAR36 ) ) > 1, IIf( AllTrim( RCM->RCM_TIPO ) $ MV_PAR36, cMarca, "" ),;
+				 IIf( AllTrim( RCM->RCM_TIPO ) $ "003,004,010,011,012", cMarca, "" ) )
 				(cAliasTRB)->TRB_COD := RCM->RCM_TIPO
 				(cAliasTRB)->TRB_DESC := RCM->RCM_DESCRI
-			(cAliasTRB)->(MsUnLock())
+			(cAliasTRB)->(MSUnLock())
 		EndIf
 
-		RCM->(dbSkip())
+		RCM->(DBSkip())
 	End
 
-	RestArea( aArea )
+	FWRestArea( aArea )
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -7683,11 +7683,11 @@ Static Function MDT700ORAF( oCombo, oGet, oMark, cAliasTRB )
 	Local nIndAfas := oCombo:nAt
 
 	// Ordena TRB conforme selecionado no combo
-	dbSelectArea( cAliasTRB )
-	dbSetOrder( nIndAfas )
-	dbGoTop()
+	DBSelectArea( cAliasTRB )
+	DBSetOrder( nIndAfas )
+	DBGoTop()
 
-	// Caso for marcação, limpa Get
+	// Caso For marcação, limpa Get
 	If nIndAfas == 3 //TRB_OK
 		oGet:cText	:= Space( 60 )
 	EndIf
@@ -7716,12 +7716,12 @@ Static Function MDT700SEAR( oCombo, oGet, oMark, cAliasTRB )
 	Local nInd    := oCombo:nAt
 	Local cResult := AllTrim( oGet:cText )
 
-	dbSelectArea( cAliasTRB )
-	dbSetOrder( nInd )
+	DBSelectArea( cAliasTRB )
+	DBSetOrder( nInd )
 
-	If ! ( lRet := dbSeek( cResult ) )
+	If ! ( lRet := DBSeek( cResult ) )
 		MsgInfo( "Valor não encontrado.", "ATENÇÃO" )//"Valor não encontrado."##"ATENÇÃO" STR0301
-		(cAliasTRB)->(dbGoTop())
+		(cAliasTRB)->(DBGoTop())
 	Else
 		oMark:oBrowse:SetFocus()//Se encontra resultado, focaliza tela do mark
 	EndIf
@@ -7746,10 +7746,10 @@ Retorno---------------: Lógico, sempre verdadeiro.
 Static Function MDT700MK( cMarca, cAliasTRB, oCombo, oMark )
 	Local nIndAfas := oCombo:nAt
 
-	// Ordena o marcado quando for o indice 3 - Marcado
+	// Ordena o marcado quando For o indice 3 - Marcado
 	If nIndAfas == 3
-		dbSelectArea( cAliasTRB )
-		dbSetOrder( nIndAfas )
+		DBSelectArea( cAliasTRB )
+		DBSetOrder( nIndAfas )
 		//Atualiza tela do Mark, para exibir a ordem
 		oMark:oBrowse:Refresh()
 	EndIf
@@ -7772,17 +7772,17 @@ Retorno---------------: Lógico, sempre verdadeiro.
 Static Function MDT700INV(cAliasTRB, cMARCA)
 	Local aArea := (cAliasTRB)->(GetArea()) // Salva área posicionada.
 
-	dbSelectArea( cAliasTRB )
-	dbSetOrder( 1 )
-	dbGoTop()
+	DBSelectArea( cAliasTRB )
+	DBSetOrder( 1 )
+	DBGoTop()
 
 	While !Eof()
 		(cAliasTRB)->TRB_OK := IIf( Empty( (cAliasTRB)->TRB_OK), cMARCA, Space( Len( cMARCA ) ) )
-		dbSelectArea( cAliasTRB )
-		( cAliasTRB )->( dbSkip() )
+		DBSelectArea( cAliasTRB )
+		( cAliasTRB )->( DBSkip() )
 	End
 
-	RestArea( aArea )
+	FWRestArea( aArea )
 Return .T.
 
 /*
@@ -7801,8 +7801,8 @@ Static Function MDT700RCM()
 
 	Local nQuant := 0
 
-	dbSelectArea( "RCM" )
-	dbGoTop()
+	DBSelectArea( "RCM" )
+	DBGoTop()
 
 	While RCM->(!Eof()) .And. xFilial( "RCM" ) == RCM->RCM_FILIAL
 
@@ -7810,7 +7810,7 @@ Static Function MDT700RCM()
 			nQuant++
 		EndIf
 
-		RCM->(dbSkip())
+		RCM->(DBSkip())
 	End
 
 	nQuant := nQuant * 3 //Multiplica por 3 mediante ao tamanho do campo RCM_TIPO
@@ -7824,7 +7824,7 @@ Autores---------------: Denis Hyroshi de Souza / Gabriel Sokacheski / Jorge Luis
                         Roger Rodrigues / Bruno Lobo de Souza / Guilherme Benkendorf / Guilherme Freudenburg (Totvs)
 Conversão para Italac-: Julio de Paula Paz
 Data da Criacao-------: 22/09/2023
-Descrição-------------: Função responsavel por realizar a validação do SX1 - Mv_par36
+Descrição-------------: Função responsavel por realizar a validação do SX1 - MV_PAR36
 Parametros------------: Nenhum
 Retorno---------------: lRet, Lógico, Verdadeiro quando não ocorrer alguma inconsistência.
 ===============================================================================================================================
@@ -7833,7 +7833,7 @@ Static Function MDT700VALF()
 
 	Local lRet := .T.
 	Local aAfast := {} // Recebe os tipos de afastamentos.
-	Local cMvAfas := mv_par36
+	Local cMvAfas := MV_PAR36
 	Local aMvAfas := {}
 	Local nX := 0
 
@@ -7841,7 +7841,7 @@ Static Function MDT700VALF()
 
 		If ( SubStr( cMvAfas, 1, 3 ) <> "***" .And. aScan( aMvAfas, { |x| x == SubStr( cMvAfas, 1, 3 ) } ) == 0  .Or. SubStr( cMvAfas, 1, 3 ) == "***" )
 			aAdd( aMvAfas, SubStr( cMvAfas, 1, 3 ) )
-			cMvAfas := SubSTr( cMvAfas, 4 )
+			cMvAfas := SubStr( cMvAfas, 4 )
 		Else
 			lRet := .F.
 			ShowHelpDlg( "ATENÇÃO", { "Não é permitido incluir tipos de afastamentos iguais." }, 2, { "Favor selecionar apenas um de cada tipo de afastamento." }, 2 ) //Atenção ## "Não é permitido incluir tipos de afastamentos iguais." ## "Favor selecionar apenas um de cada tipo de afastamento." STR0316 / STR0317 
@@ -7851,16 +7851,16 @@ Static Function MDT700VALF()
 
 	// Adiciona os tipos de Afastamentos.
 	If lRet
-		dbSelectArea( "RCM" )
-		dbSetOrder( 1 )
-		dbSeek( xFilial( "RCM" ) )
+		DBSelectArea( "RCM" )
+		DBSetOrder( 1 )
+		DBSeek( xFilial( "RCM" ) )
 		While RCM->(!Eof()) .And. xFilial( "RCM" ) == RCM->RCM_FILIAL
 
 			If RCM->RCM_TIPOAF == "1" //Afastamentos
-				aAdd( aAfast, Alltrim( RCM->RCM_TIPO ) )
+				aAdd( aAfast, AllTrim( RCM->RCM_TIPO ) )
 			EndIf
 
-			RCM->(dbSkip())
+			RCM->(DBSkip())
 		End
 
 		If Len( aMvAfas ) > 0
@@ -8012,15 +8012,15 @@ Static Function fVlCCSRE()
 	aAdd( aBind, (cTRBPPP)->EMP    )
 	aAdd( aBind, (cTRBPPP)->FILIAL )
 	aAdd( aBind, (cTRBPPP)->MAT    )
-	aAdd( aBind, DtoS( (cTRBPPP)->DTATE ) )
+	aAdd( aBind, DToS( (cTRBPPP)->DTATE ) )
 	aAdd( aBind, (cTRBPPP)->CUSTO  )
 	aAdd( aBind, Space( 1 )        )
 
 	dbUseArea( .T., 'TOPCONN', TcGenQry2( , , cQryVlCC, aBind ), cAliasSRE, .T., .T. )
 
-	lReturn := (cAliasSRE)->( !EoF() )
+	lReturn := (cAliasSRE)->( !Eof() )
 
-	(cAliasSRE)->( dbCloseArea() )
+	(cAliasSRE)->( DBCloseArea() )
 
 	/*------------------------------------------------+
 	| Libera consumo de memória p/ melhor performance |
@@ -8050,15 +8050,15 @@ Static Function fVlMedCon( cFilRis )
 	Local lExisMed  := .T.
 	Local cNumRis   := ( cTRBTN0 )->NUMRIS
 
-	dbSelectArea( "TJF" )
-	dbSetOrder( 1 )
-	dbSeek( XFilial( "TJF" , cFilRis ) + cNumRis )
+	DBSelectArea( "TJF" )
+	DBSetOrder( 1 )
+	DBSeek( xFilial( "TJF" , cFilRis ) + cNumRis )
 
 	While !Eof() .And. lExisMed
 
-		dbSelectArea( "TO4" )
-		dbSetOrder( 1 )
-		If dbSeek( xFilial( "TO4" ) + TJF->TJF_MEDCON )
+		DBSelectArea( "TO4" )
+		DBSetOrder( 1 )
+		If DBSeek( xFilial( "TO4" ) + TJF->TJF_MEDCON )
 
 			If TO4->TO4_TIPCTR == "2"
 
@@ -8079,7 +8079,7 @@ Static Function fVlMedCon( cFilRis )
 			
 		EndIf
 
-		( 'TJF' )->( DbSkip() )
+		( 'TJF' )->( DBSkip() )
 		
 	End
 

@@ -1,26 +1,20 @@
 /*
 ===============================================================================================================================
-                          ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-     Autor    |    Data    |                                             Motivo
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- André Lisboa | 24/08/2017 | Chamado 20782. Ajuste gerais para V12 e incluido ITLOGACS.
- Josué Danich | 26/06/2019 | Chamado 28886. Revisão para loboguara.
- Lucas Borges | 11/10/2019 | Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
- Jerry        | 14/10/2019 | Chamado 30870. Erro Fechamento do Alias.
- Jerry        | 03/11/2020 | Chamado 34554. Correçao do U_ITMSG.
-==============================================================================================================================================================
-Analista    - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
-==============================================================================================================================================================
-Vanderlei   - Alex Wallauer - 25/02/24 -          - 49894   - Novos rateios de peso bruto por itens de nota fiscal.
+Alex Wallauer |25/02/2024| Chamado 49894. Novos rateios de peso bruto por itens de nota fiscal
+Lucas Borges  |15/09/2025| Chamado 50617. Retirada manipulação do SX1
+Lucas Borges  |02/10/2025| Chamado 51526. Modificada forma para recuperar a matrícula do usuário.
 ==============================================================================================================================================================
 */
 
 // Definicoes de Includes da Rotina.
-#include "TOTVS.CH"
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "RWMAKE.CH"
-#INCLUDE "Colors.ch"
+#Include "TOTVS.CH"
+#Include "TOTVS.ch"
+#Include "RWMAKE.CH"
+#Include "Colors.ch"
 
 /*
 ===============================================================================================================================
@@ -41,14 +35,13 @@ User Function MOMS010()
  Private _dFatFinal As Date
 
  _aHelp := { 'Informe a(s) Carga(s).'}
- U_Itputx1(cPerg,"03","Cargas"," "," ","MV_CH03","C",99,0,0,"G",""," ","","","MV_PAR03","","","","","","","","","","","","","","","","",_aHelp,_aHelp,_aHelp)
 
- DO WHILE Pergunte(cPerg,.T.)
+ While Pergunte(cPerg,.T.)
     _dFatInic := MV_PAR01
     _dFatFinal:= MV_PAR02
-    _cCargas  := ALLTRIM(MV_PAR03)
+    _cCargas  := AllTrim(MV_PAR03)
     MOMS010A()
- ENDDO
+ EndDo
 
 Return
 
@@ -96,29 +89,29 @@ Static Function MOMS010A()
  Private _oFont1 As Object
  Private _oFont2 As Object
 
- FwMsgRun( , {||  _nContReg:= MOMS010B() }, "AGUARDE...", "NOTA(S) ESTAO SENDO SELECIONADOS... ")
+ FWMsgRun( , {||  _nContReg:= MOMS010B() }, "AGUARDE...", "NOTA(S) ESTAO SENDO SELECIONADOS... ")
 
  If _nContReg == 0
-    U_ITMSG("Não foram encontrada(s) nota(s) fiscal(is).",;
+    U_ITMsg("Não foram encontrada(s) nota(s) fiscal(is).",;
             "Informação",;
             "Favor checar os parâmetros de pesquisa informados.",1)
  Else
     //INSERE OS DADOS NO ARQUIVO TEMPORARIO CRIADO
-    FwMsgRun( , {|oProc|  MOMS010D(cTab,oProc,_nContReg) }, "AGUARDE...", "Inserindo os dados selecionados: "+ALLTRIM(STR(_nContReg))+" registros" )
+    FWMsgRun( , {|oProc|  MOMS010D(cTab,oProc,_nContReg) }, "AGUARDE...", "Inserindo os dados selecionados: "+AllTrim(Str(_nContReg))+" registros" )
 
     //FAZ O CALCULO AUTOMATICO DE DIMENSOES DE OBJETOS
     aSize := MSADVSIZE()
 
     //OBTEM TAMANHOS DAS TELAS
-    AAdd( aObjects, { 0, 0, .t., .t., .t. } )
+    aAdd( aObjects, { 0, 0, .T., .T., .T. } )
     aInfo    := { aSize[ 1 ], aSize[ 2 ], aSize[ 3 ], aSize[ 4 ], 3, 3 }
     _aPosObj1 := MsObjSize( aInfo, aObjects,  , .T. )
 
     //BOTOES DA TELA.
-    Aadd( aBotoes, {"PESQUISA" ,{|| MOMS010H(cTab)                                                                                 },"Pesquisar..."      })
-    Aadd( aBotoes, {"S4WB005N" ,{|| FwMsgRun(,{|oProc| MOMS010J(cTab) } ,"Aguarde...","GERANDO VISUALIZACAO DA CARGA AGUARDE..."  )},"Visualizar Carga"  })
-    aAdd( aBotoes, {'RELATORIO',{|| FwMsgRun(,{|oProc| MOMS010K(cTab) } ,"Aguarde...","GERANDO VISUALIZACAO DA N.F. AGUARDE..."   )},"Visualizar N.F."   })
-    Aadd( aBotoes, {"RESPONSA" ,{|| FwMsgRun(,{|oProc| MOMS010L(cTab) } ,"Aguarde...","AGUARDE MONTANDO TELA PARA ALTERAR PESO...")},"Alterar Peso Bruto"})
+    aAdd( aBotoes, {"PESQUISA" ,{|| MOMS010H(cTab)                                                                                 },"Pesquisar..."      })
+    aAdd( aBotoes, {"S4WB005N" ,{|| FWMsgRun(,{|oProc| MOMS010J(cTab) } ,"Aguarde...","GERANDO VISUALIZACAO DA CARGA AGUARDE..."  )},"Visualizar Carga"  })
+    aAdd( aBotoes, {'RELATORIO',{|| FWMsgRun(,{|oProc| MOMS010K(cTab) } ,"Aguarde...","GERANDO VISUALIZACAO DA N.F. AGUARDE..."   )},"Visualizar N.F."   })
+    aAdd( aBotoes, {"RESPONSA" ,{|| FWMsgRun(,{|oProc| MOMS010L(cTab) } ,"Aguarde...","AGUARDE MONTANDO TELA PARA ALTERAR PESO...")},"Alterar Peso Bruto"})
 
     _oFont1:=TFont():New('Courier new',,14,,.T.)
     _oFont2:=TFont():New("Arial"      ,,18,,.T.)
@@ -146,20 +139,20 @@ Static Function MOMS010A()
        Else
           nHeight	:= 143
           nWidth	:= 315
-       Endif
+       EndIf
 
-       (cTab)->(dbGotop())
+       (cTab)->(DBGoTop())
        oBrowse := TCBrowse():New( 35,01,_aPosObj1[1,3] + 7,_aPosObj1[1,4] - 10,,;
                                 ,{20,20,20,02,09,02,02,10,06,04,54,08,08},;
                                 oDlg1,,,,,{||},,,,,,,.F.,cTab,.T.,,.F.,,.T.,.T.)
 
-       oBrowse:AddColumn(TCColumn():New("",{|| IF(&(cTab + '->' + cTab+"_PESBRU") <> &(cTab + '->' + cTab+"_NVPBRU"),overde,overme) },,,,"CENTER",    ,.T.,.F.,,,,.F.,))
+       oBrowse:AddColumn(TCColumn():New("",{|| If(&(cTab + '->' + cTab+"_PESBRU") <> &(cTab + '->' + cTab+"_NVPBRU"),overde,overme) },,,,"CENTER",    ,.T.,.F.,,,,.F.,))
 
        For x:=1 to Len(aStruct)
           If aStruct[x,1] == cTab + "_STATUS"
-              oBrowse:AddColumn(TCColumn():New("",{|| IF(&(cTab + '->' + cTab + "_STATUS") == Space(2),oNO,oOK)},,,,"CENTER",,.T.,.F.,,,,.F.,))
-          Elseif aStruct[x,1] <> "WK_RECNO"
-              oBrowse:AddColumn(TCColumn():New((aTitulo[x,2]),&("{ || " + cTab + '->' + aStruct[x,1]+"}"),aTitulo[x,3],,,if(aStruct[x,2]=="N","RIGHT","LEFT"),,.F.,.F.,,,,.F.,))
+              oBrowse:AddColumn(TCColumn():New("",{|| If(&(cTab + '->' + cTab + "_STATUS") == Space(2),oNO,oOK)},,,,"CENTER",,.T.,.F.,,,,.F.,))
+          ElseIf aStruct[x,1] <> "WK_RECNO"
+              oBrowse:AddColumn(TCColumn():New((aTitulo[x,2]),&("{ || " + cTab + '->' + aStruct[x,1]+"}"),aTitulo[x,3],,,If(aStruct[x,2]=="N","RIGHT","LEFT"),,.F.,.F.,,,,.F.,))
           EndIf
        Next x
        //Insere imagem em colunas que os dados poderao ser ordenados
@@ -173,7 +166,7 @@ Static Function MOMS010A()
 
        oDlg1:lMaximized:=.T.
 
-    ACTIVATE MSDIALOG oDlg1 ON INIT (EnchoiceBar(oDlg1,{|| IF(MOMS010N(cTab),(_nOpca := 1,oDlg1:End()),) },;
+    ACTIVATE MSDIALOG oDlg1 ON INIT (EnchoiceBar(oDlg1,{|| If(MOMS010N(cTab),(_nOpca := 1,oDlg1:End()),) },;
                                                                           {|| _nOpca := 2,oDlg1:End()},,aBotoes),;
                                      oPanel:Align:=CONTROL_ALIGN_TOP,;
                                      oBrowse:Align:=CONTROL_ALIGN_ALLCLIENT,;
@@ -181,13 +174,13 @@ Static Function MOMS010A()
 
     If _nOpca == 1
 
-       FWMSGRUN( ,{|oProc| MOMS010O(cTab,oProc)  } , "Processando..." , "Acerto de Pesos e Rateios..." )
+       FWMsgRun( ,{|oProc| MOMS010O(cTab,oProc)  } , "Processando..." , "Acerto de Pesos e Rateios..." )
 
     EndIf
 
  EndIf
 
- If Select(cTab) > 0 .and. ValType(_otemp) = "O"
+ If Select(cTab) > 0 .And. ValType(_otemp) = "O"
     _otemp:delete()
  EndIf
 
@@ -219,12 +212,12 @@ Static Function MOMS010B() As Numeric
  _cQuery += " F2.D_E_L_E_T_ = ' '"
  _cQuery += " AND A1.D_E_L_E_T_ = ' '"
  _cQuery += " AND F2.F2_FILIAL = '" + xFilial("SF2") + "'"
- IF ALLTRIM(GETENVSERVER()) == "PRODUCAO"
+ If AllTrim(GETENVSERVER()) == "PRODUCAO"
     _cQuery += " AND F2.F2_FIMP = ' '"
  Else
     _cGrupoProd:=""
- ENDIF
- _cQuery += " AND F2.F2_EMISSAO BETWEEN '" + DtoS(_dFatInic) + "' AND '" + DtoS(_dFatFinal) + "'"
+ EndIf
+ _cQuery += " AND F2.F2_EMISSAO BETWEEN '" + DToS(_dFatInic) + "' AND '" + DToS(_dFatFinal) + "'"
  If !Empty((_cCargas))
 	 _cQuery += " AND F2_CARGA IN "+ FormatIn(_cCargas,";")
  EndIf
@@ -235,9 +228,9 @@ Static Function MOMS010B() As Numeric
  _cQuery += "WHERE"
  _cQuery += " D2.D_E_L_E_T_ = ' '"
  _cQuery += " AND D2.D2_FILIAL = '" + xFilial("SD2") + "'"
- IF !EMPTY(_cGrupoProd)
+ If !Empty(_cGrupoProd)
     _cQuery += " AND D2_GRUPO IN " + FormatIn(_cGrupoProd,",")
- ENDIF
+ EndIf
  _cQuery += " AND F2.F2_FILIAL  = D2.D2_FILIAL "
  _cQuery += " AND F2.F2_DOC     = D2.D2_DOC "
  _cQuery += " AND F2.F2_SERIE   = D2.D2_SERIE "
@@ -268,46 +261,46 @@ Static Function MOMS010C(cTab As Char)
  //================================================================================
  // Criando estrutura da tabela temporaria das unidades
  //================================================================================
- AAdd(aStruct,{cTab+"_STATUS"  ,"C",2,0})
- AAdd(aStruct,{cTab+"_CARGA"   ,"C",TamSx3("F2_CARGA")[1]    ,TamSx3("F2_CARGA")[2]  })
- AAdd(aStruct,{cTab+"_DOC"     ,"C",TamSx3("F2_DOC")[1]      ,TamSx3("F2_DOC")[2]    })
- AAdd(aStruct,{cTab+"_SERIE"   ,"C",TamSx3("F2_SERIE")[1]    ,TamSx3("F2_SERIE")[2]  })
- AAdd(aStruct,{cTab+"_CLIENT"  ,"C",TamSx3("F2_CLIENTE")[1]+2,TamSx3("F2_CLIENTE")[2]})
- AAdd(aStruct,{cTab+"_LOJA"    ,"C",TamSx3("F2_LOJA")[1]     ,TamSx3("F2_LOJA")[2]   })
- AAdd(aStruct,{cTab+"_NOMCLI"  ,"C",TamSx3("A1_NOME")[1]     ,TamSx3("A1_NOME")[2]   })
- AAdd(aStruct,{cTab+"_EMIS"    ,"D",TamSx3("F2_EMISSAO")[1]  ,TamSx3("F2_EMISSAO")[2]})
- AAdd(aStruct,{cTab+"_PEDIDO"  ,"C",TamSx3("F2_I_PEDID")[1]+2,TamSx3("F2_I_PEDID")[2]})
- AAdd(aStruct,{cTab+"_PLACA"   ,"C",TamSx3("F2_I_PLACA")[1]  ,TamSx3("F2_I_PLACA")[2]})
- AAdd(aStruct,{cTab+"_NOMTRA"  ,"C",TamSx3("F2_I_NTRAN")[1]  ,TamSx3("F2_I_NTRAN")[2]})
- AAdd(aStruct,{cTab+"_PESLIQ"  ,"N",TamSx3("F2_PLIQUI")[1]   ,TamSx3("F2_PLIQUI")[2] })
- AAdd(aStruct,{cTab+"_PESBRU"  ,"N",TamSx3("F2_PBRUTO")[1]   ,TamSx3("F2_PBRUTO")[2] })
- _nPosAtu:=LEN(aStruct)
-  AAdd(aStruct,{cTab+"_NVPBRU"  ,"N",TamSx3("F2_PBRUTO")[1]   ,TamSx3("F2_PBRUTO")[2] })
- _nPosNew:=LEN(aStruct)
- AAdd(aStruct,{"WK_FIMP"       ,"C",03,0})
- AAdd(aStruct,{"WK_RECNO"      ,"N",10,0})
+ aAdd(aStruct,{cTab+"_STATUS"  ,"C",2,0})
+ aAdd(aStruct,{cTab+"_CARGA"   ,"C",TamSX3("F2_CARGA")[1]    ,TamSX3("F2_CARGA")[2]  })
+ aAdd(aStruct,{cTab+"_DOC"     ,"C",TamSX3("F2_DOC")[1]      ,TamSX3("F2_DOC")[2]    })
+ aAdd(aStruct,{cTab+"_SERIE"   ,"C",TamSX3("F2_SERIE")[1]    ,TamSX3("F2_SERIE")[2]  })
+ aAdd(aStruct,{cTab+"_CLIENT"  ,"C",TamSX3("F2_CLIENTE")[1]+2,TamSX3("F2_CLIENTE")[2]})
+ aAdd(aStruct,{cTab+"_LOJA"    ,"C",TamSX3("F2_LOJA")[1]     ,TamSX3("F2_LOJA")[2]   })
+ aAdd(aStruct,{cTab+"_NOMCLI"  ,"C",TamSX3("A1_NOME")[1]     ,TamSX3("A1_NOME")[2]   })
+ aAdd(aStruct,{cTab+"_EMIS"    ,"D",TamSX3("F2_EMISSAO")[1]  ,TamSX3("F2_EMISSAO")[2]})
+ aAdd(aStruct,{cTab+"_PEDIDO"  ,"C",TamSX3("F2_I_PEDID")[1]+2,TamSX3("F2_I_PEDID")[2]})
+ aAdd(aStruct,{cTab+"_PLACA"   ,"C",TamSX3("F2_I_PLACA")[1]  ,TamSX3("F2_I_PLACA")[2]})
+ aAdd(aStruct,{cTab+"_NOMTRA"  ,"C",TamSX3("F2_I_NTRAN")[1]  ,TamSX3("F2_I_NTRAN")[2]})
+ aAdd(aStruct,{cTab+"_PESLIQ"  ,"N",TamSX3("F2_PLIQUI")[1]   ,TamSX3("F2_PLIQUI")[2] })
+ aAdd(aStruct,{cTab+"_PESBRU"  ,"N",TamSX3("F2_PBRUTO")[1]   ,TamSX3("F2_PBRUTO")[2] })
+ _nPosAtu:=Len(aStruct)
+  aAdd(aStruct,{cTab+"_NVPBRU"  ,"N",TamSX3("F2_PBRUTO")[1]   ,TamSX3("F2_PBRUTO")[2] })
+ _nPosNew:=Len(aStruct)
+ aAdd(aStruct,{"WK_FIMP"       ,"C",03,0})
+ aAdd(aStruct,{"WK_RECNO"      ,"N",10,0})
 
  //================================================================================
  // Armazena no array aCampos o nome, descricao dos campos e picture
  //================================================================================
- AAdd(aTitulo,{cTab+"_STATUS"  ,"  "               ," "							})
- AAdd(aTitulo,{cTab+"_CARGA"   ,"CARGA"            ,PesqPict("SF2","F2_CARGA")  })
- AAdd(aTitulo,{cTab+"_DOC"     ,"NOTA FISCAL"      ,PesqPict("SF2","F2_DOC")    })
- AAdd(aTitulo,{cTab+"_SERIE"   ,"SERIE"            ,PesqPict("SF2","F2_SERIE")  })
- AAdd(aTitulo,{cTab+"_CLIENT"  ,"CLIENTE"          ,PesqPict("SF2","F2_CLIENTE")})
- AAdd(aTitulo,{cTab+"_LOJA"    ,"LOJA"             ,PesqPict("SF2","F2_LOJA")   })
- AAdd(aTitulo,{cTab+"_NOMCLI"  ,"DESCRICAO CLIENTE","@!" })
- AAdd(aTitulo,{cTab+"_EMIS"    ,"EMISSAO"          ,PesqPict("SF2","F2_EMISSAO")})
- AAdd(aTitulo,{cTab+"_PEDIDO"  ,"PEDIDO"           ,PesqPict("SF2","F2_I_PEDID")})
- AAdd(aTitulo,{cTab+"_PLACA"   ,"PLACA"            ,PesqPict("SF2","F2_I_PLACA")})
- AAdd(aTitulo,{cTab+"_NOMTRA"  ,"TRANSPORTADORA"   ,"@!" })
- AAdd(aTitulo,{cTab+"_PESLIQ"  ,"PESO LIQUIDO"     ,PesqPict("SF2","F2_PLIQUI") })
- AAdd(aTitulo,{cTab+"_PESBRU"  ,"PESO BRUTO"       ,PesqPict("SF2","F2_PBRUTO") })
- AAdd(aTitulo,{cTab+"_NVPBRU"  ,"NOVO PESO"        ,PesqPict("SF2","F2_PBRUTO") })
- AAdd(aTitulo,{"WK_FIMP"       ,"Enviada?"         ,"@!" })
+ aAdd(aTitulo,{cTab+"_STATUS"  ,"  "               ," "							})
+ aAdd(aTitulo,{cTab+"_CARGA"   ,"CARGA"            ,PesqPict("SF2","F2_CARGA")  })
+ aAdd(aTitulo,{cTab+"_DOC"     ,"NOTA FISCAL"      ,PesqPict("SF2","F2_DOC")    })
+ aAdd(aTitulo,{cTab+"_SERIE"   ,"SERIE"            ,PesqPict("SF2","F2_SERIE")  })
+ aAdd(aTitulo,{cTab+"_CLIENT"  ,"CLIENTE"          ,PesqPict("SF2","F2_CLIENTE")})
+ aAdd(aTitulo,{cTab+"_LOJA"    ,"LOJA"             ,PesqPict("SF2","F2_LOJA")   })
+ aAdd(aTitulo,{cTab+"_NOMCLI"  ,"DESCRICAO CLIENTE","@!" })
+ aAdd(aTitulo,{cTab+"_EMIS"    ,"EMISSAO"          ,PesqPict("SF2","F2_EMISSAO")})
+ aAdd(aTitulo,{cTab+"_PEDIDO"  ,"PEDIDO"           ,PesqPict("SF2","F2_I_PEDID")})
+ aAdd(aTitulo,{cTab+"_PLACA"   ,"PLACA"            ,PesqPict("SF2","F2_I_PLACA")})
+ aAdd(aTitulo,{cTab+"_NOMTRA"  ,"TRANSPORTADORA"   ,"@!" })
+ aAdd(aTitulo,{cTab+"_PESLIQ"  ,"PESO LIQUIDO"     ,PesqPict("SF2","F2_PLIQUI") })
+ aAdd(aTitulo,{cTab+"_PESBRU"  ,"PESO BRUTO"       ,PesqPict("SF2","F2_PBRUTO") })
+ aAdd(aTitulo,{cTab+"_NVPBRU"  ,"NOVO PESO"        ,PesqPict("SF2","F2_PBRUTO") })
+ aAdd(aTitulo,{"WK_FIMP"       ,"Enviada?"         ,"@!" })
 
 If Select(cTab) > 0
-   (cTab)->(dbCloseArea())
+   (cTab)->(DBCloseArea())
 EndIf
  // Permite o uso do arquivo criado dentro do protheus.
  _otemp := FWTemporaryTable():New( cTab, aStruct )
@@ -337,15 +330,15 @@ Retorno-----------: Nenhum
 */
 Static Function MOMS010D(cTab As Char,oProc As Object,_nContReg As Numeric)
  Local nConta := 0 As Numeric
- Local _cTot := ALLTRIM(STR(_nContReg)) As Character
+ Local _cTot := AllTrim(Str(_nContReg)) As Character
 
  MOMS010C(cTab)//CRIA AQUIVO TEMPORARIO
 
- (_cAliasSF2)->(dbGoTop())
+ (_cAliasSF2)->(DBGoTop())
 
- Do While !(_cAliasSF2)->(Eof())
+ While !(_cAliasSF2)->(Eof())
     nConta++
-    oProc:cCaption := ('Processando: '+ALLTRIM(STR(nConta))+" de "+_cTot )
+    oProc:cCaption := ('Processando: '+AllTrim(Str(nConta))+" de "+_cTot )
     ProcessMessages()
     (cTab)->(DbAppend())
     &(cTab+'->'+cTab+'_STATUS') := Space(2)
@@ -354,22 +347,22 @@ Static Function MOMS010D(cTab As Char,oProc As Object,_nContReg As Numeric)
     &(cTab+'->'+cTab+'_SERIE')  := (_cAliasSF2)->F2_SERIE
     &(cTab+'->'+cTab+'_CLIENT') := (_cAliasSF2)->F2_CLIENTE
     &(cTab+'->'+cTab+'_LOJA')   := (_cAliasSF2)->F2_LOJA
-    &(cTab+'->'+cTab+'_NOMCLI') := UPPER((_cAliasSF2)->A1_NOME)
-    &(cTab+'->'+cTab+'_EMIS')   := StoD((_cAliasSF2)->F2_EMISSAO)
+    &(cTab+'->'+cTab+'_NOMCLI') := Upper((_cAliasSF2)->A1_NOME)
+    &(cTab+'->'+cTab+'_EMIS')   := SToD((_cAliasSF2)->F2_EMISSAO)
     &(cTab+'->'+cTab+'_PEDIDO') := (_cAliasSF2)->F2_I_PEDID
     &(cTab+'->'+cTab+'_PLACA' ) := (_cAliasSF2)->F2_I_PLACA
-    &(cTab+'->'+cTab+'_NOMTRA') := UPPER((_cAliasSF2)->F2_I_NTRAN)
+    &(cTab+'->'+cTab+'_NOMTRA') := Upper((_cAliasSF2)->F2_I_NTRAN)
     &(cTab+'->'+cTab+'_PESLIQ') := (_cAliasSF2)->F2_PLIQUI
     &(cTab+'->'+cTab+'_PESBRU') := (_cAliasSF2)->F2_PBRUTO
     &(cTab+'->'+cTab+'_NVPBRU') := (_cAliasSF2)->F2_PBRUTO
-    (cTab)->WK_FIMP             := IF((_cAliasSF2)->F2_FIMP="S","SIM","NAO")
+    (cTab)->WK_FIMP             := If((_cAliasSF2)->F2_FIMP="S","SIM","NAO")
     (cTab)->WK_RECNO            := (_cAliasSF2)->F2RECNO
 
-    (_cAliasSF2)->(dbSkip())
+    (_cAliasSF2)->(DBSkip())
 
  EndDo
 
- (_cAliasSF2)->(dbCloseArea())
+ (_cAliasSF2)->(DBCloseArea())
 
 Return
 
@@ -431,7 +424,7 @@ Static Function MOMS010F(cTab As Char,_cStatus As Char)
     nQtdTit--
  EndIf
 
- nQtdTit:= Iif(nQtdTit<0,0,nQtdTit)
+ nQtdTit:= IIf(nQtdTit<0,0,nQtdTit)
  oQtda:Refresh()
  oBrowse:DrawSelect()
  oBrowse:Refresh(.T.)
@@ -451,9 +444,9 @@ Retorno-----------: Nenhum
 Static Function MOMS010G(cTab As Character,nColuna As Numeric)
  Do Case
     //Marca ou desmarca todos
-    Case nColuna = 1 .OR. nColuna = 2
-         (cTab)->(dbGotop())
-         Do While (cTab)->(!Eof())
+    Case nColuna = 1 .Or. nColuna = 2
+         (cTab)->(DBGoTop())
+         While (cTab)->(!Eof())
             //Se o titulo nao estiver selecionado
             If &(cTab+'->'+cTab+'_STATUS') == Space(2)
                &(cTab+'->'+cTab+'_STATUS'):= 'XX'
@@ -464,50 +457,50 @@ Static Function MOMS010G(cTab As Character,nColuna As Numeric)
                 nQtdTit--
             EndIf
             oQtda:Refresh()
-            (cTab)->(dbSkip())
+            (cTab)->(DBSkip())
          EndDo
-         nQtdTit:= Iif(nQtdTit<0,0,nQtdTit)
+         nQtdTit:= IIf(nQtdTit<0,0,nQtdTit)
          oQtda:Refresh()
-         (cTab)->(dbGoTop())
+         (cTab)->(DBGoTop())
     //Carga
     Case nColuna == 3
-         (cTab)->(dbSetOrder(2))
-         (cTab)->(dbGoTop())
+         (cTab)->(DBSetOrder(2))
+         (cTab)->(DBGoTop())
 
     //Numero do documento + Serie
     Case nColuna == 4
-         (cTab)->(dbSetOrder(1))
-         (cTab)->(dbGoTop())
+         (cTab)->(DBSetOrder(1))
+         (cTab)->(DBGoTop())
 
      //Codigo do Cliente + Loja
      Case nColuna == 6
-          (cTab)->(dbSetOrder(3))
-          (cTab)->(dbGoTop())
+          (cTab)->(DBSetOrder(3))
+          (cTab)->(DBGoTop())
 
      //Nome do Cliente
      Case nColuna == 8
-          (cTab)->(dbSetOrder(4))
-          (cTab)->(dbGoTop())
+          (cTab)->(DBSetOrder(4))
+          (cTab)->(DBGoTop())
 
      //Emissao
      Case nColuna == 9
-          (cTab)->(dbSetOrder(5))
-          (cTab)->(dbGoTop())
+          (cTab)->(DBSetOrder(5))
+          (cTab)->(DBGoTop())
 
      //Pedido
      Case nColuna == 10
-          (cTab)->(dbSetOrder(6))
-          (cTab)->(dbGoTop())
+          (cTab)->(DBSetOrder(6))
+          (cTab)->(DBGoTop())
 
      //Nome da Transportadora
      Case nColuna == 12
-          (cTab)->(dbSetOrder(7))
-          (cTab)->(dbGoTop())
+          (cTab)->(DBSetOrder(7))
+          (cTab)->(DBGoTop())
 
      //Peso Bruto
      Case nColuna == 14
-          (cTab)->(dbSetOrder(8))
-          (cTab)->(dbGoTop())
+          (cTab)->(DBSetOrder(8))
+          (cTab)->(DBGoTop())
  EndCase
 
  MOMS010E(nColuna)
@@ -533,7 +526,7 @@ Static Function MOMS010H(cTab As Character)
  Local aComboBx1:= {"Numero da Nota + Serie","Carga","Cliente + Loja","Nome do Cliente","Emissao","Pedido","Nome da Transportadora","Peso Bruto"}
  Local _nOpca   := 0
  Local nI       := 0
- Private cGet1  := Space(TamSx3("F2_DOC")[1] + TamSx3("F2_SERIE")[2])
+ Private cGet1  := Space(TamSX3("F2_DOC")[1] + TamSX3("F2_SERIE")[2])
  Private oGet1
  Private cComboBx1:= ""
 
@@ -542,8 +535,8 @@ Static Function MOMS010H(cTab As Character)
  @ 004,003 ComboBox cComboBx1 Items aComboBx1 Size 213,010 PIXEL OF oDlg ON CHANGE MOMS010I()
  @ 020,003 MsGet oGet1 Var cGet1 Size 212,009 COLOR CLR_BLACK Picture "999999999999" PIXEL OF oDlg
 
- DEFINE SBUTTON FROM 004,227 TYPE 1 ENABLE ACTION (_nOpca:=1,oDlg:End()) OF oDlg
- DEFINE SBUTTON FROM 021,227 TYPE 2 ENABLE ACTION (_nOpca:=0,oDlg:End()) OF oDlg
+ DEFINE SBUTTON FROM 004,227 Type 1 ENABLE ACTION (_nOpca:=1,oDlg:End()) OF oDlg
+ DEFINE SBUTTON FROM 021,227 Type 2 ENABLE ACTION (_nOpca:=0,oDlg:End()) OF oDlg
 
  ACTIVATE MSDIALOG oDlg CENTERED
 
@@ -553,14 +546,14 @@ Static Function MOMS010H(cTab As Character)
 
        For nI := 1 To Len(aComboBx1)
            If cComboBx1 == aComboBx1[nI]
-              (cTab)->(dbSetOrder(nI))
+              (cTab)->(DBSetOrder(nI))
               (cTab)->(MsSeek(cGet1,.T.))
               oBrowse:DrawSelect()
               oBrowse:Refresh(.T.)
            EndIf
        Next nI
     Else
-         U_ITMSG("Favor informar um conteúdo a ser pesquisado.",;
+         U_ITMsg("Favor informar um conteúdo a ser pesquisado.",;
                  "Pesquisa Dados",;
                  "Para realizar a pesquisa é necessário que se forneça o conteúdo a ser pesquisado.",3)
      EndIf
@@ -582,11 +575,11 @@ Retorno-----------: Nenhum
 Static Function MOMS010I()
 
  If cComboBx1 == "Numero da Nota + Serie"
-    cGet1:= Space(TamSx3("F2_DOC")[1] + TamSx3("F2_SERIE")[2])
+    cGet1:= Space(TamSX3("F2_DOC")[1] + TamSX3("F2_SERIE")[2])
     oGet1:Picture:= "999999999999"
 
  ElseIf cComboBx1 == "Carga"
-    cGet1:= Space(TamSx3("F2_CARGA")[1])
+    cGet1:= Space(TamSX3("F2_CARGA")[1])
     oGet1:Picture:= PesqPict("SF2","F2_CARGA")
 
  ElseIf cComboBx1 == "Cliente + Loja"
@@ -610,7 +603,7 @@ Static Function MOMS010I()
     oGet1:Picture:= "@!"
 
  ElseIf cComboBx1 == "Peso Bruto"
-    cGet1:= Space(TamSx3("F2_PBRUTO")[1])
+    cGet1:= Space(TamSX3("F2_PBRUTO")[1])
     oGet1:Picture:= PesqPict("SF2","F2_PBRUTO")
     cGet1:= 0
 
@@ -654,8 +647,8 @@ Static Function MOMS010K(cTab As Character)
     cCadBack := cCadastro
  EndIf
 
- SD2->(dbSetOrder(3))
- If SD2->(dbSeek(xFilial("SD2") + _cDoc + _cSerie + _cCliente + _cLoja ))
+ SD2->(DBSetOrder(3))
+ If SD2->(DBSeek(xFilial("SD2") + _cDoc + _cSerie + _cCliente + _cLoja ))
 
     aRotina := {{ "", "AxPesqui", 2 },{ "" ,"a920NFSAI", 0, 2}}
     A920NFSAI( "SD2", SD2->( Recno() ),2)
@@ -714,8 +707,8 @@ Static Function MOMS010J(cTab As Character)
         cCadBack := cCadastro
     EndIf
 
-    DAK->(dbSetOrder(1))
-    If DAK->(dbSeek(xFilial("DAK") + _cCarga))
+    DAK->(DBSetOrder(1))
+    If DAK->(DBSeek(xFilial("DAK") + _cCarga))
        cCadastro := "Montagem de Carga - Visualizar"
        aRotina := { { "", "AxPesqui", 2 },{ "Carga Vis","Os200Visual",0,2} }
        Os200Visual("DAK",DAK->(Recno()),2)
@@ -737,7 +730,7 @@ Static Function MOMS010J(cTab As Character)
 
  Else
 
-    U_ITMSG("Nao existe carga na linha posicionada.","Alerta",,1)
+    U_ITMsg("Nao existe carga na linha posicionada.","Alerta",,1)
 
  EndIf
 
@@ -779,7 +772,7 @@ Static Function MOMS010L(cTab As Character, _lBotao As Logical)
  Private nPesBNFAtu:= 0 As Numeric
  Private nPesBNFNew:= 0 As Numeric
 
- If &(cTab+'->'+cTab+'_STATUS') == 'XX' .AND. !_lBotao
+ If &(cTab+'->'+cTab+'_STATUS') == 'XX' .And. !_lBotao
     &(cTab+'->'+cTab+'_STATUS') := Space(2)
     nQtdTit--
     oQtda:Refresh()
@@ -787,7 +780,7 @@ Static Function MOMS010L(cTab As Character, _lBotao As Logical)
  EndIf
  // PEGA TAMANHOS DAS TELAS
  _aObjects := {}
- AAdd( _aObjects, { 315, 50, .t., .t. } )
+ aAdd( _aObjects, { 315, 50, .T., .T. } )
  _aSize  := MsAdvSize()
  _aInfo  := { _aSize[ 1 ], _aSize[ 2 ], _aSize[ 3 ], _aSize[ 4 ], 3, 3 }
  _aPosObj:= MsObjSize( _aInfo, _aObjects,  , .T. )
@@ -795,61 +788,61 @@ Static Function MOMS010L(cTab As Character, _lBotao As Logical)
  nGDAction:=  GD_UPDATE
  Private aHeader:={}
  //                          1           2            3   4 5       6          7        8       9           10    11       12         13         14          15        16             17
- //aHeader,{Alltrim(SX3->X3_TITULO)  , X3_CAMPO   , PICT ,TA,D, AllwaysTrue(),  USADO,X3_TIPO,ARQUIVO,X3_CONTEXT,X3_CBOX,X3_RELACAO,X3_WHEN   ,X3_VISUAL ,X3_VLDUSER,X3_PICTVAR,X3_OBRIGAT
- Aadd(aHeader,{""                   ,"MARCA"     ,"@BMP",04,0,""               ,""  ,"C"    ,""     ,""        ,""     ,""        ,".F."})//01
- Aadd(aHeader,{"Cod.Prod."          ,"WK_CODPROD","@!"       ,09,0,""            ,"","C"    ,""     ,""        ,""     ,""        ,".F."})//01 //02
- Aadd(aHeader,{"Descricao Prod."    ,"WK_DESCRIC","@!"       ,02,0,""            ,"","C","","","","",".F."})//02 //03 //Numeracao antiga  // numeracao nova
- Aadd(aHeader,{"Quantidade"         ,"D2_QUANT"  ,_cPictQtde ,16,3,""            ,"","N","","","","",".F."})//03 //04
- Aadd(aHeader,{"Peso Bruto Novo"    ,"WK_I_PTBRU",_cPictPBru ,15,3,"U_MOMS010M()","","N","","","","",".T."})//04 //05
- nPosPBN:=LEN(aHeader)
- Aadd(aHeader,{"Peso Bruto Atual"   ,"WK_PBATUAL",_cPictPBru ,15,3,""            ,"","N","","","","",".F."})//05 //06
- nPosPBA:=LEN(aHeader)
- Aadd(aHeader,{"Peso Liquido"       ,"D2_PESO"   ,_cPictPBru ,15,3,""            ,"","N","","","","",".F."})//06 //07
- nPosPL :=LEN(aHeader)
- Aadd(aHeader,{"Peso Bruto Cadastro","B1_PESBRU" ,_cPictPBru ,15,3,""            ,"","N","","","","",".F."})//07 //08
- nPosRec:=LEN(aHeader)+1//SD2->(Recno()) //09
+ //aHeader,{AllTrim(SX3->X3_TITULO)  , X3_CAMPO   , PICT ,TA,D, AllwaysTrue(),  USADO,X3_TIPO,ARQUIVO,X3_CONTEXT,X3_CBOX,X3_RELACAO,X3_WHEN   ,X3_VISUAL ,X3_VLDUSER,X3_PICTVAR,X3_OBRIGAT
+ aAdd(aHeader,{""                   ,"MARCA"     ,"@BMP",04,0,""               ,""  ,"C"    ,""     ,""        ,""     ,""        ,".F."})//01
+ aAdd(aHeader,{"Cod.Prod."          ,"WK_CODPROD","@!"       ,09,0,""            ,"","C"    ,""     ,""        ,""     ,""        ,".F."})//01 //02
+ aAdd(aHeader,{"Descricao Prod."    ,"WK_DESCRIC","@!"       ,02,0,""            ,"","C","","","","",".F."})//02 //03 //Numeracao antiga  // numeracao nova
+ aAdd(aHeader,{"Quantidade"         ,"D2_QUANT"  ,_cPictQtde ,16,3,""            ,"","N","","","","",".F."})//03 //04
+ aAdd(aHeader,{"Peso Bruto Novo"    ,"WK_I_PTBRU",_cPictPBru ,15,3,"U_MOMS010M()","","N","","","","",".T."})//04 //05
+ nPosPBN:=Len(aHeader)
+ aAdd(aHeader,{"Peso Bruto Atual"   ,"WK_PBATUAL",_cPictPBru ,15,3,""            ,"","N","","","","",".F."})//05 //06
+ nPosPBA:=Len(aHeader)
+ aAdd(aHeader,{"Peso Liquido"       ,"D2_PESO"   ,_cPictPBru ,15,3,""            ,"","N","","","","",".F."})//06 //07
+ nPosPL :=Len(aHeader)
+ aAdd(aHeader,{"Peso Bruto Cadastro","B1_PESBRU" ,_cPictPBru ,15,3,""            ,"","N","","","","",".F."})//07 //08
+ nPosRec:=Len(aHeader)+1//SD2->(Recno()) //09
 
  aCols := {}
- SD2->(dbSetOrder(3))
- If SD2->(dbSeek( xFilial("SD2") + _cDoc + _cSerie + _cCliente + _cLoja ))
-    Do while SD2->(!EOF()) .AND. SD2->D2_FILIAL+SD2->D2_DOC+SD2->D2_SERIE+SD2->D2_CLIENTE+SD2->D2_LOJA == xFilial("SD2")+_cDoc+_cSerie+_cCliente+_cLoja
+ SD2->(DBSetOrder(3))
+ If SD2->(DBSeek( xFilial("SD2") + _cDoc + _cSerie + _cCliente + _cLoja ))
+    While SD2->(!Eof()) .And. SD2->D2_FILIAL+SD2->D2_DOC+SD2->D2_SERIE+SD2->D2_CLIENTE+SD2->D2_LOJA == xFilial("SD2")+_cDoc+_cSerie+_cCliente+_cLoja
        _aItem:={}
-       SB1->(DbSeek(xFilial("SB1")+SD2->D2_COD))
+       SB1->(DBSeek(xFilial("SB1")+SD2->D2_COD))
 
-       AADD(_aItem,oVerme       )
-       AADD(_aItem,SD2->D2_COD  )
-       AADD(_aItem,SB1->B1_DESC )
-       AADD(_aItem,SD2->D2_QUANT)
-       IF (nPos:=Ascan(_aGardaPesos , {|G| G[1] = SD2->(Recno())  } )) > 0
-          AADD(_aItem,_aGardaPesos[nPos,2] )//Peso Bruto Novo
+       aAdd(_aItem,oVerme       )
+       aAdd(_aItem,SD2->D2_COD  )
+       aAdd(_aItem,SB1->B1_DESC )
+       aAdd(_aItem,SD2->D2_QUANT)
+       If (nPos:=aScan(_aGardaPesos , {|G| G[1] = SD2->(Recno())  } )) > 0
+          aAdd(_aItem,_aGardaPesos[nPos,2] )//Peso Bruto Novo
           nPesBNFNew+=_aGardaPesos[nPos,2]
-          IF _aGardaPesos[nPos,2] <> SD2->D2_I_PTBRU
+          If _aGardaPesos[nPos,2] <> SD2->D2_I_PTBRU
              _aItem[1]:=oVerde
           EndIf
        Else
-          AADD(_aItem,SD2->D2_I_PTBRU)//Peso Bruto Atual
+          aAdd(_aItem,SD2->D2_I_PTBRU)//Peso Bruto Atual
           nPesBNFNew+=SD2->D2_I_PTBRU
        EndIf
-       AADD(_aItem,SD2->D2_I_PTBRU)//Peso Bruto Atual
-       AADD(_aItem,(SD2->D2_PESO*SD2->D2_QUANT))
-       AADD(_aItem,SB1->B1_PESBRU )
-       AADD(_aItem,SD2->(Recno()) )
-       AADD(_aItem,.F.)
+       aAdd(_aItem,SD2->D2_I_PTBRU)//Peso Bruto Atual
+       aAdd(_aItem,(SD2->D2_PESO*SD2->D2_QUANT))
+       aAdd(_aItem,SB1->B1_PESBRU )
+       aAdd(_aItem,SD2->(Recno()) )
+       aAdd(_aItem,.F.)
 
-       AADD(aCols,_aItem)
+       aAdd(aCols,_aItem)
 
        nPesBNFAtu+=SD2->D2_I_PTBRU
 
-       SD2->(Dbskip())
-    Enddo
+       SD2->(DBSkip())
+    EndDo
  Else
-    U_ITMSG("Nao existem itens para o NF selecionada.","Atenção",,1)
+    U_ITMsg("Nao existem itens para o NF selecionada.","Atenção",,1)
     Return
- Endif
+ EndIf
 
  Private _lPedPallet:= MOMS010P(_cPedido) As Logical  // Armazena se o pedido eh somente de pallet para que desta forma seja alterado o peso liquido de acordo com o peso Bruto alterado
 
- DO WHILE .T.
+ While .T.
 
    _nOpc:=0
    nQtdItem:=Len(aCols)
@@ -888,19 +881,19 @@ Static Function MOMS010L(cTab As Character, _lBotao As Logical)
    aCols:=oMsMGet:aCols
    If _nOpc = 1
        _nGetNvPes:=0
-       FOR I := 1 TO LEN(aCols)
-           IF (nPos:=Ascan(_aGardaPesos , {|G| G[1] = aCols[I,nPosRec] } )) > 0
+       For I := 1 TO Len(aCols)
+           If (nPos:=aScan(_aGardaPesos , {|G| G[1] = aCols[I,nPosRec] } )) > 0
               _aGardaPesos[nPos,2]:= aCols[I,nPosPBN]  //coloca o valor do peso bruto de novo pq pode ter sido alterado mais de 1 vez na mesma tela
            ElseIf aCols[I,nPosPBN] > 0
-              AADD(_aGardaPesos,{ aCols[I,nPosRec] ,;//01 - Recno do SD2
+              aAdd(_aGardaPesos,{ aCols[I,nPosRec] ,;//01 - Recno do SD2
                                   aCols[I,nPosPBN] ,;//02 - Peso bruto novo digitado
                                   (cTab)->WK_RECNO })//03 - Recno DO SF2
            EndIf
-           _nGetNvPes+=IF(aCols[I,nPosPBN]>0,aCols[I,nPosPBN],aCols[I,nPosPBA])
+           _nGetNvPes+=If(aCols[I,nPosPBN]>0,aCols[I,nPosPBN],aCols[I,nPosPBA])
        Next I
        //If !U_MOMS010M(_nGetNvPes, _nGetPesBru, _nPesLiquid)
-       //   LOOP
-       //EndIF
+       //   Loop
+       //EndIf
        If _lPedPallet//VERIFICA SE O PEDIDO SE EH SOMENTE DE PALLET
           &(cTab+'->'+cTab+'_NVPBRU') := _nGetNvPes
           &(cTab+'->'+cTab+'_PESLIQ') := _nGetNvPes
@@ -913,9 +906,9 @@ Static Function MOMS010L(cTab As Character, _lBotao As Logical)
           oQtda:Refresh()
        EndIf
     Else
-       IF U_ITMSG("Confirma SAIR ?  Todos as alterações feitas nessa entrada serão perdidas.",'Atenção!',"As alterações feitas anteriormente não serão perdidas.",3,2,3,,"CONFIRMA","Voltar")
-          EXIT
-       ENDIF
+       If U_ITMsg("Confirma SAIR ?  Todos as alterações feitas nessa entrada serão perdidas.",'Atenção!',"As alterações feitas anteriormente não serão perdidas.",3,2,3,,"CONFIRMA","Voltar")
+          Exit
+       EndIf
     EndIf
 
     Exit
@@ -943,7 +936,7 @@ User Function MOMS010M(_nGetNvPes As Numeric, _nGetPesBru As Numeric, _nPesLiqui
  DEFAULT _nPesLiquid:= aCols[N,nPosPL]
 
  If _nGetNvPes <= 0
-    U_ITMSG("Favor fornecer um novo peso bruto posisitivo antes de efetuar a confirmação!","Atenção",,3)
+    U_ITMsg("Favor fornecer um novo peso bruto posisitivo antes de efetuar a confirmação!","Atenção",,3)
     _lRet:= .F.
  Else
     //Pedidos que nao sejam somente de Pallet, passaram pelas validacoes abaixo
@@ -955,11 +948,11 @@ User Function MOMS010M(_nGetNvPes As Numeric, _nGetPesBru As Numeric, _nPesLiqui
              _nPesoMax:= _nGetPesBru*((_nTolerPeso/100)+1)
              _nPesoMin:= _nGetPesBru*(100-_nTolerPeso)/100
              _cTextoPL:=""
-             IF _nPesLiquid >= _nPesoMin
+             If _nPesLiquid >= _nPesoMin
                 _nPesoMin:=_nPesLiquid
                 _cTextoPL:=" (Peso Liquido)"
              EndIf
-             U_ITMSG("O valor informado para o novo peso bruto esta incorreto."+CRLF+;
+             U_ITMsg("O valor informado para o novo peso bruto esta incorreto."+CRLF+;
                      "Valor Maximo: "+AllTrim(Transform( (_nPesoMax) ,"@E 999,999,999,999.9999"))+CRLF+;
                      "Valor Atual: "+AllTrim(Transform( (_nGetPesBru),"@E 999,999,999,999.9999"))+CRLF+;
                      "Valor Minimo: "+AllTrim(Transform( (_nPesoMin) ,"@E 999,999,999,999.9999"))+_cTextoPL,;
@@ -968,7 +961,7 @@ User Function MOMS010M(_nGetNvPes As Numeric, _nGetPesBru As Numeric, _nPesLiqui
              _lRet:= .F.
           EndIf
        Else
-          U_ITMSG("O novo peso bruto não pode ser menor que o peso líquido: " + AllTrim(Transform(_nPesLiquid,"@E 999,999,999,999.9999"))+".","Alerta",,1)
+          U_ITMsg("O novo peso bruto não pode ser menor que o peso líquido: " + AllTrim(Transform(_nPesLiquid,"@E 999,999,999,999.9999"))+".","Alerta",,1)
           _lRet:= .F.
        EndIf
     EndIf
@@ -979,7 +972,7 @@ User Function MOMS010M(_nGetNvPes As Numeric, _nGetPesBru As Numeric, _nPesLiqui
     nPesBNFNew+=_nGetNvPes//soma o novo peso bruto
     oPBNew:Refresh()
  EndIf
- aCols[N,1]:=IF(_nGetNvPes<>_nGetPesBru,oVerde,oVerme)
+ aCols[N,1]:=If(_nGetNvPes<>_nGetPesBru,oVerde,oVerme)
 
 Return _lRet
 
@@ -1001,8 +994,8 @@ Static Function MOMS010N(cTab As Char) As Logical
 
  //Se tiver pelo menos uma linha de registros selecionada
  If nQtdTit > 0
-    (cTab)->(dbGotop())
-    DO While !(cTab)->(Eof())
+    (cTab)->(DBGoTop())
+    While !(cTab)->(Eof())
        //Verifica se a linha foi selecionada
        If &(cTab+'->'+cTab+'_STATUS') == 'XX'
           If &(cTab+'->'+cTab+'_NVPBRU') == 0
@@ -1011,15 +1004,15 @@ Static Function MOMS010N(cTab As Char) As Logical
          EndIf
       EndIf
       _nLinha++
-      (cTab)->(dbSkip())
+      (cTab)->(DBSkip())
    EndDo
  Else
-   U_ITMSG("Favor selecionar um ou mais registros para realizar a alteração do peso bruto..",;
+   U_ITMsg("Favor selecionar um ou mais registros para realizar a alteração do peso bruto..",;
               "Alerta",,3)
    _lRet := .F.
  EndIf
  If Len(AllTrim(_nLinhaMsg)) > 0
-    U_ITMSG("Existem linhas selecionadas para alteração do peso bruto mas sem o fornecimento do novo peso.",;
+    U_ITMsg("Existem linhas selecionadas para alteração do peso bruto mas sem o fornecimento do novo peso.",;
                "ERRO",;
                "Favor informar o novo peso bruto para todas as linhas selecionadas, as linhas que se encontram com o problema são: " + SubStr(_nLinhaMsg,1,Len(_nLinhaMsg) - 1)+".",1)
  EndIf
@@ -1055,18 +1048,18 @@ Static Function MOMS010O(cTab As Char, oProc As Object)
 
  //ProcRegua(nQtdTit)
 
- DAK->(dbSetOrder(1))
- DAI->(dbSetOrder(3))
- SC5->(Dbsetorder(1))
- SC6->(DbSetOrder(1)) // C6_FILIAL+C6_NUM+C6_ITEM+C6_PRODUTO
- SF2->(dbSetOrder(1))
- SD2->(dbSetOrder(3))
- (cTab)->(dbGotop())
- DO While !(cTab)->(Eof())
+ DAK->(DBSetOrder(1))
+ DAI->(DBSetOrder(3))
+ SC5->(DBSetOrder(1))
+ SC6->(DBSetOrder(1)) // C6_FILIAL+C6_NUM+C6_ITEM+C6_PRODUTO
+ SF2->(DBSetOrder(1))
+ SD2->(DBSetOrder(3))
+ (cTab)->(DBGoTop())
+ While !(cTab)->(Eof())
 
     _cDoc         := &(cTab+'->'+cTab+'_DOC')
-    oProc:cCaption := "Acertando pesos, NF: "+_cDoc+" - "+ALLTRIM(STR(_nConta))+" gravadas..."
-    PROCESSMESSAGES()
+    oProc:cCaption := "Acertando pesos, NF: "+_cDoc+" - "+AllTrim(Str(_nConta))+" gravadas..."
+    ProcessMessages()
 
     If &(cTab+'->'+cTab+'_STATUS') == 'XX'
        _nConta++
@@ -1083,47 +1076,47 @@ Static Function MOMS010O(cTab As Char, oProc As Object)
          Begin Sequence
 
            _aItensPesos:={}//Itens do SF2 posicionado
-           FOR I := 1 TO LEN(_aGardaPesos)//{ RECNO DO SD2 , PESO BRUTO NOVO DIGITADO , RECNO DO SF2 })
-               IF _aGardaPesos[I,3] = (cTab)->WK_RECNO// RECNO DO SF2 iguais
-                  AADD(_aItensPesos,{_aGardaPesos[I,1],_aGardaPesos[I,2]})
-               Endif
+           For I := 1 TO Len(_aGardaPesos)//{ RECNO DO SD2 , PESO BRUTO NOVO DIGITADO , RECNO DO SF2 })
+               If _aGardaPesos[I,3] = (cTab)->WK_RECNO// RECNO DO SF2 iguais
+                  aAdd(_aItensPesos,{_aGardaPesos[I,1],_aGardaPesos[I,2]})
+               EndIf
            Next I
            _lAcerto:= .F.
-           IF LEN(_aItensPesos) = 0 // pq foi marcado pelo cabeçario
-              SD2->(dbSetOrder(3))
-              If SD2->(DbSeek(xfilial("SD2")+_cDoc + _cSerie + _cCliente + _cLojaCli))
+           If Len(_aItensPesos) = 0 // pq foi marcado pelo cabeçario
+              SD2->(DBSetOrder(3))
+              If SD2->(DBSeek(xFilial("SD2")+_cDoc + _cSerie + _cCliente + _cLojaCli))
                  _lAcerto:= .T.
-                 Do While SD2->(!Eof()) .And. SD2->(D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA ) == xfilial("SD2")+_cDoc + _cSerie + _cCliente + _cLojaCli
-                    AADD(_aItensPesos,{ SD2->(RECNO()) , SD2->D2_I_PTBRU })//{ RECNO DO SD2 , PESO BRUTO ATUAL  })
-                    SD2->(Dbskip())
-                 Enddo
+                 While SD2->(!Eof()) .And. SD2->(D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA ) == xFilial("SD2")+_cDoc + _cSerie + _cCliente + _cLojaCli
+                    aAdd(_aItensPesos,{ SD2->(RECNO()) , SD2->D2_I_PTBRU })//{ RECNO DO SD2 , PESO BRUTO ATUAL  })
+                    SD2->(DBSkip())
+                 EndDo
               EndIf
-           ENDIF
+           EndIf
            _nNvPesBru:=0
-           FOR I := 1 TO LEN(_aItensPesos)// { RECNO DO SD2 , PESO BRUTO NOVO DIGITADO  })
-               SD2->(dbgoto(_aItensPesos[I,1]))
-               IF !_lAcerto .AND. !EMPTY(_aItensPesos[I,2])
+           For I := 1 TO Len(_aItensPesos)// { RECNO DO SD2 , PESO BRUTO NOVO DIGITADO  })
+               SD2->(DBGoTo(_aItensPesos[I,1]))
+               If !_lAcerto .And. !Empty(_aItensPesos[I,2])
                    SD2->(RecLock("SD2",.F.))
                    SD2->D2_I_PTBRU:=_aItensPesos[I,2]
-                   SD2->(MsUnlock())
+                   SD2->(MSUnLock())
                EndIf
-               IF SC6->(DBSEEK(SD2->D2_FILIAL+SD2->D2_PEDIDO+SD2->D2_ITEMPV+SD2->D2_COD))
+               If SC6->(DBSeek(SD2->D2_FILIAL+SD2->D2_PEDIDO+SD2->D2_ITEMPV+SD2->D2_COD))
                   SC6->(RecLock("SC6",.F.))
                   SC6->C6_I_PTBRU:=SD2->D2_I_PTBRU
-                  SC6->(MsUnlock())
+                  SC6->(MSUnLock())
                EndIf
                _nNvPesBru+=SD2->D2_I_PTBRU
            Next I
 
-           IF _nNvPesBru > 0 .AND. SC5->(Dbseek( SD2->D2_FILIAL+SD2->D2_PEDIDO))
-              SC5->(Reclock("SC5", .F.))
+           If _nNvPesBru > 0 .And. SC5->(DBSeek( SD2->D2_FILIAL+SD2->D2_PEDIDO))
+              SC5->(RecLock("SC5", .F.))
               SC5->C5_I_PESBR:=_nNvPesBru
               SC5->C5_PBRUTO :=_nNvPesBru
-              SC5->(Msunlock())
+              SC5->(MSUnLock())
            EndIf
 
            // Atualiza a tabela SF2 com o novo peso bruto e os dados de log da alteracao
-           If _nNvPesBru > 0 .AND. SF2->(dbSeek(xFilial("SF2") + _cDoc + _cSerie + _cCliente + _cLojaCli))
+           If _nNvPesBru > 0 .And. SF2->(DBSeek(xFilial("SF2") + _cDoc + _cSerie + _cCliente + _cLojaCli))
 
               SF2->(RecLock("SF2", .F.))
 
@@ -1132,22 +1125,22 @@ Static Function MOMS010O(cTab As Char, oProc As Object)
               EndIf
               SF2->F2_PBRUTO  := _nNvPesBru    // Armazena o novo peso bruto, que sera utilizado na impressao do DANFE
               SF2->F2_PLIQUI  := _nNvPesLiq    // Armazena o novo peso liquido, que sera utilizado na impressao do DANFE
-              SF2->F2_I_MATUS := u_UCFG001(1)  // Armazena o filial + matricula do usuario que realizou a alteracao
-              SF2->F2_I_DTALT := DATE()        // Armazena a data em que foi realizada a alteracao
-              SF2->F2_I_HORA  := TIME()        // Armazena a hora em que foi realizada a alteracao
-              SF2->(MsUnlock())
+              SF2->F2_I_MATUS := FWSFAllUsers({__cUserID},{"USR_FILIAL"})[1][3]+FWSFAllUsers({__cUserID},{"USR_CODFUNC"})[1][3]  // Armazena o filial + matricula do usuario que realizou a alteracao
+              SF2->F2_I_DTALT := Date()        // Armazena a data em que foi realizada a alteracao
+              SF2->F2_I_HORA  := Time()        // Armazena a hora em que foi realizada a alteracao
+              SF2->(MSUnLock())
 
               // Verifica se tem carga, para diante disto alterar os pesos das tabelas DAK e DAI
-              If !EMPTY(_cCarga)
-                 IF ASCAN(_aCargas,_cCarga) = 0
-                    AADD(_aCargas,_cCarga)
+              If !Empty(_cCarga)
+                 If aScan(_aCargas,_cCarga) = 0
+                    aAdd(_aCargas,_cCarga)
                  EndIf
-                 If DAI->(dbSeek(SF2->F2_FILIAL+ _cDoc + _cSerie + _cCliente + _cLojaCli))
+                 If DAI->(DBSeek(SF2->F2_FILIAL+ _cDoc + _cSerie + _cCliente + _cLojaCli))
                     DAI->(RecLock("DAI", .F.))
                     DAI->DAI_PESO := _nNvPesBru // Armazena o novo peso bruto
-                    DAI->(MsUnlock())
+                    DAI->(MSUnLock())
                  Else
-                    U_ITMSG("Não foi possível encontrar a Nota (DAI): " + SF2->F2_FILIAL+ _cDoc + _cSerie + _cCliente + _cLojaCli + " na tabela DAI para efetuar a alteração do peso bruto.",;
+                    U_ITMsg("Não foi possível encontrar a Nota (DAI): " + SF2->F2_FILIAL+ _cDoc + _cSerie + _cCliente + _cLojaCli + " na tabela DAI para efetuar a alteração do peso bruto.",;
                             "ERRO",;
                             "Favor contactar a TI informando o problema.", 1)
                  EndIf
@@ -1164,63 +1157,63 @@ Static Function MOMS010O(cTab As Char, oProc As Object)
         End Transaction
      EndIf
 
-     (cTab)->(dbSkip())
+     (cTab)->(DBSkip())
  EndDo
 
 
  _nConta:=0
- DAK->(DbSetOrder(1)) // DAK_FILIAL+DAK_COD+DAK_SEQCAR
- DAI->(DbSetOrder(1)) // DAI_FILIAL+DAI_COD+DAI_SEQCAR+DAI_SEQUEN+DAI_PEDIDO
- FOR I := 1 TO LEN(_aCargas)
+ DAK->(DBSetOrder(1)) // DAK_FILIAL+DAK_COD+DAK_SEQCAR
+ DAI->(DBSetOrder(1)) // DAI_FILIAL+DAI_COD+DAI_SEQCAR+DAI_SEQUEN+DAI_PEDIDO
+ For I := 1 TO Len(_aCargas)
      _cCarga:=_aCargas[I]
-     oProc:cCaption := "Acertando rateios, Carga: "+_cCarga+" - "+ALLTRIM(STR(_nConta))+" Acertadas..."
-     PROCESSMESSAGES()
-     If DAK->(dbSeek(xFilial("DAK") + _cCarga))
+     oProc:cCaption := "Acertando rateios, Carga: "+_cCarga+" - "+AllTrim(Str(_nConta))+" Acertadas..."
+     ProcessMessages()
+     If DAK->(DBSeek(xFilial("DAK") + _cCarga))
 
         Begin Transaction
            Begin Sequence
 
-              DAI->(DbSetOrder(1)) // Seto de novo por causa das funções de rateios que troca a ordem
-              IF DAI->(DbSeek(DAK->(DAK_FILIAL+DAK_COD+DAK_SEQCAR)))
+              DAI->(DBSetOrder(1)) // Seto de novo por causa das funções de rateios que troca a ordem
+              If DAI->(DBSeek(DAK->(DAK_FILIAL+DAK_COD+DAK_SEQCAR)))
                  _nSomaPesoDAK:=0
-                 Do While !DAI->(Eof()) .And. DAI->(DAI_FILIAL+DAI_COD) == DAK->(DAK_FILIAL+DAK_COD)
+                 While !DAI->(Eof()) .And. DAI->(DAI_FILIAL+DAI_COD) == DAK->(DAK_FILIAL+DAK_COD)
                     _nSomaPesoDAK+=DAI->DAI_PESO
-                    DAI->(DbSkip())
+                    DAI->(DBSkip())
                  EndDo
                  DAK->(RecLock("DAK", .F.))
                  DAK->DAK_PESO := _nSomaPesoDAK
-                 DAK->(MsUnlock())
-              Endif
+                 DAK->(MSUnLock())
+              EndIf
 
               U_CargaRatVlrs(DAK->DAK_COD)//FUNÇÃO DO OM200FIM.PRW para refazer o Reteio do FRETE 1o PERCURSO e PEDAGIO no DAI / FRETE 2o PERCURSO NÃO é RATEIO É SOMATORIA DOS ITENS DA CARGA (PEDIDOS)
 
-              DAI->(DbSetOrder(1)) // Seto de novo por causa das funções de rateios que troca a ordem
-              IF DAI->(DbSeek(DAK->(DAK_FILIAL+DAK_COD+DAK_SEQCAR)))
-                 Do While !DAI->(Eof()) .And. DAI->(DAI_FILIAL+DAI_COD) == DAK->(DAK_FILIAL+DAK_COD)
+              DAI->(DBSetOrder(1)) // Seto de novo por causa das funções de rateios que troca a ordem
+              If DAI->(DBSeek(DAK->(DAK_FILIAL+DAK_COD+DAK_SEQCAR)))
+                 While !DAI->(Eof()) .And. DAI->(DAI_FILIAL+DAI_COD) == DAK->(DAK_FILIAL+DAK_COD)
                     If !Empty(DAI->DAI_NFISCA)
                        
-                       IF SF2->(MsSeek(DAI->DAI_FILIAL+DAI->DAI_NFISCA+DAI->DAI_SERIE))
+                       If SF2->(MsSeek(DAI->DAI_FILIAL+DAI->DAI_NFISCA+DAI->DAI_SERIE))
                           U_NotaRatVlrs( DAI->DAI_I_FRET , DAK->DAK_PESO ) //FUNÇÃO DO M460FIM.PRW para refazer o Reteio do FRETE 1O PERCURSO
    
                                      //_lGrava,_lCalcSeguro, _nPesoTotC,_nPesoSoPallet , _nTotPedagio,_nVlrCHEPTot ,_nVlrFretOL,_nPesTotOL
                           U_GrvRatVlrs( .T.   , .F.        )//FUNÇÃO DO M460FIM para refazer o Reteio do FRETE 2o PERCURSO e PEDAGIO no SF2 e SD2
                        EndIf
                     EndIf
-                    DAI->(DbSkip())
+                    DAI->(DBSkip())
                  EndDo
-              Endif
+              EndIf
               _nConta++
 
           End Sequence
        End Transaction
      Else
-        U_ITMSG("Não foi possível encontrar a carga: " + _cCarga + " na tabela DAK para efetuar a alteração do peso bruto.",;
+        U_ITMsg("Não foi possível encontrar a carga: " + _cCarga + " na tabela DAK para efetuar a alteração do peso bruto.",;
                    "ERRO",;
                    "Favor contactar a TI informando o problema.", 1)
      EndIf
  Next I
 
- U_ITMSG("ToTal de cargas Acertadas: " + alltrim(str(_nConta) )+ " .","CONCLUIDO COM SUCESSO",, 2)
+ U_ITMsg("ToTal de cargas Acertadas: " + AllTrim(Str(_nConta) )+ " .","CONCLUIDO COM SUCESSO",, 2)
 
  FwRestArea(_aArea)
  FwRestArea(_aAreaSD2)
@@ -1245,17 +1238,17 @@ Static Function MOMS010P(_cPedido As Character) As Logical
  Local _cGrpUnit  :=GetMV( "IT_GRPUNIT",,"0813") As Character
 
  _cQuery := "SELECT COUNT(C6_PRODUTO) AS QTD "
- //_cQuery += " SUBSTR(C6_PRODUTO,1,4) GRUPOPROD "
+ //_cQuery += " SubStr(C6_PRODUTO,1,4) GRUPOPROD "
  _cQuery += " FROM " + RetSqlName("SC6") + " C6 "
  _cQuery += " JOIN " + RetSqlName("SB1") + " SB1 ON C6.C6_PRODUTO = SB1.B1_COD AND SB1.D_E_L_E_T_ = ' ' "
  _cQuery += " WHERE C6.D_E_L_E_T_ = ' '"
  _cQuery += " AND C6_FILIAL = '" + xFilial("SC6") + "'"
- //_cQuery+=" AND SUBSTR(C6_PRODUTO,1,4) <> '0813'"
+ //_cQuery+=" AND SubStr(C6_PRODUTO,1,4) <> '0813'"
  _cQuery += " AND	SB1.B1_GRUPO NOT IN "+ FormatIn( _cGrpUnit , ";" )  //EXCLUI GRUPOS UNITIZADORES
  _cQuery += " AND C6_NUM = '" + _cPedido + "'"
 
  MPSysOpenQuery( _cQuery,_cAliasSC6)
- dbSelectArea(_cAliasSC6)
+ DBSelectArea(_cAliasSC6)
  nCountRec:=(_cAliasSC6)->QTD  //Contabiliza o numero de registros encontrados pela query
 
  (_cAliasSC6)->( DBCloseArea() )

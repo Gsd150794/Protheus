@@ -40,12 +40,12 @@ Begin Sequence
 
 	  _lresp := Pergunte( _cPerg , .T. )
 	
-   Endif
+   EndIf
 
    If !_lresp
 
-	   MV_PAR01:=MV_PAR02:=MV_PAR03:=MV_PAR04:=MV_PAR05:=SPACE(100)
-      MV_PAR06:=SPACE(6)
+	   MV_PAR01:=MV_PAR02:=MV_PAR03:=MV_PAR04:=MV_PAR05:=Space(100)
+      MV_PAR06:=Space(6)
       MV_PAR07:=1
 	
       Break // Cancela o filtro, caso o pergunte seja cancelado.
@@ -61,7 +61,7 @@ Begin Sequence
       _cFiltro += " .And. ( "
    EndIf 
    
-   _cfiltro += "  C5_FILIAL == '" + cfilant + "')"
+   _cFiltro += "  C5_FILIAL == '" + cfilant + "')"
 	
    //====================================================================================================
    //Filtra status de pedido
@@ -74,9 +74,9 @@ Begin Sequence
          _cFiltro += " .And. ( "
       EndIf 
    
-      _cfiltro += "  C5_NOTA > ' ')"
+      _cFiltro += "  C5_NOTA > ' ')"
     
-   Elseif MV_PAR07 = 3
+   ElseIf MV_PAR07 = 3
 
 	  If Empty(_cFiltro)
     	 _cFiltro += " ( "
@@ -84,9 +84,9 @@ Begin Sequence
          _cFiltro += " .And. ( "
       EndIf 
    
-      _cfiltro += "  !(C5_NOTA > ' ') )"
+      _cFiltro += "  !(C5_NOTA > ' ') )"
       
-   Endif
+   EndIf
 
    //====================================================================================================
    // Filtra Tipos de Bloqueios
@@ -99,9 +99,9 @@ Begin Sequence
          _cFiltro += " .And. ( "
       EndIf 
     
-      _cfiltro += "  C5_I_BLPRC = 'B' )"
+      _cFiltro += "  C5_I_BLPRC = 'B' )"
     
-   Elseif MV_PAR08 = 3 // 'Com Preço Rejeitado'
+   ElseIf MV_PAR08 = 3 // 'Com Preço Rejeitado'
 
 	  If Empty(_cFiltro)
     	 _cFiltro += " ( "
@@ -109,9 +109,9 @@ Begin Sequence
          _cFiltro += " .And. ( "
       EndIf 
    
-      _cfiltro += "  C5_I_BLPRC = 'R' )"
+      _cFiltro += "  C5_I_BLPRC = 'R' )"
 
-   Elseif MV_PAR08 = 4  // 'Com Bloqueio de Credito'
+   ElseIf MV_PAR08 = 4  // 'Com Bloqueio de Credito'
 
 	  If Empty(_cFiltro)
     	 _cFiltro += " ( "
@@ -119,9 +119,9 @@ Begin Sequence
          _cFiltro += " .And. ( "
       EndIf 
     
-      _cfiltro += "  C5_I_BLCRE = 'B' )"
+      _cFiltro += "  C5_I_BLCRE = 'B' )"
 
-   Elseif MV_PAR08 = 5  // 'Com Credito Rejeitado'  
+   ElseIf MV_PAR08 = 5  // 'Com Credito Rejeitado'  
 
 	   If Empty(_cFiltro)
     	 _cFiltro += " ( "
@@ -129,9 +129,9 @@ Begin Sequence
          _cFiltro += " .And. ( "
       EndIf 
   
-      _cfiltro += "  C5_I_BLCRE = 'R' )"
+      _cFiltro += "  C5_I_BLCRE = 'R' )"
 
-   Endif
+   EndIf
 
 
    //====================================================================================================
@@ -154,7 +154,7 @@ Begin Sequence
 		  _cFiltro += " C5_I_EST == '" + _aAux[_nI] +"'"
 		
 		  If _nI <> Len(_aAux)
-			 _cFiltro += " .OR. "
+			 _cFiltro += " .Or. "
 		  EndIf
 		
       Next _nI
@@ -181,7 +181,7 @@ Begin Sequence
 		  _cFiltro += "C5_I_CMUN == '"+ _aAux[_nI] +"'"
 		
 		  If _nI <> Len(_aAux)
-			 _cFiltro += " .OR. "
+			 _cFiltro += " .Or. "
 		  EndIf
 		
 	  Next _nI
@@ -208,7 +208,7 @@ Begin Sequence
 		  _cFiltro += "C5_VEND1 == '"+ _aAux[_nI] +"'" 
 		
 		  If _nI <> Len(_aAux) 
-			 _cFiltro += " .OR. "
+			 _cFiltro += " .Or. "
 		  EndIf
 		
       Next _nI
@@ -235,7 +235,7 @@ Begin Sequence
 		  _cFiltro += "C5_VEND2 == '"+ _aAux[_nI] +"'" 
 		
 		  If _nI <> Len(_aAux)
-			 _cFiltro += " .OR. "
+			 _cFiltro += " .Or. "
 		  EndIf
 		
       Next _nI
@@ -262,7 +262,7 @@ Begin Sequence
 	      _cFiltro += "C5_I_GRPVE == '"+ _aAux[_nI] +"'"
 		
 		  If _nI <> Len(_aAux)
-			 _cFiltro += " .OR. "
+			 _cFiltro += " .Or. "
 		  EndIf
 		
 	  Next _nI

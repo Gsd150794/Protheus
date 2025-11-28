@@ -2,38 +2,30 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 21/03/2022 | Retornada inclusão manual na C00 visto que não será mais possível sincronizar com a SEFAZ pois
-			  |			   | o ITGS já faz isso. Chamado 29470 e 39535
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 26/07/2022 | Corrigido erro de chave duplicada. Chamado 40821
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 20/02/2024 | Incluído filtro para processar quem obteve alguma rejeição. Chamado 46341
+Lucas Borges  |21/03/2022| Chamado 29470 e 39535. Retornada inclusão manual na C00 visto que não será mais possível sincronizar
+			  |			 | com a SEFAZ pois o ITGS já faz isso. 
+Lucas Borges  |26/07/2022| Chamado 40821. Corrigido erro de chave duplicada
+Lucas Borges  |20/02/2024| Chamado 46341. Incluído filtro para processar quem obteve alguma rejeição
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MCOM009
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 07/02/2018
-===============================================================================================================================
 Descrição---------: Rotina para manifestar os documentos já classificados no MATA103
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function MCOM009
 
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
 Private _cPerg		:= "MCOM009"
 Private _oSelf		:= nil
 Private _aSelFil	:= {}
@@ -61,7 +53,7 @@ Else
 						.T.												,; // Se .T. exibe o painel de execução. Se falso, apenas executa a função sem exibir a régua de processamento.
     	                .F.                                              ) // Se .T. cria apenas uma regua de processamento.
 EndIf
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -70,17 +62,14 @@ Return
 Programa----------: MCOM09P
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 07/02/2018
-===============================================================================================================================
 Descrição---------: Processa registros
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: 
 ===============================================================================================================================
 */
 Static Function MCOM09P(_oSelf)
 
-Local _aArea 	:= GetArea()
+Local _aArea 	:= FWGetArea()
 Local _aSelFil	:= {}
 Local _cFilAnt	:= cFilAnt //Salva filial corrente
 Local _cAlias	:= GetNextAlias()
@@ -103,10 +92,10 @@ Private	cModelo := ""
 If MV_PAR09 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"SF1")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 For _nX:=1 to Len(_aSelFil)
 
@@ -122,7 +111,7 @@ For _nX:=1 to Len(_aSelFil)
 	EndIf
 	
 	//Posiciona corretamente no SIGAMAT para que as funções do TSS reconheçam corretamente a entidade
-	SM0->(dbSeek(SUBS(cNumEmp,1,2) + cFilAnt)) 
+	SM0->(DBSeek(SUBS(cNumEmp,1,2) + cFilAnt)) 
 	
 	If  EntAtivTss() .And. CTIsReady()
 		
@@ -133,7 +122,7 @@ For _nX:=1 to Len(_aSelFil)
 		_dDataLim :=(DATE()-_nDias)
 		
 		//Traz documentos classificados
-		BeginSQL Alias _cAlias
+		BeginSql Alias _cAlias
 	     SELECT F1_FILIAL, F1_CHVNFE, F1_DOC, F1_SERIE, F1_FORNECE, F1_LOJA, F1_EMISSAO, F1_DTDIGIT, F1_TIPO, F1_VALBRUT, F1_DAUTNFE,
 	            NVL((SELECT 'S'
 	               FROM %Table:C00% C00
@@ -161,42 +150,42 @@ For _nX:=1 to Len(_aSelFil)
 	                AND SPED150.AMBIENTE = %exp:cAmbiente%
 					AND SPED150.STATUS = 6)
 	      ORDER BY SF1.F1_DTDIGIT, SF1.F1_DOC
-		EndSQL
+		EndSql
 
 		If !_lScheduler
 			Count To _nTotReg
-			(_cAlias)->( DbGoTop())
+			(_cAlias)->( DBGoTop())
 			_oSelf:SetRegua2(_nTotReg)
 		EndIf
 
 		//Varre dados realizando a transmissão dos eventos
-		While !(_cAlias)->(EoF())
+		While !(_cAlias)->(Eof())
 			
 			_aDocMani	:= {}
 
 			If !_lScheduler
-				_oSelf:IncRegua2("Transmitindo dia " +DtoC(StoD((_cAlias)->F1_DTDIGIT))+", documento "+(_cAlias)->F1_DOC)
+				_oSelf:IncRegua2("Transmitindo dia " +DToC(SToD((_cAlias)->F1_DTDIGIT))+", documento "+(_cAlias)->F1_DOC)
 			EndIf
 
 			// Validar se o emitente da NF-e a ser manifestada é o cliente ou fornecedor
 			If (_cAlias)->F1_TIPO $ "DB" 
-				dbSelectArea("SA1")
-				dbSetOrder(1)
+				DBSelectArea("SA1")
+				DBSetOrder(1)
 				MsSeek(xFilial("SA1")+(_cAlias)->(F1_FORNECE+F1_LOJA))
-				_cRazao  := Alltrim(SA1->A1_NOME)
+				_cRazao  := AllTrim(SA1->A1_NOME)
 				_cCNPJEM := AllTrim(SA1->A1_CGC)
-				_cIEemit := Alltrim(SA1->A1_INSCR)
-				SA1->(DbCloseArea())
+				_cIEemit := AllTrim(SA1->A1_INSCR)
+				SA1->(DBCloseArea())
 			Else
-				dbSelectArea("SA2")
-				dbSetOrder(1)  				
+				DBSelectArea("SA2")
+				DBSetOrder(1)  				
 				MsSeek(xFilial("SA2")+(_cAlias)->(F1_FORNECE+F1_LOJA))
-				_cRazao  := Alltrim(SA2->A2_NOME)
+				_cRazao  := AllTrim(SA2->A2_NOME)
 				_cCNPJEM := AllTrim(SA2->A2_CGC)
-				_cIEemit := Alltrim(SA2->A2_INSCR)
-				SA2->(DbCloseArea())
+				_cIEemit := AllTrim(SA2->A2_INSCR)
+				SA2->(DBCloseArea())
 			EndIf
-			aadd(_aDocMani,{,(_cAlias)->F1_CHVNFE,(_cAlias)->F1_SERIE,(_cAlias)->F1_DOC,(_cAlias)->F1_VALBRUT,_cCNPJEM,Alltrim(_cRazao),Alltrim(_cIEemit),(_cAlias)->F1_EMISSAO,(_cAlias)->F1_DAUTNFE,.T.,'0','1'})
+			aAdd(_aDocMani,{,(_cAlias)->F1_CHVNFE,(_cAlias)->F1_SERIE,(_cAlias)->F1_DOC,(_cAlias)->F1_VALBRUT,_cCNPJEM,AllTrim(_cRazao),AllTrim(_cIEemit),(_cAlias)->F1_EMISSAO,(_cAlias)->F1_DAUTNFE,.T.,'0','1'})
 			If AllTrim((_cAlias)->GEROUC00) <> 'S'
 				_aDados	:= {}
 				
@@ -207,14 +196,14 @@ For _nX:=1 to Len(_aSelFil)
 				aAdd(_aDados,{"C00_VLDOC"	,	(_cAlias)->F1_VALBRUT	})
 				aAdd(_aDados,{"C00_DTEMI"	,	(_cAlias)->F1_EMISSAO	})
 				aAdd(_aDados,{"C00_DTREC"	,	(_cAlias)->F1_EMISSAO	})
-				aAdd(_aDados,{"C00_NOEMIT"	,	Alltrim(_cRazao)		})
+				aAdd(_aDados,{"C00_NOEMIT"	,	AllTrim(_cRazao)		})
 				aAdd(_aDados,{"C00_CNPJEM"	,	_cCNPJEM				})
-				aAdd(_aDados,{"C00_IEEMIT"	,	Alltrim(_cIEemit)		})
+				aAdd(_aDados,{"C00_IEEMIT"	,	AllTrim(_cIEemit)		})
 				aAdd(_aDados,{"C00_STATUS"	,	'0'						})
 				aAdd(_aDados,{"C00_CODRET"	,	'999'					})
 				aAdd(_aDados,{"C00_DESRES"	,	'Documento incluido manualmente'})
-				aAdd(_aDados,{"C00_MESNFE"	,	Substr((_cAlias)->F1_EMISSAO,5,2)})
-				aAdd(_aDados,{"C00_ANONFE"	,	Substr((_cAlias)->F1_EMISSAO,1,4)})
+				aAdd(_aDados,{"C00_MESNFE"	,	SubStr((_cAlias)->F1_EMISSAO,5,2)})
+				aAdd(_aDados,{"C00_ANONFE"	,	SubStr((_cAlias)->F1_EMISSAO,1,4)})
 				aAdd(_aDados,{"C00_SITDOC"	,	'1'						}) //"Uso autorizado da NFe"
 				aAdd(_aDados,{"C00_CODEVE"	,	'1'						}) //"Envio de Evento não realizado"_
 
@@ -224,38 +213,38 @@ For _nX:=1 to Len(_aSelFil)
 				Sleep(1000)//Aguarda 2 segundos para não sobrecarregar o TSS na tentativa de evitar as falhas constantes de falta de retorno
 				MontaXmlManif(cTpEvento,_aDocMani,@cRetorno,"")
 			EndIf
-			(_cAlias)->(DbSkip())
+			(_cAlias)->(DBSkip())
 		End
-		(_cAlias)->(dbCloseArea())
+		(_cAlias)->(DBCloseArea())
 		
 		Sleep(10000)//Aguarda 10 segundos para dar tempo de pegar o correto retorno da SEFAZ. Isso não resolve o problema, apenas minimiza
 		
 		//Traz documentos transmitidos, inclusive os que foram transmitidos manualmente e não foram monitorados
-		BeginSQL Alias _cAlias
+		BeginSql Alias _cAlias
 	     SELECT C00.C00_FILIAL, C00.C00_CHVNFE, C00.C00_NUMNFE, C00.C00_DTEMI
 	       FROM %Table:C00% C00
 	      WHERE C00.D_E_L_E_T_ = ' '
             AND C00.C00_FILIAL = %xFilial:C00%
 	        AND C00.C00_CODEVE = '2'
 	      ORDER BY C00.C00_DTEMI, C00.C00_NUMNFE
-		EndSQL
+		EndSql
 
 		If !_lScheduler
 			Count To _nTotReg
-			(_cAlias)->( DbGoTop())
+			(_cAlias)->( DBGoTop())
 			_oSelf:SetRegua2(_nTotReg)
 		EndIf
 				
-		While !(_cAlias)->(EoF())
+		While !(_cAlias)->(Eof())
 			If !_lScheduler
-				_oSelf:IncRegua2("Monitorando dia " +DtoC(StoD((_cAlias)->C00_DTEMI))+", documento "+(_cAlias)->C00_NUMNFE)
+				_oSelf:IncRegua2("Monitorando dia " +DToC(SToD((_cAlias)->C00_DTEMI))+", documento "+(_cAlias)->C00_NUMNFE)
 			EndIf
 			
 			MonitEven((_cAlias)->C00_CHVNFE,(_cAlias)->C00_CHVNFE,cTpEvento,cModelo,,getSitConf(cTpEvento))
-			(_cAlias)->(DbSkip())
+			(_cAlias)->(DBSkip())
 		End
 			
-		(_cAlias)->(dbCloseArea())
+		(_cAlias)->(DBCloseArea())
 		
 	Else
 		If _lScheduler
@@ -264,7 +253,7 @@ For _nX:=1 to Len(_aSelFil)
 	 	Else
 			Aviso("SPED",IIf(Empty(GetWscError(3)),GetWscError(1),GetWscError(3)),{"OK"},3)
 		EndIf
-	Endif
+	EndIf
 	If _lScheduler
 		FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM00903"/*cMsgId*/, "Fim processamento filial "+cFilant/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 	Else
@@ -273,14 +262,14 @@ For _nX:=1 to Len(_aSelFil)
 Next _nX
 	
 cFilAnt := _cFilAnt //Restaura filial
-SM0->(dbSeek(SUBS(cNumEmp,1,2) + cFilAnt)) //Restaura posição no SIGAMAT 
+SM0->(DBSeek(SUBS(cNumEmp,1,2) + cFilAnt)) //Restaura posição no SIGAMAT 
 
 If _lScheduler
 	FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM00904"/*cMsgId*/, "Fim do processamento."/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 Else
 	Aviso("Envio Manifesto","Acesse a rotina Manifesto do Destinatário e filtre por Código do Evento igual a 2 ou 4 para pegar todas as inconsistências.",{"OK"},3)
 EndIf
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -289,20 +278,17 @@ Return
 Programa----------: MontaXmlManif
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 07/02/2018
-===============================================================================================================================
 Descrição---------: Monta xml para transmissão da manifestação
-===============================================================================================================================
 Parametros--------: cTpEvento  - Evento a ser processado
 					aMontXml   - Dados da nota que deve ser transmitida
 					cRetorno   - Chaves de acesso das notas transmitidas
 					cJustific  - Justificativa da Operação não realizada
-===============================================================================================================================
 Retorno-----------: lRetOk	   - Se a transmissão foi concluída ou não
 ===============================================================================================================================
 */
 Static Function MontaXmlManif(cTpEvento,aMontXml,cRetorno,cJustific) 
 
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
 Local aRet			:={}
 Local cXml			:= ""
 Local cIdEnt		:= ""
@@ -334,10 +320,10 @@ If CTIsReady()
 		For _nX:=1 To Len(aMontXml)
 			cXml+='<detEvento>'
 			cXml+='<tpEvento>'+cTpEvento+'</tpEvento>'
-			cXml+='<chNFe>'+Alltrim(aMontXml[_nX][2])+'</chNFe>'
+			cXml+='<chNFe>'+AllTrim(aMontXml[_nX][2])+'</chNFe>'
 			cXml+='<ambiente>'+cAmbiente+'</ambiente>'
-			If '210240' $ cTpEvento .and. !Empty(cJustific)
-				cXml+='<xJust>'+Alltrim(cJustific)+'</xJust>'
+			If '210240' $ cTpEvento .And. !Empty(cJustific)
+				cXml+='<xJust>'+AllTrim(cJustific)+'</xJust>'
 			EndIf		
 			cXml+='</detEvento>'
 		Next
@@ -348,7 +334,7 @@ If CTIsReady()
 		
 		If lRetOk .And. Len(aRet) > 0
 			For _nX:=1 to Len(aRet)
-			    cRetorno:= Substr(aRet[_nX],9,44)
+			    cRetorno:= SubStr(aRet[_nX],9,44)
 			Next
 		EndIf
 	Else
@@ -357,7 +343,7 @@ If CTIsReady()
 	 	Else
 			Aviso("SPED",IIf(Empty(GetWscError(3)),GetWscError(1),GetWscError(3)),{"OK"},3)
 		EndIf
-	Endif	
+	EndIf	
 	AtuStatus(aRet,cTpEvento)
 
 Else
@@ -368,7 +354,7 @@ Else
 	EndIf
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 		
 Return lRetOk
 
@@ -377,11 +363,8 @@ Return lRetOk
 Programa----------: AtuStatus
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 07/02/2018
-===============================================================================================================================
 Descrição---------: Atualiza o Status da Manifestação de acordo com o Tipo de Evento
-===============================================================================================================================
 Parametros--------: aRet   	   - Chaves de acesso das notas transmitidas
-===============================================================================================================================
 Retorno-----------: cTpEvento  - Tipo do Evento em que a nota foi transmitida
 ===============================================================================================================================
 */
@@ -394,20 +377,20 @@ Local _nX		:= 0
 cStat := getSitConf(cTpEvento)
 
 If Len(aRet) > 0
-	aAreas := GetArea()
-	dbSelectArea("C00")
+	aAreas := FWGetArea()
+	DBSelectArea("C00")
 	For _nX:=1 to Len(aRet)
-		C00->(DbSetOrder(1))
-		aRet[_nX]:= Substr(aRet[_nX],9,44)
-		If C00->(DBSEEK(xFilial("C00")+aRet[_nX]))
+		C00->(DBSetOrder(1))
+		aRet[_nX]:= SubStr(aRet[_nX],9,44)
+		If C00->(DBSeek(xFilial("C00")+aRet[_nX]))
 			RecLock("C00")
 			C00->C00_STATUS := cStat
 			C00->C00_CODEVE := "2"
-			MsUnlock()
+			MSUnLock()
 		EndIf
 	Next
-	C00->(DbCloseArea())
-	RestArea(aAreas)	
+	C00->(DBCloseArea())
+	FWRestArea(aAreas)	
 EndIf	
 
 Return
@@ -416,15 +399,12 @@ Return
 Programa----------: getAmbMde
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 07/02/2018
-===============================================================================================================================
 Descrição---------: Retorna ambiente de configuração do Md-e
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: cAmbiente
 ===============================================================================================================================
 */
-Static function getAmbMde()
+Static Function getAmbMde()
 	
 Local cAmbiente := ""
 Local cURL		:= PadR(GetNewPar("MV_SPEDURL","http://"),250)	
@@ -441,7 +421,7 @@ If CTIsReady()
 
 	freeObj(oWs)
 	oWs := nil 	
-Endif
+EndIf
 
 Return cAmbiente
 
@@ -450,20 +430,17 @@ Return cAmbiente
 Programa----------: MonitEven
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 07/02/2018
-===============================================================================================================================
 Descrição---------: Realiza o monitoramento do Evento
-===============================================================================================================================
 Parametros--------: cChvIni   - Chave inicial a ser monitorada
 					cChvFin   - Chave final a ser monitorada
 					cCodEve	  - Codigo de Evento utilizado na busca
 					cStat	  - Código do Status do evento processado
-===============================================================================================================================
 Retorno-----------: aListBox  - Retorna o resultado da solicitação
 ===============================================================================================================================
 */
 Static Function MonitEven(cChvIni,cChvFin,cCodEve,cModelo,cChaves,cStat)
 
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
 Local aListBox		:= {}
 Local oOk			:= LoadBitMap(GetResources(), "ENABLE")
 Local oNo			:= LoadBitMap(GetResources(), "DISABLE")
@@ -471,9 +448,7 @@ Local oNo			:= LoadBitMap(GetResources(), "DISABLE")
 Local cURL   		:= PadR(GetNewPar("MV_SPEDURL","http://"),250) 
 Local cOpcUpd		:= ""
 Local cIdEnt		:= RetIdEnti()
-
 Local _nX			:= 0
-
 Local lOk      		:= .T.
 
 Private oWS			:= Nil	
@@ -498,19 +473,19 @@ If CTIsReady()
 		// Tratamento do retorno do evento
 		If Type("oWS:oWsNfemonitorLoteEventoResult:OWSNfeMonitorEvento") <> "U" 
 			
-			If Valtype(oWS:oWsNfemonitorLoteEventoResult:OWSNfeMonitorEvento) <> "A"
+			If ValType(oWS:oWsNfemonitorLoteEventoResult:OWSNfeMonitorEvento) <> "A"
 				aMonitor := {oWS:oWsNfemonitorLoteEventoResult:OWSNfeMonitorEvento}
 			Else
 				aMonitor := oWS:oWsNfemonitorLoteEventoResult:OWSNfeMonitorEvento
-			EndIF
+			EndIf
 
 			For _nX:=1 To Len(aMonitor)                                          					
-				AADD( aListBox, {	If(aMonitor[_nX]:nStatus <> 6 .And. aMonitor[_nX]:nStatus <> 7 ,oNo,oOk),;
-									If(aMonitor[_nX]:nProtocolo <> 0 ,Alltrim(Str(aMonitor[_nX]:nProtocolo)),""),;
+				aAdd( aListBox, {	If(aMonitor[_nX]:nStatus <> 6 .And. aMonitor[_nX]:nStatus <> 7 ,oNo,oOk),;
+									If(aMonitor[_nX]:nProtocolo <> 0 ,AllTrim(Str(aMonitor[_nX]:nProtocolo)),""),;
 									aMonitor[_nX]:cId_Evento,;
-									Alltrim(Str(aMonitor[_nX]:nAmbiente)),;	
-									Alltrim(Str(aMonitor[_nX]:nStatus)),;
-									If(!Empty(aMonitor[_nX]:cCMotEven),Alltrim(aMonitor[_nX]:cCMotEven),Alltrim(aMonitor[_nX]:cMensagem)),;
+									AllTrim(Str(aMonitor[_nX]:nAmbiente)),;	
+									AllTrim(Str(aMonitor[_nX]:nStatus)),;
+									If(!Empty(aMonitor[_nX]:cCMotEven),AllTrim(aMonitor[_nX]:cCMotEven),AllTrim(aMonitor[_nX]:cMensagem)),;
 									"" }) //XML manter devido ao TOTVS Colaboração.
 				//Atualizacao do Status do registro de saida
 				cOpcUpd := "3"					
@@ -521,35 +496,35 @@ If CTIsReady()
 					cOpcUpd := "3"  //Evento vinculado com sucesso
 				ElseIf aListBox[_nX][5] == "1"
 					cOpcUpd := "2"  //Envio de Evento realizado - Aguardando processamento
-				EndIF
+				EndIf
 
-				cChave:= Substr(aMonitor[_nX]:cId_Evento,9,44)
-				_aArea := GetArea()
-				DbSelectArea("C00")
-				C00->(DbSetOrder(1))
-				If C00->(DBSEEK(xFilial("C00")+cChave))
+				cChave:= SubStr(aMonitor[_nX]:cId_Evento,9,44)
+				_aArea := FWGetArea()
+				DBSelectArea("C00")
+				C00->(DBSetOrder(1))
+				If C00->(DBSeek(xFilial("C00")+cChave))
 				
-					If alltrim(C00->C00_STATUS) == cStat//Atualiza apenas evento atual 
+					If AllTrim(C00->C00_STATUS) == cStat//Atualiza apenas evento atual 
 						If cOpcUpd <> "4" 
 							RecLock("C00")
 							C00->C00_CODEVE := cOpcUpd
-							MsUnlock()
+							MSUnLock()
 						Else
-							MonitoraManif({cChave}, cAmbiente, cIdEnt, Alltrim(cURL) + "/MANIFESTACAODESTINATARIO.apw",,cOpcUpd)
-						Endif
+							MonitoraManif({cChave}, cAmbiente, cIdEnt, AllTrim(cURL) + "/MANIFESTACAODESTINATARIO.apw",,cOpcUpd)
+						EndIf
 					Else
-						If alltrim(C00->C00_STATUS) <> '4'
+						If AllTrim(C00->C00_STATUS) <> '4'
 							RecLock("C00")
 							C00->C00_CODEVE := cOpcUpd
-							MsUnlock() 
-						Endif
+							MSUnLock() 
+						EndIf
 					EndIf
-				Endif
-				C00->(DbCloseArea())
-				RestArea(_aArea)
+				EndIf
+				C00->(DBCloseArea())
+				FWRestArea(_aArea)
 			Next       
 
-		EndIF
+		EndIf
 
 	EndIf
 
@@ -557,7 +532,7 @@ Else
 	Aviso("SPED","Execute o módulo de configuração do serviço, antes de utilizar esta opção!!!",{"OK"},3)
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return aListBox 
 
@@ -566,11 +541,8 @@ Return aListBox
 Programa----------: getSitConf
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 07/02/2018
-===============================================================================================================================
 Descrição---------: Realiza De/Para nos códigos dos Eventos
-===============================================================================================================================
 Parametros--------: cTpEvento - Código do evento que está sendo processado
-===============================================================================================================================
 Retorno-----------: cSitConf  - Retorna o código da situação a ser gravada no C00_STATUS
 ===============================================================================================================================
 */
@@ -596,11 +568,8 @@ Return cSitConf
 Programa----------: InC00
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 07/02/2018
-===============================================================================================================================
 Descrição---------: Inclui/Altera registro de manifesto na C00
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -613,7 +582,7 @@ Static Function InC00(_lInclui,_aDados)
 		
 		//Checo novamente se realmente não existe o documento pois entre o início do processamento da rotina até esse ponto 
 		//outras rotinas podem ter incluído a informação causando erro de chave duplicada.
-		C00->(DbSetOrder(1))
+		C00->(DBSetOrder(1))
 		If !C00->(DBSeek(_aDados[01][02]+_aDados[02][02]))//Filial+Chave
 			//Grava na Tabela
 			Begin Transaction
@@ -621,7 +590,7 @@ Static Function InC00(_lInclui,_aDados)
 				For _nI := 1 To Len(_aDados)				
 					C00->(FieldPut(FieldPos(_aDados[_nI][1]),_aDados[_nI][2]))
 				Next _nI
-				C00->(msUnlock())
+				C00->(MSUnLock())
 				_lRet := .T.
 			End Transaction
 		EndIf
@@ -636,11 +605,10 @@ Return _lRet
 Programa----------: SchedDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 25/05/2017
-===============================================================================================================================
-Descrição---------: Definição de Static Function SchedDef para o novo Schedule
+Descrição---------: DefiniçStaticStatic Function SchedDef para o novo Schedule
 					No novo Schedule existe uma forma para a definição dos Perguntes para o botão Parâmetros, além do cadastro 
-					das funções no SXD. Ao definir em sua rotina a static function SchedDef(), no cadastro da rotina no Agenda-
-					mento do Schedule será verificado se existe esta static function e irá executá-la habilitando o botão Parâ-
+					das funções no SXD. Ao definir em sua rotinStaticatic Function SchedDef(), no cadastro da rotina no Agenda-
+					mento do Schedule será verificado se existe estStaticic Function e irá executá-la habilitando o botão Parâ-
 					metros com as informações do retorno da SchedDef(), deixando de verificar assim as informações na SXD. O 
 					retorno da SchedDef deverá ser um array.
 					Válido para Function e User Function, lembrando que uma vez definido a SchedDef, ao chamar a rotina o ambi-
@@ -648,13 +616,11 @@ Descrição---------: Definição de Static Function SchedDef para o novo Schedule
 					Uma vez definido a Static Function SchedDef(), a rotina deixa de ser uma execução como processo especial, 
 					ou seja, não se deve cadastrá-la no Agendamento passando parâmetros de linha. Ex: Funcao("A","B") ou 
 					U_Funcao("A","B").
-===============================================================================================================================
 Parametros--------: aReturn[1] - Tipo: "P" - para Processo, "R" -  para Relatórios
 					aReturn[2] - Nome do Pergunte, caso nao use passar ParamDef
 					aReturn[3] - Alias  (para Relatório)
 					aReturn[4] - Array de ordem  (para Relatório)
 					aReturn[5] - Título (para Relatório)
-===============================================================================================================================
 Retorno-----------: aParam
 ===============================================================================================================================
 */

@@ -12,10 +12,10 @@ Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 #Include "report.ch"
-#INCLUDE 'TOPCONN.CH'
-#INCLUDE "TBICONN.CH"
+#Include 'TOPCONN.CH'
+#Include "TBICONN.CH"
 
 /*
 ===============================================================================================================================
@@ -55,7 +55,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -105,11 +105,11 @@ Begin Sequence
       EndIf 
 
       If ! Empty(MV_PAR02)
-         _cQry += " AND DAK_DATA >= '" + Dtos(MV_PAR02) + "' "
+         _cQry += " AND DAK_DATA >= '" + DToS(MV_PAR02) + "' "
       EndIf 
 
       If ! Empty(MV_PAR03)
-         _cQry += " AND DAK_DATA <= '" + Dtos(MV_PAR03) + "' "
+         _cQry += " AND DAK_DATA <= '" + DToS(MV_PAR03) + "' "
       EndIf 
 
       If ! Empty(MV_PAR04)
@@ -125,7 +125,7 @@ Begin Sequence
    EndIf 
 
    If Select("QRYDAK") > 0
-      QRYDAK->(DbCloseArea())
+      QRYDAK->(DBCloseArea())
    EndIf
            
    _cQry := ChangeQuery(_cQry) 
@@ -141,11 +141,11 @@ Begin Sequence
       ProcRegua(_nTotRegs)
    EndIf
 
-   DA3->(DbSetOrder(1)) // DA3_FILIAL+DA3_COD
-   DA4->(DbSetOrder(1)) // DA4_FILIAL+DA4_COD   
-   SC5->(DbSetOrder(1)) // C5_FILIAL+C5_NUM 
+   DA3->(DBSetOrder(1)) // DA3_FILIAL+DA3_COD
+   DA4->(DBSetOrder(1)) // DA4_FILIAL+DA4_COD   
+   SC5->(DBSetOrder(1)) // C5_FILIAL+C5_NUM 
 
-   QRYDAK->(DbGoTop())
+   QRYDAK->(DBGoTop())
     
    _nI := 0 
    _aCargalida := {}
@@ -155,20 +155,20 @@ Begin Sequence
    _cLjTransp  := ""
    _cNomeTrans := ""
    _cFilCarga  := ""
-   Do While ! QRYDAK->(Eof() )
-      DAK->(DbGoTo(QRYDAK->NRRECDAK))
+   While ! QRYDAK->(Eof() )
+      DAK->(DBGoTo(QRYDAK->NRRECDAK))
 
       If _cChamada == "M" // Chamada via menu
-         DAI->(DbGoTo(QRYDAK->NRRECDAI))
+         DAI->(DBGoTo(QRYDAK->NRRECDAI))
 
-         SC5->(DbSeek(DAI->DAI_FILIAL+DAI->DAI_PEDIDO))
+         SC5->(DBSeek(DAI->DAI_FILIAL+DAI->DAI_PEDIDO))
       Else // Chamada via Scheduller
-         SC5->(DbSeek(DAK->DAK_FILIAL+QRYDAK->F2_I_PEDID))
+         SC5->(DBSeek(DAK->DAK_FILIAL+QRYDAK->F2_I_PEDID))
       EndIf 
 
       If _cChamada == "M" // Chamada via menu
          _nI += 1
-         IncProc("Lendo dados da Carga: " + AllTrim(DAK->DAK_COD) + " - Item: " + StrZero(_nI,6) + "/" + Strzero(_nTotRegs,6))
+         IncProc("Lendo dados da Carga: " + AllTrim(DAK->DAK_COD) + " - Item: " + StrZero(_nI,6) + "/" + StrZero(_nTotRegs,6))
       EndIf 
 
       If _cFilCarga <> QRYDAK->CODFILIAL + QRYDAK->CODCARGA
@@ -179,7 +179,7 @@ Begin Sequence
 
       EndIf
 
-      _nJ := Ascan(_aCargalida, {|x| x[1] = DAK->DAK_FILIAL .And. x[2] = DAK->DAK_COD})
+      _nJ := aScan(_aCargalida, {|x| x[1] = DAK->DAK_FILIAL .And. x[2] = DAK->DAK_COD})
       If _nJ == 0
          //================================================================
          // Obtendo Transportadora
@@ -190,7 +190,7 @@ Begin Sequence
          _cLjTransp  := ""
          _cNomeTrans := ""
              
-         If DA4->(DbSeek(xFilial("DA4")+_cCodMotor))
+         If DA4->(DBSeek(xFilial("DA4")+_cCodMotor))
             _cTransp   := DA4->DA4_FORNECE
             _cLjTransp := DA4->DA4_LOJA   
             If ! Empty(_cTransp)
@@ -198,11 +198,11 @@ Begin Sequence
             EndIf
          EndIf
    
-         Aadd(_aCargalida, {DAK->DAK_FILIAL, DAK->DAK_COD})
+         aAdd(_aCargalida, {DAK->DAK_FILIAL, DAK->DAK_COD})
         
          _cPlacaVeic := ""
 
-         If DA3->(DbSeek(xFilial("DA3")+DAK->DAK_CAMINH))
+         If DA3->(DBSeek(xFilial("DA3")+DAK->DAK_CAMINH))
             If DA3->DA3_I_TPVC $ "2/4" // 1=CARRETA;2=CAMINHAO;3=BI-TREM;4=UTILITARIO;5=RODOTREM
                _cPlacaVeic := DA3->DA3_PLACA 
             Else 
@@ -258,7 +258,7 @@ Begin Sequence
 
       If _cChamada == "M" .And. MV_PAR06 == 1  // Sintetico
          If _nJ == 0
-            Aadd(_aDadosRelat, {DAK->DAK_FILIAL,; // Filial
+            aAdd(_aDadosRelat, {DAK->DAK_FILIAL,; // Filial
                                 DAK->DAK_COD,;    // Cod.Carga
                                 DAK->DAK_PESO,;   // Peso
                                 DAK->DAK_VALOR,;  // Valor Carga
@@ -275,7 +275,7 @@ Begin Sequence
                                 _cStatus} )       // Status
          EndIf 
       Else // Analítico 
-         Aadd(_aDadosRelat, {DAK->DAK_FILIAL,; // Filial
+         aAdd(_aDadosRelat, {DAK->DAK_FILIAL,; // Filial
                              DAK->DAK_COD,;    // Cod.Carga
                              DAK->DAK_PESO,;   // Peso
                              DAK->DAK_VALOR,;  // Valor Carga
@@ -302,7 +302,7 @@ Begin Sequence
       // Atualiza a Tabela DAK com o numero do protocolo localizado. 
       // Caso o campo protocolo esteja vazio.
       //===================================================================================
-      If ! Empty(_cNrProtoc) .And. Empty(DAK->DAK_I_PROT) .And. ! (Alltrim(_cStatus) $ "FINALIZADA/ENCERRADA/FINAL/CANCELADA")
+      If ! Empty(_cNrProtoc) .And. Empty(DAK->DAK_I_PROT) .And. ! (AllTrim(_cStatus) $ "FINALIZADA/ENCERRADA/FINAL/CANCELADA")
          DAK->(RecLock("DAK",.F.))
          DAK->DAK_I_PROT := _cNrProtoc 
          DAK->DAK_I_MSGK := "PROTOCOLO ATUALIZADO ATRAVES DO RELATORIO DE MONITORAMENTO DE CARGAS [MOMS054]."
@@ -318,8 +318,8 @@ Begin Sequence
                             _cRetPesq + CRLF          // Retorno da Pesquisa
 
          DAK->DAK_I_ENVK := "S"
-         DAK->(MsUnlock())
-      ElseIf ! Empty(DAK->DAK_I_PROT) .And. Alltrim(_cStatus) = "CANCELADA"
+         DAK->(MSUnLock())
+      ElseIf ! Empty(DAK->DAK_I_PROT) .And. AllTrim(_cStatus) = "CANCELADA"
          DAK->(RecLock("DAK",.F.))
          DAK->DAK_I_MSGK := "PROTOCOLO ATUALIZADO ATRAVES DO RELATORIO DE MONITORAMENTO DE CARGAS [MOMS054]. VIAGEM CANCELADA. PROTOCOLO REMOVIDO: " + DAK->DAK_I_PROT
          DAK->DAK_I_JSON := "PROTOCOLO ATUALIZADO ATRAVES DO RELATORIO DE MONITORAMENTO DE CARGAS [MOMS054]." + CRLF +;
@@ -335,20 +335,20 @@ Begin Sequence
 
          DAK->DAK_I_ENVK := "S"
          DAK->DAK_I_PROT := ""
-         DAK->(MsUnlock())
+         DAK->(MSUnLock())
 //-----------------------------------//
       Else
          DAK->(RecLock("DAK",.F.))
          DAK->DAK_I_MSGK := "RELATORIO E ROTINA DE MONITORAMENTO DE CARGAS [MOMS054]. SEM ATUALIZAÇÃO DA CARGA. SIMPLES GRAVAÇÃO DA PESQUISA REALIZADA NO SISTEMA KRONA."
          DAK->DAK_I_JSON := "RELATORIO E ROTINA DE MONITORAMENTO DE CARGAS [MOMS054]. SEM ATUALIZAÇÃO DA CARGA. SIMPLES GRAVAÇÃO DA PESQUISA REALIZADA NO SISTEMA KRONA." + CRLF +;
                             _cRetPkrona + CRLF          // Retorno da Pesquisa
-         DAK->(MsUnlock())
+         DAK->(MSUnLock())
 
 //-----------------------------------//
    
       EndIf 
 
-      QRYDAK->(DbSkip())
+      QRYDAK->(DBSkip())
    EndDo
 
    If _cChamada == "S" // Chamada via Scheduller
@@ -379,16 +379,16 @@ Begin Sequence
 End Sequence
 
 If Select("QRYDAK") > 0
-   QRYDAK->(DbCloseArea())
+   QRYDAK->(DBCloseArea())
 EndIf
 
 If _cChamada == "M" // Chamada via menu
-   U_ItMsg("Rotina de emissão do relatório finalizada.","Atenção",,1)
+   U_ITMsg("Rotina de emissão do relatório finalizada.","Atenção",,1)
 Else
    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MOMS05401"/*cMsgId*/,"MOMS05401 - Rotina de emissão do relatório finalizada."/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 EndIf 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -461,8 +461,8 @@ Begin Sequence
    EndIf
                         
    _cLinkWS := ""
-   ZFM->(DbSetOrder(1))
-   If ZFM->(DbSeek(xFilial("ZFM")+_cEmpWebService))
+   ZFM->(DBSetOrder(1))
+   If ZFM->(DBSeek(xFilial("ZFM")+_cEmpWebService))
       _cDirJSon := ZFM->ZFM_LOCXML 
       _cLinkWS  := ZFM->ZFM_LINK02
    Else
@@ -481,7 +481,7 @@ Begin Sequence
       Break                                     
    EndIf
       
-   _cDirJSon := Alltrim(_cDirJSon)
+   _cDirJSon := AllTrim(_cDirJSon)
    If Right(_cDirJSon,1) <> "\"
       _cDirJSon := _cDirJSon + "\"
    EndIf
@@ -517,10 +517,10 @@ Begin Sequence
    
    _aHeadOut := {}              
    
-   Aadd(_aHeadOut,'Content-Type: application/json') 
+   aAdd(_aHeadOut,'Content-Type: application/json') 
      
-   Aadd(_aHeadOut,"usuario: " + AllTrim(_cUsuario))
-   Aadd(_aHeadOut,"senha: "+ AllTrim(_cSenha)) 
+   aAdd(_aHeadOut,"usuario: " + AllTrim(_cUsuario))
+   aAdd(_aHeadOut,"senha: "+ AllTrim(_cSenha)) 
    
    If _cTipoPesq == "P" // Pesquisa por placa de veículo
       _cLinkWS := AllTrim(_cLinkWS) + "?id_pesquisa="+AllTrim(_cChavePesq) +"&tipo_entrada=placa"  
@@ -716,12 +716,12 @@ Begin Sequence
    Next
 
    If ! Empty(_oRetJSon[1]:numero_viagem)
-      Aadd(_aRet, _operacao)
-      Aadd(_aRet, _InicPrev)
-      Aadd(_aRet, _cRetTpPesq) // Tipo de Pesquisa e Chave Pesquisa
-      Aadd(_aRet, _cRetLink)   // Link
-      Aadd(_aRet, _cRetUsrPsw) // Usuário e Senha,
-      Aadd(_aRet, _cRetPesq)   // Retorno da Pesquisa
+      aAdd(_aRet, _operacao)
+      aAdd(_aRet, _InicPrev)
+      aAdd(_aRet, _cRetTpPesq) // Tipo de Pesquisa e Chave Pesquisa
+      aAdd(_aRet, _cRetLink)   // Link
+      aAdd(_aRet, _cRetUsrPsw) // Usuário e Senha,
+      aAdd(_aRet, _cRetPesq)   // Retorno da Pesquisa
    EndIf
 
    If Upper(AllTrim(_Status)) $ "FINALIZADA/ENCERRADA/FINAL/CANCELADA" .And. _cTipoPesq == "P" 
@@ -777,8 +777,8 @@ Begin Sequence
       
    cFilAnt := _cfilial 
     
-	cUSUARIO := SPACE(06)+"Administrador  "
-	cUsername:= "Schedule"
+	cUSUARIO := Space(06)+"Administrador  "
+	cUserName:= "Schedule"
 
    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MOMS05408"/*cMsgId*/,"MOMS05408 - Iniciando schedule de integração de carga para o sistema Krona. "/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
@@ -789,7 +789,7 @@ Begin Sequence
    _cQry := " SELECT DISTINCT F2_FILIAL CODFILIAL, F2_CARGA CODCARGA, DAK.R_E_C_N_O_ NRRECDAK, F2_I_PEDID "
    _cQry += " FROM " + RetSqlName("SF2") + " SF2, " + RetSqlName("DAK") + " DAK "
    _cQry += " WHERE SF2.D_E_L_E_T_ = ' ' AND DAK.D_E_L_E_T_ = ' ' "
-   _cQry += " AND F2_EMISSAO >= '" + Dtos(_dDtInicInteg) +"' AND DAK_FILIAL = F2_FILIAL "
+   _cQry += " AND F2_EMISSAO >= '" + DToS(_dDtInicInteg) +"' AND DAK_FILIAL = F2_FILIAL "
    _cQry += " AND DAK_COD = F2_CARGA "  // AND DAK_I_PROT = ' ' 
    _cQry += " AND DAK_VALOR >= " + AllTrim(Str(_nPrcMinCarga,16,2))
    _cQry += " AND NOT EXISTS (SELECT 'X' FROM " + RetSqlName("DAI") + " DAI "
@@ -806,7 +806,7 @@ Begin Sequence
  
  End Sequence 
 
- Return Nil 
+ Return 
 
  /*
 ===============================================================================================================================
@@ -829,7 +829,7 @@ Begin Sequence
    // Se houver erro de abertura abandona processamento
    If _nStatusArq = -1  
       Break
-   Endif
+   EndIf
    
    // Posiciona na primeria linha
    FT_FGoTop()

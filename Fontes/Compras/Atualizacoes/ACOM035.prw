@@ -3,14 +3,14 @@
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Josué Danich  |28/02/2019| Chamado 28267. Ajuste de opções de aplicação direta
+===============================================================================================================================
 Lucas Borges  |17/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25
 Lucas Borges  |22/06/2025| Chamado 50617. Revisões diversas visando padronizar os fontes
+Alex Wallauer |25/09/2025| Chamado 51698. Nova Validacao do campo C1_I_USOD contra C7_I_USOD para não deixar diferente.
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 #define	MB_OK			0
 #define MB_ICONASTERISK	64
@@ -21,7 +21,7 @@ Programa----------: ACOM035
 Autor-------------: Jerry
 Data da Criacao---: 26/07/2017
 Descrição---------: Rotina para alteração Aplicação Direta 
-Parametros--------: _nopc - igual a 1 se for chamado do MT120FIM
+Parametros--------: _nopc - igual a 1 se For chamado do MT120FIM
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -49,10 +49,10 @@ Private oMSNewSC7	:= Nil As Object
 U_ITLOGACS('ACOM035')
 
 
-dbSelectArea("SY1")
-SY1->(dbSetOrder(3)) //Y1_FILIAL + Y1_USER
+DBSelectArea("SY1")
+SY1->(DBSetOrder(3)) //Y1_FILIAL + Y1_USER
 
-If SY1->(dbSeek(xFilial("SY1") + __cUserID))
+If SY1->(DBSeek(xFilial("SY1") + __cUserId))
    //=============================================================================
    //Montagem do aheader                                                        
    //=============================================================================
@@ -84,7 +84,8 @@ If SY1->(dbSeek(xFilial("SY1") + __cUserID))
 		cQry += "  AND C7_QUJE = 0 "   
 		cQry += "  AND C7_RESIDUO <> 'S' " 
 		cQry += "  AND NOT EXISTS (SELECT 'Y' FROM " +  RetSqlName("SC7") + " SC7B WHERE SC7B.C7_FILIAL = SC7.C7_FILIAL AND SC7B.C7_NUM = SC7.C7_NUM AND SC7.C7_QUJE <> 0 AND SC7.D_E_L_E_T_ = ' ') "
-	Endif
+	EndIf
+    cQry += "  AND C7_NUMSC = ' ' " //Só traz itens sem SC pq não pode mais deixar diferente o campo Aplicação Direta da SC
 
 	cQry += "  AND SC7.D_E_L_E_T_ = ' ' "
 	cQry := ChangeQuery(cQry)
@@ -95,18 +96,18 @@ If SY1->(dbSeek(xFilial("SY1") + __cUserID))
 	If !(cAliasQry)->(Eof())
 		
 		_aStructQry := {}
-		Aadd(_aStructQry, {"C7_I_USOD"   ,"C" ,1  ,0})
-		Aadd(_aStructQry, {"C7_NUM"   ,"C" ,6  ,0})
-		Aadd(_aStructQry, {"C7_TIPO"   ,"N" ,1  ,0})
-		Aadd(_aStructQry, {"C7_NUMSC"   ,"C" ,6  ,0})
-		Aadd(_aStructQry, {"C7_ITEMSC"   ,"C" ,4  ,0})
-		Aadd(_aStructQry, {"C1_I_USOD"   ,"C" ,1  ,0})
-		Aadd(_aStructQry, {"C7_PRODUTO"   ,"C" ,20  ,0})
-		Aadd(_aStructQry, {"C7_ITEM"   ,"C" ,4  ,0})
-		Aadd(_aStructQry, {"C7_DESCRI"   ,"C" ,30  ,0})
-		Aadd(_aStructQry, {"C7_I_DTFAT"   ,"C" ,15  ,0})
-		Aadd(_aStructQry, {"A2_NOME"   ,"C" ,30  ,0})
-		Aadd(_aStructQry, {"RECNO"   ,"N" ,18  ,0})
+		aAdd(_aStructQry, {"C7_I_USOD"   ,"C" ,1  ,0})
+		aAdd(_aStructQry, {"C7_NUM"   ,"C" ,6  ,0})
+		aAdd(_aStructQry, {"C7_TIPO"   ,"N" ,1  ,0})
+		aAdd(_aStructQry, {"C7_NUMSC"   ,"C" ,6  ,0})
+		aAdd(_aStructQry, {"C7_ITEMSC"   ,"C" ,4  ,0})
+		aAdd(_aStructQry, {"C1_I_USOD"   ,"C" ,1  ,0})
+		aAdd(_aStructQry, {"C7_PRODUTO"   ,"C" ,20  ,0})
+		aAdd(_aStructQry, {"C7_ITEM"   ,"C" ,4  ,0})
+		aAdd(_aStructQry, {"C7_DESCRI"   ,"C" ,30  ,0})
+		aAdd(_aStructQry, {"C7_I_DTFAT"   ,"C" ,15  ,0})
+		aAdd(_aStructQry, {"A2_NOME"   ,"C" ,30  ,0})
+		aAdd(_aStructQry, {"RECNO"   ,"N" ,18  ,0})
 
 		//Cria tabela temporária a partir da query
 		_oTemp := FWTemporaryTable():New( "TEMP",  _aStructQry )
@@ -114,12 +115,12 @@ If SY1->(dbSeek(xFilial("SY1") + __cUserID))
 		
 		While (cAliasQry)->(!Eof())
 	
-			Reclock("TEMP",.T.)
+			RecLock("TEMP",.T.)
 			TEMP->C7_I_USOD := (cAliasQry)->C7_I_USOD
 			TEMP->C7_NUM := (cAliasQry)->C7_NUM
 			TEMP->C7_NUMSC := (cAliasQry)->C7_NUMSC
 			TEMP->C7_ITEMSC := (cAliasQry)->C7_ITEMSC
-			TEMP->C1_I_USOD := POSICIONE("SC1",1,XFILIAL("SC1")+(cAliasQry)->C7_NUMSC+(cAliasQry)->C7_ITEMSC,"C1_I_USOD")
+			TEMP->C1_I_USOD := Posicione("SC1",1,xFilial("SC1")+(cAliasQry)->C7_NUMSC+(cAliasQry)->C7_ITEMSC,"C1_I_USOD")
 			TEMP->C7_TIPO := (cAliasQry)->C7_TIPO
 			TEMP->C7_PRODUTO := (cAliasQry)->C7_PRODUTO
 			TEMP->C7_ITEM := (cAliasQry)->C7_ITEM
@@ -128,27 +129,27 @@ If SY1->(dbSeek(xFilial("SY1") + __cUserID))
 			TEMP->A2_NOME := (cAliasQry)->A2_NOME
 			TEMP->RECNO := (cAliasQry)->RECSC7
 
-			(cAliasQry)->(dbSkip())
+			(cAliasQry)->(DBSkip())
 		End
 
 		aCpoBrw := {}
-		Aadd(aCpoBrw,{{||IIF(TEMP->C7_I_USOD=="S","Sim","Não")},,"Ap Direta?"})
-		Aadd(aCpoBrw,{"C7_NUM",,"Pedido"})
-		Aadd(aCpoBrw,{"C7_TIPO",,"Tipo"})
-		Aadd(aCpoBrw,{"C7_ITEM",,"Item"})
-		Aadd(aCpoBrw,{"C7_NUMSC",,"SC"})
-		Aadd(aCpoBrw,{"C7_ITEMSC",,"Item SC"})
-		Aadd(aCpoBrw,{{||IIF(TEMP->C1_I_USOD=="S","Sim",IIF(TEMP->C1_I_USOD=="N","Não","   "))},,"Ap Direta SC?"})
-		Aadd(aCpoBrw,{"C7_PRODUTO",,"Produto"})
-		Aadd(aCpoBrw,{"C7_DESCRI",,"Descrição"})
-		Aadd(aCpoBrw,{{|| STod(TEMP->C7_I_DTFAT)},,"Dt Faturamento"})
-		Aadd(aCpoBrw,{"A2_NOME",,"Fornecedor"})
+		aAdd(aCpoBrw,{{||IIf(TEMP->C7_I_USOD=="S","Sim","Não")},,"Ap Direta?"})
+		aAdd(aCpoBrw,{"C7_NUM",,"Pedido"})
+		aAdd(aCpoBrw,{"C7_TIPO",,"Tipo"})
+		aAdd(aCpoBrw,{"C7_ITEM",,"Item"})
+		aAdd(aCpoBrw,{"C7_NUMSC",,"SC"})
+		aAdd(aCpoBrw,{"C7_ITEMSC",,"Item SC"})
+		aAdd(aCpoBrw,{{||IIf(TEMP->C1_I_USOD=="S","Sim",IIf(TEMP->C1_I_USOD=="N","Não","   "))},,"Ap Direta SC?"})
+		aAdd(aCpoBrw,{"C7_PRODUTO",,"Produto"})
+		aAdd(aCpoBrw,{"C7_DESCRI",,"Descrição"})
+		aAdd(aCpoBrw,{{|| SToD(TEMP->C7_I_DTFAT)},,"Dt Faturamento"})
+		aAdd(aCpoBrw,{"A2_NOME",,"Fornecedor"})
 
-		TEMP->(Dbgotop())
+		TEMP->(DBGoTop())
 		
 		If _nopc == 1 //Se foi chamado do mt120fim a opção de salvar é default no fechamento da tela pelo x
 			nopc := 1
-		Endif
+		EndIf
 
 		DEFINE MSDIALOG oDlg TITLE "Alterar Aplicação Direta" FROM 000, 000  TO 300, 700 COLORS 0, 16777215 PIXEL
 			
@@ -157,11 +158,11 @@ If SY1->(dbSeek(xFilial("SY1") + __cUserID))
 	     	oMSNewSC7:oBrowse:lhasMark    := .T.
 	     	oMSNewSC7:oBrowse:lCanAllmark := .T.
 	
-			DEFINE SBUTTON oSButton1 FROM 129, 142 TYPE 01 OF oDlg ENABLE ACTION (nOpc := 1, oDlg:End())
+			DEFINE SBUTTON oSButton1 FROM 129, 142 Type 01 OF oDlg ENABLE ACTION (nOpc := 1, oDlg:End())
 		
 			If _nopc == 0 //Só pode cancelar se não veio do mt120fim
-				DEFINE SBUTTON oSButton2 FROM 129, 175 TYPE 02 OF oDlg ENABLE ACTION (nOpc := 2, oDlg:End())
-			Endif
+				DEFINE SBUTTON oSButton2 FROM 129, 175 Type 02 OF oDlg ENABLE ACTION (nOpc := 2, oDlg:End())
+			EndIf
 		
 			@ 129,208 BUTTON "Inverte todos" SIZE 35,10 PIXEL OF oDlg ACTION (U_ACOM035T())
 	
@@ -169,47 +170,49 @@ If SY1->(dbSeek(xFilial("SY1") + __cUserID))
 		
 		If nOpc == 1
 
-			TEMP->(Dbgotop())
-			Do while !(TEMP->(Eof()))
+			TEMP->(DBGoTop())
+			While !(TEMP->(Eof()))
 
 				BEGIN TRANSACTION
 
-				dbSelectArea("SC7")
-				SC7->(dbGoTo(TEMP->RECNO))
+				DBSelectArea("SC7")
+				SC7->(DBGoTo(TEMP->RECNO))
    				RecLock("SC7",.F.)
     				Replace SC7->C7_I_USOD With TEMP->C7_I_USOD
-				SC7->(MsUnLock())
+				SC7->(MSUnLock())
 				
 				If !Empty(SC7->C7_NUMSC)
-				    dbSelectArea("SC1")
-					SC1->(dbSetOrder(1))
-					If SC1->(dbSeek(xFilial("SC1") + SC7->C7_NUMSC + SC7->C7_ITEMSC ))
+				    DBSelectArea("SC1")
+					SC1->(DBSetOrder(1))
+					If SC1->(DBSeek(xFilial("SC1") + SC7->C7_NUMSC + SC7->C7_ITEMSC ))
    			   			RecLock("SC1",.F.)
     					Replace SC1->C1_I_USOD With TEMP->C7_I_USOD
-			   			SC1->(MsUnLock())
+			   			SC1->(MSUnLock())
 					EndIf                    
 				EndIf
 
 				END TRANSACTION
 
-				TEMP->(Dbskip())
-			Enddo
+				TEMP->(DBSkip())
+			EndDo
 			FWAlertSuccess("Aplicação Direta Alterada com sucesso para todos os itens.","ACOM03501")
-		Else
-			FWAlertInfo("Processo cancelado pelo usuário.","ACOM03502")
 		EndIf
 	Else
-		FWAlertInfo("Não houveram dados para esta seleção ou Pedido. Favor selecionar um pedido de compras válido!","ACOM03503")
+	    If _nopc == 0
+		  FWAlertInfo('Não tem produto que possa ser alterada o campo "aplicação direta" para esse Pedido. Favor selecionar um pedido com produtos com saldo e sem SC',"ACOM03503")
+		EndIf
 	EndIf
 	
 	(cAliasQry)->( DBCloseArea() )
 	
-	If select("TEMP")
+	If Select("TEMP")
 		TEMP->( DBCloseArea() )
-	Endif
+	EndIf
 Else
+    If _nopc == 0
 	FWAlertWarning("O usuário: " + cUserName + " não possui acesso para utilizar esta rotina. "+;
 				"Verifique o cadastro deste usuário como comprador.","ACOM03504")
+    EndIf
 EndIf
 
 FWRestArea(aArea)
@@ -235,9 +238,9 @@ Else
 	_copc := "S"
 EndIf
 
-Reclock("TEMP",.F.)
+RecLock("TEMP",.F.)
 TEMP->C7_I_USOD := _copc
-TEMP->(Msunlock())
+TEMP->(MSUnLock())
 
 oMSNewSC7:oBrowse:Refresh()
 
@@ -257,23 +260,23 @@ User Function ACOM035T
 
 Local _copc := "" As Character
 
-TEMP->(Dbgotop())
+TEMP->(DBGoTop())
 
-Do while !(TEMP->(Eof()))
+While !(TEMP->(Eof()))
 	If TEMP->C7_I_USOD == "S"
 		_copc := "N"
 	Else
 		_copc := "S"
 	EndIf
 
-	Reclock("TEMP",.F.)
+	RecLock("TEMP",.F.)
 	TEMP->C7_I_USOD := _copc
-	TEMP->(Msunlock())
+	TEMP->(MSUnLock())
 
-	TEMP->(Dbskip())
-Enddo
+	TEMP->(DBSkip())
+EndDo
 
-TEMP->(Dbgotop())
+TEMP->(DBGoTop())
 oMSNewSC7:oBrowse:Refresh()
 
 Return

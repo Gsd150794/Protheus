@@ -2,62 +2,53 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges | 10/10/2019 | Chamado 28346. Removidos os Warning na compilação da release 12.1.25. 
- -------------------------------------------------------------------------------------------------------------------------------
- Jonathan     | 01/10/2020 | Chamado 33566. Ajuste na compensação da DTC com a NF. 
-=-------------------------------------------------------------------------------------------------------------------------------
- Alex Wallauer| 23/05/2023 | Chamado 43841. Ajuste para efetuar a baixa da NF com a NCC a maior com variação até 0,02. 
-==============================================================================================================================
+Lucas Borges  |10/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25. 
+Jonathan      |01/10/2020| Chamado 33566. Ajuste na compensação da DTC com a NF. 
+Alex Wallauer |23/05/2023| Chamado 43841. Ajuste para efetuar a baixa da NF com a NCC a maior com variação até 0,02. 
+Jose Gavetti  |26/11/2025| Chamado 51341. cEmpAnt não deve ter seu conteúdo alterado orientação TOTVS.
+===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
+
 #Include	"Protheus.Ch"
-#Include	"FWMVCDef.Ch"
-#Include	"topconn.Ch"
+
 /*
 ===============================================================================================================================
 Programa----------: MFIN016
 Autor-------------: Alex Wallauer Ferreira
 Data da Criacao---: 28/05/2019
-===============================================================================================================================
 Descrição---------: Rotina de Leitura e compensacao titulos - Chamado 29364
-===============================================================================================================================
 Retorno-----------: Nenhum  
 ===============================================================================================================================
 */
 User Function MFIN016()
 
-PRIVATE MV_PAR01:=Space(200)
-PRIVATE _cSalva_MV_PAR01 := MV_PAR01
-PRIVATE  cMarca :=GetMark()
+Private MV_PAR01:=Space(200)
+Private _cSalva_MV_PAR01 := MV_PAR01
+Private  cMarca :=GetMark()
 
-DO WHILE .T.
+While .T.
    lSair:=.T.
 
-   fwmsgrun( ,{|oproc| lSair:=MFIN016INI(oproc) } , "Processando..." , "Iniciando o processamento..." )
+   FWMsgRun( ,{|oproc| lSair:=MFIN016INI(oproc) } , "Processando..." , "Iniciando o processamento..." )
 
-   IF lSair
-      EXIT
-   ENDIF
-ENDDO
+   If lSair
+      Exit
+   EndIf
+EndDo
 
 SET DATE FORMAT TO "DD/MM/YY"
 	
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MFIN016INI
 Autor-------------: Alex Wallauer Ferreira
 Data da Criacao---: 19/05/2017
-===============================================================================================================================
 Descrição---------: Rotina de montagem da tela de processamento
-===============================================================================================================================
 Parametros--------: oproc - objeto da barra de processamento
-===============================================================================================================================
 Retorno-----------: .T. OU .F.
 ===============================================================================================================================
 */
@@ -67,8 +58,8 @@ Local _aParAux	:= {}
 Local _aParRet	:= {}
 Local _aCpos	:= MFIN016CPS()
 Local _nreg		:= 0
-Local _adados	:= {}
-Local _ni		:= 0
+Local _aDados	:= {}
+Local _nI		:= 0
 Local _carq		:= ""
 Local _otemp    := nil  , nI
 Private cAliasAux	:= GetNextAlias()
@@ -81,7 +72,7 @@ For nI := 1 To Len( _aParAux )
 	aAdd( _aParRet , _aParAux[nI][03] )
 Next nI
 
-IF !ParamBox( _aParAux , "Leitura e compensacao de titulos DCT" , @_aParRet )
+If !ParamBox( _aParAux , "Leitura e compensacao de titulos DCT" , @_aParRet )
 	Return .T.
 EndIf
 
@@ -93,38 +84,38 @@ _cSalva_MV_PAR01 := MV_PAR01
 oproc:cCaption := ("Abrindo arquivo...")
 ProcessMessages()
 
-IF (upper(right(alltrim(MV_PAR01),4))) == ".CSV" 
+If (Upper(right(AllTrim(MV_PAR01),4))) == ".CSV" 
 
-	_carq := ALLTRIM(MV_PAR01)
+	_carq := AllTrim(MV_PAR01)
 
 	If FT_FUSE(_carq) == -1
 	
-		u_itmsg("1-Falha ao abrir o arquivo: "+_carq,"Erro",,1)
+		U_ITMsg("1-Falha ao abrir o arquivo: "+_carq,"Erro",,1)
 		
 		Return .F.
 		
-	Endif 
+	EndIf 
 	          
   	FT_FGOTOP() //POSICIONA NO TOPO DO ARQUIVO 
   	_cDados := FT_FREADLN()
 
-  	If !"TITULO" $ UPPER(alltrim(_cDados)) .OR. !"CLIENTE" $ UPPER(alltrim(_cDados))
+  	If !"TITULO" $ Upper(AllTrim(_cDados)) .Or. !"CLIENTE" $ Upper(AllTrim(_cDados))
 
-	    U_ITMSG("O arquivo "+_carq+" informado para relizar a importação não tem o layout padrão.",;
+	    U_ITMsg("O arquivo "+_carq+" informado para relizar a importação não tem o layout padrão.",;
             "Arquivo com formato inválido",;
 			"O CSV deve ter as colunas [ Titulo;Cliente ] e o mesmo deve ser salvo "+;
 		    "no Excel no formato [ CSV (separado por virgulas) ] e "+;
 		    "no LibreOffice Calc com Demilitador de campo Ponto e Virgula e sem delimitador de texto.",1)
 	    Return .F.
 
-  	Endif
+  	EndIf
 
 	//Fecha arquivo e prepara parâmetro com arquivo convertido
 	FT_FUSE()
 
-ELSE
+Else
 
-	U_ITMSG("O arquivo informado: "+Alltrim(MV_PAR01)+" não tem extenção [ .CSV ] ",;
+	U_ITMsg("O arquivo informado: "+AllTrim(MV_PAR01)+" não tem extenção [ .CSV ] ",;
             "Arquivo inválido",;
 		    "Favor informar uma arquivo no formato [ .CSV ].")
 	Return .F.
@@ -136,7 +127,7 @@ If .T.
 
 	If FT_FUSE(_carq) == -1
 		
-		u_itmsg("2-Falha ao abrir o arquivo: "+_carq,"Erro",,1)
+		U_ITMsg("2-Falha ao abrir o arquivo: "+_carq,"Erro",,1)
 		Return .F.
 
 	EndIf
@@ -151,7 +142,7 @@ If .T.
 	
 	If _nReg == 0 //O arquivo informado nao possui nenhuma linha de dados
 		
-		U_ITMSG("O arquivo informado para relizar a importação não possui dados.",;
+		U_ITMsg("O arquivo informado para relizar a importação não possui dados.",;
                 "Arquivo inválido",;
 				"Favor verificar se o arquivo informado esta no formato correto.")
 		Return .F.
@@ -159,17 +150,17 @@ If .T.
 	EndIf
 
 	
-	_adados := MFIN016L(_nreg,oproc) //Faz leitura dos dados
+	_aDados := MFIN016L(_nreg,oproc) //Faz leitura dos dados
 	
 
-	If len(_adados) <= 0
+	If Len(_aDados) <= 0
 
-		u_itmsg( "Não foram encontrados registros válidos no arquivo!" , "Atenção!",,1 )
+		U_ITMsg( "Não foram encontrados registros válidos no arquivo!" , "Atenção!",,1 )
 		Return .F.
 	
 	EndIf
 	
-Endif
+EndIf
 
 //================================================================================
 // Verifica se ja existe um arquivo com mesmo nome, SE SIM DELETA 
@@ -192,97 +183,96 @@ _otemp:Create()
 
 _aMarcados:={}
 
-FOR  _ni := 1 TO len(_adados)
+For  _nI := 1 TO Len(_aDados)
 	
-	oproc:cCaption := ("Processando: "+ STRZERO( _ni , 6 ) +" de "+ STRZERO( LEN(_adados) , 6 ) +" Registros..." )
+	oproc:cCaption := ("Processando: "+ StrZero( _nI , 6 ) +" de "+ StrZero( Len(_aDados) , 6 ) +" Registros..." )
 	ProcessMessages()
     
-    IF _adados[_ni][12] # 0 // 'DCT'
-	   SE1->(DBGOTO( _adados[_ni][12] ))//POSICIONA NO SE1
-	   IF (cAliasAux)->( DBSEEK(SE1->E1_FILIAL+SE1->E1_NUM+SE1->E1_CLIENTE+SE1->E1_PARCELA) )
+    If _aDados[_nI][12] # 0 // 'DCT'
+	   SE1->(DBGoTo( _aDados[_nI][12] ))//POSICIONA NO SE1
+	   If (cAliasAux)->( DBSeek(SE1->E1_FILIAL+SE1->E1_NUM+SE1->E1_CLIENTE+SE1->E1_PARCELA) )
          (cAliasAux)->WKPARCDCT := SE1->E1_PARCELA
  	      (cAliasAux)->SALDO	  := SE1->E1_SALDO
 	      (cAliasAux)->E1_TIPO   := SE1->E1_TIPO
 	      (cAliasAux)->E1_PREFIXO:= SE1->E1_PREFIXO
      	   (cAliasAux)->LOJA 	  := SE1->E1_LOJA
-         (cAliasAux)->REGSEDCT  := _adados[_ni][12]//12 - Recno SE1 DCT
-	      IF (cAliasAux)->FILIAL <> cFilant
+         (cAliasAux)->REGSEDCT  := _aDados[_nI][12]//12 - Recno SE1 DCT
+	      If (cAliasAux)->FILIAL <> cFilant
  	         (cAliasAux)->WKSTATUS:= "R"
-	         (cAliasAux)->ERRO:=" [Titulo não pertence a filial atual]"//ALLTRIM((cAliasAux)->ERRO) + 
-	      ELSEIF (cAliasAux)->SALDO <= 0
+	         (cAliasAux)->ERRO:=" [Titulo não pertence a filial atual]"//AllTrim((cAliasAux)->ERRO) + 
+	      ElseIf (cAliasAux)->SALDO <= 0
  	         (cAliasAux)->WKSTATUS:= "R"
-	         (cAliasAux)->ERRO    := ALLTRIM((cAliasAux)->ERRO) + " [Titulo DCT sem Saldo]"
-	      ELSEIF (cAliasAux)->SALDO > ((cAliasAux)->SALDONF+0.02)
+	         (cAliasAux)->ERRO    := AllTrim((cAliasAux)->ERRO) + " [Titulo DCT sem Saldo]"
+	      ElseIf (cAliasAux)->SALDO > ((cAliasAux)->SALDONF+0.02)
  	         (cAliasAux)->WKSTATUS:= "R"
-	         (cAliasAux)->ERRO  := ALLTRIM((cAliasAux)->ERRO) + " [Saldo do DCT maior que o saldo do NF]"
-         ELSEIF EMPTY((cAliasAux)->ERRO )
-             IF (_nPos:=ASCAN(_aMarcados,{|T| T[1]==(cAliasAux)->FILIAL+(cAliasAux)->TITU+(cAliasAux)->CLIENTE+(cAliasAux)->WKPARCELA  })) # 0
-                IF (cAliasAux)->LOJANF == (cAliasAux)->LOJA 
+	         (cAliasAux)->ERRO  := AllTrim((cAliasAux)->ERRO) + " [Saldo do DCT maior que o saldo do NF]"
+         ElseIf Empty((cAliasAux)->ERRO )
+             If (_nPos:=aScan(_aMarcados,{|T| T[1]==(cAliasAux)->FILIAL+(cAliasAux)->TITU+(cAliasAux)->CLIENTE+(cAliasAux)->WKPARCELA  })) # 0
+                If (cAliasAux)->LOJANF == (cAliasAux)->LOJA 
                    _aMarcados[_nPos,2]:=.T.
                    (cAliasAux)->MARCA := cMarca
-	            ELSE
+	            Else
  	               (cAliasAux)->WKSTATUS:= "E"
-	               (cAliasAux)->ERRO  := ALLTRIM((cAliasAux)->ERRO) + " [Titulos com Lojas diferentes]"
-	            ENDIF  
-             ENDIF
-         ENDIF
-	      (cAliasAux)->ERRO    := ALLTRIM((cAliasAux)->ERRO)//Para tirar os espacos da frente
-         LOOP//********************************************************************/
-	   ELSE
+	               (cAliasAux)->ERRO  := AllTrim((cAliasAux)->ERRO) + " [Titulos com Lojas diferentes]"
+	            EndIf  
+             EndIf
+         EndIf
+	      (cAliasAux)->ERRO    := AllTrim((cAliasAux)->ERRO)//Para tirar os espacos da frente
+         Loop//********************************************************************/
+	   Else
 	      (cAliasAux)->( DBAPPEND() ) // Senão achou a NF em aberto mostra a dct mesmo assim			
-	   ENDIF
-	ELSE
+	   EndIf
+	Else
 	   (cAliasAux)->( DBAPPEND() )
-	ENDIF
+	EndIf
 
-   (cAliasAux)->FILIAL	 := _adados[_ni][01]
-	(cAliasAux)->TITU		 := _adados[_ni][02]
-	(cAliasAux)->CLIENTE	 := _adados[_ni][03]
-   (cAliasAux)->WKPARCELA:= _adados[_ni][04]
-	(cAliasAux)->WKSTATUS := _adados[_ni][05]
-  	(cAliasAux)->ERRO   	 := _adados[_ni][06]
+   (cAliasAux)->FILIAL	 := _aDados[_nI][01]
+	(cAliasAux)->TITU		 := _aDados[_nI][02]
+	(cAliasAux)->CLIENTE	 := _aDados[_nI][03]
+   (cAliasAux)->WKPARCELA:= _aDados[_nI][04]
+	(cAliasAux)->WKSTATUS := _aDados[_nI][05]
+  	(cAliasAux)->ERRO   	 := _aDados[_nI][06]
 	
-	IF _adados[_ni][11] # 0 .OR. _adados[_ni][12] # 0 
+	If _aDados[_nI][11] # 0 .Or. _aDados[_nI][12] # 0 
 
-	  IF _adados[_ni][11] # 0 //NF
-	     SE1->(DBGOTO( _adados[_ni][11] ))//POSICIONA NO SE1
+	  If _aDados[_nI][11] # 0 //NF
+	     SE1->(DBGoTo( _aDados[_nI][11] ))//POSICIONA NO SE1
  	     (cAliasAux)->SALDONF   := SE1->E1_SALDO
 	     (cAliasAux)->E1_TIPONF := SE1->E1_TIPO
 	     (cAliasAux)->E1_PREFINF:= SE1->E1_PREFIXO
      	  (cAliasAux)->LOJANF	 := SE1->E1_LOJA
-        (cAliasAux)->REGSENF   := _adados[_ni][11]//11 - Recno SE1 NF
-        IF (cAliasAux)->SALDONF <= 0
+        (cAliasAux)->REGSENF   := _aDados[_nI][11]//11 - Recno SE1 NF
+        If (cAliasAux)->SALDONF <= 0
  	        (cAliasAux)->WKSTATUS:= "R"
-	        (cAliasAux)->ERRO    := ALLTRIM((cAliasAux)->ERRO) + " [Titulo NF sem Saldo]"
-		  ENDIF	
+	        (cAliasAux)->ERRO    := AllTrim((cAliasAux)->ERRO) + " [Titulo NF sem Saldo]"
+		  EndIf	
 	  
-	  ELSEIF _adados[_ni][12] # 0 // 'DCT'
-	     SE1->(DBGOTO( _adados[_ni][12] ))//POSICIONA NO SE1
+	  ElseIf _aDados[_nI][12] # 0 // 'DCT'
+	     SE1->(DBGoTo( _aDados[_nI][12] ))//POSICIONA NO SE1
         (cAliasAux)->WKPARCDCT := SE1->E1_PARCELA
  	     (cAliasAux)->SALDO	    := SE1->E1_SALDO
 	     (cAliasAux)->E1_TIPO   := SE1->E1_TIPO
 	     (cAliasAux)->E1_PREFIXO:= SE1->E1_PREFIXO
      	  (cAliasAux)->LOJA 		 := SE1->E1_LOJA
-        (cAliasAux)->REGSEDCT  := _adados[_ni][12]//12 - Recno SE1 DCT
-	     IF (cAliasAux)->SALDO <= 0
+        (cAliasAux)->REGSEDCT  := _aDados[_nI][12]//12 - Recno SE1 DCT
+	     If (cAliasAux)->SALDO <= 0
  	        (cAliasAux)->WKSTATUS:= "R"
-	        (cAliasAux)->ERRO    := ALLTRIM((cAliasAux)->ERRO) + " [Titulo DCT sem Saldo]"
-	     ENDIF
-	  ENDIF
-	ENDIF   
-	IF !EMPTY((cAliasAux)->FILIAL) .AND. (cAliasAux)->FILIAL <> cFilant
+	        (cAliasAux)->ERRO    := AllTrim((cAliasAux)->ERRO) + " [Titulo DCT sem Saldo]"
+	     EndIf
+	  EndIf
+	EndIf   
+	If !Empty((cAliasAux)->FILIAL) .And. (cAliasAux)->FILIAL <> cFilant
       (cAliasAux)->WKSTATUS:= "R"
       (cAliasAux)->ERRO:="[Titulo não pertence a filial atual]"
-   ENDIF
-   (cAliasAux)->ERRO    := ALLTRIM((cAliasAux)->ERRO)//Para tirar os espacos da frente	   
+   EndIf
+   (cAliasAux)->ERRO    := AllTrim((cAliasAux)->ERRO)//Para tirar os espacos da frente	   
 
-	IF ASCAN(_aMarcados,{|T| T[1]==(cAliasAux)->FILIAL+(cAliasAux)->TITU+(cAliasAux)->CLIENTE+(cAliasAux)->WKPARCELA }) = 0
-       AADD(_aMarcados,{(cAliasAux)->FILIAL+(cAliasAux)->TITU+(cAliasAux)->CLIENTE+(cAliasAux)->WKPARCELA ,.F., (cAliasAux)->LOJANF})
-	ENDIF
+	If aScan(_aMarcados,{|T| T[1]==(cAliasAux)->FILIAL+(cAliasAux)->TITU+(cAliasAux)->CLIENTE+(cAliasAux)->WKPARCELA }) = 0
+       aAdd(_aMarcados,{(cAliasAux)->FILIAL+(cAliasAux)->TITU+(cAliasAux)->CLIENTE+(cAliasAux)->WKPARCELA ,.F., (cAliasAux)->LOJANF})
+	EndIf
  
-NEXT
+Next
 
-cEmpAnt:=cEmpAnt
 _lAtivaMensagem:=.T.
 MFIN16Tela(cAliasAux)
 (cAliasAux)->( DBCloseArea() )
@@ -293,22 +283,19 @@ Return .F.
 Programa----------: MFIN016L
 Autor-------------: Alex Wallauer Ferreira
 Data da Criacao---: 19/05/2017
-===============================================================================================================================
 Descrição---------: Faz a leitura de dados no layout do Atacadao
-===============================================================================================================================
 Parametros--------: _nreg - número de linhas do arquivo
 				    oproc - objeto da barra de processamento
-===============================================================================================================================
-Retorno-----------: _adados - array com dados carregados do arquivo
+Retorno-----------: _aDados - array com dados carregados do arquivo
 ===============================================================================================================================
 */
 
-Static function MFIN016L(_nreg,oproc)
+Static Function MFIN016L(_nreg,oproc)
 
 Local _nCont 	:= 0
 Local _cdados	:= ""
 Local _alinha	:= {}
-Local _adados 	:= {}
+Local _aDados 	:= {}
 Local _nColTit  := 1
 Local _nColCli  := 2
 Local _aTiraDupl:= {}
@@ -317,52 +304,52 @@ Local _aTiraDupl:= {}
 FT_FGOTOP() //POSICIONA NO TOPO DO ARQUIVO
 FT_FSKIP()
 
-DO While !FT_FEOF()  //FACA ENQUANTO NAO FOR FIM DE ARQUIVO
+While !FT_FEOF()  //FACA ENQUANTO NAO For FIM DE ARQUIVO
 	
 	_nCont++ 
-	oproc:cCaption := ( "Lendo linha " + strzero(_nCont,5) + " de " + strzero(_nreg,5) + "." )
+	oproc:cCaption := ( "Lendo linha " + StrZero(_nCont,5) + " de " + StrZero(_nreg,5) + "." )
 	ProcessMessages()
 			
-	_cDados := ALLTRIM(FT_FREADLN())
+	_cDados := AllTrim(FT_FREADLN())
 	_aLinha := StrTokArr(_cDados,";")
 	
 	//Verifica se é final de arquivo
-	If alltrim(_cdados) = ';' .and. _nCont > 5
+	If AllTrim(_cdados) = ';' .And. _nCont > 5
 		Exit
-	Endif 	
+	EndIf 	
 	
 	//Verifica se é linha válida
-	If LEN(_aLinha) < 2	
+	If Len(_aLinha) < 2	
 		FT_FSKIP()
 		Loop		
-	Endif
+	EndIf
 
-	_cE1_NUM    :=STRZERO(VAL(_alinha[_nColTit]),LEN(SE1->E1_NUM))
-	_cE1_CLIENTE:=STRZERO(VAL(_alinha[_nColCli]),LEN(SE1->E1_CLIENTE))
-   IF LEN(_alinha) > 2
-      _cParcela:=STRZERO(VAL(_alinha[3]),LEN(SE1->E1_PARCELA))
-   ELSE
-      _cParcela:=SPACE(LEN(SE1->E1_PARCELA))
-   ENDIF
-	IF ASCAN(_aTiraDupl,_cE1_NUM+_cE1_CLIENTE+_cParcela) = 0
-	   AADD(_aTiraDupl,_cE1_NUM+_cE1_CLIENTE+_cParcela)
-	ELSE
+	_cE1_NUM    :=StrZero(Val(_alinha[_nColTit]),Len(SE1->E1_NUM))
+	_cE1_CLIENTE:=StrZero(Val(_alinha[_nColCli]),Len(SE1->E1_CLIENTE))
+   If Len(_alinha) > 2
+      _cParcela:=StrZero(Val(_alinha[3]),Len(SE1->E1_PARCELA))
+   Else
+      _cParcela:=Space(Len(SE1->E1_PARCELA))
+   EndIf
+	If aScan(_aTiraDupl,_cE1_NUM+_cE1_CLIENTE+_cParcela) = 0
+	   aAdd(_aTiraDupl,_cE1_NUM+_cE1_CLIENTE+_cParcela)
+	Else
 	   FT_FSKIP()
-	   LOOP//IGNORA CHAVE DUPLICADAS
-	ENDIF
+	   Loop//IGNORA CHAVE DUPLICADAS
+	EndIf
    
- 	_cquery := " SELECT  R_E_C_N_O_ REC_SE1 "
-	_cquery += " FROM " +RETSQLNAME("SE1") + " SE1 WHERE D_E_L_E_T_ <> '*' "
-	_cquery += " AND (    (E1_TIPO    = 'NF'                      )   "// AND E1_SALDO > 0 
-	_cquery += "       OR (E1_PREFIXO = 'DCT' AND E1_TIPO  = 'NCC') ) "
-	_cquery += " AND E1_NUM     = '" + _cE1_NUM + "' "
-	_cquery += " AND E1_CLIENTE = '" + _cE1_CLIENTE+"' "
-// IF !EMPTY(val(_cParcela))
-	_cquery += " AND E1_PARCELA = '" + _cParcela + "'"
-//	ENDIF
-	_cquery += " ORDER BY E1_FILIAL, E1_NUM, E1_CLIENTE, E1_LOJA, E1_PARCELA ,E1_TIPO DESC "
+ 	_cQuery := " SELECT  R_E_C_N_O_ REC_SE1 "
+	_cQuery += " FROM " +RETSQLNAME("SE1") + " SE1 WHERE D_E_L_E_T_ = ' ' "
+	_cQuery += " AND (    (E1_TIPO    = 'NF'                      )   "// AND E1_SALDO > 0 
+	_cQuery += "       OR (E1_PREFIXO = 'DCT' AND E1_TIPO  = 'NCC') ) "
+	_cQuery += " AND E1_NUM     = '" + _cE1_NUM + "' "
+	_cQuery += " AND E1_CLIENTE = '" + _cE1_CLIENTE+"' "
+// If !Empty(Val(_cParcela))
+	_cQuery += " AND E1_PARCELA = '" + _cParcela + "'"
+//	EndIf
+	_cQuery += " ORDER BY E1_FILIAL, E1_NUM, E1_CLIENTE, E1_LOJA, E1_PARCELA ,E1_TIPO DESC "
 	
-	DBUseArea( .T. , "TOPCONN" , TcGenQry(,,_cquery) , "SE1T" , .T. , .F. )
+	DBUseArea( .T. , "TOPCONN" , TcGenQry(,,_cQuery) , "SE1T" , .T. , .F. )
 
 	_nTotTit:=0
 	COUNT TO _nTotTit
@@ -371,42 +358,42 @@ DO While !FT_FEOF()  //FACA ENQUANTO NAO FOR FIM DE ARQUIVO
     _cStatus:="A"//WKSTATUS
     _nREGSENF:= 0
     _nREGSEDCT:= 0
-    SE1T->(DBGOTOP())
+    SE1T->(DBGoTop())
 
-	DO WHILE !SE1T->(Eof()) .OR. _nTotTit = 0
+	While !SE1T->(Eof()) .Or. _nTotTit = 0
 
-  	   IF _nTotTit > 0
-         SE1->(DBGOTO(SE1T->REC_SE1))
-	   ELSE 
+  	   If _nTotTit > 0
+         SE1->(DBGoTo(SE1T->REC_SE1))
+	   Else 
 	      SE1->(DBGOBOTTOM())    
-		   SE1->(DBSKIP())
-	   ENDIF  
-  	   IF _nTotTit <= 1
-  	      IF _nTotTit = 1
-            IF SE1->E1_TIPO == 'NF '
+		   SE1->(DBSkip())
+	   EndIf  
+  	   If _nTotTit <= 1
+  	      If _nTotTit = 1
+            If SE1->E1_TIPO == 'NF '
                 _cErro:="[Titulo DCT correspondente não localizada] "
-			   ELSE	
+			   Else	
                 _cErro:="[Titulo NF correspondente não localizada] "
-			   ENDIF
-		   ELSE	 
-            IF !EMPTY(val(_cParcela))
+			   EndIf
+		   Else	 
+            If !Empty(Val(_cParcela))
                _cErro:="[Nenhum Titulo encontrado para esse Cliente + parcela] "
-				ELSE
+				Else
                _cErro:="[Nenhum Titulo encontrado para esse Cliente ou titulo possui parcelas] "
-				ENDIF	
-		   ENDIF
+				EndIf	
+		   EndIf
          _cStatus:='R'
-	   ENDIF	  
+	   EndIf	  
 
        _nREGSENF := 0
        _nREGSEDCT:= 0
-       IF SE1->E1_TIPO == 'NF '
+       If SE1->E1_TIPO == 'NF '
 	      _nREGSENF := SE1T->REC_SE1
-       ELSEIF SE1->E1_TIPO == 'NCC' 
+       ElseIf SE1->E1_TIPO == 'NCC' 
 	      _nREGSEDCT:= SE1T->REC_SE1
-	   ENDIF	  	  
+	   EndIf	  	  
 
-	   AADD(_adados,{;
+	   aAdd(_aDados,{;
 					 SE1->E1_FILIAL ,;//01 - Filial Italac
 		          _cE1_NUM          ,;//02 - Num titulo
 					 _cE1_CLIENTE   ,;//03 - Codigo do cliente
@@ -420,75 +407,72 @@ DO While !FT_FEOF()  //FACA ENQUANTO NAO FOR FIM DE ARQUIVO
 					 _nREGSENF      ,;//11 - Recno SE1 NF
 					 _nREGSEDCT     })//12 - Recno SE1 DCT
 	    
-  	   IF _nTotTit = 0
-  	      EXIT
-  	   ENDIF
+  	   If _nTotTit = 0
+  	      Exit
+  	   EndIf
 
        _cErro:=""
 	
-	   SE1T->( DBSKIP() )	    
+	   SE1T->( DBSkip() )	    
 
-	ENDDO
-	SE1T->( Dbclosearea() )
+	EndDo
+	SE1T->( DBCloseArea() )
 	
 	FT_FSKIP()
 	
-Enddo
+EndDo
 	
-Return _adados
+Return _aDados
 /*
 ===============================================================================================================================
 Programa----------: MFIN016CNS
 Autor-------------: Alex Wallauer Ferreira
 Data da Criacao---: 19/05/2017
-===============================================================================================================================
 Descrição---------: Rotina de consulta do cadastro completo do Cliente
-===============================================================================================================================
 Parametros--------: _cChama: da onde chama
-===============================================================================================================================
 Retorno-----------: .T. OU .F.
 ===============================================================================================================================
 */
 
 User Function MFIN016R(_cChama)
-LOCAL lRet:=.T.
-LOCAL nReg:=0
+Local lRet:=.T.
+Local nReg:=0
 
-If _cChama == "MARCARALL" .OR. _cChama == "DESMARCARALL"  .OR. _cChama == "INVERTEMARCACAO"
+If _cChama == "MARCARALL" .Or. _cChama == "DESMARCARALL"  .Or. _cChama == "INVERTEMARCACAO"
    
    _lAtivaMensagem:=.F.
    (cAliasAux)->( DBGoTop() )
-   DO WHILE (cAliasAux)->(!EOF())
+   While (cAliasAux)->(!Eof())
    	
-      IF (cAliasAux)->WKSTATUS $ 'A,E'
+      If (cAliasAux)->WKSTATUS $ 'A,E'
          If _cChama == "MARCARALL" 
 	        (cAliasAux)->MARCA:= cMarca
-		 ELSEIF _cChama == "DESMARCARALL"
+		 ElseIf _cChama == "DESMARCARALL"
 	        (cAliasAux)->MARCA:= ""
-		 ELSE//INVERTEMARCACAO
-	        (cAliasAux)->MARCA:= IF(EMPTY((cAliasAux)->MARCA),cMarca,"")
-		 ENDIF	
-         IF (_nPos:=ASCAN(_aMarcados,{|T| T[1]==(cAliasAux)->FILIAL+(cAliasAux)->TITU+(cAliasAux)->CLIENTE+(cAliasAux)->WKPARCELA  })) # 0
+		 Else//INVERTEMARCACAO
+	        (cAliasAux)->MARCA:= If(Empty((cAliasAux)->MARCA),cMarca,"")
+		 EndIf	
+         If (_nPos:=aScan(_aMarcados,{|T| T[1]==(cAliasAux)->FILIAL+(cAliasAux)->TITU+(cAliasAux)->CLIENTE+(cAliasAux)->WKPARCELA  })) # 0
             _aMarcados[_nPos,2]:=.T.
             _aMarcados[_nPos,3]:=(cAliasAux)->LOJANF
-         ENDIF
-	  ENDIF	
-   	  (cAliasAux)->( DBSKIP() )
+         EndIf
+	  EndIf	
+   	  (cAliasAux)->( DBSkip() )
    
-   ENDDO
+   EndDo
    (cAliasAux)->( DBGoTop() )
    _lAtivaMensagem:=.T.
-   RETURN .T.
-ENDIF
+   Return .T.
+EndIf
 
-IF (cAliasAux)->REGSENF = 0 .AND. (_cChama == "VISUALNF" .OR. _cChama <> "VISUALDCT" )
-    U_ITMSG("Titulo NF não encontrado","Atenção",,1)
-   RETURN .F.
-ENDIF
-IF (cAliasAux)->REGSEDCT = 0  .AND. (_cChama == "VISUALDCT" .OR. _cChama <> "VISUALNF" )
-    U_ITMSG("Titulo DCT não encontrado","Atenção",,1)
-   RETURN .F.
-ENDIF
+If (cAliasAux)->REGSENF = 0 .And. (_cChama == "VISUALNF" .Or. _cChama <> "VISUALDCT" )
+    U_ITMsg("Titulo NF não encontrado","Atenção",,1)
+   Return .F.
+EndIf
+If (cAliasAux)->REGSEDCT = 0  .And. (_cChama == "VISUALDCT" .Or. _cChama <> "VISUALNF" )
+    U_ITMsg("Titulo DCT não encontrado","Atenção",,1)
+   Return .F.
+EndIf
 
 If "VISUAL" $_cChama 
    
@@ -496,73 +480,73 @@ If "VISUAL" $_cChama
       cCadastro := "Titulo NF"
       SE1->( DBGoTo( (cAliasAux)->REGSENF ) )
       nReg:=(cAliasAux)->REGSENF
-   ELSEIf _cChama == "VISUALDCT"
+   ElseIf _cChama == "VISUALDCT"
       cCadastro := "Titulo DCT"
       SE1->( DBGoTo( (cAliasAux)->REGSEDCT ) )
       nReg:=(cAliasAux)->REGSEDCT
-   ENDIF
+   EndIf
 
    DBSelectArea("SE1")
    AxVisual("SE1",nReg,2)
-   RETURN .T.
-ENDIF
+   Return .T.
+EndIf
 
-IF (cAliasAux)->WKSTATUS = 'P'"
-   U_ITMSG("Titulo já processado com sucesso","Atenção",,1)
-   RETURN .F.
-ENDIF
+If (cAliasAux)->WKSTATUS = 'P'"
+   U_ITMsg("Titulo já processado com sucesso","Atenção",,1)
+   Return .F.
+EndIf
 
-IF (cAliasAux)->WKSTATUS = 'R'"
-   U_ITMSG("Titulo rejeitado na leitura do arquivo.","Atenção",,1)
-   RETURN .F.
-ENDIF
+If (cAliasAux)->WKSTATUS = 'R'"
+   U_ITMsg("Titulo rejeitado na leitura do arquivo.","Atenção",,1)
+   Return .F.
+EndIf
 
 If _cChama = "MARCAR"
 
-   IF EMPTY((cAliasAux)->MARCA) 
+   If Empty((cAliasAux)->MARCA) 
 	  
-	  IF (_nPos:=ASCAN(_aMarcados,{|T| T[1]==(cAliasAux)->FILIAL+(cAliasAux)->TITU+(cAliasAux)->CLIENTE+(cAliasAux)->WKPARCELA  })) # 0
-         IF _aMarcados[_nPos,2] .AND. _aMarcados[_nPos,3] <> (cAliasAux)->LOJA
-            IF _lAtivaMensagem
-               U_ITMSG("Titulo ["+(cAliasAux)->TITU+"] já marcado na Loja: "+_aMarcados[_nPos,3],"Atenção",,1)
-			ENDIF   
-            RETURN .F.
-         ENDIF
-	  ENDIF
+	  If (_nPos:=aScan(_aMarcados,{|T| T[1]==(cAliasAux)->FILIAL+(cAliasAux)->TITU+(cAliasAux)->CLIENTE+(cAliasAux)->WKPARCELA  })) # 0
+         If _aMarcados[_nPos,2] .And. _aMarcados[_nPos,3] <> (cAliasAux)->LOJA
+            If _lAtivaMensagem
+               U_ITMsg("Titulo ["+(cAliasAux)->TITU+"] já marcado na Loja: "+_aMarcados[_nPos,3],"Atenção",,1)
+			EndIf   
+            Return .F.
+         EndIf
+	  EndIf
 
-      IF (cAliasAux)->SALDO <= 0
-         IF _lAtivaMensagem
-            U_ITMSG("Saldo da DCT zerado","Atenção",,1)
-		ENDIF	
-         RETURN .F.
-      ENDIF
+      If (cAliasAux)->SALDO <= 0
+         If _lAtivaMensagem
+            U_ITMsg("Saldo da DCT zerado","Atenção",,1)
+		EndIf	
+         Return .F.
+      EndIf
 
-      IF (cAliasAux)->SALDO > ((cAliasAux)->SALDONF+0.02)
-         IF _lAtivaMensagem
-            U_ITMSG("Saldo do DCT maior que o saldo do NF + 0.02","Atenção",,1)
-		 ENDIF  
-         RETURN .F.
-      ENDIF
+      If (cAliasAux)->SALDO > ((cAliasAux)->SALDONF+0.02)
+         If _lAtivaMensagem
+            U_ITMsg("Saldo do DCT maior que o saldo do NF + 0.02","Atenção",,1)
+		 EndIf  
+         Return .F.
+      EndIf
 
       lRet:=.T.
-      IF (_nPos:=ASCAN(_aMarcados,{|T| T[1]==(cAliasAux)->FILIAL+(cAliasAux)->TITU+(cAliasAux)->CLIENTE+(cAliasAux)->WKPARCELA })) # 0
+      If (_nPos:=aScan(_aMarcados,{|T| T[1]==(cAliasAux)->FILIAL+(cAliasAux)->TITU+(cAliasAux)->CLIENTE+(cAliasAux)->WKPARCELA })) # 0
          _aMarcados[_nPos,2]:=.T.
          _aMarcados[_nPos,3]:=(cAliasAux)->LOJANF
-      ENDIF
+      EndIf
       (cAliasAux)->WKSTATUS:='A'//Marca aceito de novo para poder altetrar e reprocessar caso tenha dado lMsErroAuto = .T.
 	  (cAliasAux)->MARCA   := cMarca
 
    Else
      
 	  (cAliasAux)->MARCA   := ""
-      IF (_nPos:=ASCAN(_aMarcados,{|T| T[1]==(cAliasAux)->FILIAL+(cAliasAux)->TITU+(cAliasAux)->CLIENTE })) # 0
+      If (_nPos:=aScan(_aMarcados,{|T| T[1]==(cAliasAux)->FILIAL+(cAliasAux)->TITU+(cAliasAux)->CLIENTE })) # 0
          _aMarcados[_nPos,2]:=.F.
          _aMarcados[_nPos,3]:="" 
-      ENDIF
+      EndIf
    
-   ENDIF
+   EndIf
 
-ENDIF
+EndIf
 
 DBSelectArea(cAliasAux)//Tem volta para o alias do browse pq senão dá erro
 
@@ -573,9 +557,7 @@ Return lRet
 Programa----------: MFIN016CPS
 Autor-------------: Alex Wallauer Ferreira
 Data da Criacao---: 19/05/2017
-===============================================================================================================================
 Descrição---------: Define a criação de campos para exibição da análise
-===============================================================================================================================
 Retorno-----------: aRet - Campos que serão criados e exibidos na tela
 ===============================================================================================================================
 */
@@ -585,22 +567,22 @@ Local _aCpos := {}
 
 aAdd( _aCpos , { "WKSTATUS"	    , "C" , 01, 0 } )
 aAdd( _aCpos , { "MARCA"		, "C" , 02, 0 } )
-AAdd( _aCpos , { "FILIAL"		, "C" , TamSX3("A1_FILIAL")[01]		, 0 } )
-AAdd( _aCpos , { "CLIENTE"		, "C" , TamSX3("A1_COD")[01]		, 0 } )
-AAdd( _aCpos , { "LOJA"			, "C" , TamSX3("A1_LOJA")[01]		, 0 } )
-AAdd( _aCpos , { "TITU"			, "C" , 09, 0 } )
-AAdd( _aCpos , { "WKPARCELA"	, "C" , 03, 0 } )
-AAdd( _aCpos , { "WKPARCDCT"	, "C" , 03, 0 } )
-AAdd( _aCpos , { "SALDO"  		, "N" , 18, 8 } )
-AAdd( _aCpos , { "REGSENF"		, "N" , 18, 0 } )
-AAdd( _aCpos , { "REGSEDCT"		, "N" , 18, 0 } )
-AAdd( _aCpos , { "ERRO"	  	    , "C" , 150, 0 } )
-AAdd( _aCpos , { "E1_TIPO" 	    , "C" , LEN(SE1->E1_TIPO), 0 } )
-AAdd( _aCpos , { "E1_PREFIXO" 	, "C" , LEN(SE1->E1_PREFIXO), 0 } )
-AAdd( _aCpos , { "E1_TIPONF"    , "C" , LEN(SE1->E1_TIPO), 0 } )
-AAdd( _aCpos , { "E1_PREFINF"   , "C" , LEN(SE1->E1_PREFIXO), 0 } )
-AAdd( _aCpos , { "SALDONF"  	, "N" , 18, 8 } )
-AAdd( _aCpos , { "LOJANF"			, "C" , TamSX3("A1_LOJA")[01]		, 0 } )
+aAdd( _aCpos , { "FILIAL"		, "C" , TamSX3("A1_FILIAL")[01]		, 0 } )
+aAdd( _aCpos , { "CLIENTE"		, "C" , TamSX3("A1_COD")[01]		, 0 } )
+aAdd( _aCpos , { "LOJA"			, "C" , TamSX3("A1_LOJA")[01]		, 0 } )
+aAdd( _aCpos , { "TITU"			, "C" , 09, 0 } )
+aAdd( _aCpos , { "WKPARCELA"	, "C" , 03, 0 } )
+aAdd( _aCpos , { "WKPARCDCT"	, "C" , 03, 0 } )
+aAdd( _aCpos , { "SALDO"  		, "N" , 18, 8 } )
+aAdd( _aCpos , { "REGSENF"		, "N" , 18, 0 } )
+aAdd( _aCpos , { "REGSEDCT"		, "N" , 18, 0 } )
+aAdd( _aCpos , { "ERRO"	  	    , "C" , 150, 0 } )
+aAdd( _aCpos , { "E1_TIPO" 	    , "C" , Len(SE1->E1_TIPO), 0 } )
+aAdd( _aCpos , { "E1_PREFIXO" 	, "C" , Len(SE1->E1_PREFIXO), 0 } )
+aAdd( _aCpos , { "E1_TIPONF"    , "C" , Len(SE1->E1_TIPO), 0 } )
+aAdd( _aCpos , { "E1_PREFINF"   , "C" , Len(SE1->E1_PREFIXO), 0 } )
+aAdd( _aCpos , { "SALDONF"  	, "N" , 18, 8 } )
+aAdd( _aCpos , { "LOJANF"			, "C" , TamSX3("A1_LOJA")[01]		, 0 } )
 
 
 Return( _aCpos )
@@ -610,109 +592,100 @@ Return( _aCpos )
 Programa----------: MFIN016B
 Autor-------------: Alex Wallauer Ferreira
 Data da Criacao---: 19/05/2017
-===============================================================================================================================
 Descrição---------: Processa o o ajuste de vencimentos dos titulos marcados
-===============================================================================================================================
 Parametros--------: oproc - objeto da barra de processamento
-===============================================================================================================================
 Retorno-----------: NIL
 ===============================================================================================================================
 */
 User Function MFIN016B(oproc)
 
 Local _nRegAtu	:= 0
-Local _cTotReg	:= ALLTRIM(STR((cAliasAux)->( LASTREC() )))
-Local _nTamTot	:= LEN(_cTotReg)
+Local _cTotReg	:= AllTrim(Str((cAliasAux)->( LASTREC() )))
+Local _nTamTot	:= Len(_cTotReg)
 Local _nRegSel	:= 0
 Local _nRegErro	:= 0
 
 (cAliasAux)->( DBGoTop() )
 
-DO While (cAliasAux)->( !EOF() )
+While (cAliasAux)->( !Eof() )
 
 	_nRegAtu++
 	oproc:cCaption := ("Processando: "+ Str(_nRegAtu,_nTamTot) +" de "+ _cTotReg+" / "+Str(_nRegSel,_nTamTot)+" Compensandos" )
 	ProcessMessages()
 	
-  	If (cAliasAux)->WKSTATUS = 'A' .AND. !EMPTY((cAliasAux)->MARCA)
+  	If (cAliasAux)->WKSTATUS = 'A' .And. !Empty((cAliasAux)->MARCA)
 	
 	   _cErro:=""
-	   IF MFIN13Compensar((cAliasAux)->REGSENF ,(cAliasAux)->REGSEDCT)//COMPENSAR SE1
+	   If MFIN13Compensar((cAliasAux)->REGSENF ,(cAliasAux)->REGSEDCT)//COMPENSAR SE1
 	      (cAliasAux)->WKSTATUS:='P'
 	      (cAliasAux)->ERRO  :="Titulo compensado"
 	      _nRegSel++
-	   ELSE
+	   Else
 	      _nRegErro++
 	      (cAliasAux)->WKSTATUS:='E'
 	      (cAliasAux)->ERRO  :=_cErro
-	   ENDIF	
+	   EndIf	
        (cAliasAux)->MARCA := ""//Desmarca Sempre
 
-	ENDIF	
+	EndIf	
 	
-	(cAliasAux)->( DbSkip() )
+	(cAliasAux)->( DBSkip() )
 	
 EndDo
 
 (cAliasAux)->( DBGoTop() )
 
-_cMen:=ALLTRIM(STR(_nRegAtu ))+" registro(s) processado(s)."+CHR(13)+CHR(10)
-_cMen+=ALLTRIM(STR(_nRegSel ))+" registro(s) Compensando(s) com sucesso."+CHR(13)+CHR(10)
-_cMen+=ALLTRIM(STR(_nRegErro))+" registro(s) com erro."
+_cMen:=AllTrim(Str(_nRegAtu ))+" registro(s) processado(s)."+CHR(13)+CHR(10)
+_cMen+=AllTrim(Str(_nRegSel ))+" registro(s) Compensando(s) com sucesso."+CHR(13)+CHR(10)
+_cMen+=AllTrim(Str(_nRegErro))+" registro(s) com erro."
 
-U_ITMSG(_cMen,"Concluído!",,2)
+U_ITMsg(_cMen,"Concluído!",,2)
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MFIN13Compensar()
 Autor-------------: Alex Wallauer Ferreira
 Data da Criacao---: 29/05/2017
-===============================================================================================================================
 Descrição---------: nRecnoNF,nRecnoDCT
-===============================================================================================================================
 Retorno-----------: .T. OU .F.
 ===============================================================================================================================
 */
-Static function MFIN13Compensar(nRecnoNF,nRecnoDCT)
-LOCAL lContabiliza:= .F.
-LOCAL lAglutina   := .F.
-LOCAL lDigita     := .F.
-LOCAL aRecNF      := { nRecnoNF  } //NF
-LOCAL aRecSE1     := { nRecnoDCT } //DCT
+Static Function MFIN13Compensar(nRecnoNF,nRecnoDCT)
+Local lContabiliza:= .F.
+Local lAglutina   := .F.
+Local lDigita     := .F.
+Local aRecNF      := { nRecnoNF  } //NF
+Local aRecSE1     := { nRecnoDCT } //DCT
 
 BEGIN TRANSACTION
 
-  IF nRecnoNF > 0 .AND. nRecnoDCT > 0
-    If !MaIntBxCR(3,aRecNF,,aRecSE1,,{lContabiliza,lAglutina,lDigita,.F.,.F.,.F.},,,,,DATE() )
+  If nRecnoNF > 0 .And. nRecnoDCT > 0
+    If !MaIntBxCR(3,aRecNF,,aRecSE1,,{lContabiliza,lAglutina,lDigita,.F.,.F.,.F.},,,,,Date() )
 	   //DisarmTransaction()
 	   _cErro:="Erro: Não foi possível fazer a compensação do titulo "+SE1->E1_NUM 
-    ENDIF
- ELSE
+    EndIf
+ Else
     _cErro:="Erro: Não foi possível fazer a compensação do titulo "+SE1->E1_NUM+" Registros invalido: ["+CVALTOCHAR(nRecnoNF)+"] ["+CVALTOCHAR(nRecnoDCT)+"] "
- ENDIF
+ EndIf
 
 END TRANSACTION
 
-RETURN EMPTY(_cErro)
+Return Empty(_cErro)
 
 /*
 ===============================================================================================================================
 Programa--------: MFIN16Tela()
 Autor-----------: Alex Walaluer
 Data da Criacao-: 03/06/2019
-===============================================================================================================================
 Descrição-------: Tela detalhe
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: .T.
 ===============================================================================================================================
 */
-*==============================================================================================================================*
-STATIC FUNCTION MFIN16Tela(cAliasWK)
-*==============================================================================================================================*
+Static Function MFIN16Tela(cAliasWK)
+
 Local aBotoes      :={}
 Local aTB_Campos   :={}
 Local bMarcaTodos  :={|| U_MFIN016R("INVERTEMARCACAO") , oMark:oBrowse:Refresh() }
@@ -722,17 +695,17 @@ Local oDlg,oMark,I
 Local _cTitAux:="Compensacao de titulos DCT"
 Local aCab:={};_aCols:={}
 
-AADD(aBotoes,{"RESPONSA",{|| U_MFIN016R("DESMARCARALL") , oMark:oBrowse:Refresh() },"Desmarca Todos","Desmarca Todos"})
-AADD(aBotoes,{"RESPONSA",{|| U_MFIN016R("MARCARALL") , oMark:oBrowse:Refresh() },"Marca Todos","Marca Todos"})
-AADD(aBotoes,{"RESPONSA",{|| U_MFIN016R("VISUALNF") } ,"Visualizar NF"  ,"Visualizar NF"})
-AADD(aBotoes,{"RESPONSA",{|| U_MFIN016R("VISUALDCT")} ,"Visualizar DCT","Visualizar DCT"})
-AADD(aBotoes,{"BUDGET"  ,{|| MFIN16Legenda() } ,"Legenda"     ,"Legenda"})
-AADD(aBotoes,{"Exp. Excel"	, {|| DlgToExcel( { { "ARRAY" , _cTitAux , aCab , _aCols } } ) }, "Exportação de Dados para Excel"		, "Exp. Excel"		} )
-AADD(aBotoes,{"Exp. Arquivo", {|| U_ITGERARQ( _cTitAux , aCab , _aCols ) }					, "Exportação de Dados para Arquivo"	, "Exp. Arquivo"	} )
+aAdd(aBotoes,{"RESPONSA",{|| U_MFIN016R("DESMARCARALL") , oMark:oBrowse:Refresh() },"Desmarca Todos","Desmarca Todos"})
+aAdd(aBotoes,{"RESPONSA",{|| U_MFIN016R("MARCARALL") , oMark:oBrowse:Refresh() },"Marca Todos","Marca Todos"})
+aAdd(aBotoes,{"RESPONSA",{|| U_MFIN016R("VISUALNF") } ,"Visualizar NF"  ,"Visualizar NF"})
+aAdd(aBotoes,{"RESPONSA",{|| U_MFIN016R("VISUALDCT")} ,"Visualizar DCT","Visualizar DCT"})
+aAdd(aBotoes,{"BUDGET"  ,{|| MFIN16Legenda() } ,"Legenda"     ,"Legenda"})
+aAdd(aBotoes,{"Exp. Excel"	, {|| DlgToExcel( { { "ARRAY" , _cTitAux , aCab , _aCols } } ) }, "Exportação de Dados para Excel"		, "Exp. Excel"		} )
+aAdd(aBotoes,{"Exp. Arquivo", {|| U_ITGERARQ( _cTitAux , aCab , _aCols ) }					, "Exportação de Dados para Arquivo"	, "Exp. Arquivo"	} )
 
-DBSELECTAREA(cAliasWK)
+DBSelectArea(cAliasWK)
 
-aAdd( aCpoBrowse , { "Filial"	 	,{|| (cAliasWK)->FILIAL + IF(!EMPTY((cAliasWK)->FILIAL)," - "+LEFT(FWFilialName(cEmpAnt,(cAliasWK)->FILIAL,1),25),SPACE(25)) },"@!" } )
+aAdd( aCpoBrowse , { "Filial"	 	,{|| (cAliasWK)->FILIAL + If(!Empty((cAliasWK)->FILIAL)," - "+LEFT(FWFilialName(cEmpAnt,(cAliasWK)->FILIAL,1),25),Space(25)) },"@!" } )
 aAdd( aCpoBrowse , { "Titulo"		,{|| (cAliasWK)->TITU  }	, "@!"} )
 aAdd( aCpoBrowse , { "Tipo NF"      ,{|| (cAliasWK)->E1_TIPONF }, AVSX3("E1_TIPO "   ,6)})
 aAdd( aCpoBrowse , { "Tipo DCT "    ,{|| (cAliasWK)->E1_TIPO   }, AVSX3("E1_TIPO "   ,6)})
@@ -749,44 +722,44 @@ aAdd( aCpoBrowse , { "Observação"	,{|| (cAliasWK)->ERRO  }	, ""} )
 aAdd( aCpoBrowse , { "Registro NF"  ,{|| (cAliasWK)->REGSENF }	, "@E 999,999,999"} )
 aAdd( aCpoBrowse , { "Registro DCT" ,{|| (cAliasWK)->REGSEDCT } , "@E 999,999,999"} )
 
-AADD(aTB_Campos,{"MARCA",,"",})
-FOR I := 1 TO LEN(aCpoBrowse)
-    AADD(aTB_Campos,{aCpoBrowse[I,2],,aCpoBrowse[I,1],aCpoBrowse[I,3]})
-NEXT
+aAdd(aTB_Campos,{"MARCA",,"",})
+For I := 1 TO Len(aCpoBrowse)
+    aAdd(aTB_Campos,{aCpoBrowse[I,2],,aCpoBrowse[I,1],aCpoBrowse[I,3]})
+Next
 
 //Botões de Exportar ***************************
-AADD(aCab,"Status" )
-FOR I := 2 TO LEN(aTB_Campos)
-    AADD(aCab,ALLTRIM(aTB_Campos[ I,3 ]) )
-NEXT
-(cAliasWK)->(DBGOTOP())
-DO WHILE (cAliasWK)->(!EOF())
+aAdd(aCab,"Status" )
+For I := 2 TO Len(aTB_Campos)
+    aAdd(aCab,AllTrim(aTB_Campos[ I,3 ]) )
+Next
+(cAliasWK)->(DBGoTop())
+While (cAliasWK)->(!Eof())
    _aColuna:={}
-   AADD(_aColuna, (cAliasWK)->WKSTATUS )
-   AADD(_aColuna, (cAliasWK)->FILIAL + IF(!EMPTY((cAliasWK)->FILIAL)," - "+AllTrim(FWFilialName(cEmpAnt,(cAliasWK)->FILIAL,1)),"") )
-   AADD(_aColuna, "'"+(cAliasWK)->TITU  )
-   FOR I := 4 TO LEN(aTB_Campos)
-       IF VALTYPE(aTB_Campos[ I,1 ]) = "C"
-          _xConteudo:=cAliasWK+"->"+ALLTRIM(aTB_Campos[ I,1 ])
+   aAdd(_aColuna, (cAliasWK)->WKSTATUS )
+   aAdd(_aColuna, (cAliasWK)->FILIAL + If(!Empty((cAliasWK)->FILIAL)," - "+AllTrim(FWFilialName(cEmpAnt,(cAliasWK)->FILIAL,1)),"") )
+   aAdd(_aColuna, "'"+(cAliasWK)->TITU  )
+   For I := 4 TO Len(aTB_Campos)
+       If ValType(aTB_Campos[ I,1 ]) = "C"
+          _xConteudo:=cAliasWK+"->"+AllTrim(aTB_Campos[ I,1 ])
           _xConteudo:=&(_xConteudo)
-          AADD(_aColuna,_xConteudo )
-       ELSE
+          aAdd(_aColuna,_xConteudo )
+       Else
           _xConteudo:=EVAL(aTB_Campos[ I,1 ])
-          AADD(_aColuna,_xConteudo )
-       ENDIF   
-   NEXT
-   AADD(_aCols, _aColuna )
-   (cAliasWK)->(DBSKIP())    
-ENDDO
+          aAdd(_aColuna,_xConteudo )
+       EndIf   
+   Next
+   aAdd(_aCols, _aColuna )
+   (cAliasWK)->(DBSkip())    
+EndDo
 //Botões de Exportar ***************************
 
-DO WHILE .T.
+While .T.
    nOpca:=0
 
    oMainWnd:ReadClientCoords()//So precisa declarar uma fez para o Programa todo
    DEFINE MSDIALOG oDlg TITLE _cTitAux From aCoors[1],aCoors[2] TO aCoors[3],aCoors[4] OF oMainWnd PIXEL
 
-    (cAliasWK)->(DBGOTOP())
+    (cAliasWK)->(DBGoTop())
     oMark:=MSSELECT():New(cAliasWK,"MARCA","WKSTATUS <> 'A'",aTB_Campos,.F.,@cMarca,{21,1,(oDlg:nClientHeight-6)/2,(oDlg:nClientWidth-4)/2})
 
   	oMark:bAval                      := {|| U_MFIN016R("MARCAR"),oMark:oBrowse:Refresh() }
@@ -803,41 +776,41 @@ DO WHILE .T.
    ACTIVATE MSDIALOG oDlg ON INIT ( EnchoiceBar(oDlg, {|| (nOpca:=1,oDlg:End()) } , {|| (nOpca:=0,oDlg:End()) },,aBotoes) ,;
                                     oMark:oBrowse:Align:=CONTROL_ALIGN_ALLCLIENT ,;
                                     oMark:oBrowse:Refresh() )
-   IF nOpca = 1
-      (cAliasWK)->(DBGOTOP()) 
+   If nOpca = 1
+      (cAliasWK)->(DBGoTop()) 
       nTotal:=0
-      (cAliasWK)->( DBEVAL( {|| nTotal++ }, {|| !EMPTY((cAliasWK)->MARCA) } , {|| .T.} ) )
-      IF nTotal = 0
-         U_ITMSG("Não existem registros marcados, marque pelo menos uma viagem válida para integrar!","Atenção",,1)
-         LOOP
-      ENDIF
-      IF U_ITMSG("Confirma a Compensação?" ,"Atenção","Serão conpensados "+ALLTRIM(STR(nTotal,10))+" titulos",3,2,2 ) 
-         FWMSGRUN( ,{|oproc| U_MFIN016B(oproc)},"Aguarde","Processando..." )
-         LOOP
-      ELSE
-         LOOP
-      ENDIF
-   ELSEIF nOpca = 0 
-      IF U_ITMSG("Confirma o CANCELAMENTO?" ,"Atenção" ,"Todos os dados lidos seram perdidos: ", 3,2,2 )
-         RETURN .F.
-      ELSE
-         LOOP
-      ENDIF
-   ENDIF
+      (cAliasWK)->( DBEval( {|| nTotal++ }, {|| !Empty((cAliasWK)->MARCA) } , {|| .T.} ) )
+      If nTotal = 0
+         U_ITMsg("Não existem registros marcados, marque pelo menos uma viagem válida para integrar!","Atenção",,1)
+         Loop
+      EndIf
+      If U_ITMsg("Confirma a Compensação?" ,"Atenção","Serão conpensados "+AllTrim(Str(nTotal,10))+" titulos",3,2,2 ) 
+         FWMsgRun( ,{|oproc| U_MFIN016B(oproc)},"Aguarde","Processando..." )
+         Loop
+      Else
+         Loop
+      EndIf
+   ElseIf nOpca = 0 
+      If U_ITMsg("Confirma o CANCELAMENTO?" ,"Atenção" ,"Todos os dados lidos seram perdidos: ", 3,2,2 )
+         Return .F.
+      Else
+         Loop
+      EndIf
+   EndIf
 
-   EXIT
+   Exit
 
-ENDDO
+EndDo
 
-RETURN .T.               
+Return .T.               
 
 *--------------------------------------------------------------------------------------*
-STATIC Function MFIN16Legenda()
+Static Function MFIN16Legenda()
 *--------------------------------------------------------------------------------------*
-LOCAL aLegenda:={}
-AADD(aLegenda,{"ENABLE"    ,"Aceitos"    })
-AADD(aLegenda,{"DISABLE"   ,"Rejeitados" })
-AADD(aLegenda,{"BR_AZUL"   ,"Processados"})
-AADD(aLegenda,{"BR_PRETO"  ,"Analizar"   })
+Local aLegenda:={}
+aAdd(aLegenda,{"ENABLE"    ,"Aceitos"    })
+aAdd(aLegenda,{"DISABLE"   ,"Rejeitados" })
+aAdd(aLegenda,{"BR_AZUL"   ,"Processados"})
+aAdd(aLegenda,{"BR_PRETO"  ,"Analizar"   })
 BrwLegenda("Legenda","Legenda",aLegenda)
 Return .T.

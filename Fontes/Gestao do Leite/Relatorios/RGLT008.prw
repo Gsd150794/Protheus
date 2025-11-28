@@ -2,29 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 27/07/2022 | Chamado 40778. Tratamento para Extrato Seco Total (EST)
-Lucas Borges  | 24/01/2023 | Chamado 42685. Corrigida coluna de médias
-Lucas Borges  | 31/01/2025 | Chamado 49642. Implementada faixa de início e fim para pagamento do excedente de matéria gorda
+Lucas Borges  |27/07/2022| Chamado 40778. Tratamento para Extrato Seco Total (EST)
+Lucas Borges  |24/01/2023| Chamado 42685. Corrigida coluna de médias
+Lucas Borges  |31/01/2025| Chamado 49642. Implementada faixa de início e fim para pagamento do excedente de matéria gorda
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT008
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 27/07/2022
-===============================================================================================================================
 Descrição---------: Análises de gordura/ Extrato Seco Total - Leite de Terceiros
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -43,11 +37,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 27/07/2022
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -116,11 +107,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 27/07/2022
-===============================================================================================================================
 Descrição---------: Processa impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -141,10 +129,10 @@ Local _cFornece := ""
 If MV_PAR13 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZZX")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -256,7 +244,7 @@ If MV_PAR03 == 3
   _cFiltro += " AND ZLD.ZLD_RETILJ BETWEEN '"+MV_PAR15+"' AND '"+MV_PAR17+"'"
   _cFiltro += " AND ZLA.ZLA_FILIAL = ZLX.ZLX_FILIAL "
   _cFiltro += " AND ZLA.ZLA_SETOR = ZLX.ZLX_SETOR"
-  _cFiltro += " AND NVL(ROUND((SELECT SUM(ZAP_GORD) / COUNT(1) "
+  _cFiltro += " AND NVL(Round((SELECT SUM(ZAP_GORD) / COUNT(1) "
   _cFiltro += "                            FROM "+RetSqlName("ZAP")+" AP2 "
   _cFiltro += "                           WHERE AP2.D_E_L_E_T_ = ' ' "
   _cFiltro += "                             AND AP2.ZAP_FILIAL = ZZX.ZZX_FILIAL "
@@ -270,12 +258,12 @@ Else
   _cTabela:= "% , "+RetSqlName("SF1")+" SF1, "+RetSqlName("SD1")+" SD1, "+RetSqlName("SC7")+" SC7 %"
   
   _cCampos1 := "%, '' ZLD_RETIRO, '' ZLD_RETILJ, 0 ZLD_QTDBOM, "
-  _cCampos1 += " NVL(ROUND(CASE WHEN NVL(ROUND(MEDIA_MG, 2), 0) > C7_L_PMGB AND NVL(ROUND(MEDIA_MG, 2), 0) <= C7_L_PMGB2 THEN C7_L_EXEMG
-  _cCampos1 += " WHEN NVL(ROUND(MEDIA_MG, 2), 0) > C7_L_PMGB2 THEN C7_L_EXEM2 ELSE 0 END, 2), 0) ZLA_VALOR, '' PRODUTOR, "
+  _cCampos1 += " NVL(Round(Case WHEN NVL(Round(MEDIA_MG, 2), 0) > C7_L_PMGB AND NVL(Round(MEDIA_MG, 2), 0) <= C7_L_PMGB2 THEN C7_L_EXEMG
+  _cCampos1 += " WHEN NVL(Round(MEDIA_MG, 2), 0) > C7_L_PMGB2 THEN C7_L_EXEM2 Else 0 END, 2), 0) ZLA_VALOR, '' PRODUTOR, "
   _cCampos1 += " MEDIA_MG-ZLA_FXINI DESCARTE, "
-  _cCampos1 += "NVL(ROUND(((((NVL(ROUND(MEDIA_MG,2),0) - C7_L_PMGB) * ZLX_VOLREC) / 100) * "
-  _cCampos1 += "     CASE WHEN NVL(ROUND(MEDIA_MG, 2),0) > C7_L_PMGB AND NVL(ROUND(MEDIA_MG, 2),0) <= C7_L_PMGB2 THEN C7_L_EXEMG "
-  _cCampos1 += "          WHEN NVL(ROUND(MEDIA_MG, 2),0) > C7_L_PMGB2 THEN C7_L_EXEM2 ELSE 0 END),2),0) EXCEDENTE %"
+  _cCampos1 += "NVL(Round(((((NVL(Round(MEDIA_MG,2),0) - C7_L_PMGB) * ZLX_VOLREC) / 100) * "
+  _cCampos1 += "     Case WHEN NVL(Round(MEDIA_MG, 2),0) > C7_L_PMGB AND NVL(Round(MEDIA_MG, 2),0) <= C7_L_PMGB2 THEN C7_L_EXEMG "
+  _cCampos1 += "          WHEN NVL(Round(MEDIA_MG, 2),0) > C7_L_PMGB2 THEN C7_L_EXEM2 Else 0 END),2),0) EXCEDENTE %"
   _cCampos2 := "%, ZLX_VOLREC, C7_PRECO, C7_L_PMGB, C7_L_PMGB2, C7_L_EXEMG,C7_L_EXEM2, C7_L_PMGB ZLA_FXINI, C7_L_PMGB2 ZLA_FXFIM %"
   
   _cFiltro += " AND SF1.D_E_L_E_T_ = ' ' "
@@ -326,12 +314,12 @@ SELECT ZZX_FILIAL, ZZX_CODPRD, X5_DESCRI, ZLX_TIPOLT, A2_NREDUZ, ZLX_DTENTR, ZZX
        ZAP_CODIGO, ZLX_CODIGO, ZLA_FXINI, ZLA_FXFIM %exp:_cCampos1%
   FROM (SELECT ZZX.ZZX_FILIAL, ZZX.ZZX_CODPRD, SX5.X5_DESCRI, ZAP.ZAP_CODIGO, ZAP.ZAP_ITEM, ZLX.ZLX_TIPOLT,
                A2F.A2_NREDUZ, ZLX.ZLX_DTENTR, ZZX.ZZX_HORA, A2T.A2_NREDUZ TRANSP, ZZX.ZZX_PLACA, ZZV.ZZV_CAPACI, ZZX.ZZX_DENSID, ZAP.ZAP_GORD, ZAP.ZAP_EST, ZLX_CODIGO,
-               NVL(ROUND((SELECT SUM(ZAP_GORD) / COUNT(1)
+               NVL(Round((SELECT SUM(ZAP_GORD) / COUNT(1)
                            FROM %Table:ZAP% AP2
                           WHERE AP2.D_E_L_E_T_ = ' '
                             AND AP2.ZAP_FILIAL = ZZX.ZZX_FILIAL
                             AND ZZX.ZZX_CODIGO = AP2.ZAP_CODIGO),2),0) MEDIA_MG,
-               NVL(ROUND((SELECT SUM(ZAP_EST) / COUNT(1)
+               NVL(Round((SELECT SUM(ZAP_EST) / COUNT(1)
                            FROM %Table:ZAP% AP2
                           WHERE AP2.D_E_L_E_T_ = ' '
                             AND AP2.ZAP_FILIAL = ZZX.ZZX_FILIAL
@@ -369,7 +357,7 @@ SELECT ZZX_FILIAL, ZZX_CODPRD, X5_DESCRI, ZLX_TIPOLT, A2_NREDUZ, ZLX_DTENTR, ZZX
            AND ZZX.ZZX_TRANSP BETWEEN %exp:MV_PAR09% AND %exp:MV_PAR11%
            AND ZZX.ZZX_LJTRAN BETWEEN %exp:MV_PAR10% AND %exp:MV_PAR12%
         ) PIVOT(MAX(ZAP_GORD) GORD, MAX(ZAP_EST) EST
-   FOR ZAP_ITEM IN('01' AS X01, '02' AS X02, '03' AS X03, '04' AS X04, '05' AS X05, '06' AS X06))
+   For ZAP_ITEM IN('01' AS X01, '02' AS X02, '03' AS X03, '04' AS X04, '05' AS X05, '06' AS X06))
  ORDER BY ZZX_FILIAL, ZZX_CODPRD, ZLX_TIPOLT, A2_NREDUZ, ZLX_DTENTR, ZZX_HORA, ZAP_CODIGO
 EndSql
 //==========================================================================
@@ -389,15 +377,15 @@ oReport:Section(1):Init()
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(0)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->ZZX_FILIAL
 	_cFornece := (_cAlias)->A2_NREDUZ
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

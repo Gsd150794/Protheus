@@ -2,29 +2,21 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Analista      - Programador  - Inicio   - Envio    - Chamado - Motivo da Alteração                                                                                 
-============================================================================================================================================================== 
-Antonio Ramos  - Julio Paz    - 07/08/25 - 12/08/25 -  51685  - Criação de Nova validação na digitação da data de baixa de Títulos de Contas a Pagar.        
-============================================================================================================================================================== 
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
+Julio Paz     |12/08/2025| Chamado 51685. Criação de Nova validação na digitação da data de baixa de Títulos de Contas a Pagar.        
+===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes e Defines da Rotina.
-//====================================================================================================
-#include "Protheus.ch" 
-#INCLUDE "TBICONN.CH"
-#INCLUDE "PARMTYPE.CH" 
+#Include "TOTVS.ch" 
 
 /*
 ===============================================================================================================================
 Função-------------: FADTMOV
 Autor--------------: Julio de Paula Paz
 Data da Criacao----: 29/08/2024 
-===============================================================================================================================
 Descrição----------: Ponto de entrada na validação da Data da Baixa da tela Baixa Automática de Contas a Pagar.
-===============================================================================================================================
 Parametros---------: {dDatabaixa} = data da baixa informada na tela.
-===============================================================================================================================
 Retorno------------: _lRet = .T. = Data OK.
                              .F. = Data inválida.
 ===============================================================================================================================
@@ -32,7 +24,7 @@ Retorno------------: _lRet = .T. = Data OK.
 User Function FADTMOV()
 Local _lRet := .T.
 Local _aUsuario 
-Local _aParam := PARAMIXB
+Local _aParam := ParamIXB
 Local _dData 
 Local _nDiasAvan
 Local _cCampo	:= ReadVar()
@@ -48,8 +40,8 @@ Begin Sequence
 
       _dData := _aParam[1] // Data da baixa informado na tela pelo usuário.
 
-      If Dtos(_dData) > Dtos(Date() + _nDiasAvan)
-         U_ItMsg("Usuário sem permissão de informar uma data de baixa superior a: " + Dtoc(Date() + _nDiasAvan) + ". ","Atenção",,1)
+      If DToS(_dData) > DToS(Date() + _nDiasAvan)
+         U_ITMsg("Usuário sem permissão de informar uma data de baixa superior a: " + DToC(Date() + _nDiasAvan) + ". ","Atenção",,1)
          _lRet := .F.
       EndIf 
       

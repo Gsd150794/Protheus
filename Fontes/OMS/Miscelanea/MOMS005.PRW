@@ -17,7 +17,7 @@
 // Definicoes de Includes da Rotina.
 //====================================================================================================
 
-#Include 'Protheus.Ch'
+#Include "TOTVS.ch"
 #Include 'FWMVCDef.Ch'
 #Include 'ApWizard.Ch'
 #Include "TOPCONN.CH"
@@ -49,7 +49,7 @@ Private aRotina	:= MenuDef()
 aAdd( _aParam , { 2 , 'Tipo Proc.: '	, 1				, {'1 - Leite Magro','2 - Bonificações'} , 60 , '.T.' , .T. } )
 _aParRet := { _aParam[01][03] }
 
-If Parambox( _aParam , 'Configuração do Processamento!' , @_aParRet ,,,,,,,, .F. , .F. )
+If ParamBox( _aParam , 'Configuração do Processamento!' , @_aParRet ,,,,,,,, .F. , .F. )
 	
 	If ValType(_aParRet[01]) == 'C'
 		_aParRet[01] := Val( SubStr(_aParRet[01],1,1) )
@@ -73,7 +73,7 @@ If Parambox( _aParam , 'Configuração do Processamento!' , @_aParRet ,,,,,,,, .F.
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -181,24 +181,24 @@ User Function MOMS005C()
 
 Local _aParam	:= {}
 Local _aParRet	:= {}
-Local _cDtRef	:= SubStr( DtoS( MonthSub( dDataBase , 1 ) ) , 1 , 6 )
+Local _cDtRef	:= SubStr( DToS( MonthSub( dDataBase , 1 ) ) , 1 , 6 )
 Local _cAnoMes	:= SubStr( _cDtRef , 5 , 2 ) +'/'+ SubStr( _cDtRef , 1 , 4 )
 
 If !U_ITACSUSR( 'ZZL_ADMCMS' , 'S' )
-	u_itmsg( 'Usuário sem acesso ao processamento de cálculo de Comissões! Verifique com a área de TI/ERP' , 'Atenção!' , , 1 )
-	Return()
+	U_ITMsg( 'Usuário sem acesso ao processamento de cálculo de Comissões! Verifique com a área de TI/ERP' , 'Atenção!' , , 1 )
+	Return
 EndIf
 
 
 If MOMS005VLF()
 
-	u_itmsg('Não é possível recalcular as comissões para um período que já foi fechado. '										+;
+	U_ITMsg('Não é possível recalcular as comissões para um período que já foi fechado. '										+;
 			'O período atual ['+ SubStr( _cDtRef , 5 , 2 ) +'/'+ SubStr( _cDtRef , 1 , 4 ) +'] não pode mais ser processado. '	+;
 			'Em caso de dúvidas ou problemas procure a área de TI/ERP.'															,;
 			'Atenção!'																											,;
 			,1																											 )
 	
-	Return()
+	Return
 	
 EndIf
 
@@ -217,9 +217,9 @@ If .not. u_MOMS005VD(_aParRet[01])
 	  
   Return
 	  
-Endif
+EndIf
 
-If Parambox( _aParam , 'Confirmação do Processamento!' , @_aParRet ,,,,,,,, .F. , .F. )
+If ParamBox( _aParam , 'Confirmação do Processamento!' , @_aParRet ,,,,,,,, .F. , .F. )
 	
 	//================================================================================
 	// Verifica se existe regra cadastrada para o período
@@ -237,29 +237,29 @@ If Parambox( _aParam , 'Confirmação do Processamento!' , @_aParRet ,,,,,,,, .F. 
  		ZC8->ZC8_FILIAL     := xFilial("ZC8")   
 		ZC8->ZC8_SEQ        := U_MOMS009C()  //Gera nova sequência do ZC8
 		ZC8->ZC8_ROTINA     := "Adicionais de Comissao"
-		ZC8->ZC8_DATA       := DATE()
-		ZC8->ZC8_HORA       := TIME()
-		ZC8->ZC8_USER       := CUSERNAME
-		ZC8->ZC8_CODUSU     := __CUSERID
-		ZC8->ZC8_OBS        := iif(_aParRet[01] == 1,'1 - Leite Magro','2 - Bonificações')
+		ZC8->ZC8_DATA       := Date()
+		ZC8->ZC8_HORA       := Time()
+		ZC8->ZC8_USER       := cUserName
+		ZC8->ZC8_CODUSU     := __cUserId
+		ZC8->ZC8_OBS        := IIf(_aParRet[01] == 1,'1 - Leite Magro','2 - Bonificações')
 		ZC8->ZC8_COMP       := _cAnoMes
  
-		MSUNLOCK()
+		MSUnLock()
 		
 	
 	Else
 		
-		u_itmsg( 'Não existe meta cadastrada para a comissão adicional de Leite Magro para o período atual: '+ MV_PAR01 , 'Atenção!' ,,1 )
+		U_ITMsg( 'Não existe meta cadastrada para a comissão adicional de Leite Magro para o período atual: '+ MV_PAR01 , 'Atenção!' ,,1 )
 		
 	EndIf
 
 Else
 
-	u_itmsg(  'Operação cancelada pelo usuário!' , 'Atenção!' ,,1 )
+	U_ITMsg(  'Operação cancelada pelo usuário!' , 'Atenção!' ,,1 )
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -300,7 +300,7 @@ Local _aHdrAux	:= {	'Cód. Vendedor'			,; //01
 
 Local _cAlias	:= GetNextAlias()
 Local _cQuery	:= ''
-Local _cDtIni	:= DtoS( CtoD( '01/' + MV_PAR01  ) )
+Local _cDtIni	:= DToS( CtoD( '01/' + MV_PAR01  ) )
 Local _cDtFim	:= SubStr( _cDtIni , 1 , 6 ) + '31'
 Local _cCodVen	:= ''
 Local _cPriUM   := ''
@@ -325,10 +325,10 @@ Local _nPerMin	:= MOMS005GPM( 1 , _cDtRef )
 
 If Empty(_nPerMin) .Or. _nPerMin == 0
 
-	u_itmsg( 	'Não foi possível encontrar a % referente à Meta de Leite Magro para o período atual ou a mesma foi cadastrada com valor zerado (0.00). '+;
+	U_ITMsg( 	'Não foi possível encontrar a % referente à Meta de Leite Magro para o período atual ou a mesma foi cadastrada com valor zerado (0.00). '+;
 						'Verifique o cadastro de Metas e tente novamente!' ,'Atenção!' ,,1 )
 	
-	Return()
+	Return
 	
 EndIf
 
@@ -356,8 +356,8 @@ _cQuery += "    SD2.D2_UM           AS PRIUM    , "
 _cQuery += "    SUM(SD2.D2_QTSEGUM) AS QTDSUM   , "
 _cQuery += "    SD2.D2_SEGUM        AS SEGUM    , "
 _cQuery += "    SUM(SD2.D2_TOTAL)   AS VALTOT   , "
-_cQuery += "    ROUND( SUM(SD2.D2_TOTAL) / SUM(SD2.D2_QUANT) , 2 )            AS PRCVEN , "
-_cQuery += "    ROUND( ( AVG(SD2.D2_COMIS1) / 100 ) * SUM(SD2.D2_TOTAL) , 2 ) AS COMVEN1  "
+_cQuery += "    Round( SUM(SD2.D2_TOTAL) / SUM(SD2.D2_QUANT) , 2 )            AS PRCVEN , "
+_cQuery += "    Round( ( AVG(SD2.D2_COMIS1) / 100 ) * SUM(SD2.D2_TOTAL) , 2 ) AS COMVEN1  "
 _cQuery += " FROM "+ RetSqlName('SF2') +" SF2 "
 _cQuery += " JOIN "+ RetSqlName('SD2') +" SD2 ON SD2.D2_DOC		= SF2.F2_DOC	AND SD2.D2_SERIE	= SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL "
 _cQuery += " JOIN "+ RetSqlName('SA1') +" SA1 ON SD2.D2_CLIENTE	= SA1.A1_COD	AND SD2.D2_LOJA		= SA1.A1_LOJA "
@@ -492,7 +492,7 @@ End Transaction
 //Montar saída como relatório para conferência do usuário
 U_ITListBox( 'Cálculo de Comissão' , _aHdrAux , _aResTot , .T. , 1 , 'Validação da Rotina (Desenvolvimento)' )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -721,7 +721,7 @@ ZC1->ZC1_VALCAD := _nValAdc
 ZC1->ZC1_PERMIN := _nPerMin
 ZC1->ZC1_STATUS := '1'
 
-ZC1->( MsUnlock() )
+ZC1->( MSUnLock() )
 
 For _nI := 1 To Len( _aDadZC2 )
 	
@@ -745,7 +745,7 @@ For _nI := 1 To Len( _aDadZC2 )
 	ZC2->ZC2_VALLIQ := Val( StrTran( StrTran( _aDadZC2[_nI][15] , '.' , '' ) , ',' , '.' ) )
 	ZC2->ZC2_STATUS := _aDadZC2[_nI][16]
 	
-	ZC2->( MsUnlock() )
+	ZC2->( MSUnLock() )
 	
 Next _nI
 	
@@ -755,18 +755,18 @@ If _nValAdc > 0
 	
 	SE3->E3_FILIAL 	:= '01'
 	SE3->E3_VEND   	:= _cCodVen
-	SE3->E3_EMISSAO := LastDay( StoD( _cDtRef + '01' ) )
-	SE3->E3_DATA    := LastDay( StoD( _cDtRef + '01' ) )
+	SE3->E3_EMISSAO := LastDay( SToD( _cDtRef + '01' ) )
+	SE3->E3_DATA    := LastDay( SToD( _cDtRef + '01' ) )
 	SE3->E3_BASE    := _nValMgr
 	SE3->E3_PORC    := _nPerCAD
 	SE3->E3_COMIS   := _nValAdc
 	SE3->E3_I_ORIGE := 'MOMS005'
 	
-	SE3->( MsUnLock() )
+	SE3->( MSUnLock() )
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -840,7 +840,7 @@ EndIf
 
 (_cAlias)->( DBCloseArea() )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -913,7 +913,7 @@ _cQuery := " SELECT COUNT(*) AS CONTADOR "
 _cQuery += " FROM "+ RetSqlName('SE3') +" SE3 "
 _cQuery += " WHERE "
 _cQuery += "     D_E_L_E_T_ = ' ' "
-_cQuery += " AND E3_EMISSAO BETWEEN '"+ SubStr( DtoS( MonthSub( dDatabase , 1 ) ) , 1 , 6 ) +"01' AND '"+ SubStr( DtoS( MonthSub( dDatabase , 1 ) ) , 1 , 6 ) +"31' "
+_cQuery += " AND E3_EMISSAO BETWEEN '"+ SubStr( DToS( MonthSub( dDatabase , 1 ) ) , 1 , 6 ) +"01' AND '"+ SubStr( DToS( MonthSub( dDatabase , 1 ) ) , 1 , 6 ) +"31' "
 _cQuery += " AND E3_I_FECH  = 'S' "
 
 If Select(_cAlias) > 0
@@ -983,7 +983,7 @@ While (_cAlias1)->( !Eof() )
 			SE3->( DBGoTo( _aRegSE3[_nI] ) )
 			SE3->( RecLock( 'SE3' , .F. ) )
 			SE3->( DBDelete() )
-			SE3->( MsUnLock() )
+			SE3->( MSUnLock() )
 		
 		Next _nI
 		
@@ -1000,7 +1000,7 @@ While (_cAlias1)->( !Eof() )
 			
 			ZC2->( RecLock( 'ZC2' , .F. ) )
 			ZC2->( DBDelete() )
-			ZC2->( MsUnlock() )
+			ZC2->( MSUnLock() )
 			
 		ZC2->( DBSkip() )
 		EndDo
@@ -1009,14 +1009,14 @@ While (_cAlias1)->( !Eof() )
 	
 	ZC1->( RecLock( 'ZC1' , .F. ) )
 	ZC1->( DBDelete() )
-	ZC1->( MsUnLock() )
+	ZC1->( MSUnLock() )
 
 (_cAlias1)->( DBSkip() )
 EndDo
 
 (_cAlias1)->( DBCloseArea() )
 	
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1032,15 +1032,15 @@ Parametros--------: _ntipo - 	1 Leite Magro
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-user function MOMS005VD(_ntipo)
+User Function MOMS005VD(_ntipo)
 
 Local _aalertas  := {}
 Local _cDataF    := GetMv("IT_COMFECH")  // Data do fechamento
-Local _nmes      := month(stod(substr(_cDataf,4,4)+substr(_cDataf,1,2)+'01'))
-Local _nano      := year(stod(substr(_cDataf,4,4)+substr(_cDataf,1,2)+'01'))
+Local _nmes      := month(SToD(SubStr(_cDataf,4,4)+SubStr(_cDataf,1,2)+'01'))
+Local _nano      := year(SToD(SubStr(_cDataf,4,4)+SubStr(_cDataf,1,2)+'01'))
 Local _cAlias	   := GetNextAlias()
 Local _cseq      := ""
-Local _ni		:= 0
+Local _nI		:= 0
 Default _ntipo   := 2
 
 //================================================================================
@@ -1058,42 +1058,42 @@ ZZL->( DBSetOrder(3) )
 
 If !(ZZL->( DBSeek( xFilial('ZZL') + RetCodUsr() ) ) .And. ZZL->ZZL_ADMCMS == 'S')
 
-    aadd(_aalertas,"Usuário " + alltrim(substr(cUsuario,7,15)) + " sem permissão para cálculo de comissões!") 
+    aAdd(_aalertas,"Usuário " + AllTrim(SubStr(cUsuario,7,15)) + " sem permissão para cálculo de comissões!") 
  
 End If
 
 
-_cDataf := strzero(_nano,4)+strzero(_nmes,2)+"01"
+_cDataf := StrZero(_nano,4)+StrZero(_nmes,2)+"01"
 
 //================================================================================
 //verifica se não está fazendo fechamento o mês atual ou futuro
 //================================================================================
 
-If alltrim(str(_nano))+alltrim(strzero(_nmes,2)) >= alltrim(str(year(date())))+alltrim(strzero(month(date()),2))
+If AllTrim(Str(_nano))+AllTrim(StrZero(_nmes,2)) >= AllTrim(Str(year(date())))+AllTrim(StrZero(month(date()),2))
 
-  aadd(_aalertas,"Mês " + strzero(_nmes,2) + "/" + strzero(_nano,4) + " não terminou ainda!") 
+  aAdd(_aalertas,"Mês " + StrZero(_nmes,2) + "/" + StrZero(_nano,4) + " não terminou ainda!") 
   
-Endif
+EndIf
 
 //================================================================================
 //verifica se já foi liberado pelo financeiro
 //================================================================================
 
 _cQuery := " SELECT ZC8_SEQ FROM "+ RETSQLNAME('ZC8') +" ZC8 WHERE ZC8_ROTINA = 'Fechamento Financeiro' "
-_cQuery += " and ZC8_COMP = '" + strzero(_nmes,2) + "/" + strzero(_nano,4) + "' and  D_E_L_E_T_ <> '*'"
+_cQuery += " and ZC8_COMP = '" + StrZero(_nmes,2) + "/" + StrZero(_nano,4) + "' and  D_E_L_E_T_ <> '*'"
 
 DBUseArea( .T. , "TOPCONN" , TCGenQry( ,, _cQuery ) , _cAlias , .F. , .T. )
 DBSelectArea(_cAlias)
 
-if (_cAlias)->( Eof() )
+If (_cAlias)->( Eof() )
 
-  aadd(_aalertas,"Não existe um fechamento financeiro para o período de comissões em aberto!(" + strzero(_nmes,2) + "/" + strzero(_nano,4) + ")")
-  (_cAlias)->( Dbclosearea() )  
+  aAdd(_aalertas,"Não existe um fechamento financeiro para o período de comissões em aberto!(" + StrZero(_nmes,2) + "/" + StrZero(_nano,4) + ")")
+  (_cAlias)->( DBCloseArea() )  
   
-else
+Else
 
-	_cseq := alltrim((_cAlias)->ZC8_SEQ)
-	(_cAlias)->( Dbclosearea() )
+	_cseq := AllTrim((_cAlias)->ZC8_SEQ)
+	(_cAlias)->( DBCloseArea() )
 
 	//================================================================================
 	//verifica se já rodou recálculo de comissão após a liberação do financeiro
@@ -1102,78 +1102,78 @@ else
 	_cAlias	:= GetNextAlias()
 
 	_cQuery := " SELECT ZC8_SEQ FROM "+ RETSQLNAME('ZC8') +" ZC8 WHERE ZC8_ROTINA LIKE 'Recalculo de Comissao%' "
-	_cQuery += " and ZC8_COMP = '" + strzero(_nmes,2) + "/" + strzero(_nano,4) + "' and  D_E_L_E_T_ <> '*'"
+	_cQuery += " and ZC8_COMP = '" + StrZero(_nmes,2) + "/" + StrZero(_nano,4) + "' and  D_E_L_E_T_ <> '*'"
 
 	DBUseArea( .T. , "TOPCONN" , TCGenQry( ,, _cQuery ) , _cAlias , .F. , .T. )
 	DBSelectArea(_cAlias)
 
-	if (_cAlias)->( Eof() )
+	If (_cAlias)->( Eof() )
 
-  		aadd(_aalertas,"Não existe um recálculo de comissão após a liberação do financeiro para o período de comissões em aberto!(" + strzero(_nmes,2) + "/" + strzero(_nano,4) + ")")
-  		(_cAlias)->( Dbclosearea() )
+  		aAdd(_aalertas,"Não existe um recálculo de comissão após a liberação do financeiro para o período de comissões em aberto!(" + StrZero(_nmes,2) + "/" + StrZero(_nano,4) + ")")
+  		(_cAlias)->( DBCloseArea() )
   
-	else
+	Else
 	
 		//================================================================================
 		//verifica se já não tem cálculo de adicionais para o período
 		//================================================================================
 		
-		(_cAlias)->( Dbclosearea() )
+		(_cAlias)->( DBCloseArea() )
 		
 		_cAlias	:= GetNextAlias()
 
 		_cQuery := " SELECT ZC8_SEQ FROM "+ RETSQLNAME('ZC8') +" ZC8 WHERE ZC8_ROTINA = 'Adicionais de Comissao' "
-		_cQuery += " and ZC8_COMP = '" + strzero(_nmes,2) + "/" + strzero(_nano,4) + "' and ZC8_SEQ > '" + _cseq + "' and ZC8_OBS = '" 
+		_cQuery += " and ZC8_COMP = '" + StrZero(_nmes,2) + "/" + StrZero(_nano,4) + "' and ZC8_SEQ > '" + _cseq + "' and ZC8_OBS = '" 
 		_cQuery += "2 - Bonificações' and D_E_L_E_T_ <> '*'"
 
 		DBUseArea( .T. , "TOPCONN" , TCGenQry( ,, _cQuery ) , _cAlias , .F. , .T. )
 		DBSelectArea(_cAlias)
 
-		if !(_cAlias)->( Eof() )
+		If !(_cAlias)->( Eof() )
 
-			aadd(_aalertas,"Já existe um cálculo de adicionais de " + iif(_ntipo == 1,'leite magro','bonificações') + " após a liberação do financeiro para o período de comissões em aberto!(" + strzero(_nmes,2) + "/" + strzero(_nano,4) + ")")
+			aadd(_aalertas,"Já existe um cálculo de adicionais de " + IIf(_ntipo == 1,'leite magro','bonificações') + " após a liberação do financeiro para o período de comissões em aberto!(" + StrZero(_nmes,2) + "/" + StrZero(_nano,4) + ")")
 				
-		Endif
+		EndIf
 		
-		(_cAlias)->( Dbclosearea() )
+		(_cAlias)->( DBCloseArea() )
 	
-	endif
+	EndIf
 
-Endif
+EndIf
 
 //=======================================================================================
 //Se não teve problemas verifica se todos os títulos de comissão estão reprocessados
 //=======================================================================================
-If len(_aalertas) == 0
+If Len(_aalertas) == 0
 
 		_cAlias	:= GetNextAlias()
 
 		_cQuery := " SELECT E3_FILIAL FROM "+ RETSQLNAME('SE3') +" SE3 WHERE E3_I_ORIGE = '       ' "
-		_cQuery += " AND E3_EMISSAO >= '" + strzero(_nano,4) + strzero(_nmes,2) + "01' AND E3_EMISSAO <= '" + strzero(_nano,4) + strzero(_nmes,2) + "31'"
-		_cQuery += " AND D_E_L_E_T_ <> '*' AND E3_ORIGEM <> 'R' AND E3_ORIGEM <> 'F'"
+		_cQuery += " AND E3_EMISSAO >= '" + StrZero(_nano,4) + StrZero(_nmes,2) + "01' AND E3_EMISSAO <= '" + StrZero(_nano,4) + StrZero(_nmes,2) + "31'"
+		_cQuery += " AND D_E_L_E_T_ = ' ' AND E3_ORIGEM <> 'R' AND E3_ORIGEM <> 'F'"
 		_cQuery += " GROUP BY E3_FILIAL ORDER BY E3_FILIAL"
 
 		DBUseArea( .T. , "TOPCONN" , TCGenQry( ,, _cQuery ) , _cAlias , .F. , .T. )
 		DBSelectArea(_cAlias)
 
-		Do while !((_cAlias)->( Eof() ))
+		While !((_cAlias)->( Eof() ))
 
-  			aadd(_aalertas,"A filial " + (_cAlias)->E3_FILIAL + " possui registros  não recalculados para o período - (" + strzero(_nmes,2) + "/" + strzero(_nano,4) + ")")
-  			(_cAlias)->( Dbskip() )
+  			aAdd(_aalertas,"A filial " + (_cAlias)->E3_FILIAL + " possui registros  não recalculados para o período - (" + StrZero(_nmes,2) + "/" + StrZero(_nano,4) + ")")
+  			(_cAlias)->( DBSkip() )
 			
 		
-		Enddo
+		EndDo
 		
-		(_cAlias)->( Dbclosearea() )
+		(_cAlias)->( DBCloseArea() )
 
-endif
+EndIf
 
 
 //================================================================================
 //se teve qualquer alerta na verificação monta mensagem e impede o processamento
 //================================================================================
 
-if len(_aalertas) > 0
+If Len(_aalertas) > 0
   
     _cMensagem := "<html>"
 	_cMensagem += "<body>"
@@ -1185,24 +1185,24 @@ if len(_aalertas) > 0
 	_cMensagem += "</strong>
 	_cMensagem += "<hr>"
 		
-   for _ni = 1 to len(_aalertas)
+   For _nI = 1 to Len(_aalertas)
   
   		_cMensagem += "<p>"
-		_cMensagem += _aalertas[_ni] 
+		_cMensagem += _aalertas[_nI] 
 		_cMensagem += "</p>
-		if _ni < len(_aalertas) 
+		If _nI < Len(_aalertas) 
 		  _cMensagem += "<hr>"
-		endif
+		EndIf
 		
-	next
+	Next
 	
 	_cMensagem += "</body>"
 	_cMensagem += "</html>"
 				
 	MessageBox(_cMensagem, "Problema no processo", MB_OK)
   
-  	return .F.
+  	Return .F.
 		
-endif 
+EndIf 
 
-return .T.
+Return .T.

@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 02/05/2017 | Chamado 19813. Inclusão da função de Log ITLOGACS().
--------------------------------------------------------------------------------------------------------------------------------
-Alex Walaluer | 19/12/2018 | Chamado 27369. Inclusão para gerar somente com o centro de custo informado no novo parâmetro.
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 11/09/2024 | Chamado 48465. Removendo warning de compilação.
+Julio Paz     |02/05/2017| Chamado 19813. Inclusão da função de Log ITLOGACS().
+Alex Walaluer |19/12/2018| Chamado 27369. Inclusão para gerar somente com o centro de custo informado no novo parâmetro.
+Lucas Borges  |11/09/2024| Chamado 48465. Removendo warning de compilação.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: REST004
 Autor-------------: Lucas Crevilari
 Data da Criacao---: 21/07/2014
-===============================================================================================================================
 Descrição---------: Relatorio de Relacao Das Ordens de Producao.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -50,18 +42,15 @@ oReport:PrintDialog()
 //======================================================================== 
 U_ITLOGACS('REST004')
 
-Return NIL
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: REST004
 Autor-------------: Lucas Crevilari
 Data da Criacao---: 21/07/2014
-===============================================================================================================================
 Descrição---------: Relatorio de Relacao Das Ordens de Producao.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -107,11 +96,8 @@ Return(oReport)
 Programa----------: ReportPrint
 Autor-------------: Lucas Crevilari
 Data da Criacao---: 21/07/2014
-===============================================================================================================================
-Descrição---------: Funcao estatica ReportPrint 
-===============================================================================================================================
+Descrição---------: FuncStaticatica ReportPrint 
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -134,15 +120,15 @@ Local lCusRep  := SuperGetMv("MV_CUSREP",.F.,.F.) .And. (FindFunction("MA330AvRe
 // Titulo do Relatorio |
 //======================
 
-oReport:SetTitle("Relação Por Ordem De Produção"+" - "+AllTrim(GetMv("MV_SIMB"+Ltrim(Str(mv_par03))))+ " / " + IIf(lCusRep .And. mv_par07==2,"( CUSTO REPOSIÇÃO )","( CUSTO MEDIO )") )
+oReport:SetTitle("Relação Por Ordem De Produção"+" - "+AllTrim(GetMV("MV_SIMB"+LTrim(Str(MV_PAR03))))+ " / " + IIf(lCusRep .And. MV_PAR07==2,"( CUSTO REPOSIÇÃO )","( CUSTO MEDIO )") )
 
 //============================================================
 //Alerta o usuario que o custo de reposicao esta desativado. |
 //============================================================
 
-If mv_par07==2 .And. !lCusRep
+If MV_PAR07==2 .And. !lCusRep
 	Help(" ",1,"A860CUSRP")
-	mv_par07 := 1
+	MV_PAR07 := 1
 EndIf
 
 //========================
@@ -157,17 +143,17 @@ oSection1:BeginQuery()
 cQryOP   := GetNextAlias()
 cOrderBy := "% D3_FILIAL, D3_OP, D3_CHAVE, D3_NUMSEQ, D3_COD  %"
 
-//	MV_PAR10:=ALLTRIM(MV_PAR10)
-IF !EMPTY(MV_PAR10) .AND. LEN(ALLTRIM(MV_PAR10)) > (LEN(SD3->D3_CC)+1)
+//	MV_PAR10:=AllTrim(MV_PAR10)
+If !Empty(MV_PAR10) .And. Len(AllTrim(MV_PAR10)) > (Len(SD3->D3_CC)+1)
 	cFiltraCC:= "% D3_ESTORNO <> 'S' AND D3_CC IN "+FormatIn(MV_PAR10,";")+"  %"
-ELSE
-	MV_PAR10:=LEFT(MV_PAR10,LEN(SD3->D3_CC))
-	IF !EMPTY(MV_PAR10)
+Else
+	MV_PAR10:=LEFT(MV_PAR10,Len(SD3->D3_CC))
+	If !Empty(MV_PAR10)
 		cFiltraCC:= "% D3_ESTORNO <> 'S' AND D3_CC = '"+MV_PAR10+"'  %"
-	ELSE   
+	Else   
 		cFiltraCC:= "% D3_ESTORNO <> 'S'  %"
-	ENDIF   
-ENDIF   
+	EndIf   
+EndIf   
 
 BeginSql Alias cQryOP
 
@@ -176,7 +162,7 @@ SELECT SD3.D3_FILIAL, SD3.D3_CC , SD3.D3_OP , SD3.D3_CF , SD3.D3_COD , SD3.D3_QU
 		SD3.D3_CUSRP1 , SD3.D3_CUSTO1 , SD3.D3_CUSRP2  , SD3.D3_CUSTO2  , SD3.D3_CUSRP3  , SD3.D3_CUSTO3 , SD3.D3_CUSRP4  , SD3.D3_CUSTO4  , SD3.D3_CUSRP5  , SD3.D3_CUSTO5 , 
 		SB1.B1_COD, SB1.B1_DESC, SB1.B1_CUSTD , SC2.C2_REVISAO
 
-FROM %table:SD3% SD3, %table:SB1% SB1, %table:SC2% SC2 
+FROM %Table:SD3% SD3, %Table:SB1% SB1, %Table:SC2% SC2 
 
 WHERE SD3.D3_FILIAL   = %xFilial:SD3%	 AND 
 		SB1.B1_FILIAL   = %xFilial:SB1%	 AND
@@ -220,7 +206,7 @@ oBreak2   := TRBreak():New(oSection1,oSection1:Cell("D3_OP"),"Total OP",.T.)
 //===================================
 //Totalizando Por Ordem de Producao |
 //===================================
-If !(lCusRep .And. mv_par07==2)
+If !(lCusRep .And. MV_PAR07==2)
 	oFunction := TRFunction():New(oSection1:Cell('B1_CUSTD'),NIL,"MAX",oBreak2,"Custo Unit STD -----",/*Picture*/,/*uFormula*/,.F.,.F.)
 	oFunction := TRFunction():New(oSection1:Cell('TotalSTD'),NIL,"SUM",oBreak2,"Custo Total STD ----",/*Picture*/,/*uFormula*/,.F.,.F.)
 EndIf	
@@ -235,7 +221,7 @@ oFunction := TRFunction():New(oSection1:Cell('Custo'   ),NIL,"SUM",NIL,"CUSTO TO
 
 If lCalc
 	nCMOP := CalcCMOP()
-Endif
+EndIf
 oReport:Section(1):Cell('CMOP'):SetValue(nCMOP)
 nCMOP := oSection1:Cell('CMOP'):GetValue()
 oFunction := TRFunction():New(oSection1:Cell('CMOP'	   ),NIL,"ONPRINT",NIL,"CUSTO MEDIO OP ---------------->",,{|| nCMOP })
@@ -272,32 +258,32 @@ oSection1:Cell('CMOP'):HideHeader()
 //Define o campo a ser impresso no valor de acordo com a moeda selecionada |
 //==========================================================================
 Do Case
-	Case mv_par03 == 1
-		If lCusRep .And. mv_par07==2
+	Case MV_PAR03 == 1
+		If lCusRep .And. MV_PAR07==2
 			cCampoCus :=   "(cQryOP)->D3_CUSRP1"
 		Else
 			cCampoCus :=   "(cQryOP)->D3_CUSTO1"
 		EndIf	
-	Case mv_par03 == 2
-		If lCusRep .And. mv_par07==2
+	Case MV_PAR03 == 2
+		If lCusRep .And. MV_PAR07==2
 			cCampoCus :=   "(cQryOP)->D3_CUSRP2"
 		Else
 			cCampoCus :=   "(cQryOP)->D3_CUSTO2"
 		EndIf	
-	Case mv_par03 == 3
-		If lCusRep .And. mv_par07==2
+	Case MV_PAR03 == 3
+		If lCusRep .And. MV_PAR07==2
 			cCampoCus :=   "(cQryOP)->D3_CUSRP3"
 		Else
 			cCampoCus :=   "(cQryOP)->D3_CUSTO3"
 		EndIf	
-	Case mv_par03 == 4
-		If lCusRep .And. mv_par07==2
+	Case MV_PAR03 == 4
+		If lCusRep .And. MV_PAR07==2
 			cCampoCus :=   "(cQryOP)->D3_CUSRP4"
 		Else
 			cCampoCus :=   "(cQryOP)->D3_CUSTO4"
 		EndIf	
-	Case mv_par03 == 5
-		If lCusRep .And. mv_par07==2
+	Case MV_PAR03 == 5
+		If lCusRep .And. MV_PAR07==2
 			cCampoCus :=   "(cQryOP)->D3_CUSRP5"
 		Else
 			cCampoCus :=   "(cQryOP)->D3_CUSTO5"
@@ -307,9 +293,9 @@ EndCase
 //===========================================
 //Inicio da impressao do fluxo do relatorio |
 //===========================================
-dbSelectArea(cQryOP)
+DBSelectArea(cQryOP)
 COUNT TO _nTotal
-DBGOTOP()
+DBGoTop()
 oSection1:Init()
 nTxCofin := GetMv("MV_TXCOFIN") 
 nTxPis	 := GetMv("MV_TXPIS")
@@ -338,50 +324,47 @@ While !oReport:Cancel() .And. !(cQryOP)->(Eof())
 		oReport:Section(1):Cell('Cust2'):SetValue( ((oSection1:Cell('Custo'):GetValue() * (nTxCofin+nTxPis)) / 100) + oSection1:Cell('Custo'):GetValue() )
 		oReport:Section(1):Cell('CustPro2'):SetValue( ((oSection1:Cell('CustProd'):GetValue() * (nTxCofin+nTxPis)) / 100) + oSection1:Cell('CustProd'):GetValue())
    		#IFDEF TOP
-			If !(lCusRep .And. mv_par07==2)
+			If !(lCusRep .And. MV_PAR07==2)
 				oReport:Section(1):Cell('B1_CUSTD'):SetValue( If(SubStr((cQryOP)->D3_CF,1,2)=="PR", RetFldProd((cQryOP)->B1_COD,"B1_CUSTD",cQryOP) ,0) )
 			EndIf	
-		#ELSE
-			dbSelectArea("SB1")
-			dbSeek(xFilial("SB1")+(cQryOP)->D3_COD)
-			If !(lCusRep .And. mv_par07==2)
+		#Else
+			DBSelectArea("SB1")
+			DBSeek(xFilial("SB1")+(cQryOP)->D3_COD)
+			If !(lCusRep .And. MV_PAR07==2)
 				oReport:Section(1):Cell('B1_CUSTD'):SetValue( If(SubStr((cQryOP)->D3_CF,1,2)=="PR",RetFldProd(SB1->B1_COD,"B1_CUSTD"),0) )
 			EndIf	
-			dbSelectArea(cQryOP)
-		#ENDIF
-		If !(lCusRep .And. mv_par07==2)
+			DBSelectArea(cQryOP)
+		#EndIf
+		If !(lCusRep .And. MV_PAR07==2)
 			oReport:Section(1):Cell('TotalSTD'):SetValue( If(SubStr((cQryOP)->D3_CF,1,2)=="PR",( oSection1:Cell('B1_CUSTD'):GetValue() * oSection1:Cell('D3_QUANT'):GetValue() ) , 0)  )
 		EndIf	
 		If SubStr((cQryOP)->D3_CF,1,2) == "PR"
 			oReport:SkipLine()
-		EndIF
+		EndIf
 		If oReport:Cancel()
     	   	Exit
 		EndIf
 		oSection1:PrintLine()
-		dbSkip()
+		DBSkip()
 	EndDo
-	If lCusRep .And. mv_par07==2
-		oReport:PrintText( cOpAnt+" - Valor final no ultimo fechamento ("+DTOC(dDataFec)+") => "+Transform(Posicione("SC2",1,xFilial("SC2")+cOpAnt,"C2_VFIMRP"+Str(MV_PAR03,1)),PesqPict("SC2","C2_VFIM1")) ) //" - Valor final no ultimo fechamento ("
+	If lCusRep .And. MV_PAR07==2
+		oReport:PrintText( cOpAnt+" - Valor final no ultimo fechamento ("+DToC(dDataFec)+") => "+Transform(Posicione("SC2",1,xFilial("SC2")+cOpAnt,"C2_VFIMRP"+Str(MV_PAR03,1)),PesqPict("SC2","C2_VFIM1")) ) //" - Valor final no ultimo fechamento ("
 	Else
-		oReport:PrintText( cOpAnt+" - Valor final no ultimo fechamento ("+DTOC(dDataFec)+") => "+Transform(Posicione("SC2",1,xFilial("SC2")+cOpAnt,"C2_VFIM"+Str(MV_PAR03,1)),PesqPict("SC2","C2_VFIM1")) ) //" - Valor final no ultimo fechamento ("
+		oReport:PrintText( cOpAnt+" - Valor final no ultimo fechamento ("+DToC(dDataFec)+") => "+Transform(Posicione("SC2",1,xFilial("SC2")+cOpAnt,"C2_VFIM"+Str(MV_PAR03,1)),PesqPict("SC2","C2_VFIM1")) ) //" - Valor final no ultimo fechamento ("
 	EndIf		
 	oReport:PrintText( "Produto : "+Posicione("SC2",1,xFilial("SC2")+cOpAnt,"C2_PRODUTO") ) 
 EndDo
 oSection1:Finish()
-(cQryOP)->(DbCloseArea())
-Return NIL
+(cQryOP)->(DBCloseArea())
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: CalcTot
 Autor-------------: Lucas Crevilari
 Data da Criacao---: 21/07/2014
-===============================================================================================================================
 Descrição---------: Realiza o calculo da quantitade total por OP
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -392,29 +375,26 @@ Local cChave	:= xFilial("SD3")+(cQryOP)->D3_OP
 Private cNumOp	:= ""
 Private nCont	:= 0
 
-While (cQryOP)->(!EOF()) .And. (cQryOP)->D3_FILIAL+(cQryOP)->D3_OP == cChave
+While (cQryOP)->(!Eof()) .And. (cQryOP)->D3_FILIAL+(cQryOP)->D3_OP == cChave
 	nQuant := If(SubStr((cQryOP)->D3_CF,1,2)=="DE",( -(cQryOP)->D3_QUANT ),(cQryOP)->D3_QUANT) 		
 	(cQryOP)->(DBSkip())
 EndDo
 
 (cQryOP)->( DBGoTop() )
 
-While (cQryOP)->(!EOF()) .And. (cQryOP)->D3_FILIAL+(cQryOP)->D3_OP <> cChave
+While (cQryOP)->(!Eof()) .And. (cQryOP)->D3_FILIAL+(cQryOP)->D3_OP <> cChave
 	(cQryOP)->(DBSkip())
 EndDo
 
-Return NIL   
+Return   
 
 /*
 ===============================================================================================================================
 Programa----------: CalcCMOP
 Autor-------------: Lucas Crevilari
 Data da Criacao---: 24/09/2014
-===============================================================================================================================
 Descrição---------: Realiza o calculo do Total Custo Medio por OP. Chamado 7515
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -429,7 +409,7 @@ While !(cQryOP)->(Eof())
 	lPrim	:= .T.
 	While (cQryOP)->D3_FILIAL+(cQryOP)->D3_OP == xFilial("SD3")+cOpAnt
 		If lPrim
-			While (cQryOP)->D3_FILIAL+(cQryOP)->D3_OP == xFilial("SD3")+cOpAnt //While (cQryOP)->(!EOF()) .And. (cQryOP)->D3_FILIAL+(cQryOP)->D3_OP == cChave
+			While (cQryOP)->D3_FILIAL+(cQryOP)->D3_OP == xFilial("SD3")+cOpAnt //While (cQryOP)->(!Eof()) .And. (cQryOP)->D3_FILIAL+(cQryOP)->D3_OP == cChave
 				nCusReq += If(SubStr((cQryOP)->D3_CF,1,2)=="RE" .And. SubStr(D3_CF,3,1) # "9", (cQryOP)->D3_CUSTO1, 0)
 				nQtdProd += If(SubStr((cQryOP)->D3_CF,1,2)=="PR",(cQryOP)->D3_QUANT,0)
 				(cQryOP)->(DBSkip())
@@ -438,11 +418,11 @@ While !(cQryOP)->(Eof())
 		Else
 			(cQryOP)->(DBSkip())		
 		EndIf 
-	Enddo     
-Enddo
+	EndDo     
+EndDo
                  
 (cQryOP)->( DBGoTop() )
-While (cQryOP)->(!EOF()) .And. (cQryOP)->D3_FILIAL+(cQryOP)->D3_OP <> cChave
+While (cQryOP)->(!Eof()) .And. (cQryOP)->D3_FILIAL+(cQryOP)->D3_OP <> cChave
 	(cQryOP)->(DBSkip())
 EndDo     
      

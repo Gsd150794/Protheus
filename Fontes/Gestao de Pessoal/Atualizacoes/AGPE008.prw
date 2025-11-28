@@ -9,60 +9,8 @@ Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'FWMVCDEF.CH'
-#include "protheus.ch"
-#include "topconn.ch"
-
-
-
-//===========================================================================
-//| Definições de Includes                                                  |
-//===========================================================================
-
-
-
-//===========================================================================
-//| Definições de Includes                                                  |
-//===========================================================================
-
-
-
-//===========================================================================
-//| Definições de Includes                                                  |
-//===========================================================================
-
-
-
-
-
-
-//===========================================================================
-//| Definições de Includes                                                  |
-//===========================================================================
-
-
-
-
-
-v
-
-
-
-
-
-
-
-//===========================================================================
-//| Definições de Includes                                                  |
-//===========================================================================
-
-
-
-
-
+#Include "TOTVS.ch"
+#Include "topconn.ch"
 
 /*
 ===============================================================================================================================
@@ -72,7 +20,8 @@ Data da Criacao-: 04/08/2021
 Descrição-------: Rotina de aprovação de reajuste de salários. Chamado 37366.
 Parametros------: Nenhum
 Retorno---------: Nenhum
-===============================================================================================================================*/
+===============================================================================================================================
+*/
 User Function AGPE008()
 Local _aSizeAut  := MsAdvSize(.T.)
 Local _oDlgApr
@@ -100,19 +49,19 @@ Begin Sequence
    // Configurações iniciais
    //======================================================
    _aObjects := {} 
-   AAdd( _aObjects, { 315,  50, .T., .T. } )
-   AAdd( _aObjects, { 100, 100, .T., .T. } )
+   aAdd( _aObjects, { 315,  50, .T., .T. } )
+   aAdd( _aObjects, { 100, 100, .T., .T. } )
 
    _aInfo := { _aSizeAut[ 1 ], _aSizeAut[ 2 ], _aSizeAut[ 3 ], _aSizeAut[ 4 ], 3, 3 } 
 
    _aPosObj := MsObjSize( _aInfo, _aObjects, .T. ) 
 
  //=================================================================================     
-   AADD(aRotina,{"Pesquisar"	,"AxPesqui",0,1})
-	AADD(aRotina,{"Visualizar"	,"AxVisual",0,2})
-	AADD(aRotina,{"Incluir"		,"AxInclui",0,3})
-	AADD(aRotina,{"Alterar"		,"AxAltera",0,4})
-	AADD(aRotina,{"Excluir"		,"AxExclui",0,5})
+   aAdd(aRotina,{"Pesquisar"	,"AxPesqui",0,1})
+	aAdd(aRotina,{"Visualizar"	,"AxVisual",0,2})
+	aAdd(aRotina,{"Incluir"		,"AxInclui",0,3})
+	aAdd(aRotina,{"Alterar"		,"AxAltera",0,4})
+	aAdd(aRotina,{"Excluir"		,"AxExclui",0,5})
    Inclui := .F.
    Altera := .T.
 
@@ -120,10 +69,10 @@ Begin Sequence
    // Roda a query de dados e Cria a Tabela Temporária.
    //======================================================
    
-   fwmsgrun( ,{|_oProc| _lRet := U_AGPE008Q(_oProc) } , 'Aguarde...' , 'Efetuando Leitura dos dados...' )
+   FWMsgRun( ,{|_oProc| _lRet := U_AGPE008Q(_oProc) } , 'Aguarde...' , 'Efetuando Leitura dos dados...' )
     
    If ! _lRet 
-      U_Itmsg("Não existem dados salariais a serem reajustados.","Atenção",,1)
+      U_ITMsg("Não existem dados salariais a serem reajustados.","Atenção",,1)
       Break 
    EndIf 
 
@@ -132,7 +81,7 @@ Begin Sequence
    //======================================================
    // aAdd(aHeader,{trim(x3_titulo),x3_campo,x3_picture,x3_tamanho,x3_decimal,x3_valid,x3_usado,x3_tipo, x3_f3,x3_context,	x3_cbox,x3_relacao,x3_when,X3_TRIGGER,	X3_PICTVAR,.F.,.F.})
 
-   Aadd(aHeader,{"Filial"                              ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Filial"                              ,;   // 1  = X3_TITULO                   
                  "ZGZ_FILIAL"                          ,;   // 2  = X3_CAMPO
                  ""                                    ,;   // 3  = X3_PICTURE                    
                  1                                     ,;   // 4  = X3_TAMANHO            
@@ -143,7 +92,7 @@ Begin Sequence
                                                      "",;   // 9  = X3_CONTEXT
                  ""})                                       // 10 = X3_CBOX
 
-   Aadd(aHeader,{"Situação"                            ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Situação"                            ,;   // 1  = X3_TITULO                   
                  "ZGZ_SITUAC"                          ,;   // 2  = X3_CAMPO
                  getsx3cache("ZGZ_SITUAC","X3_PICTURE"),;   // 3  = X3_PICTURE                    
                  1                                     ,;   // 4  = X3_TAMANHO            
@@ -154,7 +103,7 @@ Begin Sequence
                                                      "",;   // 9  = X3_CONTEXT
                  getsx3cache("ZGZ_SITUAC","X3_CBOX")})      // 10 = X3_CBOX
 
-    Aadd(aHeader,{"Data Reclassificação"               ,;   // 1  = X3_TITULO                   
+    aAdd(aHeader,{"Data Reclassificação"               ,;   // 1  = X3_TITULO                   
                             "ZGZ_DTOCOR"               ,;   // 2  = X3_CAMPO
                                       ""               ,;   // 3  = X3_PICTURE                    
                                        8               ,;   // 4  = X3_TAMANHO            
@@ -165,7 +114,7 @@ Begin Sequence
                                       ""               ,;   // 9  = X3_CONTEXT
                                       ""})                  // 10 = X3_CBOX
 
-    Aadd(aHeader,{"Matrícula"                          ,;   // 1  = X3_TITULO                   
+    aAdd(aHeader,{"Matrícula"                          ,;   // 1  = X3_TITULO                   
                                "ZGZ_MAT"               ,;   // 2  = X3_CAMPO
                    getsx3cache("ZGZ_MAT","X3_PICTURE") ,;   // 3  = X3_PICTURE                    
                    getsx3cache("ZGZ_MAT","X3_TAMANHO") ,;   // 4  = X3_TAMANHO            
@@ -176,7 +125,7 @@ Begin Sequence
                                                     "" ,;   // 9  = X3_CONTEXT
                                                     "" })   // 10 = X3_CBOX
 
-    Aadd(aHeader,{"Nome"                               ,;   // 1  = X3_TITULO                   
+    aAdd(aHeader,{"Nome"                               ,;   // 1  = X3_TITULO                   
                   "ZGZ_NOME"                           ,;   // 2  = X3_CAMPO
                   getsx3cache("ZGZ_NOME","X3_PICTURE") ,;   // 3  = X3_PICTURE                    
                   25                                   ,;   // 4  = X3_TAMANHO            
@@ -187,7 +136,7 @@ Begin Sequence
                                                     "" ,;   // 9  = X3_CONTEXT
                                                     "" })   // 10 = X3_CBOX
 
-    Aadd(aHeader,{"Cargo Atual"                        ,;   // 1  = X3_TITULO                   
+    aAdd(aHeader,{"Cargo Atual"                        ,;   // 1  = X3_TITULO                   
                   "ZGZ_CARGO"                          ,;   // 2  = X3_CAMPO
                   getsx3cache("ZGZ_CARGO","X3_PICTURE"),;   // 3  = X3_PICTURE                    
                   15                                   ,;   // 4  = X3_TAMANHO            
@@ -199,7 +148,7 @@ Begin Sequence
                                                      ""})   // 10 = X3_CBOX
 
 
-    Aadd(aHeader,{"Salario Atual"                       ,;  // 1  = X3_TITULO                   
+    aAdd(aHeader,{"Salario Atual"                       ,;  // 1  = X3_TITULO                   
                   "ZGZ_SALARI"                          ,;  // 2  = X3_CAMPO
                   getsx3cache("ZGZ_SALARI","X3_PICTURE"),;  // 3  = X3_PICTURE                    
                   getsx3cache("ZGZ_SALARI","X3_TAMANHO"),;  // 4  = X3_TAMANHO            
@@ -210,7 +159,7 @@ Begin Sequence
                                                       "",;  // 9  = X3_CONTEXT
                                                       ""})  // 10 = X3_CBOX
 
-    Aadd(aHeader,{"Motivo"                              ,;  // 1  = X3_TITULO                   
+    aAdd(aHeader,{"Motivo"                              ,;  // 1  = X3_TITULO                   
                   "ZGZ_MOTIVO"                          ,;  // 2  = X3_CAMPO
                   getsx3cache("ZGZ_MOTIVO","X3_PICTURE"),;  // 3  = X3_PICTURE                    
                   15                                    ,;  // 4  = X3_TAMANHO            
@@ -220,7 +169,7 @@ Begin Sequence
                   getsx3cache("ZGZ_MOTIVO","X3_TIPO")   ,;  // 8  = X3_TIPO                   
                                                       "",;  // 9  = X3_CONTEXT
                                                       ""})  // 10 = X3_CBOX
-    Aadd(aHeader,{"Tipo"                               ,;    // 1  = X3_TITULO                   
+    aAdd(aHeader,{"Tipo"                               ,;    // 1  = X3_TITULO                   
                   "ZGZ_TIPO"                           ,;    // 2  = X3_CAMPO
                   getsx3cache("ZGZ_TIPO","X3_PICTURE") ,;    // 3  = X3_PICTURE                    
                   15                                   ,;  // 4  = X3_TAMANHO            
@@ -231,7 +180,7 @@ Begin Sequence
                                                      "",;  // 9  = X3_CONTEXT
                   getsx3cache("ZGZ_TIPO","X3_CBOX")    })   // 10 = X3_CBOX
 
-   Aadd(aHeader,{"Tempo Funcao"                         ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Tempo Funcao"                         ,;   // 1  = X3_TITULO                   
                   "ZGZ_TMPFUN"                          ,;  // 2  = X3_CAMPO
                   getsx3cache("ZGZ_TMPFUN","X3_PICTURE"),;  // 3  = X3_PICTURE                    
                   getsx3cache("ZGZ_TMPFUN","X3_TAMANHO"),;  // 4  = X3_TAMANHO            
@@ -242,7 +191,7 @@ Begin Sequence
                                                       "",;  // 9  = X3_CONTEXT
                                                       ""})  // 10 = X3_CBOX
 
-    Aadd(aHeader,{"Cargo Proposto"                      ,;  // 1  = X3_TITULO                   
+    aAdd(aHeader,{"Cargo Proposto"                      ,;  // 1  = X3_TITULO                   
                   "ZGZ_DESCAR"                          ,;  // 2  = X3_CAMPO
                   getsx3cache("ZGZ_DESCAR","X3_PICTURE"),;  // 3  = X3_PICTURE                    
                   15                                    ,;  // 4  = X3_TAMANHO            
@@ -253,7 +202,7 @@ Begin Sequence
                                                       "",;  // 9  = X3_CONTEXT
                                                       ""})  // 10 = X3_CBOX
 
-    Aadd(aHeader,{"Salario Novo"                        ,;  // 1  = X3_TITULO                   
+    aAdd(aHeader,{"Salario Novo"                        ,;  // 1  = X3_TITULO                   
                   "ZGZ_SALPRO"                          ,;  // 2  = X3_CAMPO
                   getsx3cache("ZGZ_SALPRO","X3_PICTURE"),;  // 3  = X3_PICTURE                    
                   getsx3cache("ZGZ_SALPRO","X3_TAMANHO"),;  // 4  = X3_TAMANHO            
@@ -264,7 +213,7 @@ Begin Sequence
                                                       "",;  // 9  = X3_CONTEXT
                                                       ""})  // 10 = X3_CBOX
 
-    Aadd(aHeader,{"Diferença Salarial"                  ,;  // 1  = X3_TITULO                   
+    aAdd(aHeader,{"Diferença Salarial"                  ,;  // 1  = X3_TITULO                   
                   "WK_DIFSALA"                          ,;  // 2  = X3_CAMPO
                   "@E 999,999,999.99"                   ,;  // 3  = X3_PICTURE                    
                   12                                    ,;  // 4  = X3_TAMANHO            
@@ -276,7 +225,7 @@ Begin Sequence
                   ""                                    })  // 10 = X3_CBOX
 
 
-    Aadd(aHeader,{"% de Aumento"                        ,;  // 1  = X3_TITULO                   
+    aAdd(aHeader,{"% de Aumento"                        ,;  // 1  = X3_TITULO                   
                   "WK_PERAUME"                          ,;  // 2  = X3_CAMPO
                   "@E 9,999.9999"                       ,;  // 3  = X3_PICTURE                    
                    9                                    ,;  // 4  = X3_TAMANHO            
@@ -287,7 +236,7 @@ Begin Sequence
                    ""                                   ,;  // 9  = X3_CONTEXT
                    ""                                   })  // 10 = X3_CBOX
 
-Aadd(aHeader,{"Observação"                           ,;  // 1  = X3_TITULO                   
+aAdd(aHeader,{"Observação"                           ,;  // 1  = X3_TITULO                   
                   "ZGZ_OBSAPR"                           ,;  // 2  = X3_CAMPO
                    getsx3cache("ZGZ_OBSAPR","X3_PICTURE"),;  // 3  = X3_PICTURE                    
                    50,;  // 4  = X3_TAMANHO            
@@ -297,9 +246,9 @@ Aadd(aHeader,{"Observação"                           ,;  // 1  = X3_TITULO
                    "C"                                   ,;  // 8  = X3_TIPO                   
                                                        "",;  // 9  = X3_CONTEXT
                    ""                                    })     // 10 = X3_CBOX                 
-_nColOBS:=len(aHeader)
+_nColOBS:=Len(aHeader)
 
-    TRBZGZ->(DbGoTop())
+    TRBZGZ->(DBGoTop())
 
     DEFINE MSDIALOG _oDlgApr TITLE "Rotina de Aprovação de Reajuste Salarial" FROM _aSizeAut[7],00 To _aSizeAut[6], _aSizeAut[5] PIXEL // 00,00 TO 300,400
         @ _aPosObj[2,3]-30, 05  BUTTON _OButtonApr PROMPT "&Aprovar Todos"	 SIZE 50, 012 OF _oDlgApr ACTION (U_AGPE008A("A") ) PIXEL
@@ -326,22 +275,22 @@ _nColOBS:=len(aHeader)
        _oGetDB:Enable( ) 
 
 
-       TRBZGZ->(DbGoTop())
+       TRBZGZ->(DBGoTop())
        _oGetDB:ForceRefresh ( )
 
     ACTIVATE MSDIALOG _oDlgApr CENTERED
 
 End Sequence
 
-If SELECT("TRBZGZ") # 0
+If Select("TRBZGZ") # 0
    _otemp:delete()
 EndIf
 
 If Select("QRYZGZ") <> 0
-  QRYZGZ->(DbCloseArea())
+  QRYZGZ->(DBCloseArea())
 EndIf
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -352,7 +301,8 @@ Descrição-------: Roda a query e grava tabela temporária com os dados a serem ap
 Parametros------: Nenhum
 Retorno---------: _lRet = .T. = Há dados a serem processados
                           .F. = Não há dados a serem processados.
-===============================================================================================================================*/
+===============================================================================================================================
+*/
 User Function AGPE008Q(_oProc)
 Local _cQry 
 Local _aStruct := {}
@@ -374,16 +324,16 @@ Begin Sequence
    EndIf 
    
    If Select("QRYZGZ") <> 0
-	  QRYZGZ->(DbCloseArea())
+	  QRYZGZ->(DBCloseArea())
    EndIf
 	
    TCQUERY _cQry NEW ALIAS "QRYZGZ"	
    TCSetField( "QRYZGZ", "ZGZ_DTOCOR", "D", 8, 0)	
 
-   DbSelectArea("QRYZGZ")
+   DBSelectArea("QRYZGZ")
    Count To _nTotRegs
 
-   QRYZGZ->(dbGoTop())
+   QRYZGZ->(DBGoTop())
 
    If _nTotRegs == 0 
       Break 
@@ -394,28 +344,28 @@ Begin Sequence
    //=================================================================
    // Cria a tabela temporária
    //=================================================================
-   Aadd(_aStruct,{"WK_OK"      , "C",  2, 0})
-   Aadd(_aStruct,{"ZGZ_FILIAL" , "C",  2, 0})
-   Aadd(_aStruct,{"ZGZ_DTOCOR" , "D",  8, 0})
-   Aadd(_aStruct,{"ZGZ_MAT"    , "C",  6, 0})
-   Aadd(_aStruct,{"ZGZ_NOME "  , "C", 70, 0})
-   Aadd(_aStruct,{"ZGZ_CARGO " , "C", 30, 0})
-   Aadd(_aStruct,{"ZGZ_SALARI" , "N", 12, 2})
-   Aadd(_aStruct,{"ZGZ_CODMOT" , "C", 03, 0})
-   Aadd(_aStruct,{"ZGZ_MOTIVO" , "C", 30, 0})
-   Aadd(_aStruct,{"ZGZ_TIPO"   , "C", 15, 0})
-   Aadd(_aStruct,{"ZGZ_TMPFUN" , "C", 20, 0})
-   Aadd(_aStruct,{"ZGZ_CODCAR" , "C",  5, 0})
-   Aadd(_aStruct,{"ZGZ_DESCAR" , "C", 30, 0}) 
-   Aadd(_aStruct,{"ZGZ_SALPRO" , "N", 12, 2})  
-   Aadd(_aStruct,{"WK_DIFSALA" , "N", 12, 2})
-   Aadd(_aStruct,{"WK_PERAUME" , "N",  9, 4})  
-   Aadd(_aStruct,{"ZGZ_OBSAPR" , "C",100, 0}) 
-   Aadd(_aStruct,{"ZGZ_RECNO"  , "N", 10, 0})
-   Aadd(_aStruct,{"ZGZ_SITUAC" , "C",  1, 0}) 
+   aAdd(_aStruct,{"WK_OK"      , "C",  2, 0})
+   aAdd(_aStruct,{"ZGZ_FILIAL" , "C",  2, 0})
+   aAdd(_aStruct,{"ZGZ_DTOCOR" , "D",  8, 0})
+   aAdd(_aStruct,{"ZGZ_MAT"    , "C",  6, 0})
+   aAdd(_aStruct,{"ZGZ_NOME "  , "C", 70, 0})
+   aAdd(_aStruct,{"ZGZ_CARGO " , "C", 30, 0})
+   aAdd(_aStruct,{"ZGZ_SALARI" , "N", 12, 2})
+   aAdd(_aStruct,{"ZGZ_CODMOT" , "C", 03, 0})
+   aAdd(_aStruct,{"ZGZ_MOTIVO" , "C", 30, 0})
+   aAdd(_aStruct,{"ZGZ_TIPO"   , "C", 15, 0})
+   aAdd(_aStruct,{"ZGZ_TMPFUN" , "C", 20, 0})
+   aAdd(_aStruct,{"ZGZ_CODCAR" , "C",  5, 0})
+   aAdd(_aStruct,{"ZGZ_DESCAR" , "C", 30, 0}) 
+   aAdd(_aStruct,{"ZGZ_SALPRO" , "N", 12, 2})  
+   aAdd(_aStruct,{"WK_DIFSALA" , "N", 12, 2})
+   aAdd(_aStruct,{"WK_PERAUME" , "N",  9, 4})  
+   aAdd(_aStruct,{"ZGZ_OBSAPR" , "C",100, 0}) 
+   aAdd(_aStruct,{"ZGZ_RECNO"  , "N", 10, 0})
+   aAdd(_aStruct,{"ZGZ_SITUAC" , "C",  1, 0}) 
      
    If Select("TRBZGZ") <> 0
-	   TRBZGZ->(DbCloseArea())
+	   TRBZGZ->(DBCloseArea())
    EndIf
    
    //======================================================================
@@ -436,7 +386,7 @@ Begin Sequence
    _nDiferSal    := 0
    _nPerReajuste := 0
 
-   Do While ! QRYZGZ->(Eof())
+   While ! QRYZGZ->(Eof())
       _oProc:cCaption := ("Gravando tabela temporária..." + AllTrim(Str(_nI,10)) + "/" + AllTrim(Str(_nTotRegs,10)))
       ProcessMessages()
        
@@ -471,9 +421,9 @@ Begin Sequence
       TRBZGZ->ZGZ_SITUAC  := QRYZGZ->ZGZ_SITUAC
       TRBZGZ->WK_DIFSALA  := _nDifSalario
       TRBZGZ->WK_PERAUME  := _nPercAumento
-      TRBZGZ->(MsUnLock())        
+      TRBZGZ->(MSUnLock())        
 
-      QRYZGZ->(DbSkip())
+      QRYZGZ->(DBSkip())
       
       _nI += 1
 
@@ -487,7 +437,7 @@ Begin Sequence
 End Sequence
 
 If Select("QRYZGZ") <> 0
-   QRYZGZ->(DbCloseArea())
+   QRYZGZ->(DBCloseArea())
 EndIf
 
 Return _lRet 
@@ -504,28 +454,29 @@ Parametros------: _cOpcao = Opção de Atualização: "A" = Aprovado
                                                   "R" = Reprovado
                                                   "P" = Pendente de Aprovação.
 Retorno---------: Nenhum
-===============================================================================================================================*/
+===============================================================================================================================
+*/
 User Function AGPE008A(_cOpcao)
 
 Begin Sequence
    
-   TRBZGZ->(DbGoTop())
-   Do while ! TRBZGZ->(Eof())
+   TRBZGZ->(DBGoTop())
+   While ! TRBZGZ->(Eof())
 
       TRBZGZ->(RecLock("TRBZGZ",.F.))
       TRBZGZ->ZGZ_SITUAC  := _cOpcao
-      TRBZGZ->(MsUnLock())    
+      TRBZGZ->(MSUnLock())    
    
-      TRBZGZ->(DbSkip())
+      TRBZGZ->(DBSkip())
    EndDo
    
 
 End Sequence 
 
-TRBZGZ->(DbGoTop())
+TRBZGZ->(DBGoTop())
 _oGetDB:ForceRefresh()
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -535,19 +486,20 @@ Data da Criacao-: 04/08/2021
 Descrição-------: Grava  todas  as alterações realizadas.
 Parametros------: oProc
 Retorno---------: Nenhum
-===============================================================================================================================*/
+===============================================================================================================================
+*/
 User Function AGPE008G() // AGPE008G(oProc)
-Local _cCodlgi   := U_RetLgiLga(__cUserID)
-Local _cNomeUser := UsrFullName(__cUserID)
+Local _cCodlgi   := U_RetLgiLga(__cUserId)
+Local _cNomeUser := UsrFullName(__cUserId)
 Local _aDados    := {}
 Local _aTotais   := {0,0,0}
 Local _cTitulo   := "Classificação de Funcionários - Listagem com os Rejustes Que Foram Aprovados / Rejeitados"
 Local _nRegAtu   := TRBZGZ->(Recno())
-LOCAL _cPict     := "@E 999,999,999,999.99"
+Local _cPict     := "@E 999,999,999,999.99"
 Local _lAlterou, _cSituacao, _nPercAumento, _nDifSalario, _cEmailEnv,  F
 
 Begin Sequence
-   If ! U_ITMSG("Confirma a gravação dos reajustes salariais?","Atenção" , , ,2, 2) 
+   If ! U_ITMsg("Confirma a gravação dos reajustes salariais?","Atenção" , , ,2, 2) 
       Break 
    EndIf
    
@@ -557,37 +509,37 @@ Begin Sequence
    _cEmailEnv := ""
    _cMail     := ""
    PswOrder(1)
-   PswSeek(__cUserID,.T.)
+   PswSeek(__cUserId,.T.)
    aUsuario:=PswRet()	
-   _cEmailEnv :=Alltrim(aUsuario[1,14])
+   _cEmailEnv :=AllTrim(aUsuario[1,14])
 
    //==========================================================================
    // Efetua a gravação dos dados.
    //==========================================================================
-   SRJ->(DbSetOrder(4)) // RJ_FILIAL+RJ_CARGO
-   SRA->(DbSetOrder(1)) // RA_FILIAL+RA_MAT+RA_PROCES
-   SQ3->(DbSetOrder(1)) // Q3_FILIAL+Q3_CARGO+Q3_CC
+   SRJ->(DBSetOrder(4)) // RJ_FILIAL+RJ_CARGO
+   SRA->(DBSetOrder(1)) // RA_FILIAL+RA_MAT+RA_PROCES
+   SQ3->(DBSetOrder(1)) // Q3_FILIAL+Q3_CARGO+Q3_CC
 
    _nConta:= TRBZGZ->(LASTREC())
-   _cTot  :=ALLTRIM(STR(_nConta))
-   _nTam  :=LEN(_cTot)
+   _cTot  :=AllTrim(Str(_nConta))
+   _nTam  :=Len(_cTot)
    _nConta:=0
 
    ProcRegua(_nConta)   
 
-   TRBZGZ->(DbSetOrder(2))
-   TRBZGZ->(DbGoTop())
+   TRBZGZ->(DBSetOrder(2))
+   TRBZGZ->(DBGoTop())
 
-   ZGZ->(DbGoTo(TRBZGZ->ZGZ_RECNO))  
+   ZGZ->(DBGoTo(TRBZGZ->ZGZ_RECNO))  
    _cFilQ:=ZGZ->ZGZ_FILIAL
    _aFiliais:= {}
 
-   Do while ! TRBZGZ->(Eof())
+   While ! TRBZGZ->(Eof())
       
-      ZGZ->(DbGoTo(TRBZGZ->ZGZ_RECNO))  
+      ZGZ->(DBGoTo(TRBZGZ->ZGZ_RECNO))  
       _nConta++
       
-      IncProc("Gravando: "+ALLTRIM(STRZERO(_nConta,_nTam)) +" de "+ _cTot)
+      IncProc("Gravando: "+AllTrim(StrZero(_nConta,_nTam)) +" de "+ _cTot)
 
       //======================================================
       // Atualiza cadastro de reajustes.
@@ -608,7 +560,7 @@ Begin Sequence
             ZGZ->ZGZ_USRNMA:= _cNomeUser
          EndIf 
 
-         ZGZ->(MsUnLock())    
+         ZGZ->(MSUnLock())    
      
          //===============================================================
          If TRBZGZ->ZGZ_SITUAC == "A"
@@ -623,17 +575,17 @@ Begin Sequence
             SRA->RA_SALARIO := TRBZGZ->ZGZ_SALPRO
             SRA->RA_CARGO   := TRBZGZ->ZGZ_CODCAR
             SRA->RA_USERLGA := _cCodlgi
-            SRA->(MsUnLock())
+            SRA->(MSUnLock())
       
             //======================================================
             // Atualiza Histórico Valores Salariais   
             //======================================================
             cSeq:="1"
-            SR3->(dbSetOrder(2))
-            DO WHILE SR3->(dbSeek(TRBZGZ->ZGZ_FILIAL+TRBZGZ->ZGZ_MAT+DTOS(TRBZGZ->ZGZ_DTOCOR)+cSeq+TRBZGZ->ZGZ_CODMOT+"000"))
-               cSeq:=SOMA1(cSeq,1)
-            ENDDO
-            SR3->(dbSetOrder(1))
+            SR3->(DBSetOrder(2))
+            While SR3->(DBSeek(TRBZGZ->ZGZ_FILIAL+TRBZGZ->ZGZ_MAT+DToS(TRBZGZ->ZGZ_DTOCOR)+cSeq+TRBZGZ->ZGZ_CODMOT+"000"))
+               cSeq:=Soma1(cSeq,1)
+            EndDo
+            SR3->(DBSetOrder(1))
             SR3->(RecLock("SR3",.T.))
             SR3->R3_FILIAL := TRBZGZ->ZGZ_FILIAL
             SR3->R3_MAT    := TRBZGZ->ZGZ_MAT
@@ -643,17 +595,17 @@ Begin Sequence
             SR3->R3_DESCPD := "SALARIO BASE"
             SR3->R3_VALOR  := TRBZGZ->ZGZ_SALPRO
             SR3->R3_SEQ    := cSeq
-            SR3->(MsUnLock())
+            SR3->(MSUnLock())
 
             //======================================================
             // Atualiza Histórico Alterações Salariais
             //======================================================
             cSeq:="1"
-            SR7->(dbSetOrder(2))
-            DO WHILE SR7->(dbSeek(TRBZGZ->ZGZ_FILIAL+TRBZGZ->ZGZ_MAT+DTOS(TRBZGZ->ZGZ_DTOCOR)+cSeq+TRBZGZ->ZGZ_CODMOT))
-               cSeq:=SOMA1(cSeq,1)
-            ENDDO
-            SR7->(dbSetOrder(1))
+            SR7->(DBSetOrder(2))
+            While SR7->(DBSeek(TRBZGZ->ZGZ_FILIAL+TRBZGZ->ZGZ_MAT+DToS(TRBZGZ->ZGZ_DTOCOR)+cSeq+TRBZGZ->ZGZ_CODMOT))
+               cSeq:=Soma1(cSeq,1)
+            EndDo
+            SR7->(DBSetOrder(1))
             SR7->(RecLock("SR7",.T.))
             SR7->R7_FILIAL  := TRBZGZ->ZGZ_FILIAL
             SR7->R7_MAT     := TRBZGZ->ZGZ_MAT
@@ -667,7 +619,7 @@ Begin Sequence
             SR7->R7_SEQ     := cSeq
             SR7->R7_CARGO   := SQ3->Q3_CARGO 
             SR7->R7_DESCCAR := SQ3->Q3_DESCSUM
-            SR7->(MsUnLock())
+            SR7->(MSUnLock())
          EndIf 
 
       End Transaction 
@@ -678,7 +630,7 @@ Begin Sequence
          _nDifSalario  := TRBZGZ->ZGZ_SALPRO - TRBZGZ->ZGZ_SALARI
          If TRBZGZ->ZGZ_SALARI == 0
             _nPercAumento := 100
-         ELSEIf _nDifSalario == 0
+         ElseIf _nDifSalario == 0
             _nPercAumento := 0
          Else    
             _nPercAumento := _nDifSalario / TRBZGZ->ZGZ_SALARI * 100 
@@ -695,8 +647,8 @@ Begin Sequence
             _cSituacao := "Rejeitado" 
          EndIf 
 
-         Aadd(_aDados,{TRBZGZ->ZGZ_FILIAL,;
-                       DTOC(TRBZGZ->ZGZ_DTOCOR),; 
+         aAdd(_aDados,{TRBZGZ->ZGZ_FILIAL,;
+                       DToC(TRBZGZ->ZGZ_DTOCOR),; 
                        TRBZGZ->ZGZ_MAT,;
                        TRBZGZ->ZGZ_NOME,;
                        TRBZGZ->ZGZ_CARGO,;
@@ -718,26 +670,26 @@ Begin Sequence
             PswOrder(2)
             If PswSeek(_cUsern,.T.)
                _aUsuario := PswRet()	
-               If Len(aUsuario) > 0 .and.  !Alltrim(aUsuario[1,14])  $ _cMail
-                  _cMail+= Alltrim(aUsuario[1,14])+";"
+               If Len(aUsuario) > 0 .And.  !AllTrim(aUsuario[1,14])  $ _cMail
+                  _cMail+= AllTrim(aUsuario[1,14])+";"
                EndIf
             EndIf
 
       EndIf 
 
 
-      TRBZGZ->(DbSkip())
+      TRBZGZ->(DBSkip())
 
-      If TRBZGZ->ZGZ_SITUAC == "A" .Or. TRBZGZ->ZGZ_SITUAC == "R" .OR. TRBZGZ->(Eof())
-         IF _cFilQ <> TRBZGZ->ZGZ_FILIAL 
-            AADD(_aFiliais,{ACLONE(_aDados),ACLONE(_aTotais),_cFilQ,_cMail})
+      If TRBZGZ->ZGZ_SITUAC == "A" .Or. TRBZGZ->ZGZ_SITUAC == "R" .Or. TRBZGZ->(Eof())
+         If _cFilQ <> TRBZGZ->ZGZ_FILIAL 
+            aAdd(_aFiliais,{ACLONE(_aDados),ACLONE(_aTotais),_cFilQ,_cMail})
             _aDados  := {}
             _aTotais := {0,0,0}
             _cFilQ   := TRBZGZ->ZGZ_FILIAL
             _cMail   := ""
    
-         ENDIF
-      ENDIF
+         EndIf
+      EndIf
 
    EndDo
    
@@ -747,25 +699,25 @@ Begin Sequence
    _cMenEnvio  := ""
    If Len(_aFiliais) > 0 
 
-      FOR F := 1 TO LEN(_aFiliais)
+      For F := 1 TO Len(_aFiliais)
           _cNomeFilial   := _aFiliais[F,3] + "-" + AllTrim( Posicione('SM0',1,cEmpAnt+_aFiliais[F,3],'M0_FILIAL') )
           _cEmailDest    := _aFiliais[F,4] + _cEmailEnv 
           IncProc("Enviando e-mail da Filial: "+_cNomeFilial)
 
           U_AGPE007E(.F., ,_cEmailDest,_cTitulo+" - "+_cNomeFilial,"Listagem dos Reajustes que Foram Aprovados / Rejeitados",_aFiliais[F,1],_aFiliais[F,2])
       Next
-   else
+   Else
       _cMenEnvio  := "Nao houve envio de e-mails"
    EndIf 
 
    bBloco:={|| U_ITMsgLog( _cMenEnvio , "ATENCAO") }
-   U_Itmsg("Gravação dos reajustes salariais concluidas com sucesso!","Atenção","Clique em Ver Detalhes para conferir os envios de e-mail",2,,,,,,bBloco)  
+   U_ITMsg("Gravação dos reajustes salariais concluidas com sucesso!","Atenção","Clique em Ver Detalhes para conferir os envios de e-mail",2,,,,,,bBloco)  
 
 End Sequence
 
-TRBZGZ->(DbGoTo(_nRegAtu)) 
+TRBZGZ->(DBGoTo(_nRegAtu)) 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -775,15 +727,16 @@ Data da Criacao-: 04/08/2021
 Descrição-------: Grava  todas  as alterações realizadas.
 Parametros------: Nenhum
 Retorno---------: Nenhum
-===============================================================================================================================*/
+===============================================================================================================================
+*/
 User Function AGPE008V()
 Local _lRet := .T.
 
 Begin Sequence
    If !TRBZGZ->ZGZ_SITUAC $ ("P/A/R")
-      U_Itmsg("Conteúdo do campos situação inválido."+TRBZGZ->ZGZ_SITUAC,"Atenção","Informe um conteúdo válido para o campo situação.",1)
+      U_ITMsg("Conteúdo do campos situação inválido."+TRBZGZ->ZGZ_SITUAC,"Atenção","Informe um conteúdo válido para o campo situação.",1)
       _lRet := .F.
-   Endif
+   EndIf
 
 End Sequence
 
@@ -809,18 +762,18 @@ Begin Sequence
    _aTitulos := {"Filial", "Matricula", "Data Aumento","Tipo Aumento","Desc.Tipo Aumento", "Função",;
                  "Desc.Função", "Tipo Pagto", "Cat.Func","Salario Base"," Usuario", "Sequencia","Cargo","Desc.Cargo"}
    
-   SR7->(DbSetOrder(2)) // R7_FILIAL+R7_MAT+DTOS(R7_DATA)+R7_SEQ+R7_TIPO // Matricula + Data Aumento + Sequencia + Tipo Aumento 
+   SR7->(DBSetOrder(2)) // R7_FILIAL+R7_MAT+DToS(R7_DATA)+R7_SEQ+R7_TIPO // Matricula + Data Aumento + Sequencia + Tipo Aumento 
    SR7->(MsSeek(_cFilial + _cMatric))
    _aDados := {}
    
-   Do While ! SR7->(Eof()) .And. SR7->(R7_FILIAL+R7_MAT) == _cFilial + _cMatric
+   While ! SR7->(Eof()) .And. SR7->(R7_FILIAL+R7_MAT) == _cFilial + _cMatric
       
-      _nSalBase := Posicione('SR3',1,SR7->(R7_FILIAL+R7_MAT+DTOS(R7_DATA)+R7_TIPO)+"000",'R3_VALOR') // R3_FILIAL+R3_MAT+DTOS(R3_DATA)+R3_TIPO+R3_PD
+      _nSalBase := Posicione('SR3',1,SR7->(R7_FILIAL+R7_MAT+DToS(R7_DATA)+R7_TIPO)+"000",'R3_VALOR') // R3_FILIAL+R3_MAT+DToS(R3_DATA)+R3_TIPO+R3_PD
 
       _cSalBaser := "R$ " + Transform(_nSalBase,"@E 99,999,999,999.99")
 
 
-      Aadd(_aDados, {SR7->R7_FILIAL,;                   // FILIAL    
+      aAdd(_aDados, {SR7->R7_FILIAL,;                   // FILIAL    
 	                  SR7->R7_MAT,;                      // Matricula
 	                  SR7->R7_DATA,;                     // Data Aumento
 	                  SR7->R7_TIPO,;                     // Tipo Aumento
@@ -835,11 +788,11 @@ Begin Sequence
 	                  SR7->R7_CARGO,;                    // Cargo
 	                  SR7->R7_DESCCAR})                  // Desc.Cargo
 
-      SR7->(DbSkip())
+      SR7->(DBSkip())
    EndDo 
 
    If Empty(_aDados)   
-      U_Itmsg("Não existem dados de histórico a serem exibidos.","Atenção",,1)
+      U_ITMsg("Não existem dados de histórico a serem exibidos.","Atenção",,1)
       Break 
    EndIf    
 
@@ -847,4 +800,4 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil 
+Return 

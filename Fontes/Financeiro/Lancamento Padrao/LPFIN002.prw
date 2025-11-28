@@ -4,13 +4,13 @@
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  |04/10/2024| Chamado 47735. Incluídas regras para a filial 33
-Lucas Borges  |04/10/2024| Chamado 48741. Corrigida a gravação do histórico
 Lucas Borges  |03/07/2025| Chamado 51251. Inclusão da natureza 221034 nas regras genéricas
+Lucas Borges  |28/08/2025| Chamado 51910. Inclusão da natureza 221034 nas 121017 genéricas
+Lucas Borges  |21/11/2025| Chamado 53063. Inclusão da natureza 222052 na Antecipação de Produtores
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -59,13 +59,13 @@ If _cCod $ '520001CD/521001CD/527001CC/520001ID/521001ID/527001IC'
 		_xRetorno := '3301010012'
 	ElseIf SE5->E5_MOTBX == 'LIQ'//Liquidações
 		_xRetorno := '110206G001'
-		_cItem := 'SA1'+ POSICIONE("SE1",15,SE5->(E5_FILIAL+E5_DOCUMEN),"E1_CLIENTE")
-		RestArea(_aAreaSE1)
+		_cItem := 'SA1'+ Posicione("SE1",15,SE5->(E5_FILIAL+E5_DOCUMEN),"E1_CLIENTE")
+		FWRestArea(_aAreaSE1)
 	ElseIf AllTrim(SE5->E5_MOTBX) $ 'CEC'//Compensacao entre Carteiras
 
 		BeginSql alias _cAlias
 			SELECT SE5.E5_CLIFOR, SE5.E5_LOJA, SA2.A2_CONTA
-			FROM %table:SE5% SE5, %table:SA2% SA2
+			FROM %Table:SE5% SE5, %Table:SA2% SA2
 			WHERE SE5.D_E_L_E_T_ = ' '
 				AND SA2.D_E_L_E_T_ = ' 
 				AND SE5.E5_RECPAG = 'P'
@@ -78,9 +78,9 @@ If _cCod $ '520001CD/521001CD/527001CC/520001ID/521001ID/527001IC'
 
 		If 	(_cAlias)->(!Eof())
 			
-			If Substr((_cAlias)->E5_CLIFOR,1,1)== "A"//Regra especifica para quando o titulo a pagar refere-se a um autonomo
+			If SubStr((_cAlias)->E5_CLIFOR,1,1)== "A"//Regra especifica para quando o titulo a pagar refere-se a um autonomo
 				_xRetorno := '3401020011'
-			ElseIf Substr((_cAlias)->A2_CONTA,1,6) $ '210105/210106'
+			ElseIf SubStr((_cAlias)->A2_CONTA,1,6) $ '210105/210106'
 				_xRetorno := (_cAlias)->A2_CONTA
 			Else
 				_xRetorno := "210101D001"
@@ -89,7 +89,7 @@ If _cCod $ '520001CD/521001CD/527001CC/520001ID/521001ID/527001IC'
 		EndIf
 		(_cAlias)->(DBCloseArea())
 
-	ElseIf AllTrim(SE5->E5_MOTBX) == 'NOR' .AND. AllTrim(SE5->E5_TIPO) == 'NCC'
+	ElseIf AllTrim(SE5->E5_MOTBX) == 'NOR' .And. AllTrim(SE5->E5_TIPO) == 'NCC'
 		If AllTrim(SE5->E5_NATUREZ) $ '231018/231002/231009'
 			If _cCod $ '527001CC'
 				_xRetorno	:= '3301010022'
@@ -101,11 +101,11 @@ If _cCod $ '520001CD/521001CD/527001CC/520001ID/521001ID/527001IC'
 		EndIf
 	ElseIf !Empty(SE5->E5_BANCO)
 		_xRetorno := SA6->A6_CONTA
-	ElseIf AllTrim(SE5->E5_MOTBX) == 'BPD' .AND. AllTrim(SE5->E5_TIPO) $ 'NF/ICM' .AND. AllTrim(SE5->E5_NATUREZ) == '232078'
+	ElseIf AllTrim(SE5->E5_MOTBX) == 'BPD' .And. AllTrim(SE5->E5_TIPO) $ 'NF/ICM' .And. AllTrim(SE5->E5_NATUREZ) == '232078'
             _xRetorno	:= '1102100001'
-	ElseIf AllTrim(SE5->E5_MOTBX) == 'BPD' .AND. AllTrim(SE5->E5_TIPO) == 'NCC' .AND. AllTrim(SE1->E1_NATUREZ) == '410001'
+	ElseIf AllTrim(SE5->E5_MOTBX) == 'BPD' .And. AllTrim(SE5->E5_TIPO) == 'NCC' .And. AllTrim(SE1->E1_NATUREZ) == '410001'
             _xRetorno	:= '1102100004'
-	Endif
+	EndIf
 
 //======================================================================
 //520001CC - Baixa Contas a Receber Carteira Nomal - Conta Credito
@@ -118,26 +118,26 @@ If _cCod $ '520001CD/521001CD/527001CC/520001ID/521001ID/527001IC'
 	
 ElseIf AllTrim(_cCod) $ '520001CC/521001CC/527001CD/520001IC/521001IC/527001ID'
 
-	If SE5->E5_MOTBX == "DCT" .AND. AllTrim(SE5->E5_TIPO) == "RA"
+	If SE5->E5_MOTBX == "DCT" .And. AllTrim(SE5->E5_TIPO) == "RA"
 		_xRetorno	:=  '3401010002'
 
-	ElseIf SE5->E5_MOTBX == "NOR" .AND. SE5->E5_TIPO == "NCC"
+	ElseIf SE5->E5_MOTBX == "NOR" .And. SE5->E5_TIPO == "NCC"
 		_xRetorno	:=  SA6->A6_CONTA
 
 	ElseIf SE5->E5_MOTBX == "LIQ"
 		_xRetorno:=  '110206G001'
 		_cItem	 :=  'SA1'+SA1->A1_COD
 
-	ElseIf AllTrim(SE5->E5_MOTBX) == 'BPD' .AND. AllTrim(SE5->E5_TIPO) == 'NCC' .AND. AllTrim(SE1->E1_NATUREZ) == '410001'
+	ElseIf AllTrim(SE5->E5_MOTBX) == 'BPD' .And. AllTrim(SE5->E5_TIPO) == 'NCC' .And. AllTrim(SE1->E1_NATUREZ) == '410001'
             _xRetorno	:= '3301020049'
 
-	ElseIf !(AllTrim(SE5->E5_MOTBX) == "NOR" .AND. AllTrim(SE5->E5_TIPO) == "NCC") .AND. AllTrim(SE5->E5_NATUREZ) == "121005"
+	ElseIf !(AllTrim(SE5->E5_MOTBX) == "NOR" .And. AllTrim(SE5->E5_TIPO) == "NCC") .And. AllTrim(SE5->E5_NATUREZ) == "121005"
 		_xRetorno	:=  '1102150006'
 
-	ElseIf AllTrim(SE5->E5_MOTBX) == "NOR" .AND. AllTrim(SE5->E5_TIPO) == "NDC" .AND. AllTrim(SE5->E5_NATUREZ) $ "112015/112002"
+	ElseIf AllTrim(SE5->E5_MOTBX) == "NOR" .And. AllTrim(SE5->E5_TIPO) == "NDC" .And. AllTrim(SE5->E5_NATUREZ) $ "112015/112002"
 		_xRetorno	:=  '3401010001'
 		
-	ElseIf AllTrim(SE5->E5_MOTBX) == "NOR" .AND. AllTrim(SE5->E5_NATUREZ) $ "112015/112001/112002/112019"
+	ElseIf AllTrim(SE5->E5_MOTBX) == "NOR" .And. AllTrim(SE5->E5_NATUREZ) $ "112015/112001/112002/112019"
 		_xRetorno	:=  SED->ED_CREDIT
 	Else 
 		If AllTrim(SA1->A1_CONTA) $ "1102069992/1102069993/1102069995/1102069996/1102069998/1102069999"
@@ -546,7 +546,7 @@ ElseIf AllTrim(_cCod) $ '530001CD/532001CD/590001CD/530001ID/532001ID/590001ID/5
 		EndIf
 
 	//Adiantamento de Salarios
-	ElseIf AllTrim( &(_cNaturez)) == '221004' .Or.  (AllTrim(SE2->E2_TIPO) $ 'NDF/PA/RPA/FT/RC/BOL' .AND. AllTrim( &(_cNaturez)) == '121004')
+	ElseIf AllTrim( &(_cNaturez)) == '221004' .Or.  (AllTrim(SE2->E2_TIPO) $ 'NDF/PA/RPA/FT/RC/BOL' .And. AllTrim( &(_cNaturez)) == '121004')
 		If SE2->E2_FILIAL $ '01/02/03/05/06/07'
 			_xRetorno := '1102030001'
 		ElseIf SE2->E2_FILIAL == '04'
@@ -577,7 +577,7 @@ ElseIf AllTrim(_cCod) $ '530001CD/532001CD/590001CD/530001ID/532001ID/590001ID/5
 
 	//Antecipação Produtores
 	ElseIf AllTrim( &(_cNaturez) ) == '222068' .Or.;
-		(AllTrim( &(_cNaturez)) == '222052'  .AND. Substr(SE2->E2_FORNECE,1,1) == "P" .AND. SE2->E2_PREFIXO == 'GLN';
+		(AllTrim( &(_cNaturez)) == '222052'  .And. SubStr(SE2->E2_FORNECE,1,1) == "P" .And. SE2->E2_PREFIXO == 'GLN';
 		 .And. SE2->E2_FILIAL <> '10')
 		If SE2->E2_FILIAL $ _cFil01+_cFil05
 			_xRetorno := '2101050201'
@@ -655,7 +655,7 @@ ElseIf AllTrim(_cCod) $ '530001CD/532001CD/590001CD/530001ID/532001ID/590001ID/5
 		EndIf
 
 	//Fretes e Carretos - trecho existe 2 vezes
-	ElseIf !AllTrim(_cCod) == '531001CC' .And. AllTrim(SE2->E2_TIPO) $ 'RPA/FT' .AND. AllTrim( &(_cNaturez)) $ '222037'
+	ElseIf !AllTrim(_cCod) == '531001CC' .And. AllTrim(SE2->E2_TIPO) $ 'RPA/FT' .And. AllTrim( &(_cNaturez)) $ '222037'
 		If SE2->E2_FILIAL $ _cFil01
 			_xRetorno := '3299020015'
 		ElseIf SE2->E2_FILIAL $ _cFil10
@@ -677,7 +677,7 @@ ElseIf AllTrim(_cCod) $ '530001CD/532001CD/590001CD/530001ID/532001ID/590001ID/5
 		EndIf
 
 	//FGTS Rescisorio
-	ElseIf AllTrim(SE2->E2_TIPO) == 'FGT' .AND. AllTrim( &(_cNaturez)) == '221035'
+	ElseIf AllTrim(SE2->E2_TIPO) == 'FGT' .And. AllTrim( &(_cNaturez)) == '221035'
 		If AllTrim(_cCod) == '531001CC'
 			_xRetorno := '3301020049'
 		Else
@@ -693,7 +693,7 @@ ElseIf AllTrim(_cCod) $ '530001CD/532001CD/590001CD/530001ID/532001ID/590001ID/5
 		EndIf
 		
 	//Lanches e refeições
-	ElseIf !AllTrim(_cCod) == '531001CC' .And. AllTrim(SE2->E2_ORIGEM) == 'FINA050' .AND. AllTrim( &(_cNaturez)) == '221023'
+	ElseIf !AllTrim(_cCod) == '531001CC' .And. AllTrim(SE2->E2_ORIGEM) == 'FINA050' .And. AllTrim( &(_cNaturez)) == '221023'
 		If SE2->E2_FILIAL $ _cFil01
 			_xRetorno := '3299020025'
 		ElseIf SE2->E2_FILIAL $ _cFil10
@@ -713,7 +713,7 @@ ElseIf AllTrim(_cCod) $ '530001CD/532001CD/590001CD/530001ID/532001ID/590001ID/5
 		EndIf
 
 	//Aluguéis de máquinas
-	ElseIf !AllTrim(_cCod) == '531001CC' .And. AllTrim(SE2->E2_ORIGEM) == 'FINA050' .AND. AllTrim( &(_cNaturez)) $ '222034/222053/222057'
+	ElseIf !AllTrim(_cCod) == '531001CC' .And. AllTrim(SE2->E2_ORIGEM) == 'FINA050' .And. AllTrim( &(_cNaturez)) $ '222034/222053/222057'
 		If SE2->E2_FILIAL $ _cFil01+_cFil05
 			_xRetorno := '3299040025'
 		ElseIf SE2->E2_FILIAL $ _cFil10
@@ -733,8 +733,8 @@ ElseIf AllTrim(_cCod) $ '530001CD/532001CD/590001CD/530001ID/532001ID/590001ID/5
 		EndIf
 
 	//Aluguéis
-	ElseIf !AllTrim(_cCod) == '531001CC' .And. AllTrim(SE2->E2_ORIGEM) == 'FINA050' .AND. AllTrim( &(_cNaturez)) $ '222035/222036/222054/232051/232007'
-		If SE2->E2_FORNECE == "F07492" .OR. SE2->E2_FILIAL == '40'
+	ElseIf !AllTrim(_cCod) == '531001CC' .And. AllTrim(SE2->E2_ORIGEM) == 'FINA050' .And. AllTrim( &(_cNaturez)) $ '222035/222036/222054/232051/232007'
+		If SE2->E2_FORNECE == "F07492" .Or. SE2->E2_FILIAL == '40'
 			_xRetorno := '3299140020'
 		ElseIf SE2->E2_FILIAL $ _cFil01+_cFil05
 			_xRetorno := '3299020020'
@@ -754,11 +754,11 @@ ElseIf AllTrim(_cCod) $ '530001CD/532001CD/590001CD/530001ID/532001ID/590001ID/5
 
 	//Recup. Custos
 	ElseIf AllTrim(_cCod) == '531001CC' .And. ;
-	((AllTrim(SE2->E2_TIPO) $ 'RPA/FT' .AND. AllTrim( &(_cNaturez)) $ '222037');	//Fretes e Carretos
-	 .Or. (AllTrim(SE2->E2_ORIGEM) == 'FINA050' .AND. AllTrim( &(_cNaturez)) == '221023');	//Lanches e refeições
-	 .Or. (AllTrim(SE2->E2_ORIGEM) == 'FINA050' .AND. AllTrim( &(_cNaturez)) $ '222034/222053/222057');	//Aluguéis de máquinas
-	 .Or. (AllTrim(SE2->E2_ORIGEM) == 'FINA050' .AND. AllTrim( &(_cNaturez)) $ '222035/22036/222054/232051');	//Aluguéis
-	 .Or. (AllTrim(SE2->E2_ORIGEM) == 'FINA050' .AND. AllTrim( &(_cNaturez)) $ '221021/221041'); //Serviços Terceiros PF
+	((AllTrim(SE2->E2_TIPO) $ 'RPA/FT' .And. AllTrim( &(_cNaturez)) $ '222037');	//Fretes e Carretos
+	 .Or. (AllTrim(SE2->E2_ORIGEM) == 'FINA050' .And. AllTrim( &(_cNaturez)) == '221023');	//Lanches e refeições
+	 .Or. (AllTrim(SE2->E2_ORIGEM) == 'FINA050' .And. AllTrim( &(_cNaturez)) $ '222034/222053/222057');	//Aluguéis de máquinas
+	 .Or. (AllTrim(SE2->E2_ORIGEM) == 'FINA050' .And. AllTrim( &(_cNaturez)) $ '222035/22036/222054/232051');	//Aluguéis
+	 .Or. (AllTrim(SE2->E2_ORIGEM) == 'FINA050' .And. AllTrim( &(_cNaturez)) $ '221021/221041'); //Serviços Terceiros PF
 	 )  
 		If SE2->E2_FILIAL $ _cFil01
 			_xRetorno := '3299020030'
@@ -779,11 +779,11 @@ ElseIf AllTrim(_cCod) $ '530001CD/532001CD/590001CD/530001ID/532001ID/590001ID/5
 		EndIf
 
 	//Antecipação Fretitas Leite
-	ElseIf AllTrim( &(_cNaturez)) == '222052'  .AND. Substr(SE2->E2_FORNECE,1,1) == "G" .AND. SE2->E2_PREFIXO == 'GLN'
+	ElseIf AllTrim( &(_cNaturez)) == '222052'  .And. SubStr(SE2->E2_FORNECE,1,1) == "G" .And. SE2->E2_PREFIXO == 'GLN'
 		_xRetorno := '1102110058'
 
 	//Antecipação Fretitas - Pagamento
-	ElseIf AllTrim( &(_cNaturez)) == '222071'  .AND. Substr(SE2->E2_FORNECE,1,1) == "G" .AND. SE2->E2_PREFIXO == 'GLN'
+	ElseIf AllTrim( &(_cNaturez)) == '222071'  .And. SubStr(SE2->E2_FORNECE,1,1) == "G" .And. SE2->E2_PREFIXO == 'GLN'
 		If SE2->E2_FILIAL $ _cFil01+_cFil05
 			_xRetorno := '1102050001'
 		ElseIf SE2->E2_FILIAL $ _cFil10
@@ -799,7 +799,7 @@ ElseIf AllTrim(_cCod) $ '530001CD/532001CD/590001CD/530001ID/532001ID/590001ID/5
 		EndIf
 			
 	//Adiantamentos Fretitas Leite
-	ElseIf AllTrim( &(_cNaturez)) == '222005'  .OR. (AllTrim( &(_cNaturez)) == '222038' .AND. SE2->E2_PREFIXO == 'GLN')
+	ElseIf AllTrim( &(_cNaturez)) == '222005'  .Or. (AllTrim( &(_cNaturez)) == '222038' .And. SE2->E2_PREFIXO == 'GLN')
 		If SE2->E2_FILIAL $ _cFil01+_cFil05
 			_xRetorno := '1102050001'
 		ElseIf SE2->E2_FILIAL $ _cFil10
@@ -815,16 +815,16 @@ ElseIf AllTrim(_cCod) $ '530001CD/532001CD/590001CD/530001ID/532001ID/590001ID/5
 		EndIf
 
 	//Lenha
-	ElseIf AllTrim(SE2->E2_TIPO) $ 'NDF/PA/RPA/FT/RC/BOL' .AND. AllTrim( &(_cNaturez)) == '222020'
+	ElseIf AllTrim(SE2->E2_TIPO) $ 'NDF/PA/RPA/FT/RC/BOL' .And. AllTrim( &(_cNaturez)) == '222020'
 		_xRetorno := SED->ED_DEBITO
 		_cItem	  := "SA2" + SA2->A2_COD
 
 	//Vale Transporte
-	ElseIf AllTrim(SE2->E2_ORIGEM) == 'FINA050' .AND. AllTrim( &(_cNaturez)) == '221033'
+	ElseIf AllTrim(SE2->E2_ORIGEM) == 'FINA050' .And. AllTrim( &(_cNaturez)) == '221033'
 		_xRetorno := '1102030023'
 
 	//Serviços Terceiros PF
-	ElseIf !AllTrim(_cCod) == '531001CC' .And. AllTrim(SE2->E2_ORIGEM) == 'FINA050' .AND. AllTrim( &(_cNaturez)) $ '221021/221041'
+	ElseIf !AllTrim(_cCod) == '531001CC' .And. AllTrim(SE2->E2_ORIGEM) == 'FINA050' .And. AllTrim( &(_cNaturez)) $ '221021/221041'
 		If SE2->E2_FILIAL $ _cFil01+_cFil05
 			_xRetorno := '3299020026'
 		ElseIf SE2->E2_FILIAL $ _cFil10
@@ -846,7 +846,7 @@ ElseIf AllTrim(_cCod) $ '530001CD/532001CD/590001CD/530001ID/532001ID/590001ID/5
 		EndIf
 		
 	//Serviços Terceiros PJ
-	ElseIf AllTrim(SE2->E2_ORIGEM) == 'FINA050' .AND. AllTrim( &(_cNaturez)) == '221022'
+	ElseIf AllTrim(SE2->E2_ORIGEM) == 'FINA050' .And. AllTrim( &(_cNaturez)) == '221022'
 		If SE2->E2_FILIAL $ _cFil10+_cFil05
 			_xRetorno := '3299020027'
 		ElseIf SE2->E2_FILIAL $ _cFil10
@@ -876,28 +876,28 @@ ElseIf AllTrim(_cCod) $ '530001CD/532001CD/590001CD/530001ID/532001ID/590001ID/5
 		EndIf
 
 	//Naturezas Diversas
-	ElseIf ((AllTrim( &(_cNaturez)) >= '212003' .AND. AllTrim( &(_cNaturez)) <= '212011');
-	.OR. (AllTrim( &(_cNaturez)) >= '212017' .AND. AllTrim( &(_cNaturez)) <= '212028'));
-	 .OR. (!AllTrim(SE2->E2_TIPO) $ 'FT'.AND.;
-	(AllTrim( &(_cNaturez)) $ '112005/112012/121005/121009/121010/211022';
-	.OR. AllTrim( &(_cNaturez)) $ '212032/212034/212037/212038/212040/212047/212048/212050';
-	.OR. (AllTrim( &(_cNaturez)) >= '213001' .AND. AllTrim( &(_cNaturez)) <= '213003') ;
-	.OR. (AllTrim( &(_cNaturez)) >= '214001' .AND. AllTrim( &(_cNaturez)) <= '214002') ;
-	.OR. (AllTrim( &(_cNaturez)) >= '221001' .AND. AllTrim( &(_cNaturez)) <= '221003') ;
-	.OR. (AllTrim( &(_cNaturez)) >= '221005' .AND. AllTrim( &(_cNaturez)) <= '221008') ;
-	.OR. AllTrim( &(_cNaturez)) $ '221013/221014/221017/221020/221023/221025/221029/221032/221034/221038/221041/221043/221047';
-	.OR. (AllTrim( &(_cNaturez)) >= '222009' .AND. AllTrim( &(_cNaturez)) <= '222010') ;
-	.OR. ( AllTrim( &(_cNaturez)) >= '231000' .AND. AllTrim( &(_cNaturez)) <='233999') ;
-	.OR. AllTrim( &(_cNaturez)) $ '222026/222030/222036/222056/222058/222059/232001/232002/232005/232007/232012/232013/232015/232018/232019/232022/';
-	.OR. AllTrim( &(_cNaturez)) $ '232023/232032/232040/232046/232050/232058/232059/232067/232071/232075/232079/313001/321001/321004/399002/399008/399013'))
-		If AllTrim(SE2->E2_ORIGEM) $ 'FINA050/FINA565/GPEM670' .OR. AllTrim(SE2->E2_TIPO) = 'TX';
+	ElseIf ((AllTrim( &(_cNaturez)) >= '212003' .And. AllTrim( &(_cNaturez)) <= '212011');
+	.Or. (AllTrim( &(_cNaturez)) >= '212017' .And. AllTrim( &(_cNaturez)) <= '212028'));
+	 .Or. (!AllTrim(SE2->E2_TIPO) $ 'FT'.AND.;
+	(AllTrim( &(_cNaturez)) $ '112005/112012/121005/121009/121010/121017/211022';
+	.Or. AllTrim( &(_cNaturez)) $ '212032/212034/212037/212038/212040/212047/212048/212050';
+	.Or. (AllTrim( &(_cNaturez)) >= '213001' .And. AllTrim( &(_cNaturez)) <= '213003') ;
+	.Or. (AllTrim( &(_cNaturez)) >= '214001' .And. AllTrim( &(_cNaturez)) <= '214002') ;
+	.Or. (AllTrim( &(_cNaturez)) >= '221001' .And. AllTrim( &(_cNaturez)) <= '221003') ;
+	.Or. (AllTrim( &(_cNaturez)) >= '221005' .And. AllTrim( &(_cNaturez)) <= '221008') ;
+	.Or. AllTrim( &(_cNaturez)) $ '221013/221014/221017/221020/221023/221025/221029/221032/221034/221038/221041/221043/221047';
+	.Or. (AllTrim( &(_cNaturez)) >= '222009' .And. AllTrim( &(_cNaturez)) <= '222010') ;
+	.Or. ( AllTrim( &(_cNaturez)) >= '231000' .And. AllTrim( &(_cNaturez)) <='233999') ;
+	.Or. AllTrim( &(_cNaturez)) $ '222026/222030/222036/222056/222058/222059/232001/232002/232005/232007/232012/232013/232015/232018/232019/232022/';
+	.Or. AllTrim( &(_cNaturez)) $ '232023/232032/232040/232046/232050/232058/232059/232067/232071/232075/232079/313001/321001/321004/399002/399008/399013'))
+		If AllTrim(SE2->E2_ORIGEM) $ 'FINA050/FINA565/GPEM670' .Or. AllTrim(SE2->E2_TIPO) = 'TX';
 		 .Or. (AllTrim(SE2->E2_ORIGEM) $ 'FINA290' .And. !AllTrim( &(_cNaturez)) $ '221013/222026/231007/231030/232002/232025/232030/232058/232072')
 			If AllTrim(_cCod) == '531001CC'
 				_xRetorno := '3301020049'
 			Else
-				If AllTrim( &(_cNaturez)) == '221013' .AND. Substr(SE2->E2_FORNECE,1,1) == 'J'//Pagamento de despesas de funcionários
+				If AllTrim( &(_cNaturez)) == '221013' .And. SubStr(SE2->E2_FORNECE,1,1) == 'J'//Pagamento de despesas de funcionários
 					_xRetorno := '3301020038'
-				ElseIf AllTrim( &(_cNaturez)) == '231022' .AND. Substr(SE2->E2_FORNECE,1,1) == 'J' //Pagamento de despesas de funcionários
+				ElseIf AllTrim( &(_cNaturez)) == '231022' .And. SubStr(SE2->E2_FORNECE,1,1) == 'J' //Pagamento de despesas de funcionários
 					_xRetorno := '3301020011'
 				Else
 					_xRetorno := SED->ED_DEBITO
@@ -912,7 +912,7 @@ ElseIf AllTrim(_cCod) $ '530001CD/532001CD/590001CD/530001ID/532001ID/590001ID/5
 			EndIf
 		EndIf
 	Else
-		If Substr(SA2->A2_CONTA,1,6) $ '210105/210106'
+		If SubStr(SA2->A2_CONTA,1,6) $ '210105/210106'
 			_xRetorno := SA2->A2_CONTA
 		Else
 			_xRetorno := "210101D001"
@@ -944,7 +944,7 @@ ElseIf _cCod $ '530002CD/532002CD/597002CD'
 		EndIf
 		
 	//Adiantamentos Fretista Leite
-	ElseIf AllTrim(SE5->E5_NATUREZ) == '222005'  .OR. (AllTrim( SE5->E5_NATUREZ) $ '222038/222071' .AND. SE2->E2_PREFIXO == 'GLN')
+	ElseIf AllTrim(SE5->E5_NATUREZ) == '222005'  .Or. (AllTrim( SE5->E5_NATUREZ) $ '222038/222071' .And. SE2->E2_PREFIXO == 'GLN')
 		If SE2->E2_FILIAL $ _cFil01+_cFil05
 			_xRetorno := '1102050001'
 		ElseIf SE2->E2_FILIAL $ _cFil10
@@ -960,7 +960,7 @@ ElseIf _cCod $ '530002CD/532002CD/597002CD'
 		EndIf
 
 	//Antecipação de produtores
-	ElseIf AllTrim(SE5->E5_NATUREZ) == '222068'
+	ElseIf AllTrim(SE5->E5_NATUREZ) $ '222068/222052'
 		If SE2->E2_FILIAL $ _cFil01+_cFil05
 			_xRetorno := '2101050201'
 		ElseIf SE2->E2_FILIAL $ _cFil10
@@ -1019,11 +1019,11 @@ ElseIf _cCod $ '530004CC/531004CD'
 		_xRetorno := '3401010002'
 
 	//Antecipação Fretitas Leite
-	ElseIf AllTrim(SE5->E5_NATUREZ) == '222052'  .AND. Substr(SE2->E2_FORNECE,1,1) == "G" .AND. SE2->E2_PREFIXO == 'GLN'
+	ElseIf AllTrim(SE5->E5_NATUREZ) == '222052'  .And. SubStr(SE2->E2_FORNECE,1,1) == "G" .And. SE2->E2_PREFIXO == 'GLN'
 		_xRetorno := '1102110058'
 					
 	//Adiantamentos Fretitas Leite
-	ElseIf AllTrim(SE5->E5_NATUREZ) == '222005'  .OR. (AllTrim( SE5->E5_NATUREZ) $ '222038/222071' .AND. SE2->E2_PREFIXO == 'GLN')
+	ElseIf AllTrim(SE5->E5_NATUREZ) == '222005'  .Or. (AllTrim( SE5->E5_NATUREZ) $ '222038/222071' .And. SE2->E2_PREFIXO == 'GLN')
 		If SE5->E5_FILIAL $ _cFil01+_cFil05
 			_xRetorno := '1102050001'
 		ElseIf SE5->E5_FILIAL $ _cFil10
@@ -1043,7 +1043,7 @@ ElseIf _cCod $ '530004CC/531004CD'
 		_xRetorno := '2101080012'
 
 	//Compras produtores Fretitas Leite
-	ElseIf AllTrim(SE5->E5_NATUREZ) == '222040' .AND. SE2->E2_PREFIXO == 'GN1'
+	ElseIf AllTrim(SE5->E5_NATUREZ) == '222040' .And. SE2->E2_PREFIXO == 'GN1'
 		If SE5->E5_FILIAL $ _cFil01+_cFil05
 			_xRetorno := '1102069998'
 		ElseIf SE5->E5_FILIAL $ _cFil10
@@ -1244,18 +1244,18 @@ ElseIf _cCod $ '597001CC/597002CC/589001CD/589002CD'
 	//no registro que originou a compensação, que podia ser a NF ou PA
 	BeginSql alias _cAlias
 		SELECT E5_CLIFOR, E5_NATUREZ, ED_CREDIT, ED_DEBITO
-		FROM %table:SE5% SE5, %table:SED% SED
+		FROM %Table:SE5% SE5, %Table:SED% SED
 		WHERE SE5.D_E_L_E_T_ = ' '
 			AND SED.D_E_L_E_T_ = ' '
 			AND SE5.E5_FILIAL = %exp:SE5->E5_FILIAL%
 			AND SED.ED_FILIAL = %xFilial:SED%
 			AND SED.ED_CODIGO = SE5.E5_NATUREZ
-			AND SE5.E5_PREFIXO = %exp:SUBSTR(SE5->E5_DOCUMEN,1,3)%
-			AND SE5.E5_NUMERO = %exp:SUBSTR(SE5->E5_DOCUMEN,4,9)%
-			AND SE5.E5_PARCELA = %exp:SUBSTR(SE5->E5_DOCUMEN,13,2)%
-			AND SE5.E5_TIPO = %exp:SUBSTR(SE5->E5_DOCUMEN,15,3)%
-			AND SE5.E5_CLIFOR = %exp:SUBSTR(SE5->E5_DOCUMEN,18,6)%
-			AND SE5.E5_LOJA = %exp:SUBSTR(SE5->E5_DOCUMEN,24,4)%
+			AND SE5.E5_PREFIXO = %exp:SubStr(SE5->E5_DOCUMEN,1,3)%
+			AND SE5.E5_NUMERO = %exp:SubStr(SE5->E5_DOCUMEN,4,9)%
+			AND SE5.E5_PARCELA = %exp:SubStr(SE5->E5_DOCUMEN,13,2)%
+			AND SE5.E5_TIPO = %exp:SubStr(SE5->E5_DOCUMEN,15,3)%
+			AND SE5.E5_CLIFOR = %exp:SubStr(SE5->E5_DOCUMEN,18,6)%
+			AND SE5.E5_LOJA = %exp:SubStr(SE5->E5_DOCUMEN,24,4)%
 			AND SE5.E5_SEQ = %exp:SE5->E5_SEQ%
 	EndSql
 
@@ -1586,7 +1586,7 @@ ElseIf _cCod $ '597001CD/597001ID/589001CC'
 		_xRetorno := SA2->A2_CONTA
 
 	//Fretes e Carretos - trecho existe 2 vezes
-	ElseIf _cCod == '597001CD' .AND. AllTrim(SE2->E2_NATUREZ) $ '222037'
+	ElseIf _cCod == '597001CD' .And. AllTrim(SE2->E2_NATUREZ) $ '222037'
 		If SE2->E2_FILIAL $ _cFil01+_cFil05
 			_xRetorno := '3299020015'
 		ElseIf SE2->E2_FILIAL $ _cFil10
@@ -1615,7 +1615,7 @@ ElseIf _cCod $ '597001CD/597001ID/589001CC'
 			_xRetorno := SED->ED_CREDIT
 		EndIf
 	Else
-		If Substr(SA2->A2_CONTA,1,6) $ '210105/210106'
+		If SubStr(SA2->A2_CONTA,1,6) $ '210105/210106'
 			_xRetorno := SA2->A2_CONTA
 		Else
 			_xRetorno := "210101D001"
@@ -1638,7 +1638,7 @@ ElseIf _cCod $ '597001VL/589001VL/597002VL/589002VL/597003VL/589003VL/589HIST/59
 	//no registro que originou a compensação, que podia ser a NF ou PA
 	BeginSql alias _cAlias
 		SELECT E5_NUMERO, E5_TIPO, E5_NATUREZ, E5_CLIFOR, A2_NOME, E5_VLJUROS, E5_VLMULTA, E5_VLDESCO
-		FROM %table:SE5% SE5, %table:SE2% SE2, %table:SA2% SA2, %table:SED% SED
+		FROM %Table:SE5% SE5, %Table:SE2% SE2, %Table:SA2% SA2, %Table:SED% SED
 		WHERE SE5.D_E_L_E_T_ = ' '
 			AND SE2.D_E_L_E_T_ = ' '
 			AND SA2.D_E_L_E_T_ = ' '
@@ -1646,12 +1646,12 @@ ElseIf _cCod $ '597001VL/589001VL/597002VL/589002VL/597003VL/589003VL/589HIST/59
 			AND SE5.E5_FILIAL = %exp:SE5->E5_FILIAL%
 			AND SED.ED_FILIAL = %xFilial:SED%
 			AND SA2.A2_FILIAL = %xFilial:SA2%
-			AND SE5.E5_PREFIXO = %exp:SUBSTR(SE5->E5_DOCUMEN,1,3)%
-			AND SE5.E5_NUMERO = %exp:SUBSTR(SE5->E5_DOCUMEN,4,9)%
-			AND SE5.E5_PARCELA = %exp:SUBSTR(SE5->E5_DOCUMEN,13,2)%
-			AND SE5.E5_TIPO = %exp:SUBSTR(SE5->E5_DOCUMEN,15,3)%
-			AND SE5.E5_CLIFOR = %exp:SUBSTR(SE5->E5_DOCUMEN,18,6)%
-			AND SE5.E5_LOJA = %exp:SUBSTR(SE5->E5_DOCUMEN,24,4)%
+			AND SE5.E5_PREFIXO = %exp:SubStr(SE5->E5_DOCUMEN,1,3)%
+			AND SE5.E5_NUMERO = %exp:SubStr(SE5->E5_DOCUMEN,4,9)%
+			AND SE5.E5_PARCELA = %exp:SubStr(SE5->E5_DOCUMEN,13,2)%
+			AND SE5.E5_TIPO = %exp:SubStr(SE5->E5_DOCUMEN,15,3)%
+			AND SE5.E5_CLIFOR = %exp:SubStr(SE5->E5_DOCUMEN,18,6)%
+			AND SE5.E5_LOJA = %exp:SubStr(SE5->E5_DOCUMEN,24,4)%
 			AND SE5.E5_SEQ = %exp:SE5->E5_SEQ%
 			AND SE2.E2_FILIAL = SE5.E5_FILORIG
 			AND SE2.E2_NATUREZ = SED.ED_CODIGO
@@ -1665,7 +1665,7 @@ ElseIf _cCod $ '597001VL/589001VL/597002VL/589002VL/597003VL/589003VL/589HIST/59
 			AND SA2.A2_LOJA = SE5.E5_LOJA
 	EndSql
 	If _cCod $ '597001VL/589001VL/597002VL/589002VL/597003VL/589003VL'
-		If (_cAlias)->E5_TIPO=="PA " .Or.((_cAlias)->E5_TIPO == "NDF" .AND. !AllTrim((_cAlias)->E5_NATUREZ)$"420001/420002")
+		If (_cAlias)->E5_TIPO=="PA " .Or.((_cAlias)->E5_TIPO == "NDF" .And. !AllTrim((_cAlias)->E5_NATUREZ)$"420001/420002")
 			If _cCod $ '597001VL/589001VL'
 				_xRetorno := SE5->(E5_VALOR)-((_cAlias)->(E5_VLJUROS+E5_VLMULTA))
 			ElseIf _cCod $ '597002VL/589002VL'
@@ -1687,27 +1687,27 @@ ElseIf _cCod $ '596001CD/588001CC'
 
 	BeginSql alias _cAlias
 		SELECT SE5.E5_NATUREZ
-		FROM %table:SE5% SE5
+		FROM %Table:SE5% SE5
 		WHERE SE5.D_E_L_E_T_ = ' '
 			AND SE5.E5_FILIAL = %exp:SE5->E5_FILIAL%
-			AND SE5.E5_PREFIXO = %exp:SUBSTR(SE5->E5_DOCUMEN,1,3)%
-			AND SE5.E5_NUMERO = %exp:SUBSTR(SE5->E5_DOCUMEN,4,9)%
-			AND SE5.E5_PARCELA = %exp:SUBSTR(SE5->E5_DOCUMEN,13,2)%
-			AND SE5.E5_TIPO = %exp:SUBSTR(SE5->E5_DOCUMEN,15,3)%
+			AND SE5.E5_PREFIXO = %exp:SubStr(SE5->E5_DOCUMEN,1,3)%
+			AND SE5.E5_NUMERO = %exp:SubStr(SE5->E5_DOCUMEN,4,9)%
+			AND SE5.E5_PARCELA = %exp:SubStr(SE5->E5_DOCUMEN,13,2)%
+			AND SE5.E5_TIPO = %exp:SubStr(SE5->E5_DOCUMEN,15,3)%
 			AND SE5.E5_CLIFOR = %exp:SE5->E5_FORNADT%
 			AND SE5.E5_LOJA = %exp:SE5->E5_LOJAADT%
 			AND SE5.E5_SEQ = %exp:SE5->E5_SEQ%
 	EndSql
 	
-	_cNaturez:=AllTrim(IIF(Empty((_cAlias)->E5_NATUREZ),SE1->E1_NATUREZ,(_cAlias)->E5_NATUREZ))
+	_cNaturez:=AllTrim(IIf(Empty((_cAlias)->E5_NATUREZ),SE1->E1_NATUREZ,(_cAlias)->E5_NATUREZ))
 	
-	If Substr(SE5->E5_DOCUMEN,15,3) $ "NDC/NCC/NF " .AND. SE5->E5_TIPO $ "NDC/NCC/NF " .AND. (_cNaturez $'410001' .OR. AllTrim(SE5->E5_NATUREZ)$'410001')
+	If SubStr(SE5->E5_DOCUMEN,15,3) $ "NDC/NCC/NF " .And. SE5->E5_TIPO $ "NDC/NCC/NF " .And. (_cNaturez $'410001' .Or. AllTrim(SE5->E5_NATUREZ)$'410001')
 		_xRetorno := "1102100004"
-	ElseIf Substr(SE5->E5_DOCUMEN,15,3) $ "NDC/NCC/NF " .AND. SE5->E5_TIPO $ "NDC/NCC/NF " .AND. (_cNaturez $'231002/111001/231009/231018/231019' .AND. AllTrim(SE5->E5_NATUREZ)$'231002/111001/231009/231018/231019')
+	ElseIf SubStr(SE5->E5_DOCUMEN,15,3) $ "NDC/NCC/NF " .And. SE5->E5_TIPO $ "NDC/NCC/NF " .And. (_cNaturez $'231002/111001/231009/231018/231019' .And. AllTrim(SE5->E5_NATUREZ)$'231002/111001/231009/231018/231019')
 		_xRetorno := IIf(_cCod == '596001CD',"3301010012","3301010022")
-	ElseIf Substr(SE5->E5_DOCUMEN,15,3) $ "NDC/NCC/NF " .AND. SE5->E5_TIPO $ "NDC/NCC/NF " .AND. (_cNaturez $'231025/111001/231026/231027' .AND. AllTrim(SE5->E5_NATUREZ)$'231025/111001/231026/231027')
+	ElseIf SubStr(SE5->E5_DOCUMEN,15,3) $ "NDC/NCC/NF " .And. SE5->E5_TIPO $ "NDC/NCC/NF " .And. (_cNaturez $'231025/111001/231026/231027' .And. AllTrim(SE5->E5_NATUREZ)$'231025/111001/231026/231027')
 		_xRetorno := IIf(_cCod == '596001CD',"3301010019","3301010022")
-	ElseIf Substr(SE5->E5_DOCUMEN,15,3) $ "NDC/NCC/NF " .AND. SE5->E5_TIPO $ "NDC/NCC/NF " .AND. (_cNaturez $'231015/111001' .AND. AllTrim(SE5->E5_NATUREZ)$'231015/111001')
+	ElseIf SubStr(SE5->E5_DOCUMEN,15,3) $ "NDC/NCC/NF " .And. SE5->E5_TIPO $ "NDC/NCC/NF " .And. (_cNaturez $'231015/111001' .And. AllTrim(SE5->E5_NATUREZ)$'231015/111001')
 		_xRetorno := IIf(_cCod == '596001CD',"3401020011","3401020010")  
 	Else		
 		_xRetorno := "2101119999"
@@ -1722,15 +1722,15 @@ ElseIf _cCod $ '596001CC/588001CD'
 
 	BeginSql alias _cAlias
 		SELECT SE5.E5_NATUREZ, SA1.A1_CONTA
-		FROM %table:SE5% SE5, %table:SA1% SA1
+		FROM %Table:SE5% SE5, %Table:SA1% SA1
 		WHERE SE5.D_E_L_E_T_ = ' '
 			AND SA1.D_E_L_E_T_ = ' '
 			AND SA1.A1_FILIAL = %xFilial:SA1%
 			AND SE5.E5_FILIAL = %exp:SE5->E5_FILIAL%
-			AND SE5.E5_PREFIXO = %exp:SUBSTR(SE5->E5_DOCUMEN,1,3)%
-			AND SE5.E5_NUMERO = %exp:SUBSTR(SE5->E5_DOCUMEN,4,9)%
-			AND SE5.E5_PARCELA = %exp:SUBSTR(SE5->E5_DOCUMEN,13,2)%
-			AND SE5.E5_TIPO = %exp:SUBSTR(SE5->E5_DOCUMEN,15,3)%
+			AND SE5.E5_PREFIXO = %exp:SubStr(SE5->E5_DOCUMEN,1,3)%
+			AND SE5.E5_NUMERO = %exp:SubStr(SE5->E5_DOCUMEN,4,9)%
+			AND SE5.E5_PARCELA = %exp:SubStr(SE5->E5_DOCUMEN,13,2)%
+			AND SE5.E5_TIPO = %exp:SubStr(SE5->E5_DOCUMEN,15,3)%
 			AND SE5.E5_CLIFOR = %exp:SE5->E5_FORNADT%
 			AND SE5.E5_LOJA = %exp:SE5->E5_LOJAADT%
 			AND SE5.E5_SEQ = %exp:SE5->E5_SEQ%
@@ -1738,19 +1738,19 @@ ElseIf _cCod $ '596001CC/588001CD'
 			AND SE5.E5_LOJA = SA1.A1_LOJA
 	EndSql
 	
-	_cNaturez:=AllTrim(IIF(Empty((_cAlias)->E5_NATUREZ),SE1->E1_NATUREZ,(_cAlias)->E5_NATUREZ))
+	_cNaturez:=AllTrim(IIf(Empty((_cAlias)->E5_NATUREZ),SE1->E1_NATUREZ,(_cAlias)->E5_NATUREZ))
 	
-	If Substr(SE5->E5_DOCUMEN,15,3) $ "NDC" .AND. AllTrim(SE5->E5_NATUREZ)$'112012'
+	If SubStr(SE5->E5_DOCUMEN,15,3) $ "NDC" .And. AllTrim(SE5->E5_NATUREZ)$'112012'
 		_xRetorno := SED->ED_CREDIT
-	ElseIf (Substr(SE5->E5_DOCUMEN,15,3) $ "NDC/NCC" .AND. SE5->E5_TIPO $ "NDC/NCC" .AND. (_cNaturez $'410001' .AND. AllTrim(SE5->E5_NATUREZ)$'410001'));
-		.Or. (SE5->E5_TIPO == 'NCC' .AND. !(SE5->E5_PREFIXO=='DCT') .AND. AllTrim(SE5->E5_NATUREZ) == '410001' .AND. Substr(SE5->E5_DOCUMEN,15,3) == 'NDC' .AND. SUBSTR(SE5->E5_DOCUMEN,1,3)=='DCI' .AND. _cNaturez == '231002');
-		.Or. (Substr(SE5->E5_DOCUMEN,15,3) == 'NCC' .AND. !(SUBSTR(SE5->E5_DOCUMEN,1,3)=='DCT') .AND. _cNaturez == '410001' .AND. SE5->E5_TIPO == 'NDC' .AND. SE5->E5_PREFIXO=='DCI' .AND. AllTrim(SE5->E5_NATUREZ) == '231002');
-		.Or. (SE5->E5_TIPO == 'RA ' .AND. !(SE5->E5_PREFIXO=='DCT') .AND. AllTrim(SE5->E5_NATUREZ) == '111001' .AND. Substr(SE5->E5_DOCUMEN,15,3) == 'NDC' .AND. SUBSTR(SE5->E5_DOCUMEN,1,3)=='DCI' .AND. _cNaturez == '231002')
-		_xRetorno := IIF(_cCod == '596001CC',"3401010002","3401020011")
-	ElseIf Substr(SE5->E5_DOCUMEN,15,3) $ "NDC/NCC" .AND. SE5->E5_TIPO $ "NDC/NCC" .AND. (_cNaturez $'410001/231002' .AND. AllTrim(SE5->E5_NATUREZ)$'410001/231002')
-		_xRetorno := IIF(_cCod == '596001CC',"3301010022","3401020011")
-	ElseIf Substr(SE5->E5_DOCUMEN,15,3) $ "NDC/RA" .AND. SE5->E5_TIPO $ "NDC/RA " .AND. (_cNaturez $'112015/121001' .AND. AllTrim(SE5->E5_NATUREZ)$'112015/121001')
-		_xRetorno := IIF(_cCod == '596001CC',"3401010001","3401020011")
+	ElseIf (SubStr(SE5->E5_DOCUMEN,15,3) $ "NDC/NCC" .And. SE5->E5_TIPO $ "NDC/NCC" .And. (_cNaturez $'410001' .And. AllTrim(SE5->E5_NATUREZ)$'410001'));
+		.Or. (SE5->E5_TIPO == 'NCC' .And. !(SE5->E5_PREFIXO=='DCT') .And. AllTrim(SE5->E5_NATUREZ) == '410001' .And. SubStr(SE5->E5_DOCUMEN,15,3) == 'NDC' .And. SubStr(SE5->E5_DOCUMEN,1,3)=='DCI' .And. _cNaturez == '231002');
+		.Or. (SubStr(SE5->E5_DOCUMEN,15,3) == 'NCC' .And. !(SubStr(SE5->E5_DOCUMEN,1,3)=='DCT') .And. _cNaturez == '410001' .And. SE5->E5_TIPO == 'NDC' .And. SE5->E5_PREFIXO=='DCI' .And. AllTrim(SE5->E5_NATUREZ) == '231002');
+		.Or. (SE5->E5_TIPO == 'RA ' .And. !(SE5->E5_PREFIXO=='DCT') .And. AllTrim(SE5->E5_NATUREZ) == '111001' .And. SubStr(SE5->E5_DOCUMEN,15,3) == 'NDC' .And. SubStr(SE5->E5_DOCUMEN,1,3)=='DCI' .And. _cNaturez == '231002')
+		_xRetorno := IIf(_cCod == '596001CC',"3401010002","3401020011")
+	ElseIf SubStr(SE5->E5_DOCUMEN,15,3) $ "NDC/NCC" .And. SE5->E5_TIPO $ "NDC/NCC" .And. (_cNaturez $'410001/231002' .And. AllTrim(SE5->E5_NATUREZ)$'410001/231002')
+		_xRetorno := IIf(_cCod == '596001CC',"3301010022","3401020011")
+	ElseIf SubStr(SE5->E5_DOCUMEN,15,3) $ "NDC/RA" .And. SE5->E5_TIPO $ "NDC/RA " .And. (_cNaturez $'112015/121001' .And. AllTrim(SE5->E5_NATUREZ)$'112015/121001')
+		_xRetorno := IIf(_cCod == '596001CC',"3401010001","3401020011")
 	ElseIf AllTrim((_cAlias)->A1_CONTA) $ "1102069992/1102069993/1102069995/1102069996/1102069998/1102069999"
 		_xRetorno := (_cAlias)->A1_CONTA
 	Else
@@ -1766,21 +1766,21 @@ ElseIf _cCod $ '596001VL/588001VL'
 	
 	BeginSql alias _cAlias
 		SELECT SE5.E5_NATUREZ
-		FROM %table:SE5% SE5
+		FROM %Table:SE5% SE5
 		WHERE SE5.D_E_L_E_T_ = ' '
 			AND SE5.E5_FILIAL = %exp:SE5->E5_FILIAL%
-			AND SE5.E5_PREFIXO = %exp:SUBSTR(SE5->E5_DOCUMEN,1,3)%
-			AND SE5.E5_NUMERO = %exp:SUBSTR(SE5->E5_DOCUMEN,4,9)%
-			AND SE5.E5_PARCELA = %exp:SUBSTR(SE5->E5_DOCUMEN,13,2)%
-			AND SE5.E5_TIPO = %exp:SUBSTR(SE5->E5_DOCUMEN,15,3)%
+			AND SE5.E5_PREFIXO = %exp:SubStr(SE5->E5_DOCUMEN,1,3)%
+			AND SE5.E5_NUMERO = %exp:SubStr(SE5->E5_DOCUMEN,4,9)%
+			AND SE5.E5_PARCELA = %exp:SubStr(SE5->E5_DOCUMEN,13,2)%
+			AND SE5.E5_TIPO = %exp:SubStr(SE5->E5_DOCUMEN,15,3)%
 			AND SE5.E5_CLIFOR = %exp:SE5->E5_FORNADT%
 			AND SE5.E5_LOJA = %exp:SE5->E5_LOJAADT%
 			AND SE5.E5_SEQ = %exp:SE5->E5_SEQ%
 	EndSql
 	
-	_cNaturez:=AllTrim(IIF(Empty((_cAlias)->E5_NATUREZ),SE1->E1_NATUREZ,(_cAlias)->E5_NATUREZ))
+	_cNaturez:=AllTrim(IIf(Empty((_cAlias)->E5_NATUREZ),SE1->E1_NATUREZ,(_cAlias)->E5_NATUREZ))
 	
-	If Substr(SE5->E5_DOCUMEN,15,3) $ "NDC/NCC" .AND. SE5->E5_TIPO $ "NDC/NCC" .AND. _cNaturez $ '231002' .AND. AllTrim(SE5->E5_NATUREZ) $ '231002'
+	If SubStr(SE5->E5_DOCUMEN,15,3) $ "NDC/NCC" .And. SE5->E5_TIPO $ "NDC/NCC" .And. _cNaturez $ '231002' .And. AllTrim(SE5->E5_NATUREZ) $ '231002'
 		_xRetorno := 0
 	Else	
 		_xRetorno := SE5->E5_VALOR
@@ -1864,7 +1864,7 @@ ElseIf _cCod $ '520001VL/527001VL'
 	ElseIf SE5->E5_MOTBX == "LIQ"
 		BeginSql alias _cAlias
 			SELECT COUNT(1) QTD
-			FROM %table:SE1% SE1
+			FROM %Table:SE1% SE1
 			WHERE SE1.D_E_L_E_T_ = ' '
 				AND SE1.E1_FILIAL = %exp:SE5->E5_FILIAL%
 				AND SE1.E1_ORIGEM = 'FINA460'
@@ -1885,15 +1885,15 @@ ElseIf _cCod $ '520001VL/527001VL'
 
 EndIf
 //Retorna sempre uma conta genérica quando não identificar a conta correta
-If Empty(_xRetorno) .AND. Substr(_cCod,7,1) $ 'IC'
+If Empty(_xRetorno) .And. SubStr(_cCod,7,1) $ 'IC'
 	_xRetorno := "1101010020"
 EndIf 
 
-If Substr(_cCod,7,1) == 'I'
+If SubStr(_cCod,7,1) == 'I'
 	_xRetorno := _cItem
 ElseIf 'HIST' $ _cCod
 	_xRetorno := _xRetorno	
-ElseIf Substr(_cCod,7,1) == 'T'	
+ElseIf SubStr(_cCod,7,1) == 'T'	
 	_xRetorno := _cCCusto
 EndIf
 

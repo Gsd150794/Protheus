@@ -1,77 +1,53 @@
 /*
                                     ATUALIZACOES SOFRIDAS DESDE A CONSTRUÇAO INICIAL
-===============================================================================================================================
-       Autor      |    Data    |                              Motivo                                                          |
--------------------------------------------------------------------------------------------------------------------------------
-=============================================================================================================================== 
-*/
-#Include 'Protheus.ch'
+===========================================================================================================================================================================================================================================================
+Analista - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
+===========================================================================================================================================================================================================================================================
+Vandelei - Alex Wallauer - 10/10/25 - 13/10/25 -  52438  - Colocado o botão de "Monitor Integração" na rotina de ocorrências de frete chamando essa função
+.===========================================================================================================================================================================================================================================================*/
+#Include "TOTVS.ch"
 /*
 ===============================================================================================================================
 Programa----------: AOMS081
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 13/10/2016
-===============================================================================================================================
 Descrição---------: Rotina de consulta da integração e recebimento de dados Ocorrências de Frete via webservice para empresa RDC.
 ===============================================================================================================================
-Uso---------------: Italac
-===============================================================================================================================
-Parametros--------: Nenhum
-===============================================================================================================================
-Retorno-----------: Nenhum
-===============================================================================================================================
-*/  
+*/
 User Function AOMS081()
-Local _aCores := {}
-Private aRotina := {}
-Private cCadastro 
+ Local _aCores    := {} As Array
+ Private aRotina  := {} As Array
+ Private cCadastro:= "Integração dos Dados dos Ocorrências de Frete Via Webservice: RDC -> Italac" As Char
 
-Begin Sequence
-   cCadastro := "Integração dos Dados dos Ocorrências de Frete Via Webservice: Italac <---> RDC"
-   Aadd(aRotina,{"Pesquisar" ,"AxPesqui" ,0,1})
-   Aadd(aRotina,{"Visualizar","AxVisual",0,2})
-   Aadd(aRotina,{"Legenda"   ,"U_AOMS081L" ,0,3})
-   
-   Aadd(_aCores,{"ZFO_SITUAC == 'N'" ,"BR_VERDE" })
-   Aadd(_aCores,{"ZFO_SITUAC == 'P'" ,"BR_VERMELHO" })
-   Aadd(_aCores,{"ZFO_SITUAC == 'R'" ,"BR_AMARELO" })
+ AAdd(aRotina,{"Pesquisar" ,"AxPesqui"  ,0,1})
+ AAdd(aRotina,{"Visualizar","AxVisual"  ,0,2})
+ AAdd(aRotina,{"Legenda"   ,"U_AOMS081L",0,1})
 
-   DbSelectArea("ZFO")
-   ZFO->(DbSetOrder(1)) 
-   ZFO->(DbGoTop())
-   MBrowse(6,1,22,75,"ZFO", , , , , , _aCores)
-   
-End Sequence
+ AAdd(_aCores,{"ZFO_SITUAC == 'P'" ,"BR_VERDE"   })
+ AAdd(_aCores,{"ZFO_SITUAC == 'R'" ,"BR_VERMELHO"})
 
-Return Nil    
+ ZFO->(DBSetOrder(1))
+ ZFO->(DBGoTop())
+ MBrowse(6,1,22,75,"ZFO", , , , , , _aCores)
+
+ Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS081L
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 13/09/2016
-===============================================================================================================================
 Descrição---------: Rotina de Exibição da Legenda do MBrowse.
 ===============================================================================================================================
-Uso---------------: Italac
-===============================================================================================================================
-Parametros--------: Nenhum
-===============================================================================================================================
-Retorno-----------: Nenhum
-===============================================================================================================================
-*/  
-User Function AOMS081L       
-Local _aLegenda := {}
+*/
+User Function AOMS081L()
+ Local _aLegenda := {} As Array
 
-Begin Sequence
-   Aadd(_aLegenda,{"BR_VERDE"    ,"Não Processado" })
-   Aadd(_aLegenda,{"BR_AMARELO"  ,"Rejeitada" })
-   Aadd(_aLegenda,{"BR_VERMELHO" ,"Processado" })
+ AAdd(_aLegenda,{"BR_VERDE"    ,"Aceito" })
+ AAdd(_aLegenda,{"BR_VERMELHO" ,"Rejeitado" })
 
-   BrwLegenda(cCadastro, "Legenda", _aLegenda)
+ BrwLegenda(cCadastro, "Legenda", _aLegenda)
 
-End Sequence
+Return
 
-Return Nil
 
-                     

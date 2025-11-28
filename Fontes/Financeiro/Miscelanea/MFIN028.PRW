@@ -2,17 +2,16 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
-Lucas Borges  | 23/07/2025 | Chamado 51340. Trocado e-mail padrão para sistema@italac.com.br
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Lucas Borges  |23/07/2025| Chamado 51340. Trocado e-mail padrão para sistema@italac.com.br
 ===============================================================================================================================
 */ 
 
-#INCLUDE "Protheus.ch"
-#Include "TopConn.ch" 
+#Include "TOTVS.ch"
 
-Static _lScheduler := FWGetRunSchedule() .OR. SELECT("SX3") <= 0
+Static _lScheduler := FWGetRunSchedule() .Or. SELECT("SX3") <= 0
 
 /*
 ===============================================================================================================================
@@ -105,7 +104,7 @@ Begin Sequence
    _cQry += " ORDER BY E1_CLIENTE, E1_LOJA, A1_NOME, A1_EMAIL, A1_CGC " 
 
    If Select(_cAlias) <> 0
-      (_cAlias)->(DbCloseArea())
+      (_cAlias)->(DBCloseArea())
    EndIf
    
    MPSysOpenQuery( _cQry , _cAlias)
@@ -113,38 +112,38 @@ Begin Sequence
    DBSelectArea(_cAlias)
    Count to _nTotRegs
 
-   If !_lScheduler .AND. ! U_ItMsg("Confirma envio dos email?","Inicio de processamento",,4,2,2) 
+   If !_lScheduler .And. ! U_ITMsg("Confirma envio dos email?","Inicio de processamento",,4,2,2) 
       Break
    EndIf
 
-   (_cAlias)->(DbGoTop())
-   Do While !(_cAlias)->(Eof()) 
+   (_cAlias)->(DBGoTop())
+   While !(_cAlias)->(Eof()) 
       
       _nRegAtu++
 
       cTo := ""
 
       If _lScheduler
-         FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MFIN028"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MFIN02802"/*cMsgId*/, "MFIN02802 - Enviando o Boleto ref. ao Titulo "+SE1->E1_NUM+" Prefixo "+SE1->E1_PREFIXO+" Parcela "+SE1->E1_PARCELA+" - Registro : " + Alltrim(Str(_nRegAtu)) + " de " + Alltrim(Str(_nTotRegs))/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+         FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MFIN028"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MFIN02802"/*cMsgId*/, "MFIN02802 - Enviando o Boleto ref. ao Titulo "+SE1->E1_NUM+" Prefixo "+SE1->E1_PREFIXO+" Parcela "+SE1->E1_PARCELA+" - Registro : " + AllTrim(Str(_nRegAtu)) + " de " + AllTrim(Str(_nTotRegs))/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
       Else
-         IncProc("Enviando a Msg do Cliente "+(_cAlias)->A1_NOME+" - Registro : " + Alltrim(Str(_nRegAtu)) + " de " + Alltrim(Str(_nTotRegs)))  
+         IncProc("Enviando a Msg do Cliente "+(_cAlias)->A1_NOME+" - Registro : " + AllTrim(Str(_nRegAtu)) + " de " + AllTrim(Str(_nTotRegs)))  
       EndIf
 
 		DBSelectArea("AC8")
 		DBSetOrder(2)
-		If Dbseek(xFilial("AC8")+"SA1"+xFilial("SA1")+(_cAlias)->E1_CLIENTE+(_cAlias)->E1_LOJA)
-			Do While xFilial("AC8")+"SA1"+xFilial("SA1")+(_cAlias)->E1_CLIENTE+(_cAlias)->E1_LOJA == Rtrim(AC8->(AC8_FILIAL + "SA1" + AC8_FILENT + AC8_CODENT)) .AND. AC8->(!EOF())
+		If DBSeek(xFilial("AC8")+"SA1"+xFilial("SA1")+(_cAlias)->E1_CLIENTE+(_cAlias)->E1_LOJA)
+			While xFilial("AC8")+"SA1"+xFilial("SA1")+(_cAlias)->E1_CLIENTE+(_cAlias)->E1_LOJA == Rtrim(AC8->(AC8_FILIAL + "SA1" + AC8_FILENT + AC8_CODENT)) .And. AC8->(!Eof())
 				DBSelectArea("SU5")
 				DBSetOrder(1)
-				If Dbseek(AC8->(AC8_FILIAL+AC8_CODCON))
-					If !(Alltrim(SU5->U5_EMAIL) $ cTo)
-						cTo += Iif(Empty(Alltrim(cTo)),"",";") + Alltrim(SU5->U5_EMAIL)
+				If DBSeek(AC8->(AC8_FILIAL+AC8_CODCON))
+					If !(AllTrim(SU5->U5_EMAIL) $ cTo)
+						cTo += IIf(Empty(AllTrim(cTo)),"",";") + AllTrim(SU5->U5_EMAIL)
 					EndIf
 				EndIf
-				AC8->(DbSkip())
+				AC8->(DBSkip())
 			EndDo
 
-			If Empty(Alltrim(cTo))
+			If Empty(AllTrim(cTo))
 				cTo := (_cAlias)->A1_EMAIL
 			EndIf
 		Else
@@ -153,8 +152,8 @@ Begin Sequence
 
    	cHtml := 'Prezado Cliente,'
    	cHtml += '<br><br>'
-   	cHtml += '&nbsp;&nbsp;&nbsp;<b>'+Alltrim((_cAlias)->A1_NOME)+'.</b>'
-   	cHtml += '&nbsp;&nbsp;&nbsp;CNPJ '+TRANSFORM(val(alltrim((_cAlias)->A1_CGC)),"@R! NN.NNN.NNN/NNNN-99")+'.'
+   	cHtml += '&nbsp;&nbsp;&nbsp;<b>'+AllTrim((_cAlias)->A1_NOME)+'.</b>'
+   	cHtml += '&nbsp;&nbsp;&nbsp;CNPJ '+TRANSFORM(Val(AllTrim((_cAlias)->A1_CGC)),"@R! NN.NNN.NNN/NNNN-99")+'.'
    	cHtml += '<br><br>'
    	cHtml += '&nbsp;&nbsp;&nbsp;MENSAGEM IMPORTANTE!'
    	cHtml += '<br><br>'
@@ -176,10 +175,10 @@ Begin Sequence
    	lRet :=  ("Sucesso" $ _cLog)
 
       If !lRet
-         AADD(_aLog,{lRet,(_cAlias)->E1_CLIENTE,(_cAlias)->E1_LOJA,(_cAlias)->A1_NOME,(_cAlias)->A1_EMAIL,_cLog})
+         aAdd(_aLog,{lRet,(_cAlias)->E1_CLIENTE,(_cAlias)->E1_LOJA,(_cAlias)->A1_NOME,(_cAlias)->A1_EMAIL,_cLog})
       EndIf
       
-      (_cAlias)->(dbSkip())
+      (_cAlias)->(DBSkip())
 
    EndDo
 

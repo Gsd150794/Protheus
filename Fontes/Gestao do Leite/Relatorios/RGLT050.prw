@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 07/08/2019 | Corrigida largura das colunas que estavam sendo cortadas. Chamado 30202
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 27/08/2019 | Corrigida a barra de progresso. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 04/09/2019 | Criado tratamento para não filtrar setor e linha para os usuários do tanque. Chamado 30471
+Lucas Borges  |07/08/2019| Chamado 30202. Corrigida largura das colunas que estavam sendo cortadas.
+Lucas Borges  |27/08/2019| Chamado 28346. Corrigida a barra de progresso.
+Lucas Borges  |04/09/2019| Chamado 30471. Criado tratamento para não filtrar setor e linha para os usuários do tanque.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT050
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 05/12/2009
-===============================================================================================================================
 Descrição---------: Relatorio Demonstrativo Eventos. 
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -45,11 +37,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 31/01/2019
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -98,11 +87,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 31/01/2019
-===============================================================================================================================
 Descrição---------: Relacao Rota/Linha
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -124,10 +110,10 @@ Local _nCountRec	:= 0
 If MV_PAR10 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZLF")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -230,7 +216,7 @@ oReport:SetMsgPrint("Consultando registros no Banco de Dados")
 oReport:SetMeter(0)
 
 BeginSql alias _cAlias
-	SELECT A.*, CASE WHEN VOLUME > 0 THEN ROUND(TOTAL/VOLUME,4) ELSE 0 END PRC_LITRO
+	SELECT A.*, Case WHEN VOLUME > 0 THEN Round(TOTAL/VOLUME,4) Else 0 END PRC_LITRO
 	  FROM (SELECT ZLF_FILIAL, ZL8_COD, ZL8_DESCRI, ZLF_DEBCRE, ZL2_COD, ZL2_DESCRI,
 	               ZL3_COD, ZL3_DESCRI, SA2.A2_COD, SA2.A2_LOJA, SA2.A2_NOME, SA2.A2_L_TANQ ||'-'|| SA2.A2_L_TANLJ TANQUE,
 	               TNQ.A2_NOME NOME_TANQUE, SUM(ZLF_TOTAL) TOTAL,
@@ -284,20 +270,20 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->ZLF_FILIAL
 	_cTanque := AllTrim((_cAlias)->TANQUE) + " - " + (_cAlias)->NOME_TANQUE
 	_cLinha := (_cAlias)->ZL3_COD + " - " + (_cAlias)->ZL3_DESCRI
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

@@ -2,16 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor            |    Data    |                              Motivo                      										 
--------------------------------------------------------------------------------------------------------------------------------        
- Josué Danich     | 15/03/2019 | Ajuste para retirada do PE M020INC - Chamado 28466. 
------------------------------------------------------------------------------------------------------------------------------- 
- Josué Danich     | 29/03/2019 | Correção de campo município na gravação de SA2 - Chamado 28661  
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges     | 26/06/2019 | Revisão de fontes. Chamado 28346
+Josué Danich  |15/03/2019| Chamado 28466. Ajuste para retirada do PE M020INC
+Josué Danich  |29/03/2019| Chamado 28661. Correção de campo município na gravação de SA2.
+Lucas Borges  |26/06/2019| Chamado 28346. Revisão de fontes.
 ===============================================================================================================================
 */
-#Include "Protheus.ch"
+
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -29,7 +28,7 @@ Retorno-----------: Nenhum
 User Function MGPE018()
 
 If MsgYesNo("Deseja realmente fazer a geração os funcionários para clientes?","MGPE01801")
-	FwMsgRun( ,{|| MGPE018G() }, , "Aguarde, processando informações de funcionários para criação dos Fornecedores...")
+	FWMsgRun( ,{|| MGPE018G() }, , "Aguarde, processando informações de funcionários para criação dos Fornecedores...")
 EndIf
 
 Return
@@ -39,21 +38,18 @@ Return
 Programa----------: MGPE018G
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 09/06/2017
-===============================================================================================================================
 Descrição---------: Função que faz a leitura dos funcionários para criação de Fornecedor
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function MGPE018G()
 
-dbSelectArea("SRA")
-SRA->(dbGoTop())
+DBSelectArea("SRA")
+SRA->(DBGoTop())
 
 While !SRA->(Eof())
-	If SRA->RA_SITFOLH <> 'D' .AND. SRA->RA_CATFUNC == 'M'
+	If SRA->RA_SITFOLH <> 'D' .And. SRA->RA_CATFUNC == 'M'
 		//================================================================================
 		// VERIFICA SE O FUNCIONARIO JA POSSUI CADASTRO REALIZADO NO CADASTRO DE CLIENTES
 		//================================================================================
@@ -64,10 +60,10 @@ While !SRA->(Eof())
 			//================================================================================
 			// RECUPERA OS DADOS DO FUNCIONÁRIO PARA INCLUSÃO DO CLINTE
 			//================================================================================
-			_aFornec := FwMsgRun( ,{|| MGPE018D( 1 , "" , "" ) }, , "Gerando Fornecedor para o funcionário: " + SRA->RA_MAT + " - " + AllTrim(SRA->RA_NOME) + "...")
+			_aFornec := FWMsgRun( ,{|| MGPE018D( 1 , "" , "" ) }, , "Gerando Fornecedor para o funcionário: " + SRA->RA_MAT + " - " + AllTrim(SRA->RA_NOME) + "...")
 		EndIf
 	EndIf
-	SRA->(dbSkip())
+	SRA->(DBSkip())
 End                                          				
 
 Return
@@ -77,11 +73,8 @@ Return
 Programa----------: MGPE018V
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 09/06/2017
-===============================================================================================================================
 Descrição---------: Função que valida se já existe cadastro de cliente para o funcionário que está sendo inserido/alterado
-===============================================================================================================================
 Parametros--------: _cCpf - Cpf do funcionário
-===============================================================================================================================
 Retorno-----------: _aRet - Retorna os dados referentes ao cadastro, ou indicação de que o mesmo não existe
 ===============================================================================================================================
 */
@@ -101,7 +94,7 @@ BeginSql alias _cAliasSA2
 EndSql
 	
 Count To _nCntRec
-(_cAliasSA2)->( DBGotop() )
+(_cAliasSA2)->( DBGoTop() )
 
 If _nCntRec > 0
 	aAdd( _aRet , { .F. , (_cAliasSA2)->A2_COD	, (_cAliasSA2)->A2_LOJA	})
@@ -118,14 +111,11 @@ Return( _aRet )
 Programa----------: MGPE018D
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 09/06/2017
-===============================================================================================================================
 Descrição---------: Função que insere os dados da importação dos funcionários para o cadastro de clientes de acordo com a
 ------------------: operação (inclusão/alteração)
-===============================================================================================================================
 Parametros--------: _cTipo   = 1 - Inclusão / 2 - Alteração
 ------------------: _cCodCli = Código do Cliente
 ------------------: _cLojCLi = Loja do Cliente
-===============================================================================================================================
 Retorno-----------: _aCliente - Retorna os dados referentes ao cadastro
 ===============================================================================================================================
 */
@@ -158,7 +148,7 @@ aAdd( aVetor , {	"A2_NOME"		, AllTrim(SRA->RA_NOME)								, nil } )
 aAdd( aVetor , {	"A2_NREDUZ"		, AllTrim(SRA->RA_NOME)								, nil } ) 
 aAdd( aVetor , {	"A2_EST"		, AllTrim(SRA->RA_ESTADO)								, nil } )
 aAdd( aVetor , {	"A2_COD_MUN"	, AllTrim(SRA->RA_CODMUN)								, nil } )
-aAdd( aVetor , {	"A2_MUN"	     ,ALLTRIM(POSICIONE('CC2',1,xFilial('CC2')+M->RA_ESTADO+M->RA_CODMUN,'CC2_MUN'))   , nil } )
+aAdd( aVetor , {	"A2_MUN"	     ,AllTrim(Posicione('CC2',1,xFilial('CC2')+M->RA_ESTADO+M->RA_CODMUN,'CC2_MUN'))   , nil } )
 aAdd( aVetor , {	"A2_CEP"		, AllTrim(SRA->RA_CEP)								, nil } )
 aAdd( aVetor , {	"A2_END"		, AllTrim(SRA->RA_ENDEREC)+", "+AllTrim(M->RA_LOGRNUM), nil } )
 aAdd( aVetor , {	"A2_BAIRRO"		, AllTrim(SRA->RA_BAIRRO)								, nil } )
@@ -169,14 +159,14 @@ If !Empty( AllTrim(M->RA_EMAIL) )
 EndIf
 aAdd( aVetor , {	"A2_BANCO"		, SubStr(SRA->RA_BCDEPSA,1,3)							, nil } )
 aAdd( aVetor , {	"A2_AGENCIA"	, SubStr(SRA->RA_BCDEPSA,4,5)							, nil } )
-aAdd( aVetor , {	"A2_NUMCON"		, substr(SRA->RA_CTDEPSA,1,10)						, nil } )
+aAdd( aVetor , {	"A2_NUMCON"		, SubStr(SRA->RA_CTDEPSA,1,10)						, nil } )
 aAdd( aVetor , {	"A2_PAIS"		, '105'		 										, nil } )
 aAdd( aVetor , {	"A2_CODPAIS"	, '01058'	 										, nil } )
 aAdd( aVetor , {	"A2_TRIBFAV"	, '2'	 											, nil } )
 
-MSExecAuto( {|x,y| Mata020(x,y) } , aVetor , iif(_ctipo==2,4,3) )
+MSExecAuto( {|x,y| Mata020(x,y) } , aVetor , IIf(_ctipo==2,4,3) )
 	
-IF lMSErroAuto
+If lMSErroAuto
 	If ( __lSx8 )
 		RollBackSx8()
 	EndIf 
@@ -186,11 +176,11 @@ Else
 	If ( __lSX8 )
 		ConfirmSX8()
 	EndIf				
-Endif
+EndIf
 
 RecLock("SRA",.F.)
 	SRA->RA_I_F := _cCodFor
-MsUnLock()
+MSUnLock()
 
 FreeUsedCode()
 

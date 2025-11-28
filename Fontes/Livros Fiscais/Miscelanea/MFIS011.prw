@@ -2,23 +2,17 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                              Motivo                                                          
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Igor Melgaço     | 27/06/2023 | Chamado 44296 - Inclusão de Campos de Produto e Descrição.
--------------------------------------------------------------------------------------------------------------------------------
- Igor Melgaço     | 30/06/2023 | Chamado 44348 - Ajuste para acesso a alteração na guia de impostos estaduais.
--------------------------------------------------------------------------------------------------------------------------------
- Igor Melgaço     | 01/04/2024 | Chamado 46693 - Ajuste gravação de campos.
+Igor Melgaço  |27/06/2023| Chamado 44296 - Inclusão de Campos de Produto e Descrição.
+Igor Melgaço  |30/06/2023| Chamado 44348 - Ajuste para acesso a alteração na guia de impostos estaduais.
+Igor Melgaço  |01/04/2024| Chamado 46693 - Ajuste gravação de campos.
 ===============================================================================================================================
 */
 
-#INCLUDE "FWMBROWSE.CH"
-#INCLUDE "FWMVCDEF.CH"
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "TOPCONN.CH"
-#INCLUDE "RWMAKE.CH"
-#INCLUDE "TBICONN.CH"
-
+#Include "FWMBROWSE.CH"
+#Include "FWMVCDEF.CH"
+#Include "TOTVS.ch"
 
 Static _aSF2  := {}
 Static _aSD2P := {}
@@ -29,15 +23,13 @@ Static _aSD2I := {}
 Programa----------: MFIS011
 Autor-------------: Igor Melgaço
 Data da Criacao---: 23/12/2022
-===============================================================================================================================
 Descrição---------: Acertos Fiscais Italac para Nota de Saída. Chamado: 43865 
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------:  
 ===============================================================================================================================
 */ 
 User Function MFIS011(_cFiltro)
+
 Local _oBrowse := Nil
 Default _cFiltro := ""
 
@@ -51,31 +43,24 @@ If !Empty(_cFiltro)
 EndIf
 _oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MenuDef
 Autor-------------: Igor Melgaço
 Data da Criacao---: 08/06/2021
-===============================================================================================================================
 Descrição---------: Rotina de definição automática do menu via MVC
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: aRotina - Definições do menu principal da Rotina.
 ===============================================================================================================================
 */
 Static Function MenuDef()
+
 Local _aRotina	:= {}
 
 ADD OPTION _aRotina Title 'Acertar'	                Action 'VIEWDEF.MFIS011'	OPERATION 4 ACCESS 0
 ADD OPTION _aRotina Title 'Visualizar'	            Action 'VIEWDEF.MFIS011'	OPERATION 2 ACCESS 0
-
-//===========================================================================
-//| FWMVCMenu - Gera o menu padrão para o Modelo Informado (Inc/Alt/Vis/Exc) |
-//===========================================================================
-//Return( FWMVCMenu("MFIS011") )
 
 Return( _aRotina )
 
@@ -84,19 +69,17 @@ Return( _aRotina )
 Programa----------: ModelDef
 Autor-------------: Igor Melgaço
 Data da Criacao---: 08/06/2021
-===============================================================================================================================
 Descrição---------: Rotina de definição do Modelo de Dados do MVC
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: _oModel - Objeto do modelo de dados do MVC 
 ===============================================================================================================================
 */ 
 Static Function ModelDef()
+
 Local _oModel
-Local _oStruSF2  := FWFormStruct(1,"SF2",{ |x| ALLTRIM(x) $ 'F2_FILIAL,F2_DOC,F2_SERIE,F2_CLIENTE,F2_I_NFORN,F2_LOJA,F2_EMISSAO,F2_EMISSAO,F2_BASIMP5,F2_VALIMP5,F2_BASIMP6,F2_VALIMP6,F2_TIPO,F2_ESPECIE' } )
-Local _oStruSD2I := FWFormStruct(1,"SD2",{ |x| ALLTRIM(x) $ 'D2_COD,D2_ITEM,D2_CF,D2_TES,D2_DIFAL,D2_BASEDES,D2_ICMSCOM,D2_CLASFIS' } )
-Local _oStruSD2P := FWFormStruct(1,"SD2",{ |x| ALLTRIM(x) $ 'D2_COD,D2_ITEM,D2_BASIMP6,D2_ALQIMP6,D2_VALIMP6,D2_BASIMP5,D2_ALQIMP5,D2_VALIMP5' } )
+Local _oStruSF2  := FWFormStruct(1,"SF2",{ |x| AllTrim(x) $ 'F2_FILIAL,F2_DOC,F2_SERIE,F2_CLIENTE,F2_I_NFORN,F2_LOJA,F2_EMISSAO,F2_EMISSAO,F2_BASIMP5,F2_VALIMP5,F2_BASIMP6,F2_VALIMP6,F2_TIPO,F2_ESPECIE' } )
+Local _oStruSD2I := FWFormStruct(1,"SD2",{ |x| AllTrim(x) $ 'D2_COD,D2_ITEM,D2_CF,D2_TES,D2_DIFAL,D2_BASEDES,D2_ICMSCOM,D2_CLASFIS' } )
+Local _oStruSD2P := FWFormStruct(1,"SD2",{ |x| AllTrim(x) $ 'D2_COD,D2_ITEM,D2_BASIMP6,D2_ALQIMP6,D2_VALIMP6,D2_BASIMP5,D2_ALQIMP5,D2_VALIMP5' } )
 Local _bPosValidacao := {||(U_MFIS011LOG())}
 Local _bCommit   := {||U_MFIS011VAL()}
 Local _aSD2Rel   := {}
@@ -193,7 +176,7 @@ _oStruSD2I:AddField( ;
         NIL , ;                     // [08] B Code-block de validação When do campo
         NIL , ;                     // [09] A Lista de valores permitido do campo
         NIL , ;                     // [10] L Indica se o campo tem preenchimento obrigatório
-        { || POSICIONE("SB1",1,xFilial("SB1")+SD2->D2_COD,"B1_DESC") } , ;  // [11] B Code-block de inicializacao do campo
+        { || Posicione("SB1",1,xFilial("SB1")+SD2->D2_COD,"B1_DESC") } , ;  // [11] B Code-block de inicializacao do campo
         NIL , ;                     // [12] L Indica se trata de um campo chave
         NIL , ;                     // [13] L Indica se o campo pode receber valor em uma operação de update.
         .F. )                       // [14] L Indica se o campo é virtual 
@@ -274,7 +257,7 @@ _oStruSD2P:AddField( ;
         NIL , ;                     // [08] B Code-block de validação When do campo
         NIL , ;                     // [09] A Lista de valores permitido do campo
         NIL , ;                     // [10] L Indica se o campo tem preenchimento obrigatório
-        { || POSICIONE("SB1",1,xFilial("SB1")+SD2->D2_COD,"B1_DESC") } , ;  // [11] B Code-block de inicializacao do campo
+        { || Posicione("SB1",1,xFilial("SB1")+SD2->D2_COD,"B1_DESC") } , ;  // [11] B Code-block de inicializacao do campo
         NIL , ;                     // [12] L Indica se trata de um campo chave
         NIL , ;                     // [13] L Indica se o campo pode receber valor em uma operação de update.
         .F. )                       // [14] L Indica se o campo é virtual 
@@ -420,9 +403,6 @@ _oStruSD2P:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04]
 _aGatAux := FwStruTrigger( 'D2_PERPIS'	, 'D2_VRPIS'	, 'U_MFIS011IMP("PIS")' , .F. )
 _oStruSD2P:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-//_aGatAux := FwStruTrigger( 'D2_CLASSEF'	, 'D2_CLASFIS'	, 'M->D2_CLASSEF' , .F. )
-//_oStruSD2I:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
-
 _oModel := MPFormModel():New('MFIS011M' ,  /*bPreValidacao*/ , _bPosValidacao , _bCommit /*bCommit*/ , /*bCancel*/)
 
 _oModel:AddFields('SF2CAB', /*cOwner*/ ,_oStruSF2,/*bPreValidacao*/ , /*bPosValidacao*/ , /*bCarga*/)
@@ -456,18 +436,16 @@ Return _oModel
 Programa----------: ViewDef
 Autor-------------: Igor Melgaço
 Data da Criacao---: 08/06/2021
-===============================================================================================================================
 Descrição---------: Rotina de definição da View do MVC
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: _oView - Objeto de exibição do MVC  
 ===============================================================================================================================
 */ 
 Static Function ViewDef()
-Local _oStruSF2  := FWFormStruct(2,"SF2",{ |x| ALLTRIM(x) $ 'F2_FILIAL,F2_DOC,F2_SERIE,F2_CLIENTE,F2_I_NFORN,F2_LOJA,F2_EMISSAO,F2_EMISSAO,F2_BASIMP5,F2_VALIMP5,F2_BASIMP6,F2_VALIMP6,F2_TIPO,F2_ESPECIE' } )
-Local _oStruSD2I := FWFormStruct(2,"SD2",{ |x| ALLTRIM(x) $ 'D2_COD,D2_ITEM,D2_CF,D2_TES,D2_DIFAL,D2_BASEDES,D2_ICMSCOM,D2_CLASFIS' } )
-Local _oStruSD2P := FWFormStruct(2,"SD2",{ |x| ALLTRIM(x) $ 'D2_COD,D2_ITEM,D2_BASIMP6,D2_ALQIMP6,D2_VALIMP6,D2_BASIMP5,D2_ALQIMP5,D2_VALIMP5' } )
+
+Local _oStruSF2  := FWFormStruct(2,"SF2",{ |x| AllTrim(x) $ 'F2_FILIAL,F2_DOC,F2_SERIE,F2_CLIENTE,F2_I_NFORN,F2_LOJA,F2_EMISSAO,F2_EMISSAO,F2_BASIMP5,F2_VALIMP5,F2_BASIMP6,F2_VALIMP6,F2_TIPO,F2_ESPECIE' } )
+Local _oStruSD2I := FWFormStruct(2,"SD2",{ |x| AllTrim(x) $ 'D2_COD,D2_ITEM,D2_CF,D2_TES,D2_DIFAL,D2_BASEDES,D2_ICMSCOM,D2_CLASFIS' } )
+Local _oStruSD2P := FWFormStruct(2,"SD2",{ |x| AllTrim(x) $ 'D2_COD,D2_ITEM,D2_BASIMP6,D2_ALQIMP6,D2_VALIMP6,D2_BASIMP5,D2_ALQIMP5,D2_VALIMP5' } )
 Local _oModel    := FWLoadModel("MFIS011")
 Local _oView     := Nil
 
@@ -857,22 +835,17 @@ _oView:SetCloseOnOk({||.T.})
 
 Return _oView
 
-
 /*
 ===============================================================================================================================
 Programa----------: MFIS011VAL
 Autor-------------: Igor Melgaço
 Data da Criacao---: 08/06/2021
-===============================================================================================================================
 Descrição---------: Rotina de Validação
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: _lReturn
 ===============================================================================================================================
 */ 
 User Function MFIS011VAL()
-
 
 Local _cOpcLog := 'A'
 Local _oModel  := FWModelActive()
@@ -883,7 +856,7 @@ Local _cHorLog := Time()
 Local i := 0
 Local lRet := .T.
 
-Local cData  := Dtoc(SF2->F2_EMISSAO)
+Local cData  := DToC(SF2->F2_EMISSAO)
 Local cDoc   := SF2->F2_DOC
 Local cSerie := SF2->F2_SERIE
 Local cCli   := SF2->F2_CLIENTE
@@ -900,21 +873,12 @@ lRet := FWFormCommit( _oModel )
 If lRet
     Begin Sequence
 
-    //=============================================================================
-    // Ativa a filial "01" apenas para leitura das filiais do parâmetro.
-    //=============================================================================
-    // RESET ENVIRONMENT
-    // RpcSetType(3)
 
     //=============================================================================
     // Inicia processamento com base nas filiais do parâmetro.
     //=============================================================================
     u_itconout( 'Abrindo o ambiente para filial 01...' )
 
-    //===========================================================================================
-    // Preparando o ambiente com a filial 01
-    //===========================================================================================
-    // PREPARE ENVIRONMENT EMPRESA "01" FILIAL cFilAnt MODULO "FIS" 
             
         aParam[1] := cData //Data Inicial
         aParam[2] := cData //Data Final
@@ -929,9 +893,7 @@ If lRet
         aParam[11] := cLoja // Loja Final
 
         //lExec := MATA930(lRotAut,aParam)
-        FWMSGRUN(,{||  lExec := MATA930(lRotAut,aParam) },'Aguarde processamento...','Reprocessando Livro Fiscal...')
-
-        //RESET ENVIRONMENT
+        FWMsgRun(,{||  lExec := MATA930(lRotAut,aParam) },'Aguarde processamento...','Reprocessando Livro Fiscal...')
 
     End Sequence
 
@@ -947,26 +909,22 @@ If lRet
     For i := 1 To Len(_aSD2I)
         U_ITGrvLog( _aSD2I[i,2]  , "SD2" , 1 , _aSD2I[i,1] , _cOpcLog , _cCodUsr , _dDatLog , _cHorLog )
     Next
-Endif
+EndIf
 
 Return lRet
-
-
 
 /*
 ===============================================================================================================================
 Programa----------: MFIS011IMP
 Autor-------------: Igor Melgaço
 Data da Criacao---: 19/05/2023
-===============================================================================================================================
 Descrição---------: Gatilho que calcula o Valor de Pis e Cofins
-===============================================================================================================================
 Parametros--------: cCampo: Pis ou Cofins
-===============================================================================================================================
 Retorno-----------: Vr do Imposto
 ===============================================================================================================================
 */
 User Function MFIS011IMP(cCampo)
+
 Local _oModel   := FWModelActive()
 Local _oModelDET := _oModel:GetModel('SD2DETAILP')
 Local _nBase    := 0
@@ -974,57 +932,54 @@ Local _nPerc    := 0
 Local _nTotBase := 0
 Local _nTotVr   := 0
 Local i := 0
-local _nImp := 0
+Local _nImp := 0
 Local _nLinPos := 0 
 
-_nBase	:= _oModel:GetValue( 'SD2DETAILP' , Iif(cCampo == "PIS",'D2_BASPIS', 'D2_BASCOF') )
-_nPerc	:= _oModel:GetValue( 'SD2DETAILP' , Iif(cCampo == "PIS",'D2_PERPIS', 'D2_PERCOF') )
+_nBase	:= _oModel:GetValue( 'SD2DETAILP' , IIf(cCampo == "PIS",'D2_BASPIS', 'D2_BASCOF') )
+_nPerc	:= _oModel:GetValue( 'SD2DETAILP' , IIf(cCampo == "PIS",'D2_PERPIS', 'D2_PERCOF') )
 _nImp   := _nPerc / 100 * _nBase
 
-_oModel:LoadValue( 'SD2DETAILP',Iif(cCampo == "PIS",'D2_BASIMP6', 'D2_BASIMP5') ,_nBase)
-_oModel:LoadValue( 'SD2DETAILP',Iif(cCampo == "PIS",'D2_ALQIMP6', 'D2_ALQIMP5') ,_nPerc)
-_oModel:LoadValue( 'SD2DETAILP',Iif(cCampo == "PIS",'D2_VALIMP6', 'D2_VALIMP5') ,_nImp)
+_oModel:LoadValue( 'SD2DETAILP',IIf(cCampo == "PIS",'D2_BASIMP6', 'D2_BASIMP5') ,_nBase)
+_oModel:LoadValue( 'SD2DETAILP',IIf(cCampo == "PIS",'D2_ALQIMP6', 'D2_ALQIMP5') ,_nPerc)
+_oModel:LoadValue( 'SD2DETAILP',IIf(cCampo == "PIS",'D2_VALIMP6', 'D2_VALIMP5') ,_nImp)
 
 _nQtdLin	:= _oModelDET:Length()
 _nLinPos    := _oModelDET:GetLine() 
 
 For i := 1 to _nQtdLin
     _oModelDET:GoLine( i )
-    _nTotBase += _oModel:GetValue( 'SD2DETAILP' , Iif(cCampo == "PIS",'D2_BASPIS', 'D2_BASCOF') )
-    _nTotVr += _oModel:GetValue( 'SD2DETAILP' , Iif(cCampo == "PIS",'D2_VALIMP6', 'D2_VALIMP5') )     
+    _nTotBase += _oModel:GetValue( 'SD2DETAILP' , IIf(cCampo == "PIS",'D2_BASPIS', 'D2_BASCOF') )
+    _nTotVr += _oModel:GetValue( 'SD2DETAILP' , IIf(cCampo == "PIS",'D2_VALIMP6', 'D2_VALIMP5') )     
 Next
 
-_oModel:LoadValue( 'SF2CAB',Iif(cCampo == "PIS",'F2_BASPIS' , 'F2_BASCOF' ),_nTotBase)
-_oModel:LoadValue( 'SF2CAB',Iif(cCampo == "PIS",'F2_VRPIS'  , 'F2_VRCOF'  ),_nTotVr  )
-_oModel:LoadValue( 'SF2CAB',Iif(cCampo == "PIS",'F2_BASIMP6', 'F2_BASIMP5'),_nTotBase)
-_oModel:LoadValue( 'SF2CAB',Iif(cCampo == "PIS",'F2_VALIMP6', 'F2_VALIMP5'),_nTotVr  )
+_oModel:LoadValue( 'SF2CAB',IIf(cCampo == "PIS",'F2_BASPIS' , 'F2_BASCOF' ),_nTotBase)
+_oModel:LoadValue( 'SF2CAB',IIf(cCampo == "PIS",'F2_VRPIS'  , 'F2_VRCOF'  ),_nTotVr  )
+_oModel:LoadValue( 'SF2CAB',IIf(cCampo == "PIS",'F2_BASIMP6', 'F2_BASIMP5'),_nTotBase)
+_oModel:LoadValue( 'SF2CAB',IIf(cCampo == "PIS",'F2_VALIMP6', 'F2_VALIMP5'),_nTotVr  )
 
 _oModelDET:GoLine( _nLinPos ) 
 
 Return _nImp
-
 
 /*
 ===============================================================================================================================
 Programa----------: MFIS011FIS
 Autor-------------: Igor Melgaço
 Data da Criacao---: 23/05/2023
-===============================================================================================================================
 Descrição---------: Validação para alteração de acodordo com o MV_DATAFIS
-===============================================================================================================================
 Parametros--------: _oModel
-===============================================================================================================================
 Retorno-----------: lRet
 ===============================================================================================================================
 */
 User Function MFIS011FIS(_oModel)
+
 Local lRet := .T.
-Local _dDtAux := GetMV( 'MV_DATAFIS' ,, StoD('') )
+Local _dDtAux := GetMV( 'MV_DATAFIS' ,, SToD('') )
 Local _cMenPro:= "Data de digitação menor/igual ao bloqueio para operações Fiscais. Solicite o desbloqueio à Contabilidade."
 Local _cMenRes:= "Solicite o desbloqueio à Contabilidade."
 Local _nOper	:= _oModel:GetOperation()
 
-If _nOper == MODEL_OPERATION_UPDATE .AND. SF2->F2_EMISSAO <= _dDtAux
+If _nOper == MODEL_OPERATION_UPDATE .And. SF2->F2_EMISSAO <= _dDtAux
     //help( cRotina , nLinha , cCampo , cNome , cMensagem , nLinha1 , nColuna , lPop , hWnd , nHeight , nWidth , lGravaLog , aSoluc )
     Help(NIL, NIL, "MFIS011FIS", NIL, _cMenPro,1, 0, NIL, NIL, NIL, NIL, NIL, {_cMenRes})
     lRet := .F.
@@ -1037,15 +992,13 @@ Return lRet
 Programa----------: MFIS011LOG
 Autor-------------: Igor Melgaço
 Data da Criacao---: 19/05/2023
-===============================================================================================================================
 Descrição---------: Rotina para Verificar alterações dos campos e guradar informação de Log
-===============================================================================================================================
 Parametros--------: 
-===============================================================================================================================
 Retorno-----------: lRet
 ===============================================================================================================================
 */
 User Function MFIS011LOG()
+
 Local _oModel      := FWModelActive()
 Local _oModelDETP  := _oModel:GetModel('SD2DETAILP')
 Local _oModelDETI  := _oModel:GetModel('SD2DETAILI')
@@ -1065,7 +1018,7 @@ _aSD2I := {}
 
 For i := 1 To Len(_aCpSF2)
     If SF2->&(_aCpSF2[i]) <> _oModel:GetValue( 'SF2CAB',_aCpSF2[i])
-        AADD(_aSF2,{_aCpSF2[i],SF2->&(_aCpSF2[i]) ,_oModel:GetValue( 'SF2CAB',_aCpSF2[i])})
+        aAdd(_aSF2,{_aCpSF2[i],SF2->&(_aCpSF2[i]) ,_oModel:GetValue( 'SF2CAB',_aCpSF2[i])})
     EndIf
 Next
 
@@ -1085,41 +1038,36 @@ For i := 1 to _nQtdLin
         _aCamposSD2 := {}
         For j := 1 To Len(_aCpSD2P)
             If SD2->&(_aCpSD2P[j]) <> _oModel:GetValue( 'SD2DETAILP',_aCpSD2P[j])
-                AADD(_aCamposSD2,{_aCpSD2P[j],SD2->&(_aCpSD2P[j]) ,_oModel:GetValue( 'SD2DETAILP',_aCpSD2P[j])})
+                aAdd(_aCamposSD2,{_aCpSD2P[j],SD2->&(_aCpSD2P[j]) ,_oModel:GetValue( 'SD2DETAILP',_aCpSD2P[j])})
             EndIf
         Next
-        AADD(_aSD2P,{_cChave+_cD2_ITEM,_aCamposSD2})
+        aAdd(_aSD2P,{_cChave+_cD2_ITEM,_aCamposSD2})
 
         _aCamposSD2 := {}
         For k := 1 To Len(_aCpSD2I)
             If SD2->&(_aCpSD2I[k]) <> _oModel:GetValue( 'SD2DETAILI',_aCpSD2I[k])
-                AADD(_aCamposSD2,{_aCpSD2I[k],SD2->&(_aCpSD2I[k]) ,_oModel:GetValue( 'SD2DETAILI',_aCpSD2I[k])})
+                aAdd(_aCamposSD2,{_aCpSD2I[k],SD2->&(_aCpSD2I[k]) ,_oModel:GetValue( 'SD2DETAILI',_aCpSD2I[k])})
             EndIf
         Next
-        AADD(_aSD2I,{_cChave+_cD2_ITEM,_aCamposSD2})
+        aAdd(_aSD2I,{_cChave+_cD2_ITEM,_aCamposSD2})
     EndIf
 
 Next
 
 Return lRet
 
-
-
-
 /*
 ===============================================================================================================================
 Programa----------: MFIS011CON
 Autor-------------: Igor Melgaço
 Data da Criacao---: 19/05/2023
-===============================================================================================================================
 Descrição---------: Consulta Histórico de Alterações 
-===============================================================================================================================
 Parametros--------: _cChave
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function MFIS011CON(_cTipo)
+
 Local _oModel    := FWModelActive()
 Local _aCabec    := {}
 Local _cTabela   := ""
@@ -1133,37 +1081,34 @@ If _cTipo == "CAB"
     _cCpoChave := "SF2.F2_FILIAL || SF2.F2_DOC || SF2.F2_SERIE || SF2.F2_CLIENTE || SF2.F2_LOJA "
     _cTitulo   := "Log de Alterações da Nota de Saída"
 
-    AADD( _aCabec, {"Nota Fiscal / Serie",SF2->F2_DOC + " / " + SF2->F2_SERIE} )
-    AADD( _aCabec, {"Fornecedor:",SF2->F2_CLIENTE + " - " + SF2->F2_LOJA + " " + Posicione("SA2",1,xFilial("SA2")+SF2->F2_CLIENTE+SF2->F2_LOJA,"A2_NOME")} )
+    aAdd( _aCabec, {"Nota Fiscal / Serie",SF2->F2_DOC + " / " + SF2->F2_SERIE} )
+    aAdd( _aCabec, {"Fornecedor:",SF2->F2_CLIENTE + " - " + SF2->F2_LOJA + " " + Posicione("SA2",1,xFilial("SA2")+SF2->F2_CLIENTE+SF2->F2_LOJA,"A2_NOME")} )
 Else
     _cTabela   := "SD2"
     _cChave    := _oModel:GetValue( 'SF2CAB','F2_FILIAL')+_oModel:GetValue( 'SF2CAB','F2_DOC')+_oModel:GetValue( 'SF2CAB','F2_SERIE')+_oModel:GetValue( 'SF2CAB','F2_CLIENTE')+_oModel:GetValue( 'SF2CAB','F2_LOJA')+_oModel:GetValue( 'SD2DETAILP','D2_ITEM')
     _cCpoChave := "SD2.D2_FILIAL || SD2.D2_DOC || SD2.D2_SERIE || SD2.D2_CLIENTE || SD2.D2_LOJA || SD2.D2_ITEM"
     _cTitulo   := "Log de Alterações do item da Nota de Saída"
 
-    AADD( _aCabec, {"Nota Fiscal / Serie",SF2->F2_DOC + " / " + SF2->F2_SERIE} )
-    AADD( _aCabec, {"Fornecedor:",SF2->F2_CLIENTE + " - " + SF2->F2_LOJA + " " + Posicione("SA2",1,xFilial("SA2")+SF2->F2_CLIENTE+SF2->F2_LOJA,"A2_NOME")} )
+    aAdd( _aCabec, {"Nota Fiscal / Serie",SF2->F2_DOC + " / " + SF2->F2_SERIE} )
+    aAdd( _aCabec, {"Fornecedor:",SF2->F2_CLIENTE + " - " + SF2->F2_LOJA + " " + Posicione("SA2",1,xFilial("SA2")+SF2->F2_CLIENTE+SF2->F2_LOJA,"A2_NOME")} )
 EndIf
 
 U_MFIS009T(_aCabec,_cTabela,_cChave,_cCpoChave,_cTitulo)
 
 Return 
 
-
 /*
 ===============================================================================================================================
 Programa----------: MFIS011GAT
 Autor-------------: Igor Melgaço
 Data da Criacao---: 19/05/2023
-===============================================================================================================================
 Descrição---------: Gatilho de Campos 
-===============================================================================================================================
 Parametros--------: _cCampo
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function MFIS011WHE(_cCampo)
+
 Local _oModel    := FWModelActive()
 
 If _cCampo == "D2_TRIBUT"

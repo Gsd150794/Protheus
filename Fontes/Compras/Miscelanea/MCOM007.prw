@@ -10,10 +10,7 @@ Lucas Borges  | 19/12/2024 | Chamado 49415. Corrigida sintaxe na query.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -29,23 +26,23 @@ Retorno-----------: Nenhum
 */
 User Function MCOM007
 
-Local _aArea 	:= GetArea()
+Local _aArea 	:= FWGetArea()
 Local _nDias	:= SuperGetMV("IT_TCPERCON",.F., "6/9")
-Local _cArqLog	:= "\temp\mcom007_log_analise_xml_filial_"+ cFilAnt +"_"+ DtoS(Date()) +"_"+ StrTran(Time(),":","")+"_"+ RetCodUsr() +".log"
+Local _cArqLog	:= "\temp\mcom007_log_analise_xml_filial_"+ cFilAnt +"_"+ DToS(Date()) +"_"+ StrTran(Time(),":","")+"_"+ RetCodUsr() +".log"
 Local _aLog		:={}
 Local _nHdlLog	:= 0
 Local _cPerg	:= "MCOM007"
 Local _lScheduler := FWGetRunSchedule()
 
 If _lScheduler
-	MV_PAR01 :=(DATE()-Val(Substr(_nDias,3,1)))
-	MV_PAR02 :=(DATE()-Val(Substr(_nDias,1,1)))
+	MV_PAR01 :=(DATE()-Val(SubStr(_nDias,3,1)))
+	MV_PAR02 :=(DATE()-Val(SubStr(_nDias,1,1)))
 	_nHdlLog := FCreate(_cArqLog )
 	If _nHdlLog == -1
 		FWLogMsg("WARN"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM00701"/*cMsgId*/, "Filial: "+cFilant+" - Arquivo de Log não pode ser criado. Rotina será interrompida!"/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 	Else
 		aAdd(_aLog,{'Processamento das manutenções periódicas do TOTVS Colaboração, bem como a checagem junto à SEFAZ de documentos cancelados. Ambiente: '+GetEnvServer(),'','','','','','','',''})
-		aAdd(_aLog,{'Data: ' + DtoC(Date()) +' - '+ Time() +' Filial: ' + cFilAnt + ' Período: ' + DtoC(MV_PAR01) + ' a ' +DtoC(MV_PAR02),'','','','','','','',''})
+		aAdd(_aLog,{'Data: ' + DToC(Date()) +' - '+ Time() +' Filial: ' + cFilAnt + ' Período: ' + DToC(MV_PAR01) + ' a ' +DToC(MV_PAR02),'','','','','','','',''})
 		FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM00702"/*cMsgId*/, "Filial: "+cFilant+"] - Inciando processamento dos Updates..."/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 		MCOM007U(_nHdlLog)
 		FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM00703"/*cMsgId*/, "Filial: "+cFilant+"] - Inciando processamento da consulta na SEFAZ..."/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
@@ -64,10 +61,10 @@ Else
 		_nHdlLog := FCreate(_cArqLog )
 		If _nHdlLog == -1
 			Aviso( 'MCOM00707' , 'Arquivo de Log não pode ser criado. Rotina será interrompida!' , {'Sair'} )			
-			Return()
+			Return
 		Else
 			aAdd(_aLog,{'Processamento das manutenções periódicas do TOTVS Colaboração, bem como a checagem junto à SEFAZ de documentos cancelados. Ambiente: '+GetEnvServer(),'','','','','','','',''})
-			aAdd(_aLog,{'Data: ' + DtoC(Date()) +' - '+ Time() +' Filial: ' + cFilAnt + ' Período: ' + DtoC(MV_PAR01) + ' a ' +DtoC(MV_PAR02),'','','','','','','',''})		
+			aAdd(_aLog,{'Data: ' + DToC(Date()) +' - '+ Time() +' Filial: ' + cFilAnt + ' Período: ' + DToC(MV_PAR01) + ' a ' +DToC(MV_PAR02),'','','','','','','',''})		
 			Processa({|| MCOM007U(_nHdlLog) } )
 			Processa({|| MCOM007C(_nHdlLog,_lScheduler,@_aLog) } )
 			Processa({|| MCOM007E(_cArqLog,_aLog) } )
@@ -77,7 +74,7 @@ Else
 	EndIf
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 Return
 
 /*
@@ -92,7 +89,7 @@ Retorno-----------: Nenhum
 */
 Static Function MCOM007U(_nHdlLog)
 
-Local _aArea 	:= GetArea()
+Local _aArea 	:= FWGetArea()
 Local _cQuery 	:= ""
 
 	//====================================================================================================
@@ -107,7 +104,7 @@ Local _cQuery 	:= ""
 	_cQuery+="       C00_DTREC = (SELECT DOCDTAUT FROM SPED156 WHERE D_E_L_E_T_ = ' ' AND C00_CHVNFE = DOCCHV), "
 	_cQuery+="       C00_CODRET = (SELECT RESPSTAT FROM SPED156 WHERE D_E_L_E_T_ = ' ' AND C00_CHVNFE = DOCCHV), "
 	_cQuery+="       C00_DESRES = (SELECT 'Documento(s) localizado(s)' FROM SPED156 WHERE D_E_L_E_T_ = ' ' AND C00_CHVNFE = DOCCHV), "
-	_cQuery+="       C00_IEEMIT = (SELECT SUBSTR(EMITIE, 1, 11) FROM SPED156 WHERE D_E_L_E_T_ = ' ' AND C00_CHVNFE = DOCCHV) "
+	_cQuery+="       C00_IEEMIT = (SELECT SubStr(EMITIE, 1, 11) FROM SPED156 WHERE D_E_L_E_T_ = ' ' AND C00_CHVNFE = DOCCHV) "
 	_cQuery+=" WHERE D_E_L_E_T_ = ' ' "
 	_cQuery+="   AND C00_CODRET = ' ' "
 	_cQuery+="   AND C00_FILIAL = '"+cFilAnt+"'"      
@@ -218,7 +215,7 @@ Local _cQuery 	:= ""
 	_cQuery+="             (SELECT 1 FROM "+RETSQLNAME('C00')
 	_cQuery+="                     WHERE D_E_L_E_T_ = ' ' "
 	_cQuery+="                       AND C00_FILIAL = CKO_FILPRO "
-	_cQuery+="                       AND C00_CHVNFE = SUBSTR(CKO_ARQUIV,4,44) "
+	_cQuery+="                       AND C00_CHVNFE = SubStr(CKO_ARQUIV,4,44) "
 	_cQuery+="         				 AND C00_CODEVE = '3'"
 	_cQuery+="         				 AND C00_STATUS = '2'"
 	_cQuery+="                       AND NOT EXISTS (SELECT 1 FROM "+RETSQLNAME('SF1') 
@@ -248,7 +245,7 @@ Local _cQuery 	:= ""
 	_cQuery+="             (SELECT 1 FROM "+RETSQLNAME('C00')
 	_cQuery+="                     WHERE D_E_L_E_T_ = ' ' "
 	_cQuery+="                       AND C00_FILIAL = CKO_FILPRO "
-	_cQuery+="                       AND C00_CHVNFE = SUBSTR(CKO_ARQUIV,4,44) "
+	_cQuery+="                       AND C00_CHVNFE = SubStr(CKO_ARQUIV,4,44) "
 	_cQuery+="         				 AND C00_CODEVE = '3'"
 	_cQuery+="         				 AND C00_STATUS = '3'"
 	_cQuery+="                       AND NOT EXISTS (SELECT 1 FROM "+RETSQLNAME('SF1') 
@@ -355,13 +352,13 @@ Local _cQuery 	:= ""
 	_cQuery+="         			AND SPED001.IE = S.M0_INSC"
 	_cQuery+="         			AND SPED001.ID_ENT = SPED150.ID_ENT"
 	_cQuery+="         			AND CKO_FILPRO = S.M0_CODFIL"
-	_cQuery+="         			AND SPED150.NFE_CHV = SUBSTR(CKO_ARQUIV,4,44)"
+	_cQuery+="         			AND SPED150.NFE_CHV = SubStr(CKO_ARQUIV,4,44)"
 	_cQuery+="         			AND SPED150.TPEVENTO = '610110'"
 	_cQuery+="         			AND SPED150.STATUS = 6"
 	_cQuery+="                  AND NOT EXISTS (SELECT 1 FROM "+RETSQLNAME('SF1') 
 	_cQuery+="                  	WHERE D_E_L_E_T_ = ' ' "
 	_cQuery+="                      AND CKO_FILPRO = F1_FILIAL "
-	_cQuery+="                      AND SUBSTR(CKO_ARQUIV,4,44) = F1_CHVNFE)) "
+	_cQuery+="                      AND SubStr(CKO_ARQUIV,4,44) = F1_CHVNFE)) "
 
 	If TCSqlExec( _cQuery ) < 0
 		FWLogMsg("ERROR"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM00724"/*cMsgId*/, "Filial: "+cFilant+"] - Processamento 09 com erro: "+AllTrim(TCSQLError())/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
@@ -413,7 +410,7 @@ Local _cQuery 	:= ""
 	//====================================================================================================	
 	_cQuery:=" UPDATE "+RETSQLNAME('SDS')
 	_cQuery+="    SET DS_USERPRE = 'ACERTO MANUAL MCOM007', "
-	_cQuery+="        DS_DATAPRE = '"+DTOS(DATE())+"', "
+	_cQuery+="        DS_DATAPRE = '"+DToS(DATE())+"', "
 	_cQuery+="        DS_HORAPRE= '"+LEFT(TIME(),5)+"', "
 	_cQuery+="        DS_STATUS = 'P'"
 	_cQuery+="   WHERE D_E_L_E_T_ = ' '"
@@ -466,7 +463,7 @@ Local _cQuery 	:= ""
 	_cQuery+="           FROM "+RETSQLNAME('SDS')
 	_cQuery+="          WHERE D_E_L_E_T_ = ' ' "
 	_cQuery+="            AND DS_FILIAL = '"+cFilAnt+"'"
-	_cQuery+="            AND DS_CHAVENF = SUBSTR(CKO_ARQUIV, 4, 44)) "
+	_cQuery+="            AND DS_CHAVENF = SubStr(CKO_ARQUIV, 4, 44)) "
 	
 	If TCSqlExec( _cQuery ) < 0
 		FWLogMsg("ERROR"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM00736"/*cMsgId*/, "Filial: "+cFilant+"] - Processamento 15 com erro: "+AllTrim(TCSQLError())/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
@@ -565,7 +562,7 @@ Local _cQuery 	:= ""
 	_cQuery+="    AND EXISTS (SELECT 1 FROM "+RETSQLNAME('C00')+" "
 	_cQuery+="          WHERE D_E_L_E_T_ = ' ' "
 	_cQuery+="            AND C00_FILIAL = CKO_FILPRO "
-	_cQuery+="            AND C00_CHVNFE = SUBSTR(CKO_ARQUIV, 4, 44) "
+	_cQuery+="            AND C00_CHVNFE = SubStr(CKO_ARQUIV, 4, 44) "
 	_cQuery+="            AND C00_CODEVE = '3' "
 	_cQuery+="            AND C00_STATUS = '1') "
 	
@@ -618,7 +615,7 @@ Local _cQuery 	:= ""
 	_cQuery+=" AND CKO_FILPRO = '"+cFilAnt+"'"
 	_cQuery+=" AND CKO_CODEDI = '109' "
 	_cQuery+=" AND CKO_FLAG = '2' "
-	_cQuery+=" AND EXISTS (SELECT 1 FROM SPED156 WHERE SPED156.D_E_L_E_T_ = ' ' AND SUBSTR(CKO_ARQUIV,4,44) = DOCCHV AND DOCTPOP = '0')
+	_cQuery+=" AND EXISTS (SELECT 1 FROM SPED156 WHERE SPED156.D_E_L_E_T_ = ' ' AND SubStr(CKO_ARQUIV,4,44) = DOCCHV AND DOCTPOP = '0')
 
 	If TCSqlExec( _cQuery ) < 0
 		FWLogMsg("ERROR"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM00754"/*cMsgId*/, "Filial: "+cFilant+"] - Processamento 24 com erro: "+AllTrim(TCSQLError())/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
@@ -708,7 +705,7 @@ Local _cQuery 	:= ""
 	_cQuery+="           FROM "+RETSQLNAME('SF1')
 	_cQuery+="          WHERE D_E_L_E_T_ = ' ' "
 	_cQuery+="            AND F1_FILIAL = '"+cFilAnt+"'"
-	_cQuery+="            AND F1_CHVNFE = SUBSTR(CKO_ARQUIV, 4, 44)) "
+	_cQuery+="            AND F1_CHVNFE = SubStr(CKO_ARQUIV, 4, 44)) "
 	    
 	If TCSqlExec( _cQuery ) < 0
 		FWLogMsg("ERROR"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM00756"/*cMsgId*/, "Filial: "+cFilant+"] - Processamento 25 com erro: "+AllTrim(TCSQLError())/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
@@ -731,7 +728,7 @@ Local _cQuery 	:= ""
 	_cQuery+="          WHERE D_E_L_E_T_ = ' ' "
 	_cQuery+="            AND C00_FILIAL = CKO_FILPRO"
 	_cQuery+="            AND CKO_FLAG = '9'
-	_cQuery+="            AND C00_CHVNFE = SUBSTR(CKO_ARQUIV, 4, 44) "
+	_cQuery+="            AND C00_CHVNFE = SubStr(CKO_ARQUIV, 4, 44) "
 	_cQuery+="            AND CKO_CODERR = 'COM040')"
 	    
 	If TCSqlExec( _cQuery ) < 0
@@ -781,7 +778,7 @@ Local _cQuery 	:= ""
 		FWrite( _nHdlLog , 'Processamento 28 executado com sucesso. Ajustado status para documentos fora da lista de reprocesso' + CRLF )	
 	EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
     
 Return
 
@@ -797,7 +794,7 @@ Retorno-----------: Nenhum
 */
 Static Function MCOM007C(_nHdlLog,_lScheduler,_aLog)
 
-Local _aArea 	:= GetArea()
+Local _aArea 	:= FWGetArea()
 Local _cAlias	:= GetNextAlias()
 Local _lRet 	:= .T.
 Local cURL      := PadR(GetNewPar("MV_SPEDURL","http://"),250)
@@ -812,8 +809,8 @@ If  EntAtivTss() .And. CTIsReady()
   	//Obtem o codigo da entidade 
 	oWS := WsSPEDAdm():New()
 	oWS:cUSERTOKEN := "TOTVS"
-	oWS:oWSEMPRESA:cCNPJ       := IIF(SM0->M0_TPINSC==2 .Or. Empty(SM0->M0_TPINSC),SM0->M0_CGC,"")	
-	oWS:oWSEMPRESA:cCPF        := IIF(SM0->M0_TPINSC==3,SM0->M0_CGC,"")
+	oWS:oWSEMPRESA:cCNPJ       := IIf(SM0->M0_TPINSC==2 .Or. Empty(SM0->M0_TPINSC),SM0->M0_CGC,"")	
+	oWS:oWSEMPRESA:cCPF        := IIf(SM0->M0_TPINSC==3,SM0->M0_CGC,"")
 	oWS:oWSEMPRESA:cIE         := SM0->M0_INSC
 	oWS:oWSEMPRESA:cIM         := SM0->M0_INSCM		
 	oWS:oWSEMPRESA:cNOME       := SM0->M0_NOMECOM
@@ -835,7 +832,7 @@ If  EntAtivTss() .And. CTIsReady()
 	oWS:oWSEMPRESA:cEMAIL      := UsrRetMail(RetCodUsr())
 	oWS:oWSEMPRESA:cNIRE       := SM0->M0_NIRE
 	oWS:oWSEMPRESA:dDTRE       := SM0->M0_DTRE
-	oWS:oWSEMPRESA:cNIT        := IIF(SM0->M0_TPINSC==1,SM0->M0_CGC,"")
+	oWS:oWSEMPRESA:cNIT        := IIf(SM0->M0_TPINSC==1,SM0->M0_CGC,"")
 	oWS:oWSEMPRESA:cINDSITESP  := ""
 	oWS:oWSEMPRESA:cID_MATRIZ  := ""
 	oWS:oWSOUTRASINSCRICOES:oWSInscricao := SPEDADM_ARRAYOFSPED_GENERICSTRUCT():New()
@@ -851,8 +848,8 @@ If  EntAtivTss() .And. CTIsReady()
 		//====================================================================================================
 		// Levanta todas as chaves que foram recebidas e/ou escrituradas para chegar cada uma
 		//====================================================================================================
-		BeginSQL Alias _cAlias
-			SELECT RTRIM(CKO.CKO_FILPRO) FILIAL, SUBSTR(CKO_ARQUIV,4,44) CHAVE
+		BeginSql Alias _cAlias
+			SELECT RTRIM(CKO.CKO_FILPRO) FILIAL, SubStr(CKO_ARQUIV,4,44) CHAVE
 			FROM  %Table:CKO% CKO
 			WHERE CKO.%NotDel%
 			AND CKO.CKO_FLAG <> '9'
@@ -875,19 +872,19 @@ If  EntAtivTss() .And. CTIsReady()
 			AND C00.C00_STATUS = '0'
 			AND C00.C00_CODEVE = '1  '
 			AND C00.C00_SITDOC = '1'
-		EndSQL
+		EndSql
 		aAdd(_aLog,{"Filial","Documento","Serie","Forn","Loja","Especie","Chave"+ Replicate(CHR(09),5),"Clas","Digitação"})
 
-		DbSelectArea("SF1")
-		SF1->(dbSetorder(8))
-		DbSelectArea("SDS")
-		SDS->(dbSetorder(2))
-		DbSelectArea("SDT")
-		SDT->(dbSetOrder(3))
-		DbSelectArea("CKO")
-		CKO->(dbSetorder(1))
-		DbSelectArea("C00")
-		C00->(dbSetorder(1))
+		DBSelectArea("SF1")
+		SF1->(DBSetOrder(8))
+		DBSelectArea("SDS")
+		SDS->(DBSetOrder(2))
+		DBSelectArea("SDT")
+		SDT->(DBSetOrder(3))
+		DBSelectArea("CKO")
+		CKO->(DBSetOrder(1))
+		DBSelectArea("C00")
+		C00->(DBSetOrder(1))
 
 		While (_cAlias)->( !Eof() )			                             
 			_lRet:= .T.
@@ -916,35 +913,35 @@ If  EntAtivTss() .And. CTIsReady()
 				//====================================
 				If AllTrim(oWS:oWSCONSULTACHAVENFERESULT:cCODRETNFE) $ '101/102/155/205/301/302'
 					//Verifica se documento já foi gerado
-					If SF1->(dbSeek(_cFilial+_cChave))
+					If SF1->(DBSeek(_cFilial+_cChave))
 						_lRet:= .F.
-						aAdd(_aLog,{SF1->F1_FILIAL,SF1->F1_DOC,SF1->F1_SERIE,SF1->F1_FORNECE,SF1->F1_LOJA,SF1->F1_ESPECIE,SF1->F1_CHVNFE,IIF(SF1->F1_STATUS=='A','SIM','NAO'),DtoC(SF1->F1_DTDIGIT)})
+						aAdd(_aLog,{SF1->F1_FILIAL,SF1->F1_DOC,SF1->F1_SERIE,SF1->F1_FORNECE,SF1->F1_LOJA,SF1->F1_ESPECIE,SF1->F1_CHVNFE,IIf(SF1->F1_STATUS=='A','SIM','NAO'),DToC(SF1->F1_DTDIGIT)})
 					EndIf
 		
 					//Deleta cabecalho do documento
-					If _lRet .And. SDS->(dbSeek(_cFilial+_cChave))
+					If _lRet .And. SDS->(DBSeek(_cFilial+_cChave))
 						RecLock("SDS",.F.)
 						SDS->(dbDelete())
-						SDS->(MsUnLock())
+						SDS->(MSUnLock())
 					
 						//Deleta itens do documento 
-						If _lRet .And. SDT->(dbSeek(SDS->(DS_FILIAL+DS_FORNEC+DS_LOJA+DS_DOC+DS_SERIE)))
-							While !SDT->(EOF()) .And. SDT->(DT_FILIAL+DT_FORNEC+DT_LOJA+DT_DOC+DT_SERIE) == SDS->(DS_FILIAL+DS_FORNEC+DS_LOJA+DS_DOC+DS_SERIE) 
+						If _lRet .And. SDT->(DBSeek(SDS->(DS_FILIAL+DS_FORNEC+DS_LOJA+DS_DOC+DS_SERIE)))
+							While !SDT->(Eof()) .And. SDT->(DT_FILIAL+DT_FORNEC+DT_LOJA+DT_DOC+DT_SERIE) == SDS->(DS_FILIAL+DS_FORNEC+DS_LOJA+DS_DOC+DS_SERIE) 
 								RecLock("SDT",.F.)
 								SDT->(dbDelete())
-								SDT->(MsUnLock())		
-								SDT->(dbSkip())
+								SDT->(MSUnLock())		
+								SDT->(DBSkip())
 							End
 						EndIf
 					EndIf
 								
-					If Substr(_cChave,21,2)=='55'
+					If SubStr(_cChave,21,2)=='55'
 						_cChave:= '109'+AllTrim((_cAlias)->CHAVE)+'.xml'
 						_cEspecie:= 'SPED'
-					ElseIf Substr(_cChave,21,2)=='57'
+					ElseIf SubStr(_cChave,21,2)=='57'
 						_cChave:= '214'+AllTrim((_cAlias)->CHAVE)+'.xml'
 						_cEspecie:= 'CTE'
-					ElseIf Substr(_cChave,21,2)=='67'
+					ElseIf SubStr(_cChave,21,2)=='67'
 						_cChave:= '273'+AllTrim((_cAlias)->CHAVE)+'.xml'
 						_cEspecie:= 'CTEOS'
 					Else
@@ -952,7 +949,7 @@ If  EntAtivTss() .And. CTIsReady()
 					EndIf
 						
 					//Atualiza status na fila de processamento
-					If _lRet .And. CKO->(dbSeek(_cChave)) .And. (_cAlias)->FILIAL == CKO->CKO_FILPRO
+					If _lRet .And. CKO->(DBSeek(_cChave)) .And. (_cAlias)->FILIAL == CKO->CKO_FILPRO
 						RecLock("CKO",.F.)
 						CKO->CKO_FLAG := '9'
 						If AllTrim(oWS:oWSCONSULTACHAVENFERESULT:cCODRETNFE) $ '101/155'
@@ -972,16 +969,16 @@ If  EntAtivTss() .And. CTIsReady()
 								CKO->CKO_CODERR := 'COM046'
 							EndIf
 						EndIf
-						CKO->(MsUnLock())
+						CKO->(MSUnLock())
 					EndIf
 
 					//Apaga registros cancelados pois não podem ser manifestados
 					If _lRet .And. _cEspecie == 'SPED' .And. AllTrim(oWS:oWSCONSULTACHAVENFERESULT:cCODRETNFE) $ '101/155' ;
-						.And.C00->(dbSeek((_cAlias)->FILIAL+AllTrim((_cAlias)->CHAVE))) .And. C00->C00_STATUS == '0' .And. C00->C00_CODEVE == '1  '
+						.And.C00->(DBSeek((_cAlias)->FILIAL+AllTrim((_cAlias)->CHAVE))) .And. C00->C00_STATUS == '0' .And. C00->C00_CODEVE == '1  '
 						RecLock("C00",.F.)
 						C00->C00_SITDOC := '3'
 						C00->(dbDelete())
-						C00->(MsUnLock())
+						C00->(MSUnLock())
 					EndIf				
 				EndIf
 			Else	
@@ -989,15 +986,15 @@ If  EntAtivTss() .And. CTIsReady()
 				If !_lScheduler
 					Aviso("SPED",IIf(Empty(GetWscError(3)),GetWscError(1),GetWscError(3)),{"OK"},3)
 				EndIf
-				If SF1->(dbSeek(AllTrim((_cAlias)->FILIAL)+AllTrim((_cAlias)->CHAVE)))
-					aAdd(_aLog,{SF1->F1_FILIAL,SF1->F1_DOC,SF1->F1_SERIE,SF1->F1_FORNECE,SF1->F1_LOJA,SF1->F1_ESPECIE,SF1->F1_CHVNFE,IIF(SF1->F1_STATUS=='A','SIM','NAO'),DtoC(SF1->F1_DTDIGIT) + ' Erro ao Consultar a chave. Acionar a TI.'})
+				If SF1->(DBSeek(AllTrim((_cAlias)->FILIAL)+AllTrim((_cAlias)->CHAVE)))
+					aAdd(_aLog,{SF1->F1_FILIAL,SF1->F1_DOC,SF1->F1_SERIE,SF1->F1_FORNECE,SF1->F1_LOJA,SF1->F1_ESPECIE,SF1->F1_CHVNFE,IIf(SF1->F1_STATUS=='A','SIM','NAO'),DToC(SF1->F1_DTDIGIT) + ' Erro ao Consultar a chave. Acionar a TI.'})
 				EndIf
-				FWrite( _nHdlLog , 'Problemas no TSS, Consulta Chave: ' +SF1->F1_CHVNFE +' - ' + DtoC(Date()) +' - '+ Time() +' Filial: ' + cFilAnt + ' Erro: ' + IIf(Empty(GetWscError(3)),GetWscError(1),GetWscError(3)) + CRLF )	
+				FWrite( _nHdlLog , 'Problemas no TSS, Consulta Chave: ' +SF1->F1_CHVNFE +' - ' + DToC(Date()) +' - '+ Time() +' Filial: ' + cFilAnt + ' Erro: ' + IIf(Empty(GetWscError(3)),GetWscError(1),GetWscError(3)) + CRLF )	
 			EndIf
 		(_cAlias)->( DBSkip() )
 		
 		EndDo
-		(_cAlias)->(DbClosearea())
+		(_cAlias)->(DBCloseArea())
 		If Len(_aLog)==1
 			FWrite( _nHdlLog , 'Registros processados sem inconsistências.' + CRLF )
 		Else
@@ -1011,15 +1008,15 @@ If  EntAtivTss() .And. CTIsReady()
 		If !_lScheduler
 			Aviso("SPED",IIf(Empty(GetWscError(3)),GetWscError(1),GetWscError(3)),{"OK"},3)
 		EndIf
-		FWrite( _nHdlLog , 'Problemas no TSS. ' + DtoC(Date()) +' - '+ Time() +' Filial: ' + cFilAnt + ' Erro: ' + IIf(Empty(GetWscError(3)),GetWscError(1),GetWscError(3)) + CRLF )	
+		FWrite( _nHdlLog , 'Problemas no TSS. ' + DToC(Date()) +' - '+ Time() +' Filial: ' + cFilAnt + ' Erro: ' + IIf(Empty(GetWscError(3)),GetWscError(1),GetWscError(3)) + CRLF )	
 	EndIf
 Else
 	FWLogMsg("WARN"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM00737"/*cMsgId*/, "Filial: "+cFilant+"] - TSS Inativo."/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
-	FWrite( _nHdlLog , 'TSS Inativo. ' + DtoC(Date()) +' - '+ Time() +' Filial: ' + cFilAnt + CRLF )	
+	FWrite( _nHdlLog , 'TSS Inativo. ' + DToC(Date()) +' - '+ Time() +' Filial: ' + cFilAnt + CRLF )	
 EndIf
 
 FClose(_nHdlLog)
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -1028,10 +1025,10 @@ Return
 Programa----------: SchedDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 25/05/2017
-Descrição---------: Definição de Static Function SchedDef para o novo Schedule
+Descrição---------: DefiniçStaticStatic Function SchedDef para o novo Schedule
 					No novo Schedule existe uma forma para a definição dos Perguntes para o botão Parâmetros, além do cadastro 
-					das funções no SXD. Ao definir em sua rotina a static function SchedDef(), no cadastro da rotina no Agenda-
-					mento do Schedule será verificado se existe esta static function e irá executá-la habilitando o botão Parâ-
+					das funções no SXD. Ao definir em sua rotinStaticatic Function SchedDef(), no cadastro da rotina no Agenda-
+					mento do Schedule será verificado se existe estStaticic Function e irá executá-la habilitando o botão Parâ-
 					metros com as informações do retorno da SchedDef(), deixando de verificar assim as informações na SXD. O 
 					retorno da SchedDef deverá ser um array.
 					Válido para Function e User Function, lembrando que uma vez definido a SchedDef, ao chamar a rotina o ambi-
@@ -1073,7 +1070,7 @@ Retorno-----------: Nenhum
 Static Function MCOM007E(_cArqLog,_aLog)
 
 Local _nI		:= 0
-Local _cAssunto	:= "Análise XMLs TOTVS Colaboração: "+ DtoC(MV_PAR01)+" - "+ DtoC(MV_PAR02)+" Filial: "+cFilAnt
+Local _cAssunto	:= "Análise XMLs TOTVS Colaboração: "+ DToC(MV_PAR01)+" - "+ DToC(MV_PAR02)+" Filial: "+cFilAnt
 Local _cMensagem:= ""
 Local _cErro	:= ""
 Local _cAlias	:= GetNextAlias()
@@ -1088,7 +1085,7 @@ _cMensagem += '<BODY><br>'
 _cMensagem += '<FONT FACE="Courier New" Style="font-size:12px">'
 _cMensagem += '-------------------------------------------------------------------------------------------------------<br>'
 _cMensagem += ' Ambiente.........: '+ GetEnvServer() +'<br>'
-_cMensagem += ' Data Proc........: '+ DtoC( Date() ) +'<br>'
+_cMensagem += ' Data Proc........: '+ DToC( Date() ) +'<br>'
 _cMensagem += ' Hora.............: '+ Time() +'<br>'
 _cMensagem += '-------------------------------------------------------------------------------------------------------<br>'
 For _nI := 1 To Len(_aLog)
@@ -1104,13 +1101,13 @@ _cMensagem += '</FONT>'
 _cMensagem += '</BODY>'
 _cMensagem += '</HMTL>'
 
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 	SELECT ZZL_EMAIL 
 	FROM %Table:ZZL%
 	WHERE D_E_L_E_T_ =' '
 	AND ZZL_FILIAL = %xFilial:ZZL%
 	AND ZZL_WFTCOL LIKE %exp:_cFilAnt%
-EndSQL
+EndSql
 
 While (_cAlias)->( !Eof() )
 	U_EnvMail(_cMensagem,/*_cFrom*/,(_cAlias)->ZZL_EMAIL/*_cTO*/,/*_cCC*/,/*_cBCC*/,/*_cReplyTo*/,_cAssunto,_cErro,{_cArqLog}/*_aAttach*/)

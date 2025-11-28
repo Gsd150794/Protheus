@@ -2,37 +2,30 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor            |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Josué Danich     | 17/12/2018 | Workaround para calcular vend bloqueado - Chamado 26771 
--------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges 	  | 09/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+Josué Danich  |17/12/2018| Chamado 26771. Workaround para calcular vend bloqueado
+Lucas Borges  |09/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#DEFINE _ENTER CHR(13)+CHR(10)
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: FA440VLD
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 15/02/2011
-===============================================================================================================================
 Descrição---------: Ponto de entrada para realizar validações customizadas no cálculo de comissão.
 					Este ponto de entrada tem como finalidade criar validações adicionais a serem utilizadas na geração de 
 					comissões, antes da gravação da tabela SE3 (Comissões de Vendas).
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
-Retorno-----------: _lret - permite ou não o recálculo
+Retorno-----------: _lRet - permite ou não o recálculo
 ===============================================================================================================================
 */
 User Function FA440VLD()
 
-Local _cTipComis:= PARAMIXB 
+Local _cTipComis:= ParamIXB 
 Local _lRet     := .T.
 Local _sDtComiBx:= GetMv("IT_COMISBA")    
 Local _aSE1 := GetArea("SE1") 
@@ -73,7 +66,7 @@ If _cTipComis == 2
 		//Somente a partir da data que consta no parametro IT_COMISBA
 		//eh que sera possibilitada a geracao da comissao na baixa.  
 		//=============================================================
-		If SE1->E1_EMISSAO < StoD(_sDtComiBx)
+		If SE1->E1_EMISSAO < SToD(_sDtComiBx)
 			_lRet:= .F.
 		EndIf 	
 	EndIf			
@@ -86,9 +79,9 @@ Else
 	_lRet:= .F.
 EndIf   
 
-SE1->(Restarea(_aSE1))
-SE3->(Restarea(_aSE3))
-SE5->(Restarea(_aSE5))
+SE1->(FWRestArea(_aSE1))
+SE3->(FWRestArea(_aSE3))
+SE5->(FWRestArea(_aSE5))
 
 Return _lRet
 
@@ -97,14 +90,11 @@ Return _lRet
 Programa----------: VldFatura
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 15/02/2011
-===============================================================================================================================
 Descrição---------: Valida se título é fatura (titulo gerado antes do inicio de pagamento de comissão)
-===============================================================================================================================
 Parametros--------:  _cPrefixo - Prefixo da fatura
 					_cNumTitul - Numero do titulo da fatura
 					_sDtComis - Data de Inicio Comissao
-===============================================================================================================================
-Retorno-----------: _lret - valida ou não o título
+Retorno-----------: _lRet - valida ou não o título
 ===============================================================================================================================
 */
 Static Function VldFatura(_cPrefixo,_cNumTitul,_sDtComis)
@@ -132,7 +122,7 @@ EndSql
 While (_cAlias)->(!Eof())
 	_lRet:= .F.
 	_cTitulos+= ",[ " + (_cAlias)->E1_PREFIXO + "-" + (_cAlias)->E1_TIPO + " - " + (_cAlias)->E1_NUM + "/" + (_cAlias)->E1_PARCELA + " ]"
-	(_cAlias)->(dbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 (_cAlias)->(DBCloseArea())
@@ -144,13 +134,10 @@ Return _lRet
 Programa----------: VldLiquid
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 16/02/2011
-===============================================================================================================================
 Descrição---------: Valida se título é liquidacao (titulo gerado a partir de vários títulos)
-===============================================================================================================================
 Parametros--------:  _cNunLiqui - Numero da Liquidacao
 					_sDtComis - Data de Inicio Comissao
-===============================================================================================================================
-Retorno-----------: _lret - valida ou não o título
+Retorno-----------: _lRet - valida ou não o título
 ===============================================================================================================================
 */
 Static Function VldLiquid(_cNunLiqui,_sDtComis)
@@ -188,7 +175,7 @@ EndSql
 While (_cAlias)->(!Eof())
 	_lRet:= .F.
 	_cTitulos+= ",[ " + (_cAlias)->E1_PREFIXO + "-" + (_cAlias)->E1_TIPO + " - " + (_cAlias)->E1_NUM + "/" + (_cAlias)->E1_PARCELA + " ]"
-	(_cAlias)->(dbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 (_cAlias)->(DBCloseArea())

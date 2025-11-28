@@ -1,4 +1,4 @@
-#INCLUDE "rwmake.ch"
+#Include "rwmake.ch"
 /*/
 ‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -42,8 +42,8 @@ User Function AOMS025
 	
 	Private cString := "ZB1"
 	
-	dbSelectArea("ZB1")
-	dbSetOrder(1)
+	DBSelectArea("ZB1")
+	DBSetOrder(1)
 	
 	AxCadastro(cString,"Cadastro de Impressoras",cVldExc,cVldAlt)
 

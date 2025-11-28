@@ -25,7 +25,7 @@ Antonio Neves | 26/01/2024 | Chamado 46172. Tratativa para considerar impediment
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 #Include "TopConn.ch"
 /*
 ===============================================================================================================================
@@ -40,29 +40,29 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-USER FUNCTION AOMS059()
+User Function AOMS059()
  
 Private cAlias 		:= "ZZQ"
 Private cCadastro 	:= "Cadastro de Regra NCM x MVA"
 Private aRotina 	:= {}
 Private cDelFunc 	:= ".T." // Validacao para a exclusao. Pode-se utilizar ExecBlock
 _aItalac_F3:={}
-_bSelectSB1:={ || "SELECT B1_COD , B1_DESC FROM "+RETSQLNAME("SB1")+" SB1 WHERE B1_POSIPI = '"+aCOLS[n,GdFieldPos("ZZQ_NCM")]+"' AND D_E_L_E_T_ <> '*' ORDER BY B1_COD " }
-AADD(_aItalac_F3,{"M->ZZQ_PRODUT",_bSelectSB1,{|Tab| (Tab)->B1_COD }                , {|Tab| (Tab)->B1_DESC   }   ,          ,"Produtos",,,010       ,.F.        ,       , } )
+_bSelectSB1:={ || "SELECT B1_COD , B1_DESC FROM "+RETSQLNAME("SB1")+" SB1 WHERE B1_POSIPI = '"+aCOLS[n,GdFieldPos("ZZQ_NCM")]+"' AND D_E_L_E_T_ = ' ' ORDER BY B1_COD " }
+aAdd(_aItalac_F3,{"M->ZZQ_PRODUT",_bSelectSB1,{|Tab| (Tab)->B1_COD }                , {|Tab| (Tab)->B1_DESC   }   ,          ,"Produtos",,,010       ,.F.        ,       , } )
 
-AADD( aRotina , { "Pesquisar"	   , "AxPesqui"  , 0 , 1 } )
-AADD( aRotina , { "Visualizar"	   , "U_ZZQMNT"  , 0 , 2 } )
-AADD( aRotina , { "Incluir"		   , "U_ZZQINC"  , 0 , 3 } )
-AADD( aRotina , { "Manutencao"	   , "U_ZZQMNT"  , 0 , 4 } )
-AADD( aRotina , { "Excluir Títulos", "U_AOMS59E" , 0 , 5 } )
-AADD( aRotina , { "Copiar"		   , "U_ZZQCPY"  , 0 , 3 } )
+aAdd( aRotina , { "Pesquisar"	   , "AxPesqui"  , 0 , 1 } )
+aAdd( aRotina , { "Visualizar"	   , "U_ZZQMNT"  , 0 , 2 } )
+aAdd( aRotina , { "Incluir"		   , "U_ZZQINC"  , 0 , 3 } )
+aAdd( aRotina , { "Manutencao"	   , "U_ZZQMNT"  , 0 , 4 } )
+aAdd( aRotina , { "Excluir Títulos", "U_AOMS59E" , 0 , 5 } )
+aAdd( aRotina , { "Copiar"		   , "U_ZZQCPY"  , 0 , 3 } )
 
 DBSelectArea(cAlias)
 DBSetOrder(1)
 
 MBrowse( ,,,, cAlias )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -77,16 +77,16 @@ Parametros--------: cAlias , nReg , nOpc
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-USER FUNCTION ZZQINC( cAlias , nReg , nOpc )
+User Function ZZQINC( cAlias , nReg , nOpc )
 
 Local oTPanel1	:= Nil
 
 Private oDlg	:= Nil
 Private oGet	:= Nil
 
-Private cCodigo	:= SPACE(6) 
-Private cLoja	:= SPACE(4)
-Private cNome	:= SPACE(40) 
+Private cCodigo	:= Space(6) 
+Private cLoja	:= Space(4)
+Private cNome	:= Space(40) 
 
 Private aHeader	:= {} 
 Private aCols	:= {} 
@@ -95,8 +95,8 @@ Private aReg	:= {}
 //Log de utilização
 U_ITLOGACS()
 
-dbSelectArea( cAlias ) 
-dbSetOrder(1)
+DBSelectArea( cAlias ) 
+DBSetOrder(1)
 
 ZZQHEADER(cAlias) 
 ZZQCOLS( cAlias , nReg , nOpc )
@@ -105,19 +105,19 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From 8,0 To 28,80 OF oMainWnd
 	
 	oTPanel1 := TPanel():New(30,0,"",oDlg,NIL,.T.,.F.,NIL,NIL,0,20,.T.,.F.) 
 	
-	@ 5, 006 SAY "Cód. Cliente:" SIZE 70,7 PIXEL OF oTPanel1 
-	@ 5, 080 SAY "Loja:"         SIZE 70,7 PIXEL OF oTPanel1 
-	@ 5, 140 SAY "Nome:"         SIZE 70,7 PIXEL OF oTPanel1 
+	@ 5, 006 Say "Cód. Cliente:" SIZE 70,7 PIXEL OF oTPanel1 
+	@ 5, 080 Say "Loja:"         SIZE 70,7 PIXEL OF oTPanel1 
+	@ 5, 140 Say "Nome:"         SIZE 70,7 PIXEL OF oTPanel1 
 	
 	@ 4, 038 MSGET cCodigo F3 "SA1_02" PICTURE "@!" VALID U_ZZQCLI() SIZE 32,7 PIXEL OF oTPanel1
-	@ 4, 095 MSGET Iif(cCodigo <> ' ',cLoja,' ') PICTURE "@!" SIZE 30,7 PIXEL OF oTPanel1
-	@ 4, 160 MSGET Iif(cCodigo <> ' ',cNome,' ') WHEN .F.	PICTURE "@!" SIZE 150,7 PIXEL OF oTPanel1
+	@ 4, 095 MSGET IIf(cCodigo <> ' ',cLoja,' ') PICTURE "@!" SIZE 30,7 PIXEL OF oTPanel1
+	@ 4, 160 MSGET IIf(cCodigo <> ' ',cNome,' ') WHEN .F.	PICTURE "@!" SIZE 150,7 PIXEL OF oTPanel1
 		
 	oGet := MSGetDados():New(0,0,0,0,nOpc,"U_ZZQTVLD('I')","AllwaysTrue()",,.T.)
 	
     oDlg:lMaximized:=.T.
 
-ACTIVATE MSDIALOG oDlg CENTER ON INIT (EnchoiceBar(oDlg,{|| IIF(U_ZZQTVLD('I'), ZZQGRVI(),.F.)},{|| oDlg:End() })  , oTPanel1:Align := CONTROL_ALIGN_TOP , oGet:oBrowse:Align := CONTROL_ALIGN_ALLCLIENT  )
+ACTIVATE MSDIALOG oDlg CENTER ON INIT (EnchoiceBar(oDlg,{|| IIf(U_ZZQTVLD('I'), ZZQGRVI(),.F.)},{|| oDlg:End() })  , oTPanel1:Align := CONTROL_ALIGN_TOP , oGet:oBrowse:Align := CONTROL_ALIGN_ALLCLIENT  )
 
 Return 
 
@@ -134,13 +134,13 @@ Parametros--------: cAlias,nReg,nOpc
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-USER FUNCTION ZZQMNT(cAlias,nReg,nOpc)
+User Function ZZQMNT(cAlias,nReg,nOpc)
 
 Local oTPanel1 
 
-Private cCodigo := SPACE(6) 
-Private cLoja   := SPACE(4)
-Private cNome   := SPACE(40) 
+Private cCodigo := Space(6) 
+Private cLoja   := Space(4)
+Private cNome   := Space(40) 
 
 Private oDlg 
 Private oGet 
@@ -152,8 +152,8 @@ Private aReg := {}
 //Log de utilização
 U_ITLOGACS()
 
-dbSelectArea(cAlias) 
-dbGoTo(nReg) 
+DBSelectArea(cAlias) 
+DBGoTo(nReg) 
 
 cCodigo := ZZQ->ZZQ_CLIENT
 cLoja   := ZZQ->ZZQ_LOJA
@@ -166,9 +166,9 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From 8,0 To 28,80 OF oMainWnd
 	
 	oTPanel1 := TPanel():New(30,0,"",oDlg,NIL,.T.,.F.,NIL,NIL,0,20,.T.,.F.) 
 	
-	@ 5, 006 SAY "Cód. Cliente:" SIZE 70,7 PIXEL OF oTPanel1 
-	@ 5, 080 SAY "Loja:"         SIZE 70,7 PIXEL OF oTPanel1 
-	@ 5, 140 SAY "Nome:"         SIZE 70,7 PIXEL OF oTPanel1
+	@ 5, 006 Say "Cód. Cliente:" SIZE 70,7 PIXEL OF oTPanel1 
+	@ 5, 080 Say "Loja:"         SIZE 70,7 PIXEL OF oTPanel1 
+	@ 5, 140 Say "Nome:"         SIZE 70,7 PIXEL OF oTPanel1
 	
 	@ 4, 038 MSGET cCodigo F3 "SA1_02"  SIZE 32,7 PIXEL OF oTPanel1 
 	@ 4, 095 MSGET cLoja   SIZE 30,7 PIXEL OF oTPanel1 
@@ -178,13 +178,13 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From 8,0 To 28,80 OF oMainWnd
 		oGet := MSGetDados():New(0,0,0,0,nOpc,"U_ZZQTVLD('M')","AllwaysTrue()",,.T.) 
 	Else
 		oGet := MSGetDados():New(0,0,0,0,nOpc) 
-	Endif 
+	EndIf 
 
     oDlg:lMaximized:=.T.
 	
-ACTIVATE MSDIALOG oDlg CENTER ON INIT (EnchoiceBar(oDlg,{|| IIF(U_ZZQTVLD('M'), ZZQALT(),.F.) },{|| oDlg:End() }) , oTPanel1:Align := CONTROL_ALIGN_TOP , oGet:oBrowse:Align := CONTROL_ALIGN_ALLCLIENT  )
+ACTIVATE MSDIALOG oDlg CENTER ON INIT (EnchoiceBar(oDlg,{|| IIf(U_ZZQTVLD('M'), ZZQALT(),.F.) },{|| oDlg:End() }) , oTPanel1:Align := CONTROL_ALIGN_TOP , oGet:oBrowse:Align := CONTROL_ALIGN_ALLCLIENT  )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -201,18 +201,18 @@ Retorno-----------: Nenhum
 */
 Static Function ZZQHEADER(cAlias) 
 
-Local aArea := GetArea() 
+Local aArea := FWGetArea() 
 Local _aZZQ := ZZQ->(Dbstruct())
 Local _nnj	:= 0
 
-For _nnj := 1 to len(_aZZQ)
+For _nnj := 1 to Len(_aZZQ)
 
 	If 	Trim(_aZZQ[_nnj][1]) <> "ZZQ_FILIAL" .And. ;
 	Trim(_aZZQ[_nnj][1]) <> "ZZQ_CLIENT" .And. ;
 	Trim(_aZZQ[_nnj][1]) <> "ZZQ_LOJA"
 	 
 	  	 
-	AADD( aHeader, { trim(getsx3cache(_aZZQ[_NNJ][1],"X3_TITULO") ),;
+	aAdd( aHeader, { trim(getsx3cache(_aZZQ[_NNJ][1],"X3_TITULO") ),;
 							getsx3cache(_aZZQ[_NNJ][1],"X3_CAMPO")		,;
 							getsx3cache(_aZZQ[_NNJ][1],"X3_PICTURE")		,;
 							getsx3cache(_aZZQ[_NNJ][1],"X3_TAMANHO")		,;
@@ -223,12 +223,12 @@ For _nnj := 1 to len(_aZZQ)
 							getsx3cache(_aZZQ[_NNJ][1],"X3_ARQUIVO")		,;
 							getsx3cache(_aZZQ[_NNJ][1],"X3_CONTEXT")	})
 		
-	Endif 
+	EndIf 
 
 Next
 
 
-RestArea(aArea) 
+FWRestArea(aArea) 
 
 Return
 
@@ -247,20 +247,20 @@ Retorno-----------: Nenhum
 */
 Static Function ZZQCOLS(cAlias, nReg, nOpc) 
 
-Local aArea  := GetArea() 
+Local aArea  := FWGetArea() 
 Local cChave := ZZQ->ZZQ_CLIENTE+ZZQ->ZZQ_LOJA 
 Local nI     := 0,nColuna
 
 If nOpc <> 3   
 
-	dbSelectArea(cAlias) 
-	dbSetOrder(1) 
-	dbSeek(xFilial(cAlias)+cChave) 
+	DBSelectArea(cAlias) 
+	DBSetOrder(1) 
+	DBSeek(xFilial(cAlias)+cChave) 
 	
-	While !EOF() .And. ZZQ->(ZZQ_FILIAL+ZZQ_CLIENTE+ZZQ_LOJA) == xFilial(cAlias)+cChave 
+	While !Eof() .And. ZZQ->(ZZQ_FILIAL+ZZQ_CLIENTE+ZZQ_LOJA) == xFilial(cAlias)+cChave 
 	
-		AADD(aReg, ZZQ->(RecNo()))
-		AADD(aCOLS, Array(Len(aHeader)+1)) 
+		aAdd(aReg, ZZQ->(RecNo()))
+		aAdd(aCOLS, Array(Len(aHeader)+1)) 
 		
 		For nI := 1 To Len( aHeader ) 
 		
@@ -268,13 +268,13 @@ If nOpc <> 3
 				aCOLS[Len(aCOLS),nI] := CriaVar(aHeader[nI,2],.T.) 
 			Else
 				aCOLS[Len(aCOLS),nI] := FieldGet(FieldPos(aHeader[nI,2])) 
-			Endif 
+			EndIf 
 			
 		Next nI 
 		
 		aCOLS[Len(aCOLS),Len(aHeader)+1] := .F. 
 		
-		dbSkip() 
+		DBSkip() 
 	
 	End 
 	
@@ -285,7 +285,7 @@ Else
 	For nColuna := 1 to Len(aHeader)
 
 		If aHeader[nColuna][8] == "C"
-			aCols[1][nColuna] := SPACE(aHeader[nColuna][4])
+			aCols[1][nColuna] := Space(aHeader[nColuna][4])
 		ElseIf aHeader[nColuna][8] == "N"
 			aCols[1][nColuna] := 0
 		ElseIf aHeader[nColuna][8] == "D"
@@ -294,15 +294,15 @@ Else
 			aCols[1][nColuna] := .F.
 		ElseIf aHeader[nColuna][8] == "M"
 			aCols[1][nColuna] := ""
-		Endif
+		EndIf
 		
 	Next nColuna
 
 	aCols[1][Len(aHeader)+1] := .F. // Linha não deletada
 	
-Endif 
+EndIf 
 
-Restarea(aArea) 
+FWRestArea(aArea) 
 
 
 Return
@@ -322,12 +322,12 @@ Retorno-----------: Nenhum
 */
 Static Function ZZQGRVI() 
 
-Local aArea := GetArea() 
+Local aArea := FWGetArea() 
 Local nI    := 0 
 Local nX    := 0 
 
-dbSelectArea("ZZQ") 
-dbSetOrder(1) 
+DBSelectArea("ZZQ") 
+DBSetOrder(1) 
 
 For nI := 1 To Len( aCOLS ) 
 
@@ -344,13 +344,13 @@ For nI := 1 To Len( aCOLS )
 			
 		Next nX 
 		
-	MsUnLock("ZZQ") 
+	MSUnLock("ZZQ") 
 	
-	Endif 
+	EndIf 
 	
 Next nI 
 
-RestArea(aArea) 
+FWRestArea(aArea) 
 
 oDlg:End()
 
@@ -371,17 +371,17 @@ Retorno-----------: Nenhum
 */
 Static Function ZZQALT() 
 
-Local aArea := GetArea() 
+Local aArea := FWGetArea() 
 Local nI := 0
 Local nX := 0 
 
-dbSelectArea("ZZQ")
+DBSelectArea("ZZQ")
 
 For nI := 1 To Len(aCols) 
 
 	If nI <= Len(aReg) 
 		
-		dbGoTo(aReg[nI]) 
+		DBGoTo(aReg[nI]) 
 		
 		RecLock("ZZQ",.F.) 
 		
@@ -403,7 +403,7 @@ For nI := 1 To Len(aCols)
 			
 		EndIf 
 		
-		MsUnLock()
+		MSUnLock()
 	
 	Else 
  		
@@ -425,11 +425,11 @@ For nI := 1 To Len(aCols)
 	
 	EndIf 
 	
-	MsUnLock() 
+	MSUnLock() 
 	
 Next nI
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 oDlg:End() 
 
@@ -450,7 +450,7 @@ Retorno-----------: Nenhum
 */
 User Function ZZQLVLD() 
 
-Local aArea := GetArea()
+Local aArea := FWGetArea()
 
 Local lRet := .T. 
 Local nI   := 0 
@@ -462,31 +462,31 @@ For nI := 1 To Len( aCOLS )
 
 If aCOLS[nI, Len(aHeader)+1] 
 	Loop 
-Endif
+EndIf
 
-If ( aCols[len(aCols)][Len(aHeader)+1] == .F. ) 
+If ( aCols[Len(aCols)][Len(aHeader)+1] == .F. ) 
 
 	If !aCOLS[nI, Len(aHeader)+1] 
 		If Empty(aCOLS[n,GdFieldPos("ZZQ_NCM")]) 
-			U_ITMSG(cMsg1,"Atenção",,1)
+			U_ITMsg(cMsg1,"Atenção",,1)
 			lRet := .F.
 			Exit
 		ElseIf Empty(aCOLS[n,GdFieldPos("ZZQ_MVA")]) 
-			U_ITMSG(cMsg2,"Atenção",,1)
+			U_ITMsg(cMsg2,"Atenção",,1)
 			lRet := .F.
 			Exit
-		ElseIf ( (nI <> n) .and. (aCols[nI][1] == aCols[n][1]) .and. (aCols[nI][Len(aHeader)+1] == .F.) )
-			U_ITMSG(cMsg3,"Atenção",,1)
+		ElseIf ( (nI <> n) .And. (aCols[nI][1] == aCols[n][1]) .And. (aCols[nI][Len(aHeader)+1] == .F.) )
+			U_ITMsg(cMsg3,"Atenção",,1)
 			lRet := .F.
 			Exit
 		EndIf
-	Endif 
+	EndIf 
 
 EndIf
 
 Next nI 
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return(lRet)
 
@@ -505,7 +505,7 @@ Retorno-----------: Nenhum
 */
 User Function ZZQTVLD( _cTipo ) 
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cQuery	:= ''
 Local _cAlias	:= GetNextAlias()
 Local _lRet		:= .T.
@@ -515,7 +515,7 @@ For _nI := 1 To Len( aCOLS )
 
 	If aCOLS[ _nI ][ Len(aHeader) + 1 ]
 		Loop
-	Endif
+	EndIf
 	
 	If !( aCols[ Len(aCols) ][ Len(aHeader) + 1 ] )
 	
@@ -523,7 +523,7 @@ For _nI := 1 To Len( aCOLS )
 		
 			If Empty( aCOLS[ n ][ GdFieldPos("ZZQ_NCM") ] )
 			
-				u_itmsg('O NCM é obrigatório para todos os itens do cadastro.',"Atenção",'Verifique os dados informados!',1 )
+				U_ITMsg('O NCM é obrigatório para todos os itens do cadastro.',"Atenção",'Verifique os dados informados!',1 )
 
 				_lRet := .F.
 				Exit
@@ -532,7 +532,7 @@ For _nI := 1 To Len( aCOLS )
 			
 			If Empty( aCOLS[ n ][ GdFieldPos("ZZQ_MVA") ] )
 			
-				u_itmsg('O MVA é obrigatório para todos os itens do cadastro.',"Atenção",'Verifique os dados informados!',1 )
+				U_ITMsg('O MVA é obrigatório para todos os itens do cadastro.',"Atenção",'Verifique os dados informados!',1 )
 	
 				_lRet := .F.
 				Exit
@@ -541,7 +541,7 @@ For _nI := 1 To Len( aCOLS )
 			
 			If ( ( _nI <> n ) .And. ( aCols[_nI][1] == aCols[n][1] ) .And. ( aCols[_nI][2] == aCols[n][2] ) .And. ( aCols[_nI][5] == aCols[n][5] ) .And. !aCols[n][Len(aHeader)+1] )
 			
-				u_itmsg('O NCM + Perc. MVA + Cód. Exceção já foi incluído no cadastro anteriormente.',"Atenção",'Verifique os dados informados!',1 )
+				U_ITMsg('O NCM + Perc. MVA + Cód. Exceção já foi incluído no cadastro anteriormente.',"Atenção",'Verifique os dados informados!',1 )
 
 				_lRet := .F.
 				Exit
@@ -565,7 +565,7 @@ For _nI := 1 To Len( aCOLS )
 			(_cAlias)->( DBGoTop() )
 			If (_cAlias)->( !Eof() ) .And. (_cAlias)->REGS > 0
 			
-				u_itmsg('O NCM + Cód. Exceção já foi incluído no cadastro anteriormente.',"Atenção",'Verifique os dados informados!',1 )
+				U_ITMsg('O NCM + Cód. Exceção já foi incluído no cadastro anteriormente.',"Atenção",'Verifique os dados informados!',1 )
 			
 				_lRet := .F.
 				
@@ -579,7 +579,7 @@ For _nI := 1 To Len( aCOLS )
 	
 Next _nI
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return( _lRet )
 
@@ -598,11 +598,11 @@ Retorno-----------: Nenhum
 */
 User Function ZZQNCM()
 	
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cQuery	:= ""
 Local _cAlias	:= GetNextAlias()
 Local _lRet		:= .T.          
-Local _cNcm		:= ALLTRIM(M->ZZQ_NCM)
+Local _cNcm		:= AllTrim(M->ZZQ_NCM)
 Local _nQtdNcm	:= 0
 
 //====================================================================================================
@@ -631,13 +631,13 @@ EndIf
 
 If _nQtdNcm == 0
 
-	u_itmsg('O NCM informado não existe no cadastro de Produtos do Sistema.',"Atenção",'Verifique os dados informados!',1 )
+	U_ITMsg('O NCM informado não existe no cadastro de Produtos do Sistema.',"Atenção",'Verifique os dados informados!',1 )
 
 	_lRet := .F.
 
 EndIf
 	
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return( _lRet )
 
@@ -656,7 +656,7 @@ Retorno-----------: Nenhum
 */
 User Function ZZQCLI()
 	
-Local _aArea    := GetArea()
+Local _aArea    := FWGetArea()
 Local _cQuery   := ""
 Local lRet      := .T.
 Local nQtdCli  	:= 0 
@@ -671,23 +671,23 @@ If cCodigo <> ' '
 	_cQuery += " AND   A1_I_STESP = 'N' "
 	
 	If Select("QCLI") > 0
-		dbSelectArea("QCLI")
-		QCLI->(dbCloseArea())
+		DBSelectArea("QCLI")
+		QCLI->(DBCloseArea())
 	EndIf
 	
 	TcQuery _cQuery New Alias "QCLI"
 	
-	dbSelectArea("QCLI")
-	dbGoTop()
+	DBSelectArea("QCLI")
+	DBGoTop()
 	
 	nQtdCli := QCLI->CONTCLI
 
-	dbSelectArea("QCLI")
-	dbCloseArea()
+	DBSelectArea("QCLI")
+	DBCloseArea()
 	
 	If nQtdCli == 0
 	
-		u_itmsg("CLIENTE NÃO EXISTENTE OU FORA DA REGRA DE GERAÇÃO","Atenção","Teclando F3 você pode ver os clientes que podem ser cadastrados.",1 )
+		U_ITMsg("CLIENTE NÃO EXISTENTE OU FORA DA REGRA DE GERAÇÃO","Atenção","Teclando F3 você pode ver os clientes que podem ser cadastrados.",1 )
 	
 		lRet := .F.
 
@@ -695,7 +695,7 @@ If cCodigo <> ' '
 
 EndIf
 	
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return(lRet)
 
@@ -713,13 +713,13 @@ Parametros--------: cAlias,nReg,nOpc
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-USER FUNCTION ZZQCPY(cAlias,nReg,nOpc)
+User Function ZZQCPY(cAlias,nReg,nOpc)
 
 Local oTPanel1 
 
-Private cCodigo := SPACE(6) 
-Private cLoja   := SPACE(4)
-Private cNome   := SPACE(40) 
+Private cCodigo := Space(6) 
+Private cLoja   := Space(4)
+Private cNome   := Space(40) 
 
 Private oDlg 
 Private oGet 
@@ -731,8 +731,8 @@ Private aReg    := {}
 //Log de utilização
 U_ITLOGACS()
 
-DbSelectArea(cAlias) 
-DbGoTo(nReg) 
+DBSelectArea(cAlias) 
+DBGoTo(nReg) 
 
 cCodigo := Space(Len(ZZQ->ZZQ_CLIENT))
 cLoja   := Space(Len(ZZQ->ZZQ_LOJA))
@@ -745,9 +745,9 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From 8,0 To 28,80 OF oMainWnd
 	
 	oTPanel1 := TPanel():New(30,0,"",oDlg,NIL,.T.,.F.,NIL,NIL,0,20,.T.,.F.) 
 	
-	@ 5, 006 SAY "Cód. Cliente:" SIZE 70,7 PIXEL OF oTPanel1 
-	@ 5, 080 SAY "Loja:"         SIZE 70,7 PIXEL OF oTPanel1 
-	@ 5, 140 SAY "Nome:"         SIZE 70,7 PIXEL OF oTPanel1
+	@ 5, 006 Say "Cód. Cliente:" SIZE 70,7 PIXEL OF oTPanel1 
+	@ 5, 080 Say "Loja:"         SIZE 70,7 PIXEL OF oTPanel1 
+	@ 5, 140 Say "Nome:"         SIZE 70,7 PIXEL OF oTPanel1
 	
 	@ 4, 038 MSGET cCodigo F3 "SA1_02"  PICTURE "@!" VALID U_ZZQCLI() SIZE 32,7 PIXEL OF oTPanel1 
 	@ 4, 095 MSGET cLoja   PICTURE "@!" SIZE 30,7 PIXEL OF oTPanel1 
@@ -757,13 +757,13 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From 8,0 To 28,80 OF oMainWnd
 		oGet := MSGetDados():New(0,0,0,0,nOpc,"U_ZZQTVLD('I')","AllwaysTrue()",,.T.) 
 	Else
 		oGet := MSGetDados():New(0,0,0,0,nOpc) 
-	Endif 
+	EndIf 
 
     oDlg:lMaximized:=.T.
 
-ACTIVATE MSDIALOG oDlg CENTER ON INIT (EnchoiceBar(oDlg,{|| IIF(U_ZZQTVLD('I'), ZZQGRVI(),.F.) },{|| oDlg:End() }) , oTPanel1:Align := CONTROL_ALIGN_TOP , oGet:oBrowse:Align := CONTROL_ALIGN_ALLCLIENT  )
+ACTIVATE MSDIALOG oDlg CENTER ON INIT (EnchoiceBar(oDlg,{|| IIf(U_ZZQTVLD('I'), ZZQGRVI(),.F.) },{|| oDlg:End() }) , oTPanel1:Align := CONTROL_ALIGN_TOP , oGet:oBrowse:Align := CONTROL_ALIGN_ALLCLIENT  )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -772,85 +772,85 @@ Autor-------------: Alex Wallauer Ferreira
 Data da Criacao---: 02/05/2023
 ===============================================================================================================================
 Descrição---------: Função com intuito de permitir que o usuário tenha a possibilidade de excluir os títulos gerados pela 
-------------------: rotina uma vez que se for identificado alguma parametrização indevida.
+------------------: rotina uma vez que se For identificado alguma parametrização indevida.
 ===============================================================================================================================
 Parametros--------: cAlias,nReg,nOpc
 ===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-USER Function AOMS59E(cAlias,nReg,nOpc)
+User Function AOMS59E(cAlias,nReg,nOpc)
 Local _aParRet :={}
 Local _aParAux :={} , nI 
 
 MV_PAR01:=dDataBase
 MV_PAR02:=dDataBase
 
-AADD( _aParAux , { 1 , "Dt Emissão de"	      , MV_PAR01, "@D"	, ""	, ""		, "" , 060 , .T. } )
-AADD( _aParAux , { 1 , "Dt Emissão ate"       , MV_PAR02, "@D"	, ""	, ""		, "" , 060 , .T. } )
+aAdd( _aParAux , { 1 , "Dt Emissão de"	      , MV_PAR01, "@D"	, ""	, ""		, "" , 060 , .T. } )
+aAdd( _aParAux , { 1 , "Dt Emissão ate"       , MV_PAR02, "@D"	, ""	, ""		, "" , 060 , .T. } )
 
 For nI := 1 To Len( _aParAux )
 	aAdd( _aParRet , _aParAux[nI][03] )
 Next nI
 
-DO WHILE .T.
+While .T.
              //aParametros, cTitle            , @aRet     ,[bOk]  , [ aButtons ] [ lCentered ] [ nPosX ] [ nPosy ] [ oDlgWizard ] [ cLoad ] [ lCanSave ] [ lUserSave ] 
-   IF !ParamBox( _aParAux , "FILTRAR TITULOS" , @_aParRet ,/*bOK*/, /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
-      EXIT
+   If !ParamBox( _aParAux , "FILTRAR TITULOS" , @_aParRet ,/*bOK*/, /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
+      Exit
    EndIf
 
    _aDados:={}
    _nTotalM:=0
-   _cTimeIni:=TIME()
-   FWMSGRUN( ,{|oproc| _aDados:=AOMS59Ler(oproc) } , "Aguarde!" , "Hora Inicial: "+_cTimeIni+" / Executando a SELECT ..." )
+   _cTimeIni:=Time()
+   FWMsgRun( ,{|oproc| _aDados:=AOMS59Ler(oproc) } , "Aguarde!" , "Hora Inicial: "+_cTimeIni+" / Executando a SELECT ..." )
 
-   If LEN(_aDados) > 0
+   If Len(_aDados) > 0
    
        aCab:={}
-       AADD(aCab," ")
-       AADD(aCab," ")
-       AADD(aCab ,"Filial")
-       AADD(aCab ,"Dt Emissao")    
-       AADD(aCab ,"No. Titulo") ; _nPosTit:=LEN(aCab)
-       AADD(aCab ,"Parcela")    
-       AADD(aCab ,"Prefixo")    
-       AADD(aCab ,"Tipo")  
-       AADD(aCab ,"Natureza")    
-       AADD(aCab ,"Cliente")
-       AADD(aCab ,"Loja")  
-       AADD(aCab ,"Dt Vecto")   
-       AADD(aCab ,"Dt Vecto Real")    
-       AADD(aCab ,"Valor") 
-       AADD(aCab ,"Saldo") 
-       AADD(aCab ,"Dt Baixa") 
-       AADD(aCab ,"Situacao") 
-       AADD(aCab ,"Registro") 
+       aAdd(aCab," ")
+       aAdd(aCab," ")
+       aAdd(aCab ,"Filial")
+       aAdd(aCab ,"Dt Emissao")    
+       aAdd(aCab ,"No. Titulo") ; _nPosTit:=Len(aCab)
+       aAdd(aCab ,"Parcela")    
+       aAdd(aCab ,"Prefixo")    
+       aAdd(aCab ,"Tipo")  
+       aAdd(aCab ,"Natureza")    
+       aAdd(aCab ,"Cliente")
+       aAdd(aCab ,"Loja")  
+       aAdd(aCab ,"Dt Vecto")   
+       aAdd(aCab ,"Dt Vecto Real")    
+       aAdd(aCab ,"Valor") 
+       aAdd(aCab ,"Saldo") 
+       aAdd(aCab ,"Dt Baixa") 
+       aAdd(aCab ,"Situacao") 
+       aAdd(aCab ,"Registro") 
    	
-       _cTitulo2:='Exclusao de Titulos - Data: ' + DtoC(Date()) 
-       _cMsgTopFixo:=" - Dt Inicial: "+ALLTRIM(AllToChar(MV_PAR01))+"; Dt Final: "+ALLTRIM(AllToChar(MV_PAR02))+" -  H.I.: "+_cTimeIni+" H.F.: "+TIME()
-       _cMsgTop:="Total Selecionado : "+ ALLTRIM(Transform(  _nTotalM  , "9999" ))+_cMsgTopFixo
+       _cTitulo2:='Exclusao de Titulos - Data: ' + DToC(Date()) 
+       _cMsgTopFixo:=" - Dt Inicial: "+AllTrim(AllToChar(MV_PAR01))+"; Dt Final: "+AllTrim(AllToChar(MV_PAR02))+" -  H.I.: "+_cTimeIni+" H.F.: "+Time()
+       _cMsgTop:="Total Selecionado : "+ AllTrim(Transform(  _nTotalM  , "9999" ))+_cMsgTopFixo
 
        _bDblClk := {|| U_AOMS59Marca( @oLbxAux, @oSayAux, @_cMsgTop,.F.) }
-       _bHeadClk := {|oLbx, ni| Iif(ni=1,FWMSGRUN( ,{|oProc|  U_AOMS59Marca( @oLbxAux, @oSayAux, @_cMsgTop, .T.,oProc) } , "Processando... " ),.F.)  }
+       _bHeadClk := {|oLbx, ni| IIf(ni=1,FWMsgRun( ,{|oProc|  U_AOMS59Marca( @oLbxAux, @oSayAux, @_cMsgTop, .T.,oProc) } , "Processando... " ),.F.)  }
 
 		_aButtons:={}
-		AADD(_aButtons,{"",{|| AOMS59Vis(oLbxAux:aArray[oLbxAux:nAt][LEN(oLbxAux:aArray[oLbxAux:nAt])])  },"", "Visualizar Titulo" })
+		aAdd(_aButtons,{"",{|| AOMS59Vis(oLbxAux:aArray[oLbxAux:nAt][Len(oLbxAux:aArray[oLbxAux:nAt])])  },"", "Visualizar Titulo" })
         aAdd(_aButtons,{"",{|| AOMS59Pes( oLbxAux ) }, "" , "PESQUISAR TITULO"} )
 
 	//      ITListBox(_cTitAux , _aHeader , _aCols ,_lMaxSiz,_nTipo,_cMsgTop,_lSelUnc , _aSizes , _nCampo , bOk , bCancel, _aButtons )
    	   If U_ITListBox(_cTitulo2, aCab     , _aDados, .T.    , 2    ,_cMsgTop, .F.     ,         ,         ,     ,        , _aButtons,, _bDblClk ,,,,, _bHeadClk )
           
           
-          FWMSGRUN( ,{|oProc|  AOMS59Exc(oProc) }  , "Processando... " )
+          FWMsgRun( ,{|oProc|  AOMS59Exc(oProc) }  , "Processando... " )
 
-   	   Endif
+   	   EndIf
      	
-   Endif
+   EndIf
 
 
-ENDDO
+EndDo
 
-RETURN 
+Return 
 
 /*
 ===============================================================================================================================
@@ -869,47 +869,47 @@ Static Function AOMS59Pes( oLbxAux )
 
 Local _oGet1		:= Nil
 Local _oDlg			:= Nil
-Local _cGet1		:= SPACE(LEN(SE1->E1_NUM))
+Local _cGet1		:= Space(Len(SE1->E1_NUM))
 Local _nOpca		:= 0
 Local nPos			:= 0
 Local _lAchou		:= .F.
 
-IF oLbxAux <> NIL
+If oLbxAux <> NIL
    N:=oLbxAux:nAt
    aCols:=oLbxAux:aArray
-ELSE
-   RETURN .F.
-ENDIF
+Else
+   Return .F.
+EndIf
 
 DEFINE MSDIALOG _oDlg TITLE "Pesquisar Numero do Titulo" FROM 178,181 TO 259,697 PIXEL 
 
-@005,003 SAY "Numero do Titulo para Pesquisar :" Size 213,010 PIXEL OF _oDlg
+@005,003 Say "Numero do Titulo para Pesquisar :" Size 213,010 PIXEL OF _oDlg
 @020,003 MsGet _oGet1 Var _cGet1				 Size 212,009 PIXEL OF _oDlg COLOR CLR_BLACK Picture "@!" F3 "SE1"
 
-DEFINE SBUTTON FROM 004,227 TYPE 1 ENABLE ACTION ( _nOpca := 1 , _oDlg:End() ) OF _oDlg
-DEFINE SBUTTON FROM 021,227 TYPE 2 ENABLE ACTION ( _nOpca := 0 , _oDlg:End() ) OF _oDlg
+DEFINE SBUTTON FROM 004,227 Type 1 ENABLE ACTION ( _nOpca := 1 , _oDlg:End() ) OF _oDlg
+DEFINE SBUTTON FROM 021,227 Type 2 ENABLE ACTION ( _nOpca := 0 , _oDlg:End() ) OF _oDlg
 
 ACTIVATE MSDIALOG _oDlg CENTERED
 
 If _nOpca == 1
    _cGet1 := RTrim( _cGet1 )
-   If (nPos := ASCAN(aCols,{|P| P[_nPosTit] == _cGet1 }) ) <> 0 
+   If (nPos := aScan(aCols,{|P| P[_nPosTit] == _cGet1 }) ) <> 0 
    	  oLbxAux:nAt    := N :=nPos
    	 _lAchou:= .T.
    EndIf	  	
-ELSE
-   RETURN _cRet//RETORNA O CONTEUDO DELE MESMO 
+Else
+   Return _cRet//RETORNA O CONTEUDO DELE MESMO 
 EndIf
 
 If _lAchou
    oLbxAux:Refresh()
    oLbxAux:SetFocus()
-   U_ITMSG("O Titulo "+_cGet1+" esta na linha: "+ALLTRIM(STR(nPos)),'Atenção!',,2) 
-ELSE
-   U_ITMSG("Titulo não encontrado nesta lista.",'Atenção!',"Tente outro Titulo",3) 
+   U_ITMsg("O Titulo "+_cGet1+" esta na linha: "+AllTrim(Str(nPos)),'Atenção!',,2) 
+Else
+   U_ITMsg("Titulo não encontrado nesta lista.",'Atenção!',"Tente outro Titulo",3) 
 EndIf
 
-RETURN .T.
+Return .T.
 
 
 
@@ -920,84 +920,84 @@ Autor-------------: Alex Wallauer Ferreira
 Data da Criacao---: 02/05/2023
 ===============================================================================================================================
 Descrição---------: Função com intuito de permitir que o usuário tenha a possibilidade de excluir os títulos gerados pela 
-------------------: rotina uma vez que se for identificado alguma parametrização indevida.
+------------------: rotina uma vez que se For identificado alguma parametrização indevida.
 ===============================================================================================================================
 Parametros--------: cAlias,nReg,nOpc
 ===============================================================================================================================
 Retorno-----------: _aDados
 ===============================================================================================================================
 */
-STATIC Function AOMS59Ler(oproc)
+Static Function AOMS59Ler(oproc)
 Local _cAlias2:= GetNextAlias()
-LOCAL _cQuery := "SELECT "  
+Local _cQuery := "SELECT "  
 _cQuery += " R_E_C_N_O_ SE1REC "
 _cQuery += "FROM " + RetSqlName("SE1") + " E1 "  
 _cQuery += "WHERE E1.D_E_L_E_T_ = ' ' "
 _cQuery += "  AND E1.E1_FILIAL  = '" + xFilial("SE1") + "' "   
 _cQuery += "  AND E1.E1_TIPO    = 'ICM' "
 _cQuery += "  AND E1.E1_ORIGEM  = 'GRVICMST' "  
-_cQuery += "  AND E1.E1_EMISSAO BETWEEN '" + DTOS(MV_PAR01)+"' AND '"+DTOS(MV_PAR02)+"' " 
+_cQuery += "  AND E1.E1_EMISSAO BETWEEN '" + DToS(MV_PAR01)+"' AND '"+DToS(MV_PAR02)+"' " 
 _cQuery += "ORDER BY E1_NUM, E1_EMISSAO,  E1_PARCELA"
 
 
-cTimeINI:=TIME()
+cTimeINI:=Time()
 DBUseArea( .T. , "TOPCONN" , TcGenQry(,,_cQuery) , _cAlias2 , .T. , .F. )
    
 _nTot:=nConta:=0
 COUNT TO _nTot
-_cTotGeral:=ALLTRIM(STR(_nTot))
+_cTotGeral:=AllTrim(Str(_nTot))
 
 cTimeFIM:="Hora Incial: "+cTimeINI+" - Hora Final: "+TIME()+" da leitura dos dados"
 
-(_cAlias2)->(DbGoTop())
-IF (_cAlias2)->(EOF())
-   U_ITMSG("Não tem titulos para listados com esses filtros.",cTimeFIM,"Altere os filtros.",3) 
-   RETURN {}
-ENDIF
+(_cAlias2)->(DBGoTop())
+If (_cAlias2)->(Eof())
+   U_ITMsg("Não tem titulos para listados com esses filtros.",cTimeFIM,"Altere os filtros.",3) 
+   Return {}
+EndIf
       
-IF _nTot > 500 .AND. !U_ITMSG("Serão listados "+_cTotGeral+' titulos , Confirma ?',cTimeFIM,,3,2,3,,"CONFIRMA","VOLTAR")
-   RETURN {}
-ENDIF
+If _nTot > 500 .And. !U_ITMsg("Serão listados "+_cTotGeral+' titulos , Confirma ?',cTimeFIM,,3,2,3,,"CONFIRMA","VOLTAR")
+   Return {}
+EndIf
       
 _aDados:={}
 _nTotalM:=0
-DO WHILE (_cAlias2)->(!EOF()) //**********************************  WHILE  ******************************************************
+While (_cAlias2)->(!Eof()) //**********************************  While  ******************************************************
             
-    IF oproc <> NIL
+    If oproc <> NIL
        nConta++
-       oproc:cCaption := ("Lendo "+STRZERO(nConta,5) +" de "+ _cTotGeral )
+       oproc:cCaption := ("Lendo "+StrZero(nConta,5) +" de "+ _cTotGeral )
        ProcessMessages()
-    ENDIF
+    EndIf
 	
-	SE1->(DBGOTO((_cAlias2)->SE1REC))
-    If EMPTY(SE1->E1_BAIXA) .AND.  SE1->E1_SALDO = SE1->E1_VALOR
+	SE1->(DBGoTo((_cAlias2)->SE1REC))
+    If Empty(SE1->E1_BAIXA) .And.  SE1->E1_SALDO = SE1->E1_VALOR
        _nTotalM++
     EndIf
 
     _aProd := {}
-    AADD(_aProd , EMPTY(SE1->E1_BAIXA) .AND.  SE1->E1_SALDO = SE1->E1_VALOR .AND. SE1->E1_SITUACA = "0") 
-    AADD(_aProd , EMPTY(SE1->E1_BAIXA) .AND.  SE1->E1_SALDO = SE1->E1_VALOR .AND. SE1->E1_SITUACA = "0") 
-    AADD(_aProd ,SE1->E1_FILIAL )   
-    AADD(_aProd ,SE1->E1_EMISSAO)    
-    AADD(_aProd ,SE1->E1_NUM    ) 
-    AADD(_aProd ,SE1->E1_PARCELA)    
-    AADD(_aProd ,SE1->E1_PREFIXO)    
-    AADD(_aProd ,SE1->E1_TIPO   )  
-    AADD(_aProd ,SE1->E1_NATUREZ)    
-    AADD(_aProd ,SE1->E1_CLIENTE)    
-    AADD(_aProd ,SE1->E1_LOJA   )  
-    AADD(_aProd ,SE1->E1_VENCTO )   
-    AADD(_aProd ,SE1->E1_VENCREA)
-    AADD(_aProd ,"R$ "+TRANS(SE1->E1_VALOR,"@E 999,999,999,999.99")  ) 
-    AADD(_aProd ,"R$ "+TRANS(SE1->E1_SALDO,"@E 999,999,999,999.99")  ) 
-    AADD(_aProd ,SE1->E1_BAIXA)
-    AADD(_aProd ,IF(SE1->E1_SITUACA<>"0","EM BORDERO","          "))	
-    AADD(_aProd ,SE1->(RECNO()))
-    AADD(_aDados , _aProd  )
+    aAdd(_aProd , Empty(SE1->E1_BAIXA) .And.  SE1->E1_SALDO = SE1->E1_VALOR .And. SE1->E1_SITUACA = "0") 
+    aAdd(_aProd , Empty(SE1->E1_BAIXA) .And.  SE1->E1_SALDO = SE1->E1_VALOR .And. SE1->E1_SITUACA = "0") 
+    aAdd(_aProd ,SE1->E1_FILIAL )   
+    aAdd(_aProd ,SE1->E1_EMISSAO)    
+    aAdd(_aProd ,SE1->E1_NUM    ) 
+    aAdd(_aProd ,SE1->E1_PARCELA)    
+    aAdd(_aProd ,SE1->E1_PREFIXO)    
+    aAdd(_aProd ,SE1->E1_TIPO   )  
+    aAdd(_aProd ,SE1->E1_NATUREZ)    
+    aAdd(_aProd ,SE1->E1_CLIENTE)    
+    aAdd(_aProd ,SE1->E1_LOJA   )  
+    aAdd(_aProd ,SE1->E1_VENCTO )   
+    aAdd(_aProd ,SE1->E1_VENCREA)
+    aAdd(_aProd ,"R$ "+TRANS(SE1->E1_VALOR,"@E 999,999,999,999.99")  ) 
+    aAdd(_aProd ,"R$ "+TRANS(SE1->E1_SALDO,"@E 999,999,999,999.99")  ) 
+    aAdd(_aProd ,SE1->E1_BAIXA)
+    aAdd(_aProd ,If(SE1->E1_SITUACA<>"0","EM BORDERO","          "))	
+    aAdd(_aProd ,SE1->(RECNO()))
+    aAdd(_aDados , _aProd  )
           
-    (_cAlias2)->(dbSkip())
+    (_cAlias2)->(DBSkip())
       
-ENDDO
+EndDo
 
 
 Return _aDados
@@ -1015,7 +1015,7 @@ Parametros--------: oProc = Status de Processamento
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
-STATIC Function AOMS59Exc( oProc )
+Static Function AOMS59Exc( oProc )
 Local nI
 Local nModAnt  := nModulo
 Local cModAnt  := cModulo
@@ -1029,16 +1029,16 @@ cModulo := "FIN"
 
 For nI := 1 To Len( _aDados )
      
-	IF _aDados[nI,1] 
+	If _aDados[nI,1] 
 
 //INICIO DO TRATAMENTO DA EXCLUSÃO DA SE2
-		dbSelectArea("SE2")
-		SE2->(dbSetOrder(1)) //E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA                                                                                               
-		If SE2->(dbSeek(_aDados[nI][3]+_aDados[nI][7]+_aDados[nI][5]+_aDados[nI][6]+_aDados[nI][8]))
+		DBSelectArea("SE2")
+		SE2->(DBSetOrder(1)) //E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA                                                                                               
+		If SE2->(DBSeek(_aDados[nI][3]+_aDados[nI][7]+_aDados[nI][5]+_aDados[nI][6]+_aDados[nI][8]))
      	
-		DO WHILE SE2->(!EOF()) .AND. SE2->E2_FILIAL == _aDados[nI][3] .AND. SE2->E2_PREFIXO == _aDados[nI][7];
-							   .AND. SE2->E2_NUM == _aDados[nI][5] .AND. SE2->E2_PARCELA == _aDados[nI][6];
-							   .AND. SE2->E2_TIPO == _aDados[nI][8] .AND. SE2->E2_ORIGEM == "GRVICMST"
+		While SE2->(!Eof()) .And. SE2->E2_FILIAL == _aDados[nI][3] .And. SE2->E2_PREFIXO == _aDados[nI][7];
+							   .And. SE2->E2_NUM == _aDados[nI][5] .And. SE2->E2_PARCELA == _aDados[nI][6];
+							   .And. SE2->E2_TIPO == _aDados[nI][8] .And. SE2->E2_ORIGEM == "GRVICMST"
 					_TitSE2 := {}
 					aAdd(_TitSE2, {"E2_FILIAL",  SE2->E2_FILIAL,    Nil})
 					aAdd(_TitSE2, {"E2_NUM",     SE2->E2_NUM,    Nil})
@@ -1059,10 +1059,10 @@ For nI := 1 To Len( _aDados )
 					aAdd(_TitSE2, {"E2_ORIGEM",  "GRVICMST",     Nil})
 
 
-        SE2->(DBSKIP())
-        ENDDO  
+        SE2->(DBSkip())
+        EndDo  
 		EndIf
-		SE2->(dbCloseArea())
+		SE2->(DBCloseArea())
 
 
 If !Empty(_TitSE2) 
@@ -1084,7 +1084,7 @@ EndIf
 
 //TRATATIVA DA SE1
 If _lSegue
-	   SE1->(DBGOTO( _aDados[nI,LEN(_aDados[nI] )]) )
+	   SE1->(DBGoTo( _aDados[nI,Len(_aDados[nI] )]) )
        _cChave:=SE1->(E1_FILIAL+SE1->E1_CLIENTE+SE1->E1_LOJA+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO)
        _cChavErro:="Nota: "+SE1->E1_NUM+" / Cliente+Loja: "+SE1->E1_CLIENTE+SE1->E1_LOJA+" / Pref.: "+SE1->E1_PREFIXO+" / Parc.: "+SE1->E1_PARCELA
 /*
@@ -1109,19 +1109,19 @@ If _lSegue
 	    MsExecAuto( {|x,y| FINA040( x , y ) } , aArray , 5 )  // 3 - Inclusao, 4 - Alteração, 5 - Exclusão
 	
         SE1->( DBSetOrder(2) )//E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO
-	    If lMsErroAuto .OR. (lAchou:=SE1->(DBSeek(_cChave)))//SE1->(DBSEEK( SF1->F1_FILIAL+SF1->F1_FORNECE+SF1->F1_LOJA+SF1->F1_SERIE+SF1->F1_DOC ))
-		   IF lMsErroAuto
+	    If lMsErroAuto .Or. (lAchou:=SE1->(DBSeek(_cChave)))//SE1->(DBSeek( SF1->F1_FILIAL+SF1->F1_FORNECE+SF1->F1_LOJA+SF1->F1_SERIE+SF1->F1_DOC ))
+		   If lMsErroAuto
 	          _cErro:=(MostraErro())
-		   ELSE
+		   Else
 	          _cErro:="Nao exclui titulo, tente novamente!"
-		   ENDIF
+		   EndIf
            bBloco:={||  AVISO("MostraErro()",_cErro,{"Fechar"},3) }
-           U_ITMSG("Não foi possivel excluir o titulo / "+_cChavErro,"ATENCAO!","Verifique a mensagen de erro [Mais Detalhes] e tente novamente: ",1,,,,,,bBloco)
-        ELSE
+           U_ITMsg("Não foi possivel excluir o titulo / "+_cChavErro,"ATENCAO!","Verifique a mensagen de erro [Mais Detalhes] e tente novamente: ",1,,,,,,bBloco)
+        Else
 	    	_nConta++
         EndIf
 
-   ENDIF
+   EndIf
 EndIf      	  
 Next	
 
@@ -1130,9 +1130,9 @@ nModulo := nModAnt
 cModulo := cModAnt
 
 
-U_itmsg('Processo concluído com sucesso. Titulos excluidos: '+CValToChar(_nConta),"Atenção",,2)
+U_ITMsg('Processo concluído com sucesso. Titulos excluidos: '+CValToChar(_nConta),"Atenção",,2)
 
-RETURN .T.
+Return .T.
 
 /*
 ===============================================================================================================================
@@ -1185,12 +1185,12 @@ Default lHeader := .F.
 
    EndIf
 
-   _cMsgTop :="Total Selecionado : "+ ALLTRIM(Transform(  _nTotalM  , "9999" ))+_cMsgTopFixo
+   _cMsgTop :="Total Selecionado : "+ AllTrim(Transform(  _nTotalM  , "9999" ))+_cMsgTopFixo
    oMsgStop:cCaption:=_cMsgTop
    oMsgStop:Refresh()
    oLbxDados:Refresh()
 
-Return()
+Return
 
 
 /*
@@ -1207,13 +1207,13 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */ 
 Static Function AOMS59Vis(nRecno)
-Local aArea:= GetArea()
+Local aArea:= FWGetArea()
 cCadastro:="Visualizar Titulo" 
 
-DbSelectArea("SE1")
-SE1->(DbSetOrder(1))
-SE1->(DBGOTO( nRecno ))
+DBSelectArea("SE1")
+SE1->(DBSetOrder(1))
+SE1->(DBGoTo( nRecno ))
 AxVisual( "SE1", SE1->( Recno() ), 2 )
 
-RestArea( aArea )        
-RETURN .t.
+FWRestArea( aArea )        
+Return .T.

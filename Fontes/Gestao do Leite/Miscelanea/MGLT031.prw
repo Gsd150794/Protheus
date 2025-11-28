@@ -9,7 +9,7 @@ Lucas Borges  |15/07/2025| Chamado 51354. Corrgida gravação da data e hora conte
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -110,12 +110,12 @@ If ZFM->(DBSeek(xFilial("ZFM")+_cEmpCFG)) .And. !(Empty(ZFM->ZFM_LINK01) .Or. Em
     EndIf
     If !Empty(_cToken)
         //Cod integração/Cod Protheus/Descrição/Processado/processado anteriormente/erro
-        Aadd(_aTipPrd,{"1","Creme de Leite",0,0,0})
-        Aadd(_aTipPrd,{"2","Soro de Leite",0,0,0})
-        Aadd(_aTipPrd,{"3","Leite Cru",0,0,0})
+        aAdd(_aTipPrd,{"1","Creme de Leite",0,0,0})
+        aAdd(_aTipPrd,{"2","Soro de Leite",0,0,0})
+        aAdd(_aTipPrd,{"3","Leite Cru",0,0,0})
 
         _cAlias := GetNextAlias()
-        BeginSQL alias _cAlias
+        BeginSql alias _cAlias
             SELECT DISTINCT ZA7_TIPPRD, ZA7_DENMIN, ZA7_DENMAX, ZA7_DENPAD,ZA7_GORMIN, ZA7_GORMAX, ZA7_ESTMIN, ZA7_ESTMAX, ZA7_DPADIN,
             TRIM(REGEXP_SUBSTR(ZA7_CODINT, '[^;]+', 1, LEVEL)) AS ZA7_CODINT
             FROM %Table:ZA7% ZA7
@@ -126,8 +126,8 @@ If ZFM->(DBSeek(xFilial("ZFM")+_cEmpCFG)) .And. !(Empty(ZFM->ZFM_LINK01) .Or. Em
             AND PRIOR ZA7_TIPPRD = ZA7_TIPPRD
             AND PRIOR SYS_GUID() <> ' '
         EndSql
-        While (_cAlias)->(!EOF())
-            Aadd(_aProd,{(_cAlias)->ZA7_TIPPRD,; //01
+        While (_cAlias)->(!Eof())
+            aAdd(_aProd,{(_cAlias)->ZA7_TIPPRD,; //01
                         (_cAlias)->ZA7_CODINT,; //02
                         (_cAlias)->ZA7_DPADIN,; //03
                         (_cAlias)->ZA7_DENMIN,; //04
@@ -138,25 +138,25 @@ If ZFM->(DBSeek(xFilial("ZFM")+_cEmpCFG)) .And. !(Empty(ZFM->ZFM_LINK01) .Or. Em
                         (_cAlias)->ZA7_ESTMIN,; //09
                         (_cAlias)->ZA7_ESTMAX}) //10
                         
-            (_cAlias)->(DbSkip())
+            (_cAlias)->(DBSkip())
         EndDo
         (_cAlias)->(DBCloseArea())
-        ZZX->(DbSetOrder(4)) // ZZX_FILIAL+ZZX_FLOGID
-        ZAP->(DbSetOrder(2)) // ZAP_FILIAL+ZAP_FLOGID+ZAP_ITEM
-        ZBQ->(DbSetOrder(1)) //ZBQ_FILIAL+ZBQ_FLOGID+ZBQ_GRUPO
-        ZZV->(DbSetOrder(1)) //ZZV_FILIAL+ZZV_PLACA
+        ZZX->(DBSetOrder(4)) // ZZX_FILIAL+ZZX_FLOGID
+        ZAP->(DBSetOrder(2)) // ZAP_FILIAL+ZAP_FLOGID+ZAP_ITEM
+        ZBQ->(DBSetOrder(1)) //ZBQ_FILIAL+ZBQ_FLOGID+ZBQ_GRUPO
+        ZZV->(DBSetOrder(1)) //ZZV_FILIAL+ZZV_PLACA
 
 	    _oSelf:SetRegua1(Len(_aTipPrd))
         For _nI := 1 To Len(_aTipPrd)
         	_aHeadStr := {}
             _oSelf:IncRegua1("Processando produto " + _aTipPrd[_nI,2])
             _oRest := FwRest():New(ZFM->ZFM_LINK02)
-            Aadd(_aHeadStr,"Content-Type: application/json") 
-            Aadd(_aHeadStr,"Authorization: Bearer " + AllTrim(_cToken)) 
+            aAdd(_aHeadStr,"Content-Type: application/json") 
+            aAdd(_aHeadStr,"Authorization: Bearer " + AllTrim(_cToken)) 
 
             _jJSon := JsonObject():New()
             // A data e hora para a recuperação dos dados no formato ISO 8601 (yyyy-MM-ddTHH:mm:ss). No banco da aplicação a informação é gravada em UTC 0. 
-            // A aplicação vai converter o horário que for enviado no UTC-0
+            // A aplicação vai converter o horário que For enviado no UTC-0
             // Necessário excluir o indicador Zulo (Z). o Filtro é realizado no campo DataEntrada
             _jJSon["StartDate"]         := FWTimeStamp(3,MV_PAR01,"00:00:00")
             _jJSon["EndDate"]           := FWTimeStamp(3,MV_PAR02,"23:59:59")
@@ -186,7 +186,7 @@ If ZFM->(DBSeek(xFilial("ZFM")+_cEmpCFG)) .And. !(Empty(ZFM->ZFM_LINK01) .Or. Em
                         
                         //Valido se o JSon possui alguma estrutura
                         If !_jJSon[_nX]:HasProperty("FormLogId")
-                            Aadd(_aErro,{"FormLogId inválido. Posição do Json: " + StrZero(_nX,6)})
+                            aAdd(_aErro,{"FormLogId inválido. Posição do Json: " + StrZero(_nX,6)})
                             _aTipPrd[_nI,5]++
                             Loop
                         Else
@@ -194,8 +194,8 @@ If ZFM->(DBSeek(xFilial("ZFM")+_cEmpCFG)) .And. !(Empty(ZFM->ZFM_LINK01) .Or. Em
                         EndIf
 
                         //Verifico se o produto recebido está devidamente configurado
-                        If (_nCodProd:= Ascan(_aProd,{|x| Upper(FwNoAccent(AllTrim(_jJSon[_nX]["Produto"]))) == AllTrim(x[2])})) == 0
-                            Aadd(_aErro,{"Produto não configurado para integração: "+_jJSon[_nX]["Produto"]+". FormLogId:"+_cFormLogId})
+                        If (_nCodProd:= aScan(_aProd,{|x| Upper(FwNoAccent(AllTrim(_jJSon[_nX]["Produto"]))) == AllTrim(x[2])})) == 0
+                            aAdd(_aErro,{"Produto não configurado para integração: "+_jJSon[_nX]["Produto"]+". FormLogId:"+_cFormLogId})
                             _aTipPrd[_nI,5]++
                             Loop
                         EndIf
@@ -217,7 +217,7 @@ If ZFM->(DBSeek(xFilial("ZFM")+_cEmpCFG)) .And. !(Empty(ZFM->ZFM_LINK01) .Or. Em
                         _cLjForn := (_cAlias)->A2_LOJA
                         (_cAlias)->(DBCloseArea())
                         If Empty(_cFornec)
-                            Aadd(_aErro,{"Fornecedor não localizado: "+_jJSon[_nX]["Cliente_CPF_CNPJ"]+". FormLogId:"+_cFormLogId})
+                            aAdd(_aErro,{"Fornecedor não localizado: "+_jJSon[_nX]["Cliente_CPF_CNPJ"]+". FormLogId:"+_cFormLogId})
                             _aTipPrd[_nI,5]++
                         Else
                             //Transportador
@@ -239,7 +239,7 @@ If ZFM->(DBSeek(xFilial("ZFM")+_cEmpCFG)) .And. !(Empty(ZFM->ZFM_LINK01) .Or. Em
                             _cLjTran := (_cAlias)->A2_LOJA
                             (_cAlias)->(DBCloseArea())
                             If Empty(_cTransp)
-                                Aadd(_aErro,{"Relacionamento Placa/Transportador não localizado: "+_jJSon[_nX]["Placa"]+" / ";
+                                aAdd(_aErro,{"Relacionamento Placa/Transportador não localizado: "+_jJSon[_nX]["Placa"]+" / ";
                                     +_jJSon[_nX]["Transportadora_CPF_CNPJ"]+". FormLogId:"+_cFormLogId})
                                 _aTipPrd[_nI,5]++
                             EndIf
@@ -251,7 +251,7 @@ If ZFM->(DBSeek(xFilial("ZFM")+_cEmpCFG)) .And. !(Empty(ZFM->ZFM_LINK01) .Or. Em
                                 If ZZX->ZZX_ANAUSE == .F.
                                     ZZX->(RecLock("ZZX", .F.))
                                     ZZX->(DBDelete())
-                                    ZZX->(MsUnLock())
+                                    ZZX->(MSUnLock())
                                     _cUpdate 	:= "UPDATE "+RetSQLName("ZAP") + " SET D_E_L_E_T_ = '*', R_E_C_D_E_L_ = R_E_C_N_O_ "
                                     _cUpdate	+= "WHERE D_E_L_E_T_ = ' ' "
                                     _cUpdate	+= "AND ZAP_FILIAL = '"+cFilAnt+"' "
@@ -259,7 +259,7 @@ If ZFM->(DBSeek(xFilial("ZFM")+_cEmpCFG)) .And. !(Empty(ZFM->ZFM_LINK01) .Or. Em
                                     If TCSqlExec( _cUpdate ) < 0
                                         FWAlertError("Erro na exclusão dos movimentos. Favor acionar a TI. Erro: "+AllTrim(TCSQLError()),"MGLT03103")
                                     Else
-                                        Aadd(_aErro,{"Transportador/Fornecedor modificado mas não localizado. Análise excluída (ZZX/ZAP). FormLogId:"+_cFormLogId})
+                                        aAdd(_aErro,{"Transportador/Fornecedor modificado mas não localizado. Análise excluída (ZZX/ZAP). FormLogId:"+_cFormLogId})
                                     EndIf
                                            
                                     _cUpdate 	:= "UPDATE "+RetSQLName("ZBQ") + " SET D_E_L_E_T_ = '*', R_E_C_D_E_L_ = R_E_C_N_O_ "
@@ -268,10 +268,10 @@ If ZFM->(DBSeek(xFilial("ZFM")+_cEmpCFG)) .And. !(Empty(ZFM->ZFM_LINK01) .Or. Em
                                     If TCSqlExec( _cUpdate ) < 0
                                         FWAlertError("Erro na exclusão dos movimentos. Favor acionar a TI. Erro: "+AllTrim(TCSQLError()),"MGLT03103")
                                     Else
-                                        Aadd(_aErro,{"Transportador/Fornecedor modificado mas não localizado. Integração (ZQB) excluída. FormLogId:"+_cFormLogId})
+                                        aAdd(_aErro,{"Transportador/Fornecedor modificado mas não localizado. Integração (ZQB) excluída. FormLogId:"+_cFormLogId})
                                     EndIf
                                 Else
-                                    Aadd(_aErro,{"Transportador/Fornecedor modificado mas não localizado. Análise já vinculada. Não foi possível realizar sua exclusão FormLogId:"+_cFormLogId})
+                                    aAdd(_aErro,{"Transportador/Fornecedor modificado mas não localizado. Análise já vinculada. Não foi possível realizar sua exclusão FormLogId:"+_cFormLogId})
                                 EndIf
                             EndIf
                         // Gravar Tabela de Muro
@@ -337,26 +337,26 @@ If ZFM->(DBSeek(xFilial("ZFM")+_cEmpCFG)) .And. !(Empty(ZFM->ZFM_LINK01) .Or. Em
                             ZBQ->ZBQ_DESTIN := If(_jJSon[_nX]:HasProperty("Destino"),If(ValType(_jJSon[_nX]["Destino"])=="J","",_jJSon[_nX]["Destino"]),"") //C 12 0
                             ZBQ->ZBQ_JSON := _cDadosJson //M 10 0
                             ZBQ->ZBQ_SIF := If(_jJSon[_nX]:HasProperty("SIF"),Val(_jJSon[_nX]["SIF"]),0) //N 14 3
-                            ZBQ->(MsUnLock())
+                            ZBQ->(MSUnLock())
                         
                             //Somente realizar a integração quando a Qualidade liberar a análise
                             If Empty(ZBQ->ZBQ_DTLIBE)
-                                Aadd(_aErro,{"Anáise não finalizada pela qualidade. FormLogId: "+_cFormLogId})
+                                aAdd(_aErro,{"Anáise não finalizada pela qualidade. FormLogId: "+_cFormLogId})
                                 _aTipPrd[_nI,5]++
                             ElseIf ZBQ->ZBQ_DENSID == 0
-                                Aadd(_aErro,{"Densidade não informada. FormLogId: "+_cFormLogId})
+                                aAdd(_aErro,{"Densidade não informada. FormLogId: "+_cFormLogId})
                                 _aTipPrd[_nI,5]++
                             //Densidade difernte de 1 precisa estar dentro da faixa de tolerância
                             ElseIf _aProd[_nCodProd,3] <> "1" .And. (ZBQ->ZBQ_DENSID < _aProd[_nCodProd,4] .Or. ZBQ->ZBQ_DENSID > _aProd[_nCodProd,5])
-                                Aadd(_aErro,{"Densidade "+Str(ZBQ->ZBQ_DENSID)+" fora da taxa de tolerância: "+Str(_aProd[_nCodProd,4]) +" a "+ Str(_aProd[_nCodProd,5]) +". FormLogId: "+_cFormLogId})
+                                aAdd(_aErro,{"Densidade "+Str(ZBQ->ZBQ_DENSID)+" fora da taxa de tolerância: "+Str(_aProd[_nCodProd,4]) +" a "+ Str(_aProd[_nCodProd,5]) +". FormLogId: "+_cFormLogId})
                                 _aTipPrd[_nI,5]++
                             //Gordura
                             ElseIf ZBQ->ZBQ_GORDUR < _aProd[_nCodProd,7] .Or. ZBQ->ZBQ_GORDUR > _aProd[_nCodProd,8]
-                                Aadd(_aErro,{"Gordura "+Str(ZBQ->ZBQ_GORDUR)+" fora da taxa de tolerância: "+Str(_aProd[_nCodProd,7]) +" a "+ Str(_aProd[_nCodProd,8]) +". FormLogId: "+_cFormLogId})
+                                aAdd(_aErro,{"Gordura "+Str(ZBQ->ZBQ_GORDUR)+" fora da taxa de tolerância: "+Str(_aProd[_nCodProd,7]) +" a "+ Str(_aProd[_nCodProd,8]) +". FormLogId: "+_cFormLogId})
                                 _aTipPrd[_nI,5]++
                             //EST
                             ElseIf ZBQ->ZBQ_EST < _aProd[_nCodProd,9] .Or. ZBQ->ZBQ_EST > _aProd[_nCodProd,10]
-                                Aadd(_aErro,{"EST "+Str(ZBQ->ZBQ_EST)+" fora da taxa de tolerância: "+Str(_aProd[_nCodProd,9]) +" a "+ Str(_aProd[_nCodProd,10]) +". FormLogId: "+_cFormLogId})
+                                aAdd(_aErro,{"EST "+Str(ZBQ->ZBQ_EST)+" fora da taxa de tolerância: "+Str(_aProd[_nCodProd,9]) +" a "+ Str(_aProd[_nCodProd,10]) +". FormLogId: "+_cFormLogId})
                                 _aTipPrd[_nI,5]++
                             Else
                                 If ! ZZX->(MsSeek(xFilial("ZZX")+_cFormLogId))
@@ -366,7 +366,7 @@ If ZFM->(DBSeek(xFilial("ZFM")+_cEmpCFG)) .And. !(Empty(ZFM->ZFM_LINK01) .Or. Em
                                     ZZX->ZZX_CODIGO := GETSXENUM("ZZX","ZZX_CODIGO")
                                     ZZX->ZZX_CODPRD := _aProd[_nCodProd,1]
                                     ZZX->ZZX_DATA   := CToD(ZBQ->ZBQ_DTENTR)
-                                    ZZX->ZZX_HORA   := Substr(ZBQ->ZBQ_DTENTR,12,5)
+                                    ZZX->ZZX_HORA   := SubStr(ZBQ->ZBQ_DTENTR,12,5)
                                     ZZX->ZZX_FORNEC := _cFornec // Código do Produtor
                                     ZZX->ZZX_LJFORN := _cLjForn // Loja do Produtor
                                     ZZX->ZZX_PLACA  := _cPlaca    //_jJSon[_nX]["Placa"]
@@ -375,7 +375,7 @@ If ZFM->(DBSeek(xFilial("ZFM")+_cEmpCFG)) .And. !(Empty(ZFM->ZFM_LINK01) .Or. Em
                                     ZZX->ZZX_DENSID := If(_aProd[_nCodProd,3] == "1",_aProd[_nCodProd,6],ZBQ->ZBQ_DENSID) //1-Indica usar o valor padrão
                                     ZZX->ZZX_ANAUSE := .F.
                                     ZZX->ZZX_FLOGID := _cFormLogId
-                                    ZZX->(MsUnlock())
+                                    ZZX->(MSUnLock())
                                     If __lSX8
                                         ConfirmSX8()
                                     Else
@@ -395,7 +395,7 @@ If ZFM->(DBSeek(xFilial("ZFM")+_cEmpCFG)) .And. !(Empty(ZFM->ZFM_LINK01) .Or. Em
                                     ZAP->ZAP_GORD   := ZBQ->ZBQ_GORDUR
                                     ZAP->ZAP_EST    := ZBQ->ZBQ_EST
                                     ZAP->ZAP_FLOGID := ZZX->ZZX_FLOGID
-                                    ZAP->(MsUnLock()) 
+                                    ZAP->(MSUnLock()) 
                                     _aTipPrd[_nI,3]++
                                 Else
                                     _aTipPrd[_nI,4]++
@@ -436,11 +436,11 @@ Static Function Scheddef()
     Local aParam := {} as array
     Local aOrd := {} as array
 
-    Aadd(aParam, "P"        ) // 01 - Tipo R para relatorio P para processo
-    Aadd(aParam, "MGLT031") // 02 - Pergunte do relatorio, caso nao use passar ParamDef
-    Aadd(aParam, ""         ) // 03 - Alias
-    Aadd(aParam, aOrd       ) // 04 - Array de ordens
-    Aadd(aParam, ""         ) // 05 - Titulo
-    Aadd(aParam, ""         ) // 06 - Nome do relatório (parametro 1 do metodo new da classe TReport)
+    aAdd(aParam, "P"        ) // 01 - Tipo R para relatorio P para processo
+    aAdd(aParam, "MGLT031") // 02 - Pergunte do relatorio, caso nao use passar ParamDef
+    aAdd(aParam, ""         ) // 03 - Alias
+    aAdd(aParam, aOrd       ) // 04 - Array de ordens
+    aAdd(aParam, ""         ) // 05 - Titulo
+    aAdd(aParam, ""         ) // 06 - Nome do relatório (parametro 1 do metodo new da classe TReport)
  
 Return aParam

@@ -13,7 +13,7 @@
 //====================================================================================================
 
 
-#INCLUDE "Protheus.ch"
+#Include "TOTVS.ch"
 #Include "FwMVCDef.ch"
 #Include "RWMAKE.CH"
 #Include "TopConn.ch"
@@ -34,7 +34,7 @@ Retorno---------: Nenhum
 */
 User Function AOMS142()
 
-Local _aArea   := GetArea()
+Local _aArea   := FWGetArea()
 Local _oBrowse
 
     _oBrowse := FWMBrowse():New()
@@ -43,9 +43,9 @@ Local _oBrowse
     _oBrowse:SetDescription("Rateio de fretes (Troca nota)")
     _oBrowse:Activate()
 
-    RestArea(_aArea)
+    FWRestArea(_aArea)
     
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -93,46 +93,46 @@ Local _oModel := Nil
 Local _bValid	:= {|_oModel| U_AOMS142V(_oModel)}
 
 //Criação da estrutura de dados utilizada na interface
-Local _oStZRFCAB := FWFormStruct(1,"ZRF",{ |x| ALLTRIM(x) $ 'ZRF_UFCAR, ZRF_MUNCAR, ZRF_NMUNCA' } )
-Local _oStZRFDET := FWFormStruct(1,"ZRF",{ |x| ALLTRIM(x) $ 'ZRF_UFDEST, ZRF_MESODE, ZRF_NMESOD, ZRF_MICRDE, ZRF_NMICRD, ZRF_MUNDES, ZRF_NMUNDE, ZRF_PERC1T' } )
+Local _oStZRFCAB := FWFormStruct(1,"ZRF",{ |x| AllTrim(x) $ 'ZRF_UFCAR, ZRF_MUNCAR, ZRF_NMUNCA' } )
+Local _oStZRFDET := FWFormStruct(1,"ZRF",{ |x| AllTrim(x) $ 'ZRF_UFDEST, ZRF_MESODE, ZRF_NMESOD, ZRF_MICRDE, ZRF_NMICRD, ZRF_MUNDES, ZRF_NMUNDE, ZRF_PERC1T' } )
 
 Local _aGatAux	:= {}
 
 //ZRF_MUNCAR
-_aGatAux := FwStruTrigger( 'ZRF_MUNCAR', 'ZRF_NMUNCA', 'POSICIONE("CC2",1,XFILIAL("CC2")+M->ZRF_UFCAR+M->ZRF_MUNCAR,"CC2_MUN")', .F. )
+_aGatAux := FwStruTrigger( 'ZRF_MUNCAR', 'ZRF_NMUNCA', 'Posicione("CC2",1,xFilial("CC2")+M->ZRF_UFCAR+M->ZRF_MUNCAR,"CC2_MUN")', .F. )
 _oStZRFCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 //ZRF_MESO
-_aGatAux := FwStruTrigger( 'ZRF_MESODE', 'ZRF_NMESOD', 'POSICIONE("Z21",1,XFILIAL("Z21")+M->ZRF_MESODE,"Z21_NOME")', .F. )
+_aGatAux := FwStruTrigger( 'ZRF_MESODE', 'ZRF_NMESOD', 'Posicione("Z21",1,xFilial("Z21")+M->ZRF_MESODE,"Z21_NOME")', .F. )
 _oStZRFDET:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZRF_MESODE', 'ZRF_MICRDE', 'space(len(ZRF->ZRF_MICRDE))', .F. )
+_aGatAux := FwStruTrigger( 'ZRF_MESODE', 'ZRF_MICRDE', 'Space(Len(ZRF->ZRF_MICRDE))', .F. )
 _oStZRFDET:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 _aGatAux := FwStruTrigger( 'ZRF_MESODE', 'ZRF_NMICRD', '""', .F. )
 _oStZRFDET:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZRF_MESODE', 'ZRF_MUNDES', 'space(len(ZRF->ZRF_MUNDES))', .F. )
+_aGatAux := FwStruTrigger( 'ZRF_MESODE', 'ZRF_MUNDES', 'Space(Len(ZRF->ZRF_MUNDES))', .F. )
 _oStZRFDET:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 _aGatAux := FwStruTrigger( 'ZRF_MESODE', 'ZRF_NMUNDE', '""', .F. )
 _oStZRFDET:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 //ZRF_MICRO
-_aGatAux := FwStruTrigger( 'ZRF_MICRDE', 'ZRF_NMICRD', 'POSICIONE("Z22",1,XFILIAL("Z22")+M->ZRF_MICRDE,"Z22_NOME")', .F. )
+_aGatAux := FwStruTrigger( 'ZRF_MICRDE', 'ZRF_NMICRD', 'Posicione("Z22",1,xFilial("Z22")+M->ZRF_MICRDE,"Z22_NOME")', .F. )
 _oStZRFDET:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZRF_MICRDE', 'ZRF_MUNDES', 'space(len(ZRF->ZRF_MUNDES))', .F. )
+_aGatAux := FwStruTrigger( 'ZRF_MICRDE', 'ZRF_MUNDES', 'Space(Len(ZRF->ZRF_MUNDES))', .F. )
 _oStZRFDET:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 _aGatAux := FwStruTrigger( 'ZRF_MICRDE', 'ZRF_NMUNDE', '""', .F. )
 _oStZRFDET:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 //ZRF_MUNDES
-_aGatAux := FwStruTrigger( 'ZRF_MUNDES', 'ZRF_NMUNDE', 'POSICIONE("CC2",1,XFILIAL("CC2")+M->ZRF_UFDEST+M->ZRF_MUNDES,"CC2_MUN")', .F. )
+_aGatAux := FwStruTrigger( 'ZRF_MUNDES', 'ZRF_NMUNDE', 'Posicione("CC2",1,xFilial("CC2")+M->ZRF_UFDEST+M->ZRF_MUNDES,"CC2_MUN")', .F. )
 _oStZRFDET:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-//Instanciando o modelo, não é recomendado colocar nome da user function (por causa do u_), respeitando 10 caracteres
+//Instanciando o modelo, não é recomendado colocar nome da User Function (por causa do u_), respeitando 10 caracteres
 _oModel := MPFormModel():New("AOMS142M",,_bValid ,/*bCommit*/,/*bCancel*/) 
 
 //Atribuindo formulários para o modelo
@@ -164,7 +164,7 @@ Return _oModel
 
 Static Function AOMS142VLD(_oModel)
 
-Return .t.
+Return .T.
 
 /*
 ===============================================================================================================================
@@ -185,8 +185,8 @@ Static Function ViewDef()
 Local _oModel := FWLoadModel("AOMS142")
 
 //Criação da estrutura de dados utilizada na interface do cadastro de Autor
-Local _oStZRFCAB := FWFormStruct(2,"ZRF",{ |x| ALLTRIM(x) $ 'ZRF_UFCAR, ZRF_MUNCAR, ZRF_NMUNCA' } )
-Local _oStZRFDET := FWFormStruct(2,"ZRF",{ |x| ALLTRIM(x) $ 'ZRF_UFDEST, ZRF_MESODE, ZRF_NMESOD, ZRF_MICRDE, ZRF_NMICRD, ZRF_MUNDES, ZRF_NMUNDE, ZRF_PERC1T' } )          
+Local _oStZRFCAB := FWFormStruct(2,"ZRF",{ |x| AllTrim(x) $ 'ZRF_UFCAR, ZRF_MUNCAR, ZRF_NMUNCA' } )
+Local _oStZRFDET := FWFormStruct(2,"ZRF",{ |x| AllTrim(x) $ 'ZRF_UFDEST, ZRF_MESODE, ZRF_NMESOD, ZRF_MICRDE, ZRF_NMICRD, ZRF_MUNDES, ZRF_NMUNDE, ZRF_PERC1T' } )          
 //Criando _oView como nulo
 Local _oView := Nil
  
@@ -237,14 +237,14 @@ Local _cMunCarg   := _oModel:GetValue( 'ZRFMASTER', 'ZRF_MUNCAR' )
 Local _aOrd       := SaveOrd({"ZRF"})
 
 If _nOperation == MODEL_OPERATION_INSERT 
-    ZRF->(DbSetOrder(1))
-	If ZRF->( Dbseek(xfilial("ZRF") + _cUFCarg + _cMunCarg ) )
+    ZRF->(DBSetOrder(1))
+	If ZRF->( DBSeek(xFilial("ZRF") + _cUFCarg + _cMunCarg ) )
 
 		_lOk := .F.
-		U_ITMSG("Chave (UF Carreg. + Municip. Carreg.) informada já consta no cadastro. ",;
+		U_ITMsg("Chave (UF Carreg. + Municip. Carreg.) informada já consta no cadastro. ",;
                 "Atenção",;
                 "Verifique e modifique o chave digitada.  ",3 , , , .T.)	
-	Endif
+	EndIf
 EndIf
 
 RestOrd(_aOrd)
@@ -280,13 +280,13 @@ Local _cMicro     := ""
     ElseIf cTabela == "Z22"
         _cRetorno := "(Z22->Z22_EST + Z22->Z22_MESO) = '"+_cUF+_cMeso+"' "
     ElseIf cTabela ==  "CC2"
-        If Empty(Alltrim(_cMicro))
-            If Empty(Alltrim(_cMeso))
+        If Empty(AllTrim(_cMicro))
+            If Empty(AllTrim(_cMeso))
                 _cRetorno := "(CC2->CC2_EST) = '"+_cUF+"' "
             Else
                 _cRetorno := "(CC2->CC2_EST + CC2->CC2_I_MESO) = '"+_cUF+_cMeso+"' "
             EndIf
-        Elseif Empty(Alltrim(_cMeso))
+        ElseIf Empty(AllTrim(_cMeso))
             _cRetorno := "(CC2->CC2_EST) = '"+_cUF+"' "
         Else
             _cRetorno := "(CC2->CC2_EST + CC2->CC2_I_MESO + CC2->CC2_I_MICR) = '"+_cUF+_cMeso+_cMicro+"' "
@@ -312,11 +312,11 @@ User Function AOMS142X()
 Local _oModel  := FwModelActivete()
 Local _cUF     := _oModel:GetValue( 'ZRFDETAIL', 'ZRF_UFDEST' )
 Local _cCodMun := _oModel:GetValue( 'ZRFDETAIL', 'ZRF_MUNDES' )
-Local _cMun    := POSICIONE("CC2",1,XFILIAL("CC2")+_cUF+_cCodMun,"CC2_MUN")
-Local _cMeso   := POSICIONE("CC2",1,XFILIAL("CC2")+_cUF+_cCodMun,"CC2_I_MESO")
-Local _cNMeso  := POSICIONE("Z21",1,XFILIAL("Z21")+_cMeso,"Z21_NOME")
-Local _cMicro  := POSICIONE("CC2",1,XFILIAL("CC2")+_cUF+_cCodMun,"CC2_I_MICR")
-Local _cNMicro := POSICIONE("Z22",1,XFILIAL("Z22")+_cMicro,"Z22_NOME")
+Local _cMun    := Posicione("CC2",1,xFilial("CC2")+_cUF+_cCodMun,"CC2_MUN")
+Local _cMeso   := Posicione("CC2",1,xFilial("CC2")+_cUF+_cCodMun,"CC2_I_MESO")
+Local _cNMeso  := Posicione("Z21",1,xFilial("Z21")+_cMeso,"Z21_NOME")
+Local _cMicro  := Posicione("CC2",1,xFilial("CC2")+_cUF+_cCodMun,"CC2_I_MICR")
+Local _cNMicro := Posicione("Z22",1,xFilial("Z22")+_cMicro,"Z22_NOME")
 
 _oModel:LoadValue( 'ZRFDETAIL', 'ZRF_MUNDES' , _cMun )
 _oModel:LoadValue( 'ZRFDETAIL', 'ZRF_MESODE' , _cMeso )
@@ -347,9 +347,9 @@ Local _cMeso   := _oModel:GetValue( 'ZRFDETAIL','ZRF_MESODE')
 Local _cMicro  := _oModel:GetValue( 'ZRFDETAIL','ZRF_MICRDE')
 Local _lReturn := .F.
 
-If Empty(Alltrim(_cMicro)) .AND. Empty(Alltrim(_cMeso))
+If Empty(AllTrim(_cMicro)) .And. Empty(AllTrim(_cMeso))
    _lReturn := (CC2->CC2_EST == _cUF)
-ElseIf Empty(Alltrim(_cMicro)) 
+ElseIf Empty(AllTrim(_cMicro)) 
    _lReturn := (CC2->CC2_EST + CC2->CC2_I_MESO == _cUF + _cMeso)
 Else
    _lReturn := (CC2->CC2_EST + CC2->CC2_I_MESO + CC2->CC2_I_MICR == _cUF + _cMeso + _cMicro)

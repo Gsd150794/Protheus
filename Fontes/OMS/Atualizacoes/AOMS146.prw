@@ -1,17 +1,15 @@
 /*
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===========================================================================================================================================================================================================================================================
- Analista       - Programador  - Inicio   - Envio    - Chamado - Motivo da Alteração
-============================================================================================================================================================================================================================================================
-Vanderlei       - Julio Paz    - 01/08/24 - 10/06/25 - 45229   - Desenvolvimento do novo webservice OMS-Protheus x TMS-Multiembarcador.
-============================================================================================================================================================================================================================================================
+===============================================================================================================================
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
+Julio Paz     |10/06/2025| Chamado 45229. Desenvolvimento do novo webservice OMS-Protheus x TMS-Multiembarcador.
+Lucas Borges  |18/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
+===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.Ch"
+#Include "TOTVS.ch"
 #Include "FWMVCDef.Ch"
 
 /*
@@ -19,19 +17,17 @@ Vanderlei       - Julio Paz    - 01/08/24 - 10/06/25 - 45229   - Desenvolvimento
 Função------------: AOMS146A
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 01/08/2024
-===============================================================================================================================
 Descrição---------: Rotina de Envio de Notas Fiscais e Vinculação de Pedidos de Vendas com Notas Fiscais para Pedidos de 
                     Vendas do Tipo Troca Nota Fiscal. Chamado 46163.
-===============================================================================================================================
 Parametros--------: _lScheduller = .T./.F. = Rotina chamada Via Scheduller.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function AOMS146A(_lScheduller)    
-Local _cFilHabil := U_ITGETMV( 'IT_FILINTWS' , '' ) // Filiais habilitadas na integracao Webservice Italac x TMS Multi-Embarcador
+User Function AOMS146A(_lScheduller)
+
+Local _cFilHabil := SuperGetMV('IT_FILINTW',.F.,'') // Filiais habilitadas na integracao Webservice Italac x TMS Multi-Embarcador
 Local _cQry        := ""
-Local _dDtAtvTms := Ctod(U_ITGETMV( 'IT_DTATIVTMS' , '01/10/2023'))
+Local _dDtAtvTms := Ctod(SuperGetMV( 'IT_DTATTMS',.F.,'01/10/2023'))
 Local _nRegAtu := 0
 Local _nTotRegs
 Local _lSC5_PEDPA   := .F.
@@ -39,9 +35,9 @@ Local _cSC5_I_CDTMS := ""
 
 Begin Sequence 
  
-   If !_lScheduller .AND. ! U_ItMsg("Confirma a gravação de dados de XML das notas fiscais dos pedidos de vendas troca nota, para envio para o TMS MultiEmbarcador? ","Atenção",,4,2,2) 
+   If !_lScheduller .And. ! U_ITMsg("Confirma a gravação de dados de XML das notas fiscais dos pedidos de vendas troca nota, para envio para o TMS MultiEmbarcador? ","Atenção",,4,2,2) 
       Break
-   Else 
+   Else
       U_ITCONOUT("[AOMS146A] - Inicio gravação dos dados de XML das notas fiscais dos pedidos de vendas troca nota, para envio para o TMS MultiEmbarcador.")      
    EndIf
    
@@ -65,15 +61,11 @@ Begin Sequence
    _cQry +=         " SPED050 SPED50, " 
    _cQry +=         " SPED054 SPED54 " 
    _cQry += " WHERE  DAK.DAK_FILIAL IN " + FormatIn(_cFilHabil,";") // Filiais do parâmetro IT_WEBSTMS
-   _cQry += " AND DAK.DAK_DATA >= '" + Dtos(_dDtAtvTms) +"' "
+   _cQry += " AND DAK.DAK_DATA >= '" + DToS(_dDtAtvTms) +"' "
    _cQry += " AND DAK.DAK_I_TRNF IN ('C', 'F') "
    _cQry += " AND DAK.D_E_L_E_T_ = ' '  "
    _cQry += " AND DAI.DAI_FILIAL = DAK.DAK_FILIAL " 
    _cQry += " AND DAI.DAI_COD = DAK.DAK_COD "
-
-   //_cQry += " AND DAI.DAI_COD = '244855' " // JPP TESTE
-   //_cQry += " AND DAI.DAI_FILIAL = '01' "  // JPP TESTE
-
    _cQry += " AND DAI.D_E_L_E_T_ = ' ' "
    _cQry += " AND SF2.F2_FILIAL = DAI.DAI_FILIAL "
    _cQry += " AND SF2.F2_DOC = DAI.DAI_NFISCA "
@@ -132,7 +124,6 @@ Begin Sequence
    _cQry += " WHERE ZFK.ZFK_FILIAL = DAI.DAI_FILIAL "
    _cQry += " AND ZFK.ZFK_PEDIDO = DAI.DAI_PEDIDO "
    _cQry += " AND ZFK.ZFK_TIPOI = '7' "
-   //_cQry += " AND ZFK.ZFK_SITUAC = 'P' "   // JPP TESTE - Trecho comentado por solicitação do Vanderlei.
    _cQry += " AND ZFK.D_E_L_E_T_ = ' ') "
    _cQry += " ORDER BY ZFQ_CARTMS, ZFQ_RASTMS "
 
@@ -142,12 +133,12 @@ Begin Sequence
       NFETNF->( DBCloseArea() )
    EndIf
 
-   DbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQry ) , "NFETNF" , .T., .F. )                            
+   MPSysOpenQuery(_cQry,"NFETNF")
    
    DBSelectArea("NFETNF")                                                                               
-   COUNT TO _nTotRegs
+   COUNT To _nTotRegs
 
-   IF !_lScheduller 
+   If !_lScheduller 
       ProcRegua(_nTotRegs)
    EndIf
 
@@ -172,24 +163,24 @@ Begin Sequence
          
    USE SPED054 ALIAS SPED054 SHARED NEW VIA "TOPCONN" 
          
-   SC5->(DbSetOrder(1)) // C5_FILIAL+C5_NUM
+   SC5->(DBSetOrder(1)) // C5_FILIAL+C5_NUM
 
    _nRegAtu := 0
 
-   Do While ! NFETNF->(Eof()) 
+   While ! NFETNF->(Eof()) 
 
       _nRegAtu++
 
       If !_lScheduller 
-         IncProc("Lendo dados Notas Fiscais-Pedidos V.Troca Nota: " + Alltrim(Str(_nRegAtu)) + " de " + Alltrim(Str(_nTotRegs)))  
-      Else 
-         U_ITCONOUT("[AOMS146A] - Lendo dados Notas Fiscais-Pedidos V.Troca Nota: " + Alltrim(Str(_nRegAtu)) + " de " + Alltrim(Str(_nTotRegs)))
+         IncProc("Lendo dados Notas Fiscais-Pedidos V.Troca Nota: " + AllTrim(Str(_nRegAtu)) + " de " + AllTrim(Str(_nTotRegs)))  
+      Else
+         U_ITCONOUT("[AOMS146A] - Lendo dados Notas Fiscais-Pedidos V.Troca Nota: " + AllTrim(Str(_nRegAtu)) + " de " + AllTrim(Str(_nTotRegs)))
       EndIf
 
-      SF2->(DbGoTo(NFETNF->NRECSF2)) 
-      DAK->(DbGoTo(NFETNF->NRECDAK))
-      SPED054->(DbGoTo(NFETNF->NREC54))
-      SPED050->(DbGoTo(NFETNF->NREC50))
+      SF2->(DBGoTo(NFETNF->NRECSF2)) 
+      DAK->(DBGoTo(NFETNF->NRECDAK))
+      SPED054->(DBGoTo(NFETNF->NREC54))
+      SPED050->(DBGoTo(NFETNF->NREC50))
 
       If SC5->( DBSeek( SF2->F2_FILIAL + SF2->F2_I_PEDID ) )
          _lSC5_PEDPA   := (SC5->C5_I_PEDPA == "S")
@@ -200,7 +191,7 @@ Begin Sequence
       EndIf
 
       If Empty(_cSC5_I_CDTMS) // Pedido de Vendas não integrado para o TMS MultiEmbarcador.
-         NFETNF->(DbSkip())
+         NFETNF->(DBSkip())
          Loop
       EndIf 
 
@@ -234,8 +225,8 @@ Begin Sequence
       ZFK->ZFK_HORA   := Time()
       ZFK->ZFK_TIPOI  := "7"
       ZFK->ZFK_CHVNFE := SF2->F2_CHVNFE
-      ZFK->ZFK_PEDPAL := Iif(_lSC5_PEDPA ,"S","N") 
-      ZFK->ZFK_NRPPAL := Iif(_lSC5_PEDPA ,SF2->F2_I_PEDID ,"")    
+      ZFK->ZFK_PEDPAL := IIf(_lSC5_PEDPA ,"S","N") 
+      ZFK->ZFK_NRPPAL := IIf(_lSC5_PEDPA ,SF2->F2_I_PEDID ,"")    
       ZFK->ZFK_CGC    := Posicione("SA1",1,xFilial("SA1")+SF2->(F2_CLIENTE+F2_LOJA),"A1_CGC") 
       ZFK->ZFK_PEDIDO := NFETNF->ZFQ_PEDIDO // SC5->C5_NUM 
       ZFK->ZFK_COD	  := SF2->F2_CLIENTE    
@@ -244,16 +235,16 @@ Begin Sequence
       ZFK->ZFK_USUARI := __cUserId
       ZFK->ZFK_SITUAC := "N" 
       ZFK->ZFK_XML    := _cXML_Nfe
-      ZFK->(MsUnLock())
+      ZFK->(MSUnLock())
 
-      NFETNF->(DbSkip())
+      NFETNF->(DBSkip())
    EndDo
 
 End Sequence
 
 If !_lScheduller 
-   U_ItMsg("Termino da gravação dos dados das notas fiscais Pedidos de Vendas Troca NF - Protheus x TMS MultiEmbarcador.","Atenção",,2)
-Else 
+   U_ITMsg("Termino da gravação dos dados das notas fiscais Pedidos de Vendas Troca NF - Protheus x TMS MultiEmbarcador.","Atenção",,2)
+Else
    U_ITCONOUT("[AOMS146A] - Termino da gravação dos dados das notas fiscais Pedidos de Vendas Troca NF - Protheus x TMS MultiEmbarcador.")
 EndIf
 
@@ -269,25 +260,23 @@ If Select("SPED054") > 0
    SPED054->( DBCloseArea() )
 EndIf  
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
 Função------------: AOMS146B
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 01/08/2024
-===============================================================================================================================
 Descrição---------: Rotina de transmissão de dados de Notas Fiscais e Vinculação de Pedidos de Vendas com Notas Fiscais para 
                     Pedidos de Vendas do Tipo Troca Nota Fiscal. Chamado 46163.
-===============================================================================================================================
 Parametros--------: _lScheduller = .T./.F. = Rotina chamada Via Scheduller.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS146B(_lScheduller) 
+
 Local _cQry      := ""
-Local _cFilHabil := U_ITGETMV( 'IT_FILINTWS' , '' ) 
+Local _cFilHabil := SuperGetMV('IT_FILINTW',.F.,'')
 Local _cCanPXML
 Local _cDirXML
 Local _cLink
@@ -296,41 +285,38 @@ Local _cXML
 Local _lOk           := .F.
 Local _cResult       := ""
 Local _cProtocolo    := ""
-//Local _nPosi         := 0
-//Local _nPosf         := 0
-//Local _cXML_Nfe      := ""
 Local oWsdl
 
 Private _cToken
 
 Begin Sequence 
    
-   If !_lScheduller .AND. ! U_ItMsg("Confirma envio de arquivos XML das Notas Fiscais para Pedidos de Vendas Troca Nota Fiscal, para o Sistema TMS MultiEmbarcador?","Atenção",,4,2,2) 
+   If !_lScheduller .And. ! U_ITMsg("Confirma envio de arquivos XML das Notas Fiscais para Pedidos de Vendas Troca Nota Fiscal, para o Sistema TMS MultiEmbarcador?","Atenção",,4,2,2) 
       Break
-   Else 
+   Else
       U_ITCONOUT("[AOMS146B] Inicio do envio de arquivos XML das Notas Fiscais para Pedidos de Vendas Troca Nota Fiscal, para o Sistema TMS MultiEmbarcador.")   
    EndIf
 
    //=====================================================================
    // Obtem o token de acesso ao sistema multi embarcador.
    //=====================================================================
-   _cToken := U_ITGETMV( 'IT_TOKMUTE' , "a78e0523d3794843855e8d95c2bff8d4")
+   _cToken := SuperGetMV('IT_TOKMUTE',.F.,"a78e0523d3794843855e8d95c2bff8d4")
 
    //================================================================================
    // Retorna Codigo Empresa WebService TMS-MULTI EMBARCADOR.
    //================================================================================                    
-   _cCodEmpWS := U_ITGETMV( 'IT_EMPTMSM' , "000005")
+   _cCodEmpWS := SuperGetMV('IT_EMPTMSM',.F.,"000005")
    
    //================================================================================
    // Lê o diretório dos arquivos XML modelos e o link de envio dos dados.
    //================================================================================
-   ZFM->(DbSetOrder(1))
-   If ZFM->(DbSeek(xFilial("ZFM")+_cCodEmpWS))
+   ZFM->(DBSetOrder(1))
+   If ZFM->(DBSeek(xFilial("ZFM")+_cCodEmpWS))
       _cDirXML := ZFM->ZFM_LOCXML 
       _cLink   := AllTrim(ZFM->ZFM_LINK02)  // Link de envio dos dados da nota fiscal.
-   Else         
+   Else
       If ! _lScheduller
-         U_ItMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
+         U_ITMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
       Else
          U_ITCONOUT("[AOMS146B] Empresa WebService para envio dos dados não localizada.")
       EndIf
@@ -340,7 +326,7 @@ Begin Sequence
    
    If Empty(_cDirXML) .Or. Empty(_cLink)
       If _lExibeTela
-         u_itmsg("Diretório dos arquivos XML modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".","Atenção",,1)
+         U_ITMsg("Diretório dos arquivos XML modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".","Atenção",,1)
       Else
          U_ITCONOUT("[AOMS146B] Diretório dos arquivos XML modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".")
       EndIf
@@ -348,7 +334,7 @@ Begin Sequence
       Break                                     
    EndIf
       
-   _cDirXML := Alltrim(_cDirXML)
+   _cDirXML := AllTrim(_cDirXML)
    If Right(_cDirXML,1) <> "\"
       _cDirXML := _cDirXML + "\"
    EndIf
@@ -360,7 +346,7 @@ Begin Sequence
    
    If Empty(_cCanPXML)
       If _lExibeTela
-         u_itmsg("Erro na leitura do arquivo XML modelo de Envio de Arquivo XML NFE, para pedidos de vendas Troca Nota Fiscal. ","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo XML modelo de Envio de Arquivo XML NFE, para pedidos de vendas Troca Nota Fiscal. ","Atenção",,1)
       Else
          U_ITCONOUT("[AOMS146B] Erro na leitura do arquivo XML modelo de Envio de Arquivo XML NFE, para pedidos de vendas Troca Nota Fiscal. ")
       EndIf
@@ -372,10 +358,10 @@ Begin Sequence
    //===================================================================================================
    _cQry := " SELECT ZFK.R_E_C_N_O_ NRREG "
    _cQry += " FROM "+RetSqlName("ZFK")+" ZFK "
-   _cQry += " WHERE ZFK.D_E_L_E_T_ <> '*' "
+   _cQry += " WHERE ZFK.D_E_L_E_T_ = ' ' "
    _cQry += "   AND ZFK_TIPOI = '7' "
    _cQry += "   AND (ZFK_SITUAC = 'N' OR  ZFK_SITUAC = 'R') "
-   _cQry += "   AND ZFK_FILIAL IN "+FormatIn(ALLTRIM(_cFilHabil),";")
+   _cQry += "   AND ZFK_FILIAL IN "+FormatIn(AllTrim(_cFilHabil),";")
 
    _cQry := ChangeQuery(_cQry)          
 
@@ -383,12 +369,12 @@ Begin Sequence
       ZFKTNF->( DBCloseArea() )
    EndIf
 
-   DbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQry ) , "ZFKTNF" , .T., .F. )                            
+   MPSysOpenQuery(_cQry,"ZFKTNF")
    
    DBSelectArea("ZFKTNF")                                                                                  
-   COUNT TO _nTotRegs
+   COUNT To _nTotRegs
 
-   IF !_lScheduller
+   If !_lScheduller
       ProcRegua(_nTotRegs)
    EndIf
 
@@ -396,21 +382,21 @@ Begin Sequence
       Break 
    EndIf 
 
-   ZFKTNF->(DbGoTop())
+   ZFKTNF->(DBGoTop())
    
    _nRegAtu := 0
 
-   Do While !ZFKTNF->(Eof()) 
+   While !ZFKTNF->(Eof()) 
 
       _nRegAtu++
 
       If !_lScheduller 
-         IncProc("Enviando dados das Notas Fiscais-Pedidos Troca Nota para Envio ao TMS: " + Alltrim(Str(_nRegAtu)) + " de " + Alltrim(Str(_nTotRegs)))  
-      Else 
-         U_ITCONOUT("[AOMS146B] - Enviando dados das Notas Fiscais-Pedidos Troca Nota para Envio ao TMS: " + Alltrim(Str(_nRegAtu)) + " de " + Alltrim(Str(_nTotRegs)))
+         IncProc("Enviando dados das Notas Fiscais-Pedidos Troca Nota para Envio ao TMS: " + AllTrim(Str(_nRegAtu)) + " de " + AllTrim(Str(_nTotRegs)))  
+      Else
+         U_ITCONOUT("[AOMS146B] - Enviando dados das Notas Fiscais-Pedidos Troca Nota para Envio ao TMS: " + AllTrim(Str(_nRegAtu)) + " de " + AllTrim(Str(_nTotRegs)))
       EndIf
 
-      ZFK->(DbGoto(ZFKTNF->NRREG))
+      ZFK->(DBGoTo(ZFKTNF->NRREG))
 
       _cXML_Nfe := ZFK->ZFK_XML // Variável do modelo XML
 
@@ -441,8 +427,6 @@ Begin Sequence
          _oXml := XmlParser(_cResult, "_", @cError, @cWarning )
 
          _cProtocolo := _oxml:_s_Envelope:_s_Body:_EnviarArquivoXMLNFeResponse:_EnviarArquivoXMLNFeResult:_a_Objeto:text
-
-         //_cStatus := _oxml:_s_Envelope:_s_Body:_EnviarArquivoXMLNFeResponse:_EnviarArquivoXMLNFeResult:_a_status:text
       Else
          _cResult := oWsdl:cError
          _cProtocolo := ""
@@ -450,38 +434,37 @@ Begin Sequence
 
       If _lOk  .And. ! Empty(_cProtocolo)
          SF2->(RecLock("SF2",.F.))
-         //SF2->F2_I_SITUA := 'P'    
          SF2->F2_I_DTENV := Date()
          SF2->F2_I_HRENV := Time()
          SF2->F2_I_PRTMS := _cProtocolo      //Protocolo TMS
-         SF2->(MsUnLock())
+         SF2->(MSUnLock())
       EndIf 
 
       ZFK->(RecLock("ZFK",.F.))
       ZFK->ZFK_DATA   := Date()  
       ZFK->ZFK_HORA   := Time()
-      ZFK->ZFK_SITUAC := Iif(_lOk,"P","R")
+      ZFK->ZFK_SITUAC := IIf(_lOk,"P","R")
       ZFK->ZFK_CODEMP := _cCodEmpWS
       ZFK->ZFK_RETORN := _cResult
       ZFK->ZFK_PRTMS  := _cProtocolo
       If _lOk
          ZFK->ZFK_XML    := _cXML
       EndIf
-      ZFK->(MsUnLock())
+      ZFK->(MSUnLock())
 
       If ValType(oWSDL) == "O"
          FreeObj(oWsdl)
       EndIf 
       oWsdl := Nil
       
-      ZFKTNF->(DbSkip())
+      ZFKTNF->(DBSkip())
    EndDo
 
 End Sequence
 
 If !_lScheduller 
-   U_ItMsg("Termino do envio das Notas Fiscais-Pedidos Troca Nota para Envio ao TMS - Protheus x TMS MultiEmbarcador. ","Atenção",,2)
-Else 
+   U_ITMsg("Termino do envio das Notas Fiscais-Pedidos Troca Nota para Envio ao TMS - Protheus x TMS MultiEmbarcador. ","Atenção",,2)
+Else
    U_ITCONOUT("[AOMS146B] - Termino do envio das Notas Fiscais-Pedidos Troca Nota para Envio ao TMS - Protheus x TMS MultiEmbarcador.  ")
 EndIf
 
@@ -489,22 +472,20 @@ If Select("ZFKTNF") > 0
    ZFKTNF->( DBCloseArea() )
 EndIf
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Função-------------: AOMS146X
 Aut2or-------------: Julio de Paula Paz
 Data da Criacao----: 01/08/2024
-===============================================================================================================================
 Descrição---------: Lê o arquivo XML modelo no diretório informado e retorna os dados no formato de String.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: _cRet
 ===============================================================================================================================
 */  
 User Function AOMS146X(_cArq)
+
 Local _cRet := ""
 Local _nStatusArq 
 Local _cLine 
@@ -515,13 +496,13 @@ Begin Sequence
    // Se houver erro de abertura abandona processamento
    If _nStatusArq = -1  
       Break
-   Endif
+   EndIf
    
    // Posiciona na primeria linha
    FT_FGoTop()
 
   
-   While !FT_FEOF()   
+   While !FT_FEof()   
       _cLine  := FT_FReadLn() 
       
       _cRet +=  _cLine
@@ -541,24 +522,22 @@ Return _cRet
 Função------------: AOMS146C
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 01/08/2024
-===============================================================================================================================
 Descrição---------: Rotina de Gravação dos Dados de Vinculação de Notas Fiscais com Pedidos de Vendas, para pedidos de 
                     Vendas Troca Nota Fiscal.
-===============================================================================================================================
 Parametros--------: _lScheduller = .T./.F. = Rotina chamada Via Scheduller.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS146C(_lScheduller )
+
 Local _cQry
 Local _nTotRegs 
 
 Begin Sequence
 
-   If !_lScheduller .AND. ! U_ItMsg("Confirma a Gravação dos Dados de Vinculação de Pedidos de Vendas com Notas Fiscais, para Pedidos de Vendas Troca Nota Fiscal integrados para o TMS MultiEmbarcador?","Atenção",,4,2,2) 
+   If !_lScheduller .And. ! U_ITMsg("Confirma a Gravação dos Dados de Vinculação de Pedidos de Vendas com Notas Fiscais, para Pedidos de Vendas Troca Nota Fiscal integrados para o TMS MultiEmbarcador?","Atenção",,4,2,2) 
       Break
-   Else 
+   Else
       U_ITCONOUT("[AOMS146C] - Inicio gravação dos dados de Vinculação Pedido Vendas com NFE - Protheus x TMS MultiEmbarcador. ")      
    EndIf
 
@@ -598,12 +577,12 @@ Begin Sequence
       ZFKVPV->( DBCloseArea() )
    EndIf
 
-   DbUseArea(.T.,"TOPCONN",TCGENQRY(,,_cQry),"ZFKVPV",.F.,.T.)
+   MPSysOpenQuery(_cQry,"ZFKVPV")
 
    DBSelectArea("ZFKVPV")
-   Count to _nTotRegs
+   Count To _nTotRegs
 
-   IF !_lScheduller 
+   If !_lScheduller 
       ProcRegua(_nTotRegs)
    EndIf
 
@@ -615,16 +594,16 @@ Begin Sequence
    
    _nRegAtu := 0
 
-   Do While ZFKVPV->(!EOF())
+   While ZFKVPV->(!Eof())
       _nRegAtu++
 
       If !_lScheduller 
-         IncProc("Gravando dados de Vinculação Pedido Vendas com NFE: " + Alltrim(Str(_nRegAtu,10)) + " de " + Alltrim(Str(_nTotRegs,10)))  
-      Else 
-         U_ITCONOUT("[AOMS146C] Gravando dados de Vinculação Pedido Vendas com NFE: " + Alltrim(Str(_nRegAtu,10)) + " de " + Alltrim(Str(_nTotRegs,10)))
+         IncProc("Gravando dados de Vinculação Pedido Vendas com NFE: " + AllTrim(Str(_nRegAtu,10)) + " de " + AllTrim(Str(_nTotRegs,10)))  
+      Else
+         U_ITCONOUT("[AOMS146C] Gravando dados de Vinculação Pedido Vendas com NFE: " + AllTrim(Str(_nRegAtu,10)) + " de " + AllTrim(Str(_nTotRegs,10)))
       EndIf
       
-      ZFK->(DbGoTo(ZFKVPV->NRREG))
+      ZFK->(DBGoTo(ZFKVPV->NRREG))
 
       M->ZFK_FILIAL := ZFK->ZFK_FILIAL
       M->ZFK_CARGA  := ZFK->ZFK_CARGA 
@@ -646,7 +625,6 @@ Begin Sequence
       M->ZFK_XML    := ZFK->ZFK_XML   
       M->ZFK_PRTMS  := ZFK->ZFK_PRTMS   
 
-      //===========================================
       ZFK->(RecLock("ZFK",.T.))   
       ZFK->ZFK_FILIAL := M->ZFK_FILIAL 
       ZFK->ZFK_CARGA  := M->ZFK_CARGA   
@@ -663,21 +641,20 @@ Begin Sequence
       ZFK->ZFK_COD    := M->ZFK_COD	   
       ZFK->ZFK_LOJA   := M->ZFK_LOJA      
       ZFK->ZFK_NOME   := M->ZFK_NOME     
-      ZFK->ZFK_USUARI := __CUSERID // Codigo do Usuário
+      ZFK->ZFK_USUARI := __cUserId // Codigo do Usuário
       ZFK->ZFK_DATAAL := Date()
       ZFK->ZFK_PRTMS  := M->ZFK_PRTMS
       ZFK->ZFK_SITUAC := "N"  
-      //ZFK->ZFK_XML    := M->ZFK_XML
-      ZFK->(MsUnLock()) 
+      ZFK->(MSUnLock()) 
 
-      ZFKVPV->(DbSkip())
+      ZFKVPV->(DBSkip())
    EndDo
 
 End Sequence
 
 If !_lScheduller
-   U_ItMsg("Termino da gravação dos dados de Vinculação Pedido Vendas com NFE - Protheus x TMS MultiEmbarcador. ","Atenção",,2)
-Else 
+   U_ITMsg("Termino da gravação dos dados de Vinculação Pedido Vendas com NFE - Protheus x TMS MultiEmbarcador. ","Atenção",,2)
+Else
    U_ITCONOUT("[AOMS146C] - Termino da gravação dos dados de Vinculação Pedido Vendas com NFE - Protheus x TMS MultiEmbarcador. ")      
 EndIf 
 
@@ -685,24 +662,22 @@ If Select("ZFKVPV") > 0
    ZFKVPV->( DBCloseArea() )
 EndIf
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Função------------: AOMS146D
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 01/08/2024
-===============================================================================================================================
 Descrição---------: Rotina de transmissão de dados de Vinculação de Notas Fiscais com Pedidos de Vendas Troca NF.
-===============================================================================================================================
 Parametros--------: _lScheduller = .T./.F. = Rotina chamada Via Scheduller.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function AOMS146D(_lScheduller) 
+User Function AOMS146D(_lScheduller)
+
 Local _cQry      := ""
-Local _cFilHabil := U_ITGETMV( 'IT_FILINTWS' , '' ) 
+Local _cFilHabil := SuperGetMV('IT_FILINTW',.F.,'')
 Local _cDirXML
 Local _cLink
 Local _cCodEmpWS
@@ -714,32 +689,32 @@ Private _cToken
 
 Begin Sequence 
    
-   If !_lScheduller .AND. ! U_ItMsg("Confirma envio de dados de vinculação de pedidos de vendas Troca NF com Notas Fiscais, para o Sistema TMS MultiEmbarcador?","Atenção",,4,2,2) 
+   If !_lScheduller .And. ! U_ITMsg("Confirma envio de dados de vinculação de pedidos de vendas Troca NF com Notas Fiscais, para o Sistema TMS MultiEmbarcador?","Atenção",,4,2,2) 
       Break
-   Else 
+   Else
       U_ITCONOUT("[AOMS146D] Inicio do envio de dados de vinculação de pedidos de vendas Troca NF com Notas Fiscais, para o Sistema TMS MultiEmbarcador")   
    EndIf
 
    //=====================================================================
    // Obtem o token de acesso ao sistema multi embarcador.
    //=====================================================================
-   _cToken := U_ITGETMV( 'IT_TOKMUTE' , "a78e0523d3794843855e8d95c2bff8d4")
+   _cToken := SuperGetMV('IT_TOKMUTE',.F.,"a78e0523d3794843855e8d95c2bff8d4")
 
    //================================================================================
    // Retorna Codigo Empresa WebService TMS-MULTI EMBARCADOR.
    //================================================================================                    
-   _cCodEmpWS := U_ITGETMV( 'IT_EMPTMSM' , "000005")
+   _cCodEmpWS := SuperGetMV('IT_EMPTMSM',.F.,"000005")
    
    //================================================================================
    // Lê o diretório dos arquivos XML modelos e o link de envio dos dados.
    //================================================================================
-   ZFM->(DbSetOrder(1))
-   If ZFM->(DbSeek(xFilial("ZFM")+_cCodEmpWS))
+   ZFM->(DBSetOrder(1))
+   If ZFM->(DBSeek(xFilial("ZFM")+_cCodEmpWS))
       _cDirXML := ZFM->ZFM_LOCXML 
       _cLink   := AllTrim(ZFM->ZFM_LINK02)  // Link de envio dos dados da nota fiscal.
-   Else         
+   Else
       If ! _lScheduller
-         U_ItMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
+         U_ITMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
       Else
          U_ITCONOUT("[AOMS146D] Empresa WebService para envio dos dados não localizada.")
       EndIf
@@ -749,7 +724,7 @@ Begin Sequence
    
    If Empty(_cDirXML) .Or. Empty(_cLink)
       If _lExibeTela
-         u_itmsg("Diretório dos arquivos XML modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".","Atenção",,1)
+         U_ITMsg("Diretório dos arquivos XML modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".","Atenção",,1)
       Else
          U_ITCONOUT("[AOMS146D] Diretório dos arquivos XML modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".")
       EndIf
@@ -757,7 +732,7 @@ Begin Sequence
       Break                                     
    EndIf
       
-   _cDirXML := Alltrim(_cDirXML)
+   _cDirXML := AllTrim(_cDirXML)
    If Right(_cDirXML,1) <> "\"
       _cDirXML := _cDirXML + "\"
    EndIf
@@ -765,12 +740,11 @@ Begin Sequence
    //================================================================================
    // Lê os arquivos modelo XML e os transforma em String.
    //================================================================================
-   //_cVincPVXML := U_AOMS146X(_cDirXML+"Vincular_Pedidos_Vendas_Troca_NF_com_Notas_Fiscais_TMS.txt") 
    _cVincPVXML := U_AOMS146X(_cDirXML+"Vincular_Pedidos_Vendas_Troca_NF_com_Notas_Fiscais_TMS.txt") 
    
    If Empty(_cVincPVXML)
       If _lExibeTela
-         u_itmsg("Erro na leitura do arquivo XML modelo de Envio de dados de vinculação de Pedidos de Vendas Troca NF com as Notas Fiscais - Protheus x TMS MultiEmbarcador.  ","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo XML modelo de Envio de dados de vinculação de Pedidos de Vendas Troca NF com as Notas Fiscais - Protheus x TMS MultiEmbarcador.  ","Atenção",,1)
       Else
          U_ITCONOUT("[AOMS146D] Erro na leitura do arquivo XML modelo de Envio de dados de vinculação de Pedidos de Vendas Troca NF com as Notas Fiscais - Protheus x TMS MultiEmbarcador.  ")
       EndIf
@@ -782,10 +756,10 @@ Begin Sequence
    //===================================================================================================
    _cQry := " SELECT ZFK.R_E_C_N_O_ NRREG "
    _cQry += " FROM "+RetSqlName("ZFK")+" ZFK "
-   _cQry += " WHERE ZFK.D_E_L_E_T_ <> '*' "
+   _cQry += " WHERE ZFK.D_E_L_E_T_ = ' ' "
    _cQry += "   AND ZFK_TIPOI = '8' "
    _cQry += "   AND (ZFK_SITUAC = 'N' OR  ZFK_SITUAC = 'R') "
-   _cQry += "   AND ZFK_FILIAL IN "+FormatIn(ALLTRIM(_cFilHabil),";")
+   _cQry += "   AND ZFK_FILIAL IN "+FormatIn(AllTrim(_cFilHabil),";")
 
    _cQry := ChangeQuery(_cQry)          
 
@@ -793,12 +767,12 @@ Begin Sequence
       ZFKVTNF->( DBCloseArea() )
    EndIf
 
-   DbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQry ) , "ZFKVTNF" , .T., .F. )                            
+   MPSysOpenQuery(_cQry,"ZFKVTNF")
    
    DBSelectArea("ZFKVTNF")                                                                                  
-   COUNT TO _nTotRegs
+   COUNT To _nTotRegs
 
-   IF !_lScheduller
+   If !_lScheduller
       ProcRegua(_nTotRegs)
    EndIf
 
@@ -806,24 +780,24 @@ Begin Sequence
       Break 
    EndIf 
 
-   ZFKVTNF->(DbGoTop())
+   ZFKVTNF->(DBGoTop())
    
    _nRegAtu := 0
 
    _aEnvioTMS := {} // Controle de Cargas Enviadas para o TMS
    _aCargaLid := {} // Controle de cargas lidas.
 
-   Do While !ZFKVTNF->(Eof()) 
+   While !ZFKVTNF->(Eof()) 
 
       _nRegAtu++
 
       If !_lScheduller 
-         IncProc("Enviando dados de vinculação de Pedidos de Vendas Troca NF com as Notas Fiscais: " + Alltrim(Str(_nRegAtu)) + " de " + Alltrim(Str(_nTotRegs)))  
-      Else 
-         U_ITCONOUT("[AOMS146D] - Enviando dados de vinculação de Pedidos de Vendas Troca NF com as Notas Fiscais: " + Alltrim(Str(_nRegAtu)) + " de " + Alltrim(Str(_nTotRegs)))
+         IncProc("Enviando dados de vinculação de Pedidos de Vendas Troca NF com as Notas Fiscais: " + AllTrim(Str(_nRegAtu)) + " de " + AllTrim(Str(_nTotRegs)))  
+      Else
+         U_ITCONOUT("[AOMS146D] - Enviando dados de vinculação de Pedidos de Vendas Troca NF com as Notas Fiscais: " + AllTrim(Str(_nRegAtu)) + " de " + AllTrim(Str(_nTotRegs)))
       EndIf
 
-      ZFK->(DbGoto(ZFKVTNF->NRREG))
+      ZFK->(DBGoTo(ZFKVTNF->NRREG))
 
       _cXMLEnv := &(_cVincPVXML)
 
@@ -869,25 +843,25 @@ Begin Sequence
       ZFK->ZFK_XML    := _cXMLEnv
       If _cEnvioOK == "N"
          ZFK->ZFK_SITUAC := "R"
-      Else 
+      Else
          ZFK->ZFK_SITUAC := "P"
       EndIf 
 
-      ZFK->(MsUnLock())
+      ZFK->(MSUnLock())
 
       If ValType(oWSDL) == "O"
          FreeObj(oWsdl)
       EndIf 
       oWsdl := Nil
       
-      ZFKVTNF->(DbSkip())
+      ZFKVTNF->(DBSkip())
    EndDo
 
 End Sequence
 
 If !_lScheduller 
-   U_ItMsg("Termino do envio de dados de Vinculação de Pedidos de Vendas Troca NF com as Notas Fiscais - Protheus x TMS MultiEmbarcador.","Atenção",,2)
-Else 
+   U_ITMsg("Termino do envio de dados de Vinculação de Pedidos de Vendas Troca NF com as Notas Fiscais - Protheus x TMS MultiEmbarcador.","Atenção",,2)
+Else
    U_ITCONOUT("[AOMS146D] - Termino do envio de dados de Vinculação de Pedidos de Vendas Troca NF com as Notas Fiscais - Protheus x TMS MultiEmbarcador. ")
 EndIf
 
@@ -895,23 +869,20 @@ If Select("ZFKVTNF") > 0
    ZFKVTNF->( DBCloseArea() )
 EndIf
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS146E
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 01/08/2024
-===============================================================================================================================
 Descrição---------: Rotina Scheduller para leitura, gravação e Transmissão  dos dados de notas fiscais para 
                     Pedidos de Vendas Troca Nota Fiscal.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
-User Function AOMS146E()
+User Function AOMS146E
 
 Begin Sequence
 
@@ -941,23 +912,20 @@ Begin Sequence
 
 End Sequence
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS146F
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 01/08/2024
-===============================================================================================================================
 Descrição---------: Rotina Scheduller para leitura, gravação e Transmissão  dos dados de vinculação de notas fiscais  
                     com Pedidos de Vendas Troca Nota Fiscal.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
-User Function AOMS146F()
+User Function AOMS146F
 
 Begin Sequence
 
@@ -988,55 +956,52 @@ Begin Sequence
 
 End Sequence
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS146G
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 01/08/2024
-===============================================================================================================================
 Descrição---------: Rotina de solicitação de mudança da carga para pedidos do tipo Troca Nota Fiscal 
                     para próxima fase no TMS (LiberarEmissaoSemNFe).
-===============================================================================================================================
 Parametros--------: _lScheduller = .T./.F. = Determina se a rotina está sendo rodada em modo automático/Scheduller ou manual.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 User Function AOMS146G(_lScheduller)
+
 Local _cQry
 Local _nTotRegs 
 Local _aRet 
-//Local _aCargas, _nI  //  JPP TESTE
-Local _cFilHabil := U_ITGETMV( 'IT_FILINTWS' , '' ) 
+Local _cFilHabil := SuperGetMV('IT_FILINTW',.F.,'')
 
 Begin Sequence
 
-   If !_lScheduller .AND. ! U_ItMsg("Deseja rodar a rotina de mudança de pedidos de vendas do tipo Troca Nota Fiscal para a próxima fase?","Atenção",,4,2,2) 
+   If !_lScheduller .And. ! U_ITMsg("Deseja rodar a rotina de mudança de pedidos de vendas do tipo Troca Nota Fiscal para a próxima fase?","Atenção",,4,2,2) 
       Break
-   Else 
+   Else
       U_ITCONOUT("[AOMS146G] - Inicio da rotina de mudança de pedidos de vendas do tipo Troca Nota Fiscal para a próxima fase - Protheus x TMS MultiEmbarcador. ")      
    EndIf
 
    _cQry := " SELECT ZFK.R_E_C_N_O_ NRREG "
    _cQry += " FROM "+RetSqlName("ZFK")+" ZFK "
-   _cQry += " WHERE ZFK.D_E_L_E_T_ <> '*' "
-   _cQry += "   AND ZFK_TIPOI = 'A' "  // ZFK_TIPOI = '9' "
+   _cQry += " WHERE ZFK.D_E_L_E_T_ = ' ' "
+   _cQry += "   AND ZFK_TIPOI = 'A' "
    _cQry += "   AND (ZFK_SITUAC = 'N' OR  ZFK_SITUAC = 'R') "
-   _cQry += "   AND ZFK_FILIAL IN "+FormatIn(ALLTRIM(_cFilHabil),";")
+   _cQry += "   AND ZFK_FILIAL IN "+FormatIn(AllTrim(_cFilHabil),";")
    _cQry := ChangeQuery(_cQry)
 
    If Select("ZFKPROF") > 0
       ZFKPROF->( DBCloseArea() )
    EndIf
 
-   DbUseArea(.T.,"TOPCONN",TCGENQRY(,,_cQry),"ZFKPROF",.F.,.T.)
+   MPSysOpenQuery(_cQry,"ZFKPROF")
 
    DBSelectArea("ZFKPROF")
-   Count to _nTotRegs
+   Count To _nTotRegs
 
-   IF !_lScheduller 
+   If !_lScheduller 
       ProcRegua(_nTotRegs)
    EndIf
 
@@ -1046,43 +1011,24 @@ Begin Sequence
 
    ZFKPROF->(DBGoTop())
 
-   DAK->(DbSetOrder(1)) 
+   DAK->(DBSetOrder(1)) 
 
    _nRegAtu := 0
    _aCargas := {}
 
-   Do While ZFKPROF->(!EOF())
+   While ZFKPROF->(!Eof())
       _nRegAtu++
 
       If !_lScheduller 
-         IncProc("Integrando Solicitação de Mudança de PV Troca NF para Próxima Fase: " + Alltrim(Str(_nRegAtu,10)) + " de " + Alltrim(Str(_nTotRegs,10)))  
-      Else 
-         U_ITCONOUT("[AOMS146C] Integrando Solicitação de Mudança de PV Troca NF para Próxima Fase: " + Alltrim(Str(_nRegAtu,10)) + " de " + Alltrim(Str(_nTotRegs,10)))
+         IncProc("Integrando Solicitação de Mudança de PV Troca NF para Próxima Fase: " + AllTrim(Str(_nRegAtu,10)) + " de " + AllTrim(Str(_nTotRegs,10)))  
+      Else
+         U_ITCONOUT("[AOMS146C] Integrando Solicitação de Mudança de PV Troca NF para Próxima Fase: " + AllTrim(Str(_nRegAtu,10)) + " de " + AllTrim(Str(_nTotRegs,10)))
       EndIf
 
-      ZFK->(DbGoto(ZFKPROF->NRREG))
+      ZFK->(DBGoTo(ZFKPROF->NRREG))
       
-      /*  // JPP TESTE
-      _nI := Ascan(_aCargas, {|x| x[1] == ZFK->ZFK_FILIAL .And. x[2] == ZFK->ZFK_CARGA})
-      
-      If _nI > 0
-         If ! _aCargas[_nI,3] // Integração da Carga Rejeitada.
-            ZFKPROF->(DbSkip())
-            Loop
-         Else 
-            ZFK->(RecLock("ZFK",.F.))
-            ZFK->ZFK_SITUAC := "P"
-            ZFK->ZFK_RETORN := _aCargas[_nI,5]
-            ZFK->(MsUnLock())   
-            
-            ZFKPROF->(DbSkip())
-            Loop
-         EndIf 
-      EndIf 
-      */
-
       If ! DAK->(MsSeek(ZFK->ZFK_FILIAL+ZFK->ZFK_CARGA)) 
-         ZFKPROF->(DbSkip())
+         ZFKPROF->(DBSkip())
          Loop 
       EndIf
       
@@ -1095,30 +1041,27 @@ Begin Sequence
       //==============================================================================
       _aRet := U_AOMS140D() // Chama a rotina de integração Webservice de mudanção da carga para próxima fase. 
 
-                                                  //  T/F    , Cod.MSG, MSG 
-      //Aadd(_aCargas, {ZFK->ZFK_FILIAL,ZFK->ZFK_CARGA,_aRet[1],_aRet[2],_aRet[3]}) // JPP TESTE
-      
       If _aRet[1] 
          ZFK->(RecLock("ZFK",.F.))
          ZFK->ZFK_SITUAC := "P"
          ZFK->ZFK_RETORN := _aRet[3] // Mensagem de REtorno
          ZFK->ZFK_XML    := _aRet[5] // XML de envio
-         ZFK->(MsUnLock())   
-      Else 
+         ZFK->(MSUnLock())   
+      Else
          ZFK->(RecLock("ZFK",.F.))
          ZFK->ZFK_RETORN := _aRet[3] // Mensagem de REtorno
          ZFK->ZFK_XML    := _aRet[5] // XML de envio
-         ZFK->(MsUnLock())   
+         ZFK->(MSUnLock())   
       EndIf 
       
-      ZFKPROF->(DbSkip())
+      ZFKPROF->(DBSkip())
    EndDo
 
 End Sequence
 
 If !_lScheduller
-   U_ItMsg("Termino da Integração de Solicitação de Mudança de Pedidos de Vendas Troca Nota Fiscal para próxima fase. ","Atenção",,2)
-Else 
+   U_ITMsg("Termino da Integração de Solicitação de Mudança de Pedidos de Vendas Troca Nota Fiscal para próxima fase. ","Atenção",,2)
+Else
    U_ITCONOUT("[AOMS146G] - Termino da Integração de Solicitação de Mudança de Pedidos de Vendas Troca Nota Fiscal para próxima fase. ")      
 EndIf  
 
@@ -1126,19 +1069,16 @@ If Select("ZFKPROF") > 0
    ZFKPROF->( DBCloseArea() )
 EndIf
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS146H
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 01/08/2024
-===============================================================================================================================
 Descrição---------: Rotina Scheduller para Solicitação de mudança da carga para a próxima fase (encerramento). 
                     Para pedidos de vendas do tipo troca nota fiscal.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
@@ -1173,31 +1113,29 @@ Begin Sequence
 
 End Sequence
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
 Função------------: AOMS146I
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 01/08/2024
-===============================================================================================================================
 Descrição---------: Rotina de Gravação dos Dados de integração do Vale Pedágio, para pedidos de vendas  
                     do tipo troca nota fiscal para o TMS MultiEmbarcador.
-===============================================================================================================================
 Parametros--------: _lScheduller = .T./.F. = Rotina chamada Via Scheduller.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS146I(_lScheduller )
+
 Local _cQry
 Local _nTotRegs 
 
 Begin Sequence
 
-   If !_lScheduller .AND. ! U_ItMsg("Confirma a Gravação dos Dados de integração do Vale Pedágio, para Pedidos de Vendas do Tipo Troca Nota Fiscal, para o TMS MultiEmbarcador?","Atenção",,4,2,2) 
+   If !_lScheduller .And. ! U_ITMsg("Confirma a Gravação dos Dados de integração do Vale Pedágio, para Pedidos de Vendas do Tipo Troca Nota Fiscal, para o TMS MultiEmbarcador?","Atenção",,4,2,2) 
       Break
-   Else 
+   Else
       U_ITCONOUT("[AOMS146I] - Iniciando a Gravação dos Dados para a integração do Vale Pedágio, para Pedidos de Vendas do Tipo Troca Nota Fiscal, Para o TMS MultiEmbarcador. ")      
    EndIf
 
@@ -1210,10 +1148,6 @@ Begin Sequence
    _cQry += "  WHERE  ZFK_TIPOI = '8' "
    _cQry += "  AND ZFK_SITUAC = 'P' "
    _cQry += "  AND ZFK.D_E_L_E_T_ = ' ' "
-//=============================================================
-   //_cQry += "  AND ZFK.ZFK_CARGA  = '244870' "    // '244855' " // JPP TESTE
-   //_cQry += "  AND ZFK.ZFK_FILIAL = '01' "        // JPP TESTE
-//=============================================================
    _cQry += "  AND NOT EXISTS "
    _cQry += "  (SELECT 'X' "
    _cQry += "  FROM " + RETSQLNAME("ZFK") + " ZFKB "
@@ -1238,12 +1172,12 @@ Begin Sequence
       ZFKVAL->( DBCloseArea() )
    EndIf
 
-   DbUseArea(.T.,"TOPCONN",TCGENQRY(,,_cQry),"ZFKVAL",.F.,.T.)
+   MPSysOpenQuery(_cQry,"ZFKVAL")
 
    DBSelectArea("ZFKVAL")
-   Count to _nTotRegs
+   Count To _nTotRegs
 
-   IF !_lScheduller 
+   If !_lScheduller 
       ProcRegua(_nTotRegs)
    EndIf
 
@@ -1251,23 +1185,22 @@ Begin Sequence
       Break 
    EndIf 
 
-   DAK->(DbSetOrder(1))
-   ZFK->(DbSetOrder(3))
+   DAK->(DBSetOrder(1))
+   ZFK->(DBSetOrder(3))
 
    ZFKVAL->(DBGoTop())
    
    _nRegAtu := 0
 
-   Do While ZFKVAL->(!EOF())
+   While ZFKVAL->(!Eof())
       _nRegAtu++
 
       If !_lScheduller 
-         IncProc("Gravando dados de Geração do Vale Pedágio para Pedidos de Vendas do Tipo Troca Nota Fiscal: " + Alltrim(Str(_nRegAtu,10)) + " de " + Alltrim(Str(_nTotRegs,10)))  
-      Else 
-         U_ITCONOUT("[AOMS146I] Gravando dados de Geração do Vale Pedágio para Pedidos de Vendas do Tipo Troca Nota Fiscal: " + Alltrim(Str(_nRegAtu,10)) + " de " + Alltrim(Str(_nTotRegs,10)))
+         IncProc("Gravando dados de Geração do Vale Pedágio para Pedidos de Vendas do Tipo Troca Nota Fiscal: " + AllTrim(Str(_nRegAtu,10)) + " de " + AllTrim(Str(_nTotRegs,10)))  
+      Else
+         U_ITCONOUT("[AOMS146I] Gravando dados de Geração do Vale Pedágio para Pedidos de Vendas do Tipo Troca Nota Fiscal: " + AllTrim(Str(_nRegAtu,10)) + " de " + AllTrim(Str(_nTotRegs,10)))
       EndIf
      
-      //ZFK->(DbGoTo(ZFKVAL->NRREG))
       If ZFK->(MsSeek(ZFKVAL->ZFK_FILIAL+ZFKVAL->ZFK_CARGA+ZFKVAL->ZFK_TIPOI+"P"))  // ZFK_FILIAL+ZFK_CARGA+ZFK_TIPOI+ZFK_SITUAC
          M->ZFK_FILIAL := ZFK->ZFK_FILIAL
          M->ZFK_CARGA  := ZFK->ZFK_CARGA 
@@ -1291,7 +1224,6 @@ Begin Sequence
 
          DAK->(MsSeek(ZFK->ZFK_FILIAL+ZFK->ZFK_CARGA))
 
-         //===========================================
          ZFK->(RecLock("ZFK",.T.))   
          ZFK->ZFK_FILIAL := M->ZFK_FILIAL 
          ZFK->ZFK_CARGA  := M->ZFK_CARGA   
@@ -1303,16 +1235,15 @@ Begin Sequence
          ZFK->ZFK_CHVNFE := M->ZFK_CHVNFE
          ZFK->ZFK_PEDPAL := M->ZFK_PEDPAL  
          ZFK->ZFK_NRPPAL := M->ZFK_NRPPAL 
-         //ZFK->ZFK_CGC    := M->ZFK_CGC        
          ZFK->ZFK_PEDIDO := M->ZFK_PEDIDO  
          ZFK->ZFK_COD    := M->ZFK_COD	   
          ZFK->ZFK_LOJA   := M->ZFK_LOJA      
          ZFK->ZFK_NOME   := M->ZFK_NOME     
-         ZFK->ZFK_USUARI := __CUSERID // Codigo do Usuário
+         ZFK->ZFK_USUARI := __cUserId // Codigo do Usuário
          ZFK->ZFK_DATAAL := Date()
          ZFK->ZFK_PRTMS  := M->ZFK_PRTMS
       
-         If AllTrim(Upper(DAK->DAK_I_INVP)) ==  "PAMCARD" // 'Pamcard' = , se for 'Repom' = 65697260000103, senão branco
+         If AllTrim(Upper(DAK->DAK_I_INVP)) ==  "PAMCARD" // 'Pamcard' = , se For 'Repom' = 65697260000103, senão branco
             ZFK->ZFK_CGC := "12815827000132" 
          ElseIf AllTrim(Upper(DAK->DAK_I_INVP)) ==  "REPOM" // DAK->DAK_I_INVP // Integradora do Vale Pedágio 
             ZFK->ZFK_CGC := "65697260000103"
@@ -1321,17 +1252,17 @@ Begin Sequence
          ZFK->ZFK_NRVALP := DAK->DAK_I_VPED // Numero do Vale Pedágio
          ZFK->ZFK_VLVALP := DAK->DAK_I_VRVP // = Valor Rateado do Pedágio // DAK_I_VALP = Valor do Vale Pedágio 
          ZFK->ZFK_SITUAC := "N"  
-         ZFK->(MsUnLock()) 
+         ZFK->(MSUnLock()) 
       EndIf 
 
-      ZFKVAL->(DbSkip())
+      ZFKVAL->(DBSkip())
    EndDo
 
 End Sequence
 
 If !_lScheduller
-   U_ItMsg("Termino da gravação dos dados de Geração do Vale Pedágio para Pedidos de Vendas do Tipo Troca Nota Fiscal.","Atenção",,2)
-Else 
+   U_ITMsg("Termino da gravação dos dados de Geração do Vale Pedágio para Pedidos de Vendas do Tipo Troca Nota Fiscal.","Atenção",,2)
+Else
    U_ITCONOUT("[AOMS146I] - Termino da gravação dos dados de Geração do Vale Pedágio para Pedidos de Vendas do Tipo Troca Nota Fiscal.")      
 EndIf 
 
@@ -1339,25 +1270,23 @@ If Select("ZFKVAL") > 0
    ZFKVAL->( DBCloseArea() )
 EndIf
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Função------------: AOMS146J
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 01/08/2024
-===============================================================================================================================
 Descrição---------: Rotina de integração/transmissão de dados de vale pedágio, para pedidos de vendas do tipo troca nota fiscal
                     para o TMS Multiembarcador.
-===============================================================================================================================
 Parametros--------: _lScheduller = .T./.F. = Rotina chamada Via Scheduller.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function AOMS146J(_lScheduller) 
+User Function AOMS146J(_lScheduller)
+
 Local _cQry      := ""
-Local _cFilHabil := U_ITGETMV( 'IT_FILINTWS' , '' ) 
+Local _cFilHabil := SuperGetMV('IT_FILINTW',.F.,'')
 Local _cDirXML
 Local _cLink
 Local _cCodEmpWS
@@ -1369,32 +1298,32 @@ Private _cToken
 
 Begin Sequence 
    
-   If !_lScheduller .AND. ! U_ItMsg("Confirma envio de dados de integração vale pedágio, para pedidos de vendas do tipo troca nota fiscal, para o Sistema TMS MultiEmbarcador ?","Atenção",,4,2,2) 
+   If !_lScheduller .And. ! U_ITMsg("Confirma envio de dados de integração vale pedágio, para pedidos de vendas do tipo troca nota fiscal, para o Sistema TMS MultiEmbarcador ?","Atenção",,4,2,2) 
       Break
-   Else 
+   Else
       U_ITCONOUT("[AOMS146J] Inicio do envio de dados de integração vale pedágio, para de vendas do tipo Troca Notas Fiscais, para o Sistema TMS MultiEmbarcador.")   
    EndIf
 
    //=====================================================================
    // Obtem o token de acesso ao sistema multi embarcador.
    //=====================================================================
-   _cToken := U_ITGETMV( 'IT_TOKMUTE' , "a78e0523d3794843855e8d95c2bff8d4")
+   _cToken := SuperGetMV('IT_TOKMUTE',.F.,"a78e0523d3794843855e8d95c2bff8d4")
 
    //================================================================================
    // Retorna Codigo Empresa WebService TMS-MULTI EMBARCADOR.
    //================================================================================                    
-   _cCodEmpWS := U_ITGETMV( 'IT_EMPTMSM' , "000005")
+   _cCodEmpWS := SuperGetMV('IT_EMPTMSM',.F.,"000005")
    
    //================================================================================
    // Lê o diretório dos arquivos XML modelos e o link de envio dos dados.
    //================================================================================
-   ZFM->(DbSetOrder(1))
-   If ZFM->(DbSeek(xFilial("ZFM")+_cCodEmpWS))
+   ZFM->(DBSetOrder(1))
+   If ZFM->(DBSeek(xFilial("ZFM")+_cCodEmpWS))
       _cDirXML := ZFM->ZFM_LOCXML 
       _cLink   := AllTrim(ZFM->ZFM_LINK06)  // Link de integração vele pedágio.
-   Else         
+   Else
       If ! _lScheduller
-         U_ItMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
+         U_ITMsg("Empresa WebService para envio dos dados não localizada.","Atenção",,1)
       Else
          U_ITCONOUT("[AOMS146J] Empresa WebService para envio dos dados não localizada.")
       EndIf
@@ -1404,7 +1333,7 @@ Begin Sequence
    
    If Empty(_cDirXML) .Or. Empty(_cLink)
       If _lExibeTela
-         u_itmsg("Diretório dos arquivos XML modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".","Atenção",,1)
+         U_ITMsg("Diretório dos arquivos XML modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".","Atenção",,1)
       Else
          U_ITCONOUT("[AOMS146J] Diretório dos arquivos XML modelos ou o Link de envio de dados não informado para a empresa: "+AllTrim(ZFM->ZFM_NOME)+".")
       EndIf
@@ -1412,7 +1341,7 @@ Begin Sequence
       Break                                     
    EndIf
       
-   _cDirXML := Alltrim(_cDirXML)
+   _cDirXML := AllTrim(_cDirXML)
    If Right(_cDirXML,1) <> "\"
       _cDirXML := _cDirXML + "\"
    EndIf
@@ -1422,11 +1351,9 @@ Begin Sequence
    //================================================================================
    _cValePXML := U_AOMS146X(_cDirXML+"Integrar_Vale_Pedagio_TMS.txt") 
 
-   //_cValePXML := U_AOMS146X("C:\Julio\Chamados\46163\Integrar_Vale_Pedágio_TMS.txt") 
-   
    If Empty(_cValePXML)
       If _lExibeTela
-         u_itmsg("Erro na leitura do arquivo XML modelo de Integração Vale Pedágio, com o TMS MultiEmbarcador.  ","Atenção",,1)
+         U_ITMsg("Erro na leitura do arquivo XML modelo de Integração Vale Pedágio, com o TMS MultiEmbarcador.  ","Atenção",,1)
       Else
          U_ITCONOUT("[AOMS146J] Erro na leitura do arquivo XML modelo de Integração Vale Pedágio, com o TMS MultiEmbarcador.  ")
       EndIf
@@ -1438,10 +1365,10 @@ Begin Sequence
    //===================================================================================================
    _cQry := " SELECT ZFK.R_E_C_N_O_ NRREG "
    _cQry += " FROM "+RetSqlName("ZFK")+" ZFK "
-   _cQry += " WHERE ZFK.D_E_L_E_T_ <> '*' "
+   _cQry += " WHERE ZFK.D_E_L_E_T_ = ' ' "
    _cQry += "   AND ZFK_TIPOI = '9' "
    _cQry += "   AND (ZFK_SITUAC = 'N' OR  ZFK_SITUAC = 'R') "
-   _cQry += "   AND ZFK_FILIAL IN "+FormatIn(ALLTRIM(_cFilHabil),";")
+   _cQry += "   AND ZFK_FILIAL IN "+FormatIn(AllTrim(_cFilHabil),";")
 
    _cQry := ChangeQuery(_cQry)          
 
@@ -1449,12 +1376,12 @@ Begin Sequence
       ZFKINTVL->( DBCloseArea() )
    EndIf
 
-   DbUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQry ) , "ZFKINTVL" , .T., .F. )                            
+   MPSysOpenQuery(_cQry,"ZFKINTVL")
    
    DBSelectArea("ZFKINTVL")                                                                                  
-   COUNT TO _nTotRegs
+   COUNT To _nTotRegs
 
-   IF !_lScheduller
+   If !_lScheduller
       ProcRegua(_nTotRegs)
    EndIf
 
@@ -1462,24 +1389,24 @@ Begin Sequence
       Break 
    EndIf 
 
-   ZFKINTVL->(DbGoTop())
+   ZFKINTVL->(DBGoTop())
    
    _nRegAtu := 0
 
    _aEnvioTMS := {} // Controle de Cargas Enviadas para o TMS
    _aCargaLid := {} // Controle de cargas lidas.
 
-   Do While !ZFKINTVL->(Eof()) 
+   While !ZFKINTVL->(Eof()) 
 
       _nRegAtu++
 
       If !_lScheduller 
-         IncProc("Enviando dados de integração vale pedágio para Pedidos de Vendas Troca Fiscais: " + Alltrim(Str(_nRegAtu)) + " de " + Alltrim(Str(_nTotRegs)))  
-      Else 
-         U_ITCONOUT("[AOMS146J] - Enviando dados de integração vale pedágio para Pedidos de Vendas Troca Fiscais: " + Alltrim(Str(_nRegAtu)) + " de " + Alltrim(Str(_nTotRegs)))
+         IncProc("Enviando dados de integração vale pedágio para Pedidos de Vendas Troca Fiscais: " + AllTrim(Str(_nRegAtu)) + " de " + AllTrim(Str(_nTotRegs)))  
+      Else
+         U_ITCONOUT("[AOMS146J] - Enviando dados de integração vale pedágio para Pedidos de Vendas Troca Fiscais: " + AllTrim(Str(_nRegAtu)) + " de " + AllTrim(Str(_nTotRegs)))
       EndIf
 
-      ZFK->(DbGoto(ZFKINTVL->NRREG))
+      ZFK->(DBGoTo(ZFKINTVL->NRREG))
 
       _cXMLEnv := &(_cValePXML)
 
@@ -1525,25 +1452,25 @@ Begin Sequence
       ZFK->ZFK_XML    := _cXMLEnv
       If _cEnvioOK == "N"
          ZFK->ZFK_SITUAC := "R"
-      Else 
+      Else
          ZFK->ZFK_SITUAC := "P"
       EndIf 
 
-      ZFK->(MsUnLock())
+      ZFK->(MSUnLock())
 
       If ValType(oWSDL) == "O"
          FreeObj(oWsdl)
       EndIf 
       oWsdl := Nil
       
-      ZFKINTVL->(DbSkip())
+      ZFKINTVL->(DBSkip())
    EndDo
 
 End Sequence
 
 If !_lScheduller 
-   U_ItMsg("Termino do envio da integração vale pedágio para pedidos de vendas tipo troca nota fiscal, para o TMS Multi Embarcador.","Atenção",,2)
-Else 
+   U_ITMsg("Termino do envio da integração vale pedágio para pedidos de vendas tipo troca nota fiscal, para o TMS Multi Embarcador.","Atenção",,2)
+Else
    U_ITCONOUT("[AOMS146J] - Termino do envio da integração vale pedágio para pedidos de vendas tipo troca nota fiscal, para o TMS Multi Embarcador.")
 EndIf
 
@@ -1551,23 +1478,20 @@ If Select("ZFKINTVL") > 0
    ZFKINTVL->( DBCloseArea() )
 EndIf
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS146K
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 12/08/2024
-===============================================================================================================================
 Descrição---------: Rotina Scheduller para gravação dos dados de geração de Vale Pedágio e realizar a integração Webservice
                     com TMS MultiEmbarcador para a geração do Vale Pedágio. 
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
-User Function AOMS146K()
+User Function AOMS146K
 
 Begin Sequence
 
@@ -1598,31 +1522,29 @@ Begin Sequence
 
 End Sequence
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
 Função------------: AOMS146L
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 01/08/2024
-===============================================================================================================================
 Descrição---------: Rotina de Gravação dos Dados de mudança de carga para próxima fase, para pedidos de vendas  
                     do tipo troca nota fiscal para o TMS MultiEmbarcador.
-===============================================================================================================================
 Parametros--------: _lScheduller = .T./.F. = Rotina chamada Via Scheduller.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AOMS146L(_lScheduller )
+
 Local _cQry
 Local _nTotRegs 
 
 Begin Sequence
 
-   If !_lScheduller .AND. ! U_ItMsg("Confirma a Gravação dos Dados de solicitação de mudança de carga para próxma fase, para Pedidos de Vendas do Tipo Troca Nota Fiscal, para o TMS MultiEmbarcador?","Atenção",,4,2,2) 
+   If !_lScheduller .And. ! U_ITMsg("Confirma a Gravação dos Dados de solicitação de mudança de carga para próxma fase, para Pedidos de Vendas do Tipo Troca Nota Fiscal, para o TMS MultiEmbarcador?","Atenção",,4,2,2) 
       Break
-   Else 
+   Else
       U_ITCONOUT("[AOMS146L] - Iniciando a Gravação dos Dados de solicitação de mudança de carga para próxima fase, para Pedidos de Vendas do Tipo Troca Nota Fiscal, Para o TMS MultiEmbarcador. ")      
    EndIf
 
@@ -1659,12 +1581,12 @@ Begin Sequence
       ZFKVAL->( DBCloseArea() )
    EndIf
 
-   DbUseArea(.T.,"TOPCONN",TCGENQRY(,,_cQry),"ZFKVAL",.F.,.T.)
+   MPSysOpenQuery(_cQry,"ZFKVAL")
 
    DBSelectArea("ZFKVAL")
-   Count to _nTotRegs
+   Count To _nTotRegs
 
-   IF !_lScheduller 
+   If !_lScheduller 
       ProcRegua(_nTotRegs)
    EndIf
 
@@ -1676,16 +1598,16 @@ Begin Sequence
    
    _nRegAtu := 0
 
-   Do While ZFKVAL->(!EOF())
+   While ZFKVAL->(!Eof())
       _nRegAtu++
 
       If !_lScheduller 
-         IncProc("Gravando dados de solicitação de mudança de carga para a próxima fase para Pedidos de Vendas do Tipo Troca Nota Fiscal: " + Alltrim(Str(_nRegAtu,10)) + " de " + Alltrim(Str(_nTotRegs,10)))  
-      Else 
-         U_ITCONOUT("[AOMS146L] Gravando dados de solicitação de mudança de carga para a próxima fase para Pedidos de Vendas do Tipo Troca Nota Fiscal: " + Alltrim(Str(_nRegAtu,10)) + " de " + Alltrim(Str(_nTotRegs,10)))
+         IncProc("Gravando dados de solicitação de mudança de carga para a próxima fase para Pedidos de Vendas do Tipo Troca Nota Fiscal: " + AllTrim(Str(_nRegAtu,10)) + " de " + AllTrim(Str(_nTotRegs,10)))  
+      Else
+         U_ITCONOUT("[AOMS146L] Gravando dados de solicitação de mudança de carga para a próxima fase para Pedidos de Vendas do Tipo Troca Nota Fiscal: " + AllTrim(Str(_nRegAtu,10)) + " de " + AllTrim(Str(_nTotRegs,10)))
       EndIf
       
-      ZFK->(DbGoTo(ZFKVAL->NRREG))
+      ZFK->(DBGoTo(ZFKVAL->NRREG))
 
       M->ZFK_FILIAL := ZFK->ZFK_FILIAL
       M->ZFK_CARGA  := ZFK->ZFK_CARGA 
@@ -1710,7 +1632,6 @@ Begin Sequence
       M->ZFK_NRVALP := ZFK->ZFK_NRVALP 
       M->ZFK_VLVALP := ZFK->ZFK_VLVALP
 
-      //===========================================
       ZFK->(RecLock("ZFK",.T.))   
       ZFK->ZFK_FILIAL := M->ZFK_FILIAL 
       ZFK->ZFK_CARGA  := M->ZFK_CARGA   
@@ -1727,20 +1648,20 @@ Begin Sequence
       ZFK->ZFK_COD    := M->ZFK_COD	   
       ZFK->ZFK_LOJA   := M->ZFK_LOJA      
       ZFK->ZFK_NOME   := M->ZFK_NOME     
-      ZFK->ZFK_USUARI := __CUSERID // Codigo do Usuário
+      ZFK->ZFK_USUARI := __cUserId // Codigo do Usuário
       ZFK->ZFK_DATAAL := Date()
       ZFK->ZFK_PRTMS  := M->ZFK_PRTMS
       ZFK->ZFK_SITUAC := "N"  
-      ZFK->(MsUnLock()) 
+      ZFK->(MSUnLock()) 
 
-      ZFKVAL->(DbSkip())
+      ZFKVAL->(DBSkip())
    EndDo
 
 End Sequence
 
 If !_lScheduller
-   U_ItMsg("Termino da gravação dos dados de solicitação de mudança da carga para a proxima fase, para Pedidos de Vendas do Tipo Troca Nota Fiscal.","Atenção",,2)
-Else 
+   U_ITMsg("Termino da gravação dos dados de solicitação de mudança da carga para a proxima fase, para Pedidos de Vendas do Tipo Troca Nota Fiscal.","Atenção",,2)
+Else
    U_ITCONOUT("[AOMS146L] - Termino da gravação dos dados de solicitação de mudança da carga para a próxima fase, para Pedidos de Vendas do Tipo Troca Nota Fiscal.")      
 EndIf 
 
@@ -1748,7 +1669,4 @@ If Select("ZFKVAL") > 0
    ZFKVAL->( DBCloseArea() )
 EndIf
 
-Return Nil
-
-
-
+Return

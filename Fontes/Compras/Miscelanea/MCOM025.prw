@@ -4,16 +4,16 @@
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  |10/01/2025| Chamado 49563. Incluída validação para tags que não estão sendo enviadas.
-Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
 Lucas Borges  |23/05/2025| Chamado 50754. Incluído tratamento para CT-e Simplificado
+Lucas Borges  |17/09/2025| Chamado 52161. Incluída validação para tags que não são obrigatórias
+Lucas Borges  |05/10/2025| Chamado 52325. Incluído tratamento para algumas tags do CT-e Simplificado
 ===============================================================================================================================
 */
 
-#Include "Protheus.ch"
-#INCLUDE "COLORS.CH"
-#INCLUDE "RPTDEF.CH"
-#INCLUDE "FWPrintSetup.ch"
+#Include "TOTVS.ch"
+#Include "COLORS.CH"
+#Include "RPTDEF.CH"
+#Include "FWPrintSetup.ch"
 
 #DEFINE doDTC_SERNFC	1
 #DEFINE doDTC_NUMNFC	2
@@ -32,31 +32,31 @@ Retorno---------: Nenhum
 */
 User Function MCOM025(oDacte As Object, oSetup As Object, cFilePrint As Character, _cMarca As Character)
 Local lJob		:= isBlind()
-Local aArea     := GetArea()
+Local aArea     := FWGetArea()
 Local lExistNfe := .F.
 
 Private nConsNeg := 0.4 // Constante para concertar o cálculo retornado pelo GetTextWidth para fontes em negrito.
 Private nConsTex := 0.5 // Constante para concertar o cálculo retornado pelo GetTextWidth.
-private oRetNF
+Private oRetNF
 
 Default _cMarca := ' '
 
-lJob := (oDacte:lInJob .or. oSetup == nil)
+lJob := (oDacte:lInJob .Or. oSetup == nil)
 oDacte:SetResolution(72) //Tamanho estipulado para a Danfe
 oDacte:SetPortrait()
 oDacte:SetPaperSize(DMPAPER_A4)
 oDacte:SetMargin(60,60,60,60)
-oDacte:lServer := if( lJob , .T., oSetup:GetProperty(PD_DESTINATION)==AMB_SERVER )
+oDacte:lServer := If( lJob , .T., oSetup:GetProperty(PD_DESTINATION)==AMB_SERVER )
 // ----------------------------------------------
 // Define saida de impressão
 // ----------------------------------------------
-If lJob .or. oSetup:GetProperty(PD_PRINTTYPE) == IMP_PDF
+If lJob .Or. oSetup:GetProperty(PD_PRINTTYPE) == IMP_PDF
 	oDacte:nDevice := IMP_PDF
 	// ----------------------------------------------
 	// Define para salvar o PDF
 	// ----------------------------------------------
-	oDacte:cPathPDF := if ( lJob , __RelDir , oSetup:aOptions[PD_VALUETYPE] )
-elseIf oSetup:GetProperty(PD_PRINTTYPE) == IMP_SPOOL
+	oDacte:cPathPDF := If ( lJob , __RelDir , oSetup:aOptions[PD_VALUETYPE] )
+ElseIf oSetup:GetProperty(PD_PRINTTYPE) == IMP_SPOOL
 	oDacte:nDevice := IMP_SPOOL
 	oDacte:SetParm( "-RFS")
 	// ----------------------------------------------
@@ -64,7 +64,7 @@ elseIf oSetup:GetProperty(PD_PRINTTYPE) == IMP_SPOOL
 	// ----------------------------------------------
 	fwWriteProfString(GetPrinterSession(),"DEFAULT", oSetup:aOptions[PD_VALUETYPE], .T.)
 	oDacte:cPrinter := oSetup:aOptions[PD_VALUETYPE]
-Endif
+EndIf
 
 RPTStatus( {|lEnd| DACTE(@oDacte, _cMarca, @lEnd, @lExistNFe)}, "Imprimindo DANFE..." )
 
@@ -78,7 +78,7 @@ FreeObj(oDacte)
 oDacte := Nil
 oSetup := Nil
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return
 
@@ -94,7 +94,7 @@ Retorno---------: Nenhum
 */
 Static Function DACTE(oDacte,_cMarca,lEnd,lExistNfe)
 
-Local aArea		:= GetArea()
+Local aArea		:= FWGetArea()
 Local cWhere	:= "%"
 Local cAviso	:= ""
 Local cErro		:= ""
@@ -140,27 +140,27 @@ While (cAlias)->(!Eof())
 	ElseIf ValType(XmlChildEx(oRetNF,"_CTEOSPROC")) == "O"
         oRetNF := oRetNF:_CTeOSProc:_CteOS
 	EndIf
-	if ValType(XmlChildEx(oRetNF,"_CTEPROC")) == "O"
+	If ValType(XmlChildEx(oRetNF,"_CTEPROC")) == "O"
 		oNfe := WSAdvValue( oRetNF,"_CTEPROC","string",NIL,NIL,NIL,NIL,NIL)
-	else
+	Else
 		oNfe := oRetNF
-	endif
+	EndIf
 	If Empty( cAviso ) .And. Empty( cErro )
 		PrtDacte(@oDacte,oNfe)
 		RecLock("CKO",.F.)
 			CKO->CKO_I_IMP := CKO->CKO_I_IMP+1
-			CKO->CKO_I_DTIM := DATE()
-		MsUnlock()
+			CKO->CKO_I_DTIM := Date()
+		MSUnLock()
 	Else
-		cNoImpr += Substr(CKO->CKO_ARQUIV,4,44) + " / "
+		cNoImpr += SubStr(CKO->CKO_ARQUIV,4,44) + " / "
 	EndIf
 
 	oNfe     := nil
 	delClassIntF()
-	(cAlias)->(DbSkip())
+	(cAlias)->(DBSkip())
 EndDo
-(cAlias)->(dbCloseArea())
-RestArea(aArea)
+(cAlias)->(DBCloseArea())
+FWRestArea(aArea)
 
 //Mensagem para informar os DACTE's que tiveram problema de impressao e nao foram impressas
 If !Empty(cNoImpr)
@@ -348,9 +348,9 @@ nMM     := 0
 		aAdd(aCab, {;
 		AllTrim(oNfe:_INFCTE:_IDE:_NCT:TEXT),;
 		AllTrim(oNfe:_INFCTE:_IDE:_SERIE:TEXT),;
-		AllTrim(STRTRAN( SUBSTR( oNfe:_INFCTE:_IDE:_dhEmi:TEXT, 1, AT('T', oNfe:_INFCTE:_IDE:_dhEmi:TEXT) - 1) , '-', '')),;
-		AllTrim(STRTRAN( SUBSTR( oNfe:_INFCTE:_IDE:_dhEmi:TEXT, AT('T', oNfe:_INFCTE:_IDE:_dhEmi:TEXT) + 1, 5) , ':', '')),;
-		AllTrim(STRTRAN(UPPER(oNFE:_INFCTE:_ID:TEXT),'CTE','')),;
+		AllTrim(StrTran( SubStr( oNfe:_INFCTE:_IDE:_dhEmi:TEXT, 1, AT('T', oNfe:_INFCTE:_IDE:_dhEmi:TEXT) - 1) , '-', '')),;
+		AllTrim(StrTran( SubStr( oNfe:_INFCTE:_IDE:_dhEmi:TEXT, AT('T', oNfe:_INFCTE:_IDE:_dhEmi:TEXT) + 1, 5) , ':', '')),;
+		AllTrim(StrTran(Upper(oNFE:_INFCTE:_ID:TEXT),'CTE','')),;
 		""/*(cAliasCT)->DT6_PROCTE*/,"" ,cDatAut, cHorAut})	//-- Nao possui ref. no XML
 	
 	// Funcao responsavel por montar o cabecalho do relatorio
@@ -369,12 +369,12 @@ nMM     := 0
 	cDescCfop	:= AllTrim(oNfe:_INFCTE:_IDE:_NATOP:TEXT)
 
 	//-- Origem da Prestacao
-	cOriMunPre	:= Iif(XmlChildEx( oNfe:_INFCTE:_IDE, '_XMUNINI') == NIL," ",oNfe:_INFCTE:_IDE:_XMUNINI:TEXT )
+	cOriMunPre	:= IIf(XmlChildEx( oNfe:_INFCTE:_IDE, '_XMUNINI') == NIL," ",oNfe:_INFCTE:_IDE:_XMUNINI:TEXT )
 	cOriUFPre	:= oNfe:_INFCTE:_IDE:_UFINI:TEXT
 
 	//-- Destino da Prestacao
-	cDesMunPre	:= oNfe:_INFCTE:_IDE:_XMUNFIM:TEXT
-	cDesUFPre	:= oNfe:_INFCTE:_IDE:_UFFIM:TEXT
+	cDesMunPre	:= IIf(XmlChildEx( oNfe:_INFCTE:_IDE, '_XMUNFIM') == NIL," ",oNfe:_INFCTE:_IDE:_XMUNFIM:TEXT )
+	cDesUFPre	:= IIf(XmlChildEx( oNfe:_INFCTE:_IDE, '_UFFIM') == NIL," ",oNfe:_INFCTE:_IDE:_UFFIM:TEXT )
 
 	//-- Remetente
 	If XmlChildEx(oNfe:_INFCTE,'_REM') <> NIL
@@ -383,13 +383,13 @@ nMM     := 0
 		cRemNome  := oNfe:_INFCTE:_REM:_XNOME:TEXT
 		cRemEnd   := oNfe:_INFCTE:_REM:_ENDERREME:_XLGR:TEXT
 		cRemNro   := oNfe:_INFCTE:_REM:_ENDERREME:_NRO:TEXT
-		cRemCompl := Iif(XmlChildEx(oNfe:_INFCTE:_REM:_ENDERREME,'_XCPL' )== NIL," ",oNfe:_INFCTE:_REM:_ENDERREME:_XCPL:TEXT)
-		cRemBair  := Iif(XmlChildEx(oNfe:_INFCTE:_REM:_ENDERREME,'_XBAIRRO' )== NIL," ",oNfe:_INFCTE:_REM:_ENDERREME:_XBAIRRO:TEXT)
-		cRemCEP   := Iif(XmlChildEx(oNfe:_INFCTE:_REM:_ENDERREME,'_CEP' )== NIL," ",oNfe:_INFCTE:_REM:_ENDERREME:_CEP:TEXT)
-		cRemCNPJ  := Iif(XmlChildEx(oNfe:_INFCTE:_REM,'_CNPJ') == Nil,oNfe:_INFCTE:_REM:_CPF:TEXT,oNfe:_INFCTE:_REM:_CNPJ:TEXT)
-		cRemIE    := Iif(XmlChildEx(oNfe:_INFCTE:_REM,'_IE' ) == Nil," ",oNfe:_INFCTE:_REM:_IE:TEXT)
-		cRemPais  := Iif(XmlChildEx(oNfe:_INFCTE:_REM:_ENDERREME,'_XPAIS') == Nil," ",oNfe:_INFCTE:_REM:_ENDERREME:_XPAIS:TEXT)
-		cRemFone  := Iif(XmlChildEx(oNfe:_INFCTE:_REM,'_FONE') == Nil," ",oNfe:_INFCTE:_REM:_FONE:TEXT)
+		cRemCompl := IIf(XmlChildEx(oNfe:_INFCTE:_REM:_ENDERREME,'_XCPL' )== NIL," ",oNfe:_INFCTE:_REM:_ENDERREME:_XCPL:TEXT)
+		cRemBair  := IIf(XmlChildEx(oNfe:_INFCTE:_REM:_ENDERREME,'_XBAIRRO' )== NIL," ",oNfe:_INFCTE:_REM:_ENDERREME:_XBAIRRO:TEXT)
+		cRemCEP   := IIf(XmlChildEx(oNfe:_INFCTE:_REM:_ENDERREME,'_CEP' )== NIL," ",oNfe:_INFCTE:_REM:_ENDERREME:_CEP:TEXT)
+		cRemCNPJ  := IIf(XmlChildEx(oNfe:_INFCTE:_REM,'_CNPJ') == Nil,oNfe:_INFCTE:_REM:_CPF:TEXT,oNfe:_INFCTE:_REM:_CNPJ:TEXT)
+		cRemIE    := IIf(XmlChildEx(oNfe:_INFCTE:_REM,'_IE' ) == Nil," ",oNfe:_INFCTE:_REM:_IE:TEXT)
+		cRemPais  := IIf(XmlChildEx(oNfe:_INFCTE:_REM:_ENDERREME,'_XPAIS') == Nil," ",oNfe:_INFCTE:_REM:_ENDERREME:_XPAIS:TEXT)
+		cRemFone  := IIf(XmlChildEx(oNfe:_INFCTE:_REM,'_FONE') == Nil," ",oNfe:_INFCTE:_REM:_FONE:TEXT)
 	EndIf
 	//-- Expedidor
 	If (XmlChildEx(oNfe:_INFCTE,'_EXPED')) <> Nil
@@ -400,12 +400,12 @@ nMM     := 0
 		cExpEnd		:= oNfe:_INFCTE:_EXPED:_ENDEREXPED:_XLGR:TEXT
 		cExpNro		:= oNfe:_INFCTE:_EXPED:_ENDEREXPED:_NRO:TEXT
 		cExpCompl 	:= ""
-		cExpBai		:= Iif(XmlChildEx(oNfe:_INFCTE:_EXPED:_ENDEREXPED,'_XBAIRRO' )== NIL," ",oNfe:_INFCTE:_EXPED:_ENDEREXPED:_XBAIRRO:TEXT)
-		cExpCEP		:= Iif(XmlChildEx(oNfe:_INFCTE:_EXPED:_ENDEREXPED,'_CEP' )== NIL," ",oNfe:_INFCTE:_EXPED:_ENDEREXPED:_CEP:TEXT)
-		cExpCNPJ	:= Iif(XmlChildEx(oNfe:_INFCTE:_EXPED,'_CNPJ')==Nil, oNfe:_INFCTE:_EXPED:_CPF:TEXT , oNfe:_INFCTE:_EXPED:_CNPJ:TEXT)
-		cExpIE		:= Iif(XmlChildEx(oNfe:_INFCTE:_EXPED,'_IE' )==Nil," ",oNfe:_INFCTE:_EXPED:_IE:TEXT)
-		cExpPais	:= Iif(XmlChildEx(oNfe:_INFCTE:_EXPED:_ENDEREXPED,'_XPAIS')==Nil," ",oNfe:_INFCTE:_EXPED:_ENDEREXPED:_XPAIS:TEXT)
-		cExpFone	:= Iif(XmlChildEx(oNfe:_INFCTE:_EXPED,'_FONE')==Nil," ",oNfe:_INFCTE:_EXPED:_FONE:TEXT)
+		cExpBai		:= IIf(XmlChildEx(oNfe:_INFCTE:_EXPED:_ENDEREXPED,'_XBAIRRO' )== NIL," ",oNfe:_INFCTE:_EXPED:_ENDEREXPED:_XBAIRRO:TEXT)
+		cExpCEP		:= IIf(XmlChildEx(oNfe:_INFCTE:_EXPED:_ENDEREXPED,'_CEP' )== NIL," ",oNfe:_INFCTE:_EXPED:_ENDEREXPED:_CEP:TEXT)
+		cExpCNPJ	:= IIf(XmlChildEx(oNfe:_INFCTE:_EXPED,'_CNPJ')==Nil, oNfe:_INFCTE:_EXPED:_CPF:TEXT , oNfe:_INFCTE:_EXPED:_CNPJ:TEXT)
+		cExpIE		:= IIf(XmlChildEx(oNfe:_INFCTE:_EXPED,'_IE' )==Nil," ",oNfe:_INFCTE:_EXPED:_IE:TEXT)
+		cExpPais	:= IIf(XmlChildEx(oNfe:_INFCTE:_EXPED:_ENDEREXPED,'_XPAIS')==Nil," ",oNfe:_INFCTE:_EXPED:_ENDEREXPED:_XPAIS:TEXT)
+		cExpFone	:= IIf(XmlChildEx(oNfe:_INFCTE:_EXPED,'_FONE')==Nil," ",oNfe:_INFCTE:_EXPED:_FONE:TEXT)
 	EndIf
 
 	//-- Destinatario
@@ -415,39 +415,39 @@ nMM     := 0
 		cDesNome  := oNfe:_INFCTE:_DEST:_XNOME:TEXT
 		cDesEnd   := oNfe:_INFCTE:_DEST:_ENDERDEST:_XLGR:TEXT
 		cDesNro   := oNfe:_INFCTE:_DEST:_ENDERDEST:_NRO:TEXT
-		cDesCompl := Iif(XmlChildEx(oNfe:_INFCTE:_DEST:_ENDERDEST,'_XCPL' ) == Nil," ", oNfe:_INFCTE:_DEST:_ENDERDEST:_XCPL:TEXT)
-		cDesBair  := Iif(XmlChildEx(oNfe:_INFCTE:_DEST:_ENDERDEST,'_XBAIRRO' ) == Nil," ", oNfe:_INFCTE:_DEST:_ENDERDEST:_XBAIRRO:TEXT)
-		cDesCEP   := Iif(XmlChildEx(oNfe:_INFCTE:_DEST:_ENDERDEST,'_XCEP' ) == Nil," ", oNfe:_INFCTE:_DEST:_ENDERDEST:_XCEP:TEXT)
-		cDesCNPJ  := Iif(XmlChildEx(oNfe:_INFCTE:_DEST,'_CNPJ') == Nil,    oNfe:_INFCTE:_DEST:_CPF:TEXT, oNfe:_INFCTE:_DEST:_CNPJ:TEXT)
-		cDesIE    := Iif(XmlChildEx(oNfe:_INFCTE:_DEST,'_IE'  ) == Nil," ",oNfe:_INFCTE:_DEST:_IE:TEXT)
-		cDesPais  := Iif(XmlChildEx(oNfe:_INFCTE:_DEST:_ENDERDEST,'_XPAIS') == Nil," ",oNfe:_INFCTE:_DEST:_ENDERDEST:_XPAIS:TEXT)
-		cDesFone  := Iif(XmlChildEx(oNfe:_INFCTE:_DEST,'_FONE') == Nil," ",oNfe:_INFCTE:_DEST:_FONE:TEXT)
+		cDesCompl := IIf(XmlChildEx(oNfe:_INFCTE:_DEST:_ENDERDEST,'_XCPL' ) == Nil," ", oNfe:_INFCTE:_DEST:_ENDERDEST:_XCPL:TEXT)
+		cDesBair  := IIf(XmlChildEx(oNfe:_INFCTE:_DEST:_ENDERDEST,'_XBAIRRO' ) == Nil," ", oNfe:_INFCTE:_DEST:_ENDERDEST:_XBAIRRO:TEXT)
+		cDesCEP   := IIf(XmlChildEx(oNfe:_INFCTE:_DEST:_ENDERDEST,'_XCEP' ) == Nil," ", oNfe:_INFCTE:_DEST:_ENDERDEST:_XCEP:TEXT)
+		cDesCNPJ  := IIf(XmlChildEx(oNfe:_INFCTE:_DEST,'_CNPJ') == Nil,    oNfe:_INFCTE:_DEST:_CPF:TEXT, oNfe:_INFCTE:_DEST:_CNPJ:TEXT)
+		cDesIE    := IIf(XmlChildEx(oNfe:_INFCTE:_DEST,'_IE'  ) == Nil," ",oNfe:_INFCTE:_DEST:_IE:TEXT)
+		cDesPais  := IIf(XmlChildEx(oNfe:_INFCTE:_DEST:_ENDERDEST,'_XPAIS') == Nil," ",oNfe:_INFCTE:_DEST:_ENDERDEST:_XPAIS:TEXT)
+		cDesFone  := IIf(XmlChildEx(oNfe:_INFCTE:_DEST,'_FONE') == Nil," ",oNfe:_INFCTE:_DEST:_FONE:TEXT)
 	EndIf
 
 	//-- Local de Entrega
-	If XmlChildEx(oNfe:_INFCTE,'_RECEB') <> Nil .AND. XmlChildEx(oNfe:_INFCTE:_RECEB,'_ENDERRECEB') <> Nil
+	If XmlChildEx(oNfe:_INFCTE,'_RECEB') <> Nil .And. XmlChildEx(oNfe:_INFCTE:_RECEB,'_ENDERRECEB') <> Nil
 		lSeqRec := .T.
 		//Destino Recebedor
 		cRecNome	:= oNfe:_INFCTE:_RECEB:_XNOME:TEXT
 		cRecEnd		:= oNfe:_INFCTE:_RECEB:_ENDERRECEB:_XLGR:TEXT
 		cRecNro  	:= oNfe:_INFCTE:_RECEB:_ENDERRECEB:_NRO:TEXT
-		cRecBai		:= Iif( XmlChildEx(oNfe:_INFCTE:_RECEB:_ENDERRECEB,'_XBAIRRO')== Nil," ",oNfe:_INFCTE:_RECEB:_ENDERRECEB:_XBAIRRO:TEXT)
-		cRecMun		:= Iif( XmlChildEx(oNfe:_INFCTE:_RECEB:_ENDERRECEB,'_XMUN')== Nil," ",oNfe:_INFCTE:_RECEB:_ENDERRECEB:_XMUN:TEXT)
-		crecUF		:= Iif( XmlChildEx(oNfe:_INFCTE:_RECEB:_ENDERRECEB,'_XUF')== Nil," ",oNfe:_INFCTE:_RECEB:_ENDERRECEB:_XUF:TEXT)
-		cRecPais  	:= Iif( XmlChildEx(oNfe:_INFCTE:_RECEB:_ENDERRECEB,'_XPAIS')== Nil," ",oNfe:_INFCTE:_RECEB:_ENDERRECEB:_XPAIS:TEXT)
-		cRecCompl 	:= Iif( XmlChildEx(oNfe:_INFCTE:_RECEB:_ENDERRECEB,'_XCPL') == Nil," ",oNfe:_INFCTE:_RECEB:_ENDERRECEB:_XCPL:TEXT )
-		cRecCEP   	:= Iif( XmlChildEx(oNfe:_INFCTE:_RECEB:_ENDERRECEB,'_CEP')  == Nil," ",oNfe:_INFCTE:_RECEB:_ENDERRECEB:_CEP:TEXT  )
+		cRecBai		:= IIf( XmlChildEx(oNfe:_INFCTE:_RECEB:_ENDERRECEB,'_XBAIRRO')== Nil," ",oNfe:_INFCTE:_RECEB:_ENDERRECEB:_XBAIRRO:TEXT)
+		cRecMun		:= IIf( XmlChildEx(oNfe:_INFCTE:_RECEB:_ENDERRECEB,'_XMUN')== Nil," ",oNfe:_INFCTE:_RECEB:_ENDERRECEB:_XMUN:TEXT)
+		crecUF		:= IIf( XmlChildEx(oNfe:_INFCTE:_RECEB:_ENDERRECEB,'_XUF')== Nil," ",oNfe:_INFCTE:_RECEB:_ENDERRECEB:_XUF:TEXT)
+		cRecPais  	:= IIf( XmlChildEx(oNfe:_INFCTE:_RECEB:_ENDERRECEB,'_XPAIS')== Nil," ",oNfe:_INFCTE:_RECEB:_ENDERRECEB:_XPAIS:TEXT)
+		cRecCompl 	:= IIf( XmlChildEx(oNfe:_INFCTE:_RECEB:_ENDERRECEB,'_XCPL') == Nil," ",oNfe:_INFCTE:_RECEB:_ENDERRECEB:_XCPL:TEXT )
+		cRecCEP   	:= IIf( XmlChildEx(oNfe:_INFCTE:_RECEB:_ENDERRECEB,'_CEP')  == Nil," ",oNfe:_INFCTE:_RECEB:_ENDERRECEB:_CEP:TEXT  )
 		
-		cRecFone := Iif( XmlChildEx(oNfe:_INFCTE:_RECEB,'_FONE') == Nil," ",oNfe:_INFCTE:_RECEB:_FONE:TEXT )
+		cRecFone := IIf( XmlChildEx(oNfe:_INFCTE:_RECEB,'_FONE') == Nil," ",oNfe:_INFCTE:_RECEB:_FONE:TEXT )
 		If Empty(cRecFone)
-			cRecFone := Iif( XmlChildEx(oNfe:_INFCTE:_RECEB:_ENDERRECEB,'_FONE') == Nil," ",oNfe:_INFCTE:_RECEB:_ENDERRECEB:_FONE:TEXT )
+			cRecFone := IIf( XmlChildEx(oNfe:_INFCTE:_RECEB:_ENDERRECEB,'_FONE') == Nil," ",oNfe:_INFCTE:_RECEB:_ENDERRECEB:_FONE:TEXT )
 		EndIf
 
 		If XmlChildEx(oNfe:_INFCTE:_RECEB,'_CNPJ')==Nil
 			cRecCPF	:= oNfe:_INFCTE:_RECEB:_CPF:TEXT
 		Else
 			cRecCGC	:= oNfe:_INFCTE:_RECEB:_CNPJ:TEXT				
-			cRecINSCR := Iif(XmlChildEx(oNfe:_INFCTE:_RECEB,'_IE' )==Nil," ",oNfe:_INFCTE:_RECEB:_IE:TEXT)
+			cRecINSCR := IIf(XmlChildEx(oNfe:_INFCTE:_RECEB,'_IE' )==Nil," ",oNfe:_INFCTE:_RECEB:_IE:TEXT)
 			lRecPJ	:= .T.
 		EndIf		
 	EndIf
@@ -494,7 +494,7 @@ nMM     := 0
 	// 2 - Recebedor;
 	// 3 - Destinatario. 
 		//| Remetente é o tomador do frete
-	If XmlChildEx(oNfe:_INFCTE:_IDE, '_TOMA3') <> Nil .AND. (oNfe:_INFCTE:_IDE:_TOMA3,'_TOMA') <> Nil
+	If XmlChildEx(oNfe:_INFCTE:_IDE, '_TOMA3') <> Nil .And. (oNfe:_INFCTE:_IDE:_TOMA3,'_TOMA') <> Nil
 		If oNfe:_INFCTE:_IDE:_TOMA3:_TOMA:TEXT == "0"
 			cDevMun   := cRemMun
 			cDevUF    := cRemUF
@@ -551,7 +551,7 @@ nMM     := 0
 			cDevPais  := cDesPais
 			cDevFone  := cDesFone
 		EndIf
-	ElseIf XmlChildEx(oNfe:_INFCTE:_IDE, '_TOMA4') <> Nil .AND. (oNfe:_INFCTE:_IDE:_TOMA4,'_TOMA') <> Nil
+	ElseIf XmlChildEx(oNfe:_INFCTE:_IDE, '_TOMA4') <> Nil .And. (oNfe:_INFCTE:_IDE:_TOMA4,'_TOMA') <> Nil
 		If oNfe:_INFCTE:_IDE:_TOMA4:_TOMA:TEXT == "4"
 			// Subcontratacao DT6_DEVFRE == "4" - Despachante		
 			cDevMun   := oNfe:_INFCTE:_IDE:_TOMA4:_ENDERTOMA:_XMUN:TEXT
@@ -560,12 +560,12 @@ nMM     := 0
 			cDevEnd   := oNfe:_INFCTE:_IDE:_TOMA4:_ENDERTOMA:_XLGR:TEXT
 			cDevNro   := oNfe:_INFCTE:_IDE:_TOMA4:_ENDERTOMA:_NRO:TEXT
 			cDevCompl := ""
-			cDevBair  := Iif(XmlChildEx(oNfe:_INFCTE:_IDE:_TOMA4:_ENDERTOMA,'_XBAIRRO')==Nil," ",oNfe:_INFCTE:_IDE:_TOMA4:_ENDERTOMA:_XBAIRRO:TEXT)
-			cDevCEP   := Iif(XmlChildEx(oNfe:_INFCTE:_IDE:_TOMA4:_ENDERTOMA,'_CEP')==Nil," ",oNfe:_INFCTE:_IDE:_TOMA4:_ENDERTOMA:_CEP:TEXT)
-			cDevCNPJ  := Iif(XmlChildEx(oNfe:_INFCTE:_IDE:_TOMA4,'_CNPJ')==Nil,oNfe:_INFCTE:_IDE:_TOMA4:_CPF:TEXT,oNfe:_INFCTE:_IDE:_TOMA4:_CNPJ:TEXT)
-			cDevIE    := Iif(XmlChildEx(oNfe:_INFCTE:_IDE:_TOMA4,'_IE' )==Nil," ",oNfe:_INFCTE:_IDE:_TOMA4:_IE:TEXT)
+			cDevBair  := IIf(XmlChildEx(oNfe:_INFCTE:_IDE:_TOMA4:_ENDERTOMA,'_XBAIRRO')==Nil," ",oNfe:_INFCTE:_IDE:_TOMA4:_ENDERTOMA:_XBAIRRO:TEXT)
+			cDevCEP   := IIf(XmlChildEx(oNfe:_INFCTE:_IDE:_TOMA4:_ENDERTOMA,'_CEP')==Nil," ",oNfe:_INFCTE:_IDE:_TOMA4:_ENDERTOMA:_CEP:TEXT)
+			cDevCNPJ  := IIf(XmlChildEx(oNfe:_INFCTE:_IDE:_TOMA4,'_CNPJ')==Nil,oNfe:_INFCTE:_IDE:_TOMA4:_CPF:TEXT,oNfe:_INFCTE:_IDE:_TOMA4:_CNPJ:TEXT)
+			cDevIE    := IIf(XmlChildEx(oNfe:_INFCTE:_IDE:_TOMA4,'_IE' )==Nil," ",oNfe:_INFCTE:_IDE:_TOMA4:_IE:TEXT)
 			cDevPais  := ""
-			cDevFone  := Iif(XmlChildEx(oNfe:_INFCTE:_IDE:_TOMA4,'_FONE')==Nil," ",oNfe:_INFCTE:_IDE:_TOMA4:_FONE:TEXT)
+			cDevFone  := IIf(XmlChildEx(oNfe:_INFCTE:_IDE:_TOMA4,'_FONE')==Nil," ",oNfe:_INFCTE:_IDE:_TOMA4:_FONE:TEXT)
 		EndIf
 	ElseIf XmlChildEx(oNfe:_INFCTE, '_TOMA') <> Nil
 		cDevMun   := oNfe:_INFCTE:_TOMA:_ENDERTOMA:_XMUN:TEXT
@@ -574,12 +574,12 @@ nMM     := 0
 		cDevEnd   := oNfe:_INFCTE:_TOMA:_ENDERTOMA:_XLGR:TEXT
 		cDevNro   := oNfe:_INFCTE:_TOMA:_ENDERTOMA:_NRO:TEXT
 		cDevCompl := ""
-		cDevBair  := Iif(XmlChildEx(oNfe:_INFCTE:_TOMA:_ENDERTOMA,'_XBAIRRO')==Nil," ",oNfe:_INFCTE:_TOMA:_ENDERTOMA:_XBAIRRO:TEXT)
-		cDevCEP   := Iif(XmlChildEx(oNfe:_INFCTE:_TOMA:_ENDERTOMA,'_CEP')==Nil," ",oNfe:_INFCTE:_TOMA:_ENDERTOMA:_CEP:TEXT)
-		cDevCNPJ  := Iif(XmlChildEx(oNfe:_INFCTE:_TOMA,'_CNPJ')==Nil,oNfe:_INFCTE:_TOMA:_CPF:TEXT,oNfe:_INFCTE:_TOMA:_CNPJ:TEXT)
-		cDevIE    := Iif(XmlChildEx(oNfe:_INFCTE:_TOMA,'_IE' )==Nil," ",oNfe:_INFCTE:_TOMA:_IE:TEXT)
+		cDevBair  := IIf(XmlChildEx(oNfe:_INFCTE:_TOMA:_ENDERTOMA,'_XBAIRRO')==Nil," ",oNfe:_INFCTE:_TOMA:_ENDERTOMA:_XBAIRRO:TEXT)
+		cDevCEP   := IIf(XmlChildEx(oNfe:_INFCTE:_TOMA:_ENDERTOMA,'_CEP')==Nil," ",oNfe:_INFCTE:_TOMA:_ENDERTOMA:_CEP:TEXT)
+		cDevCNPJ  := IIf(XmlChildEx(oNfe:_INFCTE:_TOMA,'_CNPJ')==Nil,oNfe:_INFCTE:_TOMA:_CPF:TEXT,oNfe:_INFCTE:_TOMA:_CNPJ:TEXT)
+		cDevIE    := IIf(XmlChildEx(oNfe:_INFCTE:_TOMA,'_IE' )==Nil," ",oNfe:_INFCTE:_TOMA:_IE:TEXT)
 		cDevPais  := ""
-		cDevFone  := Iif(XmlChildEx(oNfe:_INFCTE:_TOMA,'_FONE')==Nil," ",oNfe:_INFCTE:_TOMA:_FONE:TEXT)
+		cDevFone  := IIf(XmlChildEx(oNfe:_INFCTE:_TOMA,'_FONE')==Nil," ",oNfe:_INFCTE:_TOMA:_FONE:TEXT)
 	EndIf
 	//-- Documentos Originarios
 	aDocOri := {}
@@ -587,7 +587,7 @@ nMM     := 0
 		If ValType( oNFE:_INFCTE:_REM:_INFNFE ) == 'A'
 			For nCount := 1 To Len( oNFE:_INFCTE:_REM:_INFNFE )
 				If aScan(aDocOri,{|x|x[8]==oNFE:_INFCTE:_REM:_INFNFE[ nCount ]:_CHAVE:TEXT})==0
-					AADD(aDocOri, {;
+					aAdd(aDocOri, {;
 					'',;
 					'',;
 					'',;
@@ -600,7 +600,7 @@ nMM     := 0
 			Next nCount
 		ElseIf ValType( oNFE:_INFCTE:_REM:_INFNFE ) == 'O'
 			If aScan(aDocOri,{|x|x[8]==oNFE:_INFCTE:_REM:_INFNFE:_CHAVE:TEXT})==0
-				AADD(aDocOri, {;
+				aAdd(aDocOri, {;
 				'',;
 				'',;
 				'',;
@@ -615,10 +615,10 @@ nMM     := 0
 		If ValType( oNFE:_INFCTE:_REM:_INFNF ) == 'A'
 			For nCount := 1 To Len( oNFE:_INFCTE:_REM:_INFNF )
 				If aScan(aDocOri,{|x|x[1]+x[2]==oNFE:_INFCTE:_REM:_INFNF[ nCount ]:_SERIE:TEXT+oNFE:_INFCTE:_REM:_INFNF[ nCount ]:_NDOC:TEXT})==0
-					AADD(aDocOri, {;
+					aAdd(aDocOri, {;
 					oNFE:_INFCTE:_REM:_INFNF[ nCount ]:_SERIE:TEXT,;
 					oNFE:_INFCTE:_REM:_INFNF[ nCount ]:_NDOC:TEXT,;
-					If (XmlChildEx(oNFE:_INFCTE:_REM:_INFNF[ nCount ],'_DEMI') <> Nil, STRTRAN(oNFE:_INFCTE:_REM:_INFNF[ nCount ]:_DEMI:TEXT,'-'),''),;
+					If (XmlChildEx(oNFE:_INFCTE:_REM:_INFNF[ nCount ],'_DEMI') <> Nil, StrTran(oNFE:_INFCTE:_REM:_INFNF[ nCount ]:_DEMI:TEXT,'-'),''),;
 					oNFE:_INFCTE:_REM:_INFNF[ nCount ]:_VPROD:TEXT,;
 					'',;
 					'',;
@@ -636,17 +636,17 @@ nMM     := 0
 				cExpCompl 	:= ""
 				cExpBai	:= oNfe:_INFCTE:_REM:_INFNF[1]:_LOCRET:_XBAIRRO:TEXT
 				cExpCEP   	:= ""
-				cExpCNPJ  	:= Iif(XmlChildEx(oNfe:_INFCTE:_REM:_INFNF[1]:_LOCRET,'_CNPJ')==Nil, oNfe:_INFCTE:_REM:_INFNF[1]:_LOCRET:_CPF:TEXT , oNfe:_INFCTE:_REM:_INFNF[1]:_LOCRET:_CNPJ:TEXT)
+				cExpCNPJ  	:= IIf(XmlChildEx(oNfe:_INFCTE:_REM:_INFNF[1]:_LOCRET,'_CNPJ')==Nil, oNfe:_INFCTE:_REM:_INFNF[1]:_LOCRET:_CPF:TEXT , oNfe:_INFCTE:_REM:_INFNF[1]:_LOCRET:_CNPJ:TEXT)
 				cExpIE    	:= ""
 				cExpPais  	:= cRemPais
 				cExpFone  	:= ""
 			EndIf
 		Else
 			If aScan(aDocOri,{|x|x[1]+x[2]==oNFE:_INFCTE:_REM:_INFNF:_SERIE:TEXT+oNFE:_INFCTE:_REM:_INFNF:_NDOC:TEXT})==0
-				AADD(aDocOri, {;
+				aAdd(aDocOri, {;
 				oNFE:_INFCTE:_REM:_INFNF:_SERIE:TEXT,;
 				oNFE:_INFCTE:_REM:_INFNF:_NDOC:TEXT,;
-				If(XmlChildEx(oNFE:_INFCTE:_REM:_INFNF,'_DEMI') <> Nil, STRTRAN(oNFE:_INFCTE:_REM:_INFNF:_DEMI:TEXT,'-'),''),;
+				If(XmlChildEx(oNFE:_INFCTE:_REM:_INFNF,'_DEMI') <> Nil, StrTran(oNFE:_INFCTE:_REM:_INFNF:_DEMI:TEXT,'-'),''),;
 				oNFE:_INFCTE:_REM:_INFNF:_VPROD:TEXT,;
 				'',;
 				'',;
@@ -662,7 +662,7 @@ nMM     := 0
 				cExpCompl 	:= ""
 				cExpBai	:= oNfe:_INFCTE:_REM:_INFNF:_LOCRET:_XBAIRRO:TEXT
 				cExpCEP   	:= ""
-				cExpCNPJ  	:= Iif(XmlChildEx(oNfe:_INFCTE:_REM:_INFNF:_LOCRET,'_CNPJ')==Nil, oNfe:_INFCTE:_REM:_INFNF:_LOCRET:_CPF:TEXT , oNfe:_INFCTE:_REM:_INFNF:_LOCRET:_CNPJ:TEXT)
+				cExpCNPJ  	:= IIf(XmlChildEx(oNfe:_INFCTE:_REM:_INFNF:_LOCRET,'_CNPJ')==Nil, oNfe:_INFCTE:_REM:_INFNF:_LOCRET:_CPF:TEXT , oNfe:_INFCTE:_REM:_INFNF:_LOCRET:_CNPJ:TEXT)
 				cExpIE    	:= ""
 				cExpPais  	:= cRemPais
 				cExpFone  	:= ""
@@ -673,10 +673,10 @@ nMM     := 0
 		aAux := If(ValType(oNFE:_InfCte:_InfCTeNorm:_InfDoc:_INFNF) == "O",{oNFE:_InfCte:_InfCTeNorm:_InfDoc:_INFNF},oNFE:_InfCte:_InfCTeNorm:_InfDoc:_INFNF)
 		For nCount := 1 To Len(aAux)
 			If aScan(aDocOri,{|x|x[1]+x[2]==aAux[ nCount ]:_SERIE:TEXT+aAux[ nCount ]:_NDOC:TEXT})==0
-					AADD(aDocOri, {;
+					aAdd(aDocOri, {;
 					aAux[ nCount ]:_SERIE:TEXT,;
 					aAux[ nCount ]:_NDOC:TEXT,;
-					If(XmlChildEx(aAux[ nCount ],'_DEMI') <> Nil, STRTRAN(aAux[ nCount ]:_DEMI:TEXT,'-'),''),;
+					If(XmlChildEx(aAux[ nCount ],'_DEMI') <> Nil, StrTran(aAux[ nCount ]:_DEMI:TEXT,'-'),''),;
 					aAux[ nCount ]:_VPROD:TEXT,;
 					'',;
 					'',;
@@ -690,7 +690,7 @@ nMM     := 0
 		aAux := If(ValType(oNFE:_InfCte:_InfCTeNorm:_INFSERVVINC:_INFCTEMULTIMODAL) == "O",{oNFE:_InfCte:_InfCTeNorm:_INFSERVVINC:_INFCTEMULTIMODAL},oNFE:_InfCte:_InfCTeNorm:_INFSERVVINC:_INFCTEMULTIMODAL)
 		For nCount := 1 To Len(aAux)
 			If aScan(aDocOri,{|x|x[8]==aAux[ nCount ]:_CHCTEMULTIMODAL:TEXT})==0
-					AADD(aDocOri, {;
+					aAdd(aDocOri, {;
 					'',;
 					'',;
 					'',;
@@ -706,7 +706,7 @@ nMM     := 0
 		aAux := If(ValType(oNFE:_InfCte:_InfCTeNorm:_INFDOC:_INFNFE) == "O",{oNFE:_InfCte:_InfCTeNorm:_INFDOC:_INFNFE},oNFE:_InfCte:_InfCTeNorm:_INFDOC:_INFNFE)
 		For nCount := 1 To Len(aAux)
 			If aScan(aDocOri,{|x|x[8]==aAux[ nCount ]:_CHAVE:TEXT})==0
-					AADD(aDocOri, {;
+					aAdd(aDocOri, {;
 					'',;
 					'',;
 					'',;
@@ -722,10 +722,10 @@ nMM     := 0
 		aAux := If(ValType(oNFE:_InfCte:_REM:_INFOUTROS) == "O",{oNFE:_InfCte:_REM:_INFOUTROS},oNFE:_InfCte:_REM:_INFOUTROS)
 		For nCount := 1 To Len(aAux)
 			If aScan(aDocOri,{|x|x[1]+x[2]==aAux[ nCount ]:_NDOC:TEXT})==0
-						AADD(aDocOri, {;
+						aAdd(aDocOri, {;
 						'',;//SERIE DO DOCUMENTO NAO INFORMADA NO XML QUANDO O DOCUMENTO NAO EH FISCAL
 						aAux[ nCount ]:_NDOC:TEXT,;
-						If(XmlChildEx(aAux[ nCount ],'_DEMI') <> Nil, STRTRAN(aAux[ nCount ]:_DEMI:TEXT,'-'),''),;
+						If(XmlChildEx(aAux[ nCount ],'_DEMI') <> Nil, StrTran(aAux[ nCount ]:_DEMI:TEXT,'-'),''),;
 						'',;//--VALOR DO PRODUTO NAO INFORMADO NO XML QUANDO O DOCUMENTO NAO EH FISCAL
 						'',;
 						'',;
@@ -738,10 +738,10 @@ nMM     := 0
 		aAux := If(ValType(oNFE:_InfCte:_InfCTeNorm:_INFDOC:_INFOUTROS) == "O",{oNFE:_InfCte:_InfCTeNorm:_INFDOC:_INFOUTROS},oNFE:_InfCte:_InfCTeNorm:_INFDOC:_INFOUTROS)
 		For nCount := 1 To Len(aAux)
 			If ValType(XmlChildEx(aAux[ nCount ],"_NDOC")) == "O" .And. aScan(aDocOri,{|x|x[1]+x[2]==aAux[ nCount ]:_NDOC:TEXT})==0
-						AADD(aDocOri, {;
+						aAdd(aDocOri, {;
 						'',;//SERIE DO DOCUMENTO NAO INFORMADA NO XML QUANDO O DOCUMENTO NAO EH FISCAL
 						aAux[ nCount ]:_NDOC:TEXT,;
-						If(XmlChildEx(aAux[ nCount ],"_DEMI") <> Nil, STRTRAN(aAux[ nCount ]:_DEMI:TEXT,'-'),''),;
+						If(XmlChildEx(aAux[ nCount ],"_DEMI") <> Nil, StrTran(aAux[ nCount ]:_DEMI:TEXT,'-'),''),;
 						'',;//--VALOR DO PRODUTO NAO INFORMADO NO XML QUANDO O DOCUMENTO NAO EH FISCAL
 						'',;
 						'',;
@@ -749,17 +749,47 @@ nMM     := 0
 						'' })
 			EndIf
 		Next nCount
+
+	//CT-e Simplificado
+	ElseIf (XmlChildEx(oNFE:_INFCTE,'_DET') <> Nil) .And. ( XmlChildEx(oNFE:_INFCTE:_DET,'_INFNFE') <> Nil ) 
+		If ValType( oNFE:_INFCTE:_DET:_INFNFE ) == 'A'
+			For nCount := 1 To Len( oNFE:_INFCTE:_DET:_INFNFE )
+				If aScan(aDocOri,{|x|x[8]==oNFE:_INFCTE:_DET:_INFNFE[ nCount ]:_CHNFE:TEXT})==0
+					aAdd(aDocOri, {;
+					'',;
+					'',;
+					'',;
+					'',;
+					'',;
+					'',;
+					'',;
+					oNFE:_INFCTE:_DET:_INFNFE[ nCount ]:_CHNFE:TEXT })
+				EndIf
+			Next nCount
+		ElseIf ValType( oNFE:_INFCTE:_DET:_INFNFE ) == 'O'
+			If aScan(aDocOri,{|x|x[8]==oNFE:_INFCTE:_DET:_INFNFE:_CHNFE:TEXT})==0
+				aAdd(aDocOri, {;
+				'',;
+				'',;
+				'',;
+				'',;
+				'',;
+				'',;
+				'',;
+				oNFE:_INFCTE:_DET:_INFNFE:_CHNFE:TEXT }) 
+			EndIf
+		EndIf
 	EndIf
 
 	//Tratamento para a tag docAnt
-	If (XmlChildEx(oNFE:_INFCTE,'_INFCTENORM')) <> Nil .And. XmlChildEx( oNFE:_INFCTE:_INFCTENORM,'_DOCANT' ) <> Nil .AND. ;
+	If (XmlChildEx(oNFE:_INFCTE,'_INFCTENORM')) <> Nil .And. XmlChildEx( oNFE:_INFCTE:_INFCTENORM,'_DOCANT' ) <> Nil .And. ;
 		XmlChildEx( oNFE:_INFCTE:_INFCTENORM:_DOCANT,'_EMIDOCANT' ) <> NIL .AND.;
 		XmlChildEx( oNFE:_INFCTE:_INFCTENORM:_DOCANT:_EMIDOCANT:_IDDOCANT,'_IDDOCANTELE' ) <> Nil
 		aDocOri := {}
 		aAux := If(ValType(oNFE:_InfCte:_InfCTeNorm:_DOCANT:_EMIDOCANT:_IDDOCANT:_IDDOCANTELE) == "O",{oNFE:_InfCte:_InfCTeNorm:_DOCANT:_EMIDOCANT:_IDDOCANT:_IDDOCANTELE},oNFE:_InfCte:_InfCTeNorm:_DOCANT:_EMIDOCANT:_IDDOCANT:_IDDOCANTELE)
 		For nCount := 1 To Len(aAux)
 			If aScan(aDocOri,{|x|x[9]==aAux[ nCount ]:_CHCTE:TEXT})==0
-						AADD(aDocOri, {;
+						aAdd(aDocOri, {;
 						'',;
 						'',;
 						'',;
@@ -794,9 +824,9 @@ nMM     := 0
 	oDacte:Box(0231, 0281, 0282, 0559)	//Destinatario
 
 	oDacte:Say(0237, 0003, "Remetente:", oFont08)
-	oDacte:Say(0237, 0043, NoAcentoCte(Substr(cRemNome,1,45)), oFont08N)
+	oDacte:Say(0237, 0043, NoAcentoCte(SubStr(cRemNome,1,45)), oFont08N)
 	oDacte:Say(0237, 0286, "Destinatário:", oFont08)
-	oDacte:Say(0237, 0328, NoAcentoCte(Substr(cDesNome,1,45)), oFont08N)
+	oDacte:Say(0237, 0328, NoAcentoCte(SubStr(cDesNome,1,45)), oFont08N)
 
 	cInsRemOpc := AllTrim(cRemIE)
 	For nCount := 1 To 5
@@ -847,17 +877,17 @@ nMM     := 0
 	Else
 		oDacte:Say(0291, 0003, "Local de Coleta:", oFont08)
 	EndIf
-	oDacte:Say(0291, 0043, NoAcentoCte(Substr(cExpNome,1,45))    , oFont08N)
+	oDacte:Say(0291, 0043, NoAcentoCte(SubStr(cExpNome,1,45))    , oFont08N)
 
-	//-- Sequencia de endereco preenchida, fica como local de entrega.
+	//-- Sequencia de endereco preenchida, fica como Local de entrega.
 	If lSeqDes
 		oDacte:Say(0291, 0286, "Local de Entrega:", oFont08)
-		oDacte:Say(0291, 0342,  NoAcentoCte(Substr(cRecNome,1,45)), oFont08N)
+		oDacte:Say(0291, 0342,  NoAcentoCte(SubStr(cRecNome,1,45)), oFont08N)
 	EndIf
 	
 	If lSeqRec
 		oDacte:Say(0291, 0286, "Recebedor:", oFont08)
-		oDacte:Say(0291, 0328,  NoAcentoCte(Substr(cRecNome,1,45)), oFont08N)
+		oDacte:Say(0291, 0328,  NoAcentoCte(SubStr(cRecNome,1,45)), oFont08N)
 	EndIf
 
 	If !lSeqDes .And. !lSeqRec
@@ -875,26 +905,26 @@ nMM     := 0
 					oDacte:Say(0300, 0039, IIf(!Empty(cExpEnd), AllTrim(cExpEnd) + ", " + cExpNro, " "), oFont08)
 				EndIf
 				oDacte:Say(0300, 0286, "Endereço:", oFont08)
-				//-- Sequencia de endereco preenchida, fica como local de entrega.
+				//-- Sequencia de endereco preenchida, fica como Local de entrega.
 				If Len(AllTrim(cRecEnd)) > 40
-					oDacte:Say(0300, 0324, If(lSeqDes .or. lSeqRec, SubStr(AllTrim(cRecEnd), 1, 40 ), " "), oFont08)
-					oDacte:Say(0307, 0324, If(lSeqDes .or. lSeqRec, SubStr(AllTrim(cRecEnd), 40, Len(AllTrim(cRecEnd) ) ) + ", " + cRecNro, " "), oFont08)
+					oDacte:Say(0300, 0324, If(lSeqDes .Or. lSeqRec, SubStr(AllTrim(cRecEnd), 1, 40 ), " "), oFont08)
+					oDacte:Say(0307, 0324, If(lSeqDes .Or. lSeqRec, SubStr(AllTrim(cRecEnd), 40, Len(AllTrim(cRecEnd) ) ) + ", " + cRecNro, " "), oFont08)
 				Else
-					oDacte:Say(0300, 0324, If(lSeqDes .or. lSeqRec, AllTrim(cRecEnd) + ", " + cRecNro, " "), oFont08)
+					oDacte:Say(0300, 0324, If(lSeqDes .Or. lSeqRec, AllTrim(cRecEnd) + ", " + cRecNro, " "), oFont08)
 				EndIf
 			Case ( nCount == 2 )
 				oDacte:Say(0314, 0039, If(!Empty(cExpCompl), If(!Empty(cExpCompl), SubStr(AllTrim(cExpCompl), 1, 20 ), "" ) + " - " + SubStr(AllTrim(cExpBai), 1, 20 ), cExpBai), oFont08)
-				oDacte:Say(0314, 0324, If(lSeqDes .or. lSeqRec, AllTrim(cValtoChar(FisGetEnd(cRecEnd)[4] ) ) + " - " + AllTrim(cRecBai),""), oFont08)
+				oDacte:Say(0314, 0324, If(lSeqDes .Or. lSeqRec, AllTrim(cValtoChar(FisGetEnd(cRecEnd)[4] ) ) + " - " + AllTrim(cRecBai),""), oFont08)
 			Case ( nCount == 3 )
 				oDacte:Say(0321, 0003, "Município:", oFont08)
 				oDacte:Say(0321, 0043, IIf(!Empty(cExpMun),  AllTrim(cExpMun) + ' - ' + AllTrim(cExpUF), " ")  + ' CEP.: ' + IIf(!Empty(cExpCEP), Transform(AllTrim(cExpCEP), "@r 99999-999"), ""), oFont08)
 				oDacte:Say(0321, 0286, "Município:", oFont08)
-				oDacte:Say(0321, 0328, If(lSeqDes .or. lSeqRec, AllTrim(cRecMun) + ' - ' + AllTrim(cRecUF),"") + ' CEP.: ' + IIf(!Empty(cRecCEP), Transform(AllTrim(cRecCEP), "@r 99999-999"), ""), oFont08)
+				oDacte:Say(0321, 0328, If(lSeqDes .Or. lSeqRec, AllTrim(cRecMun) + ' - ' + AllTrim(cRecUF),"") + ' CEP.: ' + IIf(!Empty(cRecCEP), Transform(AllTrim(cRecCEP), "@r 99999-999"), ""), oFont08)
 			Case ( nCount == 4 )
 				oDacte:Say(0328, 0003, "CNPJ/CPF:", oFont08)
 				oDacte:Say(0328, 0043, IIf(!Empty(cExpCNPJ), Transform(AllTrim(cExpCNPJ), "@R! NN.NNN.NNN/NNNN-99"), " ") + "   Inscrição Estadual: " +  AllTrim(cExpIE), oFont08)
 				oDacte:Say(0328, 0286, "CNPJ/CPF:", oFont08)
-				If lSeqDes .or. lSeqRec
+				If lSeqDes .Or. lSeqRec
 					If lRecPJ
 						oDacte:Say(0328, 0328, IIf(!Empty(cRecCGC), Transform(cRecCGC,"@R! NN.NNN.NNN/NNNN-99"), " ") + "   Inscrição Estadual: " +  cRecINSCR, oFont08)
 					Else
@@ -929,7 +959,7 @@ nMM     := 0
 				cEndCom := SubStr(AllTrim(cDevEnd),1,40) + ", " + cDevNro + " - " + AllTrim(cDevCompl) + " - " + AllTrim(cDevBair)
 				oDacte:Say(0352, 0003, "Endereço:", oFont08	)
 
-				If Len(cEndCom) > 64 .AND. !Empty(cDevCompl)
+				If Len(cEndCom) > 64 .And. !Empty(cDevCompl)
 					cEndCom := SubStr(AllTrim(cDevEnd),1,40) + ", " + cDevNro + " - " + SubStr(AllTrim(cDevCompl), 1, 10 ) + " - " + SubStr(AllTrim(cDevBair), 1, 29 )
 					oDacte:Say(0352, 0038, cEndCom, oFont08		)
 					oDacte:Say(0352, 0485, "País: ", oFont08	)
@@ -962,7 +992,7 @@ nMM     := 0
 		oDacte:Say(0372, 0381, "Valor Total da Mercadoria"      , oFont08N)
 		oDacte:Say(0380, 0003, SubStr(cPPDesc,1,40), oFont08)	//Produto Predominante
 		oDacte:Say(0380, 0192, AllTrim(cPPCarga)	, oFont08)	//Outras Caracteristicas da Carga
-		oDacte:Say(0380, 0381, PadL( Transform( val(cPPVlTot), PesqPict("DT6","DT6_VALMER") ), 20 ), oFont08)	//Valor Total da Mercadoria
+		oDacte:Say(0380, 0381, PadL( Transform( Val(cPPVlTot), PesqPict("DT6","DT6_VALMER") ), 20 ), oFont08)	//Valor Total da Mercadoria
 
 		// BOX: QNT. / UNIDADE MEDIDA /
 		oDacte:Box(0385, 0000, 0443,  0559)	
@@ -980,11 +1010,11 @@ nMM     := 0
 		oDacte:Line(0385, 0350, 0443, 0350) // Linha: Separador M³ / Qtd. Volume (Un)			
 		oDacte:Line(0385, 0455, 0443, 0455) // Linha: SeparadorQtd. Volume (Un) / 				
 
-		oDacte:Say(0405, 0043, Transform(val(cPPPesoB) ,	PesqPict("DT6","DT6_PESO")   ),	oFont08) 
-		oDacte:Say(0405, 0143, Transform(val(cPesoBC) ,  	PesqPict("DT6","DT6_PESO")   ),	oFont08) 						
-		oDacte:Say(0405, 0247, Transform(val(cPPPeso3) ,	PesqPict("DT6","DT6_PESOM3") ),	oFont08)  			
-		oDacte:Say(0405, 0352, Transform(val(cPPMetro3),	PesqPict("DT6","DT6_METRO3") ),	oFont08)   				
-		oDacte:Say(0405, 0457, Transform(val(cPPQtdVol),	PesqPict("DT6","DT6_QTDVOL") ),	oFont08)    
+		oDacte:Say(0405, 0043, Transform(Val(cPPPesoB) ,	PesqPict("DT6","DT6_PESO")   ),	oFont08) 
+		oDacte:Say(0405, 0143, Transform(Val(cPesoBC) ,  	PesqPict("DT6","DT6_PESO")   ),	oFont08) 						
+		oDacte:Say(0405, 0247, Transform(Val(cPPPeso3) ,	PesqPict("DT6","DT6_PESOM3") ),	oFont08)  			
+		oDacte:Say(0405, 0352, Transform(Val(cPPMetro3),	PesqPict("DT6","DT6_METRO3") ),	oFont08)   				
+		oDacte:Say(0405, 0457, Transform(Val(cPPQtdVol),	PesqPict("DT6","DT6_QTDVOL") ),	oFont08)    
 		
 		//-- Zera as variaveis(Peso, Peso Cubado, Metro Cubico e Qtd Volume) depois de impresso no DACTE.
 		cPPPesoB  := ""
@@ -1054,9 +1084,9 @@ nMM     := 0
 							//-- Imprime a Chave da NF-e, lado esquerdo
 							cChaveA := AllTrim(aDocOri[nCount][doDTC_NFEID])
 							oDacte:Say(nLInic, 0003, "NF-E CHAVE:", oFont08)
-							oDacte:Say(nLInic, 0073, SUBSTR(cChaveA,1,22), oFont08)
-							oDacte:Say(nLInic, 0168, SUBSTR(cChaveA,23,3) + " " + SUBSTR(cChaveA,26,9), oFont08N)
-							oDacte:Say(nLInic, 0223, SUBSTR(cChaveA,35,10), oFont08)
+							oDacte:Say(nLInic, 0073, SubStr(cChaveA,1,22), oFont08)
+							oDacte:Say(nLInic, 0168, SubStr(cChaveA,23,3) + " " + SubStr(cChaveA,26,9), oFont08N)
+							oDacte:Say(nLInic, 0223, SubStr(cChaveA,35,10), oFont08)
 							cChaveA := ''
 						EndIf
 
@@ -1081,9 +1111,9 @@ nMM     := 0
 							//-- Imprime a Chave da NF-e, lado direito
 							cChaveB := AllTrim(aDocOri[nCount][doDTC_NFEID])
 							oDacte:Say(nLInic, 0286, "NF-E CHAVE:", oFont08)
-							oDacte:Say(nLInic, 0356, SUBSTR(cChaveB,1,22), oFont08)
-							oDacte:Say(nLInic, 0451, SUBSTR(cChaveB,23,3) + " " + SUBSTR(cChaveB,26,9), oFont08N)
-							oDacte:Say(nLInic, 0506, SUBSTR(cChaveB,35,10), oFont08)
+							oDacte:Say(nLInic, 0356, SubStr(cChaveB,1,22), oFont08)
+							oDacte:Say(nLInic, 0451, SubStr(cChaveB,23,3) + " " + SubStr(cChaveB,26,9), oFont08N)
+							oDacte:Say(nLInic, 0506, SubStr(cChaveB,35,10), oFont08)
 							cChaveB := ''
 						EndIf
 					EndIf
@@ -1121,9 +1151,9 @@ nMM     := 0
 				cTipoDoc := IIf(Empty(AllTrim(aDocOri[nCount][doDTC_NFEID])) .And. Empty(AllTrim(aDocOri[nCount][doDTC_SERNFC])),'Outros',IIf(Empty(AllTrim(aDocOri[nCount][doDTC_NFEID])),'NF','NF-e'))
 				If cTipoDoc == 'Outros' .And. !Empty(AllTrim(aDocOri[nCount][doDTC_CTEID]))
 					cTipoDoc := 'CT-e'
-					aadd(aDoc,{ AllTrim(cRemCNPJ), AllTrim(aDocOri[nCount][doDTC_SERNFC]) + " / " + AllTrim(aDocOri[nCount][doDTC_NUMNFC]),	AllTrim(aDocOri[nCount][doDTC_CTEID]), cTipoDoc})					
+					aAdd(aDoc,{ AllTrim(cRemCNPJ), AllTrim(aDocOri[nCount][doDTC_SERNFC]) + " / " + AllTrim(aDocOri[nCount][doDTC_NUMNFC]),	AllTrim(aDocOri[nCount][doDTC_CTEID]), cTipoDoc})					
 				Else
-					aadd(aDoc,{ AllTrim(cRemCNPJ),;
+					aAdd(aDoc,{ AllTrim(cRemCNPJ),;
 						AllTrim(aDocOri[nCount][doDTC_SERNFC]) + " / " + AllTrim(aDocOri[nCount][doDTC_NUMNFC]),;
 						AllTrim(aDocOri[nCount][doDTC_NFEID]),cTipoDoc})
 				 		//--Acrescenta o Tipo do Documento no aDoc
@@ -1175,7 +1205,7 @@ nMM     := 0
     nCountObs := 9
 
 	// BOX: OBSERVACOES
-	dbSelectArea("DT6") //-- Nao retirar
+	DBSelectArea("DT6") //-- Nao retirar
 	cDT6Obs := " "
 	If XmlChildEx(oNfe:_INFCTE:_IMP,'_INFADFISCO') == Nil
 		cDT6Obs := " "
@@ -1184,7 +1214,7 @@ nMM     := 0
 	EndIf
 	cObsProp := " "
 	If (XmlChildEx(oNFE:_INFCTE,'_INFCTENORM')) <> Nil .And. ;
-		XmlChildEx(oNfe:_INFCTE:_INFCTENORM:_INFMODAL,'_RODO') != Nil .AND. ;
+		XmlChildEx(oNfe:_INFCTE:_INFCTENORM:_INFMODAL,'_RODO') != Nil .And. ;
 		XmlChildEx(oNfe:_INFCTE:_INFCTENORM:_INFMODAL:_RODO,'_VEIC') != Nil .And. ;
 		XmlChildEx(oNfe:_INFCTE:_INFCTENORM:_INFMODAL:_RODO:_VEIC,'_PROP') != Nil .And. ;
 		XmlChildEx(oNfe:_INFCTE:_INFCTENORM:_INFMODAL:_RODO:_VEIC:_PROP,'_XNOME') != Nil .And.;
@@ -1202,7 +1232,7 @@ nMM     := 0
 		If XmlChildEx(oNfe:_INFCTE:_COMPL, '_OBSCONT') <> Nil
 			If ValType(oNfe:_INFCTE:_COMPL:_OBSCONT) == "A"
 				aObsCont := {}
-				For nX := 1 to len(oNfe:_INFCTE:_COMPL:_OBSCONT)
+				For nX := 1 to Len(oNfe:_INFCTE:_COMPL:_OBSCONT)
 					aAdd(aObsCont, oNfe:_INFCTE:_COMPL:_OBSCONT[nX]:_XTEXTO:TEXT )
 				Next nX
 			ElseIf XmlChildEx(oNfe:_INFCTE:_COMPL:_OBSCONT,'_XTEXTO') == Nil
@@ -1228,64 +1258,64 @@ nMM     := 0
 	Next nCountDTC
 	
 	// Tratamento para aproveitar todo o espaco do quadro observacao
-	if !Empty(cDT6Obs)
+	If !Empty(cDT6Obs)
 	  nCountObs -= 1
 	  cTagObs += 'OBSDT61;' 
 	EndIf
 	
-	if !Empty(cDT6Obs2)
+	If !Empty(cDT6Obs2)
 	  nCountObs -= 1
 	  cTagObs += 'OBSDT62;' 
 	EndIf
 
-	if !Empty(cObsProp)
+	If !Empty(cObsProp)
 	  nCountObs -= 1
 	  cTagObs  += 'OBSPRO1;' 
 	EndIf
 	
-	// If (nCountObs > 0) .AND. (!Empty(cDTCObs2))
+	// If (nCountObs > 0) .And. (!Empty(cDTCObs2))
 	//   nCountObs -= 1
 	//   cTagObs += 'OBSDTC2;' 
 	// EndIf
 	
-	If (nCountObs > 0) .AND. (!Empty(cDT6Obs3))
+	If (nCountObs > 0) .And. (!Empty(cDT6Obs3))
 	  nCountObs -= 1
 	  cTagObs += 'OBSDT63;' 
 	EndIf
 
 	nLinhaObs := 0608
-	if AT('OBSGER1;',cTagObs) > 0
+	If AT('OBSGER1;',cTagObs) > 0
 	  oDacte:Say (nLinhaObs, 0003, cObsStat, oFont10N)
 	  nLinhaObs += 8  
-	EndIF
+	EndIf
 	
-	if AT('OBSDT61;',cTagObs) > 0
+	If AT('OBSDT61;',cTagObs) > 0
 	  oDacte:Say (nLinhaObs, 0003, cDT6Obs, oFont07)
 	  nLinhaObs += 8  
-	EndIF
+	EndIf
 	
-	if AT('OBSDT62;',cTagObs) > 0
+	If AT('OBSDT62;',cTagObs) > 0
 	  oDacte:Say (nLinhaObs, 0003, cDT6Obs2, oFont07)
 	  nLinhaObs += 8  
-	EndIF
+	EndIf
 	
-	if AT('OBSDT63;',cTagObs) > 0
+	If AT('OBSDT63;',cTagObs) > 0
 	  oDacte:Say (nLinhaObs, 0003, cDT6Obs3, oFont07)
 	  nLinhaObs += 8  
-	EndIF
+	EndIf
 	
 	//-- Realiza a impressão da observações gerais
 	For nCountDTC := 1 To Len(aDTCObserv)
 		If AT("OBSDTC" + AllTrim(Str(nCountDTC)) + ";",cTagObs) > 0
 			oDacte:Say (nLinhaObs, 0003, aDTCObserv[nCountDTC], oFont07)
 			nLinhaObs += 8
-		EndIF
+		EndIf
 	Next nCountDTC
 	
-	if AT('OBSPRO1;',cTagObs) > 0
+	If AT('OBSPRO1;',cTagObs) > 0
 	  oDacte:Say (nLinhaObs, 0003, cObsProp, oFont07)
 	  nLinhaObs += 8  
-	End IF		
+	End If		
 
 	// BOX: INFORMACOES ESPECIFICAS DO MODAL
 	nLinIEM := 40
@@ -1321,7 +1351,7 @@ nMM     := 0
 	oDacte:Box(0674+nLinIEM , 0000, 0720+nLinIEM, 0559)  
 	oDacte:Say(0681+nLinIEM , 0090, "USO EXCLUSIVO DO EMISSOR DO CT-E", oFont08N)
 	nSoma := 0
-	For nX := 1 to len(aObsCont)
+	For nX := 1 to Len(aObsCont)
 		If nX > 3
 			Exit
 		EndIf
@@ -1336,7 +1366,7 @@ nMM     := 0
 
 	//-- aDoc > 0, existe mais de uma pagina com Doc a ser impressa.
 	//-- lPerig .T. existem produtos perigosos a serem impressos.
-	If Len(aDoc) > 0 .OR. lPerig
+	If Len(aDoc) > 0 .Or. lPerig
 		//-- Caso de mais de uma pagina, chama a funcao para montar as paginas seguites.
 		TMSR35Cont(oDacte, oNfe, aDoc, aCab[nCont] )
 	EndIf
@@ -1391,16 +1421,16 @@ oDacte:Line(0232, 0000, 0232, 0559)							// Linha: DOCUMENTOS ORIGINARIOS
 oDacte:Line(0232, 0280, 0593, 0280)							// Linha: Separador DOCUMENTOS ORIGINARIOS
 oDacte:Say(	0238, 0003, "Tp.Doc",					oFont08N )
 
-If Len(aDoc) > 0 .AND. Empty(AllTrim(aDoc[1][3]))
+If Len(aDoc) > 0 .And. Empty(AllTrim(aDoc[1][3]))
 	oDacte:Say( 0238, 0033, "CNPJ/CPF Emitente",	oFont08N )
 EndIf
 
 oDacte:Say(	0238, 0163, "Série/Nr.Documento",		oFont08N )
 oDacte:Say(	0238, 0286, "Tp.Doc",					oFont08N )
 
-If Len(aDoc) > 0 .AND. Empty(AllTrim(aDoc[1][3]))
+If Len(aDoc) > 0 .And. Empty(AllTrim(aDoc[1][3]))
 	oDacte:Say( 0238, 0316, "CNPJ/CPF Emitente",	oFont08N )
-Endif
+EndIf
 
 oDacte:Say( 0238, 0448, "Série/Nr.Documento",		oFont08N )
 
@@ -1424,9 +1454,9 @@ For nCount := 1 To Len(aDoc)
 			Else
 				cChaveA     := aDoc[nCount,3]
 				oDacte:Say(nLInic, 0003, "NF-E CHAVE:",											oFont08)
-				oDacte:Say(nLInic, 0073, SUBSTR(cChaveA,1,22),									oFont08)
-				oDacte:Say(nLInic, 0168, SUBSTR(cChaveA,23,3) + " " + SUBSTR(cChaveA,26,9),		oFont08N)
-				oDacte:Say(nLInic, 0223, SUBSTR(cChaveA,35,10),									oFont08)
+				oDacte:Say(nLInic, 0073, SubStr(cChaveA,1,22),									oFont08)
+				oDacte:Say(nLInic, 0168, SubStr(cChaveA,23,3) + " " + SubStr(cChaveA,26,9),		oFont08N)
+				oDacte:Say(nLInic, 0223, SubStr(cChaveA,35,10),									oFont08)
 				cChaveA     := ''
 			EndIf
 			
@@ -1443,15 +1473,15 @@ For nCount := 1 To Len(aDoc)
 			Else
 				cChaveB     := aDoc[nCount,3]
 				oDacte:Say(nLInic, 0286, "NF-E CHAVE:",											oFont08)
-				oDacte:Say(nLInic, 0356, SUBSTR(cChaveB,1,22),									oFont08)
-				oDacte:Say(nLInic, 0451, SUBSTR(cChaveB,23,3) + " " + SUBSTR(cChaveB,26,9),		oFont08N)
-				oDacte:Say(nLInic, 0506, SUBSTR(cChaveB,35,10),									oFont08)
+				oDacte:Say(nLInic, 0356, SubStr(cChaveB,1,22),									oFont08)
+				oDacte:Say(nLInic, 0451, SubStr(cChaveB,23,3) + " " + SubStr(cChaveB,26,9),		oFont08N)
+				oDacte:Say(nLInic, 0506, SubStr(cChaveB,35,10),									oFont08)
 				cChaveB     := ''
 			EndIf
 			nLInic += 0008
 		EndIf		
 	Else
-		AAdd( aDoc1, { aDoc[nCount,1], aDoc[nCount,2], aDoc[nCount,3], aDoc[nCount,4] } )
+		aAdd( aDoc1, { aDoc[nCount,1], aDoc[nCount,2], aDoc[nCount,3], aDoc[nCount,4] } )
 	EndIf
 	
 Next nCount
@@ -1522,7 +1552,7 @@ Local cTpCte	 := ""
 
 If	IsSrvUnix() .And. GetRemoteType() == 1
 	cLogoTp := StrTran(cLogoTp,"/","\")
-Endif
+EndIf
 
 If  !File(cLogoTp)
 	cLogoTp    := cStartPath + "logoCte.bmp"
@@ -1538,15 +1568,15 @@ oDacte:SayBitmap(0088, 0005,cLogoTp,0088,0057 )		//Logo
 If XmlChildEx(oNfe:_INFCTE,'_EMIT') <> Nil
 	oDacte:Say(0100, 0090, AllTrim(oNfe:_INFCTE:_EMIT:_XNOME:Text),oFont07) 	//Nome Comercial
 	oDacte:Say(0110, 0090, 'CNPJ ' + Transform(AllTrim(oNfe:_INFCTE:_EMIT:_CNPJ:TEXT),"@R! NN.NNN.NNN/NNNN-99") +;
-						   ' - IE ' + Iif(XmlChildEx(oNfe:_INFCTE:_EMIT,'_IE'  )==NIL," ",AllTrim(oNfe:_INFCTE:_EMIT:_IE:TEXT)), oFont07)
+						   ' - IE ' + IIf(XmlChildEx(oNfe:_INFCTE:_EMIT,'_IE'  )==NIL," ",AllTrim(oNfe:_INFCTE:_EMIT:_IE:TEXT)), oFont07)
 	oDacte:Say(0120, 0090, AllTrim(oNfe:_INFCTE:_EMIT:_ENDEREMIT:_XLGR:TEXT) + ;
 						   ", "+ AllTrim(oNfe:_INFCTE:_EMIT:_ENDEREMIT:_NRO:TEXT) +;
-						   Iif(XmlChildEx(oNfe:_INFCTE:_EMIT:_ENDEREMIT,'_XCPL')==Nil, " ", " " + AllTrim(oNfe:_INFCTE:_EMIT:_ENDEREMIT:_XCPL:TEXT) + " ") +;
+						   IIf(XmlChildEx(oNfe:_INFCTE:_EMIT:_ENDEREMIT,'_XCPL')==Nil, " ", " " + AllTrim(oNfe:_INFCTE:_EMIT:_ENDEREMIT:_XCPL:TEXT) + " ") +;
 						   AllTrim(oNfe:_INFCTE:_EMIT:_ENDEREMIT:_XBAIRRO:TEXT), oFont07)	//Endereço + Bairro      
 	oDacte:Say(0130, 0090, AllTrim(oNfe:_INFCTE:_EMIT:_ENDEREMIT:_XMUN:TEXT) + '  -  ' +;
 					       AllTrim(oNfe:_INFCTE:_EMIT:_ENDEREMIT:_UF:TEXT) + ;
-						   '  CEP:  ' + Transform(AllTrim(Iif(XmlChildEx(oNfe:_INFCTE:_EMIT:_ENDEREMIT,'_CEP')==Nil," ",AllTrim(oNfe:_INFCTE:_EMIT:_ENDEREMIT:_CEP:TEXT))), "@r 99999-999") ,oFont07)	//Cidade, UF, CEP
-	oDacte:Say(0140, 0090, AllTrim(Iif(XmlChildEx(oNfe:_INFCTE:_EMIT:_ENDEREMIT,'_FONE')==Nil," ",oNfe:_INFCTE:_EMIT:_ENDEREMIT:_FONE:TEXT))	,oFont07)	//Telefone
+						   '  CEP:  ' + Transform(AllTrim(IIf(XmlChildEx(oNfe:_INFCTE:_EMIT:_ENDEREMIT,'_CEP')==Nil," ",AllTrim(oNfe:_INFCTE:_EMIT:_ENDEREMIT:_CEP:TEXT))), "@r 99999-999") ,oFont07)	//Cidade, UF, CEP
+	oDacte:Say(0140, 0090, AllTrim(IIf(XmlChildEx(oNfe:_INFCTE:_EMIT:_ENDEREMIT,'_FONE')==Nil," ",oNfe:_INFCTE:_EMIT:_ENDEREMIT:_FONE:TEXT))	,oFont07)	//Telefone
 EndIf
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ BOX: DACTE                                                             ³
@@ -1609,7 +1639,7 @@ oDacte:Say(0144, 0334, 	SubStr(AllTrim(aCab[3]), 7, 2) + '/'   +;
 						SubStr(AllTrim(aCab[4]), 3, 2) + ":00", oFont07)
 oDacte:Box(0125, 0396, 0148, 0460)
 oDacte:Say(0133, 0397, "Ins SUFRAMA Des"  , oFont07N)	//Insc. SUFRAMA Destinatário
-oDacte:Say(0144, 0397, Iif(XmlChildEx(oNfe:_INFCTE,'_DEST') <> Nil .And. XmlChildEx(oNfe:_INFCTE:_DEST,'_ISUF') <> Nil, oNfe:_INFCTE:_DEST:_ISUF:TEXT, " "), oFont07)
+oDacte:Say(0144, 0397, IIf(XmlChildEx(oNfe:_INFCTE,'_DEST') <> Nil .And. XmlChildEx(oNfe:_INFCTE:_DEST,'_ISUF') <> Nil, oNfe:_INFCTE:_DEST:_ISUF:TEXT, " "), oFont07)
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ BOX: Controle do Fisco                                                 ³
@@ -1800,7 +1830,7 @@ lControl	:= .F.
 		
 	For nCount_3 := 1 To Len( aComp )
 		nCount += 2
-		oDacte:Say(nLInic, nCInic, Substr(AllTrim(aComp[nCount_3][1]),1,14), oFont08)	//Descricao do Componente
+		oDacte:Say(nLInic, nCInic, SubStr(AllTrim(aComp[nCount_3][1]),1,14), oFont08)	//Descricao do Componente
 		nCInic += 0070	//Proxima Coluna
 
 		oDacte:Say(nLInic, nCInic, Transform(Val(AllTrim(aComp[nCount_3][2])),'@E 999,999,999.99'), oFont08)	//Valor do Componente
@@ -1814,14 +1844,14 @@ lControl	:= .F.
 			nCount_2 += 1
 			Do Case
 				Case ( nCount_2 == 1 )
-				cLabel := PadL(Transform(Val(oNFE:_INFCTE:_VPREST:_VTPREST:TEXT),'@E 999,999,999.99'),20)
+				cLabel := PadL(Transform(Val(IIf(XmlChildEx( oNfe:_INFCTE,'_VPREST') == NIL," ",oNFE:_INFCTE:_VPREST:_VTPREST:TEXT)),'@E 999,999,999.99'),20)
 				Case ( nCount_2 == 2 )
 				cLabel := ""
 				Case ( nCount_2 == 3 )
 					oDacte :Line(nLInic - 8, 0420, nLInic - 8, 0559) // Linha: VALOR A RECEBER
 					cLabel := "Valor a Receber"
 				Case ( nCount_2 == 4 )
-					cLabel := PadL(Transform(Val(oNFE:_INFCTE:_VPREST:_VREC:TEXT),'@E 999,999,999.99'),20)
+					cLabel := PadL(Transform(Val(IIf(XmlChildEx( oNfe:_INFCTE,'_VPREST') == NIL," ",oNFE:_INFCTE:_VPREST:_VREC:TEXT )),'@E 999,999,999.99'),20)
 			EndCase
 				
 			oDacte:Say(nLInic + 4 , 0423, cLabel, oFont10N)
@@ -1841,14 +1871,34 @@ lControl	:= .F.
 			nCount_2 += 1
 			Do Case
 				Case ( nCount_2 == 1 )
-					cLabel := PadL(Transform(Val(oNFE:_INFCTE:_VPREST:_VTPREST:TEXT),'@E 999,999,999.99'),20)
+					If XmlChildEx( oNfe:_INFCTE,'_VPREST') == NIL
+						If XmlChildEx( oNfe:_INFCTE,'_TOTAL') == NIL
+							cLabel := PadL(Transform(Val(""),'@E 999,999,999.99'),20)
+						ElseIf XmlChildEx( oNfe:_INFCTE:_TOTAL,'_VTPREST') == NIL
+							cLabel := PadL(Transform(Val(""),'@E 999,999,999.99'),20)
+						Else
+							cLabel := PadL(Transform(Val(oNFE:_INFCTE:_TOTAL:_VTPREST:TEXT),'@E 999,999,999.99'),20)
+						EndIf
+					Else
+						cLabel := PadL(Transform(Val(IIf(XmlChildEx( oNfe:_INFCTE,'_VPREST') == NIL," ",oNFE:_INFCTE:_VPREST:_VTPREST:TEXT )),'@E 999,999,999.99'),20)
+					EndIf
 				Case ( nCount_2 == 2 )
 					cLabel := ""
 				Case ( nCount_2 == 3 )
 					oDacte :Line(nLInic - 8, 0420, nLInic - 8, 0559) // Linha: VALOR A RECEBER
 					cLabel := "Valor a Receber"
 				Case ( nCount_2 == 4 )
-					cLabel := PadL(Transform(Val(oNFE:_INFCTE:_VPREST:_VREC:TEXT),'@E 999,999,999.99'),20)
+					If XmlChildEx( oNfe:_INFCTE,'_VPREST') == NIL
+						If XmlChildEx( oNfe:_INFCTE,'_TOTAL') == NIL
+							cLabel := PadL(Transform(Val(""),'@E 999,999,999.99'),20)
+						ElseIf XmlChildEx( oNfe:_INFCTE:_TOTAL,'_VTREC') == NIL
+							cLabel := PadL(Transform(Val(""),'@E 999,999,999.99'),20)
+						Else
+							cLabel := PadL(Transform(Val(oNFE:_INFCTE:_TOTAL:_VTREC:TEXT),'@E 999,999,999.99'),20)
+						EndIf
+					Else
+						cLabel := PadL(Transform(Val(IIf(XmlChildEx( oNfe:_INFCTE,'_VPREST') == NIL," ",oNFE:_INFCTE:_VPREST:_VREC:TEXT)),'@E 999,999,999.99'),20)
+					EndIf
 			EndCase
 			
 			oDacte:Say(nLInic, 0423, cLabel, oFont10N)
@@ -1891,29 +1941,29 @@ oDacte:Say(nLInic , 0473, "%Red. Bc. Calc."    , oFont08N)   // Label: %Red.Bc.C
 	/*ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	  ³ Tag <ICMS00>                                                    ³
 	  ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ*/
-	If !XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS,'_ICMS00') == NIL .AND. !XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMS00,'_CST') == NIL
+	If !XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS,'_ICMS00') == NIL .And. !XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMS00,'_CST') == NIL
 
 		cAliasD2  := DataSource(oDacte, oNfe, 'DESCRSUBSTTRIBUTARIA' )
 		
-		cSitTriba	:= Iif( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMS00,'_CST') == Nil," ",;
+		cSitTriba	:= IIf( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMS00,'_CST') == Nil," ",;
 		oNfe:_INFCTE:_IMP:_ICMS:_ICMS00:_CST:TEXT + " - " + SubStr(AllTrim((cAliasD2)->X5DESCRI),1,40) )
 
 		cBaseIcms	:= Val(oNFE:_INFCTE:_IMP:_ICMS:_ICMS00:_VBC:TEXT)
 		cAliqIcms	:= Val(oNFE:_INFCTE:_IMP:_ICMS:_ICMS00:_PICMS:TEXT)
 		cValIcms	:= Val(oNFE:_INFCTE:_IMP:_ICMS:_ICMS00:_VICMS:TEXT)
 		
-		(cAliasD2)->(DbCloseArea())
+		(cAliasD2)->(DBCloseArea())
 	/*ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	  ³ Tag <ICMS45>                                                    ³
 	  ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ*/
-	ElseIf !XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS,'_ICMS45') == Nil .AND. !XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMS45,'_CST') == Nil
+	ElseIf !XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS,'_ICMS45') == Nil .And. !XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMS45,'_CST') == Nil
 
 		cAliasD2  := DataSource(oDacte, oNfe, 'DESCRSUBSTTRIBUTARIA' )
 
-		cSitTriba	:= Iif( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMS45,'_CST')==Nil," ",;
+		cSitTriba	:= IIf( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMS45,'_CST')==Nil," ",;
 		oNfe:_INFCTE:_IMP:_ICMS:_ICMS45:_CST:TEXT + " - " + SubStr(AllTrim((cAliasD2)->X5DESCRI),1,40) )
 		
-		(cAliasD2)->(DbCloseArea()) 
+		(cAliasD2)->(DBCloseArea()) 
 	/*ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	  ³ Tag <ICMS90>                                                    ³
 	  ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ*/
@@ -1921,15 +1971,15 @@ oDacte:Say(nLInic , 0473, "%Red. Bc. Calc."    , oFont08N)   // Label: %Red.Bc.C
 
 		cAliasD2  := DataSource(oDacte, oNfe, 'DESCRSUBSTTRIBUTARIA' )
 
-		cSitTriba	:= Iif( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMS90,'_CST') == Nil," ",;
+		cSitTriba	:= IIf( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMS90,'_CST') == Nil," ",;
 		oNfe:_INFCTE:_IMP:_ICMS:_ICMS90:_CST:TEXT + " - " + SubStr(AllTrim((cAliasD2)->X5DESCRI),1,40) )
 
 		cBaseIcms	:= Val(oNFE:_INFCTE:_IMP:_ICMS:_ICMS90:_VBC:TEXT)
 	   	cAliqIcms	:= Val(oNFE:_INFCTE:_IMP:_ICMS:_ICMS90:_PICMS:TEXT)
 		cValIcms	:= Val(oNFE:_INFCTE:_IMP:_ICMS:_ICMS90:_VICMS:TEXT)
-		cRedBcCalc := Val(Iif( XmlChildEx(oNFE:_INFCTE:_IMP:_ICMS:_ICMS90,'_pRedBC')==Nil," ",(oNFE:_INFCTE:_IMP:_ICMS:_ICMS90:_pRedBC:TEXT) ))
+		cRedBcCalc := Val(IIf( XmlChildEx(oNFE:_INFCTE:_IMP:_ICMS:_ICMS90,'_pRedBC')==Nil," ",(oNFE:_INFCTE:_IMP:_ICMS:_ICMS90:_pRedBC:TEXT) ))
 		
-		(cAliasD2)->(DbCloseArea())
+		(cAliasD2)->(DBCloseArea())
 	/*ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	  ³ Tag <ICMS20>                                                    ³
 	  ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ*/
@@ -1937,7 +1987,7 @@ oDacte:Say(nLInic , 0473, "%Red. Bc. Calc."    , oFont08N)   // Label: %Red.Bc.C
 
 		cAliasD2  := DataSource(oDacte, oNfe, 'DESCRSUBSTTRIBUTARIA' )
 
-		cSitTriba	:= Iif( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMS20,'_CST')==Nil," ",;
+		cSitTriba	:= IIf( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMS20,'_CST')==Nil," ",;
 		oNfe:_INFCTE:_IMP:_ICMS:_ICMS20:_CST:TEXT + " - " + SubStr(AllTrim((cAliasD2)->X5DESCRI),1,40) )
 
 		cBaseIcms	:= Val(oNFE:_INFCTE:_IMP:_ICMS:_ICMS20:_VBC:TEXT)
@@ -1945,7 +1995,7 @@ oDacte:Say(nLInic , 0473, "%Red. Bc. Calc."    , oFont08N)   // Label: %Red.Bc.C
 		cValIcms	:= Val(oNFE:_INFCTE:_IMP:_ICMS:_ICMS20:_VICMS:TEXT)
 		cRedBcCalc := Val(oNFE:_INFCTE:_IMP:_ICMS:_ICMS20:_pRedBC:TEXT)
 		
-		(cAliasD2)->(DbCloseArea())
+		(cAliasD2)->(DBCloseArea())
 	/*ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	  ³ Tag <ICMS60>                                                    ³
 	  ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ*/
@@ -1953,31 +2003,31 @@ oDacte:Say(nLInic , 0473, "%Red. Bc. Calc."    , oFont08N)   // Label: %Red.Bc.C
 
 		cAliasD2  := DataSource(oDacte, oNfe, 'DESCRSUBSTTRIBUTARIA' )
 
-		cSitTriba	:= Iif( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMS60,'_CST') == "U"," ",;
+		cSitTriba	:= IIf( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMS60,'_CST') == "U"," ",;
 		oNfe:_INFCTE:_IMP:_ICMS:_ICMS60:_CST:TEXT + " - " + SubStr(AllTrim((cAliasD2)->X5DESCRI),1,40) )
 
 		cBaseIcms	:= Val(oNFE:_INFCTE:_IMP:_ICMS:_ICMS60:_VBCSTRET:TEXT)
 		cValIcms	:= Val(oNFE:_INFCTE:_IMP:_ICMS:_ICMS60:_VICMSSTRET:TEXT)
 		cAliqIcms	:= Val(oNFE:_INFCTE:_IMP:_ICMS:_ICMS60:_PICMSSTRET:TEXT)
 		
-		(cAliasD2)->(DbCloseArea())
+		(cAliasD2)->(DBCloseArea())
 	ElseIf !XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS,'_ICMSOUTRAUF') == NIL
 
 		cAliasD2  := DataSource(oDacte, oNfe, 'DESCRSUBSTTRIBUTARIA' )
 
-		cSitTriba	:= Iif( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMSOUTRAUF,'_CST') == Nil," ",;
+		cSitTriba	:= IIf( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMSOUTRAUF,'_CST') == Nil," ",;
 		oNfe:_INFCTE:_IMP:_ICMS:_ICMSOUTRAUF:_CST:TEXT + " - " + SubStr(AllTrim((cAliasD2)->X5DESCRI),1,40) )
 
 	   	cAliqIcms	:= Val(oNFE:_INFCTE:_IMP:_ICMS:_ICMSOUTRAUF:_PICMSOUTRAUF:TEXT)
 		cBaseIcms	:= Val(oNFE:_INFCTE:_IMP:_ICMS:_ICMSOUTRAUF:_VBCOUTRAUF:TEXT)
 		cValIcms   := Val(oNFE:_INFCTE:_IMP:_ICMS:_ICMSOUTRAUF:_VICMSOUTRAUF:TEXT)
 		
-		(cAliasD2)->(DbCloseArea())
+		(cAliasD2)->(DBCloseArea())
 	/*ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	  ³ Tag <ICMSSN> Simples Nacional                                   ³
 	  ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ*/	
 	ElseIf !XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS,'_ICMSSN') == Nil
-		cSitTriba	:= Iif( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMSSN,'_INDSN')==Nil," "," Simples Nacional ")		
+		cSitTriba	:= IIf( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMSSN,'_INDSN')==Nil," "," Simples Nacional ")		
 	EndIf
 
 nLInic += 0008
@@ -2066,19 +2116,21 @@ Local i			:= 0		// Auxiliar no Incremento da Estrutura de Laco
 Local aAuxClone	:= { }		// Copia da propriedade Comp do Objeto passado por parametro
 Local aAuxComp	:= { }		// Auxiliar no processamento de aAuxClone
 Local aResult	:= { }		// Retorno da Funcao
- If Valtype(XmlChildEx(oNfe:_INFCTE:_VPREST,"_COMP")) <> "U"
-	If	ValType(oNfe:_INFCTE:_VPREST:_COMP) == "A"
-		aAuxClone := ACLONE( oNfe:_INFCTE:_VPREST:_COMP )
-		For i := 1 To Len( aAuxClone )
-			AADD( aResult, {AllTrim(aAuxClone[ i ]:_XNOME:TEXT), AllTrim(aAuxClone[ i ]:_VCOMP:TEXT)} )
-		Next i
-	ElseIf	ValType(oNfe:_INFCTE:_VPREST:_COMP) == "O"
-		AADD( aAuxComp, AllTrim(oNfe:_INFCTE:_VPREST:_COMP:_XNOME:TEXT) )
-		AADD( aAuxComp, AllTrim(oNfe:_INFCTE:_VPREST:_COMP:_VCOMP:TEXT) )
-		AADD( aResult, aAuxComp )
-		aAuxComp := {}
+If XmlChildEx( oNfe:_INFCTE,'_VPREST') <> NIL
+	If ValType(XmlChildEx(oNfe:_INFCTE:_VPREST,"_COMP")) <> "U"
+		If	ValType(oNfe:_INFCTE:_VPREST:_COMP) == "A"
+			aAuxClone := ACLONE( oNfe:_INFCTE:_VPREST:_COMP )
+			For i := 1 To Len( aAuxClone )
+				aAdd( aResult, {AllTrim(aAuxClone[ i ]:_XNOME:TEXT), AllTrim(aAuxClone[ i ]:_VCOMP:TEXT)} )
+			Next i
+		ElseIf	ValType(oNfe:_INFCTE:_VPREST:_COMP) == "O"
+			aAdd( aAuxComp, AllTrim(oNfe:_INFCTE:_VPREST:_COMP:_XNOME:TEXT) )
+			aAdd( aAuxComp, AllTrim(oNfe:_INFCTE:_VPREST:_COMP:_VCOMP:TEXT) )
+			aAdd( aResult, aAuxComp )
+			aAuxComp := {}
+		EndIf
 	EndIf
- EndIf
+EndIf
 Return ( aResult )
 
 
@@ -2132,22 +2184,22 @@ If cSource == 'DESCRSUBSTTRIBUTARIA'
 	cQuery += "   AND SX5.X5_TABELA ='S2'"
 
 	If !XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS,'_ICMS00')==Nil
-		cSitTriba := Iif( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMS00,'_CST')==Nil," ",;
+		cSitTriba := IIf( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMS00,'_CST')==Nil," ",;
 		oNfe:_INFCTE:_IMP:_ICMS:_ICMS00:_CST:TEXT)
 	ElseIf !XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS,'_ICMS45')==Nil
-		cSitTriba := Iif( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMS45,'_CST')==Nil," ",;
+		cSitTriba := IIf( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMS45,'_CST')==Nil," ",;
 		oNfe:_INFCTE:_IMP:_ICMS:_ICMS45:_CST:TEXT)
 	ElseIf !XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS,'_ICMS90')==Nil
-		cSitTriba := Iif( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMS90,'_CST')==Nil," ",;
+		cSitTriba := IIf( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMS90,'_CST')==Nil," ",;
 		oNfe:_INFCTE:_IMP:_ICMS:_ICMS90:_CST:TEXT)
 	ElseIf !XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS,'_ICMS20')==Nil
-		cSitTriba := Iif( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMS20,'_CST')==Nil," ",;
+		cSitTriba := IIf( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMS20,'_CST')==Nil," ",;
 		oNfe:_INFCTE:_IMP:_ICMS:_ICMS20:_CST:TEXT)
 	ElseIf !XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS,'_ICMS60')==Nil
-		cSitTriba := Iif( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMS60,'_CST')==Nil," ",;
+		cSitTriba := IIf( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMS60,'_CST')==Nil," ",;
 		oNfe:_INFCTE:_IMP:_ICMS:_ICMS60:_CST:TEXT)
 	ElseIf !XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS,'_ICMSOUTRAUF')==Nil
-		cSitTriba := Iif( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMSOUTRAUF,'_CST')==Nil," ",;
+		cSitTriba := IIf( XmlChildEx(oNfe:_INFCTE:_IMP:_ICMS:_ICMSOUTRAUF,'_CST')==Nil," ",;
 		oNfe:_INFCTE:_IMP:_ICMS:_ICMSOUTRAUF:_CST:TEXT)
 	EndIf
 

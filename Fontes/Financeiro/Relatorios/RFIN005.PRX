@@ -2,24 +2,19 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
---------------------------------------------------------------------------------------------------------------------------------
-Josué Danich  | 03/06/2019 | Chamado 29493 - Incluido código de segurança para evitar erro na abertura da TRB. 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Igor Melgaço  | 12/03/2024 | Chamado 44651 - Tratamento para compensação de titulos entre filiais.
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 12/09/2024 | Chamado 48465. Removendo warning de compilação.
+Josué Danich  |03/06/2019| Chamado 29493. Incluido código de segurança para evitar erro na abertura da TRB. 
+Igor Melgaço  |12/03/2024| Chamado 44651. Tratamento para compensação de titulos entre filiais.
+Lucas Borges  |12/09/2024| Chamado 48465. Removendo warning de compilação.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE 'Protheus.ch'
-#INCLUDE "FINR190.CH"
+#Include "TOTVS.ch"
+#Include "FINR190.CH"
 
 Static lFWCodFil := .T.
-STATIC lUnidNeg	:= Iif( lFWCodFil, FWSizeFilial() > 2, .F. )	// Indica se usa Gestao Corporativa
+Static lUnidNeg	:= IIf( lFWCodFil, FWSizeFilial() > 2, .F. )	// Indica se usa Gestao Corporativa
 Static _oFINR190
 
 /*
@@ -27,14 +22,11 @@ Static _oFINR190
 Programa----------: RFIN005
 Autor-------------: Jeovane
 Data da Criacao---: 05/08/2009
-===============================================================================================================================
 Descrição---------: Relação das baixas baseado no FINR190 do padrão, manter código no padrão da TOTVS para facilitar futuras
 						compatibilizações de novas versões.
 						
 						Código personalizado deve ser incluído entre comentários com a palavra ITALAC para facilitar identificação
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -67,7 +59,7 @@ Return
 ±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
 ±±³Programa  ³ReportDef ³ Autor ³Nereu Humberto Junior  ³ Data ³16.05.2006³±±
 ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Descri‡…o ³A funcao estatica ReportDef devera ser criada para todos os ³±±
+±±³Descri‡…o ³Staticao estatica ReportDef devera ser criada para todos os ³±±
 ±±³          ³relatorios que poderao ser agendados pelo usuario.          ³±±
 ±±³          ³                                                            ³±±
 ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
@@ -117,31 +109,31 @@ oBaixas := TRSection():New(oReport,STR0072,{"SE5","SED"},{STR0001,STR0002,STR000
 
 oBaixas:SetTotalInLine(.F.)
 
-TRCell():New(oBaixas,"E5_PREFIXO"	,, STR0049,,TamSx3("E5_PREFIXO")[1], .F.)	//"Prf"
+TRCell():New(oBaixas,"E5_PREFIXO"	,, STR0049,,TamSX3("E5_PREFIXO")[1], .F.)	//"Prf"
 
 If "PTG/MEX" $ cPaisLoc
-	TRCell():New(oBaixas,"E5_NUMERO" 	,, STR0050,,TamSx3("E5_NUMERO")[1]+18,.F.)	//"Numero"
+	TRCell():New(oBaixas,"E5_NUMERO" 	,, STR0050,,TamSX3("E5_NUMERO")[1]+18,.F.)	//"Numero"
 Else
-	TRCell():New(oBaixas,"E5_NUMERO" 	,, STR0050,,TamSx3("E5_NUMERO")[1]+2,.F.)	//"Numero"
-Endif
+	TRCell():New(oBaixas,"E5_NUMERO" 	,, STR0050,,TamSX3("E5_NUMERO")[1]+2,.F.)	//"Numero"
+EndIf
 
 If cPaisLoc == "BRA"
 	nPlus := 5
 Else
 	nPlus := 3
-Endif
-TRCell():New(oBaixas,"E5_PARCELA"	,, STR0051,,TamSx3("E5_PARCELA")[1]		, .F.							) //"Prc"
-TRCell():New(oBaixas,"E5_TIPODOC"	,, STR0052,,TamSx3("E5_TIPODOC")[1]		, .F.							) //"TP"
-TRCell():New(oBaixas,"E5_CLIFOR"	,, STR0053,,TamSx3("E5_CLIFOR")[1]		, .F.							) //"Cli/For"
-TRCell():New(oBaixas,"NOME CLI/FOR"	,, STR0054,,15							, .F.							) //"Nome Cli/For"
+EndIf
+TRCell():New(oBaixas,"E5_PARCELA"	,, STR0051,,TamSX3("E5_PARCELA")[1]		, .F.							) //"Prc"
+TRCell():New(oBaixas,"E5_TIPODOC"	,, STR0052,,TamSX3("E5_TIPODOC")[1]		, .F.							) //"TP"
+TRCell():New(oBaixas,"E5_CLIFOR"	,, STR0053,,TamSX3("E5_CLIFOR")[1]		, .F.							) //"Cli/For"
+TRCell():New(oBaixas,"NOME CLI/For"	,, STR0054,,15							, .F.							) //"Nome Cli/For"
 TRCell():New(oBaixas,"E5_NATUREZ"	,, STR0055,,11							, .F.							) //"Natureza"
 
 //ITALAC - incluida coluna com campo VENCTO
 	TRCell():New(oBaixas,"VENCTO"		,, "Vencto ori",,10, .F.)	 
 
-TRCell():New(oBaixas,"E5_VENCTO"	,, STR0056,,TamSx3("E5_VENCTO")[1]		, .F.							) //"Vencto"
-TRCell():New(oBaixas,"E5_HISTOR"	,, STR0057,,TamSx3("E5_HISTOR")[1]/2+1	, .F.,,,.T.						) //"Historico"
-TRCell():New(oBaixas,"E5_DATA"		,, STR0058,,TamSx3("E5_DATA")[1] + 1	, .F.							) //"Dt Baixa"
+TRCell():New(oBaixas,"E5_VENCTO"	,, STR0056,,TamSX3("E5_VENCTO")[1]		, .F.							) //"Vencto"
+TRCell():New(oBaixas,"E5_HISTOR"	,, STR0057,,TamSX3("E5_HISTOR")[1]/2+1	, .F.,,,.T.						) //"Historico"
+TRCell():New(oBaixas,"E5_DATA"		,, STR0058,,TamSX3("E5_DATA")[1] + 1	, .F.							) //"Dt Baixa"
 TRCell():New(oBaixas,"E5_VALOR"		,, STR0059,,TamSX3("E5_VALOR")[1]+nPlus	,/*[lPixel]*/,,"RIGHT",,"RIGHT"	) //"Valor Original"
 TRCell():New(oBaixas,"JUROS/MULTA"	,, STR0060,,TamSX3("E5_VLJUROS")[1]		,/*[lPixel]*/,,"RIGHT",,"RIGHT"	) //"Jur/Multa"
 TRCell():New(oBaixas,"CORRECAO"		,, STR0061,,TamSX3("E5_VLCORRE")[1]		,/*[lPixel]*/,,"RIGHT",,"RIGHT"	) //"Correcao"
@@ -167,7 +159,7 @@ Return(oReport)
 ±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
 ±±³Programa  ³ReportPrin³ Autor ³Nereu Humberto Junior  ³ Data ³16.05.2006³±±
 ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Descri‡…o ³A funcao estatica ReportDef devera ser criada para todos os ³±±
+±±³Descri‡…o ³Staticao estatica ReportDef devera ser criada para todos os ³±±
 ±±³          ³relatorios que poderao ser agendados pelo usuario.          ³±±
 ±±³          ³                                                            ³±±
 ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
@@ -187,14 +179,14 @@ Static Function ReportPrint(oReport)
 Local oBaixas		:= oReport:Section(1)
 Local nOrdem		:= oReport:Section(1):GetOrder() 
 Local cTitulo		:= "" 
-Local cSuf			:= LTrim(Str(mv_par12))
+Local cSuf			:= LTrim(Str(MV_PAR12))
 Local cMoeda		:= GetMv("MV_MOEDA"+cSuf)     
 Local oBreak1		:= Nil 
 Local oBreak2		:= Nil
-Local nDecs			:= GetMv("MV_CENT"+(IIF(mv_par12 > 1 , STR(mv_par12,1),""))) 
+Local nDecs			:= GetMv("MV_CENT"+(IIf(MV_PAR12 > 1 , Str(MV_PAR12,1),""))) 
 Local aRelat		:= {}	   
 Local nI			:= 1           
-Local lVarFil		:= (mv_par17 == 1 .and. SM0->(Reccount()) > 1	) // Cons filiais abaixo
+Local lVarFil		:= (MV_PAR17 == 1 .And. SM0->(RecCount()) > 1	) // Cons filiais abaixo
 Local aTotais		:= {}
 Local cTotText		:= ""    
 Local nGerOrig		:= 0
@@ -211,12 +203,12 @@ If MV_PAR40 == 1
 	If Empty(aSelFil)
 	aSelFil := AdmGetFil(.F.,.F.,"SE5")
 		If Empty(aSelFil)
-		   Aadd(aSelFil,cFilAnt)
-		Endif
-	Endif
+		   aAdd(aSelFil,cFilAnt)
+		EndIf
+	EndIf
 Else
-	Aadd(aSelFil,cFilAnt)
-Endif
+	aAdd(aSelFil,cFilAnt)
+EndIf
 
 lVarFil := Len(aSelFil) > 1
 
@@ -225,11 +217,11 @@ lVarFil := Len(aSelFil) > 1
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Defini‡„o dos cabe‡alhos       ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-If mv_par11 == 1
+If MV_PAR11 == 1
 	cTitulo := STR0011 + cMoeda  //"Relacao dos Titulos Recebidos em "
-Elseif mv_par11 == 2
+ElseIf MV_PAR11 == 2
 	cTitulo := STR0013 + cMoeda  //"Relacao dos Titulos Pagos em "
-Elseif mv_par11 == 3
+ElseIf MV_PAR11 == 3
 	cTitulo := "Relacao dos titulos pagos e recebidos em "
 EndIf
 
@@ -264,7 +256,7 @@ EndIf
 aRelat := FA190ImpR4(nOrdem,@aTotais,oReport,@nGerOrig,@lMultiNat)
 
 If Len(aRelat) = 0
-	Return Nil
+	Return
 EndIf
 
 Do Case
@@ -294,18 +286,18 @@ OtherWise						// Data de Crédito (dtdispo)
 	cTitulo += STR0015  //" por data de pagamento"
 EndCase
 
-If !Empty(mv_par28) .And. ! ";" $ mv_par28 .And. Len(AllTrim(mv_par28)) > 3
+If !Empty(MV_PAR28) .And. ! ";" $ MV_PAR28 .And. Len(AllTrim(MV_PAR28)) > 3
 	ApMsgAlert(STR0073)//"Separe os tipos a imprimir (pergunta 28) por um ; (ponto e virgula) a cada 3 caracteres"
 	Return(Nil)
-Endif	
-If !Empty(mv_par29) .And. ! ";" $ mv_par29 .And. Len(AllTrim(mv_par29)) > 3
+EndIf	
+If !Empty(MV_PAR29) .And. ! ";" $ MV_PAR29 .And. Len(AllTrim(MV_PAR29)) > 3
 	ApMsgAlert(STR0074)//"Separe os tipos que não deseja imprimir (pergunta 29) por um ; (ponto e virgula) a cada 3 caracteres"
 	Return(Nil)
-Endif	
+EndIf	
 
 //Validacao no array para que seus tipos nao gerem error log
 //no exec block em TrPosition()
-aEval(aRelat, {|e| Iif( e[5] == Nil, e[5] := "", .T. )} )
+aEval(aRelat, {|e| IIf( e[5] == Nil, e[5] := "", .T. )} )
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³Metodo TrPosition()                                                     ³
 //³                                                                        ³
@@ -325,7 +317,7 @@ TRPosition():New(oBaixas,"SED",1,{|| xFilial("SED")+SE5->E5_NATUREZ })
 // Bloco comentado pela chave do SE5 utilizada não *
 // esta completa. Este sendo utilizado o nRecSe5.  *
 //**************************************************
-//If !((MV_MULNATR .and. mv_par11 = 1 .and. mv_par38 = 2 .and. !mv_par39 == 2) .or. (MV_MULNATP .and. mv_par11 = 2 .and. mv_par38 = 2 .and. !mv_par39 == 2) )
+//If !((MV_MULNATR .And. MV_PAR11 = 1 .And. MV_PAR38 = 2 .And. !MV_PAR39 == 2) .Or. (MV_MULNATP .And. MV_PAR11 = 2 .And. MV_PAR38 = 2 .And. !MV_PAR39 == 2) )
 //	TRPosition():New(oBaixas,"SE5",7,{|| xFilial("SE5") + aRelat[nI,01]+ aRelat[nI,02]+ aRelat[nI,03]+ aRelat[nI,04]+ aRelat[nI,05]})
 //EndIf	
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -336,7 +328,7 @@ oBaixas:Cell("E5_NUMERO")	:SetBlock( { || aRelat[nI,02] } )
 oBaixas:Cell("E5_PARCELA")	:SetBlock( { || aRelat[nI,03] } )
 oBaixas:Cell("E5_TIPODOC")	:SetBlock( { || aRelat[nI,04] } )
 oBaixas:Cell("E5_CLIFOR")	:SetBlock( { || aRelat[nI,05] } )
-oBaixas:Cell("NOME CLI/FOR"):SetBlock( { || aRelat[nI,06] } )
+oBaixas:Cell("NOME CLI/For"):SetBlock( { || aRelat[nI,06] } )
 oBaixas:Cell("E5_NATUREZ")	:SetBlock( { || aRelat[nI,07] } )
 oBaixas:Cell("E5_VENCTO")	:SetBlock( { || aRelat[nI,08] } )
 oBaixas:Cell("E5_HISTOR")	:SetBlock( { || aRelat[nI,09] } )
@@ -362,10 +354,10 @@ oBaixas:Cell("E5_ORIG")		:SetBlock( { || aRelat[nI,21] } )
 
 oBaixas:SetHeaderPage()    
 
-	If (nOrdem == 1 .or. nOrdem == 6 .or. nOrdem == 8)
+	If (nOrdem == 1 .Or. nOrdem == 6 .Or. nOrdem == 8)
 		oBreak1 := TRBreak():New( oBaixas, { || aRelat[nI][22]+DToS(aRelat[nI][nCond1]) }, STR0071) //"Sub Total"
 		oBreak1:SetTotalText({ || cTotText })	 //"Sub Total"             
-	Else //nOrdem == 2 .or. nOrdem == 3 .or. nOrdem == 4 .or. nOrdem == 5 .or. nOrdem == 7
+	Else //nOrdem == 2 .Or. nOrdem == 3 .Or. nOrdem == 4 .Or. nOrdem == 5 .Or. nOrdem == 7
 		oBreak1 := TRBreak():New( oBaixas, { || aRelat[nI][22]+aRelat[nI][nCond1] }, STR0071) //"Sub Total"
 		oBreak1:SetTotalText({ || cTotText })	 //"Sub Total"
 	EndIf	
@@ -441,13 +433,13 @@ While nI <= Len(aRelat)
 
 	If lMultiNat
 		If !Empty(aRelat[nI,29])
-		  	SE5->(dbGoto(aRelat[nI,29]))
+		  	SE5->(DBGoTo(aRelat[nI,29]))
 		EndIf
 	Else
 		If !Empty(aRelat[nI,28])
-		  	SE5->(dbGoto(aRelat[nI,28]))
+		  	SE5->(DBGoTo(aRelat[nI,28]))
 		EndIf
-	Endif
+	EndIf
         
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³Posiciona na Filial do Movimento a ser impresso³
@@ -456,16 +448,16 @@ While nI <= Len(aRelat)
   	oReport:IncMeter()
   	oBaixas:PrintLine()
 
-	If (nOrdem == 1 .or. nOrdem == 6 .or. nOrdem == 8)
+	If (nOrdem == 1 .Or. nOrdem == 6 .Or. nOrdem == 8)
 		cTotText := STR0071 + " : " + DToC(aRelat[nI][nCond1]) //"Sub Total"
-	Else //nOrdem == 2 .or. nOrdem == 3 .or. nOrdem == 4 .or. nOrdem == 5 .or. nOrdem == 7
+	Else //nOrdem == 2 .Or. nOrdem == 3 .Or. nOrdem == 4 .Or. nOrdem == 5 .Or. nOrdem == 7
 		cTotText := STR0071 + " : " + aRelat[nI][nCond1]       //"Sub Total"
 		If nOrdem == 2 //Banco
-			SA6->(DbSetOrder(1))
+			SA6->(DBSetOrder(1))
 			SA6->(MsSeek(xFilial("SA6")+aRelat[nI][nCond1] + aRelat[nI][30]+aRelat[nI][31] ))
 			cTotText += " " + TRIM(SA6->A6_NOME)
 		ElseIf nOrdem == 3 //Natureza
-			SED->(DbSetOrder(1))
+			SED->(DBSetOrder(1))
 			SED->(MsSeek(xFilial("SED")+ StrTran (aRelat[nI][nCond1],".","")))
 			cTotText += SED->ED_DESCRIC
 		EndIf
@@ -478,8 +470,8 @@ While nI <= Len(aRelat)
 	nI++
 
 EndDo
-SE5->(dbGoto(nRegSE5))
-SM0->(dbGoTo(nRegSM0))
+SE5->(DBGoTo(nRegSE5))
+SM0->(DBGoTo(nRegSM0))
 cFilAnt := IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL )
 
 //nao retirar "nI--" pois eh utilizado na impressao do ultimo TRFunction
@@ -488,7 +480,7 @@ nI--
 oBaixas:Finish()
 PRINTTOT(aTotais,oReport,.F.,3,@nJ)
 
-Return NIL
+Return
 
 
 /*/
@@ -502,13 +494,13 @@ Return NIL
 ±±³Sintaxe   ³ PRINTTOT(aTotal,oReport,lFil)                              ³±±
 ±±³          ³ aTotais -> array a ser utilizado para impressao            ³±±
 ±±³          ³ oReport -> objeto TReport                                  ³±±
-±±³          ³ lFil -> .F. se for total da secao ou .T. se for da filial  ³±±
+±±³          ³ lFil -> .F. se For total da secao ou .T. se For da filial  ³±±
 ±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 /*/
 Static Function PRINTTOT(aTotais,oReport,lFil,nBreak,nJ)
-Local nDecs := GetMv("MV_CENT"+(If(mv_par12 > 1 , STR(mv_par12,1),""))) 
+Local nDecs := GetMv("MV_CENT"+(If(MV_PAR12 > 1 , Str(MV_PAR12,1),""))) 
 Local cAnt := ""
 Local nAscan := 0 
 Local cGeral := OemToAnsi(STR0075)
@@ -520,7 +512,7 @@ If lFil == .T.
 	oReport:SkipLine(2)
 EndIf
 
-nAscan := Ascan(aTotais , {|e| Alltrim(e[1]) ==  cGeral } )
+nAscan := aScan(aTotais , {|e| AllTrim(e[1]) ==  cGeral } )
 
 If nBreak <> 3
 	If Len(aTotais)>0
@@ -531,20 +523,20 @@ If nBreak <> 3
 		EndIf
 	EndIf
 
-	While (( Iif(( ValType(cAnt) <> ValType(aTotais[nJ][1]) .And. Len(aTotais[nJ] ) == 3 ), "" , cAnt ) ) == ( Iif((( MV_MULNATP .Or. MV_MULNATR) .And. !(aTotais[nJ][1] $ "/") .And. Len(aTotais[nJ]) > 3 ), aTotais[nJ][4], aTotais[nJ][1] ) ) .and. (nJ < nAscan) )
+	While (( IIf(( ValType(cAnt) <> ValType(aTotais[nJ][1]) .And. Len(aTotais[nJ] ) == 3 ), "" , cAnt ) ) == ( IIf((( MV_MULNATP .Or. MV_MULNATR) .And. !(aTotais[nJ][1] $ "/") .And. Len(aTotais[nJ]) > 3 ), aTotais[nJ][4], aTotais[nJ][1] ) ) .And. (nJ < nAscan) )
         nTamAnt := Len(aTotais[nJ] )
 		oReport:PrintText( PadR(aTotais[nJ][2],12," ") + Transform(aTotais[nJ][3], tm(aTotais[nJ][3],20,nDecs) ) )
 		nJ++
 		If nTamAnt < Len(aTotais[nJ]) 
 		// significa quebra de filial. Antes, com print de total de filial, o tamanho é 3, com este proximo total de outra filial, tamanho será 4
 			Exit
-		Endif
+		EndIf
 	EndDo
 Else    
 	oReport:PrintText( '' )	
 	While nAscan > 0 
 		oReport:PrintText( PadR(aTotais[nAscan][2],12," ") + Transform(aTotais[nAscan][3], tm(aTotais[nAscan][3],20,nDecs) ) )
-		nAscan := If( (nAscan+1)<=Len(aTotais) .and. aTotais[nAscan+1][1] == cGeral,nAscan+1,0)
+		nAscan := If( (nAscan+1)<=Len(aTotais) .And. aTotais[nAscan+1][1] == cGeral,nAscan+1,0)
 	EndDo
 EndIf
 
@@ -594,45 +586,45 @@ pergunte("RFIN005",.F.)
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Variaveis utilizadas para parametros                     ³
-//³ mv_par01            // da data da baixa                  ³
-//³ mv_par02            // at‚ a data da baixa               ³
-//³ mv_par03            // do banco                          ³
-//³ mv_par04            // at‚ o banco                       ³
-//³ mv_par05            // da natureza                       ³
-//³ mv_par06            // at‚ a natureza                    ³
-//³ mv_par07            // do c¢digo                         ³
-//³ mv_par08            // at‚ o c¢digo                      ³
-//³ mv_par09            // da data de digita‡„o              ³
-//³ mv_par10            // ate a data de digita‡„o           ³
-//³ mv_par11            // Tipo de Carteira (R/P)            ³
-//³ mv_par12            // Moeda                             ³
-//³ mv_par13            // Hist¢rico: Baixa ou Emiss„o       ³
-//³ mv_par14            // Imprime Baixas Normais / Todas    ³
-//³ mv_par15            // Situacao                          ³
-//³ mv_par16            // Cons Mov Fin                      ³
-//³ mv_par17            // Cons filiais abaixo               ³
-//³ mv_par18            // da filial                         ³
-//³ mv_par19            // ate a filial                      ³
-//³ mv_par20            // Do Lote                           ³
-//³ mv_par21            // Ate o Lote                        ³
-//³ mv_par22            // da loja                           ³
-//³ mv_par23            // Ate a loja                        ³ 
-//³ mv_par24            // NCC Compensados                   ³
-//³ mv_par25            // Outras Moedas                     ³ 
-//³ mv_par26            // do prefixo                        ³
-//³ mv_par27            // at‚ o prefixo                     ³
-//³ mv_par28            // Imprimir os Tipos                 ³
-//³ mv_par29            // Nao Imprimir Tipos			       ³
-//³ mv_par30            // Imprime nome (Normal ou reduzido) ³
-//³ mv_par31            // da data da vencto. do tit         ³
-//³ mv_par32            // at‚ a data de vencto do tit.      ³
-//³ mv_par33            // da filial origem                  ³
-//³ mv_par34            // ate filial origem                 ³
-//³ mv_par35            // Impr.Incl. Adiantamentos ?Sim/Nao ³
-//³ mv_par36            // Imprime Titulos em Carteira ?     |
-//³ mv_par37            // Imp. mov. cheque aglutinado?Cheque/Baixa/Ambos³
-//³ mv_par38            // Cons. Nat. Aglutinadas? Sim/Nao   |
-//| mv_par39            // Filtrar Natureza Por?             |
+//³ MV_PAR01            // da data da baixa                  ³
+//³ MV_PAR02            // at‚ a data da baixa               ³
+//³ MV_PAR03            // do banco                          ³
+//³ MV_PAR04            // at‚ o banco                       ³
+//³ MV_PAR05            // da natureza                       ³
+//³ MV_PAR06            // at‚ a natureza                    ³
+//³ MV_PAR07            // do c¢digo                         ³
+//³ MV_PAR08            // at‚ o c¢digo                      ³
+//³ MV_PAR09            // da data de digita‡„o              ³
+//³ MV_PAR10            // ate a data de digita‡„o           ³
+//³ MV_PAR11            // Tipo de Carteira (R/P)            ³
+//³ MV_PAR12            // Moeda                             ³
+//³ MV_PAR13            // Hist¢rico: Baixa ou Emiss„o       ³
+//³ MV_PAR14            // Imprime Baixas Normais / Todas    ³
+//³ MV_PAR15            // Situacao                          ³
+//³ MV_PAR16            // Cons Mov Fin                      ³
+//³ MV_PAR17            // Cons filiais abaixo               ³
+//³ MV_PAR18            // da filial                         ³
+//³ MV_PAR19            // ate a filial                      ³
+//³ MV_PAR20            // Do Lote                           ³
+//³ MV_PAR21            // Ate o Lote                        ³
+//³ MV_PAR22            // da loja                           ³
+//³ MV_PAR23            // Ate a loja                        ³ 
+//³ MV_PAR24            // NCC Compensados                   ³
+//³ MV_PAR25            // Outras Moedas                     ³ 
+//³ MV_PAR26            // do prefixo                        ³
+//³ MV_PAR27            // at‚ o prefixo                     ³
+//³ MV_PAR28            // Imprimir os Tipos                 ³
+//³ MV_PAR29            // Nao Imprimir Tipos			       ³
+//³ MV_PAR30            // Imprime nome (Normal ou reduzido) ³
+//³ MV_PAR31            // da data da vencto. do tit         ³
+//³ MV_PAR32            // at‚ a data de vencto do tit.      ³
+//³ MV_PAR33            // da filial origem                  ³
+//³ MV_PAR34            // ate filial origem                 ³
+//³ MV_PAR35            // Impr.Incl. Adiantamentos ?Sim/Nao ³
+//³ MV_PAR36            // Imprime Titulos em Carteira ?     |
+//³ MV_PAR37            // Imp. mov. cheque aglutinado?Cheque/Baixa/Ambos³
+//³ MV_PAR38            // Cons. Nat. Aglutinadas? Sim/Nao   |
+//| MV_PAR39            // Filtrar Natureza Por?             |
 //|                                  - Padrao                |
 //|                                  - Nat.Principal         |
 //|                                  - Mult.Naturezas        |
@@ -695,7 +687,7 @@ Local tamanho		:="G"
 Local aCampos:= {},cNomArq1:="",nVlr,cLinha,lOriginal:=.T.
 Local nAbat 		:= 0
 Local cHistorico
-Local lManual 		:= .f.
+Local lManual 		:= .F.
 Local cTipodoc
 Local nRecSe5 		:= 0
 Local dDtMovFin
@@ -704,9 +696,9 @@ Local nRecEmp 		:= SM0->(Recno())
 Local cMotBaixa		:= CRIAVAR("E5_MOTBX")
 Local cFilNome 		:= Space(15)
 Local cCliFor190	:= ""
-Local aTam 			:= IIF(mv_par11 == 1,TamSX3("E1_CLIENTE"),TamSX3("E2_FORNECE"))
+Local aTam 			:= IIf(MV_PAR11 == 1,TamSX3("E1_CLIENTE"),TamSX3("E2_FORNECE"))
 Local aColu 		:= {}
-Local nDecs	   		:= GetMv("MV_CENT"+(IIF(mv_par12 > 1 , STR(mv_par12,1),""))) 
+Local nDecs	   		:= GetMv("MV_CENT"+(IIf(MV_PAR12 > 1 , Str(MV_PAR12,1),""))) 
 Local nMoedaBco		:= 1
 Local cCarteira
 Local aStru		:= SE5->(DbStruct()), nI
@@ -719,11 +711,11 @@ Local cFilOrig
 Local lAchou		:= .F.
 Local lF190Qry		:= ExistBlock("F190QRY")
 Local cQueryAdd		:= ""
-Local lAjuPar15		:= Len(AllTrim(mv_par15))==Len(mv_par15)
+Local lAjuPar15		:= Len(AllTrim(MV_PAR15))==Len(MV_PAR15)
 Local lAchouEmp		:= .T.                                
 Local lAchouEst		:= .F.                                
-Local nTamEH		:= TamSx3("EH_NUMERO")[1]
-Local nTamEI		:= TamSx3("EI_NUMERO")[1]+TamSx3("EI_REVISAO")[1]+TamSx3("EI_SEQ")[1]
+Local nTamEH		:= TamSX3("EH_NUMERO")[1]
+Local nTamEI		:= TamSX3("EI_NUMERO")[1]+TamSX3("EI_REVISAO")[1]+TamSX3("EI_SEQ")[1]
 Local cCodUlt		:= SM0->M0_CODIGO
 Local cFilUlt		:= IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL )
 Local nRecno  
@@ -761,12 +753,12 @@ Private nIndexSE5	:= 0
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Vari veis utilizadas para Impress„o do Cabe‡alho e Rodap‚    ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-cbtxt    := SPACE(10)
+cbtxt    := Space(10)
 cbcont   := 0
 li       := 80
 m_pag    := 1
 nOrdem 	:= aReturn[8]
-cSuf	:= LTrim(Str(mv_par12))
+cSuf	:= LTrim(Str(MV_PAR12))
 cMoeda	:= GetMv("MV_MOEDA"+cSuf)
 cCond3	:= ".T."
 
@@ -774,111 +766,111 @@ cCond3	:= ".T."
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Defini‡„o dos cabe‡alhos       ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-If mv_par11 == 1
+If MV_PAR11 == 1
 	titulo := OemToAnsi(STR0011)  + cMoeda  //"Relacao dos Titulos Recebidos em "
-	cabec1 := iif(aTam[1] > 6 , OemToAnsi(STR0039),OemToAnsi(STR0012))  //"Cliente-Nome Cliente "###"Prf Numero       P TP Client Nome Cliente       Natureza    Vencto  Historico       Dt Baixa  Valor Original    Tx Permanen         Multa      Correcao     Descontos     Abatimentos    Total Rec. Bco Dt Digit. Mot. Baixa"
-	cabec2 := iif(aTam[1] > 6 , OemToAnsi(STR0040),"")  //"                       Prf Numero       P TP     Natureza   Vencto     Historico          Dt Baixa   Valor Original  Tx Permanen        Multa     Correcao    Descontos  Abatimentos     Total Rec. Bco Dt Digit.  Mot.Baixa"
-Elseif mv_par11 == 2
+	cabec1 := IIf(aTam[1] > 6 , OemToAnsi(STR0039),OemToAnsi(STR0012))  //"Cliente-Nome Cliente "###"Prf Numero       P TP Client Nome Cliente       Natureza    Vencto  Historico       Dt Baixa  Valor Original    Tx Permanen         Multa      Correcao     Descontos     Abatimentos    Total Rec. Bco Dt Digit. Mot. Baixa"
+	cabec2 := IIf(aTam[1] > 6 , OemToAnsi(STR0040),"")  //"                       Prf Numero       P TP     Natureza   Vencto     Historico          Dt Baixa   Valor Original  Tx Permanen        Multa     Correcao    Descontos  Abatimentos     Total Rec. Bco Dt Digit.  Mot.Baixa"
+ElseIf MV_PAR11 == 2
 	titulo := OemToAnsi(STR0013)  + cMoeda  //"Relacao dos Titulos Pagos em "
-	cabec1 := iif(aTam[1] > 6 , OemToAnsi(STR0041),OemToAnsi(STR0014))  //"Prf Numero       P TP Fornec Nome Fornecedor    Natureza    Vencto  Historico       Dt Baixa  Valor Original    Tx Permanen         Multa      Correcao     Descontos     Abatimentos    Total Pago Bco Dt Digit. Mot. Baixa"
-	cabec2 := iif(aTam[1] > 6 , OemToAnsi(STR0040),"")  //"                       Prf Numero       P TP     Natureza   Vencto     Historico          Dt Baixa   Valor Original  Tx Permanen        Multa     Correcao    Descontos  Abatimentos     Total Rec. Bco Dt Digit.  Mot.Baixa"
-Elseif mv_par11 == 3
+	cabec1 := IIf(aTam[1] > 6 , OemToAnsi(STR0041),OemToAnsi(STR0014))  //"Prf Numero       P TP Fornec Nome Fornecedor    Natureza    Vencto  Historico       Dt Baixa  Valor Original    Tx Permanen         Multa      Correcao     Descontos     Abatimentos    Total Pago Bco Dt Digit. Mot. Baixa"
+	cabec2 := IIf(aTam[1] > 6 , OemToAnsi(STR0040),"")  //"                       Prf Numero       P TP     Natureza   Vencto     Historico          Dt Baixa   Valor Original  Tx Permanen        Multa     Correcao    Descontos  Abatimentos     Total Rec. Bco Dt Digit.  Mot.Baixa"
+ElseIf MV_PAR11 == 3
 	titulo := OemToAnsi("Relacao dos Titulos Pagos e recebidos em ")  + cMoeda  //"Relacao dos Titulos Pagos em "
-	cabec1 := iif(aTam[1] > 6 , OemToAnsi(STR0041),OemToAnsi(STR0014))  //"Prf Numero       P TP Fornec Nome Fornecedor    Natureza    Vencto  Historico       Dt Baixa  Valor Original    Tx Permanen         Multa      Correcao     Descontos     Abatimentos    Total Pago Bco Dt Digit. Mot. Baixa"
-	cabec2 := iif(aTam[1] > 6 , OemToAnsi(STR0040),"")  //"                       Prf Numero       P TP     Natureza   Vencto     Historico          Dt Baixa   Valor Original  Tx Permanen        Multa     Correcao    Descontos  Abatimentos     Total Rec. Bco Dt Digit.  Mot.Baixa"
+	cabec1 := IIf(aTam[1] > 6 , OemToAnsi(STR0041),OemToAnsi(STR0014))  //"Prf Numero       P TP Fornec Nome Fornecedor    Natureza    Vencto  Historico       Dt Baixa  Valor Original    Tx Permanen         Multa      Correcao     Descontos     Abatimentos    Total Pago Bco Dt Digit. Mot. Baixa"
+	cabec2 := IIf(aTam[1] > 6 , OemToAnsi(STR0040),"")  //"                       Prf Numero       P TP     Natureza   Vencto     Historico          Dt Baixa   Valor Original  Tx Permanen        Multa     Correcao    Descontos  Abatimentos     Total Rec. Bco Dt Digit.  Mot.Baixa"
 EndIf
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Atribui valores as variaveis ref a filiais                ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-If mv_par17 == 2
+If MV_PAR17 == 2
 	cFilDe := IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL )
 	cFilAte:= IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL )
 Else
-	cFilDe := mv_par18	// Todas as filiais
-	cFilAte:= mv_par19
+	cFilDe := MV_PAR18	// Todas as filiais
+	cFilAte:= MV_PAR19
 EndIf
 // Definicao das condicoes e ordem de impressao, de acordo com a ordem escolhida pelo
 // usuario.
-DbSelectArea("SE5")
+DBSelectArea("SE5")
 Do Case
 Case nOrdem == 1
-	cCondicao := "E5_DATA >= mv_par01 .and. E5_DATA <= mv_par02"
+	cCondicao := "E5_DATA >= MV_PAR01 .And. E5_DATA <= MV_PAR02"
 	cCond2 := "E5_DATA"
 	cChave := IndexKey(1)
 	cChaveInterFun := cChave
 	titulo += OemToAnsi(STR0015)  //" por data de pagamento"
-	bFirst := {|| MsSeek(xFilial("SE5")+Dtos(mv_par01),.T.)}
+	bFirst := {|| MsSeek(xFilial("SE5")+DToS(MV_PAR01),.T.)}
 Case nOrdem == 2
-	cCondicao := "E5_BANCO >= mv_par03 .and. E5_BANCO <= mv_par04"
+	cCondicao := "E5_BANCO >= MV_PAR03 .And. E5_BANCO <= MV_PAR04"
 	cCond2 := "E5_BANCO"
 	cChave := IndexKey(3)
 	cChaveInterFun := cChave
 	titulo += OemToAnsi(STR0016) // " por Banco"
-	bFirst := {||MsSeek(xFilial("SE5")+mv_par03,.T.)}
+	bFirst := {||MsSeek(xFilial("SE5")+MV_PAR03,.T.)}
 Case nOrdem == 3
-	cCondicao := "E5_MULTNAT = '1' .Or. (E5_NATUREZ >= mv_par05 .and. E5_NATUREZ <= mv_par06)"
+	cCondicao := "E5_MULTNAT = '1' .Or. (E5_NATUREZ >= MV_PAR05 .And. E5_NATUREZ <= MV_PAR06)"
 	cCond2 := "E5_NATUREZ"
 	cChave := IndexKey(4)
 	cChaveInterFun := cChave
 	titulo += OemToAnsi(STR0017)  //" por Natureza"
-	bFirst := {||MsSeek(xFilial("SE5")+mv_par05,.T.)}
+	bFirst := {||MsSeek(xFilial("SE5")+MV_PAR05,.T.)}
 Case nOrdem == 4
 	cCondicao := ".T."
 	cCond2 := "E5_BENEF"
-	cChave := "E5_FILIAL+E5_BENEF+DTOS(E5_DATA)+E5_PREFIXO+E5_NUMERO+E5_PARCELA"
+	cChave := "E5_FILIAL+E5_BENEF+DToS(E5_DATA)+E5_PREFIXO+E5_NUMERO+E5_PARCELA"
 	cChaveInterFun := cChave
 	titulo += OemToAnsi(STR0020)  //" Alfabetica"
 	bFirst := {||MsSeek(xFilial("SE5"),.T.)}
 Case nOrdem == 5
 	cCondicao := ".T."
 	cCond2 := "E5_NUMERO"
-	cChave := "E5_FILIAL+E5_NUMERO+E5_PARCELA+E5_PREFIXO+DTOS(E5_DATA)"
+	cChave := "E5_FILIAL+E5_NUMERO+E5_PARCELA+E5_PREFIXO+DToS(E5_DATA)"
 	cChaveInterFun := cChave
 	titulo += OemToAnsi(STR0035) //" Nro. dos Titulos"
 	bFirst := {||MsSeek(xFilial("SE5"),.T.)}
 Case nOrdem == 6	//Ordem 6 (Digitacao)
 	cCondicao := ".T."
 	cCond2 := "E5_DTDIGIT"
-	cChave := "E5_FILIAL+DTOS(E5_DTDIGIT)+E5_PREFIXO+E5_NUMERO+E5_PARCELA+DTOS(E5_DATA)"
+	cChave := "E5_FILIAL+DToS(E5_DTDIGIT)+E5_PREFIXO+E5_NUMERO+E5_PARCELA+DToS(E5_DATA)"
 	cChaveInterFun := cChave
 	titulo += OemToAnsi(STR0019)  //" Por Data de Digitacao"
 	bFirst := {||MsSeek(xFilial("SE5"),.T.)}
 Case nOrdem == 7 // por Lote
-	cCondicao := "E5_LOTE >= mv_par20 .and. E5_LOTE <= mv_par21"
+	cCondicao := "E5_LOTE >= MV_PAR20 .And. E5_LOTE <= MV_PAR21"
 	cCond2 := "E5_LOTE"
 	cChave := IndexKey(5)
 	cChaveInterFun := cChave
 	titulo += OemToAnsi(STR0036)  //" por Lote"
-	bFirst := {||MsSeek(xFilial("SE5")+mv_par20,.T.)}
+	bFirst := {||MsSeek(xFilial("SE5")+MV_PAR20,.T.)}
 OtherWise						// Data de Crédito (dtdispo)
-	cCondicao := "E5_DTDISPO >= mv_par01 .and. E5_DTDISPO <= mv_par02"
+	cCondicao := "E5_DTDISPO >= MV_PAR01 .And. E5_DTDISPO <= MV_PAR02"
 	cCond2 := "E5_DTDISPO"
-	cChave := "E5_FILIAL+DTOS(E5_DTDISPO)+E5_BANCO+E5_AGENCIA+E5_CONTA+E5_NUMCHEQ"
+	cChave := "E5_FILIAL+DToS(E5_DTDISPO)+E5_BANCO+E5_AGENCIA+E5_CONTA+E5_NUMCHEQ"
 	cChaveInterFun := cChave
 	titulo += OemToAnsi(STR0015)  //" por data de pagamento"
-	bFirst := {||MsSeek(xFilial("SE5")+Dtos(mv_par01),.T.)}
+	bFirst := {||MsSeek(xFilial("SE5")+DToS(MV_PAR01),.T.)}
 EndCase
 
-If !Empty(mv_par28) .And. ! ";" $ mv_par28 .And. Len(AllTrim(mv_par28)) > 3
+If !Empty(MV_PAR28) .And. ! ";" $ MV_PAR28 .And. Len(AllTrim(MV_PAR28)) > 3
 	ApMsgAlert(STR0073)//"Separe os tipos a imprimir (pergunta 28) por um ; (ponto e virgula) a cada 3 caracteres")
 	Return(Nil)
-Endif	
-If !Empty(mv_par29) .And. ! ";" $ mv_par29 .And. Len(AllTrim(mv_par29)) > 3
+EndIf	
+If !Empty(MV_PAR29) .And. ! ";" $ MV_PAR29 .And. Len(AllTrim(MV_PAR29)) > 3
 	ApMsgAlert(STR0074)//"Separe os tipos que não deseja imprimir (pergunta 29) por um ; (ponto e virgula) a cada 3 caracteres")
 	Return(Nil)
-Endif	
+EndIf	
 
 #IFDEF TOP
-	If TcSrvType() != "AS/400" .and. TCGetDB()!="SYBASE"
+	If TcSrvType() != "AS/400" .And. TCGetDB()!="SYBASE"
 		lAsTop := .T.
 		cCondicao := ".T."
-		DbSelectArea("SE5")
+		DBSelectArea("SE5")
 		cQuery := ""
 		aEval(DbStruct(),{|e| cQuery += ","+AllTrim(e[1])})
 		// Obtem os registros a serem processados
 		//ITALAC - Para tratar filtro da Emissao e Rede na SE1
-		if MV_PAR11 == 1
+		If MV_PAR11 == 1
 		
 			// Obtem os registros a serem processados
 			cQuery := "SELECT " +SubStr(cQuery,2)
@@ -888,7 +880,7 @@ Endif
   	    	cQuery += " AND SE1.E1_PARCELA = SE5.E5_PARCELA AND SE1.E1_TIPO = SE5.E5_TIPO "
   	    	cQuery += " AND SE1.E1_CLIENTE = SE5.E5_CLIFOR AND SE1.E1_LOJA = SE5.E5_LOJA ) VENCTO, "   //ITALAC - INCLUIDOS CAMPOS E2_VENCTO E E1_VENCTO
 			
-		Elseif MV_PAR11 == 2
+		ElseIf MV_PAR11 == 2
 
 			// Obtem os registros a serem processados
 			cQuery := "SELECT " +SubStr(cQuery,2)
@@ -898,12 +890,12 @@ Endif
   	    	cQuery += " AND SE2.E2_PARCELA = SE5.E5_PARCELA AND SE2.E2_TIPO = SE5.E5_TIPO "
   	    	cQuery += " AND SE2.E2_FORNECE = SE5.E5_CLIFOR AND SE2.E2_LOJA = SE5.E5_LOJA )	 VENCTO, "   //ITALAC - INCLUIDOS CAMPOS E2_VENCTO E E1_VENCTO
 		
-		Elseif mv_par11 == 3
+		ElseIf MV_PAR11 == 3
 		
 			// Obtem os registros a serem processados
 			cQuery := "SELECT " +SubStr(cQuery,2)
 			cQuery +=         ",SE5.R_E_C_N_O_ SE5RECNO, "
-			cQuery += " CASE SE5.E5_RECPAG "
+			cQuery += " Case SE5.E5_RECPAG "
 			cQuery += " WHEN 'R' THEN (SELECT E2_VENCTO FROM "+RetSqlName("SE2")+" SE2 WHERE SE2.D_E_L_E_T_ = ' ' "	
   	    	//cQuery += " SE2.D_E_L_E_T_ = ' ' AND SE2.E2_FILIAL = SE5.E5_FILIAL " 
   	    	cQuery += " AND SE2.E2_PREFIXO = SE5.E5_PREFIXO AND SE2.E2_NUM = SE5.E5_NUMERO "
@@ -915,7 +907,7 @@ Endif
   	    	cQuery += " AND SE1.E1_PARCELA = SE5.E5_PARCELA AND SE1.E1_TIPO = SE5.E5_TIPO "
   	    	cQuery += " AND SE1.E1_CLIENTE = SE5.E5_CLIFOR AND SE1.E1_LOJA = SE5.E5_LOJA ) END VENCTO,"   //ITALAC - INCLUIDOS CAMPOS E2_VENCTO E E1_VENCTO
 		
-		endif
+		EndIf
 		//ITALAC
 	
 		cQuery += " ( SELECT MAX(E5_SEQ)"
@@ -946,18 +938,18 @@ Endif
 		
 		
 		cQuery += "FROM " + RetSqlName("SE5")+" SE5 "
-		If mv_par11 != 3
-			cQuery += "WHERE E5_RECPAG = '" + IIF( mv_par11 == 1, "R","P") + "' AND "
-		Endif
-		cQuery += "      E5_DATA    between '" + DTOS(mv_par01) + "' AND '" + DTOS(mv_par02) + "' AND "
-		cQuery += "      E5_DATA    <= '" + DTOS(dDataBase) + "' AND "
+		If MV_PAR11 != 3
+			cQuery += "WHERE E5_RECPAG = '" + IIf( MV_PAR11 == 1, "R","P") + "' AND "
+		EndIf
+		cQuery += "      E5_DATA    between '" + DToS(MV_PAR01) + "' AND '" + DToS(MV_PAR02) + "' AND "
+		cQuery += "      E5_DATA    <= '" + DToS(dDataBase) + "' AND "
 
 
 		//-- Realiza filtragem pela natureza principal
-		If mv_par39 == 2
-			cQuery +=  " E5_NATUREZ between '" + mv_par05       + "' AND '" + mv_par06     	+ "' AND "
+		If MV_PAR39 == 2
+			cQuery +=  " E5_NATUREZ between '" + MV_PAR05       + "' AND '" + MV_PAR06     	+ "' AND "
 		Else
-			cQuery +=  " (E5_NATUREZ between '" + mv_par05       + "' AND '" + mv_par06     	+ "' OR "
+			cQuery +=  " (E5_NATUREZ between '" + MV_PAR05       + "' AND '" + MV_PAR06     	+ "' OR "
 			cQuery +=  " EXISTS (SELECT EV_FILIAL, EV_PREFIXO, EV_NUM, EV_PARCELA, EV_CLIFOR, EV_LOJA "
 			cQuery +=            " FROM "+RetSqlName("SEV")+" SEV "
 			cQuery +=           " WHERE E5_FILIAL  = EV_FILIAL  AND "
@@ -967,50 +959,50 @@ Endif
 			cQuery +=                  "E5_TIPO    = EV_TIPO    AND "
 			cQuery +=                  "E5_CLIFOR  = EV_CLIFOR  AND "
 			cQuery +=                  "E5_LOJA    = EV_LOJA    AND "
-			cQuery +=                  "EV_NATUREZ between '" + mv_par05 + "' AND '" + mv_par06 + "' AND "
+			cQuery +=                  "EV_NATUREZ between '" + MV_PAR05 + "' AND '" + MV_PAR06 + "' AND "
 			cQuery +=                  "SEV.D_E_L_E_T_ = ' ')) AND "
 		EndIf	
-		cQuery += "      E5_CLIFOR  between '" + mv_par07       + "' AND '" + mv_par08       + "' AND "
-		cQuery += "      E5_DTDIGIT between '" + DTOS(mv_par09) + "' AND '" + DTOS(mv_par10) + "' AND "
-		cQuery += "      E5_LOTE    between '" + mv_par20       + "' AND '" + mv_par21       + "' AND "
-		cQuery += "      E5_LOJA    between '" + mv_par22       + "' AND '" + mv_par23 	    + "' AND "
-		cQuery += "      E5_PREFIXO between '" + mv_par26       + "' AND '" + mv_par27 	    + "' AND "
+		cQuery += "      E5_CLIFOR  between '" + MV_PAR07       + "' AND '" + MV_PAR08       + "' AND "
+		cQuery += "      E5_DTDIGIT between '" + DToS(MV_PAR09) + "' AND '" + DToS(MV_PAR10) + "' AND "
+		cQuery += "      E5_LOTE    between '" + MV_PAR20       + "' AND '" + MV_PAR21       + "' AND "
+		cQuery += "      E5_LOJA    between '" + MV_PAR22       + "' AND '" + MV_PAR23 	    + "' AND "
+		cQuery += "      E5_PREFIXO between '" + MV_PAR26       + "' AND '" + MV_PAR27 	    + "' AND "
 		cQuery += "      SE5.D_E_L_E_T_ = ' '  AND "
 		cQuery += " 	  E5_SITUACA NOT IN ('C','E','X') AND "
 		cQuery += "      ((E5_TIPODOC = 'CD' AND E5_VENCTO <= E5_DATA) OR "
 		cQuery += "      (E5_TIPODOC != 'CD')) "
 		cQuery += "		  AND E5_HISTOR NOT LIKE '%"+STR0077+"%'"
 		cQuery += "		  AND E5_TIPODOC NOT IN ('DC','D2','JR','J2','TL','MT','VA','M2','CM','C2','ES'"
-		If mv_par11 == 2
+		If MV_PAR11 == 2
 			cQuery += " ,'E2'"
 		EndIf
-		If mv_par16 == 2
+		If MV_PAR16 == 2
 			cQuery += " ,' '"
 			cQuery += " ,'CH'"  
 			cQuery += " ,'TR'"  
 			cQuery += " ,'TE'"
-		endif
+		EndIf
 		cQuery += " )"
-		If mv_par16 == 2
-			cQuery += " AND E5_NUMERO  != '" + SPACE(LEN(E5_NUMERO)) + "'"
-		Endif	
-		If !Empty(mv_par28) // Deseja imprimir apenas os tipos do parametro 28
-			cQuery += " AND E5_TIPO IN "+FormatIn(mv_par28,";")
-		ElseIf !Empty(Mv_par29) // Deseja excluir os tipos do parametro 29
-			cQuery += " AND E5_TIPO NOT IN "+FormatIn(mv_par29,";")
+		If MV_PAR16 == 2
+			cQuery += " AND E5_NUMERO  != '" + Space(Len(E5_NUMERO)) + "'"
+		EndIf	
+		If !Empty(MV_PAR28) // Deseja imprimir apenas os tipos do parametro 28
+			cQuery += " AND E5_TIPO IN "+FormatIn(MV_PAR28,";")
+		ElseIf !Empty(MV_PAR29) // Deseja excluir os tipos do parametro 29
+			cQuery += " AND E5_TIPO NOT IN "+FormatIn(MV_PAR29,";")
 		EndIf
 		
 		cCondFil := "NEWSE5->E5_FILIAL==xFilial('SE5')"
 		
-		If mv_par17 == 2
+		If MV_PAR17 == 2
 			cQuery += " AND E5_FILIAL = '" + FwxFilial("SE5") + "'"
 		Else
 			If Empty( xFilial("SE5") )
-				cQuery += " AND E5_FILORIG between '" + mv_par18 + "' AND '" + mv_par19 + "'"
+				cQuery += " AND E5_FILORIG between '" + MV_PAR18 + "' AND '" + MV_PAR19 + "'"
 			Else
-				cQuery += " AND E5_FILIAL between '" + mv_par18 + "' AND '" + mv_par19 + "'"
+				cQuery += " AND E5_FILIAL between '" + MV_PAR18 + "' AND '" + MV_PAR19 + "'"
 			EndIf
-		Endif
+		EndIf
 		
 		//ITALAC - comentado ponto de entrada para não misturar queries
 		//If lF190Qry
@@ -1023,118 +1015,118 @@ Endif
 		// ITALAC - ALTERADO A QUERY DE EXTRAÇÃO DOS TITULOS A PAGAR PARA NÃO CONSIDERAR O UNION E COMEÇAR A CONSIDERAR A DATA DE EMISSÃO DO TITULOS A PAGAR - CHAMADO 3021
 		
 		//FILTRA GRUPO DE CLIENTES
-		if !empty(MV_PAR42)
-		   cQuery += "(SELECT A1_GRPVEN FROM "+RetSqlName("SA1")+" A1T WHERE A1T.D_E_L_E_T_ <> '*' AND A1T.COD = SE5.E5_CLIFOR AND A1T.LOJA = SE5.E5_LOJA) IN " 
+		If !Empty(MV_PAR42)
+		   cQuery += "(SELECT A1_GRPVEN FROM "+RetSqlName("SA1")+" A1T WHERE A1T.D_E_L_E_T_ = ' ' AND A1T.COD = SE5.E5_CLIFOR AND A1T.LOJA = SE5.E5_LOJA) IN " 
 		   cQuery +=  FormatIn(MV_PAR42,";") 
-		endif  
+		EndIf  
 		
 		//================================================================================
         // Filtro por natureza de operação que deverão ser excluidas do relatório. 
         //================================================================================  
         If ! Empty(MV_PAR49)
-            cQuery += " AND SE5.E5_NATUREZ NOT IN " + FORMATIN(MV_PAR49,";")
+            cQuery += " AND SE5.E5_NATUREZ NOT IN " + FormatIn(MV_PAR49,";")
         EndIf	           
 				
-		if MV_PAR11 == 1   
+		If MV_PAR11 == 1   
 
 		   	//Filtra Emissao da SE1
-		  	if !empty(MV_PAR43) .and. !empty(MV_PAR44)
+		  	If !Empty(MV_PAR43) .And. !Empty(MV_PAR44)
   	    		cQuery += " AND (SELECT E1_EMISSAO FROM "+RetSqlName("SE1")+" SE1 WHERE  SE1.D_E_L_E_T_ = ' ' "	
   	    		cQuery += " SE1.D_E_L_E_T_ = ' ' AND SE1.E1_FILIAL = SE5.E5_FILIAL " 
   	    		cQuery += " SE1.D_E_L_E_T_ = ' ' "
   	    		cQuery += " AND SE1.E1_PREFIXO = SE5.E5_PREFIXO AND SE1.E1_NUM = SE5.E5_NUMERO "
   	    		cQuery += " AND SE1.E1_PARCELA = SE5.E5_PARCELA AND SE1.E1_TIPO = SE5.E5_TIPO "
   	    		cQuery += " AND SE1.E1_CLIENTE = SE5.E5_CLIFOR AND SE1.E1_LOJA = SE5.E5_LOJA )"	
-  	    		cQuery += " BETWEEN '" + dtos(MV_PAR43) + "' AND '" + dtos(MV_PAR44) + "'"
-		  	endif
+  	    		cQuery += " BETWEEN '" + DToS(MV_PAR43) + "' AND '" + DToS(MV_PAR44) + "'"
+		  	EndIf
 		  	
 		  	//Filtra VENCTO da SE1
-		  	if !empty(MV_PAR47) .and. !empty(MV_PAR48)
+		  	If !Empty(MV_PAR47) .And. !Empty(MV_PAR48)
    	     		cQuery += " AND (SELECT E1_VENCTO FROM "+RetSqlName("SE1")+" SE1 WHERE "	
   	    		cQuery += " SE1.D_E_L_E_T_ = ' ' AND SE1.E1_FILIAL = SE5.E5_FILIAL " 
   	    		cQuery += " SE1.D_E_L_E_T_ = ' ' "
   	    		cQuery += " AND SE1.E1_PREFIXO = SE5.E5_PREFIXO AND SE1.E1_NUM = SE5.E5_NUMERO "
   	    		cQuery += " AND SE1.E1_PARCELA = SE5.E5_PARCELA AND SE1.E1_TIPO = SE5.E5_TIPO "
   	    		cQuery += " AND SE1.E1_CLIENTE = SE5.E5_CLIFOR AND SE1.E1_LOJA = SE5.E5_LOJA )"	
-  	    		cQuery += " BETWEEN '" + dtos(MV_PAR47) + "' AND '" + dtos(MV_PAR48) + "'"
-		  	endif  
+  	    		cQuery += " BETWEEN '" + DToS(MV_PAR47) + "' AND '" + DToS(MV_PAR48) + "'"
+		  	EndIf  
 		  	
             
-		ElseIF MV_PAR11 == 2
+		ElseIf MV_PAR11 == 2
 	
 			//FILTRA EMISSÃO DA SE2
-		  	if !empty(MV_PAR43) .and. !empty(MV_PAR44)
+		  	If !Empty(MV_PAR43) .And. !Empty(MV_PAR44)
 	    		cQuery += " AND (SELECT E2_EMISSAO FROM "+RetSqlName("SE2")+" SE2 WHERE "	
   	    		cQuery += " SE2.D_E_L_E_T_ = ' ' AND SE2.E2_FILIAL = SE5.E5_FILIAL " 
   	    		cQuery += " SE2.D_E_L_E_T_ = ' ' "
   	    		cQuery += " AND SE2.E2_PREFIXO = SE5.E5_PREFIXO AND SE2.E2_NUM = SE5.E5_NUMERO "
   	    		cQuery += " AND SE2.E2_PARCELA = SE5.E5_PARCELA AND SE2.E2_TIPO = SE5.E5_TIPO "
   	    		cQuery += " AND SE2.E2_FORNECE = SE5.E5_CLIFOR AND SE2.E2_LOJA = SE5.E5_LOJA )"	
-  	    		cQuery += " BETWEEN '" + dtos(MV_PAR43) + "' AND '" + dtos(MV_PAR44) + "'"
-		  	endif
+  	    		cQuery += " BETWEEN '" + DToS(MV_PAR43) + "' AND '" + DToS(MV_PAR44) + "'"
+		  	EndIf
 		  	
 		  	//Filtra VENCTO da SE2
-		  	if !empty(MV_PAR47) .and. !empty(MV_PAR48)
+		  	If !Empty(MV_PAR47) .And. !Empty(MV_PAR48)
 	     		cQuery += " AND (SELECT E2_VENCTO FROM "+RetSqlName("SE2")+" SE2 WHERE "	
   	    		cQuery += " SE2.D_E_L_E_T_ = ' ' AND SE2.E2_FILIAL = SE5.E5_FILIAL " 
   	    		cQuery += " SE2.D_E_L_E_T_ = ' ' "
   	    		cQuery += " AND SE2.E2_PREFIXO = SE5.E5_PREFIXO AND SE2.E2_NUM = SE5.E5_NUMERO "
   	    		cQuery += " AND SE2.E2_PARCELA = SE5.E5_PARCELA AND SE2.E2_TIPO = SE5.E5_TIPO "
   	    		cQuery += " AND SE2.E2_FORNECE = SE5.E5_CLIFOR AND SE2.E2_LOJA = SE5.E5_LOJA )"	
-  	    		cQuery += " BETWEEN '" + dtos(MV_PAR47) + "' AND '" + dtos(MV_PAR48) + "'"
-		  	endif
+  	    		cQuery += " BETWEEN '" + DToS(MV_PAR47) + "' AND '" + DToS(MV_PAR48) + "'"
+		  	EndIf
 		
-		Elseif MV_PAR11 == 3  		
+		ElseIf MV_PAR11 == 3  		
 	
 			  	//FILTRA EMISSÃO DA SE2
-		  	if !empty(MV_PAR43) .and. !empty(MV_PAR44)
+		  	If !Empty(MV_PAR43) .And. !Empty(MV_PAR44)
 	    		cQuery += " AND ((SELECT E2_EMISSAO FROM "+RetSqlName("SE2")+" SE2 WHERE "	
   	    		//cQuery += " SE2.D_E_L_E_T_ = ' ' AND SE2.E2_FILIAL = SE5.E5_FILIAL " 
   	    		cQuery += " SE2.D_E_L_E_T_ = ' ' "
   	    		cQuery += " AND SE2.E2_PREFIXO = SE5.E5_PREFIXO AND SE2.E2_NUM = SE5.E5_NUMERO "
   	    		cQuery += " AND SE2.E2_PARCELA = SE5.E5_PARCELA AND SE2.E2_TIPO = SE5.E5_TIPO "
   	    		cQuery += " AND SE2.E2_FORNECE = SE5.E5_CLIFOR AND SE2.E2_LOJA = SE5.E5_LOJA )"	
-  	    		cQuery += " BETWEEN '" + dtos(MV_PAR43) + "' AND '" + dtos(MV_PAR44) + "'"
+  	    		cQuery += " BETWEEN '" + DToS(MV_PAR43) + "' AND '" + DToS(MV_PAR44) + "'"
   	    		cQuery += " OR (SELECT E1_EMISSAO FROM "+RetSqlName("SE1")+" SE1 WHERE "	
   	    		//cQuery += " SE1.D_E_L_E_T_ = ' ' AND SE1.E1_FILIAL = SE5.E5_FILIAL " 
   	    		cQuery += " SE1.D_E_L_E_T_ = ' ' "
   	    		cQuery += " AND SE1.E1_PREFIXO = SE5.E5_PREFIXO AND SE1.E1_NUM = SE5.E5_NUMERO "
   	    		cQuery += " AND SE1.E1_PARCELA = SE5.E5_PARCELA AND SE1.E1_TIPO = SE5.E5_TIPO "
   	    		cQuery += " AND SE1.E1_CLIENTE = SE5.E5_CLIFOR AND SE1.E1_LOJA = SE5.E5_LOJA )"	
-  	    		cQuery += " BETWEEN '" + dtos(MV_PAR43) + "' AND '" + dtos(MV_PAR44) + "')"
+  	    		cQuery += " BETWEEN '" + DToS(MV_PAR43) + "' AND '" + DToS(MV_PAR44) + "')"
   	    		
-		  	endif
+		  	EndIf
 		  	
 		  	//Filtra VENCTO da SE2
-		  	if !empty(MV_PAR47) .and. !empty(MV_PAR48)
+		  	If !Empty(MV_PAR47) .And. !Empty(MV_PAR48)
 	     		cQuery += " AND ((SELECT E2_VENCTO FROM "+RetSqlName("SE2")+" SE2 WHERE "	
   	    		//cQuery += " SE2.D_E_L_E_T_ = ' ' AND SE2.E2_FILIAL = SE5.E5_FILIAL " 
   	    		cQuery += " SE2.D_E_L_E_T_ = ' ' "
   	    		cQuery += " AND SE2.E2_PREFIXO = SE5.E5_PREFIXO AND SE2.E2_NUM = SE5.E5_NUMERO "
   	    		cQuery += " AND SE2.E2_PARCELA = SE5.E5_PARCELA AND SE2.E2_TIPO = SE5.E5_TIPO "
   	    		cQuery += " AND SE2.E2_FORNECE = SE5.E5_CLIFOR AND SE2.E2_LOJA = SE5.E5_LOJA )"	
-  	    		cQuery += " BETWEEN '" + dtos(MV_PAR47) + "' AND '" + dtos(MV_PAR48) + "'"
+  	    		cQuery += " BETWEEN '" + DToS(MV_PAR47) + "' AND '" + DToS(MV_PAR48) + "'"
   	     		cQuery += " OR (SELECT E1_VENCTO FROM "+RetSqlName("SE1")+" SE1 WHERE "	
   	    		//cQuery += " SE1.D_E_L_E_T_ = ' ' AND SE1.E1_FILIAL = SE5.E5_FILIAL " 
   	    		cQuery += " SE1.D_E_L_E_T_ = ' ' "
   	    		cQuery += " AND SE1.E1_PREFIXO = SE5.E5_PREFIXO AND SE1.E1_NUM = SE5.E5_NUMERO "
   	    		cQuery += " AND SE1.E1_PARCELA = SE5.E5_PARCELA AND SE1.E1_TIPO = SE5.E5_TIPO "
   	    		cQuery += " AND SE1.E1_CLIENTE = SE5.E5_CLIFOR AND SE1.E1_LOJA = SE5.E5_LOJA )"	
-  	    		cQuery += " BETWEEN '" + dtos(MV_PAR47) + "' AND '" + dtos(MV_PAR48) + "')"
-		  	endif
+  	    		cQuery += " BETWEEN '" + DToS(MV_PAR47) + "' AND '" + DToS(MV_PAR48) + "')"
+		  	EndIf
 		
-		Endif 
+		EndIf 
 	
-		if !empty(MV_PAR45)
+		If !Empty(MV_PAR45)
 			cQuery += " AND E5_MOTBX   IN " + FormatIn(MV_PAR45,";") + " "                                                                                               
-		endif
+		EndIf
 
 		If 'CMP' $ MV_PAR45
 			If MV_PAR46 == 1
-				cQuery += " AND SUBSTR(SE5.E5_DOCUMEN,1,3) = 'DCT' "
+				cQuery += " AND SubStr(SE5.E5_DOCUMEN,1,3) = 'DCT' "
 			ElseIf MV_PAR46 == 2
-				cQuery += " AND SUBSTR(SE5.E5_DOCUMEN,1,3) <> 'DCT' "
-			EndIF
+				cQuery += " AND SubStr(SE5.E5_DOCUMEN,1,3) <> 'DCT' "
+			EndIf
 		EndIf	
 
 		//ITALAC 	
@@ -1143,14 +1135,14 @@ Endif
 		cQuery += " ORDER BY " + SqlOrder(cChave) 
 		cQuery := ChangeQuery(cQuery)
 		dbUseArea(.T., "TOPCONN", TCGenQry(,,cQuery), "NEWSE5", .F., .T.)
-		For nI := 1 TO LEN(aStru)
+		For nI := 1 TO Len(aStru)
 			If aStru[nI][2] != "C"
 				TCSetField("NEWSE5", aStru[nI][1], aStru[nI][2], aStru[nI][3], aStru[nI][4])
 			EndIf
 		Next
-		DbGoTop()
+		DBGoTop()
 	Else
-#ENDIF
+#EndIf
 		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 		//³ Abre o SE5 com outro alias para ser filtrado porque a funcao³
 		//³ TemBxCanc() utilizara o SE5 sem filtro.							 ³
@@ -1159,49 +1151,49 @@ Endif
 			Return(Nil)
 		EndIf		
 		lAsTop := .F.
-		DbSelectArea("NEWSE5")
+		DBSelectArea("NEWSE5")
 		If MV_PAR11 != 3
 		
-			cFilSE5 := 'E5_RECPAG=='+IIF(mv_par11 == 1,'"R"','"P"')+'.and.'
+			cFilSE5 := 'E5_RECPAG=='+IIf(MV_PAR11 == 1,'"R"','"P"')+'.and.'
 			
-		Endif
-		cFilSE5 += 'DTOS(E5_DATA)>='+'"'+dtos(mv_par01)+'"'+'.and.DTOS(E5_DATA)<='+'"'+dtos(mv_par02)+'".and.'
-		cFilSE5 += 'DTOS(E5_DATA)<='+'"'+dtos(dDataBase)+'".and.'
+		EndIf
+		cFilSE5 += 'DToS(E5_DATA)>='+'"'+DToS(MV_PAR01)+'"'+'.and.DToS(E5_DATA)<='+'"'+DToS(MV_PAR02)+'".and.'
+		cFilSE5 += 'DToS(E5_DATA)<='+'"'+DToS(dDataBase)+'".and.'
 		If nOrdem == 3
-   			cFilSE5 += '(E5_MULTNAT = "1" .Or. (E5_NATUREZ>='+'"'+mv_par05+'"'+'.and.E5_NATUREZ<='+'"'+mv_par06+'")).and.'
+   			cFilSE5 += '(E5_MULTNAT = "1" .Or. (E5_NATUREZ>='+'"'+MV_PAR05+'"'+'.and.E5_NATUREZ<='+'"'+MV_PAR06+'")).and.'
 		Else
-			cFilSE5 += '(E5_NATUREZ>='+'"'+mv_par05+'"'+'.and.E5_NATUREZ<='+'"'+mv_par06+'").and.'
-		Endif		
-		cFilSE5 += 'E5_CLIFOR>='+'"'+mv_par07+'"'+'.and.E5_CLIFOR<='+'"'+mv_par08+'".and.'
-		cFilSE5 += 'DTOS(E5_DTDIGIT)>='+'"'+dtos(mv_par09)+'"'+'.and.DTOS(E5_DTDIGIT)<='+'"'+dtos(mv_par10)+'".and.'
-		cFilSE5 += 'E5_LOTE>='+'"'+mv_par20+'"'+'.and.E5_LOTE<='+'"'+mv_par21+'".and.'
-		cFilSE5 += 'E5_LOJA>='+'"'+mv_par22+'"'+'.and.E5_LOJA<='+'"'+mv_par23+'".and.'
-		cFilSe5 += 'E5_PREFIXO>='+'"'+mv_par26+'"'+'.And.E5_PREFIXO<='+'"'+mv_par27+'"'
-		If !Empty(mv_par28) // Deseja imprimir apenas os tipos do parametro 28
-			cFilSe5 += '.And.E5_TIPO $'+'"'+ALLTRIM(mv_par28)+Space(1)+'"'
-		ElseIf !Empty(Mv_par29) // Deseja excluir os tipos do parametro 29
-			cFilSe5 += '.And.!(E5_TIPO $'+'"'+ALLTRIM(mv_par29)+Space(1)+'")'
+			cFilSE5 += '(E5_NATUREZ>='+'"'+MV_PAR05+'"'+'.and.E5_NATUREZ<='+'"'+MV_PAR06+'").and.'
+		EndIf		
+		cFilSE5 += 'E5_CLIFOR>='+'"'+MV_PAR07+'"'+'.and.E5_CLIFOR<='+'"'+MV_PAR08+'".and.'
+		cFilSE5 += 'DToS(E5_DTDIGIT)>='+'"'+DToS(MV_PAR09)+'"'+'.and.DToS(E5_DTDIGIT)<='+'"'+DToS(MV_PAR10)+'".and.'
+		cFilSE5 += 'E5_LOTE>='+'"'+MV_PAR20+'"'+'.and.E5_LOTE<='+'"'+MV_PAR21+'".and.'
+		cFilSE5 += 'E5_LOJA>='+'"'+MV_PAR22+'"'+'.and.E5_LOJA<='+'"'+MV_PAR23+'".and.'
+		cFilSe5 += 'E5_PREFIXO>='+'"'+MV_PAR26+'"'+'.And.E5_PREFIXO<='+'"'+MV_PAR27+'"'
+		If !Empty(MV_PAR28) // Deseja imprimir apenas os tipos do parametro 28
+			cFilSe5 += '.And.E5_TIPO $'+'"'+AllTrim(MV_PAR28)+Space(1)+'"'
+		ElseIf !Empty(MV_PAR29) // Deseja excluir os tipos do parametro 29
+			cFilSe5 += '.And.!(E5_TIPO $'+'"'+AllTrim(MV_PAR29)+Space(1)+'")'
 		EndIf
 
 		cCondFil := "NEWSE5->E5_FILIAL==xFilial('SE5')"
 		
-		If mv_par17 == 2
-			cFilSe5 +=  " .AND. E5_FILIAL = '" + xFilial("SE5") + "'"
+		If MV_PAR17 == 2
+			cFilSe5 +=  " .And. E5_FILIAL = '" + xFilial("SE5") + "'"
 		Else
 			If Empty( xFilial("SE5") )
-				cFilSe5 += " .AND. E5_FILORIG >= '" + mv_par18 + "' .AND. E5_FILORIG <= '" + mv_par19 + "'"
+				cFilSe5 += " .And. E5_FILORIG >= '" + MV_PAR18 + "' .And. E5_FILORIG <= '" + MV_PAR19 + "'"
 			Else
-				cFilSe5 +=" .AND. E5_FILIAL >= '" + mv_par18 + "' .AND. E5_FILIAL <= '" + mv_par19 + "'"
+				cFilSe5 +=" .And. E5_FILIAL >= '" + MV_PAR18 + "' .And. E5_FILIAL <= '" + MV_PAR19 + "'"
 			EndIf
-		Endif
+		EndIf
 #IFDEF TOP
-	Endif
-#ENDIF	
+	EndIf
+#EndIf	
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Define array para arquivo de trabalho    ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-AADD(aCampos,{"LINHA","C",80,0 } )
+aAdd(aCampos,{"LINHA","C",80,0 } )
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Cria arquivo de Trabalho   ³
@@ -1213,44 +1205,44 @@ If(_oFINR190 <> NIL)
 
 EndIf
 
-If select("TRB") > 0
+If Select("TRB") > 0
 
-	Dbselectarea("TRB")
-	TRB->(Dbclosearea())
+	DBSelectArea("TRB")
+	TRB->(DBCloseArea())
 
-Endif
+EndIf
 
 _oFINR190 := FwTemporaryTable():New("TRB")
 _oFINR190:SetFields(aCampos)
 _oFINR190:AddIndex("1",{"LINHA"})
 _oFINR190:Create()
 
-aColu := Iif(aTam[1] > 6,{023,027,TamParcela("E1_PARCELA",40,39,38),042,000,022},{000,004,TamParcela("E1_PARCELA",17,16,15),019,023,030})
+aColu := IIf(aTam[1] > 6,{023,027,TamParcela("E1_PARCELA",40,39,38),042,000,022},{000,004,TamParcela("E1_PARCELA",17,16,15),019,023,030})
 
 If MV_PAR16 == 1
 
-	dbSelectArea("SE5")
-	dbSetOrder(17) //"E5_FILIAL+E5_BANCO+E5_AGENCIA+E5_CONTA+E5_NUMCHEQ+E5_TIPODOC+E5_SEQ"
-	dbGoTop()
+	DBSelectArea("SE5")
+	DBSetOrder(17) //"E5_FILIAL+E5_BANCO+E5_AGENCIA+E5_CONTA+E5_NUMCHEQ+E5_TIPODOC+E5_SEQ"
+	DBGoTop()
 
-Endif
+EndIf
 
-DbSelectArea("SM0")
-DbSeek(cEmpAnt+cFilDe,.T.)
+DBSelectArea("SM0")
+DBSeek(cEmpAnt+cFilDe,.T.)
 
-While !Eof() .and. M0_CODIGO == cEmpAnt .and. IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL ) <= cFilAte
+While !Eof() .And. M0_CODIGO == cEmpAnt .And. IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL ) <= cFilAte
 	cFilAnt := IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL )
 	cFilNome:= SM0->M0_FILIAL
-	DbSelectArea("NEWSE5")
+	DBSelectArea("NEWSE5")
 	SetRegua(RecCount())
-	// Se nao for TOP, ou se for TOP e for AS400, posiciona no primeiro registro do escopo	
+	// Se nao For TOP, ou se For TOP e For AS400, posiciona no primeiro registro do escopo	
 	// Pois em SQL os registro ja estao filtrados em uma Query e ja esta no inicio do arquivo
 	If !lAsTop
 		Eval(bFirst) // Posiciona no primeiro registro a ser processado
-	Endif
+	EndIf
 
-	If ((MV_MULNATR .and. mv_par11 = 1 .and. mv_par38 = 2 .and. !mv_par39 == 2) .or. (MV_MULNATP .and. mv_par11 = 2 .and. mv_par38 = 2 .and. !mv_par39 == 2);
-			.or. (MV_MULNATP .and. MV_MULNATR .and. mv_par11 = 3 .and. mv_par38 = 2 .and. !mv_par39 == 2) )
+	If ((MV_MULNATR .And. MV_PAR11 = 1 .And. MV_PAR38 = 2 .And. !MV_PAR39 == 2) .Or. (MV_MULNATP .And. MV_PAR11 = 2 .And. MV_PAR38 = 2 .And. !MV_PAR39 == 2);
+			.Or. (MV_MULNATP .And. MV_MULNATR .And. MV_PAR11 = 3 .And. MV_PAR38 = 2 .And. !MV_PAR39 == 2) )
 		
 	
 		Finr199R3(	@nGerOrig,@nGerValor,@nGerDesc,@nGerJurMul,@nGerCM,@nGerAbLiq,@nGerAbImp,@nGerBaixado,@nGerMovFin,@nGerComp,;
@@ -1258,26 +1250,26 @@ While !Eof() .and. M0_CODIGO == cEmpAnt .and. IIf( lFWCodFil, FWGETCODFILIAL, SM
 					lEnd,cCondicao,cCond2,aColu,lContinua,cFilSe5,lAsTop,Tamanho,nOrdem, @nGerFat, @nFilFat)
 
 		#IFDEF TOP
-			If TcSrvType() != "AS/400" .and. TCGetDB()!="SYBASE"
-				dbSelectArea("SE5")
-				dbCloseArea()
+			If TcSrvType() != "AS/400" .And. TCGetDB()!="SYBASE"
+				DBSelectArea("SE5")
+				DBCloseArea()
 				ChKFile("SE5")
-				dbSelectArea("SE5")
-				dbSetOrder(1)
-			Endif
-		#ENDIF
+				DBSelectArea("SE5")
+				DBSetOrder(1)
+			EndIf
+		#EndIf
 		If Empty(xFilial("SE5"))
 			Exit
-		Endif
-		dbSelectArea("SM0")
+		EndIf
+		DBSelectArea("SM0")
 		cCodUlt := SM0->M0_CODIGO
 		cFilUlt := IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL )
-		dbSkip()
+		DBSkip()
 		Loop
 
 	Else
 
-		While NEWSE5->(!Eof()) .And. &cCondFil .And. &cCondicao .and. lContinua
+		While NEWSE5->(!Eof()) .And. &cCondFil .And. &cCondicao .And. lContinua
 			If lEnd
 				@PROW()+1,001 PSAY OemToAnsi(STR0021)  //"CANCELADO PELO OPERADOR"
 				lContinua:=.F.
@@ -1285,48 +1277,48 @@ While !Eof() .and. M0_CODIGO == cEmpAnt .and. IIf( lFWCodFil, FWGETCODFILIAL, SM
 			EndIf
 			
 			IncRegua()
-			DbSelectArea("NEWSE5")
+			DBSelectArea("NEWSE5")
 			// Testa condicoes de filtro	
 			If !Fr190TstCond(cFilSe5,.F.)
-				NEWSE5->(dbSkip())		      // filtro de registros desnecessarios
+				NEWSE5->(DBSkip())		      // filtro de registros desnecessarios
 				Loop
-			Endif						
+			EndIf						
 								 	
-			// Se nao for TOP, ou se for TOP e for AS400, posiciona no primeiro registro do escopo	
+			// Se nao For TOP, ou se For TOP e For AS400, posiciona no primeiro registro do escopo	
 			// Pois em SQL os registro ja estao filtrados em uma Query e ja esta no inicio do arquivo
 			If !lAsTop
-				SE2->(dbSetOrder(1))
+				SE2->(DBSetOrder(1))
 				SE2->(MsSeek(NEWSE5->(E5_FILIAL+E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA)))
 				If SE2->E2_MULTNAT == '1'
 					lNaturez := .F.
-					SEV->(dbSetOrder(1))
+					SEV->(DBSetOrder(1))
 					SEV->(MsSeek(NEWSE5->(E5_FILIAL+E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA)))
-					While NEWSE5->(E5_FILIAL+E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA) == SEV->(EV_FILIAL+EV_PREFIXO+EV_NUM+EV_PARCELA+EV_TIPO+EV_CLIFOR+EV_LOJA) .and. !lNaturez
-						If SEV->EV_NATUREZ >= mv_par05 .and. SEV->EV_NATUREZ <= mv_par06
+					While NEWSE5->(E5_FILIAL+E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA) == SEV->(EV_FILIAL+EV_PREFIXO+EV_NUM+EV_PARCELA+EV_TIPO+EV_CLIFOR+EV_LOJA) .And. !lNaturez
+						If SEV->EV_NATUREZ >= MV_PAR05 .And. SEV->EV_NATUREZ <= MV_PAR06
 							lNaturez := .T.
 						EndIf
-						SEV->(DbSkip())
+						SEV->(DBSkip())
 					EndDo
 					If !lNaturez
-						NEWSE5->(dbSkip())
+						NEWSE5->(DBSkip())
 						Loop
 					EndIf
 				Else
-					If !(NEWSE5->E5_NATUREZ >= mv_par05 .and. NEWSE5->E5_NATUREZ <= mv_par06)
-						NEWSE5->(dbSkip())
+					If !(NEWSE5->E5_NATUREZ >= MV_PAR05 .And. NEWSE5->E5_NATUREZ <= MV_PAR06)
+						NEWSE5->(DBSkip())
 						Loop
 					EndIf
 				EndIf
 			EndIf			
 					 	
-			If (NEWSE5->E5_RECPAG == "R" .and. ! (NEWSE5->E5_TIPO $ "PA /"+MV_CPNEG )) .or. ;	//Titulo normal
-				(NEWSE5->E5_RECPAG == "P" .and.   (NEWSE5->E5_TIPO $ "RA /"+MV_CRNEG )) 	//Adiantamento
+			If (NEWSE5->E5_RECPAG == "R" .And. ! (NEWSE5->E5_TIPO $ "PA /"+MV_CPNEG )) .Or. ;	//Titulo normal
+				(NEWSE5->E5_RECPAG == "P" .And.   (NEWSE5->E5_TIPO $ "RA /"+MV_CRNEG )) 	//Adiantamento
 				cCarteira := "R"
 			Else
 				cCarteira := "P"
-			Endif
+			EndIf
 	
-			dbSelectArea("NEWSE5")
+			DBSelectArea("NEWSE5")
 			cAnterior 	:= &cCond2
 			cBancoAnt	:= NEWSE5->E5_BANCO
 			cAgAnt		:= NEWSE5->E5_AGENCIA
@@ -1346,78 +1338,78 @@ While !Eof() .and. M0_CODIGO == cEmpAnt .and. IIf( lFWCodFil, FWGETCODFILIAL, SM
 			nTotFat	    := 0
 			nTotPOrig	:= 0
 	
-			While NEWSE5->(!EOF()) .and. &cCond2=cAnterior .and. &cCondFil .and. lContinua
+			While NEWSE5->(!Eof()) .And. &cCond2=cAnterior .And. &cCondFil .And. lContinua
 	
-				lManual := .f.
-				dbSelectArea("NEWSE5")
+				lManual := .F.
+				DBSelectArea("NEWSE5")
 				
-				IF lEnd
+				If lEnd
 					@PROW()+1,001 PSAY OemToAnsi(STR0021)  //"CANCELADO PELO OPERADOR"
 					lContinua:=.F.
 					Exit
-				EndIF
+				EndIf
 	
-				If (Empty(NEWSE5->E5_TIPODOC) .And. mv_par16 == 1) .Or.;
-					(Empty(NEWSE5->E5_NUMERO)  .And. mv_par16 == 1)
-					lManual := .t.
+				If (Empty(NEWSE5->E5_TIPODOC) .And. MV_PAR16 == 1) .Or.;
+					(Empty(NEWSE5->E5_NUMERO)  .And. MV_PAR16 == 1)
+					lManual := .T.
 				EndIf
 				
 				// Testa condicoes de filtro	
 				If !Fr190TstCond(cFilSe5,.T.)
-					dbSelectArea("NEWSE5")
-					NEWSE5->(dbSkip())		      // filtro de registros desnecessarios
+					DBSelectArea("NEWSE5")
+					NEWSE5->(DBSkip())		      // filtro de registros desnecessarios
 					Loop
-				Endif	               											
+				EndIf	               											
 				
 				// Imprime somente cheques
-				If mv_par37 == 1 .And. NEWSE5->E5_TIPODOC == "BA"
+				If MV_PAR37 == 1 .And. NEWSE5->E5_TIPODOC == "BA"
 
 					aAreaSE5 := SE5->(GetArea())
 					lAchou := .F.
 
-					SE5->(dbSetOrder(11))
+					SE5->(DBSetOrder(11))
 					cChaveNSE5	:= NEWSE5->(E5_BANCO+E5_AGENCIA+E5_CONTA+E5_NUMCHEQ)
 					SE5->(MsSeek(xFilial("SE5")+cChaveNSE5))					
                
 					// Procura o cheque aglutinado, se encontrar, marca lAchou := .T. e despreza 
-					WHILE SE5->(!EOF()) .And. SE5->(E5_BANCO+E5_AGENCIA+E5_CONTA+E5_NUMCHEQ)	== cChaveNSE5
+					While SE5->(!Eof()) .And. SE5->(E5_BANCO+E5_AGENCIA+E5_CONTA+E5_NUMCHEQ)	== cChaveNSE5
 						If SE5->E5_TIPODOC == "CH"
 							lAchou := .T.
 							Exit
-						Endif
-						SE5->(dbSkip())
-					Enddo
-					RestArea(aAreaSE5)
+						EndIf
+						SE5->(DBSkip())
+					EndDo
+					FWRestArea(aAreaSE5)
 					// Achou cheque aglutinado para a baixa, despreza o registro
 					If lAchou
-						NEWSE5->(dbSkip())
+						NEWSE5->(DBSkip())
 						Loop
-					Endif  	
+					EndIf  	
 
-				ElseIf mv_par37 == 2 .And. NEWSE5->E5_TIPODOC == "CH" //somente baixas
+				ElseIf MV_PAR37 == 2 .And. NEWSE5->E5_TIPODOC == "CH" //somente baixas
 
 					aAreaSE5 := SE5->(GetArea())
 					lAchou := .F.
 					
-					SE5->(dbSetOrder(11))
+					SE5->(DBSetOrder(11))
 					cChaveNSE5	:= NEWSE5->(E5_BANCO+E5_AGENCIA+E5_CONTA+E5_NUMCHEQ)
 					SE5->(MsSeek(xFilial("SE5")+cChaveNSE5))					
                
 					// Procura a baixa aglutinada, se encontrar despreza o movimento bancario
-					WHILE SE5->(!EOF()) .And. SE5->(E5_BANCO+E5_AGENCIA+E5_CONTA+E5_NUMCHEQ)	== cChaveNSE5
+					While SE5->(!Eof()) .And. SE5->(E5_BANCO+E5_AGENCIA+E5_CONTA+E5_NUMCHEQ)	== cChaveNSE5
 						If SE5->E5_TIPODOC $ "BA"
 							lAchou := .T.
 							Exit
-						Endif	
-						SE5->(dbSkip())
-					Enddo
-					RestArea(aAreaSE5)
+						EndIf	
+						SE5->(DBSkip())
+					EndDo
+					FWRestArea(aAreaSE5)
 					// Achou cheque aglutinado para a baixa, despreza o registro
 					If lAchou
-						NEWSE5->(dbSkip())
+						NEWSE5->(DBSkip())
 						Loop
-					Endif
-				Endif	
+					EndIf
+				EndIf	
 
 				cNumero    	:= NEWSE5->E5_NUMERO
 				cPrefixo   	:= NEWSE5->E5_PREFIXO
@@ -1441,72 +1433,72 @@ While !Eof() .and. M0_CODIGO == cEmpAnt .and. IIf( lFWCodFil, FWGETCODFILIAL, SM
 				lBxTit	  	:= .F.
 				cFilorig    := NEWSE5->E5_FILORIG
 				
-				If (NEWSE5->E5_RECPAG == "R" .and. ! (NEWSE5->E5_TIPO $ "PA /"+MV_CPNEG )) .or. ;	//Titulo normal
-					(NEWSE5->E5_RECPAG == "P" .and.   (NEWSE5->E5_TIPO $ "RA /"+MV_CRNEG )) 	//Adiantamento
-					dbSelectArea("SE1")
-					dbSetOrder(1)
+				If (NEWSE5->E5_RECPAG == "R" .And. ! (NEWSE5->E5_TIPO $ "PA /"+MV_CPNEG )) .Or. ;	//Titulo normal
+					(NEWSE5->E5_RECPAG == "P" .And.   (NEWSE5->E5_TIPO $ "RA /"+MV_CRNEG )) 	//Adiantamento
+					DBSelectArea("SE1")
+					DBSetOrder(1)
 					// Procuro SE1 pela filial origem
 					lBxTit		:= MsSeek(xFilial("SE1",cFilorig)+cPrefixo+cNumero+cParcela+cTipo)
 					If !lBxTit
-						lBxTit := dbSeek(NEWSE5->E5_FILORIG+cPrefixo+cNumero+cParcela+cTipo)
-					Endif				
+						lBxTit := DBSeek(NEWSE5->E5_FILORIG+cPrefixo+cNumero+cParcela+cTipo)
+					EndIf				
 					cCarteira	:= "R"
-					dDtMovFin	:= IIF (lManual,CTOD("//"), DataValida(SE1->E1_VENCTO,.T.))
-					While SE1->(!Eof()) .and. SE1->E1_PREFIXO+SE1->E1_NUM+SE1->E1_PARCELA+SE1->E1_TIPO==cPrefixo+cNumero+cParcela+cTipo
+					dDtMovFin	:= IIf (lManual,CTOD("//"), DataValida(SE1->E1_VENCTO,.T.))
+					While SE1->(!Eof()) .And. SE1->E1_PREFIXO+SE1->E1_NUM+SE1->E1_PARCELA+SE1->E1_TIPO==cPrefixo+cNumero+cParcela+cTipo
 						If SE1->E1_CLIENTE == cFornece .And. SE1->E1_LOJA == cLoja	// Cliente igual, Ok
 							Exit
-						Endif                                
-						SE1->( dbSkip() )
+						EndIf                                
+						SE1->( DBSkip() )
 					EndDo
-					If !SE1->(EOF()) .And. (mv_par11 == 1 .or. mv_par11==3) .and. !lManual .and.  ;
-						(NEWSE5->E5_RECPAG == "R" .and. !(NEWSE5->E5_TIPO $ MVPAGANT+"/"+MV_CPNEG))
+					If !SE1->(Eof()) .And. (MV_PAR11 == 1 .Or. MV_PAR11==3) .And. !lManual .And.  ;
+						(NEWSE5->E5_RECPAG == "R" .And. !(NEWSE5->E5_TIPO $ MVPAGANT+"/"+MV_CPNEG))
 						cExp := "NEWSE5->E5_SITCOB"
 						
-						If mv_par36 == 2 // Nao imprime titulos em carteira 
+						If MV_PAR36 == 2 // Nao imprime titulos em carteira 
 							// Retira da comparacao as situacoes branco, 0, F e G
-							mv_par15 := AllTrim(mv_par15)       
-							mv_par15 := StrTran(mv_par15,"0","")
-							mv_par15 := StrTran(mv_par15,"F","")
-							mv_par15 := StrTran(mv_par15,"G","")
+							MV_PAR15 := AllTrim(MV_PAR15)       
+							MV_PAR15 := StrTran(MV_PAR15,"0","")
+							MV_PAR15 := StrTran(MV_PAR15,"F","")
+							MV_PAR15 := StrTran(MV_PAR15,"G","")
 						Else
 							If (NEWSE5->E5_RECPAG == "R") .And. lAjuPar15
-								mv_par15  += " "
-							Endif
+								MV_PAR15  += " "
+							EndIf
 						EndIf	
 				
-						cExp += " $ mv_par15" 
+						cExp += " $ MV_PAR15" 
 						If !(&cExp)
-							dbSelectArea("NEWSE5")
-							NEWSE5->(dbSkip())		      // filtro de registros desnecessarios
+							DBSelectArea("NEWSE5")
+							NEWSE5->(DBSkip())		      // filtro de registros desnecessarios
 							Loop
-						Endif
-					Endif
-					cCond3:="NEWSE5->(E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+DtoS(E5_DATA)+E5_SEQ+E5_NUMCHEQ)==cPrefixo+cNumero+cParcela+cTipo+DtoS(dBaixa)+cSeq+cNumCheq"
+						EndIf
+					EndIf
+					cCond3:="NEWSE5->(E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+DToS(E5_DATA)+E5_SEQ+E5_NUMCHEQ)==cPrefixo+cNumero+cParcela+cTipo+DToS(dBaixa)+cSeq+cNumCheq"
 					nDesc := nJuros := nValor := nMulta := nJurMul := nCM := nVlMovFin := 0
 				Else
-					dbSelectArea("SE2")
-					DbSetOrder(1)
+					DBSelectArea("SE2")
+					DBSetOrder(1)
 					cCarteira := "P"
 					// Procuro SE2 pela filial origem
 				    lBxTit 	:= MsSeek(xFilial("SE2",cFilorig)+cPrefixo+cNumero+cParcela+cTipo+cFornece+cLoja)
 				    
-				    Iif(lBxTit, nRecSE2	:= SE2->(Recno()), nRecSE2 := 0 )
+				    IIf(lBxTit, nRecSE2	:= SE2->(Recno()), nRecSE2 := 0 )
 				    
 					If !lBxTit
-						lBxTit := dbSeek(NEWSE5->E5_FILORIG+cPrefixo+cNumero+cParcela+cTipo+cFornece+cLoja)
-					Endif				
-					dDtMovFin := IIF(lManual,CTOD("//"),DataValida(SE2->E2_VENCTO,.T.))
-					cCond3:="NEWSE5->(E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+DtoS(E5_DATA)+E5_SEQ+E5_NUMCHEQ)==cPrefixo+cNumero+cParcela+cTipo+cFornece+DtoS(dBaixa)+cSeq+cNumCheq"
+						lBxTit := DBSeek(NEWSE5->E5_FILORIG+cPrefixo+cNumero+cParcela+cTipo+cFornece+cLoja)
+					EndIf				
+					dDtMovFin := IIf(lManual,CTOD("//"),DataValida(SE2->E2_VENCTO,.T.))
+					cCond3:="NEWSE5->(E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+DToS(E5_DATA)+E5_SEQ+E5_NUMCHEQ)==cPrefixo+cNumero+cParcela+cTipo+cFornece+DToS(dBaixa)+cSeq+cNumCheq"
 					nDesc := nJuros := nValor := nMulta := nJurMul := nCM := nVlMovFin := 0
-					cCheque    := Iif(Empty(NEWSE5->E5_NUMCHEQ),SE2->E2_NUMBCO,NEWSE5->E5_NUMCHEQ)
-				Endif
-				dbSelectArea("NEWSE5")
+					cCheque    := IIf(Empty(NEWSE5->E5_NUMCHEQ),SE2->E2_NUMBCO,NEWSE5->E5_NUMCHEQ)
+				EndIf
+				DBSelectArea("NEWSE5")
 				IncRegua()
 				cHistorico := Space(40)
-				While NEWSE5->( !Eof()) .and. &cCond3 .and. lContinua .And. &cCondFil
+				While NEWSE5->( !Eof()) .And. &cCond3 .And. lContinua .And. &cCondFil
 					
 					IncRegua()
-					dbSelectArea("NEWSE5")
+					DBSelectArea("NEWSE5")
 					cTipodoc   := NEWSE5->E5_TIPODOC
 					cCheque    := NEWSE5->E5_NUMCHEQ
 	
@@ -1514,46 +1506,46 @@ While !Eof() .and. M0_CODIGO == cEmpAnt .and. IIf( lFWCodFil, FWGETCODFILIAL, SM
 					lAchouEst := .F.
 					nVlrGlosa := 0
 	
-					IF lEnd
+					If lEnd
 						@PROW()+1,001 PSAY OemToAnsi(STR0021)  //"CANCELADO PELO OPERADOR"
 						lContinua:=.F.
 						Exit
-					EndIF	                																		
+					EndIf	                																		
 	
 					// Testa condicoes de filtro	
 					If !Fr190TstCond(cFilSe5,.T.)
-						dbSelectArea("NEWSE5")
-						NEWSE5->(dbSkip())		      // filtro de registros desnecessarios
+						DBSelectArea("NEWSE5")
+						NEWSE5->(DBSkip())		      // filtro de registros desnecessarios
 						Loop
-					Endif  								
+					EndIf  								
 										
 					If NEWSE5->E5_SITUACA $ "C/E/X" 
-						dbSelectArea("NEWSE5")
-						NEWSE5->( dbSkip() )
+						DBSelectArea("NEWSE5")
+						NEWSE5->( DBSkip() )
 						Loop
-					EndIF
+					EndIf
 					
 					If NEWSE5->E5_LOJA != cLoja
 						Exit
-					Endif
+					EndIf
 	
-					If NEWSE5->E5_FILORIG < mv_par33 .or. NEWSE5->E5_FILORIG > mv_par34
-						dbSelectArea("NEWSE5")
-						NEWSE5->( dbSkip() )
+					If NEWSE5->E5_FILORIG < MV_PAR33 .Or. NEWSE5->E5_FILORIG > MV_PAR34
+						DBSelectArea("NEWSE5")
+						NEWSE5->( DBSkip() )
 						Loop
-					Endif
+					EndIf
 	
 					//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 					//³ Nao imprime os registros de emprestimos excluidos ³
 					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ					
 					If NEWSE5->E5_TIPODOC == "EP"
 						aAreaSE5 := NEWSE5->(GetArea())	
-						dbSelectArea("SEH")
-						dbSetOrder(1)
-						lAchouEmp := MsSeek(xFilial("SEH")+Substr(NEWSE5->E5_DOCUMEN,1,nTamEH))
-						RestArea(aAreaSE5)
+						DBSelectArea("SEH")
+						DBSetOrder(1)
+						lAchouEmp := MsSeek(xFilial("SEH")+SubStr(NEWSE5->E5_DOCUMEN,1,nTamEH))
+						FWRestArea(aAreaSE5)
 						If !lAchouEmp
-							NEWSE5->(dbSkip())
+							NEWSE5->(DBSkip())
 							Loop
 						EndIf
 					EndIf
@@ -1563,16 +1555,16 @@ While !Eof() .and. M0_CODIGO == cEmpAnt .and. IIf( lFWCodFil, FWGETCODFILIAL, SM
 					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ					
 					If NEWSE5->E5_TIPODOC == "PE"
 						aAreaSE5 := NEWSE5->(GetArea())	
-						dbSelectArea("SEI")
-						dbSetOrder(1)
-						If	MsSeek(xFilial("SEI")+"EMP"+Substr(NEWSE5->E5_DOCUMEN,1,nTamEI))
+						DBSelectArea("SEI")
+						DBSetOrder(1)
+						If	MsSeek(xFilial("SEI")+"EMP"+SubStr(NEWSE5->E5_DOCUMEN,1,nTamEI))
 							If SEI->EI_STATUS == "C"
 								lAchouEst := .T.
 							EndIf
 						EndIf
-						RestArea(aAreaSE5)
+						FWRestArea(aAreaSE5)
 						If lAchouEst
-							NEWSE5->(dbSkip())
+							NEWSE5->(DBSkip())
 							Loop
 						EndIf
 					EndIf
@@ -1582,11 +1574,11 @@ While !Eof() .and. M0_CODIGO == cEmpAnt .and. IIf( lFWCodFil, FWGETCODFILIAL, SM
 					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 					cFilTrb := If(NEWSE5->E5_RECPAG=='R',"SE1","SE2")
 					If (cFilTrb)->(!Eof()) .And.;
-						((cFilTrb)->&(Right(cFilTrb,2)+"_VENCREA") < mv_par31 .Or. (!Empty(mv_par32) .And. (cFilTrb)->&(Right(cFilTrb,2)+"_VENCREA") > mv_par32))
-						dbSelectArea("NEWSE5")
-						NEWSE5->(dbSkip())
+						((cFilTrb)->&(Right(cFilTrb,2)+"_VENCREA") < MV_PAR31 .Or. (!Empty(MV_PAR32) .And. (cFilTrb)->&(Right(cFilTrb,2)+"_VENCREA") > MV_PAR32))
+						DBSelectArea("NEWSE5")
+						NEWSE5->(DBSkip())
 						Loop
-					Endif
+					EndIf
 	            
 					dBaixa     	:= NEWSE5->E5_DATA
 					cBanco     	:= NEWSE5->E5_BANCO
@@ -1601,87 +1593,87 @@ While !Eof() .and. M0_CODIGO == cEmpAnt .and. IIf( lFWCodFil, FWGETCODFILIAL, SM
 					//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 					//³ Obter moeda da conta no Banco.                               ³
 					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-					If ( cPaisLoc # "BRA".And.!Empty(NEWSE5->E5_BANCO+NEWSE5->E5_AGENCIA+NEWSE5->E5_CONTA) ) .OR. FXMultSld()
-						SA6->(DbSetOrder(1))
+					If ( cPaisLoc # "BRA".And.!Empty(NEWSE5->E5_BANCO+NEWSE5->E5_AGENCIA+NEWSE5->E5_CONTA) ) .Or. FXMultSld()
+						SA6->(DBSetOrder(1))
 						SA6->(MsSeek(xFilial()+NEWSE5->E5_BANCO+NEWSE5->E5_AGENCIA+NEWSE5->E5_CONTA))
 						nMoedaBco	:=	Max(SA6->A6_MOEDA,1)
 					Else
 						nMoedaBco	:=	1
-					Endif
+					EndIf
 	
 					If !Empty(NEWSE5->E5_NUMERO)
-						If (NEWSE5->E5_RECPAG == "R" .and. !(NEWSE5->E5_TIPO $ MVPAGANT+"/"+MV_CPNEG)) .or. ;
-							(NEWSE5->E5_RECPAG == "P" .and. NEWSE5->E5_TIPO $ MVRECANT+"/"+MV_CRNEG) .Or.;
+						If (NEWSE5->E5_RECPAG == "R" .And. !(NEWSE5->E5_TIPO $ MVPAGANT+"/"+MV_CPNEG)) .Or. ;
+							(NEWSE5->E5_RECPAG == "P" .And. NEWSE5->E5_TIPO $ MVRECANT+"/"+MV_CRNEG) .Or.;
 							(NEWSE5->E5_RECPAG == "P" .And. NEWSE5->E5_TIPODOC $ "DB#OD")
-							dbSelectArea( "SA1")
-							dbSetOrder(1)
+							DBSelectArea( "SA1")
+							DBSetOrder(1)
 							lAchou := .F.							
-							If dbSeek(xFilial("SA1")+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
+							If DBSeek(xFilial("SA1")+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
 								lAchou := .T.
-							Endif
+							EndIf
 							If !lAchou
 								cFilOrig := NEWSE5->E5_FILIAL //Procuro SA1 pela filial do movimento
-								If dbSeek(cFilOrig+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
-									If Upper(Alltrim(SA1->A1_NREDUZ)) == Upper(Alltrim(NEWSE5->E5_BENEF))
+								If DBSeek(cFilOrig+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
+									If Upper(AllTrim(SA1->A1_NREDUZ)) == Upper(AllTrim(NEWSE5->E5_BENEF))
 										lAchou := .T.
 									Else
 										cFilOrig := NEWSE5->E5_FILORIG //Procuro SA1 pela filial origem
-										If dbSeek(cFilOrig+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
-											If Upper(Alltrim(SA1->A1_NREDUZ)) == Upper(Alltrim(NEWSE5->E5_BENEF))
+										If DBSeek(cFilOrig+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
+											If Upper(AllTrim(SA1->A1_NREDUZ)) == Upper(AllTrim(NEWSE5->E5_BENEF))
 												lAchou := .T.
-											Endif
-										Endif
-									Endif
+											EndIf
+										EndIf
+									EndIf
 								Else
 									cFilOrig := NEWSE5->E5_FILORIG	//Procuro SA1 pela filial origem
-									If dbSeek(cFilOrig+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
-										If Upper(Alltrim(SA1->A1_NREDUZ)) == Upper(Alltrim(NEWSE5->E5_BENEF))
+									If DBSeek(cFilOrig+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
+										If Upper(AllTrim(SA1->A1_NREDUZ)) == Upper(AllTrim(NEWSE5->E5_BENEF))
 											lAchou := .T.
-										Endif
-									Endif
-								Endif							
-							EndIF
+										EndIf
+									EndIf
+								EndIf							
+							EndIf
 							If lAchou 
-								cCliFor := Iif(mv_par30==1,SA1->A1_NREDUZ,SA1->A1_NOME)
-							Endif
+								cCliFor := IIf(MV_PAR30==1,SA1->A1_NREDUZ,SA1->A1_NOME)
+							EndIf
 						Else
-							dbSelectArea( "SA2")
-							dbSetOrder(1)
+							DBSelectArea( "SA2")
+							DBSetOrder(1)
 							lAchou := .F.							
-							If dbSeek(xFilial("SA2")+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
+							If DBSeek(xFilial("SA2")+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
 								lAchou := .T.
-							Endif
+							EndIf
 							If !lAchou
 								cFilOrig := NEWSE5->E5_FILIAL //Procuro SA2 pela filial do movimento
-								If dbSeek(cFilOrig+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
-									If Upper(Alltrim(SA2->A2_NREDUZ)) == Upper(Alltrim(NEWSE5->E5_BENEF))
+								If DBSeek(cFilOrig+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
+									If Upper(AllTrim(SA2->A2_NREDUZ)) == Upper(AllTrim(NEWSE5->E5_BENEF))
 										lAchou := .T.
 									Else
 										cFilOrig := NEWSE5->E5_FILORIG //Procuro SA2 pela filial origem
-										If dbSeek(cFilOrig+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
-											If Upper(Alltrim(SA2->A2_NREDUZ)) == Upper(Alltrim(NEWSE5->E5_BENEF))
+										If DBSeek(cFilOrig+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
+											If Upper(AllTrim(SA2->A2_NREDUZ)) == Upper(AllTrim(NEWSE5->E5_BENEF))
 												lAchou := .T.
-											Endif
-										Endif
-									Endif
+											EndIf
+										EndIf
+									EndIf
 								Else
 									cFilOrig := NEWSE5->E5_FILORIG	//Procuro SA2 pela filial origem
-									If dbSeek(cFilOrig+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
-										If Upper(Alltrim(SA2->A2_NREDUZ)) == Upper(Alltrim(NEWSE5->E5_BENEF))
+									If DBSeek(cFilOrig+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
+										If Upper(AllTrim(SA2->A2_NREDUZ)) == Upper(AllTrim(NEWSE5->E5_BENEF))
 											lAchou := .T.
-										Endif
-									Endif
-								Endif							
-							EndIF
+										EndIf
+									EndIf
+								EndIf							
+							EndIf
 							If lAchou 
-								cCliFor := Iif(mv_par30==1,SA2->A2_NREDUZ,SA2->A2_NOME)
-							Endif
+								cCliFor := IIf(MV_PAR30==1,SA2->A2_NREDUZ,SA2->A2_NOME)
+							EndIf
 						EndIf
 					EndIf
-					dbSelectArea("SM2")
-					dbSetOrder(1)
-					dbSeek(NEWSE5->E5_DATA)
-					dbSelectArea("NEWSE5")
+					DBSelectArea("SM2")
+					DBSetOrder(1)
+					DBSeek(NEWSE5->E5_DATA)
+					DBSelectArea("NEWSE5")
 					nTaxa:= 0
 					If cPaisLoc=="BRA"
 						If !Empty(NEWSE5->E5_TXMOEDA)
@@ -1695,34 +1687,34 @@ While !Eof() .and. M0_CODIGO == cEmpAnt .and. IIf( lFWCodFil, FWGETCODFILIAL, SM
 						EndIf
 					EndIf
 					nRecSe5:=If(lAsTop,NEWSE5->SE5RECNO,Recno())
-					nDesc+=Iif(mv_par12==1.And.nMoedaBco==1,NEWSE5->E5_VLDESCO,Round(xMoeda(NEWSE5->E5_VLDESCO,nMoedaBco,mv_par12,NEWSE5->E5_DATA,nDecs+1,,nTaxa),nDecs+1))
-					nJuros+=Iif(mv_par12==1.And.nMoedaBco==1,NEWSE5->E5_VLJUROS,Round(xMoeda(NEWSE5->E5_VLJUROS,nMoedaBco,mv_par12,NEWSE5->E5_DATA,nDecs+1,,nTaxa),nDecs+1))
-					nMulta+=Iif(mv_par12==1.And.nMoedaBco==1,NEWSE5->E5_VLMULTA,Round(xMoeda(NEWSE5->E5_VLMULTA,nMoedaBco,mv_par12,NEWSE5->E5_DATA,nDecs+1,,nTaxa),nDecs+1))
+					nDesc+=IIf(MV_PAR12==1.And.nMoedaBco==1,NEWSE5->E5_VLDESCO,Round(xMoeda(NEWSE5->E5_VLDESCO,nMoedaBco,MV_PAR12,NEWSE5->E5_DATA,nDecs+1,,nTaxa),nDecs+1))
+					nJuros+=IIf(MV_PAR12==1.And.nMoedaBco==1,NEWSE5->E5_VLJUROS,Round(xMoeda(NEWSE5->E5_VLJUROS,nMoedaBco,MV_PAR12,NEWSE5->E5_DATA,nDecs+1,,nTaxa),nDecs+1))
+					nMulta+=IIf(MV_PAR12==1.And.nMoedaBco==1,NEWSE5->E5_VLMULTA,Round(xMoeda(NEWSE5->E5_VLMULTA,nMoedaBco,MV_PAR12,NEWSE5->E5_DATA,nDecs+1,,nTaxa),nDecs+1))
 					nJurMul+= nJuros + nMulta
-					nCM+=Iif(mv_par12==1.And.nMoedaBco==1,NEWSE5->E5_VLCORRE,Round(xMoeda(NEWSE5->E5_VLCORRE,nMoedaBco,mv_par12,NEWSE5->E5_DATA,nDecs+1,,nTaxa),nDecs+1))
+					nCM+=IIf(MV_PAR12==1.And.nMoedaBco==1,NEWSE5->E5_VLCORRE,Round(xMoeda(NEWSE5->E5_VLCORRE,nMoedaBco,MV_PAR12,NEWSE5->E5_DATA,nDecs+1,,nTaxa),nDecs+1))
 										
-					If cCarteira == "R" .and. mv_par12 == SE1->E1_MOEDA					
+					If cCarteira == "R" .And. MV_PAR12 == SE1->E1_MOEDA					
 					   nCM := 0
 					
-					ElseIf cCarteira == "P" .and. mv_par12 == SE2->E2_MOEDA
+					ElseIf cCarteira == "P" .And. MV_PAR12 == SE2->E2_MOEDA
 					   nCM := 0					   
 					   
-					Endif					
+					EndIf					
 										
-					If lPccBaixa .and. Empty(NEWSE5->E5_PRETPIS) .And. Empty(NEWSE5->E5_PRETCOF) .And. Empty(NEWSE5->E5_PRETCSL) .And. cCarteira == "P" 
+					If lPccBaixa .And. Empty(NEWSE5->E5_PRETPIS) .And. Empty(NEWSE5->E5_PRETCOF) .And. Empty(NEWSE5->E5_PRETCSL) .And. cCarteira == "P" 
 						If nRecSE2 > 0 
 						
-							aAreabk  := Getarea()
+							aAreabk  := FWGetArea()
 							aAreaSE2 := SE2->(Getarea())
-							SE2->(DbGoto(nRecSE2))
+							SE2->(DBGoTo(nRecSE2))
 						
 							nTotAbImp += (NEWSE5->E5_VRETPIS) + (NEWSE5->E5_VRETCOF) + (NEWSE5->E5_VRETCSL) + ;
 										SE2->E2_INSS + SE2->E2_ISS + SE2->E2_IRRF
 										
-							Restarea(aAreaSE2)
-							Restarea(aAreabk)
+							FWRestArea(aAreaSE2)
+							FWRestArea(aAreabk)
 						Else
-							nTotAbImp += (NEWSE5->E5_VRETPIS) + (NEWSE5->E5_VRETCOF) + (NEWSE5->E5_VRETCSL) + Iif( lMvGlosa , NEWSE5->E5_VRETIRF + NEWSE5->E5_VRETISS + NEWSE5->E5_VRETINS , 0 )
+							nTotAbImp += (NEWSE5->E5_VRETPIS) + (NEWSE5->E5_VRETCOF) + (NEWSE5->E5_VRETCSL) + IIf( lMvGlosa , NEWSE5->E5_VRETIRF + NEWSE5->E5_VRETISS + NEWSE5->E5_VRETINS , 0 )
 						EndIf
 
 						nVlrGlosa := nTotAbImp
@@ -1733,57 +1725,57 @@ While !Eof() .and. M0_CODIGO == cEmpAnt .and. IIf( lFWCodFil, FWGETCODFILIAL, SM
 						cHistorico := NEWSE5->E5_HISTOR
 
 						If NEWSE5->E5_RECPAG == 'R' 
-							If cPaisLoc == "ARG" .and. !EMPTY(NEWSE5->E5_ORDREC)
-								nValor += Iif(VAL(NEWSE5->E5_MOEDA)==mv_par12,NEWSE5->E5_VALOR,Round(xMoeda(NEWSE5->E5_VALOR,VAL(NEWSE5->E5_MOEDA),mv_par12,NEWSE5->E5_DATA,nDecs+1,NEWSE5->E5_TXMOEDA),nDecs+1))
+							If cPaisLoc == "ARG" .And. !Empty(NEWSE5->E5_ORDREC)
+								nValor += IIf(Val(NEWSE5->E5_MOEDA)==MV_PAR12,NEWSE5->E5_VALOR,Round(xMoeda(NEWSE5->E5_VALOR,Val(NEWSE5->E5_MOEDA),MV_PAR12,NEWSE5->E5_DATA,nDecs+1,NEWSE5->E5_TXMOEDA),nDecs+1))
 							Else
-							 	nValor += Iif(mv_par12==nMoedaBco,NEWSE5->E5_VALOR,Round(xMoeda(NEWSE5->E5_VLMOED2,SE2->E2_MOEDA,mv_par12,SE2->E2_BAIXA,nDecs+1,If(cPaisLoc=="BRA",SE2->E2_TXMOEDA,0))+nJurMul-nDesc,nDecs+1))
-							Endif
+							 	nValor += IIf(MV_PAR12==nMoedaBco,NEWSE5->E5_VALOR,Round(xMoeda(NEWSE5->E5_VLMOED2,SE2->E2_MOEDA,MV_PAR12,SE2->E2_BAIXA,nDecs+1,If(cPaisLoc=="BRA",SE2->E2_TXMOEDA,0))+nJurMul-nDesc,nDecs+1))
+							EndIf
 						Else 
-							If cPaisLoc <> "BRA" .and. !EMPTY(NEWSE5->E5_ORDREC)
-								nValor+=Iif(mv_par12==1.And.nMoedaBco==1,NEWSE5->E5_VALOR,Round(xMoeda(NEWSE5->E5_VLMOED2,VAL(NEWSE5->E5_MOEDA),mv_par12,NEWSE5->E5_DATA,nDecs+1,If(cPaisLoc=="BRA",NEWSE5->E5_TXMOEDA,0)),nDecs+1))
+							If cPaisLoc <> "BRA" .And. !Empty(NEWSE5->E5_ORDREC)
+								nValor+=IIf(MV_PAR12==1.And.nMoedaBco==1,NEWSE5->E5_VALOR,Round(xMoeda(NEWSE5->E5_VLMOED2,Val(NEWSE5->E5_MOEDA),MV_PAR12,NEWSE5->E5_DATA,nDecs+1,If(cPaisLoc=="BRA",NEWSE5->E5_TXMOEDA,0)),nDecs+1))
 							Else						
-						  		nValor+=Iif(mv_par12==1.And.nMoedaBco==1,NEWSE5->E5_VALOR,Round(xMoeda(NEWSE5->E5_VLMOED2,SE1->E1_MOEDA,mv_par12,SE1->E1_BAIXA,nDecs+1,If(cPaisLoc=="BRA",SE1->E1_TXMOEDA,0)),nDecs+1))						
+						  		nValor+=IIf(MV_PAR12==1.And.nMoedaBco==1,NEWSE5->E5_VALOR,Round(xMoeda(NEWSE5->E5_VLMOED2,SE1->E1_MOEDA,MV_PAR12,SE1->E1_BAIXA,nDecs+1,If(cPaisLoc=="BRA",SE1->E1_TXMOEDA,0)),nDecs+1))						
 						  	EndIf
 						EndIf
 
 						//Pcc Baixa CR
-						If cCarteira == "R" .and. lPccBxCr .and. cPaisLoc == "BRA" .And. (IiF(lRaRtImp,NEWSE5->E5_TIPO $ MVRECANT,.T.) .OR. lPccBaixa)
+						If cCarteira == "R" .And. lPccBxCr .And. cPaisLoc == "BRA" .And. (IIf(lRaRtImp,NEWSE5->E5_TIPO $ MVRECANT,.T.) .Or. lPccBaixa)
 							If Empty(NEWSE5->E5_PRETPIS) 
-								nPccBxCr += Iif(mv_par12==1.And.nMoedaBco==1,NEWSE5->E5_VRETPIS,Round(xMoeda(NEWSE5->E5_VRETPIS,nMoedaBco,mv_par12,NEWSE5->E5_DATA,nDecs+1,,NEWSE5->E5_TXMOEDA),nDecs+1))
-							Endif						
+								nPccBxCr += IIf(MV_PAR12==1.And.nMoedaBco==1,NEWSE5->E5_VRETPIS,Round(xMoeda(NEWSE5->E5_VRETPIS,nMoedaBco,MV_PAR12,NEWSE5->E5_DATA,nDecs+1,,NEWSE5->E5_TXMOEDA),nDecs+1))
+							EndIf						
 							If Empty(NEWSE5->E5_PRETCOF) 
-								nPccBxCr += Iif(mv_par12==1.And.nMoedaBco==1,NEWSE5->E5_VRETCOF,Round(xMoeda(NEWSE5->E5_VRETCOF,nMoedaBco,mv_par12,NEWSE5->E5_DATA,nDecs+1,,NEWSE5->E5_TXMOEDA),nDecs+1))
-							Endif						
+								nPccBxCr += IIf(MV_PAR12==1.And.nMoedaBco==1,NEWSE5->E5_VRETCOF,Round(xMoeda(NEWSE5->E5_VRETCOF,nMoedaBco,MV_PAR12,NEWSE5->E5_DATA,nDecs+1,,NEWSE5->E5_TXMOEDA),nDecs+1))
+							EndIf						
 							If Empty(NEWSE5->E5_PRETCSL) 
-								nPccBxCr += Iif(mv_par12==1.And.nMoedaBco==1,NEWSE5->E5_VRETCSL,Round(xMoeda(NEWSE5->E5_VRETCSL,nMoedaBco,mv_par12,NEWSE5->E5_DATA,nDecs+1,,NEWSE5->E5_TXMOEDA),nDecs+1))
-							Endif											
-						Endif
+								nPccBxCr += IIf(MV_PAR12==1.And.nMoedaBco==1,NEWSE5->E5_VRETCSL,Round(xMoeda(NEWSE5->E5_VRETCSL,nMoedaBco,MV_PAR12,NEWSE5->E5_DATA,nDecs+1,,NEWSE5->E5_TXMOEDA),nDecs+1))
+							EndIf											
+						EndIf
 
 					Else
-						nVlMovFin+=Iif(mv_par12==1.And.nMoedaBco==1,NEWSE5->E5_VALOR,Round(xMoeda(NEWSE5->E5_VALOR,nMoedaBco,mv_par12,NEWSE5->E5_DATA,nDecs+1,nTaxa),nDecs+1))
-						cHistorico := Iif(Empty(NEWSE5->E5_HISTOR),"MOV FIN MANUAL",NEWSE5->E5_HISTOR)
+						nVlMovFin+=IIf(MV_PAR12==1.And.nMoedaBco==1,NEWSE5->E5_VALOR,Round(xMoeda(NEWSE5->E5_VALOR,nMoedaBco,MV_PAR12,NEWSE5->E5_DATA,nDecs+1,nTaxa),nDecs+1))
+						cHistorico := IIf(Empty(NEWSE5->E5_HISTOR),"MOV FIN MANUAL",NEWSE5->E5_HISTOR)
 						cNatureza  	:= NEWSE5->E5_NATUREZ
-					Endif	
-					dbSkip()
-					If lManual		// forca a saida do looping se for mov manual
+					EndIf	
+					DBSkip()
+					If lManual		// forca a saida do looping se For mov manual
 						Exit
-					Endif
-				EndDO
+					EndIf
+				EndDo
 	
 				If (nDesc+nValor+nJurMul+nCM+nVlMovFin) > 0
 					//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 					//³ C lculo do Abatimento        ³
 					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-					If cCarteira == "R" .and. !lManual
-						dbSelectArea("SE1")
+					If cCarteira == "R" .And. !lManual
+						DBSelectArea("SE1")
 						nRecno := Recno()
 						nAbat := 0
 						nAbatLiq := 0
 						//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-						//³ Entra no if abaixo se titulo totalmente baixado e se for a maior
+						//³ Entra no If abaixo se titulo totalmente baixado e se For a maior
 						// sequnecia de baixa no SE5 
 						//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ												
-						If !SE1->E1_TIPO $ MVRECANT + "/" + MV_CRNEG .and. Empty(SE1->E1_SALDO) .and.;
+						If !SE1->E1_TIPO $ MVRECANT + "/" + MV_CRNEG .And. Empty(SE1->E1_SALDO) .and.;
 						    cMaxSeq == cSeq
                                                          
 							//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -1793,63 +1785,63 @@ While !Eof() .and. M0_CODIGO == cEmpAnt .and. IIf( lFWCodFil, FWGETCODFILIAL, SM
 							nAbat := SumAbatRec(cPrefixo,cNumero,cParcela,SE1->E1_MOEDA,"V",dBaixa,@nTotAbImp)
 							nAbatLiq := nAbat - nTotAbImp
 						EndIf
-						dbSelectArea("SE1")
-						dbGoTo(nRecno)
+						DBSelectArea("SE1")
+						DBGoTo(nRecno)
 						cCliFor190 := SE1->E1_CLIENTE+SE1->E1_LOJA
                                                                       
 						SA1->(DBSetOrder(1))
 						If cPaisLoc == "BRA" .And. SA1->(DBSeek(xFilial("SA1")+cCliFor190) )
-							lCalcIRF := SA1->A1_RECIRRF == "1" .and. SA1->A1_IRBAX == "1" // se for na baixa 
+							lCalcIRF := SA1->A1_RECIRRF == "1" .And. SA1->A1_IRBAX == "1" // se For na baixa 
 						Else
 							lCalcIRF := .F.	
 						EndIf	
 						If lCalcIRF .And. !lMvGlosa
 							nTotAbImp += SE1->E1_IRRF
 						EndIf	
-					Elseif !lManual
-						dbSelectArea("SE2")
+					ElseIf !lManual
+						DBSelectArea("SE2")
 						nRecno := Recno()
 						nAbat := 0
 						nAbatLiq := 0						
-						If !SE2->E2_TIPO $ MVPAGANT+"/"+MV_CPNEG .and. Empty(SE2->E2_SALDO) .and.;
+						If !SE2->E2_TIPO $ MVPAGANT+"/"+MV_CPNEG .And. Empty(SE2->E2_SALDO) .and.;
 						    cMaxSeq == cSeq
-							nAbat :=	SomaAbat(cPrefixo,cNumero,cParcela,"P",mv_par12,,cFornece,cLoja)
+							nAbat :=	SomaAbat(cPrefixo,cNumero,cParcela,"P",MV_PAR12,,cFornece,cLoja)
 							nAbatLiq := nAbat	
 						EndIf			
-						dbSelectArea("SE2")
-						dbGoTo(nRecno)
-					EndIF
+						DBSelectArea("SE2")
+						DBGoTo(nRecno)
+					EndIf
 	
 					If li > 55
 						cabec(titulo,cabec1,cabec2,nomeprog,tamanho,15)
-					EndIF
+					EndIf
 	
-					IF cCarteira=="R" .and. aTam[1] > 6 .and. !lManual
+					If cCarteira=="R" .And. aTam[1] > 6 .And. !lManual
 						If lBxTit
 							@li, aColu[05] PSAY SE1->E1_CLIENTE						
-						Endif
+						EndIf
 						@li, aColu[06] PSAY SubStr(cCliFor,1,18)
 						li++
-					Elseif cCarteira=="P" .and. aTam[1] > 6 .and. !lManual
+					ElseIf cCarteira=="P" .And. aTam[1] > 6 .And. !lManual
 						If lBxTit
 							@li, aColu[05] PSAY SE2->E2_FORNECE
-						Endif
+						EndIf
 						@li, aColu[06] PSAY SubStr(cCliFor,1,18)
 						li++
-					Endif
+					EndIf
 	
 					@li, aColu[01] PSAY cPrefixo
 					@li, aColu[02] PSAY cNumero
 					
 					If cPaisLoc	$ "MEX|PTG"
 					   li++
-					Endif					
+					EndIf					
 					
 					@li, aColu[03] PSAY cParcela
 					@li, aColu[04] PSAY cTipo		
 	
 					If !lManual
-						dbSelectArea("TRB")
+						DBSelectArea("TRB")
 						lOriginal := .T.
 						//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 						//³ Baixas a Receber             ³
@@ -1857,9 +1849,9 @@ While !Eof() .and. M0_CODIGO == cEmpAnt .and. IIf( lFWCodFil, FWGETCODFILIAL, SM
 						If cCarteira == "R"
 							cCliFor190 := SE1->E1_CLIENTE+SE1->E1_LOJA
 							nVlr:= SE1->E1_VLCRUZ
-							If mv_par12 > 1
-								nVlr := Round(xMoeda(SE1->E1_VALOR,SE1->E1_MOEDA,mv_par12,SE1->E1_BAIXA,nDecs+1,If(cPaisLoc=="BRA",SE1->E1_TXMOEDA,0)),nDecs+1)
-							EndIF
+							If MV_PAR12 > 1
+								nVlr := Round(xMoeda(SE1->E1_VALOR,SE1->E1_MOEDA,MV_PAR12,SE1->E1_BAIXA,nDecs+1,If(cPaisLoc=="BRA",SE1->E1_TXMOEDA,0)),nDecs+1)
+							EndIf
 							//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 							//³ Baixa de PA                  ³
 							//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -1870,103 +1862,103 @@ While !Eof() .and. M0_CODIGO == cEmpAnt .and. IIf( lFWCodFil, FWGETCODFILIAL, SM
 								lCalcIRF:= Posicione("SA2",1,xFilial("SA2")+cCliFor190,"A2_CALCIRF") == "1" .Or.;//1-Normal, 2-Baixa
 								           Posicione("SA2",1,xFilial("SA2")+cCliFor190,"A2_CALCIRF") == " "
 							Else 
-								lCalcIRF:=.f.
+								lCalcIRF:=.F.
 							EndIf
 										
 							// MV_MRETISS "1" retencao do ISS na Emissao, "2" retencao na Baixa.
 					   		nVlr:= SE2->E2_VLCRUZ
 							
 							If lConsImp   //default soma os impostos no valor original
-								nVlr += SE2->E2_INSS+ Iif(GetNewPar('MV_MRETISS',"1")=="1",SE2->E2_ISS,0) +;
-									   	Iif(lCalcIRF,SE2->E2_IRRF,0)
+								nVlr += SE2->E2_INSS+ IIf(GetNewPar('MV_MRETISS',"1")=="1",SE2->E2_ISS,0) +;
+									   	IIf(lCalcIRF,SE2->E2_IRRF,0)
 								If ! lPccBaixa  // SE PCC NA EMISSAO SOMA PCC
 									nVlr += SE2->E2_VRETPIS+SE2->E2_VRETCOF+SE2->E2_VRETCSL
 								EndIf
 							EndIf
 							
-							If mv_par12 > 1
-								nVlr := Round(xMoeda(SE2->E2_VALOR,SE2->E2_MOEDA,mv_par12,SE2->E2_BAIXA,nDecs+1,If(cPaisLoc=="BRA",SE2->E2_TXMOEDA,0)),nDecs+1)
-							Endif
-						Endif
+							If MV_PAR12 > 1
+								nVlr := Round(xMoeda(SE2->E2_VALOR,SE2->E2_MOEDA,MV_PAR12,SE2->E2_BAIXA,nDecs+1,If(cPaisLoc=="BRA",SE2->E2_TXMOEDA,0)),nDecs+1)
+							EndIf
+						EndIf
 						cFilTrb := If(cCarteira=="R","SE1","SE2")
-						IF DbSeek( xFilial(cFilTrb)+cPrefixo+cNumero+cParcela+cCliFor190+cTipo)
+						If DBSeek( xFilial(cFilTrb)+cPrefixo+cNumero+cParcela+cCliFor190+cTipo)
 							nAbat:=0
 							lOriginal := .F.
 						Else
 							nVlr:=NoRound(nVlr)
 							RecLock("TRB",.T.)
 							Replace linha With xFilial(cFilTrb)+cPrefixo+cNumero+cParcela+cCliFor190+cTipo
-							MsUnlock()
-						EndIF
+							MSUnLock()
+						EndIf
 					Else
 						If lAsTop
-							dbSelectArea("SE5")
+							DBSelectArea("SE5")
 						Else
-							dbSelectArea("NEWSE5")
-						Endif
-						dbgoto(nRecSe5)
-						nVlr := Round(xMoeda(E5_VALOR,nMoedaBco,mv_par12,E5_DATA,nDecs+1,,If(cPaisLoc=="BRA",E5_TXMOEDA,0)),nDecs+1)
+							DBSelectArea("NEWSE5")
+						EndIf
+						DBGoTo(nRecSe5)
+						nVlr := Round(xMoeda(E5_VALOR,nMoedaBco,MV_PAR12,E5_DATA,nDecs+1,,If(cPaisLoc=="BRA",E5_TXMOEDA,0)),nDecs+1)
 						nAbat:= 0
-						lOriginal := .t.
+						lOriginal := .T.
 						If lAsTop
 							nRecSe5:=NEWSE5->SE5RECNO
 						Else
 							nRecSe5:=Recno()
-							NEWSE5->( dbSkip() )
-						Endif
-						dbSelectArea("TRB")
-					Endif
-					IF cCarteira == "R"
-						If ( !lManual )
-							If mv_par13 == 1  // Utilizar o Hist¢rico da Baixa ou Emiss„o
-								cHistorico := Iif(Empty(cHistorico), SE1->E1_HIST, cHistorico )
-							Else
-								cHistorico := Iif(Empty(SE1->E1_HIST), cHistorico, SE1->E1_HIST )
-							Endif
+							NEWSE5->( DBSkip() )
 						EndIf
-						If aTam[1] <= 6 .and. !lManual
+						DBSelectArea("TRB")
+					EndIf
+					If cCarteira == "R"
+						If ( !lManual )
+							If MV_PAR13 == 1  // Utilizar o Hist¢rico da Baixa ou Emiss„o
+								cHistorico := IIf(Empty(cHistorico), SE1->E1_HIST, cHistorico )
+							Else
+								cHistorico := IIf(Empty(SE1->E1_HIST), cHistorico, SE1->E1_HIST )
+							EndIf
+						EndIf
+						If aTam[1] <= 6 .And. !lManual
 							If lBxTit
 								@li, aColu[05] PSAY SE1->E1_CLIENTE
-							Endif
+							EndIf
 							@li, aColu[06] PSAY SubStr(cCliFor,1,18)
-						Endif
+						EndIf
 						@li, 49 PSAY cNatureza
-						If Empty( dDtMovFin ) .or. dDtMovFin == Nil
+						If Empty( dDtMovFin ) .Or. dDtMovFin == Nil
 							dDtMovFin := CtoD("  /  /  ")
-						Endif
+						EndIf
 						@li, 60 PSAY IIf(lManual,dDtMovFin,DataValida(SE1->E1_VENCTO,.T.))
 						@li, 71 PSAY SubStr( cHistorico ,1,21)
 						@li, 93 PSAY dBaixa
-						IF nVlr > 0
+						If nVlr > 0
 							@li,103 PSAY nVlr  Picture tm(nVlr,14,nDecs)
-						Endif
+						EndIf
 					Else
-						If mv_par13 == 1  // Utilizar o Hist¢rico da Baixa ou Emiss„o
-							cHistorico := Iif(Empty(cHistorico), SE2->E2_HIST, cHistorico )
+						If MV_PAR13 == 1  // Utilizar o Hist¢rico da Baixa ou Emiss„o
+							cHistorico := IIf(Empty(cHistorico), SE2->E2_HIST, cHistorico )
 						Else
-							cHistorico := Iif(Empty(SE2->E2_HIST), cHistorico, SE2->E2_HIST )
-						Endif
-						If aTam[1] <= 6 .and. !lManual
+							cHistorico := IIf(Empty(SE2->E2_HIST), cHistorico, SE2->E2_HIST )
+						EndIf
+						If aTam[1] <= 6 .And. !lManual
 							If lBxTit
 								@li, aColu[05] PSAY SE2->E2_FORNECE
-							Endif
+							EndIf
 							@li, aColu[06] PSAY SubStr(cCliFor,1,18)
-						Endif
+						EndIf
 						@li, 49 PSAY cNatureza
-						If Empty( dDtMovFin ) .or. dDtMovFin == Nil
+						If Empty( dDtMovFin ) .Or. dDtMovFin == Nil
 							dDtMovFin := CtoD("  /  /  ")
-						Endif
+						EndIf
 						@li, 60 PSAY IIf(lManual,dDtMovFin,DataValida(SE2->E2_VENCTO,.T.))
 						If !Empty(cCheque)
-							@li, 71 PSAY SubStr(ALLTRIM(cCheque)+"/"+Trim(cHistorico),1,18)
+							@li, 71 PSAY SubStr(AllTrim(cCheque)+"/"+Trim(cHistorico),1,18)
 						Else
 							@li, 71 PSAY SubStr(cHistorico,1,21)
 						EndIf
 						@li, 93 PSAY dBaixa
-						IF nVlr > 0
+						If nVlr > 0
 							@li,103 PSAY nVlr Picture tm(nVlr,14,nDecs)
-						Endif
-					Endif
+						EndIf
+					EndIf
 					nCT++
 					
 					//PCC Baixa CR
@@ -1984,8 +1976,8 @@ While !Eof() .and. M0_CODIGO == cEmpAnt .and. IIf( lFWCodFil, FWGETCODFILIAL, SM
 					@li,142 PSAY nDesc      PicTure tm(nDesc,11,nDecs)
 					@li,154 PSAY nAbatLiq  	Picture tm(nAbatLiq,11,nDecs)
 					@li,166 PSAY nTotAbImp 	Picture tm(nTotAbImp,11,nDecs)
-					If (nVlr <= IIf(nVlMovFin > 0 , nVlMovFin , nValor)) .AND. ;
-						(Substr(AllTrim(cHistorico),1,At("-",AllTrim(cHistorico))-1) == "LOJ")
+					If (nVlr <= IIf(nVlMovFin > 0 , nVlMovFin , nValor)) .And. ;
+						(SubStr(AllTrim(cHistorico),1,At("-",AllTrim(cHistorico))-1) == "LOJ")
 						//---------------------------------------------------------------------------------
 						//Quando o recebimento de titulos é efetuado pelo SIGALOJA e o parametro 
 						//MV_LJTROCO == .T., o valor de total gravado no E5_VALOR é gravado com o valor do 
@@ -1998,88 +1990,88 @@ While !Eof() .and. M0_CODIGO == cEmpAnt .and. IIf( lFWCodFil, FWGETCODFILIAL, SM
 						@li,178 PSAY nVlMovFin     PicTure tm(nVlMovFin,15,nDecs)
 					Else
 						@li,178 PSAY nValor			PicTure tm(nValor,15,nDecs)
-					Endif
+					EndIf
 					@li,196 PSAY cBanco
-					If Len(DtoC(dDigit)) <= 8
+					If Len(DToC(dDigit)) <= 8
 						@li,202 PSAY dDigit
 					Else                   
 						@li,200 PSAY dDigit
 					EndIf
 	
-					If empty(cMotBaixa)
+					If Empty(cMotBaixa)
 						cMotBaixa := "NOR"  //NORMAL
-					Endif
+					EndIf
 	
-					@li,211 PSAY Substr(cMotBaixa,1,3)
+					@li,211 PSAY SubStr(cMotBaixa,1,3)
 					@li,215 PSAY cFilorig
 					
 					nTotOrig   += nVlr
 					nTotPOrig 	+= nVlr
-					nTotBaixado+= If(cTipodoc $ "CP/BA" .AND. cMotBaixa $ "CMP/FAT",0,IIF(lBxLoja,nVlr,nValor))		// n„o soma, j  somou no principal					
+					nTotBaixado+= If(cTipodoc $ "CP/BA" .And. cMotBaixa $ "CMP/FAT",0,IIf(lBxLoja,nVlr,nValor))		// n„o soma, j  somou no principal					
 					nTotDesc   += nDesc
 					nTotJurMul += nJurMul
 					nTotCM     += nCM
 					nTotAbLiq  += nAbatLiq
 					nTotImp    += nTotAbImp
-					nTotValor  += IIF( lBxLoja , nVlr, IIF(nVlMovFin <> 0, nVlMovFin , nValor))
+					nTotValor  += IIf( lBxLoja , nVlr, IIf(nVlMovFin <> 0, nVlMovFin , nValor))
 					nTotMovFin += nVlMovFin
-					nTotComp   += Iif(cTipodoc == "CP",IIF(lBxLoja,nVlr,nValor),0)
-					nTotFat	   += Iif(cMotBaixa $ "FAT",IIF(lBxLoja,nVlr,nValor), 0)									
+					nTotComp   += IIf(cTipodoc == "CP",IIf(lBxLoja,nVlr,nValor),0)
+					nTotFat	   += IIf(cMotBaixa $ "FAT",IIf(lBxLoja,nVlr,nValor), 0)									
 					nDesc := nJurMul := nValor := nCM := nAbat := nTotAbImp := nAbatLiq := nVlMovFin := 0
 					nPccBxCr	 := 0			//PCC Baixa
 					lBxLoja		 := .F.
 					li++
-				Endif
-				dbSelectArea("NEWSE5")
-			Enddo
+				EndIf
+				DBSelectArea("NEWSE5")
+			EndDo
 	
 			If (nTotValor+nDesc+nJurMul+nCM+nTotOrig+nTotMovFin+nTotComp+nTotBaixado)>0
 				li++
-				IF li > 55
+				If li > 55
 					cabec(titulo,cabec1,cabec2,nomeprog,tamanho,15)
-				Endif
+				EndIf
 				If nCT > 0
-					IF nOrdem == 1 .or. nOrdem == 6 .or. nOrdem == 8
-						@li, 0 PSAY "Sub Total : " + DTOC(cAnterior)
-					Elseif nOrdem == 2 .or. nOrdem == 4 .or. nOrdem == 7
+					If nOrdem == 1 .Or. nOrdem == 6 .Or. nOrdem == 8
+						@li, 0 PSAY "Sub Total : " + DToC(cAnterior)
+					ElseIf nOrdem == 2 .Or. nOrdem == 4 .Or. nOrdem == 7
 						cLinha := "Sub Total : "+cAnterior+" "
 						If nOrdem == 4
-							If ((mv_par11 == 1 .OR. MV_PAR11 == 3) .and. (cRecpag == "R" .and. !(cTipo190 $ MVPAGANT+"/"+MV_CPNEG))) .or. ;
-								(cRecpag == "P" .and. cTipo190 $ MVRECANT+"/"+MV_CRNEG) .Or.;
+							If ((MV_PAR11 == 1 .Or. MV_PAR11 == 3) .And. (cRecpag == "R" .And. !(cTipo190 $ MVPAGANT+"/"+MV_CPNEG))) .Or. ;
+								(cRecpag == "P" .And. cTipo190 $ MVRECANT+"/"+MV_CRNEG) .Or.;
 								(cRecPag == "P" .And. cTipoDoc $ "DB#OD")
 	
-								dbSelectArea("SA1")
-								DbSetOrder(1)
+								DBSelectArea("SA1")
+								DBSetOrder(1)
 								If !Empty(cAnterior)
 									MsSeek(cFilial+cFornece+cLoja)
 									cLinha+=" "+A1_CGC
 								Else
 									cLinha+= OemToAnsi(STR0038)  //"Moviment. Financeiras Manuais "
-								Endif
-							ElseIF ((mv_par11 == 2 .OR. MV_PAR11 == 3)  .and. (cRecpag == "P" .and. !(cTipo190 $ MVRECANT+"/"+MV_CRNEG))) .or.;
-									(cRecpag == "R" .and. cTipo190 $ MVPAGANT+"/"+MV_CPNEG)
-								dbSelectArea("SA2")
-								DbSetOrder(1)
+								EndIf
+							ElseIf ((MV_PAR11 == 2 .Or. MV_PAR11 == 3)  .And. (cRecpag == "P" .And. !(cTipo190 $ MVRECANT+"/"+MV_CRNEG))) .or.;
+									(cRecpag == "R" .And. cTipo190 $ MVPAGANT+"/"+MV_CPNEG)
+								DBSelectArea("SA2")
+								DBSetOrder(1)
 								If !Empty(cAnterior)
 									MsSeek(cFilial+cFornece+cLoja)
 									cLinha+=TRIM(A2_NOME)+"  "+A2_CGC
 								Else
 									cLinha+= OemToAnsi(STR0038)  //"Moviment. Financeiras Manuais "
-								Endif
-							Endif
-						Elseif nOrdem == 2
-							dbSelectArea("SA6")
-							DbSetOrder(1)
+								EndIf
+							EndIf
+						ElseIf nOrdem == 2
+							DBSelectArea("SA6")
+							DBSetOrder(1)
 							MsSeek(xFilial("SA6")+cBancoAnt+cAgAnt+cContaAnt)
 							cLinha+=TRIM(A6_NOME)
-						Endif
+						EndIf
 						@li,0 PSAY cLinha
-					Elseif nOrdem == 3
-						dbSelectArea("SED")
-						DbSetOrder(1)
+					ElseIf nOrdem == 3
+						DBSelectArea("SED")
+						DBSetOrder(1)
 						MsSeek(cFilial+cAnterior)
 						@li, 0 PSAY "SubTotal : " + cAnterior + " "+ED_DESCRIC
-					Endif
+					EndIf
 					If nOrdem != 5
 						@li,102 PSAY nTotOrig     PicTure tm(nTotOrig,15,nDecs)
 						@li,118 PSAY nTotJurMul   PicTure tm(nTotJurMul,11,nDecs)
@@ -2091,28 +2083,28 @@ While !Eof() .and. M0_CODIGO == cEmpAnt .and. IIf( lFWCodFil, FWGETCODFILIAL, SM
 						If nTotBaixado > 0
 							@li,195 PSAY STR0028  //"Baixados"
 							@li,204 PSAY nTotBaixado  PicTure tm(nTotBaixado,15,nDecs)
-						Endif	
+						EndIf	
 						If nTotMovFin > 0
 							li++
 							@li,195 PSAY STR0031   //"Mov Fin."
 							@li,204 PSAY nTotMovFin   PicTure tm(nTotMovFin,15,nDecs)
-						Endif
+						EndIf
 						If nTotComp > 0
 							li++
 							@li,195 PSAY STR0037  //"Compens."
 							@li,204 PSAY nTotComp     PicTure tm(nTotComp,15,nDecs)
-						Endif
+						EndIf
 						If nTotFat > 0
 							li++
 							@li,195 PSAY STR0076  //"Bx.Fatura"
 							@li,204 PSAY nTotFat     PicTure tm(nTotFat,15,nDecs)
-						Endif						
+						EndIf						
 						li+=2
 						nTotPOrig := 0 //zerando o total parcial
-					Endif
-					dbSelectArea("NEWSE5")
-				Endif
-			Endif
+					EndIf
+					DBSelectArea("NEWSE5")
+				EndIf
+			EndIf
 	
 			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 			//³Incrementa Totais Gerais ³
@@ -2142,13 +2134,13 @@ While !Eof() .and. M0_CODIGO == cEmpAnt .and. IIf( lFWCodFil, FWGETCODFILIAL, SM
 			nFilMovFin	+= nTotMovFin
 			nFilComp	+= nTotComp
 			nFilFat	    += nTotFat
-		Enddo
-	Endif	
+		EndDo
+	EndIf	
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Imprimir TOTAL por filial somente quan-³
 	//³ do houver mais do que 1 filial.        ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	if mv_par17 == 1 .and. SM0->(Reccount()) > 1 .And. li != 80 .And. !Empty(FWFilial("SE5"))            
+	If MV_PAR17 == 1 .And. SM0->(RecCount()) > 1 .And. li != 80 .And. !Empty(FWFilial("SE5"))            
 		@li,  0 PSAY "FILIAL : " +  cFilAnt + " - " + cFilNome
 		@li,102 PSAY nFilOrig       PicTure tm(nFilOrig,15,nDecs)
 		@li,118 PSAY nFilJurMul     PicTure tm(nFilJurMul,11,nDecs)
@@ -2160,42 +2152,42 @@ While !Eof() .and. M0_CODIGO == cEmpAnt .and. IIf( lFWCodFil, FWGETCODFILIAL, SM
 		If nFilBaixado > 0 
 			@li,195 PSAY STR0028 // "Baixados"
 			@li,204 PSAY nFilBaixado    PicTure tm(nFilBaixado,15,nDecs)
-		Endif
+		EndIf
 		If nFilMovFin > 0
 			li++
 			@li,195 PSAY STR0031   //"Mov Fin."
 			@li,204 PSAY nFilMovFin   PicTure tm(nFilMovFin,15,nDecs)
-		Endif
+		EndIf
 		If nFilComp > 0
 			li++
 			@li,195 PSAY STR0037  //"Compens."
 			@li,204 PSAY nFilComp     PicTure tm(nFilComp,15,nDecs)
-		Endif
+		EndIf
 		If nFilFat > 0
 			li++
 			@li,195 PSAY STR0076  //"Bx.Fatura"
 			@li,204 PSAY nFilFat     PicTure tm(nFilFat,15,nDecs)
-		Endif
+		EndIf
 		li+=2
-		If Empty(xFilial("SE5")) .And. mv_par17 == 2
+		If Empty(xFilial("SE5")) .And. MV_PAR17 == 2
 			Exit
-		Endif	
+		EndIf	
 
 		nFilOrig:=nFilJurMul:=nFilCM:=nFilDesc:=nFilAbLiq:=nFilAbImp:=nFilValor:=0
 		nFilBaixado:=nFilMovFin:=nFilComp:=nFilFat:=0
-	Endif
-	dbSelectArea("SM0")
+	EndIf
+	DBSelectArea("SM0")
 	cCodUlt := SM0->M0_CODIGO
 	cFilUlt := IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL )
-	dbSkip()
-Enddo
+	DBSkip()
+EndDo
 
 If li != 80
 	// Imprime o cabecalho, caso nao tenha espaco suficiente para impressao do total geral
 	If (li+4)>=60
 		SM0->(MsSeek(cCodUlt+cFilUlt))		
 		cabec(titulo,cabec1,cabec2,nomeprog,tamanho,15)
-	Endif
+	EndIf
 	li+=2
 	@li,  0 PSAY OemToAnsi(STR0029)  //"Total Geral : "
 	@li,102 PSAY nGerOrig       PicTure tm(nGerOrig,15,nDecs)
@@ -2208,27 +2200,27 @@ If li != 80
 	If nGerBaixado > 0 
 		@li,195 PSAY OemToAnsi(STR0028) // "Baixados"
 		@li,204 PSAY nGerBaixado    PicTure tm(nGerBaixado,15,nDecs)
-	Endif
+	EndIf
 	If nGerMovFin > 0
 		li++
 		@li,195 PSAY OemToAnsi(STR0031)   //"Mov Fin."
 		@li,204 PSAY nGerMovFin   PicTure tm(nGerMovFin,15,nDecs)
-	Endif
+	EndIf
 	If nGerComp > 0
 		li++
 		@li,195 PSAY STR0037  //"Compens."
 		@li,204 PSAY nGerComp     PicTure tm(nGerComp,15,nDecs)
-	Endif
+	EndIf
 	If nGerFat > 0
 		li++
 		@li,195 PSAY STR0076  //"Bx.Fatura"
 		@li,204 PSAY nGerFat     PicTure tm(nGerFat,15,nDecs)
-	Endif
+	EndIf
 	li++
 	roda(cbcont,cbtxt,"G")
-Endif
+EndIf
 
-SM0->(dbgoto(nRecEmp))
+SM0->(DBGoTo(nRecEmp))
 cFilAnt := IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL )
 If(_oFINR190 <> NIL)
 
@@ -2236,19 +2228,19 @@ If(_oFINR190 <> NIL)
 	_oFINR190 := NIL
 
 EndIf
-dbSelectArea("NEWSE5")
-dbCloseArea()
+DBSelectArea("NEWSE5")
+DBCloseArea()
 If cNomeArq # Nil
 	Ferase(cNomeArq+OrdBagExt())
-Endif
-dbSelectArea("SE5")
-dbSetOrder(1)
+EndIf
+DBSelectArea("SE5")
+DBSetOrder(1)
 
 If aReturn[5] == 1
 	Set Printer to
 	dbCommit()
 	OurSpool(wnrel)
-Endif
+EndIf
 
 MS_FLUSH()
 /*/
@@ -2273,9 +2265,9 @@ Local lRet := .T.
 Local nMoedaBco
 Local lManual := .F.
 
-If (Empty(NEWSE5->E5_TIPODOC) .And. mv_par16 == 1) .Or.;
-	(Empty(NEWSE5->E5_NUMERO)  .And. mv_par16 == 1)
-	lManual := .t.
+If (Empty(NEWSE5->E5_TIPODOC) .And. MV_PAR16 == 1) .Or.;
+	(Empty(NEWSE5->E5_NUMERO)  .And. MV_PAR16 == 1)
+	lManual := .T.
 EndIf
 
 Do Case
@@ -2283,29 +2275,29 @@ Case !&(cFilSe5)           		// Verifico filtro CODEBASE tambem para TOP
 	lRet := .F.
 Case NEWSE5->E5_TIPODOC $ "DC/D2/JR/J2/TL/MT/M2/CM/C2" 
 	lRet := .F.
-Case NEWSE5->E5_SITUACA $ "C/E/X" .or. NEWSE5->E5_TIPODOC $ "TE" .or.;
-	(NEWSE5->E5_TIPODOC == "CD" .and. NEWSE5->E5_VENCTO > NEWSE5->E5_DATA)
+Case NEWSE5->E5_SITUACA $ "C/E/X" .Or. NEWSE5->E5_TIPODOC $ "TE" .or.;
+	(NEWSE5->E5_TIPODOC == "CD" .And. NEWSE5->E5_VENCTO > NEWSE5->E5_DATA)
 	lRet := .F.
-Case NEWSE5->E5_TIPODOC == "E2" .and. mv_par11 == 2
+Case NEWSE5->E5_TIPODOC == "E2" .And. MV_PAR11 == 2
 	lRet := .F.
-Case Empty(NEWSE5->E5_TIPODOC) .and. mv_par16 == 2
+Case Empty(NEWSE5->E5_TIPODOC) .And. MV_PAR16 == 2
 	lRet := .F.
-Case Empty(NEWSE5->E5_NUMERO) .and. mv_par16 == 2
+Case Empty(NEWSE5->E5_NUMERO) .And. MV_PAR16 == 2
 	lRet := .F. 
-Case mv_par16 == 2 .and. (NEWSE5->E5_TIPODOC $ "CH" .or. NEWSE5->E5_TIPODOC == "TR")  
+Case MV_PAR16 == 2 .And. (NEWSE5->E5_TIPODOC $ "CH" .Or. NEWSE5->E5_TIPODOC == "TR")  
 	lRet := .F. 
 Case NEWSE5->E5_MOTBX == "DSD"
 	lRet := .F.
-Case mv_par11 = 1 .And. E5_TIPODOC $ "E2#CB"
+Case MV_PAR11 = 1 .And. E5_TIPODOC $ "E2#CB"
 	lRet := .F.
-Case IIf(mv_par03 == mv_par04,NEWSE5->E5_BANCO != mv_par03 .And. !Empty(NEWSE5->E5_BANCO),NEWSE5->E5_BANCO < mv_par03 .Or. NEWSE5->E5_BANCO > MV_PAR04)
+Case IIf(MV_PAR03 == MV_PAR04,NEWSE5->E5_BANCO != MV_PAR03 .And. !Empty(NEWSE5->E5_BANCO),NEWSE5->E5_BANCO < MV_PAR03 .Or. NEWSE5->E5_BANCO > MV_PAR04)
 	lRet := .F.
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³Se escolhido o parƒmetro "baixas normais", apenas imprime as baixas  ³
 	//³que gerarem movimenta‡„o banc ria e as movimenta‡”es financeiras     ³
 	//³manuais, se consideradas.                                            ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-Case mv_par14 == 1 .and. !MovBcoBx(NEWSE5->E5_MOTBX) .and. !lManual	
+Case MV_PAR14 == 1 .And. !MovBcoBx(NEWSE5->E5_MOTBX) .And. !lManual	
 	lRet := .F.
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Considera filtro do usuario                                  ³
@@ -2319,36 +2311,36 @@ Case !Empty(cFilterUser).and.!(&cFilterUser)
 Case	lInterno .And.;
 		!Empty(NEWSE5->(E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA+E5_SEQ)) .And.;
 	  	TemBxCanc(NEWSE5->(E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA+E5_SEQ)) .And.;
-	  	(!EMPTY(NEWSE5->E5_NUMERO))
+	  	(!Empty(NEWSE5->E5_NUMERO))
 	lRet := .F.
 EndCase
 
 If lRet .And. NEWSE5->E5_RECPAG == "R"
-	If ( NEWSE5->E5_TIPODOC = "RA" .And. mv_par35 = 2 ) .Or.;
-		(NEWSE5->E5_TIPO $ MVRECANT+"/"+MV_CRNEG.and. mv_par24 == 2 .and.;
+	If ( NEWSE5->E5_TIPODOC = "RA" .And. MV_PAR35 = 2 ) .Or.;
+		(NEWSE5->E5_TIPO $ MVRECANT+"/"+MV_CRNEG.And. MV_PAR24 == 2 .and.;
 		NEWSE5->E5_MOTBX == "CMP")
 		lRet := .F.
 	EndIf
-Endif
+EndIf
 If lRet .And. NEWSE5->E5_RECPAG == "P"
-	If ( NEWSE5->E5_TIPODOC = "PA" .And. mv_par35 = 2 ) .Or.;
-		(NEWSE5->E5_TIPO $ MVPAGANT+"/"+MV_CPNEG .and. mv_par24 == 2 .and.;
+	If ( NEWSE5->E5_TIPODOC = "PA" .And. MV_PAR35 = 2 ) .Or.;
+		(NEWSE5->E5_TIPO $ MVPAGANT+"/"+MV_CPNEG .And. MV_PAR24 == 2 .and.;
 		 NEWSE5->E5_MOTBX == "CMP")
 		lRet := .F.
 	EndIf
-Endif	
+EndIf	
 
-If lRet .And. mv_par25 == 2
-	If ( cPaisLoc # "BRA".And.!Empty(NEWSE5->E5_BANCO+NEWSE5->E5_AGENCIA+NEWSE5->E5_CONTA) ) .OR. FXMultSld()
-	   SA6->(DbSetOrder(1))
+If lRet .And. MV_PAR25 == 2
+	If ( cPaisLoc # "BRA".And.!Empty(NEWSE5->E5_BANCO+NEWSE5->E5_AGENCIA+NEWSE5->E5_CONTA) ) .Or. FXMultSld()
+	   SA6->(DBSetOrder(1))
 	   SA6->(MsSeek(xFilial()+NEWSE5->E5_BANCO+NEWSE5->E5_AGENCIA+NEWSE5->E5_CONTA))
 	   nMoedaBco	:=	Max(SA6->A6_MOEDA,1)
 	ElseIf !Empty(NEWSE5->E5_ORDREC)
 		nMoedaBco:= Val(NEWSE5->E5_MOEDA)
 	Else
 	   nMoedaBco	:=	1
-	Endif
-	If nMoedaBco <> mv_par12
+	EndIf
+	If nMoedaBco <> MV_PAR12
 		lRet := .F.
 	EndIf
 EndIf 
@@ -2358,13 +2350,13 @@ If lRet
 	If MV_PAR16 == 1			   
 		If Fr190MovCan(17,"NEWSE5")
 		   lRet := .F.
-		Endif   
-	Endif
-Endif
+		EndIf   
+	EndIf
+EndIf
 
 If lRet
-	// Se for um recebimento de Titulo pago em dinheiro originado pelo SIGALOJA, nao imprime o mov.
-	If NEWSE5->E5_TIPODOC == "BA" .and. NEWSE5->E5_MOTBX == "LOJ" .And. IsMoney(NEWSE5->E5_MOEDA)
+	// Se For um recebimento de Titulo pago em dinheiro originado pelo SIGALOJA, nao imprime o mov.
+	If NEWSE5->E5_TIPODOC == "BA" .And. NEWSE5->E5_MOTBX == "LOJ" .And. IsMoney(NEWSE5->E5_MOEDA)
 		lRet := .F.	
 	EndIf
 EndIf
@@ -2470,9 +2462,9 @@ Local nRecEmp		:= SM0->(Recno())
 Local cMotBaixa		:= CRIAVAR("E5_MOTBX")
 Local cFilNome		:= Space(15)
 Local cCliFor190	:= ""
-Local aTam			:= IIF(mv_par11 == 1,TamSX3("E1_CLIENTE"),TamSX3("E2_FORNECE"))
+Local aTam			:= IIf(MV_PAR11 == 1,TamSX3("E1_CLIENTE"),TamSX3("E2_FORNECE"))
 Local aColu			:= {}
-Local nDecs			:= GetMv("MV_CENT"+(IIF(mv_par12 > 1 , STR(mv_par12,1),""))) 
+Local nDecs			:= GetMv("MV_CENT"+(IIf(MV_PAR12 > 1 , Str(MV_PAR12,1),""))) 
 Local nMoedaBco		:= 1
 Local cCarteira
 Local aStru			:= SE5->(DbStruct()), nI
@@ -2486,11 +2478,11 @@ Local cFilOrig
 Local lAchou		:= .F.
 Local lF190Qry		:= ExistBlock("F190QRY")
 Local cQueryAdd		:= ""
-Local lAjuPar15		:= Len(AllTrim(mv_par15))==Len(mv_par15)
+Local lAjuPar15		:= Len(AllTrim(MV_PAR15))==Len(MV_PAR15)
 Local lAchouEmp		:= .T.                                
 Local lAchouEst		:= .F.                                
-Local nTamEH		:= TamSx3("EH_NUMERO")[1]
-Local nTamEI		:= TamSx3("EI_NUMERO")[1]+TamSx3("EI_REVISAO")[1]+TamSx3("EI_SEQ")[1]
+Local nTamEH		:= TamSX3("EH_NUMERO")[1]
+Local nTamEI		:= TamSX3("EI_NUMERO")[1]+TamSX3("EI_REVISAO")[1]+TamSX3("EI_SEQ")[1]
 Local cCodUlt		:= SM0->M0_CODIGO
 Local cFilUlt		:= IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL )
 Local nRecno
@@ -2535,7 +2527,7 @@ Local cTmpSE5Fil	:= ""
 Local lNovaGestao	:= .F.
 Local nSelFil		:= 0
 Local nLenSelFil	:= 0
-Local lGestao		:= Iif( lFWCodFil, ( "E" $ FWSM0Layout() .And. "U" $ FWSM0Layout() ), .F. )	// Indica se usa Gestao Corporativa
+Local lGestao		:= IIf( lFWCodFil, ( "E" $ FWSM0Layout() .And. "U" $ FWSM0Layout() ), .F. )	// Indica se usa Gestao Corporativa
 Local lExclusivo	:= .F.
 Local aModoComp		:= {}
 /* GESTAO - fim */
@@ -2551,9 +2543,9 @@ If lFWCodFil .And. lGestao
 	aAdd(aModoComp, FWModeAccess("SE5",1) )
 	aAdd(aModoComp, FWModeAccess("SE5",2) )
 	aAdd(aModoComp, FWModeAccess("SE5",3) )
-	lExclusivo := Ascan(aModoComp, 'E') > 0
+	lExclusivo := aScan(aModoComp, 'E') > 0
 Else
-	dbSelectArea("SE5")
+	DBSelectArea("SE5")
 	lExclusivo := !Empty(xFilial("SE5"))
 EndIf
 
@@ -2571,106 +2563,106 @@ li := 1
 /* GESTAO - inicio */
 If lNovaGestao
 	nLenSelFil := Len(aSelFil)
-	If mv_Par40 == 1
+	If MV_PAR40 == 1
 		If nLenSelFil > 0
 			cFilDe 	:= aSelFil[1]
 			cFilAte := aSelFil[nLenSelFil]
-		Endif
+		EndIf
 	Else
-		If mv_par17 == 2 // Cons filiais abaixo
+		If MV_PAR17 == 2 // Cons filiais abaixo
 			cFilDe := IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL )
 			cFilAte:= IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL )
 		Else
-			cFilDe := mv_par18	// Todas as filiais
-			cFilAte:= mv_par19
+			cFilDe := MV_PAR18	// Todas as filiais
+			cFilAte:= MV_PAR19
 		EndIf
 	EndIf
 Else
-	If mv_par17 == 2 // Cons filiais abaixo
+	If MV_PAR17 == 2 // Cons filiais abaixo
 		cFilDe := IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL )
 		cFilAte:= IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL )
 	Else
-		cFilDe := mv_par18	// Todas as filiais
-		cFilAte:= mv_par19
+		cFilDe := MV_PAR18	// Todas as filiais
+		cFilAte:= MV_PAR19
 	EndIf
-Endif
+EndIf
 /* GESTAO - fim */
 
 // Definicao das condicoes e ordem de impressao, de acordo com a ordem escolhida pelo
 // usuario.
-DbSelectArea("SE5")
+DBSelectArea("SE5")
 Do Case
 Case nOrdem == 1
-	cCondicao := "E5_DATA >= mv_par01 .and. E5_DATA <= mv_par02"
+	cCondicao := "E5_DATA >= MV_PAR01 .And. E5_DATA <= MV_PAR02"
 	cCond2 := "E5_DATA"
 	cChave := IndexKey(1)
 	cChaveInterFun := cChave
-	bFirst := {|| MsSeek(xFilial("SE5")+Dtos(mv_par01),.T.)}
+	bFirst := {|| MsSeek(xFilial("SE5")+DToS(MV_PAR01),.T.)}
 Case nOrdem == 2
-	cCondicao := "E5_BANCO >= mv_par03 .and. E5_BANCO <= mv_par04"
+	cCondicao := "E5_BANCO >= MV_PAR03 .And. E5_BANCO <= MV_PAR04"
 	cCond2 := "E5_BANCO"
 	cChave := IndexKey(3)
 	cChaveInterFun := cChave
-	bFirst := {||MsSeek(xFilial("SE5")+mv_par03,.T.)}
+	bFirst := {||MsSeek(xFilial("SE5")+MV_PAR03,.T.)}
 Case nOrdem == 3
-	cCondicao := "E5_MULTNAT = '1' .Or. (E5_NATUREZ >= mv_par05 .and. E5_NATUREZ <= mv_par06)"
+	cCondicao := "E5_MULTNAT = '1' .Or. (E5_NATUREZ >= MV_PAR05 .And. E5_NATUREZ <= MV_PAR06)"
 	cCond2 := "E5_NATUREZ"
 	cChave := IndexKey(4)
 	cChaveInterFun := cChave
-	bFirst := {||MsSeek(xFilial("SE5")+mv_par05,.T.)}
+	bFirst := {||MsSeek(xFilial("SE5")+MV_PAR05,.T.)}
 Case nOrdem == 4
 	cCondicao := ".T."
 	cCond2 := "E5_BENEF"
-	cChave := "E5_FILIAL+E5_BENEF+DTOS(E5_DATA)+E5_PREFIXO+E5_NUMERO+E5_PARCELA"
+	cChave := "E5_FILIAL+E5_BENEF+DToS(E5_DATA)+E5_PREFIXO+E5_NUMERO+E5_PARCELA"
 	cChaveInterFun := cChave
 	bFirst := {||MsSeek(xFilial("SE5"),.T.)}
 Case nOrdem == 5
 	cCondicao := ".T."
 	cCond2 := "E5_NUMERO"
-	cChave := "E5_FILIAL+E5_NUMERO+E5_PARCELA+E5_PREFIXO+DTOS(E5_DATA)"
+	cChave := "E5_FILIAL+E5_NUMERO+E5_PARCELA+E5_PREFIXO+DToS(E5_DATA)"
 	cChaveInterFun := cChave
 	bFirst := {||MsSeek(xFilial("SE5"),.T.)}
 Case nOrdem == 6	//Ordem 6 (Digitacao)
 	cCondicao := ".T."
 	cCond2 := "E5_DTDIGIT"
-	cChave := "E5_FILIAL+DTOS(E5_DTDIGIT)+E5_PREFIXO+E5_NUMERO+E5_PARCELA+DTOS(E5_DATA)"
+	cChave := "E5_FILIAL+DToS(E5_DTDIGIT)+E5_PREFIXO+E5_NUMERO+E5_PARCELA+DToS(E5_DATA)"
 	cChaveInterFun := cChave
 	bFirst := {||MsSeek(xFilial("SE5"),.T.)}
 Case nOrdem == 7 // por Lote
-	cCondicao := "E5_LOTE >= '"+mv_par20+"' .and. E5_LOTE <= '"+mv_par21+"'"
+	cCondicao := "E5_LOTE >= '"+MV_PAR20+"' .And. E5_LOTE <= '"+MV_PAR21+"'"
 	cCond2 := "E5_LOTE"
 	cChave := IndexKey(5)
 	cChaveInterFun := cChave
-	bFirst := {||MsSeek(xFilial("SE5")+mv_par20,.T.)}
+	bFirst := {||MsSeek(xFilial("SE5")+MV_PAR20,.T.)}
 OtherWise						// Data de Crédito (dtdispo)
-	cCondicao := "E5_DTDISPO >= mv_par01 .and. E5_DTDISPO <= mv_par02"
+	cCondicao := "E5_DTDISPO >= MV_PAR01 .And. E5_DTDISPO <= MV_PAR02"
 	cCond2 := "E5_DTDISPO"
-	cChave := "E5_FILIAL+DTOS(E5_DTDISPO)+E5_BANCO+E5_AGENCIA+E5_CONTA+E5_NUMCHEQ"
+	cChave := "E5_FILIAL+DToS(E5_DTDISPO)+E5_BANCO+E5_AGENCIA+E5_CONTA+E5_NUMCHEQ"
 	cChaveInterFun := cChave
-	bFirst := {||MsSeek(xFilial("SE5")+Dtos(mv_par01),.T.)}
+	bFirst := {||MsSeek(xFilial("SE5")+DToS(MV_PAR01),.T.)}
 EndCase
 
-If !Empty(mv_par28) .And. ! ";" $ mv_par28 .And. Len(AllTrim(mv_par28)) > 3
+If !Empty(MV_PAR28) .And. ! ";" $ MV_PAR28 .And. Len(AllTrim(MV_PAR28)) > 3
 	ApMsgAlert(STR0073)//"Separe os tipos a imprimir (pergunta 28) por um ; (ponto e virgula) a cada 3 caracteres")
 	Return(Nil)
-Endif	
-If !Empty(mv_par29) .And. ! ";" $ mv_par29 .And. Len(AllTrim(mv_par29)) > 3
+EndIf	
+If !Empty(MV_PAR29) .And. ! ";" $ MV_PAR29 .And. Len(AllTrim(MV_PAR29)) > 3
 	ApMsgAlert(STR0074)//"Separe os tipos que não deseja imprimir (pergunta 29) por um ; (ponto e virgula) a cada 3 caracteres")
 	Return(Nil)
-Endif	
+EndIf	
 
 #IFDEF TOP
-	If TcSrvType() != "AS/400" .and. TCGetDB()!="SYBASE"
+	If TcSrvType() != "AS/400" .And. TCGetDB()!="SYBASE"
 		
 		lAsTop := .T.
 		cCondicao := ".T."
-		DbSelectArea("SE5")
+		DBSelectArea("SE5")
 		cQuery := ""
 		aEval(DbStruct(),{|e| cQuery += ","+AllTrim(e[1])})
 		// Obtem os registros a serem processados
 
 		//ITALAC - Para tratar filtro da Emissao e Rede na SE1
-		if MV_PAR11 == 1
+		If MV_PAR11 == 1
 		
 			// Obtem os registros a serem processados
 			cQuery := "SELECT " +SubStr(cQuery,2)
@@ -2680,7 +2672,7 @@ Endif
   	    	cQuery += " AND SE1.E1_PARCELA = SE5.E5_PARCELA AND SE1.E1_TIPO = SE5.E5_TIPO "
   	    	cQuery += " AND SE1.E1_CLIENTE = SE5.E5_CLIFOR AND SE1.E1_LOJA = SE5.E5_LOJA ) VENCTO, "   //ITALAC - INCLUIDOS CAMPOS E2_VENCTO E E1_VENCTO
 			
-		Elseif MV_PAR11 == 2
+		ElseIf MV_PAR11 == 2
 
 			// Obtem os registros a serem processados
 			cQuery := "SELECT " +SubStr(cQuery,2)
@@ -2690,12 +2682,12 @@ Endif
   	    	cQuery += " AND SE2.E2_PARCELA = SE5.E5_PARCELA AND SE2.E2_TIPO = SE5.E5_TIPO "
   	    	cQuery += " AND SE2.E2_FORNECE = SE5.E5_CLIFOR AND SE2.E2_LOJA = SE5.E5_LOJA )	 VENCTO, "   //ITALAC - INCLUIDOS CAMPOS E2_VENCTO E E1_VENCTO
 		
-		Elseif mv_par11 == 3
+		ElseIf MV_PAR11 == 3
 		
 			// Obtem os registros a serem processados
 			cQuery := "SELECT " +SubStr(cQuery,2)
 			cQuery +=         ",SE5.R_E_C_N_O_ SE5RECNO, "
-			cQuery += " CASE SE5.E5_RECPAG "
+			cQuery += " Case SE5.E5_RECPAG "
 			cQuery += " WHEN 'R' THEN (SELECT E2_VENCTO FROM "+RetSqlName("SE2")+" SE2 WHERE  SE2.D_E_L_E_T_ = ' ' "	
   	    	//cQuery += " SE2.D_E_L_E_T_ = ' ' AND SE2.E2_FILIAL = SE5.E5_FILIAL " 
   	    	cQuery += " AND SE2.E2_PREFIXO = SE5.E5_PREFIXO AND SE2.E2_NUM = SE5.E5_NUMERO "
@@ -2707,7 +2699,7 @@ Endif
   	    	cQuery += " AND SE1.E1_PARCELA = SE5.E5_PARCELA AND SE1.E1_TIPO = SE5.E5_TIPO "
   	    	cQuery += " AND SE1.E1_CLIENTE = SE5.E5_CLIFOR AND SE1.E1_LOJA = SE5.E5_LOJA ) END VENCTO,"   //ITALAC - INCLUIDOS CAMPOS E2_VENCTO E E1_VENCTO
 		
-		endif
+		EndIf
 		//ITALAC
 		
 		cQuery += " ( SELECT MAX(E5_SEQ)"
@@ -2737,17 +2729,17 @@ Endif
         cQuery += "            AND A.E5_TIPODOC = 'ES' )  ) MAXSEQ "  //Coluna maxseq	
          
 		cQuery += "FROM " + RetSqlName("SE5")+" SE5 WHERE "
-		If mv_par11 != 3
-			cQuery += " E5_RECPAG = '" + IIF( mv_par11 == 1, "R","P") + "' AND "
-		Endif
-		cQuery += "      E5_DATA    between '" + DTOS(mv_par01) + "' AND '" + DTOS(mv_par02) + "' AND "
-		cQuery += "      E5_DATA    <= '" + DTOS(dDataBase) + "' AND "
+		If MV_PAR11 != 3
+			cQuery += " E5_RECPAG = '" + IIf( MV_PAR11 == 1, "R","P") + "' AND "
+		EndIf
+		cQuery += "      E5_DATA    between '" + DToS(MV_PAR01) + "' AND '" + DToS(MV_PAR02) + "' AND "
+		cQuery += "      E5_DATA    <= '" + DToS(dDataBase) + "' AND "
 
 		//-- Realiza filtragem pela natureza principal
-		If mv_par39 == 2
-			cQuery +=  " E5_NATUREZ between '" + mv_par05       + "' AND '" + mv_par06     	+ "' AND "
+		If MV_PAR39 == 2
+			cQuery +=  " E5_NATUREZ between '" + MV_PAR05       + "' AND '" + MV_PAR06     	+ "' AND "
 		Else
-			cQuery +=       " (E5_NATUREZ between '" + mv_par05       + "' AND '" + mv_par06       + "' OR "
+			cQuery +=       " (E5_NATUREZ between '" + MV_PAR05       + "' AND '" + MV_PAR06       + "' OR "
 			cQuery +=       " EXISTS (SELECT EV_FILIAL, EV_PREFIXO, EV_NUM, EV_PARCELA, EV_CLIFOR, EV_LOJA "
 			cQuery +=                 " FROM "+RetSqlName("SEV")+" SEV "
 			cQuery +=                " WHERE E5_FILIAL  = EV_FILIAL AND "
@@ -2757,50 +2749,50 @@ Endif
 			cQuery +=                       "E5_TIPO    = EV_TIPO AND "		
 			cQuery +=                       "E5_CLIFOR  = EV_CLIFOR AND "
 			cQuery +=                       "E5_LOJA    = EV_LOJA AND " 
-			cQuery +=                       "EV_NATUREZ between '" + mv_par05 + "' AND '" + mv_par06 + "' AND "
+			cQuery +=                       "EV_NATUREZ between '" + MV_PAR05 + "' AND '" + MV_PAR06 + "' AND "
 			cQuery +=                       "SEV.D_E_L_E_T_ = ' ')) AND "
 		EndIf
-		cQuery += "      E5_CLIFOR  between '" + mv_par07       + "' AND '" + mv_par08       + "' AND "
-		cQuery += "      E5_DTDIGIT between '" + DTOS(mv_par09) + "' AND '" + DTOS(mv_par10) + "' AND "
-		cQuery += "      E5_LOTE    between '" + mv_par20       + "' AND '" + mv_par21       + "' AND "
-		cQuery += "      E5_LOJA    between '" + mv_par22       + "' AND '" + mv_par23 	    + "' AND "
-		cQuery += "      E5_PREFIXO between '" + mv_par26       + "' AND '" + mv_par27 	    + "' AND "
+		cQuery += "      E5_CLIFOR  between '" + MV_PAR07       + "' AND '" + MV_PAR08       + "' AND "
+		cQuery += "      E5_DTDIGIT between '" + DToS(MV_PAR09) + "' AND '" + DToS(MV_PAR10) + "' AND "
+		cQuery += "      E5_LOTE    between '" + MV_PAR20       + "' AND '" + MV_PAR21       + "' AND "
+		cQuery += "      E5_LOJA    between '" + MV_PAR22       + "' AND '" + MV_PAR23 	    + "' AND "
+		cQuery += "      E5_PREFIXO between '" + MV_PAR26       + "' AND '" + MV_PAR27 	    + "' AND "
 		cQuery += "      SE5.D_E_L_E_T_ = ' '  AND "
 		cQuery += " 	  E5_SITUACA NOT IN ('C','E','X') AND "
 		cQuery += "      ((E5_TIPODOC = 'CD' AND E5_VENCTO <= E5_DATA) OR "
 		cQuery += "      (E5_TIPODOC != 'CD')) "
 		cQuery += "		  AND E5_HISTOR NOT LIKE '%"+STR0077+"%'"
 		cQuery += "		  AND E5_TIPODOC NOT IN ('DC','D2','JR','J2','TL','MT','M2','CM','C2','ES'"
-		If mv_par11 == 2
+		If MV_PAR11 == 2
 			cQuery += " ,'E2'"
 		EndIf
-		If mv_par16 == 2
+		If MV_PAR16 == 2
 			cQuery += " ,' '"
 			cQuery += " ,'CH'" 
 			cQuery += " ,'TR'" 
 			cQuery += " ,'TE'"
-		Endif
+		EndIf
 		cQuery += " )"
-		If mv_par16 == 2
-			cQuery += " AND E5_NUMERO  != '" + SPACE(LEN(E5_NUMERO)) + "'"
-		Endif
-		If !Empty(mv_par28) // Deseja imprimir apenas os tipos do parametro 28
-			cQuery += " AND E5_TIPO IN "+FormatIn(mv_par28,";")
-		ElseIf !Empty(Mv_par29) // Deseja excluir os tipos do parametro 29
-			cQuery += " AND E5_TIPO NOT IN "+FormatIn(mv_par29,";")
+		If MV_PAR16 == 2
+			cQuery += " AND E5_NUMERO  != '" + Space(Len(E5_NUMERO)) + "'"
+		EndIf
+		If !Empty(MV_PAR28) // Deseja imprimir apenas os tipos do parametro 28
+			cQuery += " AND E5_TIPO IN "+FormatIn(MV_PAR28,";")
+		ElseIf !Empty(MV_PAR29) // Deseja excluir os tipos do parametro 29
+			cQuery += " AND E5_TIPO NOT IN "+FormatIn(MV_PAR29,";")
 		EndIf
 
 		cCondFil := "NEWSE5->E5_FILIAL==xFilial('SE5')"		
 				
 		/* GESTAO - inicio */
-		If mv_par40 == 1 .and. !Empty(aSelFil)
+		If MV_PAR40 == 1 .And. !Empty(aSelFil)
 			If lExclusivo
 				cQuery += " AND E5_FILIAL " + GetRngFil( aSelFil, "SE5", .T., @cTmpSE5Fil)
 			Else
 				cQuery += " AND E5_FILORIG " + FR190InFilial()
-			Endif
+			EndIf
 		Else
-		   If mv_par17 == 2
+		   If MV_PAR17 == 2
 				cQuery += " AND E5_FILIAL = '" + FwxFilial("SE5") + "'"
 			Else
 				If !lExclusivo
@@ -2808,7 +2800,7 @@ Endif
 				Else
 					cQuery += " AND E5_FILIAL between '" + cFilDe + "' AND '" + cFilAte + "'"
 				EndIf
-			Endif
+			EndIf
 		EndIf
 		/* GESTAO - fim */
 		
@@ -2828,126 +2820,126 @@ Endif
 		
 		// ITALAC - ALTERADO A QUERY DE EXTRAÇÃO DOS TITULOS A PAGAR PARA NÃO CONSIDERAR O UNION E COMEÇAR A CONSIDERAR A DATA DE EMISSÃO DO TITULOS A PAGAR - CHAMADO 3021
 		//FILTRA GRUPO DE CLIENTES
-		if !empty(MV_PAR42)
-		   cQuery += "(SELECT A1_GRPVEN FROM "+RetSqlName("SA1")+" A1T WHERE A1T.D_E_L_E_T_ <> '*' AND A1T.COD = SE5.E5_CLIFOR AND A1T.LOJA = SE5.E5_LOJA) IN " 
+		If !Empty(MV_PAR42)
+		   cQuery += "(SELECT A1_GRPVEN FROM "+RetSqlName("SA1")+" A1T WHERE A1T.D_E_L_E_T_ = ' ' AND A1T.COD = SE5.E5_CLIFOR AND A1T.LOJA = SE5.E5_LOJA) IN " 
 		   cQuery +=  FormatIn(MV_PAR42,";") 
-		endif  
+		EndIf  
 		
-		if MV_PAR11 == 1   
+		If MV_PAR11 == 1   
 
 		   	//Filtra Emissao da SE1
-		  	if !empty(MV_PAR43) .and. !empty(MV_PAR44)
+		  	If !Empty(MV_PAR43) .And. !Empty(MV_PAR44)
   	    		cQuery += " AND (SELECT E1_EMISSAO FROM "+RetSqlName("SE1")+" SE1 WHERE "	
   	    		//cQuery += " SE1.D_E_L_E_T_ = ' ' AND SE1.E1_FILIAL = SE5.E5_FILIAL " 
 				cQuery += " SE1.D_E_L_E_T_ = ' ' AND SE1.E1_FILIAL = SE5.E5_FILORIG " 
   	    		cQuery += " AND SE1.E1_PREFIXO = SE5.E5_PREFIXO AND SE1.E1_NUM = SE5.E5_NUMERO "
   	    		cQuery += " AND SE1.E1_PARCELA = SE5.E5_PARCELA AND SE1.E1_TIPO = SE5.E5_TIPO "
   	    		cQuery += " AND SE1.E1_CLIENTE = SE5.E5_CLIFOR AND SE1.E1_LOJA = SE5.E5_LOJA )"	
-  	    		cQuery += " BETWEEN '" + dtos(MV_PAR43) + "' AND '" + dtos(MV_PAR44) + "'"
-		  	endif
+  	    		cQuery += " BETWEEN '" + DToS(MV_PAR43) + "' AND '" + DToS(MV_PAR44) + "'"
+		  	EndIf
 		  	
 		  	//Filtra VENCTO da SE1
-		  	if !empty(MV_PAR47) .and. !empty(MV_PAR48)
+		  	If !Empty(MV_PAR47) .And. !Empty(MV_PAR48)
    	     		cQuery += " AND (SELECT E1_VENCTO FROM "+RetSqlName("SE1")+" SE1 WHERE "	
   	    		//cQuery += " SE1.D_E_L_E_T_ = ' ' AND SE1.E1_FILIAL = SE5.E5_FILIAL " 
 				cQuery += " SE1.D_E_L_E_T_ = ' ' AND SE1.E1_FILIAL = SE5.E5_FILORIG " 
   	    		cQuery += " AND SE1.E1_PREFIXO = SE5.E5_PREFIXO AND SE1.E1_NUM = SE5.E5_NUMERO "
   	    		cQuery += " AND SE1.E1_PARCELA = SE5.E5_PARCELA AND SE1.E1_TIPO = SE5.E5_TIPO "
   	    		cQuery += " AND SE1.E1_CLIENTE = SE5.E5_CLIFOR AND SE1.E1_LOJA = SE5.E5_LOJA )"	
-  	    		cQuery += " BETWEEN '" + dtos(MV_PAR47) + "' AND '" + dtos(MV_PAR48) + "'"
+  	    		cQuery += " BETWEEN '" + DToS(MV_PAR47) + "' AND '" + DToS(MV_PAR48) + "'"
   	    		
-		  	endif  
+		  	EndIf  
 		  	
 		  	//================================================================================
             // Filtro por natureza de operação que deverão ser excluidas do relatório. 
             //================================================================================  
             If ! Empty(MV_PAR49)
-               cQuery += " AND SE5.E5_NATUREZ NOT IN " + FORMATIN(MV_PAR49,";")
+               cQuery += " AND SE5.E5_NATUREZ NOT IN " + FormatIn(MV_PAR49,";")
             EndIf	           
             
-		Elseif MV_PAR11 == 2
+		ElseIf MV_PAR11 == 2
 	
 		  	//FILTRA EMISSÃO DA SE2
-		  	if !empty(MV_PAR43) .and. !empty(MV_PAR44)
+		  	If !Empty(MV_PAR43) .And. !Empty(MV_PAR44)
 	    		cQuery += " AND (SELECT E2_EMISSAO FROM "+RetSqlName("SE2")+" SE2 WHERE "	
   	    		//cQuery += " SE2.D_E_L_E_T_ = ' ' AND SE2.E2_FILIAL = SE5.E5_FILIAL " 
 				cQuery += " SE2.D_E_L_E_T_ = ' ' AND SE2.E2_FILIAL = SE5.E5_FILORIG " 
   	    		cQuery += " AND SE2.E2_PREFIXO = SE5.E5_PREFIXO AND SE2.E2_NUM = SE5.E5_NUMERO "
   	    		cQuery += " AND SE2.E2_PARCELA = SE5.E5_PARCELA AND SE2.E2_TIPO = SE5.E5_TIPO "
   	    		cQuery += " AND SE2.E2_FORNECE = SE5.E5_CLIFOR AND SE2.E2_LOJA = SE5.E5_LOJA )"	
-  	    		cQuery += " BETWEEN '" + dtos(MV_PAR43) + "' AND '" + dtos(MV_PAR44) + "'"
-		  	endif
+  	    		cQuery += " BETWEEN '" + DToS(MV_PAR43) + "' AND '" + DToS(MV_PAR44) + "'"
+		  	EndIf
 		  	
 		  	//Filtra VENCTO da SE2
-		  	if !empty(MV_PAR47) .and. !empty(MV_PAR48)
+		  	If !Empty(MV_PAR47) .And. !Empty(MV_PAR48)
 	     		cQuery += " AND (SELECT E2_VENCTO FROM "+RetSqlName("SE2")+" SE2 WHERE "	
   	    		//cQuery += " SE2.D_E_L_E_T_ = ' ' AND SE2.E2_FILIAL = SE5.E5_FILIAL " 
 				cQuery += " SE2.D_E_L_E_T_ = ' ' AND SE2.E2_FILIAL = SE5.E5_FILORIG " 
   	    		cQuery += " AND SE2.E2_PREFIXO = SE5.E5_PREFIXO AND SE2.E2_NUM = SE5.E5_NUMERO "
   	    		cQuery += " AND SE2.E2_PARCELA = SE5.E5_PARCELA AND SE2.E2_TIPO = SE5.E5_TIPO "
   	    		cQuery += " AND SE2.E2_FORNECE = SE5.E5_CLIFOR AND SE2.E2_LOJA = SE5.E5_LOJA )"	
-  	    		cQuery += " BETWEEN '" + dtos(MV_PAR47) + "' AND '" + dtos(MV_PAR48) + "'"
-		  	endif
+  	    		cQuery += " BETWEEN '" + DToS(MV_PAR47) + "' AND '" + DToS(MV_PAR48) + "'"
+		  	EndIf
 		  	
 		  	//================================================================================
             // Filtro por natureza de operação que deverão ser excluidas do relatório. 
             //================================================================================  
             If ! Empty(MV_PAR49)
-               cQuery += " AND SE5.E5_NATUREZ NOT IN " + FORMATIN(MV_PAR49,";")
+               cQuery += " AND SE5.E5_NATUREZ NOT IN " + FormatIn(MV_PAR49,";")
             EndIf
 	
-       	Elseif MV_PAR11 == 3  		
+       	ElseIf MV_PAR11 == 3  		
 	
 			  	//FILTRA EMISSÃO DA SE2
-		  	if !empty(MV_PAR43) .and. !empty(MV_PAR44)
+		  	If !Empty(MV_PAR43) .And. !Empty(MV_PAR44)
 	    		cQuery += " AND ((SELECT E2_EMISSAO FROM "+RetSqlName("SE2")+" SE2 WHERE "	
   	    		//cQuery += " SE2.D_E_L_E_T_ = ' ' AND SE2.E2_FILIAL = SE5.E5_FILIAL " 
 				cQuery += " SE2.D_E_L_E_T_ = ' ' AND SE2.E2_FILIAL = SE5.E5_FILORIG " 
   	    		cQuery += " AND SE2.E2_PREFIXO = SE5.E5_PREFIXO AND SE2.E2_NUM = SE5.E5_NUMERO "
   	    		cQuery += " AND SE2.E2_PARCELA = SE5.E5_PARCELA AND SE2.E2_TIPO = SE5.E5_TIPO "
   	    		cQuery += " AND SE2.E2_FORNECE = SE5.E5_CLIFOR AND SE2.E2_LOJA = SE5.E5_LOJA )"	
-  	    		cQuery += " BETWEEN '" + dtos(MV_PAR43) + "' AND '" + dtos(MV_PAR44) + "'"
+  	    		cQuery += " BETWEEN '" + DToS(MV_PAR43) + "' AND '" + DToS(MV_PAR44) + "'"
   	    		cQuery += " OR (SELECT E1_EMISSAO FROM "+RetSqlName("SE1")+" SE1 WHERE  "	
   	    		//cQuery += " SE1.D_E_L_E_T_ = ' ' AND SE1.E1_FILIAL = SE5.E5_FILIAL " 
 				cQuery += " SE1.D_E_L_E_T_ = ' ' AND SE1.E1_FILIAL = SE5.E5_FILORIG " 
   	    		cQuery += " AND SE1.E1_PREFIXO = SE5.E5_PREFIXO AND SE1.E1_NUM = SE5.E5_NUMERO "
   	    		cQuery += " AND SE1.E1_PARCELA = SE5.E5_PARCELA AND SE1.E1_TIPO = SE5.E5_TIPO "
   	    		cQuery += " AND SE1.E1_CLIENTE = SE5.E5_CLIFOR AND SE1.E1_LOJA = SE5.E5_LOJA )"	
-  	    		cQuery += " BETWEEN '" + dtos(MV_PAR43) + "' AND '" + dtos(MV_PAR44) + "')"
+  	    		cQuery += " BETWEEN '" + DToS(MV_PAR43) + "' AND '" + DToS(MV_PAR44) + "')"
   	    		
-		  	endif
+		  	EndIf
 		  	
 		  	//Filtra VENCTO da SE2
-		  	if !empty(MV_PAR47) .and. !empty(MV_PAR48)
+		  	If !Empty(MV_PAR47) .And. !Empty(MV_PAR48)
 	     		cQuery += " AND ((SELECT E2_VENCTO FROM "+RetSqlName("SE2")+" SE2 WHERE  "	
   	    		//cQuery += " SE2.D_E_L_E_T_ = ' ' AND SE2.E2_FILIAL = SE5.E5_FILIAL " 
 				cQuery += " SE2.D_E_L_E_T_ = ' ' AND SE2.E2_FILIAL = SE5.E5_FILORIG " 
   	    		cQuery += " AND SE2.E2_PREFIXO = SE5.E5_PREFIXO AND SE2.E2_NUM = SE5.E5_NUMERO "
   	    		cQuery += " AND SE2.E2_PARCELA = SE5.E5_PARCELA AND SE2.E2_TIPO = SE5.E5_TIPO "
   	    		cQuery += " AND SE2.E2_FORNECE = SE5.E5_CLIFOR AND SE2.E2_LOJA = SE5.E5_LOJA )"	
-  	    		cQuery += " BETWEEN '" + dtos(MV_PAR47) + "' AND '" + dtos(MV_PAR48) + "'"
+  	    		cQuery += " BETWEEN '" + DToS(MV_PAR47) + "' AND '" + DToS(MV_PAR48) + "'"
   	     		cQuery += " OR (SELECT E1_VENCTO FROM "+RetSqlName("SE1")+" SE1 WHERE  "	
   	    		//cQuery += " SE1.D_E_L_E_T_ = ' ' AND SE1.E1_FILIAL = SE5.E5_FILIAL " 
 				cQuery += " SE1.D_E_L_E_T_ = ' ' AND SE1.E1_FILIAL = SE5.E5_FILORIG " 
   	    		cQuery += " AND SE1.E1_PREFIXO = SE5.E5_PREFIXO AND SE1.E1_NUM = SE5.E5_NUMERO "
   	    		cQuery += " AND SE1.E1_PARCELA = SE5.E5_PARCELA AND SE1.E1_TIPO = SE5.E5_TIPO "
   	    		cQuery += " AND SE1.E1_CLIENTE = SE5.E5_CLIFOR AND SE1.E1_LOJA = SE5.E5_LOJA )"	
-  	    		cQuery += " BETWEEN '" + dtos(MV_PAR47) + "' AND '" + dtos(MV_PAR48) + "')"
-		  	endif
+  	    		cQuery += " BETWEEN '" + DToS(MV_PAR47) + "' AND '" + DToS(MV_PAR48) + "')"
+		  	EndIf
 
-		Endif 
+		EndIf 
 			
 		If !Empty(MV_PAR45)
 			cQuery += " AND E5_MOTBX   IN " + FormatIn(MV_PAR45,";") + " "                                                                                               
-		endif
+		EndIf
 		
 		If 'CMP' $ MV_PAR45
 		
 			If MV_PAR46 == 1
-				cQuery += " AND SUBSTR(SE5.E5_DOCUMEN,1,3) = 'DCT' "
+				cQuery += " AND SubStr(SE5.E5_DOCUMEN,1,3) = 'DCT' "
 			ElseIf MV_PAR46 == 2
-				cQuery += " AND SUBSTR(SE5.E5_DOCUMEN,1,3) <> 'DCT' "
-			EndIF
+				cQuery += " AND SubStr(SE5.E5_DOCUMEN,1,3) <> 'DCT' "
+			EndIf
 			
 		EndIf	
 		//ITALAC - FILTRO POR TIPO DE COMPENSÇÃO	 	
@@ -2956,14 +2948,14 @@ Endif
 		cQuery += " ORDER BY " + SqlOrder(cChave) 
 		cQuery := ChangeQuery(cQuery)
 		dbUseArea(.T., "TOPCONN", TCGenQry(,,cQuery), "NEWSE5", .F., .T.)
-		For nI := 1 TO LEN(aStru)
+		For nI := 1 TO Len(aStru)
 			If aStru[nI][2] != "C"
 				TCSetField("NEWSE5", aStru[nI][1], aStru[nI][2], aStru[nI][3], aStru[nI][4])
 			EndIf
 		Next
-		DbGoTop()
+		DBGoTop()
 	Else
-#ENDIF
+#EndIf
 		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 		//³ Abre o SE5 com outro alias para ser filtrado porque a funcao³        
 		//³ TemBxCanc() utilizara o SE5 sem filtro.							 ³
@@ -2972,53 +2964,53 @@ Endif
 			Return(Nil)
 		EndIf		
 		lAsTop := .F.
-		DbSelectArea("NEWSE5")
-		If mv_par11 != 3
-			cFilSE5 := 'E5_RECPAG=='+IIF(mv_par11 == 1,'"R"','"P"')+'.and.'
-		Endif
-		cFilSE5 += 'DTOS(E5_DATA)>='+'"'+dtos(mv_par01)+'"'+'.and.DTOS(E5_DATA)<='+'"'+dtos(mv_par02)+'".and.'
-		cFilSE5 += 'DTOS(E5_DATA)<='+'"'+dtos(dDataBase)+'".and.'
+		DBSelectArea("NEWSE5")
+		If MV_PAR11 != 3
+			cFilSE5 := 'E5_RECPAG=='+IIf(MV_PAR11 == 1,'"R"','"P"')+'.and.'
+		EndIf
+		cFilSE5 += 'DToS(E5_DATA)>='+'"'+DToS(MV_PAR01)+'"'+'.and.DToS(E5_DATA)<='+'"'+DToS(MV_PAR02)+'".and.'
+		cFilSE5 += 'DToS(E5_DATA)<='+'"'+DToS(dDataBase)+'".and.'
 		If nOrdem == 3
-			cFilSE5 += '(E5_MULTNAT = "1" .Or. (E5_NATUREZ>='+'"'+mv_par05+'"'+'.and.E5_NATUREZ<='+'"'+mv_par06+'")).and.'
+			cFilSE5 += '(E5_MULTNAT = "1" .Or. (E5_NATUREZ>='+'"'+MV_PAR05+'"'+'.and.E5_NATUREZ<='+'"'+MV_PAR06+'")).and.'
 		Else
-			cFilSE5 += '(E5_NATUREZ>='+'"'+mv_par05+'"'+'.and.E5_NATUREZ<='+'"'+mv_par06+'").and.'
-		Endif		
-		cFilSE5 += 'E5_CLIFOR>='+'"'+mv_par07+'"'+'.and.E5_CLIFOR<='+'"'+mv_par08+'".and.'
-		cFilSE5 += 'DTOS(E5_DTDIGIT)>='+'"'+dtos(mv_par09)+'"'+'.and.DTOS(E5_DTDIGIT)<='+'"'+dtos(mv_par10)+'".and.'
-		cFilSE5 += 'E5_LOTE>='+'"'+mv_par20+'"'+'.and.E5_LOTE<='+'"'+mv_par21+'".and.'
-		cFilSE5 += 'E5_LOJA>='+'"'+mv_par22+'"'+'.and.E5_LOJA<='+'"'+mv_par23+'".and.'
-		cFilSe5 += 'E5_PREFIXO>='+'"'+mv_par26+'"'+'.And.E5_PREFIXO<='+'"'+mv_par27+'"'
+			cFilSE5 += '(E5_NATUREZ>='+'"'+MV_PAR05+'"'+'.and.E5_NATUREZ<='+'"'+MV_PAR06+'").and.'
+		EndIf		
+		cFilSE5 += 'E5_CLIFOR>='+'"'+MV_PAR07+'"'+'.and.E5_CLIFOR<='+'"'+MV_PAR08+'".and.'
+		cFilSE5 += 'DToS(E5_DTDIGIT)>='+'"'+DToS(MV_PAR09)+'"'+'.and.DToS(E5_DTDIGIT)<='+'"'+DToS(MV_PAR10)+'".and.'
+		cFilSE5 += 'E5_LOTE>='+'"'+MV_PAR20+'"'+'.and.E5_LOTE<='+'"'+MV_PAR21+'".and.'
+		cFilSE5 += 'E5_LOJA>='+'"'+MV_PAR22+'"'+'.and.E5_LOJA<='+'"'+MV_PAR23+'".and.'
+		cFilSe5 += 'E5_PREFIXO>='+'"'+MV_PAR26+'"'+'.And.E5_PREFIXO<='+'"'+MV_PAR27+'"'
 
-		If !Empty(mv_par28) // Deseja imprimir apenas os tipos do parametro 28
-			cFilSe5 += '.And.E5_TIPO $'+'"'+ALLTRIM(mv_par28)+Space(1)+'"'
-		ElseIf !Empty(Mv_par29) // Deseja excluir os tipos do parametro 29
-			cFilSe5 += '.And.!(E5_TIPO $'+'"'+ALLTRIM(mv_par29)+Space(1)+'")'
+		If !Empty(MV_PAR28) // Deseja imprimir apenas os tipos do parametro 28
+			cFilSe5 += '.And.E5_TIPO $'+'"'+AllTrim(MV_PAR28)+Space(1)+'"'
+		ElseIf !Empty(MV_PAR29) // Deseja excluir os tipos do parametro 29
+			cFilSe5 += '.And.!(E5_TIPO $'+'"'+AllTrim(MV_PAR29)+Space(1)+'")'
 		EndIf
 
 		cFilUser := oBaixas:GetAdvPlExp('SE5')
 		If !Empty(cFilUser)
 			cFilSe5 += '.And. (' + cFilUser + ')'		
-		Endif
+		EndIf
 		
 		cCondFil := "NEWSE5->E5_FILIAL==xFilial('SE5')"
 		
-		If mv_par17 == 2
-			cFilSe5 += " .AND. E5_FILIAL = '" + xFilial("SE5") + "'"
+		If MV_PAR17 == 2
+			cFilSe5 += " .And. E5_FILIAL = '" + xFilial("SE5") + "'"
 		Else
 			If Empty( xFilial("SE5") )
-				cFilSe5 += " .AND. E5_FILORIG >= '" + mv_par18 + "' .AND. E5_FILORIG <= '" + mv_par19 + "'"
+				cFilSe5 += " .And. E5_FILORIG >= '" + MV_PAR18 + "' .And. E5_FILORIG <= '" + MV_PAR19 + "'"
 			Else
-				cFilSe5 +=" .AND. E5_FILIAL >= '" + mv_par18 + "' .AND. E5_FILIAL <= '" + mv_par19 + "'"
+				cFilSe5 +=" .And. E5_FILIAL >= '" + MV_PAR18 + "' .And. E5_FILIAL <= '" + MV_PAR19 + "'"
 			EndIf
-		Endif
+		EndIf
 #IFDEF TOP
-	Endif
-#ENDIF	
+	EndIf
+#EndIf	
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Define array para arquivo de trabalho    ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-AADD(aCampos,{"LINHA","C",80,0 } )
+aAdd(aCampos,{"LINHA","C",80,0 } )
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Cria arquivo de Trabalho   ³
@@ -3030,62 +3022,62 @@ If(_oFINR190 <> NIL)
 
 EndIf
 
-If select("TRB") > 0
+If Select("TRB") > 0
 
-	Dbselectarea("TRB")
-	TRB->(Dbclosearea())
+	DBSelectArea("TRB")
+	TRB->(DBCloseArea())
 
-Endif
+EndIf
 
 _oFINR190 := FwTemporaryTable():New("TRB")
 _oFINR190:SetFields(aCampos)
 _oFINR190:AddIndex("1",{"LINHA"})
 _oFINR190:Create()
 
-aColu := Iif(aTam[1] > 6,{023,027,TamParcela("E1_PARCELA",40,39,38),042,000,022},{000,004,TamParcela("E1_PARCELA",17,16,15),019,023,030})
+aColu := IIf(aTam[1] > 6,{023,027,TamParcela("E1_PARCELA",40,39,38),042,000,022},{000,004,TamParcela("E1_PARCELA",17,16,15),019,023,030})
 
 
 If MV_PAR16 == 1
 
-	dbSelectArea("SE5")
-	dbSetOrder(17) //"E5_FILIAL+E5_BANCO+E5_AGENCIA+E5_CONTA+E5_NUMCHEQ+E5_TIPODOC+E5_SEQ"
-	dbGoTop()
+	DBSelectArea("SE5")
+	DBSetOrder(17) //"E5_FILIAL+E5_BANCO+E5_AGENCIA+E5_CONTA+E5_NUMCHEQ+E5_TIPODOC+E5_SEQ"
+	DBGoTop()
 
-Endif
+EndIf
 
 
-DbSelectArea("SM0")
+DBSelectArea("SM0")
 /* GESTAO - inicio */
-If mv_par40 == 1 .and. lNovaGestao
+If MV_PAR40 == 1 .And. lNovaGestao
 	nSelFil := 0
 Else
-	DbSeek(cEmpAnt+If(Empty(cFilDe),"",cFilDe),.T.)
-Endif
+	DBSeek(cEmpAnt+If(Empty(cFilDe),"",cFilDe),.T.)
+EndIf
 
-While SM0->(!Eof()) .and. SM0->M0_CODIGO == cEmpAnt .and.  If(mv_par40 ==1 .And. lNovaGestao,(nSelFil < nLenSelFil) .and. cFilDe <= cFilAte , SM0->M0_CODFIL <= cFilAte)
-	If mv_par40 ==1 .and. lNovaGEstao
+While SM0->(!Eof()) .And. SM0->M0_CODIGO == cEmpAnt .And.  If(MV_PAR40 ==1 .And. lNovaGestao,(nSelFil < nLenSelFil) .And. cFilDe <= cFilAte , SM0->M0_CODFIL <= cFilAte)
+	If MV_PAR40 ==1 .And. lNovaGEstao
 		nSelFil++
-		DbSeek(cEmpAnt+aSelFil[nSelFil],.T.)
-	Endif
+		DBSeek(cEmpAnt+aSelFil[nSelFil],.T.)
+	EndIf
 /* GESTAO - fim */
 	
 	cFilAnt := IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL )
 	cFilNome:= SM0->M0_FILIAL
-	DbSelectArea("NEWSE5")
+	DBSelectArea("NEWSE5")
 
-	If mv_par11 = 2  //Pagar
-		If mv_par39 != 3  //diferente de multinatureza verifica no SE2 se o campo esta preenchido
-			SE2->(dbSetOrder(1))
-			If SE2->(MsSeek(NEWSE5->(E5_FILIAL+E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA))) //Alimentar a variável lMultiNat apenas se for encontrado o título na filial corrente
+	If MV_PAR11 = 2  //Pagar
+		If MV_PAR39 != 3  //diferente de multinatureza verifica no SE2 se o campo esta preenchido
+			SE2->(DBSetOrder(1))
+			If SE2->(MsSeek(NEWSE5->(E5_FILIAL+E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA))) //Alimentar a variável lMultiNat apenas se For encontrado o título na filial corrente
 				lMultiNat := .F.//Inicializa variável apenas se encontrar o título na filial corrente
 				lMultiNat := ( SE2->E2_MULTNAT == '1' ) //pq se o campo nao estiver preenchido nao desvia para FINR199
-				lMultiNat := ( lMultiNat .And. MV_MULNATP .and. mv_par38 = 2 .and. mv_par39 != 2)
+				lMultiNat := ( lMultiNat .And. MV_MULNATP .And. MV_PAR38 = 2 .And. MV_PAR39 != 2)
 			EndIf
 		Else
-			lMultiNat := ( MV_MULNATP .and. mv_par38 = 2 .and. mv_par39 != 2)
+			lMultiNat := ( MV_MULNATP .And. MV_PAR38 = 2 .And. MV_PAR39 != 2)
 		EndIf
-	ElseIf mv_par11 = 1  //Receber
-		lMultiNat := ( MV_MULNATR .and. mv_par38 = 2 .and. mv_par39 != 2 )
+	ElseIf MV_PAR11 = 1  //Receber
+		lMultiNat := ( MV_MULNATR .And. MV_PAR38 = 2 .And. MV_PAR39 != 2 )
 	EndIf
 	
 	If lMultiNat
@@ -3095,68 +3087,68 @@ While SM0->(!Eof()) .and. SM0->M0_CODIGO == cEmpAnt .and.  If(mv_par40 ==1 .And.
 					.F.,cCondicao,cCond2,aColu,lContinua,cFilSe5,lAsTop,Tamanho, @aRet, @aTotais, nOrdem, @nGerFat, @nFilFat,lNovaGestao)
 
 		#IFDEF TOP
-			If TcSrvType() != "AS/400" .and. TCGetDB()!="SYBASE"
-				dbSelectArea("SE5")
-				dbCloseArea()
+			If TcSrvType() != "AS/400" .And. TCGetDB()!="SYBASE"
+				DBSelectArea("SE5")
+				DBCloseArea()
 				ChKFile("SE5")
-				dbSelectArea("SE5")
-				dbSetOrder(1)
-			Endif
-		#ENDIF
+				DBSelectArea("SE5")
+				DBSetOrder(1)
+			EndIf
+		#EndIf
 		If Empty(xFilial("SE5"))
 			Exit
-		Endif
-		dbSelectArea("SM0")
+		EndIf
+		DBSelectArea("SM0")
 		cCodUlt := SM0->M0_CODIGO
  		cFilUlt := IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL )
-		dbSkip()
+		DBSkip()
 		Loop
 
 	Else
 
-		While NEWSE5->(!Eof()) .And. &cCondFil .And. &cCondicao .and. lContinua
+		While NEWSE5->(!Eof()) .And. &cCondFil .And. &cCondicao .And. lContinua
 			
-			DbSelectArea("NEWSE5")
+			DBSelectArea("NEWSE5")
 			// Testa condicoes de filtro	
 			If !Fr190TstCond(cFilSe5,.F.)
-				NEWSE5->(dbSkip())		      // filtro de registros desnecessarios
+				NEWSE5->(DBSkip())		      // filtro de registros desnecessarios
 				Loop
-			Endif							
+			EndIf							
 						
-			// Se nao for TOP, ou se for TOP e for AS400, posiciona no primeiro registro do escopo	
+			// Se nao For TOP, ou se For TOP e For AS400, posiciona no primeiro registro do escopo	
 			// Pois em SQL os registro ja estao filtrados em uma Query e ja esta no inicio do arquivo
 			If !lAsTop 
-				SE2->(dbSetOrder(1))
+				SE2->(DBSetOrder(1))
 				SE2->(MsSeek(NEWSE5->(E5_FILIAL+E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA)))
 				If SE2->E2_MULTNAT == '1'
 					lNaturez := .F.					
-					SEV->(dbSetOrder(1))
+					SEV->(DBSetOrder(1))
 					SEV->(MsSeek(NEWSE5->(E5_FILIAL+E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA)))
-					While NEWSE5->(E5_FILIAL+E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA) == SEV->(EV_FILIAL+EV_PREFIXO+EV_NUM+EV_PARCELA+EV_TIPO+EV_CLIFOR+EV_LOJA) .and. !lNaturez
-						If SEV->EV_NATUREZ >= mv_par05 .and. SEV->EV_NATUREZ <= mv_par06
+					While NEWSE5->(E5_FILIAL+E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+E5_LOJA) == SEV->(EV_FILIAL+EV_PREFIXO+EV_NUM+EV_PARCELA+EV_TIPO+EV_CLIFOR+EV_LOJA) .And. !lNaturez
+						If SEV->EV_NATUREZ >= MV_PAR05 .And. SEV->EV_NATUREZ <= MV_PAR06
 							lNaturez := .T.
 						EndIf
-						SEV->(DbSkip())
+						SEV->(DBSkip())
 					EndDo
 					If !lNaturez
-						NEWSE5->(dbSkip())
+						NEWSE5->(DBSkip())
 						Loop
 					EndIf
 				Else
-					If !(NEWSE5->E5_NATUREZ >= mv_par05 .and. NEWSE5->E5_NATUREZ <= mv_par06)
-						NEWSE5->(dbSkip())
+					If !(NEWSE5->E5_NATUREZ >= MV_PAR05 .And. NEWSE5->E5_NATUREZ <= MV_PAR06)
+						NEWSE5->(DBSkip())
 						Loop
 					EndIf					
 				EndIf
 			EndIf		 	
-			If (NEWSE5->E5_RECPAG == "R" .and. ! (NEWSE5->E5_TIPO $ "PA /"+MV_CPNEG )) .or. ;	//Titulo normal
-				(NEWSE5->E5_RECPAG == "P" .and.   (NEWSE5->E5_TIPO $ "RA /"+MV_CRNEG )) 	//Adiantamento
+			If (NEWSE5->E5_RECPAG == "R" .And. ! (NEWSE5->E5_TIPO $ "PA /"+MV_CPNEG )) .Or. ;	//Titulo normal
+				(NEWSE5->E5_RECPAG == "P" .And.   (NEWSE5->E5_TIPO $ "RA /"+MV_CRNEG )) 	//Adiantamento
 				cCarteira := "R"
 			Else
 				cCarteira := "P"
-			Endif
+			EndIf
 	
-			dbSelectArea("NEWSE5")
+			DBSelectArea("NEWSE5")
 			cAnterior 	:= &cCond2
 			nTotValor	:= 0
 			nTotDesc	   := 0
@@ -3171,72 +3163,72 @@ While SM0->(!Eof()) .and. SM0->M0_CODIGO == cEmpAnt .and.  If(mv_par40 ==1 .And.
 			nTotComp		:= 0
 			nTotFat		:= 0
 	
-			While NEWSE5->(!EOF()) .and. &cCond2=cAnterior .and. &cCondFil .and. lContinua
+			While NEWSE5->(!Eof()) .And. &cCond2=cAnterior .And. &cCondFil .And. lContinua
 	
-				lManual := .f.
-				dbSelectArea("NEWSE5")
+				lManual := .F.
+				DBSelectArea("NEWSE5")
 				
-				If (Empty(NEWSE5->E5_TIPODOC) .And. mv_par16 == 1) .Or.;
-					(Empty(NEWSE5->E5_NUMERO)  .And. mv_par16 == 1)
-					lManual := .t.
+				If (Empty(NEWSE5->E5_TIPODOC) .And. MV_PAR16 == 1) .Or.;
+					(Empty(NEWSE5->E5_NUMERO)  .And. MV_PAR16 == 1)
+					lManual := .T.
 				EndIf
 				
 				// Testa condicoes de filtro	
 				If !Fr190TstCond(cFilSe5,.T.)
-					dbSelectArea("NEWSE5")
-					NEWSE5->(dbSkip())		      // filtro de registros desnecessarios
+					DBSelectArea("NEWSE5")
+					NEWSE5->(DBSkip())		      // filtro de registros desnecessarios
 					Loop
-				Endif	 						
+				EndIf	 						
 					
 				// Imprime somente cheques
-				If mv_par37 == 1 .And. NEWSE5->E5_TIPODOC == "BA"
+				If MV_PAR37 == 1 .And. NEWSE5->E5_TIPODOC == "BA"
 
 					aAreaSE5 := SE5->(GetArea())
 					lAchou := .F.
 
-					SE5->(dbSetOrder(11))
+					SE5->(DBSetOrder(11))
 					cChaveNSE5	:= NEWSE5->(E5_BANCO+E5_AGENCIA+E5_CONTA+E5_NUMCHEQ)
 					SE5->(MsSeek(xFilial("SE5")+cChaveNSE5))					
                
 					// Procura o cheque aglutinado, se encontrar, marca lAchou := .T. e despreza 
-					WHILE SE5->(!EOF()) .And. SE5->(E5_BANCO+E5_AGENCIA+E5_CONTA+E5_NUMCHEQ)	== cChaveNSE5
+					While SE5->(!Eof()) .And. SE5->(E5_BANCO+E5_AGENCIA+E5_CONTA+E5_NUMCHEQ)	== cChaveNSE5
 						If SE5->E5_TIPODOC == "CH"
 							lAchou := .T.
 							Exit
-						Endif
-						SE5->(dbSkip())
-					Enddo
-					RestArea(aAreaSE5)
+						EndIf
+						SE5->(DBSkip())
+					EndDo
+					FWRestArea(aAreaSE5)
 					// Achou cheque aglutinado para a baixa, despreza o registro
 					If lAchou
-						NEWSE5->(dbSkip())
+						NEWSE5->(DBSkip())
 						Loop
-					Endif  	
+					EndIf  	
 
-				ElseIf mv_par37 == 2 .And. NEWSE5->E5_TIPODOC == "CH" //somente baixas
+				ElseIf MV_PAR37 == 2 .And. NEWSE5->E5_TIPODOC == "CH" //somente baixas
 
 					aAreaSE5 := SE5->(GetArea())
 					lAchou := .F.
 					
-					SE5->(dbSetOrder(11))
+					SE5->(DBSetOrder(11))
 					cChaveNSE5	:= NEWSE5->(E5_BANCO+E5_AGENCIA+E5_CONTA+E5_NUMCHEQ)
 					SE5->(MsSeek(xFilial("SE5")+cChaveNSE5))					
                
 					// Procura a baixa aglutinada, se encontrar despreza o movimento bancario
-					WHILE SE5->(!EOF()) .And. SE5->(E5_BANCO+E5_AGENCIA+E5_CONTA+E5_NUMCHEQ)	== cChaveNSE5
+					While SE5->(!Eof()) .And. SE5->(E5_BANCO+E5_AGENCIA+E5_CONTA+E5_NUMCHEQ)	== cChaveNSE5
 						If SE5->E5_TIPODOC $ "BA"
 							lAchou := .T.
 							Exit
-						Endif	
-						SE5->(dbSkip())
-					Enddo
-					RestArea(aAreaSE5)
+						EndIf	
+						SE5->(DBSkip())
+					EndDo
+					FWRestArea(aAreaSE5)
 					// Achou cheque aglutinado para a baixa, despreza o registro
 					If lAchou
-						NEWSE5->(dbSkip())
+						NEWSE5->(DBSkip())
 						Loop
-					Endif
-				Endif	
+					EndIf
+				EndIf	
 
 				cNumero    	:= NEWSE5->E5_NUMERO
 				cPrefixo   	:= NEWSE5->E5_PREFIXO
@@ -3263,70 +3255,70 @@ While SM0->(!Eof()) .and. SM0->M0_CODIGO == cEmpAnt .and.  If(mv_par40 ==1 .And.
 				lBxTit	  	:= .F.
 				cFilorig    := NEWSE5->E5_FILORIG
 				
-				If (NEWSE5->E5_RECPAG == "R" .and. ! (NEWSE5->E5_TIPO $ "PA /"+MV_CPNEG )) .or. ;	//Titulo normal
-					(NEWSE5->E5_RECPAG == "P" .and.   (NEWSE5->E5_TIPO $ "RA /"+MV_CRNEG )) 	//Adiantamento
-					dbSelectArea("SE1")
-					dbSetOrder(1)
+				If (NEWSE5->E5_RECPAG == "R" .And. ! (NEWSE5->E5_TIPO $ "PA /"+MV_CPNEG )) .Or. ;	//Titulo normal
+					(NEWSE5->E5_RECPAG == "P" .And.   (NEWSE5->E5_TIPO $ "RA /"+MV_CRNEG )) 	//Adiantamento
+					DBSelectArea("SE1")
+					DBSetOrder(1)
 					// Procuro SE1 pela filial origem
 					lBxTit := MsSeek(xFilial("SE1",cFilorig)+cPrefixo+cNumero+cParcela+cTipo)
 					If !lBxTit
-						lBxTit := dbSeek(NEWSE5->E5_FILORIG+cPrefixo+cNumero+cParcela+cTipo)
-					Endif				
+						lBxTit := DBSeek(NEWSE5->E5_FILORIG+cPrefixo+cNumero+cParcela+cTipo)
+					EndIf				
 					cCarteira := "R"
-					dDtMovFin := IIF (lManual,CTOD("//"), DataValida(SE1->E1_VENCTO,.T.))
-					While SE1->(!Eof()) .and. SE1->E1_PREFIXO+SE1->E1_NUM+SE1->E1_PARCELA+SE1->E1_TIPO==cPrefixo+cNumero+cParcela+cTipo
+					dDtMovFin := IIf (lManual,CTOD("//"), DataValida(SE1->E1_VENCTO,.T.))
+					While SE1->(!Eof()) .And. SE1->E1_PREFIXO+SE1->E1_NUM+SE1->E1_PARCELA+SE1->E1_TIPO==cPrefixo+cNumero+cParcela+cTipo
 						If SE1->E1_CLIENTE == cFornece .And. SE1->E1_LOJA == cLoja	// Cliente igual, Ok
 							Exit
-						Endif                                
-						SE1->( dbSkip() )
+						EndIf                                
+						SE1->( DBSkip() )
 					EndDo
-					If !SE1->(EOF()) .And. mv_par11 == 1 .and. !lManual .and.  ;
-						(NEWSE5->E5_RECPAG == "R" .and. !(NEWSE5->E5_TIPO $ MVPAGANT+"/"+MV_CPNEG))
+					If !SE1->(Eof()) .And. MV_PAR11 == 1 .And. !lManual .And.  ;
+						(NEWSE5->E5_RECPAG == "R" .And. !(NEWSE5->E5_TIPO $ MVPAGANT+"/"+MV_CPNEG))
 						cExp := "NEWSE5->E5_SITCOB"
 						
-						If mv_par36 == 2 // Nao imprime titulos em carteira 
+						If MV_PAR36 == 2 // Nao imprime titulos em carteira 
 							// Retira da comparacao as situacoes branco, 0, F e G
-							mv_par15 := AllTrim(mv_par15)       
-							mv_par15 := StrTran(mv_par15,"0","")
-							mv_par15 := StrTran(mv_par15,"F","")
-							mv_par15 := StrTran(mv_par15,"G","")
+							MV_PAR15 := AllTrim(MV_PAR15)       
+							MV_PAR15 := StrTran(MV_PAR15,"0","")
+							MV_PAR15 := StrTran(MV_PAR15,"F","")
+							MV_PAR15 := StrTran(MV_PAR15,"G","")
 						Else
 							If (NEWSE5->E5_RECPAG == "R") .And. lAjuPar15
-								mv_par15  += " "
-							Endif
+								MV_PAR15  += " "
+							EndIf
 						EndIf	
 				
-						cExp += " $ mv_par15" 
+						cExp += " $ MV_PAR15" 
 						If !(&cExp)
-							dbSelectArea("NEWSE5")
-							NEWSE5->(dbSkip())		      // filtro de registros desnecessarios
+							DBSelectArea("NEWSE5")
+							NEWSE5->(DBSkip())		      // filtro de registros desnecessarios
 							Loop
-						Endif
-					Endif
-					cCond3:="NEWSE5->(E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+DtoS(E5_DATA)+E5_SEQ+E5_NUMCHEQ)==cPrefixo+cNumero+cParcela+cTipo+DtoS(dBaixa)+cSeq+cNumCheq"
+						EndIf
+					EndIf
+					cCond3:="NEWSE5->(E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+DToS(E5_DATA)+E5_SEQ+E5_NUMCHEQ)==cPrefixo+cNumero+cParcela+cTipo+DToS(dBaixa)+cSeq+cNumCheq"
 					nDesc := nJuros := nValor := nMulta := nJurMul := nCM := nVlMovFin := 0
 				Else
-					dbSelectArea("SE2")
-					DbSetOrder(1)
+					DBSelectArea("SE2")
+					DBSetOrder(1)
 					cCarteira := "P"
 					// Procuro SE2 pela filial origem
 				    lBxTit 	:= MsSeek(xFilial("SE2",cFilOrig)+cPrefixo+cNumero+cParcela+cTipo+cFornece+cLoja)
 				    
-				    Iif(lBxTit, nRecSE2	:= SE2->(Recno()), nRecSE2 := 0 )
+				    IIf(lBxTit, nRecSE2	:= SE2->(Recno()), nRecSE2 := 0 )
 				    
 					If !lBxTit
-						lBxTit := dbSeek(NEWSE5->E5_FILORIG+cPrefixo+cNumero+cParcela+cTipo+cFornece+cLoja)
-					Endif				
-					dDtMovFin := IIF(lManual,CTOD("//"),DataValida(SE2->E2_VENCTO,.T.))
-					cCond3:="NEWSE5->(E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+DtoS(E5_DATA)+E5_SEQ+E5_NUMCHEQ)==cPrefixo+cNumero+cParcela+cTipo+cFornece+DtoS(dBaixa)+cSeq+cNumCheq"
+						lBxTit := DBSeek(NEWSE5->E5_FILORIG+cPrefixo+cNumero+cParcela+cTipo+cFornece+cLoja)
+					EndIf				
+					dDtMovFin := IIf(lManual,CTOD("//"),DataValida(SE2->E2_VENCTO,.T.))
+					cCond3:="NEWSE5->(E5_PREFIXO+E5_NUMERO+E5_PARCELA+E5_TIPO+E5_CLIFOR+DToS(E5_DATA)+E5_SEQ+E5_NUMCHEQ)==cPrefixo+cNumero+cParcela+cTipo+cFornece+DToS(dBaixa)+cSeq+cNumCheq"
 					nDesc := nJuros := nValor := nMulta := nJurMul := nCM := nVlMovFin := 0
-					cCheque    := Iif(Empty(NEWSE5->E5_NUMCHEQ),SE2->E2_NUMBCO,NEWSE5->E5_NUMCHEQ)
-				Endif
-				dbSelectArea("NEWSE5")
+					cCheque    := IIf(Empty(NEWSE5->E5_NUMCHEQ),SE2->E2_NUMBCO,NEWSE5->E5_NUMCHEQ)
+				EndIf
+				DBSelectArea("NEWSE5")
 				cHistorico := Space(40)
-				While NEWSE5->( !Eof()) .and. &cCond3 .and. lContinua .And. &cCondFil
+				While NEWSE5->( !Eof()) .And. &cCond3 .And. lContinua .And. &cCondFil
 					
-					dbSelectArea("NEWSE5")
+					DBSelectArea("NEWSE5")
 					cTipodoc   := NEWSE5->E5_TIPODOC
 					cCheque    := NEWSE5->E5_NUMCHEQ
 	
@@ -3336,38 +3328,38 @@ While SM0->(!Eof()) .and. SM0->M0_CODIGO == cEmpAnt .and.  If(mv_par40 ==1 .And.
 	
 					// Testa condicoes de filtro	
 					If !Fr190TstCond(cFilSe5,.T.)
-						dbSelectArea("NEWSE5")
-						NEWSE5->(dbSkip())		      // filtro de registros desnecessarios
+						DBSelectArea("NEWSE5")
+						NEWSE5->(DBSkip())		      // filtro de registros desnecessarios
 						Loop
-					Endif	  								
+					EndIf	  								
 												
 					If NEWSE5->E5_SITUACA $ "C/E/X" 
-						dbSelectArea("NEWSE5")
-						NEWSE5->( dbSkip() )
+						DBSelectArea("NEWSE5")
+						NEWSE5->( DBSkip() )
 						Loop
-					EndIF
+					EndIf
 					
 					If NEWSE5->E5_LOJA != cLoja
 						Exit
-					Endif
+					EndIf
 	
-					If NEWSE5->E5_FILORIG < mv_par33 .or. NEWSE5->E5_FILORIG > mv_par34
-						dbSelectArea("NEWSE5")
-						NEWSE5->( dbSkip() )
+					If NEWSE5->E5_FILORIG < MV_PAR33 .Or. NEWSE5->E5_FILORIG > MV_PAR34
+						DBSelectArea("NEWSE5")
+						NEWSE5->( DBSkip() )
 						Loop
-					Endif
+					EndIf
 	
 					//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 					//³ Nao imprime os registros de emprestimos excluidos ³
 					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ					
 					If NEWSE5->E5_TIPODOC == "EP"
 						aAreaSE5 := NEWSE5->(GetArea())	
-						dbSelectArea("SEH")
-						dbSetOrder(1)
-						lAchouEmp := MsSeek(xFilial("SEH")+Substr(NEWSE5->E5_DOCUMEN,1,nTamEH))
-						RestArea(aAreaSE5)
+						DBSelectArea("SEH")
+						DBSetOrder(1)
+						lAchouEmp := MsSeek(xFilial("SEH")+SubStr(NEWSE5->E5_DOCUMEN,1,nTamEH))
+						FWRestArea(aAreaSE5)
 						If !lAchouEmp
-							NEWSE5->(dbSkip())
+							NEWSE5->(DBSkip())
 							Loop
 						EndIf
 					EndIf
@@ -3377,16 +3369,16 @@ While SM0->(!Eof()) .and. SM0->M0_CODIGO == cEmpAnt .and.  If(mv_par40 ==1 .And.
 					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ					
 					If NEWSE5->E5_TIPODOC == "PE"
 						aAreaSE5 := NEWSE5->(GetArea())	
-						dbSelectArea("SEI")
-						dbSetOrder(1)
-						If	MsSeek(xFilial("SEI")+"EMP"+Substr(NEWSE5->E5_DOCUMEN,1,nTamEI))
+						DBSelectArea("SEI")
+						DBSetOrder(1)
+						If	MsSeek(xFilial("SEI")+"EMP"+SubStr(NEWSE5->E5_DOCUMEN,1,nTamEI))
 							If SEI->EI_STATUS == "C"
 								lAchouEst := .T.
 							EndIf
 						EndIf
-						RestArea(aAreaSE5)
+						FWRestArea(aAreaSE5)
 						If lAchouEst
-							NEWSE5->(dbSkip())
+							NEWSE5->(DBSkip())
 							Loop
 						EndIf
 					EndIf
@@ -3396,11 +3388,11 @@ While SM0->(!Eof()) .and. SM0->M0_CODIGO == cEmpAnt .and.  If(mv_par40 ==1 .And.
 					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 					cFilTrb := If(NEWSE5->E5_RECPAG == "R","SE1","SE2")
 					If (cFilTrb)->(!Eof()) .And.;
-						((cFilTrb)->&(Right(cFilTrb,2)+"_VENCREA") < mv_par31 .Or. (!Empty(mv_par32) .And. (cFilTrb)->&(Right(cFilTrb,2)+"_VENCREA") > mv_par32))
-						dbSelectArea("NEWSE5")
-						NEWSE5->(dbSkip())
+						((cFilTrb)->&(Right(cFilTrb,2)+"_VENCREA") < MV_PAR31 .Or. (!Empty(MV_PAR32) .And. (cFilTrb)->&(Right(cFilTrb,2)+"_VENCREA") > MV_PAR32))
+						DBSelectArea("NEWSE5")
+						NEWSE5->(DBSkip())
 						Loop
-					Endif
+					EndIf
 	            
 					dBaixa     	:= NEWSE5->E5_DATA
 					cBanco     	:= NEWSE5->E5_BANCO
@@ -3417,91 +3409,91 @@ While SM0->(!Eof()) .and. SM0->M0_CODIGO == cEmpAnt .and.  If(mv_par40 ==1 .And.
 					//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 					//³ Obter moeda da conta no Banco.                               ³
 					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-					If ( cPaisLoc # "BRA".And.!Empty(NEWSE5->E5_BANCO+NEWSE5->E5_AGENCIA+NEWSE5->E5_CONTA) ) .OR. FXMultSld()
-						SA6->(DbSetOrder(1))
+					If ( cPaisLoc # "BRA".And.!Empty(NEWSE5->E5_BANCO+NEWSE5->E5_AGENCIA+NEWSE5->E5_CONTA) ) .Or. FXMultSld()
+						SA6->(DBSetOrder(1))
 						SA6->(MsSeek(xFilial()+NEWSE5->E5_BANCO+NEWSE5->E5_AGENCIA+NEWSE5->E5_CONTA))
 						nMoedaBco	:=	Max(SA6->A6_MOEDA,1)
 					Else
 						nMoedaBco	:=	1
-					Endif
+					EndIf
 	
 					If !Empty(NEWSE5->E5_NUMERO)
-						If (NEWSE5->E5_RECPAG == "R" .and. !(NEWSE5->E5_TIPO $ MVPAGANT+"/"+MV_CPNEG)) .or. ;
-							(NEWSE5->E5_RECPAG == "P" .and. NEWSE5->E5_TIPO $ MVRECANT+"/"+MV_CRNEG) .Or.;
+						If (NEWSE5->E5_RECPAG == "R" .And. !(NEWSE5->E5_TIPO $ MVPAGANT+"/"+MV_CPNEG)) .Or. ;
+							(NEWSE5->E5_RECPAG == "P" .And. NEWSE5->E5_TIPO $ MVRECANT+"/"+MV_CRNEG) .Or.;
 							(NEWSE5->E5_RECPAG == "P" .And. NEWSE5->E5_TIPODOC $ "DB#OD")
-							dbSelectArea( "SA1")
-							dbSetOrder(1)
+							DBSelectArea( "SA1")
+							DBSetOrder(1)
 							lAchou := .F.							
-							If dbSeek(xFilial("SA1")+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
+							If DBSeek(xFilial("SA1")+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
 								lAchou := .T.
-							Endif
+							EndIf
 							If !lAchou
 								cFilOrig := NEWSE5->E5_FILIAL //Procuro SA1 pela filial do movimento
-								If dbSeek(cFilOrig+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
-									If Upper(Alltrim(SA1->A1_NREDUZ)) == Upper(Alltrim(NEWSE5->E5_BENEF))
+								If DBSeek(cFilOrig+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
+									If Upper(AllTrim(SA1->A1_NREDUZ)) == Upper(AllTrim(NEWSE5->E5_BENEF))
 										lAchou := .T.
 									Else
 										cFilOrig := NEWSE5->E5_FILORIG //Procuro SA1 pela filial origem
-										If dbSeek(cFilOrig+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
-											If Upper(Alltrim(SA1->A1_NREDUZ)) == Upper(Alltrim(NEWSE5->E5_BENEF))
+										If DBSeek(cFilOrig+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
+											If Upper(AllTrim(SA1->A1_NREDUZ)) == Upper(AllTrim(NEWSE5->E5_BENEF))
 												lAchou := .T.
-											Endif
-										Endif
-									Endif
+											EndIf
+										EndIf
+									EndIf
 								Else
 									cFilOrig := NEWSE5->E5_FILORIG	//Procuro SA1 pela filial origem
-									If dbSeek(cFilOrig+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
-										If Upper(Alltrim(SA1->A1_NREDUZ)) == Upper(Alltrim(NEWSE5->E5_BENEF))
+									If DBSeek(cFilOrig+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
+										If Upper(AllTrim(SA1->A1_NREDUZ)) == Upper(AllTrim(NEWSE5->E5_BENEF))
 											lAchou := .T.
-										Endif
-									Endif
-								Endif							
-							EndIF
+										EndIf
+									EndIf
+								EndIf							
+							EndIf
 							If lAchou 
-								cCliFor := Iif(mv_par30==1,SA1->A1_NREDUZ,SA1->A1_NOME)
+								cCliFor := IIf(MV_PAR30==1,SA1->A1_NREDUZ,SA1->A1_NOME)
 							Else
-								cCliFor	:= 	Upper(Alltrim(NEWSE5->E5_BENEF))
-							Endif
+								cCliFor	:= 	Upper(AllTrim(NEWSE5->E5_BENEF))
+							EndIf
 						Else
-							dbSelectArea( "SA2")
-							dbSetOrder(1)
+							DBSelectArea( "SA2")
+							DBSetOrder(1)
 							lAchou := .F.							
-							If dbSeek(xFilial("SA2")+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
+							If DBSeek(xFilial("SA2")+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
 								lAchou := .T.
-							Endif
+							EndIf
 							If !lAchou 
 								cFilOrig := NEWSE5->E5_FILIAL //Procuro SA2 pela filial do movimento
-								If dbSeek(cFilOrig+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
-									If Upper(Alltrim(SA2->A2_NREDUZ)) == Upper(Alltrim(NEWSE5->E5_BENEF))
+								If DBSeek(cFilOrig+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
+									If Upper(AllTrim(SA2->A2_NREDUZ)) == Upper(AllTrim(NEWSE5->E5_BENEF))
 										lAchou := .T.
 									Else
 										cFilOrig := NEWSE5->E5_FILORIG //Procuro SA2 pela filial origem
-										If dbSeek(cFilOrig+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
-											If Upper(Alltrim(SA2->A2_NREDUZ)) == Upper(Alltrim(NEWSE5->E5_BENEF))
+										If DBSeek(cFilOrig+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
+											If Upper(AllTrim(SA2->A2_NREDUZ)) == Upper(AllTrim(NEWSE5->E5_BENEF))
 												lAchou := .T.
-											Endif
-										Endif
-									Endif
+											EndIf
+										EndIf
+									EndIf
 								Else
 									cFilOrig := NEWSE5->E5_FILORIG	//Procuro SA2 pela filial origem
-									If dbSeek(cFilOrig+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
-										If Upper(Alltrim(SA2->A2_NREDUZ)) == Upper(Alltrim(NEWSE5->E5_BENEF))
+									If DBSeek(cFilOrig+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
+										If Upper(AllTrim(SA2->A2_NREDUZ)) == Upper(AllTrim(NEWSE5->E5_BENEF))
 											lAchou := .T.
-										Endif
-									Endif
-								Endif							
-							EndIF
+										EndIf
+									EndIf
+								EndIf							
+							EndIf
 							If lAchou 
-								cCliFor := Iif(mv_par30==1,SA2->A2_NREDUZ,SA2->A2_NOME)
+								cCliFor := IIf(MV_PAR30==1,SA2->A2_NREDUZ,SA2->A2_NOME)
 							Else
-								cCliFor	:= 	Upper(Alltrim(NEWSE5->E5_BENEF))
-							Endif
+								cCliFor	:= 	Upper(AllTrim(NEWSE5->E5_BENEF))
+							EndIf
 						EndIf
 					EndIf
-					dbSelectArea("SM2")
-					dbSetOrder(1)
-					dbSeek(NEWSE5->E5_DATA)
-					dbSelectArea("NEWSE5") 
+					DBSelectArea("SM2")
+					DBSetOrder(1)
+					DBSeek(NEWSE5->E5_DATA)
+					DBSelectArea("NEWSE5") 
 					nTaxa:= 0
 
 					If cPaisLoc=="BRA"
@@ -3516,27 +3508,27 @@ While SM0->(!Eof()) .and. SM0->M0_CODIGO == cEmpAnt .and.  If(mv_par40 ==1 .And.
 						EndIf
 					EndIf
 					nRecSe5:=If(lAsTop,NEWSE5->SE5RECNO,Recno())
-					nDesc+=Iif(mv_par12==1.And.nMoedaBco==1,NEWSE5->E5_VLDESCO,Round(xMoeda(NEWSE5->E5_VLDESCO,nMoedaBco,mv_par12,NEWSE5->E5_DATA,nDecs+1,,nTaxa),nDecs+1))
-					nJuros+=Iif(mv_par12==1.And.nMoedaBco==1,NEWSE5->E5_VLJUROS,Round(xMoeda(NEWSE5->E5_VLJUROS,nMoedaBco,mv_par12,NEWSE5->E5_DATA,nDecs+1,,nTaxa),nDecs+1))
-					nMulta+=Iif(mv_par12==1.And.nMoedaBco==1,NEWSE5->E5_VLMULTA,Round(xMoeda(NEWSE5->E5_VLMULTA,nMoedaBco,mv_par12,NEWSE5->E5_DATA,nDecs+1,,nTaxa),nDecs+1))
+					nDesc+=IIf(MV_PAR12==1.And.nMoedaBco==1,NEWSE5->E5_VLDESCO,Round(xMoeda(NEWSE5->E5_VLDESCO,nMoedaBco,MV_PAR12,NEWSE5->E5_DATA,nDecs+1,,nTaxa),nDecs+1))
+					nJuros+=IIf(MV_PAR12==1.And.nMoedaBco==1,NEWSE5->E5_VLJUROS,Round(xMoeda(NEWSE5->E5_VLJUROS,nMoedaBco,MV_PAR12,NEWSE5->E5_DATA,nDecs+1,,nTaxa),nDecs+1))
+					nMulta+=IIf(MV_PAR12==1.And.nMoedaBco==1,NEWSE5->E5_VLMULTA,Round(xMoeda(NEWSE5->E5_VLMULTA,nMoedaBco,MV_PAR12,NEWSE5->E5_DATA,nDecs+1,,nTaxa),nDecs+1))
 					nJurMul+= nJuros + nMulta
-					nCM+=Iif(mv_par12==1.And.nMoedaBco==1,NEWSE5->E5_VLCORRE,Round(xMoeda(NEWSE5->E5_VLCORRE,nMoedaBco,mv_par12,NEWSE5->E5_DATA,nDecs+1,,nTaxa),nDecs+1))
+					nCM+=IIf(MV_PAR12==1.And.nMoedaBco==1,NEWSE5->E5_VLCORRE,Round(xMoeda(NEWSE5->E5_VLCORRE,nMoedaBco,MV_PAR12,NEWSE5->E5_DATA,nDecs+1,,nTaxa),nDecs+1))
 
-					If lPccBaixa .and. Empty(NEWSE5->E5_PRETPIS) .And. Empty(NEWSE5->E5_PRETCOF) .And. Empty(NEWSE5->E5_PRETCSL) .And. cCarteira == "P" 
+					If lPccBaixa .And. Empty(NEWSE5->E5_PRETPIS) .And. Empty(NEWSE5->E5_PRETCOF) .And. Empty(NEWSE5->E5_PRETCSL) .And. cCarteira == "P" 
 						If nRecSE2 > 0 
 						
-							aAreabk  := Getarea()
+							aAreabk  := FWGetArea()
 							aAreaSE2 := SE2->(Getarea())
-							SE2->(DbGoto(nRecSE2))
+							SE2->(DBGoTo(nRecSE2))
 						
 							nTotAbImp += (NEWSE5->E5_VRETPIS) + (NEWSE5->E5_VRETCOF) + (NEWSE5->E5_VRETCSL) + ;
 										SE2->E2_INSS + SE2->E2_ISS + SE2->E2_IRRF
 										
-							Restarea(aAreaSE2)
-							Restarea(aAreabk)
+							FWRestArea(aAreaSE2)
+							FWRestArea(aAreabk)
 						Else
-							nTotAbImp += (NEWSE5->E5_VRETPIS) + (NEWSE5->E5_VRETCOF) + (NEWSE5->E5_VRETCSL) + Iif( lMvGlosa , NEWSE5->E5_VRETIRF + NEWSE5->E5_VRETISS + NEWSE5->E5_VRETINS , 0 )
-						Endif
+							nTotAbImp += (NEWSE5->E5_VRETPIS) + (NEWSE5->E5_VRETCOF) + (NEWSE5->E5_VRETCSL) + IIf( lMvGlosa , NEWSE5->E5_VRETIRF + NEWSE5->E5_VRETISS + NEWSE5->E5_VRETINS , 0 )
+						EndIf
 
 						nVlrGlosa := nTotAbImp
 					EndIf				
@@ -3546,90 +3538,90 @@ While SM0->(!Eof()) .and. SM0->M0_CODIGO == cEmpAnt .and.  If(mv_par40 ==1 .And.
 						cHistorico := NEWSE5->E5_HISTOR
 
 						If NEWSE5->E5_RECPAG == "P"
-							If cPaisLoc == "ARG" .and. !EMPTY(NEWSE5->E5_ORDREC)
-								nValor += Iif(VAL(NEWSE5->E5_MOEDA)==mv_par12,NEWSE5->E5_VALOR,Round(xMoeda(NEWSE5->E5_VALOR,VAL(NEWSE5->E5_MOEDA),mv_par12,NEWSE5->E5_DATA,nDecs+1,NEWSE5->E5_TXMOEDA),nDecs+1))
+							If cPaisLoc == "ARG" .And. !Empty(NEWSE5->E5_ORDREC)
+								nValor += IIf(Val(NEWSE5->E5_MOEDA)==MV_PAR12,NEWSE5->E5_VALOR,Round(xMoeda(NEWSE5->E5_VALOR,Val(NEWSE5->E5_MOEDA),MV_PAR12,NEWSE5->E5_DATA,nDecs+1,NEWSE5->E5_TXMOEDA),nDecs+1))
 							Else
-							 	nValor += Iif(mv_par12==nMoedaBco,NEWSE5->E5_VALOR,Round(xMoeda(NEWSE5->E5_VLMOED2,SE2->E2_MOEDA,mv_par12,SE2->E2_BAIXA,nDecs+1,If(cPaisLoc=="BRA",SE2->E2_TXMOEDA,0))+nJurMul-nDesc,nDecs+1))
-							Endif
+							 	nValor += IIf(MV_PAR12==nMoedaBco,NEWSE5->E5_VALOR,Round(xMoeda(NEWSE5->E5_VLMOED2,SE2->E2_MOEDA,MV_PAR12,SE2->E2_BAIXA,nDecs+1,If(cPaisLoc=="BRA",SE2->E2_TXMOEDA,0))+nJurMul-nDesc,nDecs+1))
+							EndIf
 						Else
-							If cPaisLoc <> "BRA" .and. !EMPTY(NEWSE5->E5_ORDREC)
-								nValor+=Iif(mv_par12==1.And.nMoedaBco==1,NEWSE5->E5_VALOR,Round(xMoeda(NEWSE5->E5_VLMOED2,VAL(NEWSE5->E5_MOEDA),mv_par12,NEWSE5->E5_DATA,nDecs+1,If(cPaisLoc=="BRA",NEWSE5->E5_TXMOEDA,0)),nDecs+1))
+							If cPaisLoc <> "BRA" .And. !Empty(NEWSE5->E5_ORDREC)
+								nValor+=IIf(MV_PAR12==1.And.nMoedaBco==1,NEWSE5->E5_VALOR,Round(xMoeda(NEWSE5->E5_VLMOED2,Val(NEWSE5->E5_MOEDA),MV_PAR12,NEWSE5->E5_DATA,nDecs+1,If(cPaisLoc=="BRA",NEWSE5->E5_TXMOEDA,0)),nDecs+1))
 							Else
-						 		nValor+=Iif(mv_par12==1.And.nMoedaBco==1,NEWSE5->E5_VALOR,Round(xMoeda(NEWSE5->E5_VLMOED2,SE1->E1_MOEDA,mv_par12,SE1->E1_BAIXA,nDecs+1,If(cPaisLoc=="BRA",SE1->E1_TXMOEDA,0)),nDecs+1))
+						 		nValor+=IIf(MV_PAR12==1.And.nMoedaBco==1,NEWSE5->E5_VALOR,Round(xMoeda(NEWSE5->E5_VLMOED2,SE1->E1_MOEDA,MV_PAR12,SE1->E1_BAIXA,nDecs+1,If(cPaisLoc=="BRA",SE1->E1_TXMOEDA,0)),nDecs+1))
 						 	EndIf
 						EndIf						
 
 						If lMVLjTroco
-							lTroco := If(Substr(NEWSE5->E5_HISTOR,1,3)=="LOJ",.T.,.F.)
+							lTroco := If(SubStr(NEWSE5->E5_HISTOR,1,3)=="LOJ",.T.,.F.)
 							If lTroco						
 								nRecnoSE5 := SE5->(Recno())
-								DbSelectArea("SE5")
-								DbSetOrder(7)
-								If dbSeek(xFilial("SE5")+NEWSE5->E5_PREFIXO+NEWSE5->E5_NUMERO+NEWSE5->E5_PARCELA+Space(TamSX3("E5_TIPO")[1])+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
-									While !Eof() .AND. xFilial("SE5") == SE5->E5_FILIAL .AND. NEWSE5->E5_PREFIXO+NEWSE5->E5_NUMERO+NEWSE5->E5_PARCELA+Space(TamSX3("E5_TIPO")[1])+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA == SE5->E5_PREFIXO+;
+								DBSelectArea("SE5")
+								DBSetOrder(7)
+								If DBSeek(xFilial("SE5")+NEWSE5->E5_PREFIXO+NEWSE5->E5_NUMERO+NEWSE5->E5_PARCELA+Space(TamSX3("E5_TIPO")[1])+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA)
+									While !Eof() .And. xFilial("SE5") == SE5->E5_FILIAL .And. NEWSE5->E5_PREFIXO+NEWSE5->E5_NUMERO+NEWSE5->E5_PARCELA+Space(TamSX3("E5_TIPO")[1])+NEWSE5->E5_CLIFOR+NEWSE5->E5_LOJA == SE5->E5_PREFIXO+;
 														SE5->E5_NUMERO + SE5->E5_PARCELA + SE5->E5_TIPO + SE5->E5_CLIFOR + SE5->E5_LOJA
 										
-										If SE5->E5_MOEDA = "TC" .AND. SE5->E5_TIPODOC = "VL" .AND.;
+										If SE5->E5_MOEDA = "TC" .And. SE5->E5_TIPODOC = "VL" .AND.;
 											SE5->E5_RECPAG = "P" 
 											nValTroco := SE5->E5_VALOR
 										EndIf  
-										SE5->(DbSkip())				    					
+										SE5->(DBSkip())				    					
 									EndDo
 								EndIf
-								SE5->(DbGoTo(nRecnoSE5)) 			   
-							Endif
-                        Endif                                                              
+								SE5->(DBGoTo(nRecnoSE5)) 			   
+							EndIf
+                        EndIf                                                              
                         
-						dbSelectArea("NEWSE5") 										
+						DBSelectArea("NEWSE5") 										
 						
 						nValor -= nValTroco
 
 						//Pcc Baixa CR
-						If cCarteira == "R" .and. lPccBxCr .and. cPaisLoc == "BRA" .And. (IiF(lRaRtImp,NEWSE5->E5_TIPO $ MVRECANT,.T.) .OR. lPccBaixa)
+						If cCarteira == "R" .And. lPccBxCr .And. cPaisLoc == "BRA" .And. (IIf(lRaRtImp,NEWSE5->E5_TIPO $ MVRECANT,.T.) .Or. lPccBaixa)
 							If Empty(NEWSE5->E5_PRETPIS) 
-								nPccBxCr += Iif(mv_par12==1.And.nMoedaBco==1,NEWSE5->E5_VRETPIS,Round(xMoeda(NEWSE5->E5_VRETPIS,nMoedaBco,mv_par12,NEWSE5->E5_DATA,nDecs+1,,NEWSE5->E5_TXMOEDA),nDecs+1))
-							Endif						
+								nPccBxCr += IIf(MV_PAR12==1.And.nMoedaBco==1,NEWSE5->E5_VRETPIS,Round(xMoeda(NEWSE5->E5_VRETPIS,nMoedaBco,MV_PAR12,NEWSE5->E5_DATA,nDecs+1,,NEWSE5->E5_TXMOEDA),nDecs+1))
+							EndIf						
 							If Empty(NEWSE5->E5_PRETCOF) 
-								nPccBxCr += Iif(mv_par12==1.And.nMoedaBco==1,NEWSE5->E5_VRETCOF,Round(xMoeda(NEWSE5->E5_VRETCOF,nMoedaBco,mv_par12,NEWSE5->E5_DATA,nDecs+1,,NEWSE5->E5_TXMOEDA),nDecs+1))
-							Endif						
+								nPccBxCr += IIf(MV_PAR12==1.And.nMoedaBco==1,NEWSE5->E5_VRETCOF,Round(xMoeda(NEWSE5->E5_VRETCOF,nMoedaBco,MV_PAR12,NEWSE5->E5_DATA,nDecs+1,,NEWSE5->E5_TXMOEDA),nDecs+1))
+							EndIf						
 							If Empty(NEWSE5->E5_PRETCSL) 
-								nPccBxCr += Iif(mv_par12==1.And.nMoedaBco==1,NEWSE5->E5_VRETCSL,Round(xMoeda(NEWSE5->E5_VRETCSL,nMoedaBco,mv_par12,NEWSE5->E5_DATA,nDecs+1,,NEWSE5->E5_TXMOEDA),nDecs+1))
-							Endif											
-						Endif
+								nPccBxCr += IIf(MV_PAR12==1.And.nMoedaBco==1,NEWSE5->E5_VRETCSL,Round(xMoeda(NEWSE5->E5_VRETCSL,nMoedaBco,MV_PAR12,NEWSE5->E5_DATA,nDecs+1,,NEWSE5->E5_TXMOEDA),nDecs+1))
+							EndIf											
+						EndIf
 
 					Else
-						nVlMovFin+=Iif(mv_par12==1.And.nMoedaBco==1,NEWSE5->E5_VALOR,Round(xMoeda(NEWSE5->E5_VALOR,nMoedaBco,mv_par12,NEWSE5->E5_DATA,nDecs+1,nTaxa),nDecs+1))
-						cHistorico := Iif(Empty(NEWSE5->E5_HISTOR),"MOV FIN MANUAL",NEWSE5->E5_HISTOR)
+						nVlMovFin+=IIf(MV_PAR12==1.And.nMoedaBco==1,NEWSE5->E5_VALOR,Round(xMoeda(NEWSE5->E5_VALOR,nMoedaBco,MV_PAR12,NEWSE5->E5_DATA,nDecs+1,nTaxa),nDecs+1))
+						cHistorico := IIf(Empty(NEWSE5->E5_HISTOR),"MOV FIN MANUAL",NEWSE5->E5_HISTOR)
 						cNatureza  	:= NEWSE5->E5_NATUREZ
-					Endif	
+					EndIf	
 
 					cAuxFilNome := cFilAnt + " - "+ cFilNome
 					cAuxCliFor  := cCliFor					    
 					cAuxLote    := E5_LOTE
 					dAuxDtDispo := E5_DTDISPO
 
-					dbSkip()
-					If lManual		// forca a saida do looping se for mov manual
+					DBSkip()
+					If lManual		// forca a saida do looping se For mov manual
 						Exit
-					Endif
-				EndDO
+					EndIf
+				EndDo
 	
 				If (nDesc+nValor+nJurMul+nVlMovFin) > 0 
 				
 					
-					AAdd(aRet, Array(32))
+					aAdd(aRet, Array(32))
 					//ITALAC - inclui campos com valor de VENCTO
 					
 					
 					If NEWSE5->E5_RECPAG == "R"
 					
-						aRet[Li][29] := dtoc( stod( NEWSE5->VENCTO ))
+						aRet[Li][29] := DToC( SToD( NEWSE5->VENCTO ))
 					
 					Else
 					
-						aRet[Li][29] := dtoc( stod( NEWSE5->VENCTO ))
+						aRet[Li][29] := DToC( SToD( NEWSE5->VENCTO ))
 						
-					Endif
+					EndIf
 				
 				
 					// Defaults >>>
@@ -3648,16 +3640,16 @@ While SM0->(!Eof()) .and. SM0->M0_CODIGO == cEmpAnt .and.  If(mv_par40 ==1 .And.
 					//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 					//³ C lculo do Abatimento        ³
 					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-					If cCarteira == "R" .and. !lManual
-						dbSelectArea("SE1")
+					If cCarteira == "R" .And. !lManual
+						DBSelectArea("SE1")
 						nRecno := Recno()
 						nAbat := 0
 						nAbatLiq := 0
 						//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-						//³ Entra no if abaixo se titulo totalmente baixado e se for a maior
+						//³ Entra no If abaixo se titulo totalmente baixado e se For a maior
 						// sequnecia de baixa no SE5 
 						//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-						If !SE1->E1_TIPO $ MVRECANT+"/"+MV_CRNEG .and. Empty(SE1->E1_SALDO) .and.;
+						If !SE1->E1_TIPO $ MVRECANT+"/"+MV_CRNEG .And. Empty(SE1->E1_SALDO) .and.;
 						    cMaxSeq == cSeq //NEWSE5->E5_SEQ
 							//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 							//³ Calcula o valor total de abatimento do titulo e impostos se houver ³
@@ -3670,7 +3662,7 @@ While SM0->(!Eof()) .and. SM0->M0_CODIGO == cEmpAnt .and.  If(mv_par40 ==1 .And.
                                                                       
 							SA1->(DBSetOrder(1))
 							If cPaisLoc == "BRA" .And. SA1->(DBSeek(xFilial("SA1")+cCliFor190) )
-								lCalcIRF := SA1->A1_RECIRRF == "1" .and. SA1->A1_IRBAX == "1" // se for na baixa 
+								lCalcIRF := SA1->A1_RECIRRF == "1" .And. SA1->A1_IRBAX == "1" // se For na baixa 
 							Else
 								lCalcIRF := .F.	
 							EndIf	
@@ -3678,36 +3670,36 @@ While SM0->(!Eof()) .and. SM0->M0_CODIGO == cEmpAnt .and.  If(mv_par40 ==1 .And.
 								nTotAbImp += SE1->E1_IRRF
 							EndIf							
 						EndIf
-						dbSelectArea("SE1")
-						dbGoTo(nRecno)
-					Elseif !lManual
-						dbSelectArea("SE2")
+						DBSelectArea("SE1")
+						DBGoTo(nRecno)
+					ElseIf !lManual
+						DBSelectArea("SE2")
 						nRecno := Recno()
 						nAbat := 0
 						nAbatLiq := 0						
-						If !SE2->E2_TIPO $ MVPAGANT+"/"+MV_CPNEG .and. Empty(SE2->E2_SALDO) .and.;
+						If !SE2->E2_TIPO $ MVPAGANT+"/"+MV_CPNEG .And. Empty(SE2->E2_SALDO) .and.;
 						    cMaxSeq == cSeq //NEWSE5->E5_SEQ
-							nAbat :=	SomaAbat(cPrefixo,cNumero,cParcela,"P",mv_par12,,cFornece,cLoja)
+							nAbat :=	SomaAbat(cPrefixo,cNumero,cParcela,"P",MV_PAR12,,cFornece,cLoja)
 							nAbatLiq := nAbat	
 						EndIf			
-						dbSelectArea("SE2")
-						dbGoTo(nRecno)
-					EndIF
+						DBSelectArea("SE2")
+						DBGoTo(nRecno)
+					EndIf
 					aRet[li][05]:= " "
 					aRet[Li][32]:= " "
-					IF cCarteira == "R" .and. aTam[1] > 6 .and. !lManual
+					If cCarteira == "R" .And. aTam[1] > 6 .And. !lManual
 						If lBxTit
 							aRet[li][05] := SE1->E1_CLIENTE
 							aRet[Li][32] := SE1->E1_LOJA
-						Endif
+						EndIf
 						aRet[li][06] := AllTrim(cCliFor)
-					Elseif cCarteira == "P" .and. aTam[1] > 6 .and. !lManual
+					ElseIf cCarteira == "P" .And. aTam[1] > 6 .And. !lManual
 						If lBxTit
 							aRet[li][05] := SE2->E2_FORNECE
 							aRet[Li][32] := SE2->E2_LOJA
-						Endif
+						EndIf
 						aRet[li][06] := AllTrim(cCliFor)
-					Endif
+					EndIf
 	
 					aRet[li][01] := cPrefixo
 					aRet[li][02] := cNumero
@@ -3715,7 +3707,7 @@ While SM0->(!Eof()) .and. SM0->M0_CODIGO == cEmpAnt .and.  If(mv_par40 ==1 .And.
 					aRet[li][04] := cTipo		
 	
 					If !lManual
-						dbSelectArea("TRB")
+						DBSelectArea("TRB")
 						lOriginal := .T.
 						//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 						//³ Baixas a Receber             ³
@@ -3723,9 +3715,9 @@ While SM0->(!Eof()) .and. SM0->M0_CODIGO == cEmpAnt .and.  If(mv_par40 ==1 .And.
 						If cCarteira == "R"
 							cCliFor190 := SE1->E1_CLIENTE+SE1->E1_LOJA
 							nVlr:= SE1->E1_VLCRUZ
-							If mv_par12 > 1
-								nVlr := Round(xMoeda(SE1->E1_VALOR,SE1->E1_MOEDA,mv_par12,SE1->E1_BAIXA,nDecs+1,If(cPaisLoc=="BRA",SE1->E1_TXMOEDA,0)),nDecs+1)
-							EndIF
+							If MV_PAR12 > 1
+								nVlr := Round(xMoeda(SE1->E1_VALOR,SE1->E1_MOEDA,MV_PAR12,SE1->E1_BAIXA,nDecs+1,If(cPaisLoc=="BRA",SE1->E1_TXMOEDA,0)),nDecs+1)
+							EndIf
 							//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 							//³ Baixa de PA                  ³
 							//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -3736,121 +3728,121 @@ While SM0->(!Eof()) .and. SM0->M0_CODIGO == cEmpAnt .and.  If(mv_par40 ==1 .And.
 								lCalcIRF:= Posicione("SA2",1,xFilial("SA2")+cCliFor190,"A2_CALCIRF") == "1" .Or.;//1-Normal, 2-Baixa
 								    	   Posicione("SA2",1,xFilial("SA2")+cCliFor190,"A2_CALCIRF") == " "
 							Else 
-								lCalcIRF:=.f.
+								lCalcIRF:=.F.
 							EndIf
 
 							// MV_MRETISS "1" retencao do ISS na Emissao, "2" retencao na Baixa.
 					   		nVlr:= SE2->E2_VLCRUZ
 							If lConsImp   //default soma os impostos no valor original
-								nVlr += SE2->E2_INSS+ Iif(GetNewPar('MV_MRETISS',"1")=="1",SE2->E2_ISS,0) +;
-									   	Iif(lCalcIRF,SE2->E2_IRRF,0)
+								nVlr += SE2->E2_INSS+ IIf(GetNewPar('MV_MRETISS',"1")=="1",SE2->E2_ISS,0) +;
+									   	IIf(lCalcIRF,SE2->E2_IRRF,0)
 								If ! lPccBaixa  // SE PCC NA EMISSAO SOMA PCC
 									nVlr += SE2->E2_VRETPIS+SE2->E2_VRETCOF+SE2->E2_VRETCSL
 								EndIf
 							EndIf
 
-							If mv_par12 > 1
-								nVlr := Round(xMoeda(SE2->E2_VALOR,SE2->E2_MOEDA,mv_par12,SE2->E2_BAIXA,nDecs+1,If(cPaisLoc=="BRA",SE2->E2_TXMOEDA,0)),nDecs+1)
-							Endif
-						Endif
+							If MV_PAR12 > 1
+								nVlr := Round(xMoeda(SE2->E2_VALOR,SE2->E2_MOEDA,MV_PAR12,SE2->E2_BAIXA,nDecs+1,If(cPaisLoc=="BRA",SE2->E2_TXMOEDA,0)),nDecs+1)
+							EndIf
+						EndIf
 						aRet[li,28] := nRecSE5
-						dbgoto(nRecSe5)
+						DBGoTo(nRecSe5)
 						cFilTrb := If(cCarteira=="R","SE1","SE2")
-						IF DbSeek( xFilial(cFilTrb)+cPrefixo+cNumero+cParcela+cCliFor190+cTipo)
+						If DBSeek( xFilial(cFilTrb)+cPrefixo+cNumero+cParcela+cCliFor190+cTipo)
 							nAbat:=0
 							lOriginal := .F.
 						Else
 							nVlr:=NoRound(nVlr)
 							RecLock("TRB",.T.)
 							Replace linha With xFilial(cFilTrb)+cPrefixo+cNumero+cParcela+cCliFor190+cTipo
-							MsUnlock()
-						EndIF
+							MSUnLock()
+						EndIf
 					Else
 						If lAsTop
-							dbSelectArea("SE5")
+							DBSelectArea("SE5")
 						Else
-							dbSelectArea("NEWSE5")
-						Endif         
+							DBSelectArea("NEWSE5")
+						EndIf         
 						aRet[li,28] := nRecSE5
-						dbgoto(nRecSe5)
-						nVlr := Round(xMoeda(E5_VALOR,nMoedaBco,mv_par12,E5_DATA,nDecs+1,,If(cPaisLoc=="BRA",E5_TXMOEDA,0)),nDecs+1)
+						DBGoTo(nRecSe5)
+						nVlr := Round(xMoeda(E5_VALOR,nMoedaBco,MV_PAR12,E5_DATA,nDecs+1,,If(cPaisLoc=="BRA",E5_TXMOEDA,0)),nDecs+1)
 						nAbat:= 0
-						lOriginal := .t.
+						lOriginal := .T.
 						If lAsTop
 							nRecSe5:=NEWSE5->SE5RECNO
 						Else
 							nRecSe5:=Recno()
-							NEWSE5->( dbSkip() )
-						Endif
-						dbSelectArea("TRB")
-					Endif
-					IF cCarteira == "R"
-						If ( !lManual )
-							If mv_par13 == 1  // Utilizar o Hist¢rico da Baixa ou Emiss„o
-								cHistorico := Iif(Empty(cHistorico), SE1->E1_HIST, cHistorico )
-							Else
-								cHistorico := Iif(Empty(SE1->E1_HIST), cHistorico, SE1->E1_HIST )
-							Endif
+							NEWSE5->( DBSkip() )
 						EndIf
-						If aTam[1] <= 6 .and. !lManual
+						DBSelectArea("TRB")
+					EndIf
+					If cCarteira == "R"
+						If ( !lManual )
+							If MV_PAR13 == 1  // Utilizar o Hist¢rico da Baixa ou Emiss„o
+								cHistorico := IIf(Empty(cHistorico), SE1->E1_HIST, cHistorico )
+							Else
+								cHistorico := IIf(Empty(SE1->E1_HIST), cHistorico, SE1->E1_HIST )
+							EndIf
+						EndIf
+						If aTam[1] <= 6 .And. !lManual
 							If lBxTit
 								aRet[li][05] := SE1->E1_CLIENTE
 								aRet[li][32] := SE1->E1_LOJA
-							Endif
+							EndIf
 							aRet[li][06] := AllTrim(cCliFor)
-						Endif
+						EndIf
 						cMascNat := MascNat(cNatureza)
-						aRet[li][07] := If(Len(Alltrim(cNatureza))>8, cNatureza, cMascNat)  
-						If Empty( dDtMovFin ) .or. dDtMovFin == Nil
+						aRet[li][07] := If(Len(AllTrim(cNatureza))>8, cNatureza, cMascNat)  
+						If Empty( dDtMovFin ) .Or. dDtMovFin == Nil
 							dDtMovFin := CtoD("  /  /  ")
-						Endif
+						EndIf
 						aRet[li][08] := IIf(lManual,dDtMovFin,DataValida(SE1->E1_VENCTO,.T.)) //Vencto
 						aRet[li][09] := AllTrim(cHistorico)
 						aRet[li][10] := dBaixa
-						IF nVlr > 0
+						If nVlr > 0
 							aRet[li][11] := nVlr // Picture tm(nVlr,14,nDecs)
-						Endif
+						EndIf
 					Else
-						If mv_par13 == 1  // Utilizar o Hist¢rico da Baixa ou Emiss„o
-							cHistorico := Iif(Empty(cHistorico), SE2->E2_HIST, cHistorico )
+						If MV_PAR13 == 1  // Utilizar o Hist¢rico da Baixa ou Emiss„o
+							cHistorico := IIf(Empty(cHistorico), SE2->E2_HIST, cHistorico )
 						Else
-							cHistorico := Iif(Empty(SE2->E2_HIST), cHistorico, SE2->E2_HIST )
-						Endif
-						If aTam[1] <= 6 .and. !lManual
+							cHistorico := IIf(Empty(SE2->E2_HIST), cHistorico, SE2->E2_HIST )
+						EndIf
+						If aTam[1] <= 6 .And. !lManual
 							If lBxTit
 								aRet[li][05] := SE2->E2_FORNECE
 								aRet[li][32] := SE2->E2_LOJA
-							Endif
+							EndIf
 							aRet[li][06] := AllTrim(cCliFor)
-						Endif
+						EndIf
 						cMascNat := MascNat(cNatureza)
-						aRet[li][07] := If(Len(Alltrim(cNatureza))>8, cNatureza, cMascNat)  
-						If Empty( dDtMovFin ) .or. dDtMovFin == Nil
+						aRet[li][07] := If(Len(AllTrim(cNatureza))>8, cNatureza, cMascNat)  
+						If Empty( dDtMovFin ) .Or. dDtMovFin == Nil
 							dDtMovFin := CtoD("  /  /  ")
-						Endif
+						EndIf
 						aRet[li][08] := IIf(lManual,dDtMovFin,DataValida(SE2->E2_VENCTO,.T.))
 						If !Empty(cCheque)
-							aRet[li][09] := ALLTRIM(cCheque)+"/"+Trim(cHistorico)
+							aRet[li][09] := AllTrim(cCheque)+"/"+Trim(cHistorico)
 						Else
-							aRet[li][09] := ALLTRIM(cHistorico)
+							aRet[li][09] := AllTrim(cHistorico)
 						EndIf
 						aRet[li][10] := dBaixa
-						IF nVlr > 0
+						If nVlr > 0
 							aRet[li][11] := nVlr //Picture tm(nVlr,14,nDecs)
-						Endif
-					Endif
+						EndIf
+					EndIf
 					nCT++
 					aRet[li][12] := nJurMul    //PicTure tm(nJurMul,11,nDecs)
 										
-					If cCarteira == "R" .and. mv_par12 == SE1->E1_MOEDA					
+					If cCarteira == "R" .And. MV_PAR12 == SE1->E1_MOEDA					
 					   aRet[li][13] := 0
 					
-					ElseIf cCarteira == "P" .and. mv_par12 == SE2->E2_MOEDA
+					ElseIf cCarteira == "P" .And. MV_PAR12 == SE2->E2_MOEDA
 					   aRet[li][13] := 0
 					   
 					Else					   
 					   aRet[li][13] := nCM        //PicTure tm(nCM ,11,nDecs)
-					Endif
+					EndIf
 
 					//PCC Baixa CR
 					//Somo aos abatimentos de impostos, os impostos PCC na baixa.
@@ -3869,27 +3861,27 @@ While SM0->(!Eof()) .and. SM0->M0_CODIGO == cEmpAnt .and.  If(mv_par40 ==1 .And.
 						aRet[li][17] := nVlMovFin     //PicTure tm(nVlMovFin,15,nDecs)
 					Else
 						aRet[li][17] := nValor			//PicTure tm(nValor,15,nDecs)
-					Endif
+					EndIf
 					aRet[li][18] := cBanco
 					aRet[li][30] := cAge
 					aRet[li][31] := cContaBco
-					If Len(DtoC(dDigit)) <= 8
+					If Len(DToC(dDigit)) <= 8
 						aRet[li][19] := dDigit
 					Else                   
 						aRet[li][19] := dDigit
 					EndIf
 	
-					If empty(cMotBaixa)
+					If Empty(cMotBaixa)
 						cMotBaixa := "NOR"  //NORMAL
-					Endif
+					EndIf
 	
-					aRet[li][20] := Substr(cMotBaixa,1,3)
+					aRet[li][20] := SubStr(cMotBaixa,1,3)
 					aRet[li][21] := cFilorig
 					
 					aRet[li][26] := .T.
 					aRet[li][27] := If( nVlMovFin <> 0, nVlMovFin , nValor )
 					nTotOrig   += nVlr
-					nTotBaixado+= If(cTipodoc $ "CP/BA" .AND. cMotBaixa $ "CMP/FAT",0,nValor)		// n„o soma, j  somou no principal
+					nTotBaixado+= If(cTipodoc $ "CP/BA" .And. cMotBaixa $ "CMP/FAT",0,nValor)		// n„o soma, j  somou no principal
 					nTotDesc   += nDesc
 					nTotJurMul += nJurMul
 					nTotCM     += nCM
@@ -3902,32 +3894,32 @@ While SM0->(!Eof()) .and. SM0->M0_CODIGO == cEmpAnt .and.  If(mv_par40 ==1 .And.
 					nDesc := nJurMul := nValor := nCM := nAbat := nTotAbImp := nAbatLiq := nVlMovFin := 0
 					nPccBxCr	:= 0		//PCC Baixa CR
 					li++
-				Endif
-				dbSelectArea("NEWSE5")
-			Enddo
+				EndIf
+				DBSelectArea("NEWSE5")
+			EndDo
 
-			If (nOrdem == 1 .or. nOrdem == 6 .or. nOrdem == 8)
-				cQuebra := DtoS(cAnterior)
-			Else //nOrdem == 2 .or. nOrdem == 3 .or. nOrdem == 4 .or. nOrdem == 5 .or. nOrdem == 7
+			If (nOrdem == 1 .Or. nOrdem == 6 .Or. nOrdem == 8)
+				cQuebra := DToS(cAnterior)
+			Else //nOrdem == 2 .Or. nOrdem == 3 .Or. nOrdem == 4 .Or. nOrdem == 5 .Or. nOrdem == 7
 				cQuebra := cAnterior
 			EndIf
 
 			If (nTotValor+nDesc+nJurMul+nCM+nTotOrig+nTotMovFin+nTotComp+nTotFat)>0
 				If nCT > 0
 						If nTotBaixado > 0
-							AAdd(aTotais,{cQuebra,STR0028,nTotBaixado})  //"Baixados"
-						Endif	
+							aAdd(aTotais,{cQuebra,STR0028,nTotBaixado})  //"Baixados"
+						EndIf	
 						If nTotMovFin > 0
-							AAdd(aTotais,{cQuebra,STR0031,nTotMovFin})  //"Mov Fin."
-						Endif
+							aAdd(aTotais,{cQuebra,STR0031,nTotMovFin})  //"Mov Fin."
+						EndIf
 						If nTotComp > 0
-							AAdd(aTotais,{cQuebra,STR0037,nTotComp})  //"Compens."
-						Endif
+							aAdd(aTotais,{cQuebra,STR0037,nTotComp})  //"Compens."
+						EndIf
 						If nTotFat > 0
-							AAdd(aTotais,{cQuebra,STR0076,nTotFat})  //"Bx.Fatura"
-						Endif						
-				Endif
-			Endif      
+							aAdd(aTotais,{cQuebra,STR0076,nTotFat})  //"Bx.Fatura"
+						EndIf						
+				EndIf
+			EndIf      
 	
 			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 			//³Incrementa Totais Gerais ³
@@ -3951,53 +3943,53 @@ While SM0->(!Eof()) .and. SM0->M0_CODIGO == cEmpAnt .and.  If(mv_par40 ==1 .And.
 			nFilMovFin	+= nTotMovFin
 			nFilComp	+= nTotComp 
 			nFilFat     += nTotFat
-		Enddo
-	Endif	
+		EndDo
+	EndIf	
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Imprimir TOTAL por filial somente quan-³
 	//³ do houver mais do que 1 filial.        ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	if mv_par17 == 1 .and. SM0->(Reccount()) > 1
+	If MV_PAR17 == 1 .And. SM0->(RecCount()) > 1
 		If nFilBaixado > 0 
-			AAdd( aTotais,{ IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL ), STR0028, nFilBaixado } )  //"Baixados"
-		Endif
+			aAdd( aTotais,{ IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL ), STR0028, nFilBaixado } )  //"Baixados"
+		EndIf
 		If nFilMovFin > 0
-			AAdd( aTotais,{ IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL ), STR0031, nFilMovFin } )  //"Mov Fin."
-		Endif
+			aAdd( aTotais,{ IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL ), STR0031, nFilMovFin } )  //"Mov Fin."
+		EndIf
 		If nFilComp > 0
-			AAdd( aTotais,{ IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL ), STR0037, nFilComp } )  //"Compens."
-		Endif
+			aAdd( aTotais,{ IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL ), STR0037, nFilComp } )  //"Compens."
+		EndIf
 		If nFilFat > 0
-			AAdd( aTotais,{ IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL ), STR0076, nFilFat } )  //"Compens."
-		Endif
+			aAdd( aTotais,{ IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL ), STR0076, nFilFat } )  //"Compens."
+		EndIf
 		
-		If Empty(xFilial("SE5")) .And. mv_par17 == 2
+		If Empty(xFilial("SE5")) .And. MV_PAR17 == 2
 			Exit
-		Endif	
+		EndIf	
 
 		nFilOrig:=nFilJurMul:=nFilCM:=nFilDesc:=nFilAbLiq:=nFilAbImp:=nFilValor:=0
 		nFilBaixado:=nFilMovFin:=nFilComp:=nFilFat:=0
-	Endif
-	dbSelectArea("SM0")
+	EndIf
+	DBSelectArea("SM0")
 	cCodUlt := SM0->M0_CODIGO
 	cFilUlt := IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL )
-	SM0->(dbSkip())
-Enddo
+	SM0->(DBSkip())
+EndDo
 
 If nGerBaixado > 0
-	AAdd(aTotais,{STR0075,STR0028,nGerBaixado})  //"Baixados"
-Endif	
+	aAdd(aTotais,{STR0075,STR0028,nGerBaixado})  //"Baixados"
+EndIf	
 If nGerMovFin > 0
-	AAdd(aTotais,{STR0075,STR0031,nGerMovFin})  //"Mov Fin."
-Endif
+	aAdd(aTotais,{STR0075,STR0031,nGerMovFin})  //"Mov Fin."
+EndIf
 If nGerComp > 0
-	AAdd(aTotais,{STR0075,STR0037,nGerComp})  //"Compens."
+	aAdd(aTotais,{STR0075,STR0037,nGerComp})  //"Compens."
 EndIf                             
 If nGerFat > 0
-	AAdd(aTotais,{STR0075,STR0076,nGerFat})  //"Bx.Fatura"
+	aAdd(aTotais,{STR0075,STR0076,nGerFat})  //"Bx.Fatura"
 EndIf                             
 
-SM0->(dbgoto(nRecEmp))                                                                            
+SM0->(DBGoTo(nRecEmp))                                                                            
 cFilAnt := IIf( lFWCodFil, FWGETCODFILIAL, SM0->M0_CODFIL )
 If(_oFINR190 <> NIL)
 
@@ -4005,20 +3997,20 @@ If(_oFINR190 <> NIL)
 	_oFINR190 := NIL
 
 EndIf
-dbSelectArea("NEWSE5")
-dbCloseArea() 
+DBSelectArea("NEWSE5")
+DBCloseArea() 
 
 /* GESTAO - inicio */
 If !Empty(cTmpSE5Fil)
 	CtbTmpErase(cTmpSE5Fil)
-Endif
+EndIf
 /* GESTAO - fim */
 
 If cNomeArq # Nil
 	Ferase(cNomeArq+OrdBagExt())
-Endif
-dbSelectArea("SE5")
-dbSetOrder(1)
+EndIf
+DBSelectArea("SE5")
+DBSetOrder(1)
 
 Return aRet
 
@@ -4051,14 +4043,14 @@ Static Function FR190MovCan(nIndexSE5,_SE5)
 	Local aAreaSE5 := (_SE5)->(GetArea())
 	
 	If Empty((_SE5)->E5_MOTBX)
-		dbSelectArea("SE5")
-		dbSetOrder(nIndexSE5)
-		If dbSeek((_SE5)->(E5_FILIAL+E5_BANCO+E5_AGENCIA+E5_CONTA+E5_NUMCHEQ+"EC"+E5_SEQ))
+		DBSelectArea("SE5")
+		DBSetOrder(nIndexSE5)
+		If DBSeek((_SE5)->(E5_FILIAL+E5_BANCO+E5_AGENCIA+E5_CONTA+E5_NUMCHEQ+"EC"+E5_SEQ))
 			lRet := .T.
-		Endif
-		dbSelectArea(_SE5)
-		RestArea(aAreaSE5)
-	Endif	
+		EndIf
+		DBSelectArea(_SE5)
+		FWRestArea(aAreaSE5)
+	EndIf	
 Return lRet
 
 //-------------------------------------------------------------------
@@ -4072,7 +4064,7 @@ para que seja usada no parametro "IN" da query
 @since 05/05/2014
 @version P1180
  
-@return Retorna uma string com as filiais selecionadas
+@Return Retorna uma string com as filiais selecionadas
 /*/
 //-------------------------------------------------------------------
 Static Function FR190InFilial()
@@ -4091,31 +4083,28 @@ Return " IN " + FormatIn( SubStr( cRetornoIn , 1 , Len( cRetornoIn ) -1 ) , '|' 
 Programa----------: LSTMBX
 Autor-------------: Jeovane
 Data da Criacao---: 05/08/2009
-===============================================================================================================================
 Descrição---------: Consulta por lista de motivo de baixa 
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 
-user function lstMbx()
+User Function lstMbx()
 Local i := 0
 Private nTam      := 0
 Private nMaxSelect := 0
 Private aCat      := {}
-Private MvRet     := Alltrim(ReadVar())
+Private MvRet     := AllTrim(ReadVar())
 Private MvPar     := ""
 Private cTitulo   := ""
 Private MvParDef  := ""
-private aMotBx := ReadMotBx()
+Private aMotBx := ReadMotBx()
 
 
 
 #IFDEF WINDOWS
 	oWnd := GetWndDefault()
-#ENDIF
+#EndIf
 
 //Tratamento para carregar variaveis da lista de opcoes
 nTam:=3
@@ -4123,10 +4112,10 @@ nMaxSelect := 16 //14 * 7 = 98 (cod(6) +";") = 7
 cTitulo :="Motivos de baixas"
 
 
-for i := 1 to len(aMotBx)
-	MvParDef += substr(aMotBx[i],1,3)
-	aAdd(aCat,substr(aMotBx[i],7,10) )
-next i 
+For i := 1 to Len(aMotBx)
+	MvParDef += SubStr(aMotBx[i],1,3)
+	aAdd(aCat,SubStr(aMotBx[i],7,10) )
+Next i 
 
 If Len(AllTrim(&MvRet)) == 0                              
 
@@ -4144,11 +4133,11 @@ If f_Opcoes(@MvPar,cTitulo,aCat,MvParDef,12,49,.F.,nTam,nMaxSelect)
 
 	//Tratamento para separar retorno com barra ";"
 	&MvRet := ""
-	for i:=1 to Len(MvPar) step nTam
-		if !(SubStr(MvPar,i,1) $ " |*")
+	For i:=1 to Len(MvPar) step nTam
+		If !(SubStr(MvPar,i,1) $ " |*")
 			&MvRet  += SubStr(MvPar,i,nTam) + ";"
-		endIf
-	next i
+		EndIf
+	Next i
 	
 	//Trata para tirar o ultimo caracter
 	&MvRet := SubStr(&MvRet,1,Len(&MvRet)-1) 

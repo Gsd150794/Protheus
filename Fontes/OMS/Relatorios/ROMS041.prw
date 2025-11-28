@@ -10,7 +10,7 @@ Josué Danich | 27/06/19 | Chamado 29782. Ajuste de bug.
 -------------------------------------------------------------------------------------------------------------------------------
 Lucas Borges | 17/10/19 | Chamado 28346. Removidos os Warning na compilação da release 12.1.25. 
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer| 24/06/24 | Chamado 47669. André. Correção do error.log array out of bounds [1] of [0]  line : 454.
+Alex Wallauer| 24/06/24 | Chamado 47669. André. Correção do error.log array out of bounds [1] of [0]  Line : 454.
 ===============================================================================================================================
 */
 //====================================================================================================
@@ -58,14 +58,14 @@ Begin Sequence
    //================================================================================
    // Cria tabela temporária.
    //================================================================================                                    
-   Aadd(_aCamposTab,{"WK_OK"     ,"C",2		                 ,0 })
-   Aadd(_aCamposTab,{"ZF5_DOCOC" ,"C",TamSX3("ZF5_DOCOC")[1] ,0 })
-   Aadd(_aCamposTab,{"ZF5_SEROC" ,"C",TamSX3("ZF5_SEROC")[1] ,0 })
-   Aadd(_aCamposTab,{"ZF5_CODIGO","C",TamSX3("ZF5_CODIGO")[1],0 })
-   Aadd(_aCamposTab,{"ZF5_MOTIVO","C",TamSX3("ZF5_MOTIVO")[1],0 })
-   Aadd(_aCamposTab,{"WK_RECNO"  ,"N",10                     ,0 })
+   aAdd(_aCamposTab,{"WK_OK"     ,"C",2		                 ,0 })
+   aAdd(_aCamposTab,{"ZF5_DOCOC" ,"C",TamSX3("ZF5_DOCOC")[1] ,0 })
+   aAdd(_aCamposTab,{"ZF5_SEROC" ,"C",TamSX3("ZF5_SEROC")[1] ,0 })
+   aAdd(_aCamposTab,{"ZF5_CODIGO","C",TamSX3("ZF5_CODIGO")[1],0 })
+   aAdd(_aCamposTab,{"ZF5_MOTIVO","C",TamSX3("ZF5_MOTIVO")[1],0 })
+   aAdd(_aCamposTab,{"WK_RECNO"  ,"N",10                     ,0 })
    
-   AADD(_aButtons,{"RESPONSA",{|| U_ROMS041M("T") },"Marc/Des","Marca/Desmarca Todos"})
+   aAdd(_aButtons,{"RESPONSA",{|| U_ROMS041M("T") },"Marc/Des","Marca/Desmarca Todos"})
        
    //================================================================================
    // Verifica se ja existe um arquivo com mesmo nome, se sim deleta.
@@ -92,7 +92,7 @@ Begin Sequence
    Processa( {|| _lRet := U_ROMS041D(ZF5->ZF5_DOCOC,ZF5->ZF5_SEROC) }, "Aguarde...", "Carregando as ocorrências da nota fiscal selecionada...",.F.)
 
    If !_lRet
-      U_ITMSG("Não existem dados a serem exibidos.","Atenção",,1)
+      U_ITMsg("Não existem dados a serem exibidos.","Atenção",,1)
       Break
    EndIf
    
@@ -100,18 +100,18 @@ Begin Sequence
    // Monta colunas do MsSelect
    //================================================================================
                     //Campo         , "" , Titulo                                         , Picture   
-   Aadd( _aCampos , { "WK_OK"		   , "" , ""                                             ,"@!"})
-   Aadd( _aCampos , { "ZF5_DOCOC"	, "" , Posicione("SX3",2,"ZF5_DOCOC" ,"X3_TITULO")		, Posicione("SX3",2,"ZF5_DOCOC" ,"X3_PICTURE") } )
-   Aadd( _aCampos , { "ZF5_SEROC"	, "" , Posicione("SX3",2,"ZF5_SEROC" ,"X3_TITULO")		, Posicione("SX3",2,"ZF5_SEROC" ,"X3_PICTURE") } )    
-   Aadd( _aCampos , { "ZF5_CODIGO"	, "" , Posicione("SX3",2,"ZF5_CODIGO","X3_TITULO")		, Posicione("SX3",2,"ZF5_CODIGO","X3_PICTURE") } )
-   Aadd( _aCampos , { "ZF5_MOTIVO"	, "" , Posicione("SX3",2,"ZF5_MOTIVO","X3_TITULO")		, Posicione("SX3",2,"ZF5_MOTIVO","X3_PICTURE")   } )
+   aAdd( _aCampos , { "WK_OK"		   , "" , ""                                             ,"@!"})
+   aAdd( _aCampos , { "ZF5_DOCOC"	, "" , Posicione("SX3",2,"ZF5_DOCOC" ,"X3_TITULO")		, Posicione("SX3",2,"ZF5_DOCOC" ,"X3_PICTURE") } )
+   aAdd( _aCampos , { "ZF5_SEROC"	, "" , Posicione("SX3",2,"ZF5_SEROC" ,"X3_TITULO")		, Posicione("SX3",2,"ZF5_SEROC" ,"X3_PICTURE") } )    
+   aAdd( _aCampos , { "ZF5_CODIGO"	, "" , Posicione("SX3",2,"ZF5_CODIGO","X3_TITULO")		, Posicione("SX3",2,"ZF5_CODIGO","X3_PICTURE") } )
+   aAdd( _aCampos , { "ZF5_MOTIVO"	, "" , Posicione("SX3",2,"ZF5_MOTIVO","X3_TITULO")		, Posicione("SX3",2,"ZF5_MOTIVO","X3_PICTURE")   } )
                                                                                                                                                     
    _bOk := {|| _lRet := .T., _oDlgImp:End()}
    _bCancel := {|| _lRet := .F., _oDlgImp:End()}
 
-   DO WHILE .T.
+   While .T.
    _lRet:=.F.
-   TRBZF5->(DbGotop())
+   TRBZF5->(DBGoTop())
    //================================================================================
    // Monta a tela de dados com MSSELECT.
    //================================================================================      
@@ -128,31 +128,31 @@ Begin Sequence
 
    If _lRet
       _lRet:=.F.
-      TRBZF5->(DbGoTop()) 
-      Do While ! TRBZF5->(Eof())
+      TRBZF5->(DBGoTop()) 
+      While ! TRBZF5->(Eof())
          If !Empty(TRBZF5->WK_OK)
             _lRet:=.T.
-            EXIT
+            Exit
          EndIf                        
-         TRBZF5->(DbSkip())
-      ENDDO
-      IF _lRet
+         TRBZF5->(DBSkip())
+      EndDo
+      If _lRet
          Processa( {|| ROMS041P(  ) } , 'Aguarde!' , 'Imprimindo registros...' )
-      ELSE
-         U_ITMSG("Marque pelo menos um registro para continuar.","Atenção",'No botão "Outras Ações" tem a opção "Marca/Desmarca Todos" ',1)
-         LOOP
-      ENDIF
+      Else
+         U_ITMsg("Marque pelo menos um registro para continuar.","Atenção",'No botão "Outras Ações" tem a opção "Marca/Desmarca Todos" ',1)
+         Loop
+      EndIf
    EndIf
    
-   EXIT
-   ENDDO		
+   Exit
+   EndDo		
 End Sequence
 
 If Select("TRBZF5") > 0
-   TRBZF5->(DbCloseArea())
+   TRBZF5->(DBCloseArea())
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -172,9 +172,9 @@ Local _nRegAtu := ZF5->(Recno())
 Local _lRet := .F.
 
 Begin Sequence
-   ZF5->(DbSetOrder(1)) //ZF5_FILIAL+ZF5_DOCOC+ZF5_SEROC 
-   ZF5->(DbSeek(xFilial("ZF5")+_cNumNF+_cSerieNF))
-   Do While ! ZF5->(Eof()) .And. ZF5->(ZF5_FILIAL+ZF5_DOCOC+ZF5_SEROC) == xFilial("ZF5")+_cNumNF+_cSerieNF
+   ZF5->(DBSetOrder(1)) //ZF5_FILIAL+ZF5_DOCOC+ZF5_SEROC 
+   ZF5->(DBSeek(xFilial("ZF5")+_cNumNF+_cSerieNF))
+   While ! ZF5->(Eof()) .And. ZF5->(ZF5_FILIAL+ZF5_DOCOC+ZF5_SEROC) == xFilial("ZF5")+_cNumNF+_cSerieNF
       TRBZF5->(DBAPPEND())
       TRBZF5->WK_OK      := _cMarca 
       TRBZF5->ZF5_DOCOC  := ZF5->ZF5_DOCOC
@@ -184,13 +184,13 @@ Begin Sequence
       TRBZF5->WK_RECNO   := ZF5->(Recno()) 
       _lRet := .T.
       
-      ZF5->(DbSkip())
+      ZF5->(DBSkip())
    EndDo
    
 End Sequence
 
 RestOrd(_aOrd)
-ZF5->(DbGoTo(_nRegAtu))
+ZF5->(DBGoTo(_nRegAtu))
 
 Return _lRet
 
@@ -224,20 +224,20 @@ Begin Sequence
    If _cTipoMarca == "P"
       TRBZF5->WK_OK := _cSimboloMarca 
    Else
-      TRBZF5->(DbGoTop())
-      Do While ! TRBZF5->(Eof())
+      TRBZF5->(DBGoTop())
+      While ! TRBZF5->(Eof())
          TRBZF5->WK_OK := _cSimboloMarca 
-         TRBZF5->(DbSkip())
+         TRBZF5->(DBSkip())
       EndDo
    
    EndIf
            
 End Sequence
 
-TRBZF5->(DbGoTo(_nRegAtu)) 
+TRBZF5->(DBGoTo(_nRegAtu)) 
 _oMarkImp:oBrowse:Refresh()
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -282,8 +282,8 @@ _cSerieNF := ZF5->ZF5_SEROC // Série da Nota Fiscal
 //====================================================================================================
 // Posiciona na tabela de notas fiscais de saída SF2.
 //====================================================================================================
-SF2->(DbSetOrder(1))
-SF2->(DbSeek(xFilial("SF2")+_cNumNF+_cSerieNF))
+SF2->(DBSetOrder(1))
+SF2->(DBSeek(xFilial("SF2")+_cNumNF+_cSerieNF))
 
 //====================================================================================================
 // Conhecimento de Transporte - CTRC
@@ -300,7 +300,7 @@ _cTransport := ZF5->ZF5_TRANSP + "/" + ZF5->ZF5_LJTRAN + " - " + ZF5->ZF5_NTRANS
 //====================================================================================================
 If ! Empty(SF2->F2_CLIENTE)
    _cret := Posicione("SA1",1,xFilial("SA1")+SF2->(F2_CLIENTE+F2_LOJA),"A1_NREDUZ")          
-   _cCliente :=  SF2->F2_CLIENTE+ "/" + SF2->F2_LOJA + " - " + alltrim(_cret) // Cliente
+   _cCliente :=  SF2->F2_CLIENTE+ "/" + SF2->F2_LOJA + " - " + AllTrim(_cret) // Cliente
 Else
    _cCliente :=  ""
 EndIf
@@ -310,7 +310,7 @@ EndIf
 //====================================================================================================    
 If ! Empty(SF2->F2_VEND1)
    _cret := Posicione("SA3",1,xFilial("SA3")+SF2->F2_VEND1,"A3_NOME")
-   _cVendedor := SF2->F2_VEND1 + " - " + alltrim(_cret) // Vendedor
+   _cVendedor := SF2->F2_VEND1 + " - " + AllTrim(_cret) // Vendedor
 Else
    _cVendedor := ""
 EndIf
@@ -320,7 +320,7 @@ EndIf
 //====================================================================================================
 If ! Empty(SF2->F2_VEND2)
    _cret := Posicione("SA3",1,xFilial("SA3")+SF2->F2_VEND2,"A3_NOME")
-   _cCoordenador := SF2->F2_VEND2 + " - " + alltrim(_cret)
+   _cCoordenador := SF2->F2_VEND2 + " - " + AllTrim(_cret)
 Else
    _cCoordenador := ""
 EndIf                 
@@ -328,12 +328,12 @@ EndIf
 //====================================================================================================
 // Data da Entrega
 //====================================================================================================
-_cDataEntrega := dtoc(ZF5->ZF5_DATAE)
+_cDataEntrega := DToC(ZF5->ZF5_DATAE)
 
 //====================================================================================================
 // Data da Chegada
 //====================================================================================================
-_cDataChegada := dtoc(ZF5->ZF5_DATAC) + " - " + ZF5->ZF5_HORAC 
+_cDataChegada := DToC(ZF5->ZF5_DATAC) + " - " + ZF5->ZF5_HORAC 
 
 //====================================================================================================
 // Peso do Veículo
@@ -347,7 +347,7 @@ EndIf
 //====================================================================================================
 // Data da Saída
 //====================================================================================================
-_cDataSaida := Dtoc(ZF5->ZF5_DATAS) + " - " + ZF5->ZF5_HORAS
+_cDataSaida := DToC(ZF5->ZF5_DATAS) + " - " + ZF5->ZF5_HORAS
 
 //====================================================================================================
 // Agrupa os dados das ocorrências que possuem o mesmo numero de nata fiscal.
@@ -400,7 +400,7 @@ ROMS041B() //Imprime box de campo
 //====================================================================================================
 _cTexto := ""
 For _nI := 1 To Len(_aNumOcorrencia)
-    _cTexto += IF(Empty(_cTexto),_aNumOcorrencia[_nI],"/"+_aNumOcorrencia[_nI]) 
+    _cTexto += If(Empty(_cTexto),_aNumOcorrencia[_nI],"/"+_aNumOcorrencia[_nI]) 
 Next                                                                        
 
 _nTotLinhas := MlCount(_cTexto,_NTAMLINHA) // Conta o numero total de linhas de _cTexto.
@@ -482,7 +482,7 @@ For _nI := 1 To _nTotLinhas
        If ! Empty(_cTexto)
           _cTexto += " / "
        EndIf
-       _cTexto += If(_nTotLinhas > 1,Alltrim(_aNumOcorrencia[_nI])+"-","")+AllTrim(_aObserv1[_nI])
+       _cTexto += If(_nTotLinhas > 1,AllTrim(_aNumOcorrencia[_nI])+"-","")+AllTrim(_aObserv1[_nI])
     EndIf
 Next                                                                        
 
@@ -510,7 +510,7 @@ Next
 //====================================================================================================
 _cTexto := ""
 For _nI := 1 To Len(_aDtAbreOcorrencia)
-    _cTexto += IF(Empty(_cTexto),_aDtAbreOcorrencia[_nI]," - "+_aDtAbreOcorrencia[_nI]) 
+    _cTexto += If(Empty(_cTexto),_aDtAbreOcorrencia[_nI]," - "+_aDtAbreOcorrencia[_nI]) 
 Next                                                                        
 
 _nTotLinhas := MlCount(_cTexto,_NTAMLINHA) // Conta o numero total de linhas de _cTexto.
@@ -643,7 +643,7 @@ For _nI := 1 To _nTotLinhas
           _cTexto += " / "
        EndIf
     
-       _cTexto += If(_nTotLinhas > 1,Alltrim(_aNumOcorrencia[_nI])+"-","")+AllTrim(_aMotivoCusto[_nI])
+       _cTexto += If(_nTotLinhas > 1,AllTrim(_aNumOcorrencia[_nI])+"-","")+AllTrim(_aMotivoCusto[_nI])
     EndIf
 Next                                                                        
 
@@ -677,7 +677,7 @@ For _nI := 1 To _nTotLinhas
        If ! Empty(_cTexto)
           _cTexto += " / "
        EndIf
-       _cTexto += If(_nTotLinhas > 1,Alltrim(_aNumOcorrencia[_nI])+"-","")+AllTrim(_aMotivoOcor[_nI])
+       _cTexto += If(_nTotLinhas > 1,AllTrim(_aNumOcorrencia[_nI])+"-","")+AllTrim(_aMotivoOcor[_nI])
     EndIf
 Next                                                                        
 
@@ -729,7 +729,7 @@ For _nI := 1 To _nTotLinhas
           _cTexto += " / "
        EndIf
 
-       _cTexto += If(_nTotLinhas > 1,Alltrim(_aNumOcorrencia[_nI])+"-","")+AllTrim(_aObserv2[_nI])
+       _cTexto += If(_nTotLinhas > 1,AllTrim(_aNumOcorrencia[_nI])+"-","")+AllTrim(_aObserv2[_nI])
     EndIf
 Next                                                                        
 
@@ -764,7 +764,7 @@ For _nI := 1 To _nTotLinhas
           _cTexto += " / "
        EndIf
     
-       _cTexto += If(_nTotLinhas > 1,Alltrim(_aNumOcorrencia[_nI])+"-","")+AllTrim(_aStatusCusto[_nI])
+       _cTexto += If(_nTotLinhas > 1,AllTrim(_aNumOcorrencia[_nI])+"-","")+AllTrim(_aStatusCusto[_nI])
     EndIf
 Next                                                                        
 
@@ -793,7 +793,7 @@ RestOrd(_aOrd) // Volta a ordem original dos indices do array _aOrd.
 //=============================================================================
 _oPrint:Preview()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -846,15 +846,15 @@ Begin Sequence
    _cReentrega     := Space(1)
    _cOutros        := Space(1)
    
-   TRBZF5->(DbGoTop()) 
+   TRBZF5->(DBGoTop()) 
    
-   Do While ! TRBZF5->(Eof())
+   While ! TRBZF5->(Eof())
       If Empty(TRBZF5->WK_OK)
-         TRBZF5->(DbSkip())
+         TRBZF5->(DBSkip())
          Loop
       EndIf                        
       
-      ZF5->(DbGoto(TRBZF5->WK_RECNO))
+      ZF5->(DBGoTo(TRBZF5->WK_RECNO))
       _nVlCustoAdic   += ZF5->ZF5_CUSTO 
       _nVlCustoClien  += ZF5->ZF5_CUSTOC
       _nVlCustoItalac += ZF5->ZF5_CUSTOI
@@ -866,15 +866,15 @@ Begin Sequence
       _nVlCobradoTon  += ZF5->ZF5_VALTON 
    
       
-      Aadd(_aNumOcorrencia,alltrim(ZF5->ZF5_CODIGO))
-      Aadd(_aObserv1,alltrim(ZF5->ZF5_OBSCT))
-      Aadd(_aDtAbreOcorrencia,dtoc(ZF5->ZF5_DTINI))
-      Aadd(_aMotivoOcor, AllTrim(ZF5->ZF5_MOTIVO))
-      Aadd(_aMotivoCusto, Alltrim(ZF5->ZF5_MOTCUS))
+      aAdd(_aNumOcorrencia,AllTrim(ZF5->ZF5_CODIGO))
+      aAdd(_aObserv1,AllTrim(ZF5->ZF5_OBSCT))
+      aAdd(_aDtAbreOcorrencia,DToC(ZF5->ZF5_DTINI))
+      aAdd(_aMotivoOcor, AllTrim(ZF5->ZF5_MOTIVO))
+      aAdd(_aMotivoCusto, AllTrim(ZF5->ZF5_MOTCUS))
 
-      Aadd(_aObserv2, Alltrim(ZF5->ZF5_OBS))
-      _cStatusCusto := IIF(ZF5->ZF5_STATC = "P", "Pendente",	IIF(ZF5->ZF5_STATC = "E", "Encerrado",IIF(ZF5->ZF5_STATC = "T", "Em tratamento","")))
-      Aadd(_aStatusCusto, _cStatusCusto) 
+      aAdd(_aObserv2, AllTrim(ZF5->ZF5_OBS))
+      _cStatusCusto := IIf(ZF5->ZF5_STATC = "P", "Pendente",	IIf(ZF5->ZF5_STATC = "E", "Encerrado",IIf(ZF5->ZF5_STATC = "T", "Em tratamento","")))
+      aAdd(_aStatusCusto, _cStatusCusto) 
 
       If ZF5->ZF5_SERVIC == '1'     // Descarga
          _cDescarga      := "X"
@@ -889,12 +889,12 @@ Begin Sequence
       EndIf
       _aServico := {_cDescarga, _cDeslocamento, _cDiária, _cReentrega, _cOutros}
                                                                                                                 
-      TRBZF5->(DbSkip())
+      TRBZF5->(DBSkip())
    EndDo   
    
 End Sequence
 
 RestOrd(_aOrd)
-ZF5->(DbGoTo(_nRegAtu ))
+ZF5->(DBGoTo(_nRegAtu ))
 
-Return Nil
+Return

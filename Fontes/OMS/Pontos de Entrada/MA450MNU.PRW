@@ -28,10 +28,10 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 
-User function MA450MNU()
+User Function MA450MNU()
 
 //Adiciona botão de liberação completa
 
-aadd( aRotina, {"Lib. Completa","U_MOMS029()"	, 0 , 1,0,.F.} )
+aAdd( aRotina, {"Lib. Completa","U_MOMS029()"	, 0 , 1,0,.F.} )
 						
 Return

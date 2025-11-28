@@ -2,15 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 22/01/2025 | Chamado 49641. Implementada faixa de início e fim para pagamento do excedente de matéria gorda
-Lucas Borges  | 31/02/2025 | Chamado 50016. Ajustar exibição da média da matéria gorda
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Lucas Borges  |31/02/2025| Chamado 50016. Ajustar exibição da média da matéria gorda
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Lucas Borges  |01/10/2025| Chamado 52143. Incluido filtro para fornecedore Centro Leite
 ===============================================================================================================================
 */
 
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 #Include "FWPrintSetup.ch" 
 #Include "RPTDEF.CH"
 
@@ -24,27 +24,27 @@ Parametros------: Nenhum
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-User Function RGLT020(_lJob,_aPergunte,_lPdf,_lEnvMail,_cDirPlan,_cDirUser)
+User Function RGLT020(_lJob As Logical,_aPergunte As Array,_lPdf As Logical,_lEnvMail As Logical,_cDirPlan As Character,_cDirUser As Character)
 
-Local _oProfile			:= Nil
-Local _oPrinter			:= Nil
-Local _oSetup			:= Nil
-Local _oExcel			:= Nil
-Local _nDestination		:= 1//1-SERVER - 2-CLIENT
-Local _aMargRel			:= {0,0,0,0} //nEsquerda, nSuperior, nDireita, nInferior
-Local _cPerg			:= "RGLT020"
-Local _nPrintType		:= 6 //FwMsPrinter só aceita 2-SPOOL (IMP_SPOOL) ou 6-PDF (IMP_PDF)
-Local _cValueType		:= "d:\"
-Local _cPathInServer	:= __RelDir
-Local _aOrdem			:= {"Por Filial+Ticket+Recepção"} 
-Local _nFlags			:= PD_ISTOTVSPRINTER+PD_DISABLEORIENTATION+PD_DISABLEPAPERSIZE+PD_DISABLEMARGIN//PD_ISTOTVSPRINTER=1,PD_DISABLEDESTINATION=2,PD_DISABLEORIENTATION=4,PD_DISABLEPAPERSIZE=8,PD_DISABLEPREVIEW=16,PD_DISABLEMARGIN=32
-Local _cFilePrint		:= If(_lJob,_aPergunte[5]+_aPergunte[6]+"_RGLT020","RGLT020")//+Dtos(MSDate())+StrTran(Time(),":","")
-Local _nOrientation		:= 1 //1-PORTRAIT - 2-LANDSCAPE
-Local _cTitulo			:= "RGLT020 - Leite de Terceiros - Fechamento Quinzenal"
-Local _nPaperSize		:= 9//1-"Letter 8 1/2 x 11 in" / 2-"A4 210 x 297 mm" / 3-"A3 297 x 420 mm"/ 4-"Executive 7 1/4 x 10 1/2 in" / 5-"Tabloid 11 x 17 in"
-Local _nOrdem			:= 1
-Local _lPreview			:= .F.
-Local _nX				:= 1
+Local _oProfile			:= Nil As Object
+Local _oPrinter			:= Nil As Object
+Local _oSetup			:= Nil As Object
+Local _oExcel			:= Nil As Object
+Local _nDestination		:= 1 As Numeric //1-SERVER - 2-CLIENT
+Local _aMargRel			:= {0,0,0,0} As Array//nEsquerda, nSuperior, nDireita, nInferior
+Local _cPerg			:= "RGLT020" As Character
+Local _nPrintType		:= 6 As Numeric //FwMsPrinter só aceita 2-SPOOL (IMP_SPOOL) ou 6-PDF (IMP_PDF)
+Local _cValueType		:= "d:\" As Character
+Local _cPathInServer	:= __RelDir As Character
+Local _aOrdem			:= {"Por Filial+Ticket+Recepção"} As Array
+Local _nFlags			:= PD_ISTOTVSPRINTER+PD_DISABLEORIENTATION+PD_DISABLEPAPERSIZE+PD_DISABLEMARGIN As Numeric//PD_ISTOTVSPRINTER=1,PD_DISABLEDESTINATION=2,PD_DISABLEORIENTATION=4,PD_DISABLEPAPERSIZE=8,PD_DISABLEPREVIEW=16,PD_DISABLEMARGIN=32
+Local _cFilePrint		:= If(_lJob,_aPergunte[5]+_aPergunte[6]+"_RGLT020","RGLT020") As Character//+DToS(MSDate())+StrTran(Time(),":","")
+Local _nOrientation		:= 1 As Numeric//1-PORTRAIT - 2-LANDSCAPE
+Local _cTitulo			:= "RGLT020 - Leite de Terceiros - Fechamento Quinzenal" As Character
+Local _nPaperSize		:= 9 As Numeric//1-"Letter 8 1/2 x 11 in" / 2-"A4 210 x 297 mm" / 3-"A3 297 x 420 mm"/ 4-"Executive 7 1/4 x 10 1/2 in" / 5-"Tabloid 11 x 17 in"
+Local _nOrdem			:= 1 As Numeric
+Local _lPreview			:= .F. As Logical
+Local _nX				:= 1 As Numeric
 Default _lJob			:= .F.
 Default _aPergunte		:= {}
 Default _lPdf			:= .T.
@@ -124,7 +124,7 @@ Else
 		_oPrinter:SetPortrait()
 	EndIf
 
-	_lJob := If(_lJob,.T.,(_oPrinter:lInJob .or. _oSetup == nil))
+	_lJob := If(_lJob,.T.,(_oPrinter:lInJob .Or. _oSetup == nil))
 	_oPrinter:lServer := If( _lJob , .T., _oSetup:GetProperty(PD_DESTINATION) == 1)//SERVER
 	_oPrinter:SetResolution(75)
 	_oPrinter:SetMargin(_oSetup:GetProperty(PD_MARGIN)[1],_oSetup:GetProperty(PD_MARGIN)[2],_oSetup:GetProperty(PD_MARGIN)[3],_oSetup:GetProperty(PD_MARGIN)[4])
@@ -218,31 +218,39 @@ Parametros--------: _oPrinter,_cPerg,_lPreview
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function RGLT020I(_oPrinter,_oExcel,_cPerg,_lPreview,_lPdf)
+Static Function RGLT020I(_oPrinter As Object,_oExcel As Object,_cPerg As Character,_lPreview As Logical,_lPdf As Logical)
 
-Local _aRet			:= {}
-Local _cAlias		:= GetNextAlias()
-Local _cFiltro		:= "%"
-Local _cPedido		:= ''
-Local _nI			:= 0
-Local _nTam			:= 0
-Private _nNumPag	:= 0
-Private _cDtIni		:= ''
-Private _cDtFim		:= ''
+Local _aRet			:= {} As Array
+Local _cAlias		:= GetNextAlias() As Character
+Local _cFiltro		:= "%" As Character
+Local _cFilSA2		:= "% %" As Character
+Local _cPedido		:= '' As Character
+Local _nI			:= 0 As Numeric
+Local _nTam			:= 0 As Numeric
+Private _nNumPag	:= 0 As Numeric
+Private _cDtIni		:= '' As Character
+Private _cDtFim		:= '' As Character
 
 If MV_PAR01 == 1
 	_cDtIni := SubStr( MV_PAR02 , 3 , 4 ) + SubStr( MV_PAR02 , 1 , 2 ) + '01'
 	_cDtFim := SubStr( MV_PAR02 , 3 , 4 ) + SubStr( MV_PAR02 , 1 , 2 ) + '15'
 Else
 	_cDtIni := SubStr( MV_PAR02 , 3 , 4 ) + SubStr( MV_PAR02 , 1 , 2 ) + '16'
-	_cDtFim := DtoS( LastDay( StoD( SubStr( MV_PAR02 , 3 , 4 ) + SubStr( MV_PAR02 , 1 , 2 ) + '01' ) ) )
+	_cDtFim := DToS( LastDay( SToD( SubStr( MV_PAR02 , 3 , 4 ) + SubStr( MV_PAR02 , 1 , 2 ) + '01' ) ) )
 EndIf
 
 _cFiltro += IIf( MV_PAR03 == 1 , " AND SC7.C7_FORNECE  = 'F00001' ", "" )
-_cFiltro += IIf( MV_PAR03 == 2 , " AND SC7.C7_FORNECE <> 'F00001' AND SUBSTR(SC7.C7_FORNECE,1,1) <> 'Z' ", "" )
-_cFiltro += IIf( MV_PAR03 == 3 , " AND SUBSTR(SC7.C7_FORNECE,1,1) = 'Z' ", "" )
+_cFiltro += IIf( MV_PAR03 == 2 , " AND SC7.C7_FORNECE <> 'F00001' AND SubStr(SC7.C7_FORNECE,1,1) <> 'Z' ", "" )
+_cFiltro += IIf( MV_PAR03 == 3 , " AND SubStr(SC7.C7_FORNECE,1,1) = 'Z' ", "" )
 _cFiltro += IIf( !Empty(MV_PAR04) , " AND ZA7.ZA7_TIPPRD IN "+ FormatIn( MV_PAR04 , ';' ), "" )
 _cFiltro += "%"
+
+//Centro Leite
+If MV_PAR11 == 1
+	_cFilSA2 := "% AND A2_L_CENTR = '1' %"
+ElseIf MV_PAR11 == 2
+	_cFilSA2 := "% AND A2_L_CENTR = '2' %"
+EndIf
 
 BeginSql alias _cAlias
 SELECT GERAL.ZA7_TIPPRD, GERAL.ORIGEM, SA2.A2_COD, SA2.A2_LOJA, SA2.A2_NOME, SA2.A2_NREDUZ, SA2.A2_RECINSS, 
@@ -251,12 +259,12 @@ SELECT GERAL.ZA7_TIPPRD, GERAL.ORIGEM, SA2.A2_COD, SA2.A2_LOJA, SA2.A2_NOME, SA2
        GERAL.C7_PRODUTO, GERAL.C7_L_PMGB, GERAL.C7_L_PMGB2, GERAL.C7_L_PMEST, GERAL.C7_L_EXEMG, GERAL.C7_L_EXEM2, GERAL.C7_L_PMEST, 
 	   GERAL.C7_L_EXEST, SA2.A2_L_KMLE, GERAL.PRODUTO, GERAL.VENCTO, RTRIM(GERAL.PEDIDOS) PEDIDOS, GERAL.FUNDESA
   FROM (SELECT ZA7.ZA7_TIPPRD,
-               CASE
-                 WHEN SUBSTR(SC7.C7_FORNECE, 1, 1) = 'Z' THEN
+               Case
+                 WHEN SubStr(SC7.C7_FORNECE, 1, 1) = 'Z' THEN
                   'PLATAFORMA'
                  WHEN SC7.C7_FORNECE = 'F00001' THEN
                   'LEITE FILIAIS'
-                 ELSE
+                 Else
                   'LEITE TERCEIRO'
                END ORIGEM,
                SC7.C7_FORNECE, SC7.C7_LOJA,
@@ -342,6 +350,7 @@ SELECT GERAL.ZA7_TIPPRD, GERAL.ORIGEM, SA2.A2_COD, SA2.A2_LOJA, SA2.A2_NOME, SA2
    AND SA2.A2_FILIAL = %xFilial:SA2%
    AND SA2.A2_COD = GERAL.C7_FORNECE
    AND SA2.A2_LOJA = GERAL.C7_LOJA
+   %exp:_cFilSA2%
  ORDER BY GERAL.ORIGEM, GERAL.ZA7_TIPPRD, SA2.A2_NREDUZ
 EndSql
 
@@ -357,8 +366,8 @@ While (_cAlias)->( !Eof() )
 	_nI		:= 1
 	If _nTam > 0
 		While _nI <= Len(AllTrim((_cAlias)->PEDIDOS))
-			If !(SUBSTR((_cAlias)->PEDIDOS,_nI,_nTam - 1) $ _cPedido)
-				_cPedido += SUBSTR(AllTrim((_cAlias)->PEDIDOS),_nI,_nTam)
+			If !(SubStr((_cAlias)->PEDIDOS,_nI,_nTam - 1) $ _cPedido)
+				_cPedido += SubStr(AllTrim((_cAlias)->PEDIDOS),_nI,_nTam)
 			EndIf
 			_nI := _nI + _nTam
 		End
@@ -369,7 +378,7 @@ While (_cAlias)->( !Eof() )
 	EndIf
 	//Retiro o último ;, pois no FormatIn ficará ('XXX','') e o Embedded SQL irá converter em ' '
 	//que irá gerar problemas posteriores
-	_cPedido := Substr(_cPedido,1,Len(_cPedido)-1)
+	_cPedido := SubStr(_cPedido,1,Len(_cPedido)-1)
 	
 	aAdd( _aRet , {				(_cAlias)->ORIGEM										,; //01 - Codigo de Produto
 								(_cAlias)->A2_COD										,; //02 - Procedencia
@@ -426,44 +435,44 @@ Parametros------: _aDados  - Dados do relatório
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-Static Function RGLT020PRT(_aDados,_oPrinter,_oExcel,_cPerg,_lPdf)
+Static Function RGLT020PRT(_aDados As Array,_oPrinter As Object,_oExcel As Object,_cPerg As Character,_lPdf As Logical)
 
-Local _aCabec1	:= {}
-Local _aCabec2	:= {}
-Local _aColCab	:= {}
-Local _aColCab2	:= {}
-Local _aColItn	:= {}
-Local _aColItn2	:= {}
-Local _aColDiv	:= {}
-Local _aItnAux	:= {}
-Local _aTotAux	:= {}
-Local _cAlias	:= GetNextAlias()
-Local _cFiltro	:= ""
-Local _nLinha	:= 2
-Local _nI		:= 0
-Local _nX		:= 0
-Local _nZ		:= 0
-Local _nY		:= 0
-Local _nValUlt	:= 0
-Local _nDifAux	:= 0
-Local _nLinAux	:= 0
-Local _nTotAux	:= 0
-Local _aNFDev	:= {}
-Local _nNFDTot	:= 0
-Local _aPeds	:= {}
-Local _nD		:= 0
-Local _nQuant	:= 0
-Local _lExtrato := .F.
-Local _cWorkSheet:= ""
+Local _aCabec1	:= {} As Array
+Local _aCabec2	:= {} As Array
+Local _aColCab	:= {} As Array
+Local _aColCab2	:= {} As Array
+Local _aColItn	:= {} As Array
+Local _aColItn2	:= {} As Array
+Local _aColDiv	:= {} As Array
+Local _aItnAux	:= {} As Array
+Local _aTotAux	:= {} As Array
+Local _cAlias	:= GetNextAlias() As Character
+Local _cFiltro	:= "" As Character
+Local _nLinha	:= 2 As Numeric
+Local _nI		:= 0 As Numeric
+Local _nX		:= 0 As Numeric
+Local _nZ		:= 0 As Numeric
+Local _nY		:= 0 As Numeric
+Local _nValUlt	:= 0 As Numeric
+Local _nDifAux	:= 0 As Numeric
+Local _nLinAux	:= 0 As Numeric
+Local _nTotAux	:= 0 As Numeric
+Local _aNFDev	:= {} As Array
+Local _nNFDTot	:= 0 As Numeric
+Local _aPeds	:= {} As Array
+Local _nD		:= 0 As Numeric
+Local _nQuant	:= 0 As Numeric
+Local _lExtrato := .F. As Logical
+Local _cWorkSheet:= "" As Character
 Local _cTable	:= "Transportador"
-Local _nExtrato	:= 0
-Local _nMatGExc	:= 0
-Local _nTotPgMg	:= 0
-Local _nFaixa	:= 0
-Private _oFont12	:= Nil
-Private _oFont08	:= Nil
-Private _oFont07	:= Nil
-Private _oFont08N	:= Nil
+Local _nExtrato	:= 0 As Numeric
+Local _nMatGExc	:= 0 As Numeric
+Local _nTotPgMg	:= 0 As Numeric
+Local _nFaixa	:= 0 As Numeric
+Private _oFont12	:= Nil As Object
+Private _oFont08	:= Nil As Object
+Private _oFont07	:= Nil As Object
+Private _oFont08N	:= Nil As Object
 
 If _lPdf
 	_oFont12	:= TFontEx():New(_oPrinter,"Tahoma",16,16,.T.,.T.,.F.)
@@ -517,16 +526,16 @@ For _nI := 1 To Len( _aDados )
 	BeginSql alias _cAlias
 	SELECT ZLX_DATAEN, ZLX_HRENTR, DIA_MOV, ZLX_NRONF, ZLX_VOLNF, ZLX_VOLREC, ZLX_VOLREC, ZLX_DIFVOL, ZLX_VLRNF, ZLX_ICMSNF, ZLX_PRCNF, GORDURA, EXTRATO, 
 	CALC_EXT FROM (
-	SELECT ZLX.ZLX_DATAEN, ZLX.ZLX_HRENTR, SUBSTR(ZLX.ZLX_DTENTR, 7, 2) DIA_MOV, ZLX.ZLX_NRONF, ZLX.ZLX_VOLNF,
+	SELECT ZLX.ZLX_DATAEN, ZLX.ZLX_HRENTR, SubStr(ZLX.ZLX_DTENTR, 7, 2) DIA_MOV, ZLX.ZLX_NRONF, ZLX.ZLX_VOLNF,
           ZLX.ZLX_VOLREC, ZLX.ZLX_DIFVOL, ZLX.ZLX_VLRNF, ZLX.ZLX_ICMSNF, ZLX.ZLX_PRCNF,
-          NVL(ROUND((SELECT SUM(ZAP_GORD) / COUNT(1)
+          NVL(Round((SELECT SUM(ZAP_GORD) / COUNT(1)
                       FROM %Table:ZAP% ZAP
                      WHERE ZAP.D_E_L_E_T_ = ' '
                        AND ZAP.ZAP_FILIAL = ZLX.ZLX_FILIAL
                        AND ZLX.ZLX_CODANA = ZAP.ZAP_CODIGO),
                     2),
               0) GORDURA,
-		NVL(ROUND((SELECT SUM(ZAP_EST) / COUNT(1)
+		NVL(Round((SELECT SUM(ZAP_EST) / COUNT(1)
                       FROM %Table:ZAP% ZAP
                      WHERE ZAP.D_E_L_E_T_ = ' '
                        AND ZAP.ZAP_FILIAL = ZLX.ZLX_FILIAL
@@ -621,7 +630,7 @@ For _nI := 1 To Len( _aDados )
 			_nTotPgMg := _nMatGExc * _nFaixa
 		EndIf
 
-		aAdd( _aItnAux , {	DtoC(StoD((_cAlias)->ZLX_DATAEN)) +" | "+ (_cAlias)->ZLX_HRENTR,; //Data/hora
+		aAdd( _aItnAux , {	DToC(SToD((_cAlias)->ZLX_DATAEN)) +" | "+ (_cAlias)->ZLX_HRENTR,; //Data/hora
 							StrZero(Val((_cAlias)->DIA_MOV ),2),; //Dia Mov
 							AllTrim((_cAlias)->ZLX_NRONF),; //Num NF
 							(_cAlias)->ZLX_VOLNF,; // Volume NF
@@ -750,7 +759,7 @@ For _nI := 1 To Len( _aDados )
 
 		While (_cAlias)->( !Eof() )
 			_nQuant += (_cAlias)->C7_QUANT
-			(_cAlias)->( dbSkip() )
+			(_cAlias)->( DBSkip() )
 		EndDo
 		(_cAlias)->( DBCloseArea() )
 	Next _nD
@@ -762,7 +771,7 @@ For _nI := 1 To Len( _aDados )
 		
 		_oPrinter:Say(_nLinha, 060, "Diferença de Programação (L): ", _oFont08N:oFont)
 		_oPrinter:SayAlign(_nLinha-25, 400, Transform(( _aTotAux[05] - _nQuant), '@E 999,999,999,999'), _oFont08N:oFont,300,10,,1)
-		_oPrinter:Say(_nLinha, 800, IIF((_aTotAux[05] - _nQuant) < 0 , 'A menor que o programado!' , '' ), _oFont08N:oFont)
+		_oPrinter:Say(_nLinha, 800, IIf((_aTotAux[05] - _nQuant) < 0 , 'A menor que o programado!' , '' ), _oFont08N:oFont)
 
 		//====================================================================================================
 		// Verifica dados para imprimir a relação das entradas do fornecedor no período - GRUPO 01 - Fim
@@ -770,7 +779,7 @@ For _nI := 1 To Len( _aDados )
 	Else
 		_oExcel:AddRow(_cWorkSheet,_cTable,{"Quantidade Programada (L):",Transform( _nQuant , '@E 999,999,999,999' )})
 		_oExcel:AddRow(_cWorkSheet,_cTable,{"Diferença de Programação (L):",Transform(( _aTotAux[05] - _nQuant), '@E 999,999,999,999'),;
-						IIF((_aTotAux[05] - _nQuant) < 0 , 'A menor que o programado!' , '' )})
+						IIf((_aTotAux[05] - _nQuant) < 0 , 'A menor que o programado!' , '' )})
 	EndIf
 		
 	If _lPdf
@@ -849,7 +858,7 @@ For _nI := 1 To Len( _aDados )
 		_nTotAux := (_aTotAux[05]*Val(StrTran(StrTran(_aDados[_nI][15],'.',''),',','.')))+_aTotAux[13]
 		
 		If _lPdf
-			_oPrinter:Say(_nLinha + 070+25, 0050, Substr(_aDados[_nI][18],1,47), _oFont07:oFont)
+			_oPrinter:Say(_nLinha + 070+25, 0050, SubStr(_aDados[_nI][18],1,47), _oFont07:oFont)
 			_oPrinter:SayAlign(_nLinha + 070, 650, AllTrim(Transform(_aTotAux[05], '@E 999,999,999,999')) +' L', _oFont07:oFont,300,10,,1)
 			_oPrinter:SayAlign(_nLinha + 070, 810, _aDados[_nI][15], _oFont07:oFont,300,10,,1)
 			_oPrinter:SayAlign(_nLinha + 070, 1020, AllTrim(Transform(_aTotAux[05]*Val(StrTran(StrTran(_aDados[_nI][15],'.',''),',','.')),'@E 999,999,999,999.99')), _oFont07:oFont,300,10,,1)
@@ -924,7 +933,7 @@ For _nI := 1 To Len( _aDados )
 		_oPrinter:Say(_nLinha,	  1180, '   Valor', _oFont08N:oFont)
 		_oPrinter:Say(_nLinha+20, 1180, 'faturado', _oFont08N:oFont)
 		_nLinha += 30
-		_oPrinter:Say(_nLinha + 20, 0050, Substr(_aDados[_nI][18],1,47), _oFont07:oFont)
+		_oPrinter:Say(_nLinha + 20, 0050, SubStr(_aDados[_nI][18],1,47), _oFont07:oFont)
 		_oPrinter:SayAlign(_nLinha, 650, AllTrim(Transform(_aTotAux[04],'@E 999,999,999,999'))+' L', _oFont07:oFont,300,10,,1)
 		_oPrinter:SayAlign(_nLinha, 810, AllTrim(Transform(_aTotAux[07]/_aTotAux[04],'@E 999,999,999,999.9999')), _oFont07:oFont,300,10,,1)
 		_oPrinter:SayAlign(_nLinha, 1020, AllTrim(Transform(_aTotAux[07],'@E 999,999,999,999.99')), _oFont07:oFont,300,10,,1)
@@ -1095,24 +1104,24 @@ For _nI := 1 To Len( _aDados )
 		_nDifLtr -= _aNFDev[_nX][02]
 	Next _nX
 	
-	_nComAux := -( _aTotAux[04] - _aTotAux[05] ) + IIF( _nDifLtr > 0 , _nDifLtr , 0 )
-	_nDifLtr := IIF( _nDifLtr > 0 , _nDifLtr , 0 )
+	_nComAux := -( _aTotAux[04] - _aTotAux[05] ) + IIf( _nDifLtr > 0 , _nDifLtr , 0 )
+	_nDifLtr := IIf( _nDifLtr > 0 , _nDifLtr , 0 )
 	If _lPdf
 		_nLinha += 25
 		_oPrinter:Say(_nLinha + 20, 050, 'Devol. Ref. Diferença de Litragem', _oFont07:oFont)
-		_oPrinter:SayAlign(_nLinha, 650, AllTrim(Transform(IIF(_nDifLtr>0,_nDifLtr,0),'@E 999,999,999,999'))+' L', _oFont07:oFont,300,10,,1)
+		_oPrinter:SayAlign(_nLinha, 650, AllTrim(Transform(IIf(_nDifLtr>0,_nDifLtr,0),'@E 999,999,999,999'))+' L', _oFont07:oFont,300,10,,1)
 		_oPrinter:SayAlign(_nLinha, 810, AllTrim(Transform(_nValUlt,'@E 999,999,999,999.9999')), _oFont07:oFont,300,10,,1)
-		_oPrinter:SayAlign(_nLinha, 1020, AllTrim(Transform(IIF(_nDifLtr>0,_nDifLtr,0)*_nValUlt,'@E 999,999,999,999.99')), _oFont07:oFont,300,10,,1)
+		_oPrinter:SayAlign(_nLinha, 1020, AllTrim(Transform(IIf(_nDifLtr>0,_nDifLtr,0)*_nValUlt,'@E 999,999,999,999.99')), _oFont07:oFont,300,10,,1)
 	Else
 		_oExcel:SetFontSize(11)// Tamanho da fonte.
 		_oExcel:SetBold(.F.)// Efeito Negrito.
 		_oExcel:AddRow(_cWorkSheet,_cTable,{"Devol. Ref. Diferença de Litragem","",;
-											IIF(_nDifLtr>0,_nDifLtr,0),;
+											IIf(_nDifLtr>0,_nDifLtr,0),;
 											_nValUlt,;
-											IIF(_nDifLtr>0,_nDifLtr,0)*_nValUlt})
+											IIf(_nDifLtr>0,_nDifLtr,0)*_nValUlt})
 	EndIf
 
-	_nValLtr := ( IIF( _nDifLtr > 0 , _nDifLtr , 0 ) * _nValUlt )
+	_nValLtr := ( IIf( _nDifLtr > 0 , _nDifLtr , 0 ) * _nValUlt )
 	
 	//====================================================================================================
 	// Valores de Litragem complementar a ser emitida
@@ -1135,19 +1144,19 @@ For _nI := 1 To Len( _aDados )
 	For _nX := 1 To Len( _aNFCom )
 		_nDifAux += _aNFCom[_nX][04]
 	Next _nX
-	_nDevVal := ( IIF( ( _aTotAux[04] - _aTotAux[05] ) > 0 , _aTotAux[04] - _aTotAux[05] , 0 ) * _nValUlt ) + IIF( _nDifAux > 0 , _nDifAux , 0 )
+	_nDevVal := ( IIf( ( _aTotAux[04] - _aTotAux[05] ) > 0 , _aTotAux[04] - _aTotAux[05] , 0 ) * _nValUlt ) + IIf( _nDifAux > 0 , _nDifAux , 0 )
 	_nValPen := _nDevVal - _nNFDTot
 
 	If _lPdf
 		_nLinha += 25
 		_oPrinter:Say(_nLinha + 20, 0050, 'Devol. Ref. Diferença de Valor', _oFont07:oFont)
-		_oPrinter:SayAlign(_nLinha, 810, AllTrim(Transform(IIF(_nDifAux>0,_nDifAux,0),'@E 999,999,999,999.9999')), _oFont07:oFont,300,10,,1)
-		_oPrinter:SayAlign(_nLinha, 1020, AllTrim(Transform(IIF(_nDifAux>0,_nDifAux,0),'@E 999,999,999,999.99')), _oFont07:oFont,300,10,,1)
+		_oPrinter:SayAlign(_nLinha, 810, AllTrim(Transform(IIf(_nDifAux>0,_nDifAux,0),'@E 999,999,999,999.9999')), _oFont07:oFont,300,10,,1)
+		_oPrinter:SayAlign(_nLinha, 1020, AllTrim(Transform(IIf(_nDifAux>0,_nDifAux,0),'@E 999,999,999,999.99')), _oFont07:oFont,300,10,,1)
 		
 		_nLinha += 30
 		_oPrinter:Line(_nLinha, 0040, _nLinha, 1330)
 		_oPrinter:Say(_nLinha  + 30, 0050, 'Valor pendente à devolver:', _oFont08N:oFont)
-		_oPrinter:SayAlign(_nLinha, 1020, AllTrim(Transform(IIF(_nDifAux>0,_nDifAux,0)+_nValLtr,'@E 999,999,999,999.99')), _oFont08N:oFont,300,10,,1)
+		_oPrinter:SayAlign(_nLinha, 1020, AllTrim(Transform(IIf(_nDifAux>0,_nDifAux,0)+_nValLtr,'@E 999,999,999,999.99')), _oFont08N:oFont,300,10,,1)
 	
 		//====================================================================================================
 		// Imprime quadro dos dados do Fechamento
@@ -1164,17 +1173,17 @@ For _nI := 1 To Len( _aDados )
 		_oPrinter:Say(_nLinha, 	  1230, 'Valor', _oFont08N:oFont)
 		_nLinha += 25
 		_oPrinter:Say(_nLinha + 20, 050, 'Compl. Ref. Diferença de Litragem', _oFont07:oFont)
-		_oPrinter:SayAlign(_nLinha, 650, AllTrim(Transform(IIF(_nComAux>0,_nComAux,0),'@E 999,999,999,999'))+' L', _oFont07:oFont,300,10,,1)
-		_oPrinter:SayAlign(_nLinha, 810, AllTrim(Transform(IIF(_nValAux>0,_nValAux,0),'@E 999,999,999,999.9999')), _oFont07:oFont,300,10,,1)
-		_oPrinter:SayAlign(_nLinha, 1020, AllTrim(Transform(IIF(_nLtrCom>0,_nLtrCom,0),'@E 999,999,999,999.99')), _oFont07:oFont,300,10,,1)
+		_oPrinter:SayAlign(_nLinha, 650, AllTrim(Transform(IIf(_nComAux>0,_nComAux,0),'@E 999,999,999,999'))+' L', _oFont07:oFont,300,10,,1)
+		_oPrinter:SayAlign(_nLinha, 810, AllTrim(Transform(IIf(_nValAux>0,_nValAux,0),'@E 999,999,999,999.9999')), _oFont07:oFont,300,10,,1)
+		_oPrinter:SayAlign(_nLinha, 1020, AllTrim(Transform(IIf(_nLtrCom>0,_nLtrCom,0),'@E 999,999,999,999.99')), _oFont07:oFont,300,10,,1)
 	Else
 		_oExcel:AddRow(_cWorkSheet,_cTable,{"Devol. Ref. Diferença de Valor","","",;
-						IIF(_nDifAux>0,_nDifAux,0),;
-						IIF(_nDifAux>0,_nDifAux,0)})
+						IIf(_nDifAux>0,_nDifAux,0),;
+						IIf(_nDifAux>0,_nDifAux,0)})
 		_oExcel:SetFontSize(12)// Tamanho da fonte.
 		_oExcel:SetBold(.T.)// Efeito Negrito.
 		_oExcel:AddRow(_cWorkSheet,_cTable,{"Valor pendente à devolver:","","","",;
-						IIF(_nDifAux>0,_nDifAux,0)+_nValLtr})
+						IIf(_nDifAux>0,_nDifAux,0)+_nValLtr})
 		_oExcel:AddRow(_cWorkSheet,_cTable,{"","","","",""})
 		_oExcel:SetFontSize(12)// Tamanho da fonte.
 		_oExcel:SetBold(.T.)// Efeito Negrito.
@@ -1183,13 +1192,13 @@ For _nI := 1 To Len( _aDados )
 		_oExcel:SetFontSize(11)// Tamanho da fonte.
 		_oExcel:SetBold(.F.)// Efeito Negrito.
 		_oExcel:AddRow(_cWorkSheet,_cTable,{"Compl. Ref. Diferença de Litragem","",;
-						IIF(_nComAux>0,_nComAux,0),;
-						IIF(_nValAux>0,_nValAux,0),;
-						IIF(_nLtrCom>0,_nLtrCom,0)})
+						IIf(_nComAux>0,_nComAux,0),;
+						IIf(_nValAux>0,_nValAux,0),;
+						IIf(_nLtrCom>0,_nLtrCom,0)})
 	EndIf
 
 	_nDifAux := _aTotAux[07] - _nTotAux
-	_nDifAux += IIF( _nLtrCom > 0 , _nLtrCom , 0 )
+	_nDifAux += IIf( _nLtrCom > 0 , _nLtrCom , 0 )
 	_nDifAux -= _nNFDTot
 	_nDifAux -= _nValPen
 	
@@ -1200,12 +1209,12 @@ For _nI := 1 To Len( _aDados )
 	If _lPdf
 		_nLinha += 25
 		_oPrinter:Say(_nLinha + 20, 0050, 'Compl. Ref. Diferença de Valor', _oFont07:oFont)
-		_oPrinter:SayAlign(_nLinha, 810, AllTrim(Transform(IIF(_nDifAux<0,-_nDifAux,0),'@E 999,999,999,999.9999')), _oFont07:oFont,300,10,,1)
-		_oPrinter:SayAlign(_nLinha, 1020, AllTrim(Transform(IIF(_nDifAux<0,-_nDifAux,0),'@E 999,999,999,999.99')), _oFont07:oFont,300,10,,1)
+		_oPrinter:SayAlign(_nLinha, 810, AllTrim(Transform(IIf(_nDifAux<0,-_nDifAux,0),'@E 999,999,999,999.9999')), _oFont07:oFont,300,10,,1)
+		_oPrinter:SayAlign(_nLinha, 1020, AllTrim(Transform(IIf(_nDifAux<0,-_nDifAux,0),'@E 999,999,999,999.99')), _oFont07:oFont,300,10,,1)
 		_nLinha += 30
 		_oPrinter:Line(_nLinha, 0040, _nLinha, 1330)
 		_oPrinter:Say(_nLinha + 30, 0050, 'Valor pendente à receber:', _oFont08N:oFont)
-		_oPrinter:SayAlign(_nLinha, 1020, AllTrim(Transform(IIF(_nLtrCom>0,_nLtrCom,0)+IIF(_nDifAux<0,-_nDifAux,0),'@E 999,999,999,999.99')), _oFont08N:oFont,300,10,,1)
+		_oPrinter:SayAlign(_nLinha, 1020, AllTrim(Transform(IIf(_nLtrCom>0,_nLtrCom,0)+IIf(_nDifAux<0,-_nDifAux,0),'@E 999,999,999,999.99')), _oFont08N:oFont,300,10,,1)
 		
 		//====================================================================================================
 		// Imprime quadro dos dados do Fechamento
@@ -1216,12 +1225,12 @@ For _nI := 1 To Len( _aDados )
 		_oExcel:SetFontSize(11)// Tamanho da fonte.
 		_oExcel:SetBold(.F.)// Efeito Negrito.
 		_oExcel:AddRow(_cWorkSheet,_cTable,{"Compl. Ref. Diferença de Valor","","",;
-						IIF(_nDifAux<0,-_nDifAux,0),;
-						IIF(_nDifAux<0,-_nDifAux,0)})
+						IIf(_nDifAux<0,-_nDifAux,0),;
+						IIf(_nDifAux<0,-_nDifAux,0)})
 		_oExcel:SetFontSize(12)// Tamanho da fonte.
 		_oExcel:SetBold(.T.)// Efeito Negrito.
 		_oExcel:AddRow(_cWorkSheet,_cTable,{"Valor pendente à receber:","","","",;
-						IIF(_nLtrCom>0,_nLtrCom,0)+IIF(_nDifAux<0,-_nDifAux,0)})
+						IIf(_nLtrCom>0,_nLtrCom,0)+IIf(_nDifAux<0,-_nDifAux,0)})
 		_oExcel:AddRow(_cWorkSheet,_cTable,{"","","","",""})
 		_oExcel:AddRow(_cWorkSheet,_cTable,{"Controle das notas fiscais complementares/devoluções","","","",""})
 	EndIf
@@ -1261,7 +1270,7 @@ For _nI := 1 To Len( _aDados )
 				// Imprime quadro dos dados do Fechamento
 				//====================================================================================================
 				_oPrinter:Say(_nLinha+20, 050, _aNFDev[_nX][01], _oFont07:oFont)
-				_oPrinter:Say(_nLinha+20, 400, DtoC(StoD(_aNFDev[_nX][05])), _oFont07:oFont)
+				_oPrinter:Say(_nLinha+20, 400, DToC(SToD(_aNFDev[_nX][05])), _oFont07:oFont)
 				_oPrinter:SayAlign(_nLinha, 650, AllTrim(Transform(_aNFDev[_nX][02],'@E 999,999,999,999')), _oFont07:oFont,300,10,,1)
 				_oPrinter:SayAlign(_nLinha, 810, AllTrim(Transform(_aNFDev[_nX][03],'@E 999,999,999,999.99')), _oFont07:oFont,300,10,,1)
 				_oPrinter:SayAlign(_nLinha, 1020, AllTrim(Transform(_aNFDev[_nX][04],'@E 999,999,999,999.99')), _oFont07:oFont,300,10,,1)
@@ -1324,7 +1333,7 @@ For _nI := 1 To Len( _aDados )
 				// Imprime quadro dos dados do Fechamento
 				//====================================================================================================
 				_oPrinter:Say(_nLinha+20, 0050, _aNFCom[_nX][01], _oFont07:oFont)
-				_oPrinter:Say(_nLinha+20, 0400, DtoC(StoD(_aNFCom[_nX][05])), _oFont07:oFont)
+				_oPrinter:Say(_nLinha+20, 0400, DToC(SToD(_aNFCom[_nX][05])), _oFont07:oFont)
 				_oPrinter:SayAlign(_nLinha, 650, AllTrim(Transform(_aNFCom[_nX][02],'@E 999,999,999,999')), _oFont07:oFont,300,10,,1)
 				_oPrinter:SayAlign(_nLinha, 810, AllTrim(Transform(_aNFCom[_nX][03],'@E 999,999,999,999.99')), _oFont07:oFont,300,10,,1)
 				_oPrinter:SayAlign(_nLinha, 1030, AllTrim(Transform(_aNFCom[_nX][04],'@E 999,999,999,999.99')), _oFont07:oFont,300,10,,1)
@@ -1390,7 +1399,7 @@ For _nI := 1 To Len( _aDados )
 						_nZ := 1
 						While _nZ < Len(_cMsg)
 							_nY := 0
-							IF !Empty( SubStr( _cMsg , _nZ ) )
+							If !Empty( SubStr( _cMsg , _nZ ) )
 								While SubStr( _cMsg , _nZ + 194 - _nY , 1 ) <> ' '
 									If ( _nZ + 194 - _nY ) > _nZ
 										_nY++
@@ -1563,8 +1572,8 @@ For _nI := 1 To Len( _aDados )
 			
 			_oPrinter:Say(_nLinha+ 025, _aColItn2[01], (_cAlias)->A2_NREDUZ, _oFont07:oFont)
 			_oPrinter:Say(_nLinha+ 025, _aColItn2[02], (_cAlias)->E2_NUM, _oFont07:oFont)
-			_oPrinter:SayAlign(_nLinha, _aColItn2[03], DtoC( StoD((_cAlias)->E2_EMISSAO)), _oFont07:oFont, 300,10,,1)
-			_oPrinter:SayAlign(_nLinha, _aColItn2[04], DtoC( StoD((_cAlias)->E2_VENCTO)), _oFont07:oFont, 300,10,,1)
+			_oPrinter:SayAlign(_nLinha, _aColItn2[03], DToC( SToD((_cAlias)->E2_EMISSAO)), _oFont07:oFont, 300,10,,1)
+			_oPrinter:SayAlign(_nLinha, _aColItn2[04], DToC( SToD((_cAlias)->E2_VENCTO)), _oFont07:oFont, 300,10,,1)
 			_oPrinter:Say(_nLinha+ 025, _aColItn2[05], (_cAlias)->EVENTO, _oFont07:oFont)
 			_oPrinter:SayAlign(_nLinha, _aColItn2[06], AllTrim(Transform((_cAlias)->E2_VALOR,'@E 999,999,999,999.99')),_oFont07:oFont, 300,10,,1)
 			//Grade da tabela
@@ -1576,8 +1585,8 @@ For _nI := 1 To Len( _aDados )
 			_oExcel:SetBold(.F.)// Efeito Negrito.
 			_oExcel:AddRow(_cWorkSheet,_cTable,{(_cAlias)->A2_NREDUZ,;
 							(_cAlias)->E2_NUM,;
-							DtoC( StoD((_cAlias)->E2_EMISSAO)),;
-							DtoC( StoD((_cAlias)->E2_VENCTO)),;
+							DToC( SToD((_cAlias)->E2_EMISSAO)),;
+							DToC( SToD((_cAlias)->E2_VENCTO)),;
 							(_cAlias)->EVENTO,;
 							(_cAlias)->E2_VALOR})
 		EndIf
@@ -1713,20 +1722,20 @@ For _nI := 1 To Len( _aDados )
 	_cAlias := GetNextAlias()
 	BeginSql alias _cAlias
 		SELECT NUMERO, DIA_MOV, CTE, NREDUZ, PLACA, VLRKM, VLRFRT, PEDAGI, ICMSFR, TVLFRT, CUSTO, CHAVE, VOLUME FROM (
-		SELECT ZLX.ZLX_NRONF NUMERO, SUBSTR(ZLX.ZLX_DTENTR, 7, 2) DIA_MOV, ZLX.ZLX_CTE CTE, SA2.A2_NREDUZ NREDUZ, ZLX.ZLX_PLACA PLACA,
-		       CASE
+		SELECT ZLX.ZLX_NRONF NUMERO, SubStr(ZLX.ZLX_DTENTR, 7, 2) DIA_MOV, ZLX.ZLX_CTE CTE, SA2.A2_NREDUZ NREDUZ, ZLX.ZLX_PLACA PLACA,
+		       Case
 		         WHEN ZLX.ZLX_VLRKM > 0 THEN
 		          ZLX.ZLX_VLRKM
 		         WHEN ZZU.ZZU_KMFORN > 0 THEN
 		          (ZLX.ZLX_VLRFRT / ZZU.ZZU_KMFORN)
-		         ELSE
+		         Else
 		          0
 		       END VLRKM,
 		       ZLX.ZLX_VLRFRT VLRFRT, ZLX.ZLX_PEDAGI PEDAGI, ZLX.ZLX_ICMSFR ICMSFR, ZLX.ZLX_TVLFRT TVLFRT,
-		       CASE
+		       Case
 		         WHEN ZLX.ZLX_VOLREC > 0 THEN
 		          ((ZLX.ZLX_VLRFRT + ZLX.ZLX_PEDAGI) / ZLX.ZLX_VOLREC)
-		         ELSE
+		         Else
 		          0
 		       END CUSTO,
 		       ZLX.ZLX_TRANSP || ZLX.ZLX_LJTRAN CHAVE,
@@ -2051,10 +2060,10 @@ Parametros------: oPrint	- Objeto de Impressão do Relatório
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-Static Function RGLT020VPG( _oPrinter, _nLinha , _lFinPag, _oExcel, _lPdf, _cWorkSheet, _cTable )
+Static Function RGLT020VPG(_oPrinter As Object,_nLinha As Numeric,_lFinPag As Logical,_oExcel As Object,_lPdf As Logical,_cWorkSheet As Character,_cTable As Character) As Logical
 
-Local _nLimPag		:= 3000//limite de linhas
-Local _lRet			:= .F.
+Local _nLimPag		:= 3000 As Numeric//limite de linhas
+Local _lRet			:= .F. As Logical
 Default _lFinPag	:= .T.
 
 If _lPdf .And. _nLinha > _nLimPag
@@ -2062,10 +2071,10 @@ If _lPdf .And. _nLinha > _nLimPag
 	//====================================================================================================
 	// Verifica se encerra a página atual
 	//====================================================================================================
-	IF _lFinPag
+	If _lFinPag
 		_oPrinter:EndPage()
 		_lRet := .T.
-	EndIF
+	EndIf
 	
 	//====================================================================================================
 	// Inicializa a nova página e o posicionamento
@@ -2130,10 +2139,10 @@ Parametros------: oPrint	- Objeto de Impressão do Relatório
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-Static Function Cabec(_oPrinter, _nLinha, _aDados, _nI, _oExcel,_lPdf, _cWorkSheet, _cTable )
+Static Function Cabec(_oPrinter As Object,_nLinha As Numeric,_aDados As Array,_nI As Numeric,_oExcel As Object,_lPdf As Logical,_cWorkSheet As Character,_cTable As Character)
 
-Local _cTitulo := "> Fechamento: "+ cValToChar(MV_PAR01) +"ª quinzena / "+ MesExtenso(Substr(alltrim(MV_PAR02),1,2));
-	+" "+ Substr(alltrim(MV_PAR02),3,4) +" - "+ _aDados[_nI][01]
+Local _cTitulo := "> Fechamento: "+ cValToChar(MV_PAR01) +"ª quinzena / "+ MesExtenso(SubStr(AllTrim(MV_PAR02),1,2));
+	+" "+ SubStr(AllTrim(MV_PAR02),3,4) +" - "+ _aDados[_nI][01] As Character
 
 If _lPdf
 	_oPrinter:Say( _nLinha , 060 , _cTitulo, _oFont12:oFont )
@@ -2149,7 +2158,7 @@ If _lPdf
 	_nLinha += 035
 	_oPrinter:Say(_nLinha, 0080, 'Endereço: ', _oFont08N:oFont); _oPrinter:Say(_nLinha, 0240, AllTrim(_aDados[_nI][07]), _oFont07:oFont)
 	_oPrinter:Say(_nLinha, 1080, 'Cidade: ', _oFont08N:oFont); _oPrinter:Say(_nLinha, 1205, AllTrim(_aDados[_nI][08]) +' / '+ AllTrim(_aDados[_nI][09]), _oFont07:oFont)
-	_oPrinter:Say(_nLinha, 1750, 'e-Mail: ', _oFont08N:oFont); _oPrinter:Say(_nLinha, 1890, Substr(_aDados[_nI][10],1,36), _oFont07:oFont)
+	_oPrinter:Say(_nLinha, 1750, 'e-Mail: ', _oFont08N:oFont); _oPrinter:Say(_nLinha, 1890, SubStr(_aDados[_nI][10],1,36), _oFont07:oFont)
 	_nLinha += 035
 	_oPrinter:Say(_nLinha, 0080, 'CNPJ: ', _oFont08N:oFont); _oPrinter:Say(_nLinha, 0190, Transform(_aDados[_nI][11],'@R! NN.NNN.NNN/NNNN-99'), _oFont07:oFont)
 	_oPrinter:Say(_nLinha, 0600, 'Inscr.Est.: ', _oFont08N:oFont); _oPrinter:Say(_nLinha, 0790, AllTrim(_aDados[_nI][12]), _oFont07:oFont)
@@ -2178,7 +2187,7 @@ If _lPdf
 	_oPrinter:Say(_nLinha, 1700, 'Pg. Exc. EST: ', _oFont08N:oFont); _oPrinter:Say(_nLinha, 1950, 'R$ '+ _aDados[_nI][26],_oFont07:oFont)
 	_nLinha += 035
 	_oPrinter:Say(_nLinha, 0080, 'Pedidos: ', _oFont08N:oFont); _oPrinter:Say(_nLinha, 0230, _aDados[_nI][17], _oFont07:oFont)
-	_oPrinter:Say(_nLinha, 1700, 'Vencto: ', _oFont08N:oFont); _oPrinter:Say(_nLinha, 1920, DtoC(StoD(_aDados[_nI][22])), _oFont07:oFont)
+	_oPrinter:Say(_nLinha, 1700, 'Vencto: ', _oFont08N:oFont); _oPrinter:Say(_nLinha, 1920, DToC(SToD(_aDados[_nI][22])), _oFont07:oFont)
 
 	_nLinha += 100
 Else
@@ -2202,7 +2211,7 @@ Else
 	_oExcel:AddRow(_cWorkSheet,_cTable,{"Pg. Exc. MG",'R$ '+ _aDados[_nI][20]})
 	_oExcel:AddRow(_cWorkSheet,_cTable,{"Pg. Exc. EST",'R$ '+ _aDados[_nI][26]})
 	_oExcel:AddRow(_cWorkSheet,_cTable,{"Pedidos",_aDados[_nI][17]})
-	_oExcel:AddRow(_cWorkSheet,_cTable,{"Vencto",DtoC(StoD(_aDados[_nI][22]))})
+	_oExcel:AddRow(_cWorkSheet,_cTable,{"Vencto",DToC(SToD(_aDados[_nI][22]))})
 EndIf
 	
 Return

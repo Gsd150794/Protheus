@@ -5,48 +5,35 @@
        Autor      |    Data    |                                             Motivo                                           
 -------------------------------------------------------------------------------------------------------------------------------
  Josué Danich     | 27/07/2017 | Chamado: 20916 - Validar campos de pallet chep, revisão para 12.
--------------------------------------------------------------------------------------------------------------------------------
  Josué Danich     | 13/06/2019 | Chamado: 29648 - Não valida isento/email na importação de funcionário.
--------------------------------------------------------------------------------------------------------------------------------
  Lucas Borges     | 11/10/2019 | Chamado: 28346 - Removidos os Warning na compilação da release 12.1.25. 
--------------------------------------------------------------------------------------------------------------------------------
  Julio Paz        | 12/03/2021 | Chamado: 35759 - Quando Cliente alterado p/Simples Nacional=Não,limpar codigo tab Treço Simp.Nac.
--------------------------------------------------------------------------------------------------------------------------------
  Igor Melgaço     | 04/05/2021 | Chamado: 36378 - Quando grupo de cliente é genérico o vendedor tb tem que ser genérico.
-------------------:------------:-----------------------------------------------------------------------------------------------
- Julio Paz        | 20/12/2021 | Chamado: 25540 - Desenv.Rotina Env.WorkFlow quando vendedor1,2,3,4 for alter.e Grupo Env.WorkFlow.
-------------------:------------:-----------------------------------------------------------------------------------------------
+ Julio Paz        | 20/12/2021 | Chamado: 25540 - Desenv.Rotina Env.WorkFlow quando vendedor1,2,3,4 For alter.e Grupo Env.WorkFlow.
  Julio Paz        | 23/12/2021 | Chamado: 30177 - Alterações diversas relacionados a Desconto Contratual. 
--------------------------------------------------------------------------------------------------------------------------------
  Igor Melgaço     | 30/05/2022 | Chamado: 40048 - Ajustes para validação de caracteres inválidos. 
-------------------------------------------------------------------------------------------------------------------------------
  Igor Melgaço     | 11/08/2022 | Chamado: 40048 - Ajustes para conversão de caracteres.
--------------------------------------------------------------------------------------------------------------------------------
  Julio Paz        | 24/05/2023 | Chamado: 43808 - Ajustar layout/validações execauto p/Importação Clientes Broker p/novo layout  
--------------------------------------------------------------------------------------------------------------------------------
  Julio Paz        | 07/07/2023 | Chamado: 44399 - Correções nas validações de cadastro clientes criados na efetivação prospect
--------------------------------------------------------------------------------------------------------------------------------
  Julio Paz        | 25/07/2023 | Chamado: 44096 - Ajustar rotina incl/alter gravar Grupo Tributação "023" p/Parana e Simples Nac
--------------------------------------------------------------------------------------------------------------------------------
  Igor Melgaço     | 02/07/2024 | Chamado: 47127 - Ajustes para não gravar o campo A1_MSBLQL.
--------------------------------------------------------------------------------------------------------------------------------
  Igor Melgaço     | 12/07/2024 | Chamado: 47556 - Ajuste para preenchimento obrigatório do campo A1_CNAE.
--------------------------------------------------------------------------------------------------------------------------------
  Igor Melgaço     | 16/07/2024 | Chamado: 48523 - Ajuste para exceção do fonte MOMS003.
 ===============================================================================================================================
 Analista - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
 ===================================================================================================================================================================================================
 Antonio  - Julio Paz     - 17/06/25 - 27/06/25 - 50278   - Criação de Campo e Inclusão de validações para determinar usuários que podem incluir/alterar Clientes com base nos limetes de crédito.
-Antonio  - Julio Paz     - 01/07/25 - 01/07/25 - 51203   - Ajustar as validações por limite de crédito para não validar quando for MSEXECAUTO dos fontes: GP010VALPE/GPE10MENU/MOMS003/MOMS055. 
+Antonio  - Julio Paz     - 01/07/25 - 01/07/25 - 51203   - Ajustar as validações por limite de crédito para não validar quando For MSEXECAUTO dos fontes: GP010VALPE/GPE10MENU/MOMS003/MOMS055. 
+Antonio  - Igor Melgaço  - 11/09/25 -          - 51346   - Ajuste para replicar A1_COND e A1_GRPVEN entre clientes com mesma base de CNPJ.
 ===================================================================================================================================================================================================
 */
 
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#include "RwMake.ch"
-#include "TopConn.ch" 
-#INCLUDE "PROTHEUS.CH"
+#Include "RwMake.ch"
+#Include "TopConn.ch" 
+#Include "TOTVS.ch"
 #Include 'fileio.ch'
 
 #define CRLF		Chr(13) + Chr(10)
@@ -68,35 +55,26 @@ Retorno-----------: Lógico com exibição de mensagens para tratativa das negativa
 */
 User Function MA030TOK()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cAlias	:= GetNextAlias()
 Local _cQuery	:= ""
 Local _cUser	:= ""
 Local _cCodigo	:= ""
 Local _cTxtAux	:= ""
 Local _lRet		:= .T.
-Local _cfilsa1 	:= xFilial("SA1")
-Local _ccodcli 	:= M->A1_COD
-Local _cgrpcli 	:= M->A1_GRPVEN
-Local _cloja	:= M->A1_LOJA
-
 Local _lMashup	:= U_ItGetMV("IT_MASHUP",.F.)
 Local _lLibMas	:= .F.
-
 Local _nQtdDia	:= Val(M->A1_I_PEREX)
-Local _nQtdiaT	:= Iif(Empty(M->A1_I_DTEXE),0,dDataBase - M->A1_I_DTEXE)
-Local _lExec	:= Iif(_nQtdiaT > _nQtdDia, .T., .F.)
-
+Local _nQtdiaT	:= IIf(Empty(M->A1_I_DTEXE),0,dDataBase - M->A1_I_DTEXE)
+Local _lExec	:= IIf(_nQtdiaT > _nQtdDia, .T., .F.)
 Local _cVendGen := U_ITGetMV("IT_VENDGEN","000156")
 Local _cGrpGen  := U_ITGetMV("IT_GRPGEN","11")
-
 Local _cEnvWorkF  := "S"
 Local _aListaVend := {}
 Local _cNomeGrupo := ""
 Local _cNomVendA := ""
 Local _cNomVendB := ""
 Local _cDescCont := ""
-
 Local _cA1_NOME    := ""
 Local _cA1_END     := ""
 Local _cA1_BAIRRO  := ""
@@ -104,7 +82,6 @@ Local _cA1_ENDCOB  := ""
 Local _cA1_ENDREC  := ""
 Local _cA1_ENDENT  := ""
 Local _cA1_BAIRROE := ""
-
 Local _cUfMVA := U_ITGetMV("IT_UFSMVA","PR") 
 Local _cTRIBMVA := U_ITGetMV("IT_TRIBMVA","023")
 Local _nLimeteAp
@@ -119,14 +96,14 @@ Private _lVarLog	:= Type("_aLogM003") == "A"
 //==================================================================
 If ! FWIsInCallStack("U_GP010VALPE") .And. ! FWIsInCallStack("IMPORTAFUN") .And. ! FWIsInCallStack("U_IMPCLI") .And. ! FWIsInCallStack("MOMS003L") .And. ! FWIsInCallStack("MOMS055I")
 
-   _nLimeteAp :=  Posicione("ZZL",3,xfilial("ZZL")+AllTrim(__cUserId),"ZZL_VLMAXP") // ZZL_FILIAL+ZZL_CODUSU
+   _nLimeteAp :=  Posicione("ZZL",3,xFilial("ZZL")+AllTrim(__cUserId),"ZZL_VLMAXP") // ZZL_FILIAL+ZZL_CODUSU
    If ValType(_nLimeteAp) <> "N"
       _nLimeteAp := 0
    EndIf 
  
    If Inclui .And. _lRet
       If M->A1_LC > _nLimeteAp
-         U_ITMSG("O Valor do limite de crédito deste cliente: " + AllTrim(Str(M->A1_LC,14,2)) + ", é superior ao limite permitido para este usuário incluir o cliente: " + AllTrim(Str(_nLimeteAp,14,2))+".","Atenção","",1)
+         U_ITMsg("O Valor do limite de crédito deste cliente: " + AllTrim(Str(M->A1_LC,14,2)) + ", é superior ao limite permitido para este usuário incluir o cliente: " + AllTrim(Str(_nLimeteAp,14,2))+".","Atenção","",1)
          _lRet := .F.      
       EndIf 
    EndIf 
@@ -134,10 +111,10 @@ If ! FWIsInCallStack("U_GP010VALPE") .And. ! FWIsInCallStack("IMPORTAFUN") .And.
    If Altera .And. _lRet
       If M->A1_LC <> SA1->A1_LC 
          If M->A1_LC > _nLimeteAp
-            U_ITMSG("O Valor do limite de crédito deste cliente: " + AllTrim(Str(M->A1_LC,14,2)) + ", é superior ao limite permitido para este usuário alterar o cliente: " + AllTrim(Str(_nLimeteAp,14,2))+".","Atenção","",1)
+            U_ITMsg("O Valor do limite de crédito deste cliente: " + AllTrim(Str(M->A1_LC,14,2)) + ", é superior ao limite permitido para este usuário alterar o cliente: " + AllTrim(Str(_nLimeteAp,14,2))+".","Atenção","",1)
             _lRet := .F.      
          EndIf 
-      EndIF 
+      EndIf 
    EndIf 
 EndIf 
 
@@ -160,8 +137,8 @@ If Inclui
 	DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQuery ) , _cAlias , .T. , .F. )
 	
 	DBSelectArea( _cAlias )
- 	(_cAlias)->( DBGotop() )
-	IF (_cAlias)->( !Eof() )
+ 	(_cAlias)->( DBGoTop() )
+	If (_cAlias)->( !Eof() )
 		_cCodigo := (_cAlias)->CODIGO
 	Else
 		_cCodigo := StrZero( 0 , TamSX3("A1_COD")[01] )
@@ -179,8 +156,8 @@ If Inclui
 
 		DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBCLI" , .T. , .F. )
 		
-		dbSelectArea("TRBCLI")
-		TRBCLI->(dbGotop())
+		DBSelectArea("TRBCLI")
+		TRBCLI->(DBGoTop())
 		
 		If TRBCLI->CONTADOR <> 0
 
@@ -189,15 +166,15 @@ If Inclui
 					aAdd( _aLogM003 , { Date() , Time() ,"Erro" ,"O código de cliente: " + M->A1_COD + " e Loja: " + M->A1_LOJA + " já existe." } )
 				EndIf
 			Else
-				u_itmsg("Este código de cliente já está em uso!","Validação Código","Favor digitar novamente o CPF/CNPJ.",1)
+				U_ITMsg("Este código de cliente já está em uso!","Validação Código","Favor digitar novamente o CPF/CNPJ.",1)
 			EndIf
 			
 			_lRet := .F.
 
 		EndIf
 		
-		dbSelectArea("TRBCLI")
-		TRBCLI->(dbCloseArea())
+		DBSelectArea("TRBCLI")
+		TRBCLI->(DBCloseArea())
 	
 	EndIf
 
@@ -218,7 +195,7 @@ If Inclui
 						aAdd( _aLogM003 , { Date() , Time() ,"Erro" ,"O usuário: " + Capital( UsrFullName( _cUser ) ) + " não tem permissão para incluir cliente que já possui cadastro com o mesmo CPF/CNPJ" } )
 					EndIf
 				Else
-					u_itmsg("O usuário "+ Capital( UsrFullName( _cUser ) ) +" não tem permissão para incluir um cliente que já possui cadastro com o mesmo CPF/CNPJ.",;
+					U_ITMsg("O usuário "+ Capital( UsrFullName( _cUser ) ) +" não tem permissão para incluir um cliente que já possui cadastro com o mesmo CPF/CNPJ.",;
 							"Validação usuário",;
 							"Informar a área de TI/ERP solicitando a liberação!",1)
 				EndIf
@@ -234,7 +211,7 @@ If Inclui
 					aAdd( _aLogM003 , { Date() , Time() ,"Erro" ,"O usuário: " + Capital( UsrFullName( _cUser ) ) + " não tem permissão para incluir cliente que já possui cadastro com o mesmo CPF/CNPJ" } )
 				EndIf
 			Else
-				u_itmsg("O usuário "+ Capital( UsrFullName( _cUser ) ) +" não tem permissão para incluir um cliente que já possui cadastro com o mesmo CPF/CNPJ.",;
+				U_ITMsg("O usuário "+ Capital( UsrFullName( _cUser ) ) +" não tem permissão para incluir um cliente que já possui cadastro com o mesmo CPF/CNPJ.",;
 						"Validação usuário",;
 						"Informar a área de TI/ERP solicitando a liberação!",1)
 			EndIf
@@ -258,23 +235,23 @@ If Inclui .Or. Altera
 	// Validação do preenchimento do campo de e-mail. Rotina automatica não deve mostrar
 	//================================================================================
 	If !IsInCallStack("U_GP010VALPE") .And. !IsInCallStack("U_GP265VALPE")
-		If Empty( M->A1_EMAIL ) .AND. ( FunName() <> "MOMS003" ) .AND. FUNNAME() <> "GPEA010"
+		If Empty( M->A1_EMAIL ) .And. ( FunName() <> "MOMS003" ) .And. FUNNAME() <> "GPEA010"
 			
 			If _lAuto
 				If _lVarLog
 					aAdd( _aLogM003 , { Date() , Time() ,"Erro" ,"O campo E-Mail não foi preenchido no cliente: " + M->A1_COD + " loja: " + M->A1_LOJA + " nome: " + AllTrim(M->A1_NOME) + ". Não cadastre endereços genéricos." } )
 				EndIf
 			Else
-				u_itmsg('O campo "e-mail" não foi preenchido, esse campo não é obrigatório mas deve ser preenchido com um endereço válido!',;
+				U_ITMsg('O campo "e-mail" não foi preenchido, esse campo não é obrigatório mas deve ser preenchido com um endereço válido!',;
 						'Validação Email','Não cadastre endereços genéricos como "funcionarios@italac.com.br" ou nfe@italac.com.br', 3)
 			EndIf		
 	
 		EndIf
 	
-		If Empty(M->A1_INSCR) .AND. ( FunName() <> "MOMS003" ) .AND. ( FunName() <> "GPEA010" )
+		If Empty(M->A1_INSCR) .And. ( FunName() <> "MOMS003" ) .And. ( FunName() <> "GPEA010" )
 	
 			
-			u_itmsg('Preencher como ISENTO quando for dispensado de IE e deixar em branco quando for não contribuinte do ICMS.  ',;
+			U_ITMsg('Preencher como ISENTO quando For dispensado de IE e deixar em branco quando For não contribuinte do ICMS.  ',;
 					'Atenção','Dúvidas procurar departamento FISCAL.',2)
 	
 		EndIf
@@ -290,7 +267,7 @@ If Inclui .Or. Altera
 	   			aAdd( _aLogM003 , { Date() , Time() ,"Erro" ,"O campo Nome não foi preenchido no cliente: " + M->A1_COD + " loja: " + M->A1_LOJA + "." } )
 	   		EndIf
 	   	Else
-	   		u_itmsg("Erro no preenchimento do campo Nome!","Validação de Nome","É necessário retirar os espaços em branco para prosseguir com o cadastro.",1)
+	   		U_ITMsg("Erro no preenchimento do campo Nome!","Validação de Nome","É necessário retirar os espaços em branco para prosseguir com o cadastro.",1)
 	   	EndIf
 
    		_lRet := .F.
@@ -305,7 +282,7 @@ If Inclui .Or. Altera
 				aAdd( _aLogM003 , { Date() , Time() ,"Erro" ,"O campo Endereço não foi preenchido no cliente: " + M->A1_COD + " loja: " + M->A1_LOJA + " nome: " + AllTrim(M->A1_NOME) + "." } )
 			EndIf
 		Else
-			u_itmsg("Erro no preenchimento do campo Endereço!","Validação de endereço","É necessário retirar os espaços em branco para prosseguir com o cadastro.",1)
+			U_ITMsg("Erro no preenchimento do campo Endereço!","Validação de endereço","É necessário retirar os espaços em branco para prosseguir com o cadastro.",1)
 		EndIf
 
    		_lRet := .F.
@@ -320,7 +297,7 @@ If Inclui .Or. Altera
 	   			aAdd( _aLogM003 , { Date() , Time() ,"Erro" ,"O campo Bairro não foi preenchido no cliente: " + M->A1_COD + " loja: " + M->A1_LOJA + " nome: " + AllTrim(M->A1_NOME) + "." } )
 	   		EndIf
    		Else
-   			u_itmsg("Erro no preenchimento do campo Endereço!","Validação de endereço","É necessário retirar os espaços em branco para prosseguir com o cadastro.",1)
+   			U_ITMsg("Erro no preenchimento do campo Endereço!","Validação de endereço","É necessário retirar os espaços em branco para prosseguir com o cadastro.",1)
    		EndIf
 
    		_lRet := .F.
@@ -335,7 +312,7 @@ If Inclui .Or. Altera
 				aAdd( _aLogM003 , { Date() , Time() ,"Erro" ,"O campo Complemento não foi preenchido no cliente: " + M->A1_COD + " loja: " + M->A1_LOJA + " nome: " + AllTrim(M->A1_NOME) + "." } )
 			EndIf
   		Else
-  			u_itmsg("Erro no preenchimento do campo Complemento do Endereço!","Validação Endereço","É necessário retirar os espaços em branco para prosseguir com o cadastro.",1)
+  			U_ITMsg("Erro no preenchimento do campo Complemento do Endereço!","Validação Endereço","É necessário retirar os espaços em branco para prosseguir com o cadastro.",1)
   		EndIf
 
 	   	_lRet := .F.
@@ -350,7 +327,7 @@ If Inclui .Or. Altera
 				aAdd( _aLogM003 , { Date() , Time() ,"Erro" ,"O campo Inscrição Estadual não foi preenchido no cliente: " + M->A1_COD + " loja: " + M->A1_LOJA + " nome: " + AllTrim(M->A1_NOME) + "." } )
 			EndIf
 		Else
-			u_itmsg("Erro no preenchimento do campo Inscrição Estadual!","Validação de inscrição estadual","É necessário retirar os espaços em branco para prosseguir com o cadastro.",1)
+			U_ITMsg("Erro no preenchimento do campo Inscrição Estadual!","Validação de inscrição estadual","É necessário retirar os espaços em branco para prosseguir com o cadastro.",1)
 		EndIf
 
    		_lRet := .F.
@@ -359,144 +336,6 @@ If Inclui .Or. Altera
     If _lRet .And. !IsInCallStack("U_AOMS014")
     	_lRet := MA030RIS() 
     EndIf
-
-	//--------------------------------------------------------------------------------------------------------------
-	//Valida se cliente tem outros registros com mesmo código e lojas diferentes e se estão todos na mesma rede	
-	//--------------------------------------------------------------------------------------------------------------
-	If M->A1_MSBLQL <> '1' .and. _lRet
-
-		_cAlias  := GetNextAlias()
-		_cfilsa1 := xFilial("SA1")
-		_ccodcli := M->A1_COD
-		_cgrpcli := M->A1_GRPVEN
-		_cloja	  := M->A1_LOJA
-  
-		BeginSql alias _cAlias
-			   	
-   			SELECT 
-	 			A1_GRPVEN, A1_LOJA
-			FROM 
-			%table:SA1% SA1
-			WHERE 
-	   			a1_filial = %exp:_cfilsa1%
-	   			and a1_msblql <> '1'
-	   			and a1_cod = %exp:_ccodcli%
-	   			and a1_loja <> %exp:_cloja%
-	   			and d_e_l_e_t_ = ' ' 
-
-		EndSql
-
-		DbSelectArea(_cAlias)
-		(_cAlias)->(  dbgotop() )
- 
-		//-----------------------------------------------------
-		//Prepara matriz com lojas com grupo diferente 
-		//Analisa de grupo está ok ou se existem outras com problema
-		//-----------------------------------------------------
-		_alojas := {}
-		_cult := alltrim((_cAlias)->A1_GRPVEN)
-		
-		Do while .not. (_cAlias)->( Eof() )
-		
-			if alltrim((_cAlias)->A1_GRPVEN) != alltrim(_cult)
-			
-				_cult := "mudou"
-				
-			Endif
-			
-			if alltrim((_cAlias)->A1_GRPVEN) != alltrim(_cgrpcli)
-			
-				aadd( _alojas, { alltrim((_cAlias)->A1_LOJA), alltrim((_cAlias)->A1_GRPVEN)})
-			
-			Endif
-			
-			(_cAlias)->( dbskip())
-			
-		EndDo		
-		
-		//-----------------------------------------------------
-		//se achou cliente do mesmo código e grupo diferente
-		//dá mensagem e trava o processo
-		//-----------------------------------------------------
-		(_cAlias)->(  dbgotop() )
- 
-		if .not. (_cAlias)->( Eof() )
-
-			_cMensagem += "Erro no preenchimento do grupo de vendas!" + chr(10) + chr(13)
-			
-			//------------------------------------------------------------------------
-			//Se o _cult não mudou significa que todas as lojas estão no mesmo grupo
-			//-----------------------------------------------------------------------
-			If _cult == alltrim((_cAlias)->A1_GRPVEN)
-			
-				if _cult == alltrim((_cAlias)->A1_GRPVEN) .and. alltrim((_cAlias)->A1_GRPVEN) != alltrim(M->A1_GRPVEN)
-				
-					_lRet := .F.
-					_cMensagem += "Todas as lojas desse cliente estão no grupo " + alltrim((_cAlias)->A1_GRPVEN)
-					
-				Endif 
-				
-			//------------------------------------------------------------------------
-			//Se não mostra lista de lojas com problema
-			//-----------------------------------------------------------------------
-			Else
-				
-				
-				_lRet := .F.
-				_cMensagem += "Existem clientes do mesmo código em grupo de vendas diferente."
-				_cMensagem += chr(10)+chr(13)
-				
-				_nx := 1
-				
-				Do while _nx <=  2 .and. _nx <= len(_alojas)
-				
-					_cMensagem += "Loja: " + _alojas[_nx][1] + "  - Grupo: " + _alojas[_nx][2]
-					_cMensagem += chr(10)+chr(13)
-					
-					_nx++
-					
-				Enddo	
-				
-				If len(_alojas) > 2
-				
-					_cMensagem += "E mais " + alltrim(str(len(_alojas) - 2)) + " lojas com divergência."
-					_cMensagem += chr(10)+chr(13)
-				
-				Endif	
-			
-			Endif
-			
-			_cMen2 := "Continua mesmo assim?"
-	
-			If _lAuto .and. !(_lRet)
-			
-				If _lVarLog
-			
-					aAdd( _aLogM003 , { Date() , Time() ,"Erro" ,"Existem clientes do mesmo código em grupo de vendas diferente: " + M->A1_COD + " loja: " + M->A1_LOJA + " nome: " + AllTrim(M->A1_NOME) + "." } )
-			
-				EndIf
-		
-			Elseif  !(_lRet)
-			
-				if u_itmsg(_cMensagem, "Validação Grupo de Vendas",_cMen2,3,2,2) 
-				
-					_lRet := .T.
-					
-				Else
-				
-					_lRet := .F.
-					
-				Endif
-			
-			EndIf
-		
-		Endif
- 
-        If Select(_cAlias) > 0 
-		   (_cAlias)->( DBCloseArea() )
-	    EndIf
-
-	Endif
 
 	//================================================================================
 	// Validação da sitação cadastral do cliente, conforme retorno no mashups
@@ -515,13 +354,13 @@ If Inclui .Or. Altera
 	
 			If !_lLibMas
 				If Inclui
-					If (ALLTRIM(M->A1_I_SITRF) <> "ATIVO" .AND. ALLTRIM(M->A1_I_SITRF) <> "REGULAR" .AND. ALLTRIM(M->A1_I_SITRF) <> "APTO" .AND. ALLTRIM(M->A1_I_SITRF) <> "ATIVA") .Or. _lExec
+					If (AllTrim(M->A1_I_SITRF) <> "ATIVO" .And. AllTrim(M->A1_I_SITRF) <> "REGULAR" .And. AllTrim(M->A1_I_SITRF) <> "APTO" .And. AllTrim(M->A1_I_SITRF) <> "ATIVA") .Or. _lExec
 						If _lExec
 							_lRet := .F.
 							If IsInCallStack("U_MOMS003")
 								aAdd( _aLogM003 , { Date() , Time() ,'Log' ,'É necessário realizar a consulta deste cadastro de Fornecedor na Receita Federal devido a periodicidade de consulta. A consulta deve ser realizada no menu: Ações Relacionadas -> Mashups.' } )
 							Else
-								u_itmsg( "É necessário realizar a consulta deste cadastro na Receita Federal devido a periodicidade de consulta.","Validação Mashup","A consulta deve ser realizada no menu: Ações Relacionadas -> Mashups.",1 )
+								U_ITMsg( "É necessário realizar a consulta deste cadastro na Receita Federal devido a periodicidade de consulta.","Validação Mashup","A consulta deve ser realizada no menu: Ações Relacionadas -> Mashups.",1 )
 							EndIf
 						Else
 							_lRet := .F.
@@ -529,25 +368,25 @@ If Inclui .Or. Altera
 								If IsInCallStack("U_MOMS003")
 									aAdd( _aLogM003 , { Date() , Time() ,'Log' ,'É necessário realizar a consulta deste cadastro de Fornecedor na Receita Federal e se "Jurídico" no Sintegra também. A consulta pode ser realizada no menu: Ações Relacionadas -> Mashups.' } )
 								Else
-									u_itmsg( "É necessário realizar a consulta deste cadastro na Receita Federal e se 'Jurídico' no Sintegra também.","Validação Mashup","A consulta pode ser realizada no menu: Ações Relacionadas -> Mashups.",1 )
+									U_ITMsg( "É necessário realizar a consulta deste cadastro na Receita Federal e se 'Jurídico' no Sintegra também.","Validação Mashup","A consulta pode ser realizada no menu: Ações Relacionadas -> Mashups.",1 )
 								EndIf
 							Else
 								If IsInCallStack("U_MOMS003")
-									aAdd( _aLogM003 , { Date() , Time() ,'Log' ,'Não é possível concluir a criação do cadastro de cliente, devido o status deste Fornecedor na Receita Federal estar como [' + ALLTRIM(A1_I_SITRF) + '].' } )
+									aAdd( _aLogM003 , { Date() , Time() ,'Log' ,'Não é possível concluir a criação do cadastro de cliente, devido o status deste Fornecedor na Receita Federal estar como [' + AllTrim(A1_I_SITRF) + '].' } )
 								Else
-									u_itmsg( 'Não é possível concluir o cadastro deste cliente, devido seu status na Receita Federal estar como [' + ALLTRIM(M->A1_I_SITRF) + '].' , "Validação Mashup",,1 )
+									U_ITMsg( 'Não é possível concluir o cadastro deste cliente, devido seu status na Receita Federal estar como [' + AllTrim(M->A1_I_SITRF) + '].' , "Validação Mashup",,1 )
 								EndIf
 							EndIf
 						EndIf
 					EndIf
 				ElseIf Altera
-					If (ALLTRIM(A1_I_SITRF) <> "ATIVO" .AND. ALLTRIM(A1_I_SITRF) <> "REGULAR" .AND. ALLTRIM(A1_I_SITRF) <> "APTO" .AND. ALLTRIM(A1_I_SITRF) <> "ATIVA") .Or. _lExec
+					If (AllTrim(A1_I_SITRF) <> "ATIVO" .And. AllTrim(A1_I_SITRF) <> "REGULAR" .And. AllTrim(A1_I_SITRF) <> "APTO" .And. AllTrim(A1_I_SITRF) <> "ATIVA") .Or. _lExec
 						If _lExec
 							_lRet := .F.
 							If IsInCallStack("U_MOMS003")
 								aAdd( _aLogM003 , { Date() , Time() ,'Log' ,'É necessário realizar a consulta deste cadastro de Fornecedor na Receita Federal devido a periodicidade de consulta. A consulta deve ser realizada no menu: Ações Relacionadas -> Mashups.' } )
 							Else
-								u_itmsg( 'É necessário realizar a consulta deste cadastro na Receita Federal devido a periodicidade de consulta.',"Validação Mashup",'A consulta deve ser realizada no menu: Ações Relacionadas -> Mashups.' , 1)
+								U_ITMsg( 'É necessário realizar a consulta deste cadastro na Receita Federal devido a periodicidade de consulta.',"Validação Mashup",'A consulta deve ser realizada no menu: Ações Relacionadas -> Mashups.' , 1)
 							EndIf
 						Else
 							_lRet := .F.
@@ -555,13 +394,13 @@ If Inclui .Or. Altera
 								If IsInCallStack("U_MOMS003")
 									aAdd( _aLogM003 , { Date() , Time() ,'Log' ,'É necessário realizar a consulta deste cadastro de Fornecedor na Receita Federal e se "Jurídico" no Sintegra também. A consulta pode ser realizada no menu: Ações Relacionadas -> Mashups.' } )
 								Else
-									u_itmsg( 'É necessário realizar a consulta deste cadastro na Receita Federal e se "Jurídico" no Sintegra também.',"Validação Mashup",'A consulta pode ser realizada no menu: Ações Relacionadas -> Mashups.' , 1 )
+									U_ITMsg( 'É necessário realizar a consulta deste cadastro na Receita Federal e se "Jurídico" no Sintegra também.',"Validação Mashup",'A consulta pode ser realizada no menu: Ações Relacionadas -> Mashups.' , 1 )
 								EndIf
 							Else
 								If IsInCallStack("U_MOMS003")
-									aAdd( _aLogM003 , { Date() , Time() ,'Log' ,'Não é possível concluir a criação do cadastro de cliente, devido o status deste Fornecedor na Receita Federal estar como [' + ALLTRIM(A1_I_SITRF) + '].' } )
+									aAdd( _aLogM003 , { Date() , Time() ,'Log' ,'Não é possível concluir a criação do cadastro de cliente, devido o status deste Fornecedor na Receita Federal estar como [' + AllTrim(A1_I_SITRF) + '].' } )
 								Else
-									u_itmsg( 'Não é possível concluir o cadastro deste cliente, devido seu status na Receita Federal estar como [' + ALLTRIM(A1_I_SITRF) + '].' ,"Validação Mashup",,1 )
+									U_ITMsg( 'Não é possível concluir o cadastro deste cliente, devido seu status na Receita Federal estar como [' + AllTrim(A1_I_SITRF) + '].' ,"Validação Mashup",,1 )
 								EndIf
 							EndIf
 						EndIf
@@ -576,27 +415,27 @@ EndIf
 //================================================================================
 //Validação de campos Chep
 //================================================================================
-If _lRet .and. M->A1_I_CHEP  == "C" .AND. LEN(ALLTRIM(A1_I_CCHEP)) != 10
+If _lRet .And. M->A1_I_CHEP  == "C" .And. Len(AllTrim(A1_I_CCHEP)) != 10
 
-	u_itmsg("Campo de código de cadastro chep inválido!","Validação Chep","Mude cliente para pallet pbr ou inclua código Chep válido!",1)
+	U_ITMsg("Campo de código de cadastro chep inválido!","Validação Chep","Mude cliente para pallet pbr ou inclua código Chep válido!",1)
 	_lRet := .F.
 	
-Endif
+EndIf
 
-If _lRet .and. M->A1_I_CHEP  != "C" .AND. LEN(ALLTRIM(A1_I_CCHEP)) > 0 
+If _lRet .And. M->A1_I_CHEP  != "C" .And. Len(AllTrim(A1_I_CCHEP)) > 0 
 
-	u_itmsg("Campo de código de cadastro chep prenchido para cliente não Chep!","Validação Chep","Mude cliente para chep pbr ou limpe o código Chep válido!",1)
+	U_ITMsg("Campo de código de cadastro chep prenchido para cliente não Chep!","Validação Chep","Mude cliente para chep pbr ou limpe o código Chep válido!",1)
 	_lRet := .F.
 	
-Endif
+EndIf
 
 If !IsInCallStack("U_AOMS014")
 	If !Empty(M->A1_INSCR)
-		M->A1_INSCR := AllTrim(Strtran(M->A1_INSCR,"-",""))
+		M->A1_INSCR := AllTrim(StrTran(M->A1_INSCR,"-",""))
 	EndIf
     
 	//==========================================================================
-	// Quando o cliente for alterado para Simples Nacional == NÃO, 
+	// Quando o cliente For alterado para Simples Nacional == NÃO, 
 	// Limpar código de tabela de preços Simples Nacional do campo A1_TABELA.
 	//==========================================================================
 	If _lRet .And. Altera
@@ -608,11 +447,11 @@ If !IsInCallStack("U_AOMS014")
 	EndIf 
 EndIf
 
-If _lRet .And. !Empty(Alltrim(_cGrpGen)) .And. !Empty(Alltrim(_cVendGen))
+If _lRet .And. !Empty(AllTrim(_cGrpGen)) .And. !Empty(AllTrim(_cVendGen))
 
 	If M->A1_I_GRCLI $ _cGrpGen .And. IsInCallStack("MATA030") .And. !(M->A1_VEND $ _cVendGen)
 		
-		U_ITMSG("A efetivação não será realizada!"+Chr(13)+Chr(10)+"Para este grupo de clientes "+M->A1_I_GRCLI+" só é permito vincular os vendedores genéricos: "+_cVendGen,"Atenção","Altere o vendedor para um que seja genérico conforme informado.",1)
+		U_ITMsg("A efetivação não será realizada!"+Chr(13)+Chr(10)+"Para este grupo de clientes "+M->A1_I_GRCLI+" só é permito vincular os vendedores genéricos: "+_cVendGen,"Atenção","Altere o vendedor para um que seja genérico conforme informado.",1)
 		_lRet := .F.	
 
 	EndIf
@@ -625,9 +464,9 @@ If _lRet .And. Altera
    // Responsável. Chamado 25540.
    //===================================================================================
    If (M->A1_VEND <> SA1->A1_VEND ;
-      .OR. M->A1_I_VEND2 <> SA1->A1_I_VEND2;
-      .OR. M->A1_I_VEND3 <> SA1->A1_I_VEND3;
-      .OR. M->A1_I_VEND4 <> SA1->A1_I_VEND4)
+      .Or. M->A1_I_VEND2 <> SA1->A1_I_VEND2;
+      .Or. M->A1_I_VEND3 <> SA1->A1_I_VEND3;
+      .Or. M->A1_I_VEND4 <> SA1->A1_I_VEND4)
           
       _aListaVend := {} 
 
@@ -639,25 +478,25 @@ If _lRet .And. Altera
          If M->A1_VEND <> SA1->A1_VEND
             _cNomVendA := Posicione("SA3",1,xFilial("SA3")+SA1->A1_VEND,"A3_NOME")
             _cNomVendB := Posicione("SA3",1,xFilial("SA3")+M->A1_VEND,"A3_NOME")
-		    Aadd(_aListaVend,{M->A1_GRPVEN,_cNomeGrupo, SA1->A1_VEND,_cNomVendA,M->A1_VEND,_cNomVendB,"Vendedor1"})
+		    aAdd(_aListaVend,{M->A1_GRPVEN,_cNomeGrupo, SA1->A1_VEND,_cNomVendA,M->A1_VEND,_cNomVendB,"Vendedor1"})
 		 EndIf 
 
 	     If M->A1_I_VEND2 <> SA1->A1_I_VEND2
             _cNomVendA := Posicione("SA3",1,xFilial("SA3")+SA1->A1_I_VEND2,"A3_NOME")
             _cNomVendB := Posicione("SA3",1,xFilial("SA3")+M->A1_I_VEND2,"A3_NOME")
-		    Aadd(_aListaVend,{M->A1_GRPVEN,_cNomeGrupo, SA1->A1_I_VEND2,_cNomVendA,M->A1_I_VEND2,_cNomVendB,"Vendedor2"})
+		    aAdd(_aListaVend,{M->A1_GRPVEN,_cNomeGrupo, SA1->A1_I_VEND2,_cNomVendA,M->A1_I_VEND2,_cNomVendB,"Vendedor2"})
 		 EndIf 
 
 	     If M->A1_I_VEND3 <> SA1->A1_I_VEND3
             _cNomVendA := Posicione("SA3",1,xFilial("SA3")+SA1->A1_I_VEND3,"A3_NOME")
             _cNomVendB := Posicione("SA3",1,xFilial("SA3")+M->A1_I_VEND3,"A3_NOME")
-		    Aadd(_aListaVend,{M->A1_GRPVEN,_cNomeGrupo, SA1->A1_I_VEND3,_cNomVendA,M->A1_I_VEND3,_cNomVendB,"Vendedor3"})
+		    aAdd(_aListaVend,{M->A1_GRPVEN,_cNomeGrupo, SA1->A1_I_VEND3,_cNomVendA,M->A1_I_VEND3,_cNomVendB,"Vendedor3"})
 		 EndIf 
 
 	     If M->A1_I_VEND4 <> SA1->A1_I_VEND4
             _cNomVendA := Posicione("SA3",1,xFilial("SA3")+SA1->A1_I_VEND4,"A3_NOME")
             _cNomVendB := Posicione("SA3",1,xFilial("SA3")+M->A1_I_VEND4,"A3_NOME")
-		    Aadd(_aListaVend,{M->A1_GRPVEN,_cNomeGrupo, SA1->A1_I_VEND4,_cNomVendA,M->A1_I_VEND4,_cNomVendB,"Vendedor4"})
+		    aAdd(_aListaVend,{M->A1_GRPVEN,_cNomeGrupo, SA1->A1_I_VEND4,_cNomVendA,M->A1_I_VEND4,_cNomVendB,"Vendedor4"})
 		 EndIf 
 
          U_M030WKFLOW(_aListaVend)
@@ -677,7 +516,7 @@ If _lRet .And. (Altera .Or. Inclui)
 
    If (AllTrim(_cDescCont) == "S" .And. Inclui) .Or. (Altera .And. M->A1_GRPVEN <> SA1->A1_GRPVEN .And. AllTrim(_cDescCont) == "S")
       
-	   If U_ItMsg("O grupo de cliente informado para este cliente possui uma regra de desconto contratual de uso restrito," +; //If U_ItMsg("O grupo de cliente informado para este cliente possui uma regra de desconto contratual preexistente,"+;
+	   If U_ITMsg("O grupo de cliente informado para este cliente possui uma regra de desconto contratual de uso restrito," +; //If U_ITMsg("O grupo de cliente informado para este cliente possui uma regra de desconto contratual preexistente,"+;
 	             " ao confirmar este cadastro o mesmo será bloqueado para análise do setor de contratos. "+ CRLF +;
 				 " Deseja prosseguir?", "Atenção", "",2,2,2) // 3,2,2 
 		 
@@ -707,43 +546,43 @@ EndIf
 If _lRet .And. (Altera .Or. Inclui)
 
 	_cA1_NOME := M->A1_NOME
-	If !Empty(Alltrim(M->A1_NOME))
+	If !Empty(AllTrim(M->A1_NOME))
 		_lRet := U_CRMA980VCP(@_cA1_NOME   ,"A1_NOME")
 		M->A1_NOME := _cA1_NOME
 	EndIf
 
 	_cA1_END := M->A1_END
-	If _lRet .And. !Empty(Alltrim(_cA1_END))
+	If _lRet .And. !Empty(AllTrim(_cA1_END))
 		_lRet := U_CRMA980VCP(@_cA1_END    ,"A1_END")
 		M->A1_END := _cA1_END
 	EndIf
 
 	_cA1_BAIRRO := M->A1_BAIRRO
-	If _lRet .And. !Empty(Alltrim(_cA1_BAIRRO))
+	If _lRet .And. !Empty(AllTrim(_cA1_BAIRRO))
 		_lRet := U_CRMA980VCP(@_cA1_BAIRRO ,"A1_BAIRRO")
 		M->A1_BAIRRO := _cA1_BAIRRO
 	EndIf
 
 	_cA1_ENDCOB := M->A1_ENDCOB
-	If _lRet .And. !Empty(Alltrim(_cA1_ENDCOB))
+	If _lRet .And. !Empty(AllTrim(_cA1_ENDCOB))
 		_lRet := U_CRMA980VCP(@_cA1_ENDCOB ,"A1_ENDCOB")
 		M->A1_ENDCOB := _cA1_ENDCOB
 	EndIf
 
 	_cA1_ENDREC := M->A1_ENDREC
-	If _lRet .And. !Empty(Alltrim(_cA1_ENDREC))
+	If _lRet .And. !Empty(AllTrim(_cA1_ENDREC))
 		_lRet := U_CRMA980VCP(@_cA1_ENDREC ,"A1_ENDREC")
 		M->A1_ENDREC := _cA1_ENDREC
 	EndIf
 
 	_cA1_ENDENT := M->A1_ENDENT
-	If _lRet .And. !Empty(Alltrim(_cA1_ENDENT))
+	If _lRet .And. !Empty(AllTrim(_cA1_ENDENT))
 		_lRet := U_CRMA980VCP(@_cA1_ENDENT,"A1_ENDENT")
 		M->A1_ENDENT := _cA1_ENDENT
 	EndIf
 
 	_cA1_BAIRROE := M->A1_BAIRROE
-	If _lRet .And. !Empty(Alltrim(_cA1_BAIRROE))
+	If _lRet .And. !Empty(AllTrim(_cA1_BAIRROE))
 		_lRet := U_CRMA980VCP(@_cA1_BAIRROE,"A1_BAIRROE")
 		M->A1_BAIRROE := _cA1_BAIRROE
 	EndIf
@@ -758,14 +597,18 @@ If _lRet .And. (Altera .Or. Inclui)
 	
 EndIf
 
-If _lRet .And. (Altera .Or. Inclui) .AND. !IsInCallStack("U_AOMS014") .AND. !IsInCallStack("U_MOMS003")
-   If M->A1_PESSOA <> "F" .AND. (Empty(Alltrim(M->A1_CNAE)) .OR. M->A1_CNAE == "    - /  ")
-		U_ITMSG("Necessário o preenchimento do campo CNAE para Clientes pessoa Jurídica!","Atenção","",1)
+If _lRet .And. (Altera .Or. Inclui) .And. !IsInCallStack("U_AOMS014") .And. !IsInCallStack("U_MOMS003")
+   If M->A1_PESSOA <> "F" .And. (Empty(AllTrim(M->A1_CNAE)) .Or. M->A1_CNAE == "    - /  ")
+		U_ITMsg("Necessário o preenchimento do campo CNAE para Clientes pessoa Jurídica!","Atenção","",1)
 		_lRet := .F.	
    EndIf
 EndIf
 
-RestArea( _aArea )
+If _lRet .And. (Altera .Or. Inclui) .And. !IsInCallStack("U_MOMS003") .And. ! FWIsInCallStack("IMPORTAFUN") .And. ! FWIsInCallStack("U_IMPCLI") .And. ! FWIsInCallStack("MOMS003L") .And. ! FWIsInCallStack("MOMS055I") .AND. !FWIsInCallStack("U_GP010VALPE") .And. !FWIsInCallStack("U_GP265VALPE")
+	_lRet := U_CRMA980REP(M->A1_CGC,M->A1_COND,M->A1_GRPVEN,M->A1_I_NGRPC)
+EndIf
+
+FWRestArea( _aArea )
 
 Return( _lRet )
 
@@ -783,7 +626,7 @@ Retorno-----------: Lógico com exibição de mensagens para tratativa das negativa
 ===============================================================================================================================
 */
 Static Function MA030RIS()
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _lRet		:= .T.
 Local _cQry		:= ""
 Local _cCliente	:= ""
@@ -822,11 +665,11 @@ Begin Sequence
 		    
    DBSelectArea(_cAlias)
    (_cAlias)->( DBGoTop() )
-   While (_cAlias)->( !EOF() )
+   While (_cAlias)->( !Eof() )
 			
 	  If _cLoja <> (_cAlias)->A1_LOJA
-    	 AAdd( _aCliente,	{ (_cAlias)->A1_LOJA }	)
-    	 AAdd( _aRecnos,		{ (_cAlias)->SA1REG }	)
+    	 aAdd( _aCliente,	{ (_cAlias)->A1_LOJA }	)
+    	 aAdd( _aRecnos,		{ (_cAlias)->SA1REG }	)
    	  EndIf
 		    
       (_cAlias)->( DBSkip() )
@@ -837,7 +680,7 @@ Begin Sequence
    //================================================================================
    If Len( _aCliente ) > 0
 			
-	  If M->A1_LC <> 0 .AND. ( FunName() <> "MOMS003" )
+	  If M->A1_LC <> 0 .And. ( FunName() <> "MOMS003" )
 		 _lLimite := .T.
 	  EndIf
       //================================================================================
@@ -850,7 +693,7 @@ Begin Sequence
 			aAdd( _aLogM003 , { Date() , Time() ,"Erro" ,"O campo Limite de Crédito não foi preenchido no cliente: " + M->A1_COD + " loja: " + M->A1_LOJA + " nome: " + AllTrim(M->A1_NOME) + ". É obrigatório o preencimento deste campo." } )
 		 EndIf
 	  Else
-	   	 u_itmsg("Limite de crédito não preenchido!","Validação Crédito","É obrigatório incluir um limite de crédito para o cliente.",1)
+	   	 U_ITMsg("Limite de crédito não preenchido!","Validação Crédito","É obrigatório incluir um limite de crédito para o cliente.",1)
 	  EndIf
 
 	  _lRet := .F.
@@ -869,15 +712,15 @@ Begin Sequence
 	
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQTD" , .T. , .F. )
 	
-   dbSelectArea("TRBQTD")
-   TRBQTD->(dbGoTop())
+   DBSelectArea("TRBQTD")
+   TRBQTD->(DBGoTop())
 		
    If TRBQTD->QTDENT > 0
 	  _lRisco := .T.
    EndIf
 
-   dbSelectArea("TRBQTD")
-   TRBQTD->(dbCloseArea())	
+   DBSelectArea("TRBQTD")
+   TRBQTD->(DBCloseArea())	
 
    If _lLimite .And. !_lRisco
 
@@ -893,7 +736,7 @@ Begin Sequence
 						
 	  Next _nI
 		
-	  If u_itmsg("A(s) Loja(s) " + _cLjvalid + " do cliente " + AllTrim(Posicione("SA1", 1, xFilial("SA1") + M->A1_COD + M->A1_LOJA, "A1_NOME")) + ;
+	  If U_ITMsg("A(s) Loja(s) " + _cLjvalid + " do cliente " + AllTrim(Posicione("SA1", 1, xFilial("SA1") + M->A1_COD + M->A1_LOJA, "A1_NOME")) + ;
 	 			" já possui(em) valor(es) de Limite(s) cadastrado(s), como o valor de Limite é compartilhado entre as lojas somente uma loja deverá ter limite estabelecido!",;
 	 			"Validação Crédito","Deseja manter este limite de crédito compartilhado para todas as lojas? O sistema irá zerar o limite de crédito das outras lojas.",2,2,2)
 		 VLDLIM(_lLimite, _aCliente, _aRecnos)
@@ -909,7 +752,7 @@ Begin Sequence
 
 	  If !IsInCallStack("U_MOMS003")
 		
-		 If u_itmsg("Erro no Grau de Risco informado para o cliente - " + AllTrim(Posicione("SA1", 1, xFilial("SA1") + M->A1_COD + M->A1_LOJA, "A1_NOME")) + chr(10) + chr(13) + ;
+		 If U_ITMsg("Erro no Grau de Risco informado para o cliente - " + AllTrim(Posicione("SA1", 1, xFilial("SA1") + M->A1_COD + M->A1_LOJA, "A1_NOME")) + chr(10) + chr(13) + ;
 	 			"É necessário verificar o cadastro deste cliente, pois existem outras lojas com o Grau de Risco diferente deste cadastro.",;
 	 			"Validação Crédito","Deseja replicar este Risco para todas as lojas?",2,2,2)
 		
@@ -939,7 +782,7 @@ Begin Sequence
 						
 	  Next _nI
 	
-	  If u_itmsg("A(s) Loja(s) " + _cLjvalid + " do cliente - " + AllTrim(Posicione("SA1", 1, xFilial("SA1") + M->A1_COD + M->A1_LOJA, "A1_NOME")) + ;
+	  If U_ITMsg("A(s) Loja(s) " + _cLjvalid + " do cliente - " + AllTrim(Posicione("SA1", 1, xFilial("SA1") + M->A1_COD + M->A1_LOJA, "A1_NOME")) + ;
 				"já possui(em) valor(es) de Limite(s) cadastrado(s), como o valor de Limite é compartilhado entre as lojas somente uma loja deverá ter limite estabelecido!",;
 				"Validação de limite de crédito","Deseja manter este Grau de Risco e limite de crédito compartilhado para todas as lojas? O sistema irá zerar o limite de crédito das outras lojas.",2,2,2)
 				
@@ -958,7 +801,7 @@ Begin Sequence
 
 End Sequence 
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return(_lRet)
 
@@ -981,12 +824,12 @@ Local _nI		:= 0
 
 If _lLimite
 	If M->A1_LC > 0
-		dbSelectArea("SA1")
+		DBSelectArea("SA1")
 		For _nI := 1 To Len( _aRecnos )
-			dbGoTo( _aRecnos[_nI][01] )
+			DBGoTo( _aRecnos[_nI][01] )
 			RecLock("SA1", .F.)
 				Replace SA1->A1_LC With 0
-				MsUnLock()
+				MSUnLock()
 		Next _nI
 	EndIf
 EndIf
@@ -1019,20 +862,20 @@ _cQry += "  AND D_E_L_E_T_ = ' ' "
 			
 DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBSA1" , .T. , .F. )
 					
-dbSelectArea("TRBSA1")
-TRBSA1->(dbGoTop())
+DBSelectArea("TRBSA1")
+TRBSA1->(DBGoTop())
 					
 While !TRBSA1->(Eof())
-	dbSelectArea("SA1")
-	dbGoTo(TRBSA1->RECSA1)
+	DBSelectArea("SA1")
+	DBGoTo(TRBSA1->RECSA1)
 	RecLock("SA1", .F.)
 		Replace SA1->A1_RISCO With M->A1_RISCO
-	MsUnLock()
-	TRBSA1->(dbSkip())
+	MSUnLock()
+	TRBSA1->(DBSkip())
 End
 					
-dbSelectArea("TRBSA1")
-TRBSA1->(dbCloseArea())
+DBSelectArea("TRBSA1")
+TRBSA1->(DBCloseArea())
 
 Return
 
@@ -1059,7 +902,7 @@ Local _cEmail2	:= AllTrim(U_ITGETMV("IT_EMALGP2",""))
 Local _cEmailEnv, _cEmlLog := "" 
 
 If Empty(_cEmail1) .And. Empty(_cEmail2)
-   Return Nil 
+   Return 
 EndIf 
 
 _cEmailEnv := AllTrim(_cEmail1) + ";" + AllTrim(_cEmail2)
@@ -1067,7 +910,7 @@ _cEmailEnv := AllTrim(_cEmail1) + ";" + AllTrim(_cEmail2)
 _cMsgEml := '<html>'
 _cMsgEml += '<head><title>' + _cAssunto + '</title></head>'
 _cMsgEml += '<body>'
-_cMsgEml += '<style type="text/css"><!--'
+_cMsgEml += '<style Type="text/css"><!--'
 _cMsgEml += 'table.bordasimples { border-collapse: collapse; }'
 _cMsgEml += 'table.bordasimples tr td { border:1px solid #777777; }'
 _cMsgEml += 'td.titulos	{ font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #C6E2FF; }'
@@ -1120,7 +963,7 @@ _cMsgEml += '      <td class="itens" align="left" width="65%">' + UsrFullName (_
 _cMsgEml += '    </tr>'
 _cMsgEml += '    <tr>'
 _cMsgEml += '      <td class="grupos" align="left" width="35%"><b>Data da Alteração:</b></td>'
-_cMsgEml += '      <td class="itens" align="left" width="65%">' + Dtoc(Date()) +'</td>'
+_cMsgEml += '      <td class="itens" align="left" width="65%">' + DToC(Date()) +'</td>'
 _cMsgEml += '    </tr>'
 _cMsgEml += '    <tr>'
 _cMsgEml += '      <td class="grupos" align="left" width="35%"><b>Hora da Alteração:</b></td>'
@@ -1166,11 +1009,11 @@ Programa----------: MA30RETA
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 23/12/2021
 ===============================================================================================================================
-Descrição---------: Retorna a variável Static _aBloqSA1 para outros programas. Chamado 30177.
+Descrição---------: Retorna a variáStaticatic _aBloqSA1 para outros programas. Chamado 30177.
 ===============================================================================================================================
 Parametros--------: Nenhum
 ===============================================================================================================================
-Retorno-----------: _aRet = Conteúdo da variável Static _aBloqSA1.
+Retorno-----------: _aRet = Conteúdo da variáStaticatic _aBloqSA1.
 ===============================================================================================================================
 */
 User Function MA30RETA()

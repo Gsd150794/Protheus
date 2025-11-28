@@ -1,4 +1,4 @@
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -33,7 +33,7 @@ Local _cForn 	:= Upper(SubStr(M->DA4_FORNEC,1,1))
 Local lRet 		:= .T.
 Local aInfHelp	:= {}
 
-If Inclui .OR. Altera
+If Inclui .Or. Altera
 	If _cForn $ "T;A;C;G" 
 		lRet := .T.
 	Else // Se Classe do motorista não é T, A, C ou G.

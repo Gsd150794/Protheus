@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 21/07/2021 | Tratamento para produtores familiares (A2_L_CLASS=L). Chamado 37147
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 20/09/2021 | Criado filtro para produtores familiares. Chamado 37789
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 24/05/2022 | Corrigido vínculo da ZL3/ZL2 para casos onde o setor da linha for alterado. Chamado 40203
+Lucas Borges  |21/07/2021| Chamado 37147. Tratamento para produtores familiares (A2_L_CLASS=L).
+Lucas Borges  |20/09/2021| Chamado 37789. Criado filtro para produtores familiares.
+Lucas Borges  |24/05/2022| Chamado 40203. Corrigido vínculo da ZL3/ZL2 para casos onde o setor da linha For alterado.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT062
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 29/05/2014
-===============================================================================================================================
 Descrição---------: Relatório de conferência do volume e quantidade de produtores por município
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -45,11 +37,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Erich Buttner
 Data da Criacao---: 27/03/2013
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -93,11 +82,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Erich Buttner
 Data da Criacao---: 27/03/2013
-===============================================================================================================================
 Descrição---------: Relacao Rota/Linha
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -123,10 +109,10 @@ Local _nCountRec	:= 0
 If MV_PAR08 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,_cAux)
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -189,9 +175,9 @@ _cFiltro += " AND "+ _cAux +"_FILIAL = ZL3.ZL3_FILIAL"
 _cFiltro += " AND "+ _cAux +"_FILIAL "+ GetRngFil( _aSelFil, _cAux, .T.,)
 _cFiltro += " AND D3_L_ORIG (+)= "+ _cAux +"_TICKET"
 If MV_PAR09 == 1
-	_cFiltro += " AND "+ _cAux +"_DTCOLE BETWEEN '"+ DTOS(MV_PAR02) +"' AND '"+ DTOS(MV_PAR03) +"' "
+	_cFiltro += " AND "+ _cAux +"_DTCOLE BETWEEN '"+ DToS(MV_PAR02) +"' AND '"+ DToS(MV_PAR03) +"' "
 Else 
-	_cFiltro += " AND (CASE WHEN D3_EMISSAO IS NULL THEN "+ _cAux +"_DTCOLE ELSE D3_EMISSAO END) BETWEEN '"+ DTOS(MV_PAR02) +"' AND '"+ DTOS(MV_PAR03) +"' "
+	_cFiltro += " AND (Case WHEN D3_EMISSAO IS NULL THEN "+ _cAux +"_DTCOLE Else D3_EMISSAO END) BETWEEN '"+ DToS(MV_PAR02) +"' AND '"+ DToS(MV_PAR03) +"' "
 EndIf
 //Se preencheu os setores, já fiz a validação de acesso no SX1
 //Se não preencheu e não tem acesso a todos, filtra de forma que não retorme registros
@@ -233,8 +219,8 @@ If _nOrdem == 3 .Or. MV_PAR04 == 2 //Quebra por data ou analítico
 		_cGroup2 += " , "+ _cAux +"_DTCOLE "
 		_cCampo2 += " , "+ _cAux +"_DTCOLE ZLD_DTCOLE"
 	Else
-		_cCampo2 += " , CASE WHEN D3_EMISSAO IS NULL THEN "+ _cAux +"_DTCOLE ELSE D3_EMISSAO END ZLD_DTCOLE"
-		_cGroup2 += " , CASE WHEN D3_EMISSAO IS NULL THEN "+ _cAux +"_DTCOLE ELSE D3_EMISSAO END "
+		_cCampo2 += " , Case WHEN D3_EMISSAO IS NULL THEN "+ _cAux +"_DTCOLE Else D3_EMISSAO END ZLD_DTCOLE"
+		_cGroup2 += " , Case WHEN D3_EMISSAO IS NULL THEN "+ _cAux +"_DTCOLE Else D3_EMISSAO END "
 	EndIf
 	_cGroup += " , ZLD_DTCOLE "
 	
@@ -270,7 +256,7 @@ oReport:SetMeter(0)
 BeginSql alias _cAlias
 	SELECT ZL3_FILIAL, A2_EST, A2_COD_MUN, CC2_MUN, SUM(VOLUME) VOLUME, COUNT(1) QTD_PRD %exp:_cCampo%
 		 FROM (SELECT ZL3_FILIAL, A2_EST, A2_COD_MUN, CC2_MUN, 1 QTD_PRD %exp:_cCampo2%
-		FROM %table:SA2% SA2, %table:ZL3% ZL3, %table:ZL2% ZL2, %table:CC2% CC2, %table:SD3% SD3, %exp:_cTabela%
+		FROM %Table:SA2% SA2, %Table:ZL3% ZL3, %Table:ZL2% ZL2, %Table:CC2% CC2, %Table:SD3% SD3, %exp:_cTabela%
 		WHERE SA2.D_E_L_E_T_ = ' '
 		AND CC2.D_E_L_E_T_ = ' '
 		AND ZL3.D_E_L_E_T_ = ' '
@@ -303,24 +289,24 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->ZL3_FILIAL
 	If _nOrdem == 3 .Or. MV_PAR04 == 2 //Quebra por data ou analítico
-		_cData	:= DtoC((_cAlias)->ZLD_DTCOLE)
+		_cData	:= DToC((_cAlias)->ZLD_DTCOLE)
 	EndIf
 	If _nOrdem == 2 .Or. MV_PAR04 == 2 //Quebra por setor ou analítico
 		_cSetor	:= (_cAlias)->ZL2_COD + ' - ' + (_cAlias)->ZL2_DESCRI
 	EndIf
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

@@ -10,7 +10,7 @@ Lucas Borges  |09/05/2025| Chamado 50617. Corrigir chamada estática no nome das 
 ===============================================================================================================================
 */
 
-#include "protheus.ch"  
+#Include "TOTVS.ch"  
 
 /*
 ===============================================================================================================================
@@ -29,22 +29,22 @@ Local cPerg  :="MEST016"
 
 Private _aItalac_F3:={}
 
-DO While .T.
+While .T.
 
 	If !Pergunte(cPerg,.T.)
 		Return
 	EndIf
 
-   IF MV_PAR02 < d_Fecha
-	  U_ITMSG('A data inicial deve ser maior que a data do ultimo fechamento: '+DTOC(d_Fecha), 'ATENÇÃO',,1)
-	  LOOP
-   ELSEIF MV_PAR02 > MV_PAR03
-	  U_ITMSG('A data inicial deve ser menor que a data final','ATENÇÃO',,1)
-	  LOOP
-   ELSEIF EMPTY(MV_PAR04)
-	  U_ITMSG('É obrigadotorio informar o codigo do produto','ATENÇÃO',,1)
-	  LOOP
-   ENDIF  
+   If MV_PAR02 < d_Fecha
+	  U_ITMsg('A data inicial deve ser maior que a data do ultimo fechamento: '+DToC(d_Fecha), 'ATENÇÃO',,1)
+	  Loop
+   ElseIf MV_PAR02 > MV_PAR03
+	  U_ITMsg('A data inicial deve ser menor que a data final','ATENÇÃO',,1)
+	  Loop
+   ElseIf Empty(MV_PAR04)
+	  U_ITMsg('É obrigadotorio informar o codigo do produto','ATENÇÃO',,1)
+	  Loop
+   EndIf  
 
    _aOProd:={}
    _nTotOPs:=0
@@ -53,51 +53,51 @@ DO While .T.
    _nTotVlN:=0
    _cCustos:=""
 
-   FWMSGRUN( ,{|oProc| MEST16Ler(oProc) } , "Aguarde...", "Lendo dados..."  )
+   FWMsgRun( ,{|oProc| MEST16Ler(oProc) } , "Aguarde...", "Lendo dados..."  )
 
    If Select("QRT") > 0
-      DbSelectArea("QRT")
-      DbCloseArea()
+      DBSelectArea("QRT")
+      DBCloseArea()
    EndIf
 
-   IF LEN(_aOProd) = 0
-      LOOP
-   ENDIF
+   If Len(_aOProd) = 0
+      Loop
+   EndIf
      
    _cMsgTop:="Totais das OPs, Litros: ;"
-   _cMsgTop+="Valor Rateio por produto: "+ALLTRIM(TRANS(MV_PAR01,"@E 999,999,999,999,999,999.999"))+"; "
+   _cMsgTop+="Valor Rateio por produto: "+AllTrim(TRANS(MV_PAR01,"@E 999,999,999,999,999,999.999"))+"; "
    _cMsgTop+=" C.C.(s): "+_cCustos
 
-   EXIT	
+   Exit	
 
 EndDo
 
-DO WHILE .T.
+While .T.
 
 //User Function ITListBox( _cTitAux ,
    _lOK:=U_ITListBox( 'OPs Filtradas (MEST016): '+_cMsgTop ,;                                                                        // _aHeader , _aCols,_lMaxSiz,_nTipo ,_cMsgTop ,_lSelUnc , _aSizes , _nCampo , bOk , bCancel, _abuttons )
                      {'OP + CC','Data Emissao','Produto [PR0]','Qtde Apontada','Produto [RE1]','Qtde Consumida','Reteio','Valor Novo','Quantidade Empenho'},_aOProd,.T.     ,1      ,_cMsgTop ,         ,;
                      {       55,            55,             50,             50,             50,              50,      50,          50,                  50})//,, _bOK,_bCancel )
-   IF _lOK 
+   If _lOK 
    
-      IF U_ITMSG("CONFIRMA A GRAVAÇÃO DOS VALORES ????",'Atenção!',,2,2,2)
+      If U_ITMsg("CONFIRMA A GRAVAÇÃO DOS VALORES ????",'Atenção!',,2,2,2)
 
-         FWMSGRUN( ,{|oProc| _lOK:=MEST16Grv(oProc) } , "Aguarde...", "Gravando dados..."  )
+         FWMsgRun( ,{|oProc| _lOK:=MEST16Grv(oProc) } , "Aguarde...", "Gravando dados..."  )
 
-         IF !_lOK
-            LOOP
-         ENDIF   
-      ELSE   
-         LOOP
-      ENDIF   
+         If !_lOK
+            Loop
+         EndIf   
+      Else   
+         Loop
+      EndIf   
 
-   ENDIF  
+   EndIf  
 
-   EXIT
+   Exit
 
-ENDDO   
+EndDo   
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -110,42 +110,42 @@ Retorno-----------: .T. ou .F.
 ===============================================================================================================================
 */
 Static Function MEST16Grv(oProc)
-LOCAL nCotaGRV:=0 , P
-LOCAL _nConta:=0
+Local nCotaGRV:=0 , P
+Local _nConta:=0
 
-_cTotOPs:=ALLTRIM(STR(LEN(_aOProd)))
-_nTam:=LEN(_cTotOPs)+1
+_cTotOPs:=AllTrim(Str(Len(_aOProd)))
+_nTam:=Len(_cTotOPs)+1
 
-FOR P := 1 TO LEN(_aOProd)
+For P := 1 TO Len(_aOProd)
 
    _nConta++
-   oProc:cCaption := "2/2-Gravando OP: "+SD3->D3_OP+" - "+STR(_nConta,_nTam)+" de "+_cTotOPs
+   oProc:cCaption := "2/2-Gravando OP: "+SD3->D3_OP+" - "+Str(_nConta,_nTam)+" de "+_cTotOPs
    ProcessMessages()
 
-   IF _aOProd[P,10] = 0
-      LOOP
-   ENDIF
-   SD3->(DBGOTO( _aOProd[P,10] ))
-   SD3->(RECLOCK("SD3",.F.))
+   If _aOProd[P,10] = 0
+      Loop
+   EndIf
+   SD3->(DBGoTo( _aOProd[P,10] ))
+   SD3->(RecLock("SD3",.F.))
    SD3->D3_I_QTORI:= SD3->D3_QUANT
    SD3->D3_QUANT  := _aOProd[P,12]
-   SD3->(MSUNLOCK())  
+   SD3->(MSUnLock())  
    nCotaGRV++
 
-   IF _aOProd[P,11] = 0
-      LOOP
-   ENDIF
-   SD4->(DBGOTO( _aOProd[P,11] ))
-   SD4->(RECLOCK("SD4",.F.))
+   If _aOProd[P,11] = 0
+      Loop
+   EndIf
+   SD4->(DBGoTo( _aOProd[P,11] ))
+   SD4->(RecLock("SD4",.F.))
    SD4->D4_I_QTORI:=SD4->D4_QTDEORI
    SD4->D4_QTDEORI:= _aOProd[P,12]
-   SD4->(MSUNLOCK())  
+   SD4->(MSUnLock())  
 
-NEXT
+Next
 
-U_ITMSG(ALLTRIM(STR(nCotaGRV))+" Resgistros atualizados com sucesso",'FINAL',_cMsgTop,2)
+U_ITMsg(AllTrim(Str(nCotaGRV))+" Resgistros atualizados com sucesso",'FINAL',_cMsgTop,2)
 
-RETURN .T.
+Return .T.
 
 /*
 ===============================================================================================================================
@@ -158,119 +158,119 @@ Retorno-----------: .T. ou .F.
 ===============================================================================================================================
 */
 Static Function MEST16Ler(oProc)
-LOCAL nCountRec , P , _nVlrDif
+Local nCountRec , P , _nVlrDif
 
-LOCAL _cPicT3:=AVSX3("D3_QUANT",6)
-LOCAL _cPicT4:=AVSX3("D4_QTDEORI",6)
-LOCAL _cPicTR:="@E 999,999,999,999,999,999.999"
-LOCAL _cCodFiltro:=""//"08000000051"
-LOCAL _Query := ""  , E
+Local _cPicT3:=AVSX3("D3_QUANT",6)
+Local _cPicT4:=AVSX3("D4_QTDEORI",6)
+Local _cPicTR:="@E 999,999,999,999,999,999.999"
+Local _cCodFiltro:=""//"08000000051"
+Local _Query := ""  , E
 _cCustos:="Todos"
 
-IF MV_PAR07 = 1 //ESTRUTURA
+If MV_PAR07 = 1 //ESTRUTURA
 
    _Query += "        SELECT D3_CC FROM "+RETSQLNAME("SD3")+" SD3 "
    _QUERY += "                 WHERE SD3.D_E_L_E_T_ = ' ' AND D3_FILIAL = '"+xFilial("SD3")+"' " 
    _QUERY += "                   AND SD3.D3_CF = 'PR0' AND D3_ESTORNO <> 'S' "
-   _Query += "                AND SD3.D3_COD = '"+ALLTRIM(MV_PAR04)+"'"
-   IF EMPTY(MV_PAR03)
-      _Query += "                AND  SD3.D3_EMISSAO >= '"+DTOS(MV_PAR02)+"' " 
-   ELSE
-      _Query += "                AND  SD3.D3_EMISSAO BETWEEN '"+DTOS(MV_PAR02)+"' AND '"+DTOS(MV_PAR03)+"' " 
-   ENDIF
+   _Query += "                AND SD3.D3_COD = '"+AllTrim(MV_PAR04)+"'"
+   If Empty(MV_PAR03)
+      _Query += "                AND  SD3.D3_EMISSAO >= '"+DToS(MV_PAR02)+"' " 
+   Else
+      _Query += "                AND  SD3.D3_EMISSAO BETWEEN '"+DToS(MV_PAR02)+"' AND '"+DToS(MV_PAR03)+"' " 
+   EndIf
    _Query += " GROUP BY D3_CC "
    _Query := ChangeQuery(_Query)
 
    If Select("QRT") > 0
-      QRT->(DbCloseArea())
+      QRT->(DBCloseArea())
    EndIf
    oProc:cCaption := "Lendo OPs Pai, Aguarde..."
    ProcessMessages()
    
    MPSysOpenQuery( _Query, "QRT" ) 
    
-   QRT->(DBGOTOP())
+   QRT->(DBGoTop())
    
    _cCustos:=""
-   DO WHILE QRT->(!EOF())
+   While QRT->(!Eof())
    
-      IF !QRT->D3_CC $ _cCustos
+      If !QRT->D3_CC $ _cCustos
          _cCustos+=QRT->D3_CC+";"
-      ENDIF   
-      QRT->(DBSKIP())
+      EndIf   
+      QRT->(DBSkip())
    	
-   ENDDO
+   EndDo
    
-   IF EMPTY(_cCustos)
-      U_ITMSG("Não foram encontrados dados para essa seleção",'ATENÇÃO',"Selecione outros dados no filtro e tene novamente",1)
-      RETURN .F.
-   ENDIF
-   
-   _cCustos:=LEFT(_cCustos,LEN(_cCustos)-1)
-   
-   If Select("QRT") > 0
-      QRT->(DbCloseArea())
+   If Empty(_cCustos)
+      U_ITMsg("Não foram encontrados dados para essa seleção",'ATENÇÃO',"Selecione outros dados no filtro e tene novamente",1)
+      Return .F.
    EndIf
    
-   SB1->(DBSETORDER(1))
+   _cCustos:=LEFT(_cCustos,Len(_cCustos)-1)
+   
+   If Select("QRT") > 0
+      QRT->(DBCloseArea())
+   EndIf
+   
+   SB1->(DBSetOrder(1))
 
-//IF MV_PAR07 = 1 //ESTRUTURA
+//If MV_PAR07 = 1 //ESTRUTURA
 
    _cTeste:=" PAI "+CHR(13)+CHR(10)
    nEstru := 0
    aEstrutura:={}
    _aCodFiltro:={}
    aEstrProd:=Estrut(AVKEY(MV_PAR04,"G1_COD"),1) 
-   FOR P := 1 TO LEN(aEstrProd)
+   For P := 1 TO Len(aEstrProd)
        _cTeste += ARRTOKSTR(aEstrProd[P])
-       SB1->(DBSEEK(xFILIAL()+aEstrProd[P,3]))
-       IF aEstrProd[P,1] = 1 .AND. SB1->B1_TIPO $ "'PP','PI','MP','PA'" .AND. SB1->B1_GRUPO $ "'0003','0002','0006','0800','0814'"
+       SB1->(DBSeek(xFilial()+aEstrProd[P,3]))
+       If aEstrProd[P,1] = 1 .And. SB1->B1_TIPO $ "'PP','PI','MP','PA'" .And. SB1->B1_GRUPO $ "'0003','0002','0006','0800','0814'"
           _cCodFiltro+=aEstrProd[P,3]+";"
-          AADD(_aCodFiltro,aEstrProd[P,3])
+          aAdd(_aCodFiltro,aEstrProd[P,3])
           _cTeste += "; X "
-       ENDIF
+       EndIf
        _cTeste += CHR(13)+CHR(10)
-   NEXT
+   Next
    
    _aCodNivel:={}
-   FOR E := 1 TO LEN(_aCodFiltro)
+   For E := 1 TO Len(_aCodFiltro)
    	_cCodAux:=_aCodFiltro[E]
    	nEstru := 0
    	aEstrutura:={}
    	aEstrProd:=Estrut(AVKEY(_cCodAux,"G1_COD"),1)
    	_cTeste+=" FILHO 1 "+CHR(13)+CHR(10)
    	_cCodNivel:=""
-   	FOR P := 1 TO LEN(aEstrProd)
+   	For P := 1 TO Len(aEstrProd)
    		_cTeste+=ARRTOKSTR(aEstrProd[P])
-   		SB1->(DBSEEK(xFILIAL()+aEstrProd[P,3]))
-   		IF aEstrProd[P,1] = 1 .AND. SB1->B1_TIPO $ "'PP','PI','MP'" .AND. SB1->B1_GRUPO $ "'0003','0002','0006','0800','0814'"
+   		SB1->(DBSeek(xFilial()+aEstrProd[P,3]))
+   		If aEstrProd[P,1] = 1 .And. SB1->B1_TIPO $ "'PP','PI','MP'" .And. SB1->B1_GRUPO $ "'0003','0002','0006','0800','0814'"
    			_cCodFiltro+=aEstrProd[P,3]+";"
-   			AADD(_aCodNivel,aEstrProd[P,3])
+   			aAdd(_aCodNivel,aEstrProd[P,3])
    			_cTeste += "; X "
-   		ENDIF
+   		EndIf
    		_cTeste += CHR(13)+CHR(10)
-   	NEXT
-   NEXT
+   	Next
+   Next
    
-   FOR E := 1 TO LEN(_aCodNivel)
+   For E := 1 TO Len(_aCodNivel)
    	_cCodNivel:=_aCodNivel[E]
    	nEstru := 0
    	aEstrutura:={}
    	aEstrProd:=Estrut(AVKEY(_cCodNivel,"G1_COD"),1)
    	_cTeste+=" FILHO 2 "+CRLF
    	_cCodNivel:=""
-   	FOR P := 1 TO LEN(aEstrProd)
+   	For P := 1 TO Len(aEstrProd)
    		_cTeste+=ARRTOKSTR(aEstrProd[P])
-   		SB1->(DBSEEK(xFILIAL()+aEstrProd[P,3]))
-   		IF aEstrProd[P,1] = 1 .AND. SB1->B1_TIPO $ "'PP','PI','MP'" .AND. SB1->B1_GRUPO $ "'0003','0002','0006','0800','0814'"
+   		SB1->(DBSeek(xFilial()+aEstrProd[P,3]))
+   		If aEstrProd[P,1] = 1 .And. SB1->B1_TIPO $ "'PP','PI','MP'" .And. SB1->B1_GRUPO $ "'0003','0002','0006','0800','0814'"
    			_cCodFiltro+=aEstrProd[P,3]+";"
    			_cTeste += "; X "
-   		ENDIF
+   		EndIf
    		_cTeste += CRLF
-   	NEXT
-   NEXT
+   	Next
+   Next
    
-   _cTeste:=STRTRAN(_cTeste,"|",";")
+   _cTeste:=StrTran(_cTeste,"|",";")
    
    _Query := ""
    _QUERY += "         SELECT D3_EMISSAO, D3_OP, D3_COD, D3_I_QTORI, D3_QUANT, R_E_C_N_O_ REC_SD3 FROM "+RETSQLNAME("SD3")+" SD3 "
@@ -280,18 +280,18 @@ IF MV_PAR07 = 1 //ESTRUTURA
    _QUERY += "                  AND  SD3.D3_ESTORNO <> 'S' AND SD3.D3_I_ORIGE <> 'MATA685' "
    _Query += "                  AND  SD3.D3_COD IN "+FormatIn(_cCodFiltro,";")
    _Query += "                  AND  SD3.D3_CC  IN "+FormatIn(_cCustos,";")
-   IF !EMPTY(MV_PAR05)
-      _Query += "               AND  SD3.D3_OP  IN "+FormatIn(ALLTRIM(MV_PAR05),";")
-   ENDIF
-   IF EMPTY(MV_PAR03)
-      _Query += "               AND  SD3.D3_EMISSAO >= '"+DTOS(MV_PAR02)+"' " 
-   ELSE
-      _Query += "               AND  SD3.D3_EMISSAO BETWEEN '"+DTOS(MV_PAR02)+"' AND '"+DTOS(MV_PAR03)+"' " 
-   ENDIF
+   If !Empty(MV_PAR05)
+      _Query += "               AND  SD3.D3_OP  IN "+FormatIn(AllTrim(MV_PAR05),";")
+   EndIf
+   If Empty(MV_PAR03)
+      _Query += "               AND  SD3.D3_EMISSAO >= '"+DToS(MV_PAR02)+"' " 
+   Else
+      _Query += "               AND  SD3.D3_EMISSAO BETWEEN '"+DToS(MV_PAR02)+"' AND '"+DToS(MV_PAR03)+"' " 
+   EndIf
    
    _QUERY += " ORDER BY D3_EMISSAO , D3_OP , D3_COD "
 
-ELSE//MV_PAR07 - CONSUMO
+Else//MV_PAR07 - CONSUMO
 
    _QUERY := ""
    _QUERY += " SELECT D3_EMISSAO, D3_OP, D3_COD, D3_I_QTORI, D3_QUANT, R_E_C_N_O_ REC_SD3 FROM "+RETSQLNAME("SD3")+" SD3 "
@@ -300,23 +300,23 @@ ELSE//MV_PAR07 - CONSUMO
    _QUERY += "                  AND SD3.D3_TIPO IN ('MP','PP','PI','PA')
    _QUERY += "                  AND SD3.D3_GRUPO IN ('0003','0002','0006','0800','0814')
    _QUERY += "                  AND SD3.D3_ESTORNO <> 'S' AND SD3.D3_I_ORIGE <> 'MATA685' "
-   IF !EMPTY((MV_PAR08))
-      _Query += "               AND SD3.D3_COD IN "+FormatIn(ALLTRIM(MV_PAR08),";")
-   ENDIF
-   IF !EMPTY(MV_PAR05)
-      _Query += "               AND SD3.D3_OP  IN "+FormatIn(ALLTRIM(MV_PAR05),";")
-   ELSE
+   If !Empty((MV_PAR08))
+      _Query += "               AND SD3.D3_COD IN "+FormatIn(AllTrim(MV_PAR08),";")
+   EndIf
+   If !Empty(MV_PAR05)
+      _Query += "               AND SD3.D3_OP  IN "+FormatIn(AllTrim(MV_PAR05),";")
+   Else
       _Query += "               AND SD3.D3_OP  IN (SELECT D3_OP FROM " + RetSqlName("SD3") + " WHERE D_E_L_E_T_ = ' '  "
-      _Query += "                                     AND  D3_ESTORNO <> 'S' AND D3_CF = 'PR0' AND D3_COD = '"+ALLTRIM(MV_PAR04)+"' ) "
-      IF EMPTY(MV_PAR03)
-         _Query += "                                  AND  SD3.D3_EMISSAO >= '"+DTOS(MV_PAR02)+"' " 
-      ELSE
-         _Query += "                                  AND  SD3.D3_EMISSAO BETWEEN '"+DTOS(MV_PAR02)+"' AND '"+DTOS(MV_PAR03)+"' " 
-      ENDIF
-   ENDIF
+      _Query += "                                     AND  D3_ESTORNO <> 'S' AND D3_CF = 'PR0' AND D3_COD = '"+AllTrim(MV_PAR04)+"' ) "
+      If Empty(MV_PAR03)
+         _Query += "                                  AND  SD3.D3_EMISSAO >= '"+DToS(MV_PAR02)+"' " 
+      Else
+         _Query += "                                  AND  SD3.D3_EMISSAO BETWEEN '"+DToS(MV_PAR02)+"' AND '"+DToS(MV_PAR03)+"' " 
+      EndIf
+   EndIf
    _QUERY += " ORDER BY D3_EMISSAO , D3_OP , D3_COD "
 
-Endif
+EndIf
 
 oProc:cCaption := "Lendo OPs Filhas, Aguarde..."
 ProcessMessages()
@@ -324,161 +324,161 @@ ProcessMessages()
 _Query := ChangeQuery(_Query)
 MPSysOpenQuery( _Query, "QRT" ) 
 
-DbSelectArea("QRT")
+DBSelectArea("QRT")
 COUNT TO nCountRec //Contabiliza o numero de registros encontrados pela query
 		
 If nCountRec = 0
 
-   U_ITMSG("Não tem registros para esses filtros: Cods: "+_cCodFiltro+", CC: "+_cCustos,'Atenção!',"Seleciones outros filtros e tente novamente",1)
-   RETURN .F.
+   U_ITMsg("Não tem registros para esses filtros: Cods: "+_cCodFiltro+", CC: "+_cCustos,'Atenção!',"Seleciones outros filtros e tente novamente",1)
+   Return .F.
 
-ENDIF
+EndIf
 
 _aDados:={}
-QRT->(DBGOTOP())
-DO WHILE QRT->(!EOF())
+QRT->(DBGoTop())
+While QRT->(!Eof())
 
-   IF !EMPTY(QRT->D3_I_QTORI)
-	   AADD(_aDados, { QRT->D3_OP,DTOC(STOD(QRT->D3_EMISSAO)),QRT->D3_COD } )
-   ENDIF   
+   If !Empty(QRT->D3_I_QTORI)
+	   aAdd(_aDados, { QRT->D3_OP,DToC(SToD(QRT->D3_EMISSAO)),QRT->D3_COD } )
+   EndIf   
 
-	QRT->(DBSKIP())
+	QRT->(DBSkip())
 	
-ENDDO
+EndDo
 
                                        // _aHeader , _aCols,_lMaxSiz,_nTipo ,_cMsgTop ,_lSelUnc , _aSizes , _nCampo , bOk , bCancel, _abuttons )
-IF LEN(_aDados) > 0
+If Len(_aDados) > 0
    bBloco:={||U_ITListBox( 'OPs já rateadas (MEST016) ',;
                      {'OP','Data Emissao','Produto'},_aDados,.F.     ,1      ,         ,         ,;
                      { 50,            55,        50})  }//,, _bOK,_bCancel )
-   IF !U_ITMSG("Existem OPs que já foram rateadas",'Atenção!',"Deseja continuar mesmo assim? ",3,2,2,,,,bBloco)
-      RETURN .F.
-   ENDIF
-ENDIF
+   If !U_ITMsg("Existem OPs que já foram rateadas",'Atenção!',"Deseja continuar mesmo assim? ",3,2,2,,,,bBloco)
+      Return .F.
+   EndIf
+EndIf
 
-QRT->(DBGOTOP())
+QRT->(DBGoTop())
 _aOProd:={}
 _nTotVlN:=_nTotOPs:=_nConta:=0
-_cTotOPs:=ALLTRIM(STR(nCountRec))
-_nTam:=LEN(_cTotOPs)+1
+_cTotOPs:=AllTrim(Str(nCountRec))
+_nTam:=Len(_cTotOPs)+1
 _aTotProds:={}
 
-SD4->(DBSETORDER(2))
+SD4->(DBSetOrder(2))
 
-DO WHILE QRT->(!EOF())
+While QRT->(!Eof())
 	
-	SD3->(DBGOTO( QRT->REC_SD3 ))
+	SD3->(DBGoTo( QRT->REC_SD3 ))
 	
 	_nConta++
-	oProc:cCaption := "1/2-Lendo OP: "+SD3->D3_OP+" - "+STR(_nConta,_nTam)+" de "+_cTotOPs
+	oProc:cCaption := "1/2-Lendo OP: "+SD3->D3_OP+" - "+Str(_nConta,_nTam)+" de "+_cTotOPs
 	ProcessMessages()
 
 	//*********************************   PRODUTO PAI  ****************************
-	IF SD3->D3_CF = "PR0"
+	If SD3->D3_CF = "PR0"
 		
 			nQtdeSD4:=0
 			nRecSD4 :=0
 		                //OP + CC                           ,Data                 ,           ,Qtde Apontada   ,Prod Filho ,Qtde Consumida              ,Rateio          ,Valor Novo      ,Qtde Emepnho           ,REC SD3      ,REC SD4 ,Valor para gravar
 		                //01                                ,02                   ,03         ,04              ,05         ,06                          ,07              ,08              ,09                     ,10           ,11      ,12
-		AADD(_aOProd, { ALLTRIM(SD3->D3_OP)+" - "+SD3->D3_CC,DTOC(SD3->D3_EMISSAO),SD3->D3_COD,TRANS(SD3->D3_QUANT,_cPicT3),""         ,TRANS(0,_cPicT3),TRANS(0,_cPicTR),TRANS(0,_cPicTR),TRANS(nQtdeSD4,_cPicT4), QRT->REC_SD3, nRecSD4,0 } )
+		aAdd(_aOProd, { AllTrim(SD3->D3_OP)+" - "+SD3->D3_CC,DToC(SD3->D3_EMISSAO),SD3->D3_COD,TRANS(SD3->D3_QUANT,_cPicT3),""         ,TRANS(0,_cPicT3),TRANS(0,_cPicTR),TRANS(0,_cPicTR),TRANS(nQtdeSD4,_cPicT4), QRT->REC_SD3, nRecSD4,0 } )
 		_nTotPR0+=SD3->D3_QUANT
 		
-	ELSEIF SD3->D3_CF = "RE1"
+	ElseIf SD3->D3_CF = "RE1"
 		
 		//*********************************   PRODUTO FILHO  ****************************
-		IF SD4->(DBSEEK(SD3->D3_FILIAL+SD3->D3_OP+SD3->D3_COD+SD3->D3_LOCAL))
+		If SD4->(DBSeek(SD3->D3_FILIAL+SD3->D3_OP+SD3->D3_COD+SD3->D3_LOCAL))
 			nQtdeSD4:=SD4->D4_QTDEORI
 			nRecSD4 :=SD4->(RECNO())
-		ELSE
+		Else
 			nQtdeSD4:=0
 			nRecSD4 :=0
-		ENDIF
+		EndIf
 		                //OP + CC                           ,Data                 ,  ,Qtde Apontada   ,Prod Filho ,Qtde Consumida              ,Rateio          ,Valor Novo      ,Qtde Emepnho           ,REC SD3      ,REC SD4 ,Valor para gravar
 		                //01                                ,02                   ,03,04              ,05         ,06                          ,07              ,08              ,09                     ,10           ,11      ,12
-		AADD(_aOProd, { ALLTRIM(SD3->D3_OP)+" - "+SD3->D3_CC,DTOC(SD3->D3_EMISSAO),"",TRANS(0,_cPicT3),SD3->D3_COD,TRANS(SD3->D3_QUANT,_cPicT3),TRANS(0,_cPicTR),TRANS(0,_cPicTR),TRANS(nQtdeSD4,_cPicT4), QRT->REC_SD3, nRecSD4,0                } )
+		aAdd(_aOProd, { AllTrim(SD3->D3_OP)+" - "+SD3->D3_CC,DToC(SD3->D3_EMISSAO),"",TRANS(0,_cPicT3),SD3->D3_COD,TRANS(SD3->D3_QUANT,_cPicT3),TRANS(0,_cPicTR),TRANS(0,_cPicTR),TRANS(nQtdeSD4,_cPicT4), QRT->REC_SD3, nRecSD4,0                } )
 		_nTotOPs+=SD3->D3_QUANT
 		
-	ENDIF
+	EndIf
 	
-	IF (nPos:=ASCAN(_aTotProds, {|P| P[1] == SD3->D3_COD+SD3->D3_CF})) = 0
+	If (nPos:=aScan(_aTotProds, {|P| P[1] == SD3->D3_COD+SD3->D3_CF})) = 0
                         //1-CODIGO               ,2-QUATANTIDADE .3- MAIOR,4-POSICAO,5-SOMA RATEIO,6-SOMA QTDE NOVA
-		AADD(_aTotProds,{ SD3->D3_COD+SD3->D3_CF , SD3->D3_QUANT ,   0    ,    0    ,     0       ,   0            })
-	ELSE
+		aAdd(_aTotProds,{ SD3->D3_COD+SD3->D3_CF , SD3->D3_QUANT ,   0    ,    0    ,     0       ,   0            })
+	Else
 		_aTotProds[nPos,2]+=SD3->D3_QUANT
-	ENDIF
+	EndIf
 	
-	QRT->(DBSKIP())
+	QRT->(DBSkip())
 	
-ENDDO
+EndDo
 
 _nTotVlN:=_nTotRat:=_nConta:=0
-_cTotOPs:=ALLTRIM(STR(LEN(_aOProd)))
+_cTotOPs:=AllTrim(Str(Len(_aOProd)))
 _nPosMaior:=0
 MV_PAR06:=MV_PAR06
 
-FOR P := 1 TO LEN(_aOProd)
+For P := 1 TO Len(_aOProd)
 
-   SD3->(DBGOTO( _aOProd[P,10] ))
+   SD3->(DBGoTo( _aOProd[P,10] ))
 
    _nConta++
-   oProc:cCaption := "2/2-Calculando OP: "+SD3->D3_OP+" - "+STR(_nConta,_nTam)+" de "+_cTotOPs
+   oProc:cCaption := "2/2-Calculando OP: "+SD3->D3_OP+" - "+Str(_nConta,_nTam)+" de "+_cTotOPs
    ProcessMessages()
 
-	IF (nPos:=ASCAN(_aTotProds, {|P| P[1] == SD3->D3_COD+SD3->D3_CF })) <> 0
-      _nRateio    := ROUND(MV_PAR01*(SD3->D3_QUANT/_aTotProds[nPos,2]),3)
+	If (nPos:=aScan(_aTotProds, {|P| P[1] == SD3->D3_COD+SD3->D3_CF })) <> 0
+      _nRateio    := Round(MV_PAR01*(SD3->D3_QUANT/_aTotProds[nPos,2]),3)
 
       _aTotProds[nPos,5]+= _nRateio//SOMATORIA RATEIO 
 
-      IF _nRateio > _aTotProds[nPos,3]
+      If _nRateio > _aTotProds[nPos,3]
         _aTotProds[nPos,3]:=_nRateio
         _aTotProds[nPos,4]:=P
-      ENDIF   
+      EndIf   
 
-      IF MV_PAR06 = 1//1-Acrescimo,2-Abatimento
+      If MV_PAR06 = 1//1-Acrescimo,2-Abatimento
          _nRateio:=(_nRateio*-1)
-      ENDIF
+      EndIf
 
       _aTotProds[nPos,6]+= (SD3->D3_QUANT+_nRateio)//SOMATORIA VALOR NOVO
       _aOProd[P,07]:= TRANS(_nRateio,_cPicT3)//Rateio
       _aOProd[P,08]:= TRANS(SD3->D3_QUANT+_nRateio,_cPicT3)//Valor Novo
       _aOProd[P,12]:= SD3->D3_QUANT+_nRateio//Valor para grava na tabela na integra
-   ENDIF   
+   EndIf   
 
-NEXT
+Next
 
-FOR P := 1 TO LEN(_aTotProds)
+For P := 1 TO Len(_aTotProds)
 	
-	IF (MV_PAR01 - _aTotProds[P,5] <> 0)
+	If (MV_PAR01 - _aTotProds[P,5] <> 0)
 		
 		_nVlrDif:=(MV_PAR01 - _aTotProds[P,5])//_nTotRat
 		_nPosMaior:=_aTotProds[P,4]
 		
 		_aTotProds[P,5]+= _nVlrDif//SOMA RATEIO
 
-        IF MV_PAR06 = 1//1-Acrescimo,2-Abatimento
+        If MV_PAR06 = 1//1-Acrescimo,2-Abatimento
            _nVlrDif:=(_nVlrDif*-1)
-         ENDIF
+         EndIf
 		_aTotProds[P,6]+= _nVlrDif//SOMA QTDE NOVA
-		_aOProd[_nPosMaior,07]:= TRANS( VAL( StrTran(StrTran(_aOProd[_nPosMaior,7],".",""),",",".") )+_nVlrDif ,_cPicT3)//Rateio
-		_aOProd[_nPosMaior,08]:= TRANS( VAL( StrTran(StrTran(_aOProd[_nPosMaior,8],".",""),",",".") )+_nVlrDif ,_cPicT3)//Valor Novo
+		_aOProd[_nPosMaior,07]:= TRANS( Val( StrTran(StrTran(_aOProd[_nPosMaior,7],".",""),",",".") )+_nVlrDif ,_cPicT3)//Rateio
+		_aOProd[_nPosMaior,08]:= TRANS( Val( StrTran(StrTran(_aOProd[_nPosMaior,8],".",""),",",".") )+_nVlrDif ,_cPicT3)//Valor Novo
 		_aOProd[_nPosMaior,12]:= _aOProd[_nPosMaior,12]+_nVlrDif//Valor para grava na tabela na integra
 		
-	ENDIF
+	EndIf
 	
 	//                //1-CODIGO               ,2-QUATANTIDADE .3- MAIOR,4-POSICAO,5-SOMA RATEIO,6-SOMA QTDE NOVA
-	//AADD(_aTotProds,{ SD3->D3_COD+SD3->D3_CF , SD3->D3_QUANT ,   0    ,    0    ,     0       ,   0            })
+	//aAdd(_aTotProds,{ SD3->D3_COD+SD3->D3_CF , SD3->D3_QUANT ,   0    ,    0    ,     0       ,   0            })
 	
-	AADD(_aOProd, {"---------------------","---------------------","---------------------","","","","","","",0,0,0} )
+	aAdd(_aOProd, {"---------------------","---------------------","---------------------","","","","","","",0,0,0} )
 
-	_cQtde:=ALLTRIM(TRANS(_aTotProds[P,2],"@E 999,999,999,999,999,999.999"))
-	AADD(_aOProd, {"Total Produto:" ,_aTotProds[P,1],_cQtde,"","","","","","",0,0,0} )
+	_cQtde:=AllTrim(TRANS(_aTotProds[P,2],"@E 999,999,999,999,999,999.999"))
+	aAdd(_aOProd, {"Total Produto:" ,_aTotProds[P,1],_cQtde,"","","","","","",0,0,0} )
 	
-	_cQtde:=ALLTRIM(TRANS(_aTotProds[P,5],"@E 999,999,999,999,999,999.999"))
-	AADD(_aOProd, {"Total Rateio:"  ,_aTotProds[P,1],_cQtde,"","","","","","",0,0,0} )
+	_cQtde:=AllTrim(TRANS(_aTotProds[P,5],"@E 999,999,999,999,999,999.999"))
+	aAdd(_aOProd, {"Total Rateio:"  ,_aTotProds[P,1],_cQtde,"","","","","","",0,0,0} )
 	
-	_cQtde:=ALLTRIM(TRANS(_aTotProds[P,6],"@E 999,999,999,999,999,999.999"))
-	AADD(_aOProd, {"Total Qtd Novo:",_aTotProds[P,1],_cQtde,"","","","","","",0,0,0} )
+	_cQtde:=AllTrim(TRANS(_aTotProds[P,6],"@E 999,999,999,999,999,999.999"))
+	aAdd(_aOProd, {"Total Qtd Novo:",_aTotProds[P,1],_cQtde,"","","","","","",0,0,0} )
 
-NEXT
+Next
                                                                  '
 Return .T.

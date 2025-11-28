@@ -10,7 +10,7 @@ Lucas Borges  |27/06/2025| Chamado 50617. Revisões diversas visando padronizar o
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 #Define TITULO	"Ponto Eletrônico - Marcação de Ponto (Jornada x Intervalos)"
 
 /*
@@ -76,7 +76,7 @@ Local _cAlias	:= '' As Character
 Local _aFiliais	:= {} As Array
 Local _cQuery	:= "" As Character
 Local _cIntMax	:= cValToChar((Val(SubStr(MV_PAR08,1,2))*60) + (Val(SubStr(MV_PAR08,4,2)))) As Character
-Local _dDtAux	:= STOD("") As Date
+Local _dDtAux	:= SToD("") As Date
 Local _nEnt_02	:= 0 As Numeric
 Local _nSai_01	:= 0 As Numeric
 Local _nResInt	:= 0 As Numeric
@@ -93,7 +93,7 @@ Else
 	_cIntMax := cValToChar((Val(SubStr("99:59",1,2))*60) + (Val(SubStr(MV_PAR08,4,2))))
 EndIf
 
-_aFiliais := StrToKArr(AllTrim(MV_PAR01),";")
+_aFiliais := StrTokArr(AllTrim(MV_PAR01),";")
 
 If Empty(_aFiliais)
 	FWAlertInfo( "Não foram informadas Filiais válidas para o processamento!","RPON00603")
@@ -101,12 +101,12 @@ EndIf
 
 For _nI := 1 To Len( _aFiliais )
 	_cAlias	:= GetNextAlias()
-	BeginSQL alias _cAlias
+	BeginSql alias _cAlias
 		SELECT MAX(PO_DATAFIM) AS DTFECHA
 		FROM %Table:SPO% SPO
 		WHERE PO_FILIAL = %exp:_aFiliais[_nI]%
 		AND D_E_L_E_T_	= ' '
-	EndSQL
+	EndSql
 	
 	_dDtAux := SToD( (_cAlias)->DTFECHA )
 	(_cAlias)->(DBCloseArea())
@@ -131,15 +131,15 @@ For _nI := 1 To Len( _aFiliais )
 		_cQuery += "		A.ZAK_COD 		AS CODSET		,"		 
 		_cQuery += "		A.ZAK_DESCRI 	AS DESCSET		,"		 
 		_cQuery += " 		TO_DATE(A.PG_DATAAPO, 'YYYYMMDD') AS DT_APO, "	
-		_cQuery += "     	SUBSTR(A.ENT_01, 12, 5)		|| ' ' || SUBSTR(A.SAI_01, 12, 5) || ' ' || SUBSTR(A.ENT_02, 12, 5) || ' ' || SUBSTR(A.SAI_02, 12, 5) || ' ' || "	
-		_cQuery += "     	SUBSTR(A.ENT_03, 12, 5) || ' ' || SUBSTR(A.SAI_03, 12, 5) || ' ' || SUBSTR(A.ENT_04, 12, 5) || ' ' || SUBSTR(A.SAI_04, 12, 5) AS MARCAS, "		
-		_cQuery += "     	SUBSTR(A.SAI_01,12,5) AS SAI_01, "	
-		_cQuery += "     	SUBSTR(A.ENT_02,12,5) AS ENT_02, "	
+		_cQuery += "     	SubStr(A.ENT_01, 12, 5)		|| ' ' || SubStr(A.SAI_01, 12, 5) || ' ' || SubStr(A.ENT_02, 12, 5) || ' ' || SubStr(A.SAI_02, 12, 5) || ' ' || "	
+		_cQuery += "     	SubStr(A.ENT_03, 12, 5) || ' ' || SubStr(A.SAI_03, 12, 5) || ' ' || SubStr(A.ENT_04, 12, 5) || ' ' || SubStr(A.SAI_04, 12, 5) AS MARCAS, "		
+		_cQuery += "     	SubStr(A.SAI_01,12,5) AS SAI_01, "	
+		_cQuery += "     	SubStr(A.ENT_02,12,5) AS ENT_02, "	
 		_cQuery += "     	LPAD( TRUNC( ABS( ( (		TO_DATE(A.SAI_01,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_01,'DD/MM/YYYY hh24:mi') 	) "	
 		_cQuery += " 						+ NVL(	TO_DATE(A.SAI_02,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_02,'DD/MM/YYYY hh24:mi')	, 0	) "		
 		_cQuery += " 						+ NVL(	TO_DATE(A.SAI_03,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_03,'DD/MM/YYYY hh24:mi') , 0	) "		
 		_cQuery += " 						+ NVL(	TO_DATE(A.SAI_04,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_04,'DD/MM/YYYY hh24:mi') , 0	) ) ) * 1440 / 60 ) , 2 , 0 ) || ':' || "
-		_cQuery += " 		LPAD( ROUND( MOD( ( ABS( ( (	TO_DATE(A.SAI_01,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_01,'DD/MM/YYYY hh24:mi') ) "	
+		_cQuery += " 		LPAD( Round( MOD( ( ABS( ( (	TO_DATE(A.SAI_01,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_01,'DD/MM/YYYY hh24:mi') ) "	
 		_cQuery += " 						+ NVL(			TO_DATE(A.SAI_02,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_02,'DD/MM/YYYY hh24:mi') , 0	) "	
 		_cQuery += " 						+ NVL(			TO_DATE(A.SAI_03,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_03,'DD/MM/YYYY hh24:mi') , 0	) "	
 		_cQuery += " 						+ NVL(			TO_DATE(A.SAI_04,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_04,'DD/MM/YYYY hh24:mi') , 0	) ) ) *1440 ) , 60 ) , 2 ) , 2 , 0 ) AS TOTAL "
@@ -187,11 +187,11 @@ For _nI := 1 To Len( _aFiliais )
 		_cQuery += " 							RJ_DESC, " 
 		_cQuery += " 							RA_ADMISSA, " 
 		_cQuery += " 							RA_I_SETOR AS ZAK_COD, " 
-		_cQuery += " 							(SELECT ZAK_DESCRI FROM "+ RetSqlName("ZAK") +" WHERE ZAK_FILIAL = '" +  Xfilial("ZAK") + "'"
-		_cQuery += " 							AND D_E_L_E_T_ <> '*' AND ZAK_COD = RA_I_SETOR AND ROWNUM = 1) AS ZAK_DESCRI, " 
+		_cQuery += " 							(SELECT ZAK_DESCRI FROM "+ RetSqlName("ZAK") +" WHERE ZAK_FILIAL = '" +  xFilial("ZAK") + "'"
+		_cQuery += " 							AND D_E_L_E_T_ = ' ' AND ZAK_COD = RA_I_SETOR AND ROWNUM = 1) AS ZAK_DESCRI, " 
 		_cQuery += " 							SPG.PG_DATAAPO, "
 		_cQuery += " 							SPG.PG_DATA, "
-		_cQuery += " 							SUBSTR(SPG.PG_DATA,7,2) ||'/'|| SUBSTR(SPG.PG_DATA,5,2) ||'/'|| SUBSTR(SPG.PG_DATA,1,4) || ' ' || "
+		_cQuery += " 							SubStr(SPG.PG_DATA,7,2) ||'/'|| SubStr(SPG.PG_DATA,5,2) ||'/'|| SubStr(SPG.PG_DATA,1,4) || ' ' || "
 		_cQuery += " 								TO_CHAR(TO_DATE(to_char(PG_HORA, '00.00'),'hh24:mi'),'hh24:mi') AS PG_HORA "
 		_cQuery += " 						FROM "+ RetSqlName("SPG") +" SPG "
 		_cQuery += " 						INNER JOIN "+ RetSqlName("SRA") +" SRA ON "
@@ -214,14 +214,14 @@ For _nI := 1 To Len( _aFiliais )
 		_cQuery += " 						AND SPG.PG_MAT		BETWEEN '"+ MV_PAR04 +"' AND '"+ MV_PAR05 +"' "
 	
 		If __nOpcao == 1
-			_cQuery += "					AND SPG.PG_DATAAPO	BETWEEN '"+ DTOS( MV_PAR02 ) +"' AND '"+ DTOS( _dDtAux ) +"' "
+			_cQuery += "					AND SPG.PG_DATAAPO	BETWEEN '"+ DToS( MV_PAR02 ) +"' AND '"+ DToS( _dDtAux ) +"' "
 		ElseIf __nOpcao == 2
-			_cQuery += "					AND SPG.PG_DATAAPO	BETWEEN '"+ DTOS( MV_PAR02 ) +"' AND '"+ DTOS( MV_PAR03 ) +"' "
+			_cQuery += "					AND SPG.PG_DATAAPO	BETWEEN '"+ DToS( MV_PAR02 ) +"' AND '"+ DToS( MV_PAR03 ) +"' "
 		EndIf
 	
 		_cQuery += " 				) "
 		_cQuery += " 		) PG "
-		_cQuery += " 			PIVOT ( MAX(PG_HORA) FOR RN IN (	1 AS ENT_01 , "
+		_cQuery += " 			PIVOT ( MAX(PG_HORA) For RN IN (	1 AS ENT_01 , "
 		_cQuery += " 												2 AS SAI_01 , "
 		_cQuery += " 												3 AS ENT_02 , "
 		_cQuery += " 												4 AS SAI_02 , "
@@ -233,19 +233,19 @@ For _nI := 1 To Len( _aFiliais )
 		_cQuery += " ) A "
 		_cQuery += " HAVING "
 		
-		_cQuery += "	DECODE ( TRUNC( ( TO_DATE(SUBSTR(A.ENT_02, 12, 5),'hh24:mi') - TO_DATE(SUBSTR(A.SAI_01, 12, 5),'hh24:mi') ) * 1440 ) + "
-       	_cQuery += "          ABS(TRUNC( ( TO_DATE(SUBSTR(A.ENT_02, 12, 5),'hh24:mi') - TO_DATE(SUBSTR(A.SAI_01, 12, 5),'hh24:mi') ) * 1440 )),0,"
-       	_cQuery += "             TRUNC( (( TO_DATE(SUBSTR(A.ENT_02, 12, 5),'hh24:mi') - TO_DATE(SUBSTR(A.SAI_01, 12, 5),'hh24:mi') ) * 1440) + 1440 ),"
-       	_cQuery += "              TRUNC( ( TO_DATE(SUBSTR(A.ENT_02, 12, 5),'hh24:mi') - TO_DATE(SUBSTR(A.SAI_01, 12, 5),'hh24:mi') ) * 1440 )) < "+ _cIntMax  
+		_cQuery += "	DECODE ( TRUNC( ( TO_DATE(SubStr(A.ENT_02, 12, 5),'hh24:mi') - TO_DATE(SubStr(A.SAI_01, 12, 5),'hh24:mi') ) * 1440 ) + "
+       	_cQuery += "          ABS(TRUNC( ( TO_DATE(SubStr(A.ENT_02, 12, 5),'hh24:mi') - TO_DATE(SubStr(A.SAI_01, 12, 5),'hh24:mi') ) * 1440 )),0,"
+       	_cQuery += "             TRUNC( (( TO_DATE(SubStr(A.ENT_02, 12, 5),'hh24:mi') - TO_DATE(SubStr(A.SAI_01, 12, 5),'hh24:mi') ) * 1440) + 1440 ),"
+       	_cQuery += "              TRUNC( ( TO_DATE(SubStr(A.ENT_02, 12, 5),'hh24:mi') - TO_DATE(SubStr(A.SAI_01, 12, 5),'hh24:mi') ) * 1440 )) < "+ _cIntMax  
 		 
-		_cQuery += " AND (	CASE	WHEN ROUND( ( ( TO_DATE(A.SAI_01,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_01,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) IS NOT NULL "
-		_cQuery += " 				THEN ROUND( ( ( TO_DATE(A.SAI_01,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_01,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) ELSE 0 END + "
-		_cQuery += " 		CASE	WHEN ROUND( ( ( TO_DATE(A.SAI_02,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_02,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) IS NOT NULL "
-		_cQuery += " 				THEN ROUND( ( ( TO_DATE(A.SAI_02,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_02,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) ELSE 0 END + "
-		_cQuery += " 		CASE	WHEN ROUND( ( ( TO_DATE(A.SAI_03,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_03,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) IS NOT NULL "
-		_cQuery += " 				THEN ROUND( ( ( TO_DATE(A.SAI_03,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_03,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) ELSE 0 END + "
-		_cQuery += " 		CASE	WHEN ROUND( ( ( TO_DATE(A.SAI_04,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_04,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) IS NOT NULL "
-		_cQuery += " 				THEN ROUND( ( ( TO_DATE(A.SAI_04,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_04,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) ELSE 0 END ) >= 0"
+		_cQuery += " AND (	Case	WHEN Round( ( ( TO_DATE(A.SAI_01,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_01,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) IS NOT NULL "
+		_cQuery += " 				THEN Round( ( ( TO_DATE(A.SAI_01,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_01,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) Else 0 END + "
+		_cQuery += " 		Case	WHEN Round( ( ( TO_DATE(A.SAI_02,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_02,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) IS NOT NULL "
+		_cQuery += " 				THEN Round( ( ( TO_DATE(A.SAI_02,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_02,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) Else 0 END + "
+		_cQuery += " 		Case	WHEN Round( ( ( TO_DATE(A.SAI_03,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_03,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) IS NOT NULL "
+		_cQuery += " 				THEN Round( ( ( TO_DATE(A.SAI_03,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_03,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) Else 0 END + "
+		_cQuery += " 		Case	WHEN Round( ( ( TO_DATE(A.SAI_04,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_04,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) IS NOT NULL "
+		_cQuery += " 				THEN Round( ( ( TO_DATE(A.SAI_04,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_04,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) Else 0 END ) >= 0"
 		
 		_cQuery += " GROUP BY A.PG_FILIAL, A.RA_I_SETOR, A.PG_MAT, A.RA_NOME, A.PG_DATAAPO, A.ENT_01, A.SAI_01, A.ENT_02, A.SAI_02, A.ENT_03, A.SAI_03, A.ENT_04, A.SAI_04,A.RA_CODFUNC,A.RJ_DESC,A.RA_ADMISSA,A.ZAK_COD,A.ZAK_DESCRI "
 	EndIf
@@ -267,15 +267,15 @@ For _nI := 1 To Len( _aFiliais )
 		_cQuery += "		A.ZAK_COD AS CODSET," 
 		_cQuery += "		A.ZAK_DESCRI AS DESCSET," 
 		_cQuery += " 		TO_DATE(A.P8_DATAAPO, 'YYYYMMDD') AS DT_APO, "
-		_cQuery += "    	SUBSTR(A.ENT_01, 12, 5)		|| ' ' || SUBSTR(A.SAI_01, 12, 5) || ' ' || SUBSTR(A.ENT_02, 12, 5) || ' ' || SUBSTR(A.SAI_02, 12, 5) || ' ' || "
-		_cQuery += "     	SUBSTR(A.ENT_03, 12, 5) || ' ' || SUBSTR(A.SAI_03, 12, 5) || ' ' || SUBSTR(A.ENT_04, 12, 5) || ' ' || SUBSTR(A.SAI_04, 12, 5) AS MARCAS, "
-		_cQuery += "     	SUBSTR(A.SAI_01,12,5) AS SAI_01, "
-		_cQuery += "     	SUBSTR(A.ENT_02,12,5) AS ENT_02, "
+		_cQuery += "    	SubStr(A.ENT_01, 12, 5)		|| ' ' || SubStr(A.SAI_01, 12, 5) || ' ' || SubStr(A.ENT_02, 12, 5) || ' ' || SubStr(A.SAI_02, 12, 5) || ' ' || "
+		_cQuery += "     	SubStr(A.ENT_03, 12, 5) || ' ' || SubStr(A.SAI_03, 12, 5) || ' ' || SubStr(A.ENT_04, 12, 5) || ' ' || SubStr(A.SAI_04, 12, 5) AS MARCAS, "
+		_cQuery += "     	SubStr(A.SAI_01,12,5) AS SAI_01, "
+		_cQuery += "     	SubStr(A.ENT_02,12,5) AS ENT_02, "
 		_cQuery += "     	LPAD( TRUNC( ABS( ( (		TO_DATE(A.SAI_01,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_01,'DD/MM/YYYY hh24:mi') 	) "
 		_cQuery += " 						+ NVL(	TO_DATE(A.SAI_02,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_02,'DD/MM/YYYY hh24:mi')	, 0	) "
 		_cQuery += " 						+ NVL(	TO_DATE(A.SAI_03,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_03,'DD/MM/YYYY hh24:mi') , 0	) "
 		_cQuery += " 						+ NVL(	TO_DATE(A.SAI_04,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_04,'DD/MM/YYYY hh24:mi') , 0	) ) ) * 1440 / 60 ) , 2 , 0 ) || ':' || "
-		_cQuery += " 		LPAD( ROUND( MOD( ( ABS( ( (	TO_DATE(A.SAI_01,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_01,'DD/MM/YYYY hh24:mi') ) "
+		_cQuery += " 		LPAD( Round( MOD( ( ABS( ( (	TO_DATE(A.SAI_01,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_01,'DD/MM/YYYY hh24:mi') ) "
 		_cQuery += " 						+ NVL(			TO_DATE(A.SAI_02,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_02,'DD/MM/YYYY hh24:mi') , 0	) "
 		_cQuery += " 						+ NVL(			TO_DATE(A.SAI_03,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_03,'DD/MM/YYYY hh24:mi') , 0	) "
 		_cQuery += " 						+ NVL(			TO_DATE(A.SAI_04,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_04,'DD/MM/YYYY hh24:mi') , 0	) ) ) *1440 ) , 60 ) , 2 ) , 2 , 0 ) AS TOTAL "
@@ -323,11 +323,11 @@ For _nI := 1 To Len( _aFiliais )
 		_cQuery += " 							RJ_DESC, " 
 		_cQuery += " 							RA_ADMISSA, " 
 		_cQuery += " 							RA_I_SETOR AS ZAK_COD, " 
-		_cQuery += " 							(SELECT ZAK_DESCRI FROM "+ RetSqlName("ZAK") +" WHERE ZAK_FILIAL = '" +  Xfilial("ZAK") + "'"
-		_cQuery += " 							AND D_E_L_E_T_ <> '*' AND ZAK_COD = RA_I_SETOR AND ROWNUM = 1) AS ZAK_DESCRI, " 
+		_cQuery += " 							(SELECT ZAK_DESCRI FROM "+ RetSqlName("ZAK") +" WHERE ZAK_FILIAL = '" +  xFilial("ZAK") + "'"
+		_cQuery += " 							AND D_E_L_E_T_ = ' ' AND ZAK_COD = RA_I_SETOR AND ROWNUM = 1) AS ZAK_DESCRI, " 
 		_cQuery += " 							SP8.P8_DATAAPO, "
 		_cQuery += " 							SP8.P8_DATA, "
-		_cQuery += " 							SUBSTR(SP8.P8_DATA,7,2) ||'/'|| SUBSTR(SP8.P8_DATA,5,2) ||'/'|| SUBSTR(SP8.P8_DATA,1,4) || ' ' || "
+		_cQuery += " 							SubStr(SP8.P8_DATA,7,2) ||'/'|| SubStr(SP8.P8_DATA,5,2) ||'/'|| SubStr(SP8.P8_DATA,1,4) || ' ' || "
 		_cQuery += " 								TO_CHAR(TO_DATE(to_char(P8_HORA, '00.00'),'hh24:mi'),'hh24:mi') AS P8_HORA "
 		_cQuery += " 						FROM "+ RetSqlName("SP8") +" SP8 "
 		_cQuery += " 						INNER JOIN "+ RetSqlName("SRA") +" SRA ON "
@@ -350,15 +350,15 @@ For _nI := 1 To Len( _aFiliais )
 		_cQuery += " 						AND SP8.P8_MAT		BETWEEN '"+ MV_PAR04 +"' AND '"+ MV_PAR05 +"' "
 	
 		If __nOpcao == 1
-			_cQuery += " 					AND SP8.P8_DATAAPO	> '"+ DTOS( _dDtAux ) +"' "
-			_cQuery += " 					AND SP8.P8_DATAAPO	<= '"+ DTOS( MV_PAR03 ) +"' "
+			_cQuery += " 					AND SP8.P8_DATAAPO	> '"+ DToS( _dDtAux ) +"' "
+			_cQuery += " 					AND SP8.P8_DATAAPO	<= '"+ DToS( MV_PAR03 ) +"' "
 		ElseIf __nOpcao == 3
-			_cQuery += " 					AND SP8.P8_DATAAPO	BETWEEN '"+ DTOS( MV_PAR02 ) +"' AND '"+ DTOS( MV_PAR03 ) +"' "
+			_cQuery += " 					AND SP8.P8_DATAAPO	BETWEEN '"+ DToS( MV_PAR02 ) +"' AND '"+ DToS( MV_PAR03 ) +"' "
 		EndIf
 	
 		_cQuery += " 				) "
 		_cQuery += " 		) P8 "
-		_cQuery += " 			PIVOT ( MAX(P8_HORA) FOR RN IN (	1 AS ENT_01 , "
+		_cQuery += " 			PIVOT ( MAX(P8_HORA) For RN IN (	1 AS ENT_01 , "
 		_cQuery += " 												2 AS SAI_01 , "
 		_cQuery += " 												3 AS ENT_02 , "
 		_cQuery += " 												4 AS SAI_02 , "
@@ -371,19 +371,19 @@ For _nI := 1 To Len( _aFiliais )
 		
 		_cQuery += " HAVING "
 		
-		_cQuery += "	DECODE ( TRUNC( ( TO_DATE(SUBSTR(A.ENT_02, 12, 5),'hh24:mi') - TO_DATE(SUBSTR(A.SAI_01, 12, 5),'hh24:mi') ) * 1440 ) + "
-       	_cQuery += "            ABS(TRUNC( ( TO_DATE(SUBSTR(A.ENT_02, 12, 5),'hh24:mi') - TO_DATE(SUBSTR(A.SAI_01, 12, 5),'hh24:mi') ) * 1440 )),0,"
-       	_cQuery += "                TRUNC( (( TO_DATE(SUBSTR(A.ENT_02, 12, 5),'hh24:mi') - TO_DATE(SUBSTR(A.SAI_01, 12, 5),'hh24:mi') ) * 1440) + 1440 ),"
-       	_cQuery += "                TRUNC( ( TO_DATE(SUBSTR(A.ENT_02, 12, 5),'hh24:mi') - TO_DATE(SUBSTR(A.SAI_01, 12, 5),'hh24:mi') ) * 1440 )) < "+ _cIntMax  
+		_cQuery += "	DECODE ( TRUNC( ( TO_DATE(SubStr(A.ENT_02, 12, 5),'hh24:mi') - TO_DATE(SubStr(A.SAI_01, 12, 5),'hh24:mi') ) * 1440 ) + "
+       	_cQuery += "            ABS(TRUNC( ( TO_DATE(SubStr(A.ENT_02, 12, 5),'hh24:mi') - TO_DATE(SubStr(A.SAI_01, 12, 5),'hh24:mi') ) * 1440 )),0,"
+       	_cQuery += "                TRUNC( (( TO_DATE(SubStr(A.ENT_02, 12, 5),'hh24:mi') - TO_DATE(SubStr(A.SAI_01, 12, 5),'hh24:mi') ) * 1440) + 1440 ),"
+       	_cQuery += "                TRUNC( ( TO_DATE(SubStr(A.ENT_02, 12, 5),'hh24:mi') - TO_DATE(SubStr(A.SAI_01, 12, 5),'hh24:mi') ) * 1440 )) < "+ _cIntMax  
 				
-		_cQuery += " AND (	CASE	WHEN ROUND( ( ( TO_DATE(A.SAI_01,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_01,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) IS NOT NULL "
-		_cQuery += " 				THEN ROUND( ( ( TO_DATE(A.SAI_01,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_01,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) ELSE 0 END + "
-		_cQuery += " 		CASE	WHEN ROUND( ( ( TO_DATE(A.SAI_02,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_02,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) IS NOT NULL "
-		_cQuery += " 				THEN ROUND( ( ( TO_DATE(A.SAI_02,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_02,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) ELSE 0 END + "
-		_cQuery += " 		CASE	WHEN ROUND( ( ( TO_DATE(A.SAI_03,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_03,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) IS NOT NULL "
-		_cQuery += " 				THEN ROUND( ( ( TO_DATE(A.SAI_03,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_03,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) ELSE 0 END + "
-		_cQuery += " 		CASE	WHEN ROUND( ( ( TO_DATE(A.SAI_04,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_04,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) IS NOT NULL "
-		_cQuery += " 				THEN ROUND( ( ( TO_DATE(A.SAI_04,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_04,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) ELSE 0 END ) >= 0 "
+		_cQuery += " AND (	Case	WHEN Round( ( ( TO_DATE(A.SAI_01,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_01,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) IS NOT NULL "
+		_cQuery += " 				THEN Round( ( ( TO_DATE(A.SAI_01,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_01,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) Else 0 END + "
+		_cQuery += " 		Case	WHEN Round( ( ( TO_DATE(A.SAI_02,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_02,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) IS NOT NULL "
+		_cQuery += " 				THEN Round( ( ( TO_DATE(A.SAI_02,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_02,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) Else 0 END + "
+		_cQuery += " 		Case	WHEN Round( ( ( TO_DATE(A.SAI_03,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_03,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) IS NOT NULL "
+		_cQuery += " 				THEN Round( ( ( TO_DATE(A.SAI_03,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_03,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) Else 0 END + "
+		_cQuery += " 		Case	WHEN Round( ( ( TO_DATE(A.SAI_04,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_04,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) IS NOT NULL "
+		_cQuery += " 				THEN Round( ( ( TO_DATE(A.SAI_04,'DD/MM/YYYY hh24:mi') - TO_DATE(A.ENT_04,'DD/MM/YYYY hh24:mi') ) * 1440 ) , 0 ) Else 0 END ) >= 0 "
 		
 		_cQuery += " GROUP BY A.P8_FILIAL, A.RA_I_SETOR, A.P8_MAT, A.RA_NOME, A.P8_DATAAPO, A.ENT_01, A.SAI_01, A.ENT_02, A.SAI_02, A.ENT_03, A.SAI_03, A.ENT_04, A.SAI_04,A.RA_CODFUNC,A.RJ_DESC,A.RA_ADMISSA,A.ZAK_COD,A.ZAK_DESCRI "
 	EndIf
@@ -420,8 +420,8 @@ For _nI := 1 To Len( _aFiliais )
 		AllTrim((_cAlias)->DESCFUNC)					,; //Desc. Funçao - Inclusao de novos campos. Chamado 7392
 		AllTrim((_cAlias)->CODSET)						,; //Codigo Setor
 		AllTrim((_cAlias)->DESCSET)						,; //Desc. Setor
-		AllTrim(Dtoc((_cAlias)->DTADMIS))				,; //Dt Admissao - Fim Inclusao de novos campos.
-		AllTrim(DtoC((_cAlias)->DT_APO ))				,; //Data do Apontamento
+		AllTrim(DToC((_cAlias)->DTADMIS))				,; //Dt Admissao - Fim Inclusao de novos campos.
+		AllTrim(DToC((_cAlias)->DT_APO ))				,; //Data do Apontamento
 		AllTrim((_cAlias)->MARCAS)						,; //Marcações da Data
 		AllTrim((_cAlias)->TOTAL)						,; //Jornada
 		AllTrim(cInterv)				}) 				   //Intervalo
@@ -911,8 +911,8 @@ If _nLinha > _nLimPag
 	_oPrint:Line( 050 , 2450 , 240 , 2450 )
 	
 	// Insere Informações no cabecalho
-	_oPrint:Say( 060 , 420 , TITULO +" ( "+ DtoC(Date()) +" - "+ Time() +")" , _oFont01 )
-	_oPrint:Say( 120 , 420 , "Período: "+ DTOC( MV_PAR02 ) +" - "+ DTOC( MV_PAR03 ) +" | Filiais: "+ AllTrim( MV_PAR01 )											, _oFont02 )
+	_oPrint:Say( 060 , 420 , TITULO +" ( "+ DToC(Date()) +" - "+ Time() +")" , _oFont01 )
+	_oPrint:Say( 120 , 420 , "Período: "+ DToC( MV_PAR02 ) +" - "+ DToC( MV_PAR03 ) +" | Filiais: "+ AllTrim( MV_PAR01 )											, _oFont02 )
 	_oPrint:Say( 150 , 420 ,	"Categorias: "+ AllTrim( MV_PAR06 ) +" | Sit. Folha: "+ AllTrim( MV_PAR07 ) +" | Intervalo: "+ MV_PAR08, _oFont02 )
 	
 	_oPrint:Say( 190 , 420 , _cTxtCab , _oFont04 )

@@ -26,11 +26,11 @@ Retorno-----------: aButtons
 ===============================================================================================================================
 */
 User Function MA040BUT()
-LOCAL aButtons:=NIL
+Local aButtons:=NIL
 
-IF !Inclui
+If !Inclui
    aButtons:={}
-   AADD( aButtons,{"",{ || U_COMS006("P")  }, "Histórico Altarações Vendedor", "Histórico Altarações Vendedor" } )
-ENDIF
+   aAdd( aButtons,{"",{ || U_COMS006("P")  }, "Histórico Altarações Vendedor", "Histórico Altarações Vendedor" } )
+EndIf
 
 Return aButtons

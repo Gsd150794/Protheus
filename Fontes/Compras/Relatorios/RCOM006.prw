@@ -2,19 +2,19 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 30/09/2019 | Chamado 30523. Chamada do Layout do U_RCOM002().
-Alex Wallauer | 08/02/2023 | Chamado 42719. Acrescentada a opcao NF no campo C7_I_URGEN : S(SIM), N(NAO) F(NF).
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Alex Wallauer |30/09/2019| Chamado 30523. Chamada do Layout do U_RCOM002().
+Alex Wallauer |08/02/2023| Chamado 42719. Acrescentada a opcao NF no campo C7_I_URGEN : S(SIM), N(NAO) F(NF).
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
 ===============================================================================================================================
 */
 
-#include "rwmake.ch"
-#include "ap5mail.ch"
-#include "tbiconn.ch"
-#include "protheus.ch"
-#INCLUDE "MATR110.CH"
+#Include "rwmake.ch"
+#Include "ap5mail.ch"
+#Include "tbiconn.ch"
+#Include "TOTVS.ch"
+#Include "MATR110.CH"
 
 /*
 ===============================================================================================================================
@@ -30,7 +30,7 @@ User Function RCOM006(cAlias, nReg, nOpcx,_cFil,_cNumPed)
 
 Local _cPerg:= "MTR110"
              
-//Private cData     := DTOC(DDATABASE)
+//Private cData     := DToC(DDATABASE)
 Private cTitulo   := "Vendas"
 Private cMensagem := OemToAnsi("Teste") + CHR(13)+CHR(10)
 Private lImpInc   := .F.   
@@ -46,19 +46,19 @@ Pergunte(_cPerg,.F.)
 If 'MT120FIM' $ Upper(AllTrim(ProcName(1))) 
     
  	lImpInc := .T. //Impressao na inclusao  
-	dbSelectArea("SC7")
-	SC7->(dbSetOrder(1))
-	If SC7->(dbSeek(_cFil + _cNumPed))    
-       mv_par01:=SC7->C7_NUM
-       mv_par02:=SC7->C7_NUM
+	DBSelectArea("SC7")
+	SC7->(DBSetOrder(1))
+	If SC7->(DBSeek(_cFil + _cNumPed))    
+       MV_PAR01:=SC7->C7_NUM
+       MV_PAR02:=SC7->C7_NUM
 	EndIf     
 
 Else
 
-   IF U_ITMSG("Imprimir em formato PDF?" ,'Impressão',"",3,2,3,,"Sim (PDF)","Não (Normal)")
+   If U_ITMsg("Imprimir em formato PDF?" ,'Impressão',"",3,2,3,,"Sim (PDF)","Não (Normal)")
       U_RCOM002()
       Return
-   ENDIF
+   EndIf
 
 	
   If !Pergunte("MTR110",.T.) 
@@ -68,7 +68,7 @@ Else
 EndIf
 
 
-fwMsgRun(,{|| RCOM006M(cAlias, nReg, nOpcx,_cFil,_cNumPed)},"Processando relatorio...","Aguarde")
+FWMsgRun(,{|| RCOM006M(cAlias, nReg, nOpcx,_cFil,_cNumPed)},"Processando relatorio...","Aguarde")
 
 
 Return               
@@ -94,7 +94,7 @@ Local cCont     := Nil
 
 Private nPagina     := 1//Responsavel por armazenar a numeracao da pagina 
 
-PRIVATE lAuto		:= (nReg!=Nil)
+Private lAuto		:= (nReg!=Nil)
 
 Private oFont10
 Private oFont10b
@@ -118,7 +118,7 @@ Private _cEmailXML  := SuperGetMv("IT_ENDXML" , .F. , "")
 
 If Type("lPedido") != "L"
 	lPedido := .F.
-Endif
+EndIf
 
 
 Define Font oFont10    Name "Helvetica"       Size 0,-08       // Tamanho 10 		                                                                              
@@ -134,29 +134,29 @@ Define Font oFontValor Name "Arial"           Size 0,-16 Bold  // Tamanho 18 Neg
 
 //================================================================
 // Variaveis utilizadas para parametros                         
-// mv_par01               Do Pedido                             
-// mv_par02               Ate o Pedido                          
-// mv_par03               A partir da data de emissao           
-// mv_par04               Ate a data de emissao                 
-// mv_par05               Somente os Novos                      
-// mv_par06               Campo Descricao do Produto    	     
-// mv_par07               Unidade de Medida:Primaria ou Secund. 
-// mv_par08               Imprime ? Pedido Compra ou Aut. Entreg
-// mv_par09               Numero de vias                        
-// mv_par10               Pedidos ? Liberados Bloqueados Ambos  
-// mv_par11               Impr. SC's Firmes, Previstas ou Ambas 
-// mv_par12               Qual a Moeda ?                        
-// mv_par13               Endereco de Entrega                   
-// mv_par14               todas ou em aberto ou atendidos       
+// MV_PAR01               Do Pedido                             
+// MV_PAR02               Ate o Pedido                          
+// MV_PAR03               A partir da data de emissao           
+// MV_PAR04               Ate a data de emissao                 
+// MV_PAR05               Somente os Novos                      
+// MV_PAR06               Campo Descricao do Produto    	     
+// MV_PAR07               Unidade de Medida:Primaria ou Secund. 
+// MV_PAR08               Imprime ? Pedido Compra ou Aut. Entreg
+// MV_PAR09               Numero de vias                        
+// MV_PAR10               Pedidos ? Liberados Bloqueados Ambos  
+// MV_PAR11               Impr. SC's Firmes, Previstas ou Ambas 
+// MV_PAR12               Qual a Moeda ?                        
+// MV_PAR13               Endereco de Entrega                   
+// MV_PAR14               todas ou em aberto ou atendidos       
 //================================================================
 
 	If lAuto
-		mv_par08 := Eval({|| cCont:=ChkPergUs(cUserId,"MTR110","08"),If(cCont == Nil,SC7->C7_TIPO,cCont) })
+		MV_PAR08 := Eval({|| cCont:=ChkPergUs(cUserId,"MTR110","08"),If(cCont == Nil,SC7->C7_TIPO,cCont) })
 	EndIf
 	
 	If lPedido
 		MV_PAR12 := MAX(SC7->C7_MOEDA,1)
-	Endif                          
+	EndIf                          
 	
 	oPrint:= TMSPrinter():New("RELATORIO DE PEDIDO DE COMPRAS")
 	oPrint:SetPortrait() 	// Retrato
@@ -201,8 +201,8 @@ nLinha :=0100
 oPrint:SayBitmap(nlinha + (nSaltoLinha * 2),nColInic + 460,cRaizServer + "system/lgrl01.bmp",200,080) 
 nlinha+=nSaltoLinha * 4                      
                                              
-SM0->(dbSetOrder(1))   // forca o indice na ordem certa
-SM0->(dbSeek(SUBS(cNumEmp,1,2) + cFilAnt))   
+SM0->(DBSetOrder(1))   // forca o indice na ordem certa
+SM0->(DBSeek(SUBS(cNumEmp,1,2) + cFilAnt))   
 
 //1 QUADRANTE          
 //DADOS DA EMPRESA ITALAC                    
@@ -305,9 +305,9 @@ cEmisaoVia:= IIf(SC7->C7_QTDREEM > 0,AllTrim(Str((SC7->C7_QTDREEM+1),2)) + "a.EM
 oPrint:Say (nLinha + nSaltoLinha,2180,cEmisaoVia,oFont11bAr,nColFinal,,,2)
 
 //DADOS DO FORNECEDOR
-DbSelectArea("SA2")
-SA2->(DbSetOrder(1))
-SA2->(DbSeek(xFilial("SA2") + cCodFornec + cCodLjForn))
+DBSelectArea("SA2")
+SA2->(DBSetOrder(1))
+SA2->(DBSeek(xFilial("SA2") + cCodFornec + cCodLjForn))
 
 nlinha+=nSaltoLinha * 2                                               
 
@@ -320,15 +320,15 @@ RCOM006Q(AllTrim(SA2->A2_END),58,oFont11bAr,19.23,1762,2360)
 RCOM006Q(SubStr(("CEP:" + SubStr(AllTrim(SA2->A2_CEP),1,2) + "." + SubStr(AllTrim(SA2->A2_CEP),3,3) + "-" + SubStr(AllTrim(SA2->A2_CEP),6,3) + '-' + SubStr(AllTrim(SA2->A2_MUN),1,50) + '-' + AllTrim(SA2->A2_EST)),1,70),58,oFont11bAr,19.23,1762,2360)
 //TELEFONE + FAX   
 
-cDDD:=IIF(Len(AllTrim(SA2->A2_DDD))==3,Substr(SA2->A2_DDD,2,2),Substr(SA2->A2_DDD,1,2))
+cDDD:=IIf(Len(AllTrim(SA2->A2_DDD))==3,SubStr(SA2->A2_DDD,2,2),SubStr(SA2->A2_DDD,1,2))
 
-IF Len(AllTrim(SA2->A2_TEL)) > 2
+If Len(AllTrim(SA2->A2_TEL)) > 2
     
     cTelFax:="TEL:("+cDDD+")"+ SubStr(SA2->A2_TEL,1,4) + '-' +SubStr(SA2->A2_TEL,5,4) + " "  
 	
 EndIf           
 
-IF Len(AllTrim(SA2->A2_FAX)) > 2
+If Len(AllTrim(SA2->A2_FAX)) > 2
     
     cTelFax+="FAX:("+cDDD+")"+ SubStr(SA2->A2_FAX,1,4) + '-' +SubStr(SA2->A2_FAX,5,4) 
 	
@@ -342,7 +342,7 @@ If Len(AllTrim(cTelFax)) > 1
 	oPrint:Say (nLinha,1762,cTextoSay,oFont11bAr,2360,,,2)                
 	nlinha+=nSaltoLinha
 
-EndIF
+EndIf
 //CNPJ               
 cTextoSay:= "C.N.P.J./C.P.F.:" + RCOM006J(SA2->A2_CGC) + " I.E.:" + AllTrim(SA2->A2_INSCR)
 
@@ -383,7 +383,7 @@ EndIf
 nlinha+=nSaltoLinha                                              
 
 //RESTAURA A AREA DA SC7
-restArea(cAreaSC7)     
+FWRestArea(cAreaSC7)     
 
 Return                                                                                                                                    
 
@@ -460,7 +460,7 @@ Local cCampFormat:=""//Armazena o CPF ou CNPJ formatado
 		
 	Else//CNPJ       
 		
-		cCampFormat:=Substr(cCPFCNPJ,1,2)+"."+Substr(cCPFCNPJ,3,3)+"."+Substr(cCPFCNPJ,6,3)+"/"+Substr(cCPFCNPJ,9,4)+"-"+ Substr(cCPFCNPJ,13,2)
+		cCampFormat:=SubStr(cCPFCNPJ,1,2)+"."+SubStr(cCPFCNPJ,3,3)+"."+SubStr(cCPFCNPJ,6,3)+"/"+SubStr(cCPFCNPJ,9,4)+"-"+ SubStr(cCPFCNPJ,13,2)
 			
 	EndIf
 	
@@ -537,51 +537,51 @@ nTotMerc := 0
 NumPed   := Space(6)    
 
 If lAuto
-	dbSelectArea("SC7")
-	dbGoto(nReg)
+	DBSelectArea("SC7")
+	DBGoTo(nReg)
 	SetRegua(1)
-	mv_par01 := C7_NUM
-	mv_par02 := C7_NUM
-	mv_par03 := C7_EMISSAO
-	mv_par04 := C7_EMISSAO
-	mv_par05 := Eval({|| cCont:=ChkPergUs(cUserId,"MTR110","05"),If(cCont == Nil,2,cCont) })
-   	mv_par08 := Eval({|| cCont:=ChkPergUs(cUserId,"MTR110","08"),If(cCont == Nil,C7_TIPO,cCont) })
-	mv_par09 := Eval({|| cCont:=ChkPergUs(cUserId,"MTR110","09"),If(cCont == Nil,1,cCont) })
-  	mv_par10 := Eval({|| cCont:=ChkPergUs(cUserId,"MTR110","10"),If(cCont == Nil,3,cCont) }) 
-	mv_par11 := Eval({|| cCont:=ChkPergUs(cUserId,"MTR110","11"),If(cCont == Nil,3,cCont) }) 
-  	mv_par14 := Eval({|| cCont:=ChkPergUs(cUserId,"MTR110","14"),If(cCont == Nil,1,cCont) }) 
+	MV_PAR01 := C7_NUM
+	MV_PAR02 := C7_NUM
+	MV_PAR03 := C7_EMISSAO
+	MV_PAR04 := C7_EMISSAO
+	MV_PAR05 := Eval({|| cCont:=ChkPergUs(cUserId,"MTR110","05"),If(cCont == Nil,2,cCont) })
+   	MV_PAR08 := Eval({|| cCont:=ChkPergUs(cUserId,"MTR110","08"),If(cCont == Nil,C7_TIPO,cCont) })
+	MV_PAR09 := Eval({|| cCont:=ChkPergUs(cUserId,"MTR110","09"),If(cCont == Nil,1,cCont) })
+  	MV_PAR10 := Eval({|| cCont:=ChkPergUs(cUserId,"MTR110","10"),If(cCont == Nil,3,cCont) }) 
+	MV_PAR11 := Eval({|| cCont:=ChkPergUs(cUserId,"MTR110","11"),If(cCont == Nil,3,cCont) }) 
+  	MV_PAR14 := Eval({|| cCont:=ChkPergUs(cUserId,"MTR110","14"),If(cCont == Nil,1,cCont) }) 
 EndIf                  
 
 //If ( cPaisLoc$"ARG|POR|EUA" )
-//	cCondBus	:=	"1"+strzero(val(mv_par01),6)
+//	cCondBus	:=	"1"+StrZero(Val(MV_PAR01),6)
 //	nOrder	:=	10
 //	nTipo		:= 1
 //Else
 	If lImpInc //Tratamento pedidos Automatico/Manual - Guilherme 19/10/2012  
-   		mv_par01 := _cNumPed
-		mv_par02 := _cNumPed
-		cCondBus := mv_par01
+   		MV_PAR01 := _cNumPed
+		MV_PAR02 := _cNumPed
+		cCondBus := MV_PAR01
 	Else
-		cCondBus := mv_par01
+		cCondBus := MV_PAR01
 		nOrder	 :=	1 
 	EndIf
 //EndIf
 
-If mv_par14 == 2
-	cFiltro := "SC7->C7_QUANT-SC7->C7_QUJE <= 0 .Or. !EMPTY(SC7->C7_RESIDUO)"
-Elseif mv_par14 == 3
+If MV_PAR14 == 2
+	cFiltro := "SC7->C7_QUANT-SC7->C7_QUJE <= 0 .Or. !Empty(SC7->C7_RESIDUO)"
+ElseIf MV_PAR14 == 3
 	cFiltro := "SC7->C7_QUANT > SC7->C7_QUJE"
 EndIf                                                        
                                     
-SB1->(dbSetOrder(1))
+SB1->(DBSetOrder(1))
 
-dbSelectArea("SC7") 
-SC7->(dbSetOrder(nOrder))
-SC7->(dbSeek(xFilial("SC7")+cCondBus,.T.))
+DBSelectArea("SC7") 
+SC7->(DBSetOrder(nOrder))
+SC7->(DBSeek(xFilial("SC7")+cCondBus,.T.))
 
 
-While SC7->(!Eof()) .And. C7_FILIAL = xFilial("SC7") .And. C7_NUM >= mv_par01 .And. ;
-		C7_NUM <= mv_par02
+While SC7->(!Eof()) .And. C7_FILIAL = xFilial("SC7") .And. C7_NUM >= MV_PAR01 .And. ;
+		C7_NUM <= MV_PAR02
 
 	//================================================================
 	// Cria as variaveis para armazenar os valores do pedido        
@@ -594,61 +594,61 @@ While SC7->(!Eof()) .And. C7_FILIAL = xFilial("SC7") .And. C7_NUM >= mv_par01 .A
 	cObs04   := " "
 	cObs05   := " "
 
-	If	C7_EMITIDO == "S" .And. mv_par05 == 1
-		dbSkip()
+	If	C7_EMITIDO == "S" .And. MV_PAR05 == 1
+		DBSkip()
 		Loop
-	Endif
+	EndIf
 	
-	If	(C7_CONAPRO == "B" .And. mv_par10 == 1) .Or.;
-		(C7_CONAPRO != "B" .And. mv_par10 == 2)
-		dbSkip()
+	If	(C7_CONAPRO == "B" .And. MV_PAR10 == 1) .Or.;
+		(C7_CONAPRO != "B" .And. MV_PAR10 == 2)
+		DBSkip()
 		Loop
-	Endif
+	EndIf
 	
-	If	(C7_EMISSAO < mv_par03) .Or. (C7_EMISSAO > mv_par04)
-		dbSkip()
+	If	(C7_EMISSAO < MV_PAR03) .Or. (C7_EMISSAO > MV_PAR04)
+		DBSkip()
 		Loop
-	Endif
+	EndIf
 	
 	If	C7_TIPO == 2
-		dbSkip()
+		DBSkip()
 		Loop
 	EndIf
 
 	//================================================================
 	// Consiste este item. EM ABERTO                                
 	//================================================================
-	If mv_par14 == 2
-		If SC7->C7_QUANT-SC7->C7_QUJE <= 0 .Or. !EMPTY(SC7->C7_RESIDUO)
-			dbSelectArea("SC7")
-			dbSkip()
+	If MV_PAR14 == 2
+		If SC7->C7_QUANT-SC7->C7_QUJE <= 0 .Or. !Empty(SC7->C7_RESIDUO)
+			DBSelectArea("SC7")
+			DBSkip()
 			Loop
-		Endif
-	Endif
+		EndIf
+	EndIf
 
 	//================================================================
 	// Consiste este item. ATENDIDOS                                
 	//================================================================
-	If mv_par14 == 3
+	If MV_PAR14 == 3
 		If SC7->C7_QUANT > SC7->C7_QUJE
-			dbSelectArea("SC7")
-			dbSkip()
+			DBSelectArea("SC7")
+			DBSkip()
 			Loop
-		Endif
-	Endif
+		EndIf
+	EndIf
 
 	//================================================================
 	// Filtra Tipo de SCs Firmes ou Previstas                       
 	//================================================================
-	If !MtrAValOP(mv_par11, 'SC7')
-		dbSkip()
+	If !MtrAValOP(MV_PAR11, 'SC7')
+		DBSkip()
 		Loop
 	EndIf
 
 	MaFisEnd()
 	RCOM0061(SC7->C7_NUM,,,cFiltro)
 	
-	For ncw := 1 To mv_par09		// Imprime o numero de vias informadas
+	For ncw := 1 To MV_PAR09		// Imprime o numero de vias informadas
         
 		oPrint:StartPage()          //Inicia uma nova pagina a cada novo produtor
 		nPagina  := 1 				//Variavel que controla o numero da pagina atual
@@ -674,40 +674,40 @@ While SC7->(!Eof()) .And. C7_FILIAL = xFilial("SC7") .And. C7_NUM >= mv_par01 .A
 			//================================================================
 			// Consiste este item. EM ABERTO                                
 			//================================================================
-			If mv_par14 == 2
-				If SC7->C7_QUANT-SC7->C7_QUJE <= 0 .Or. !EMPTY(SC7->C7_RESIDUO)
-					dbSelectArea("SC7")
-					dbSkip()
+			If MV_PAR14 == 2
+				If SC7->C7_QUANT-SC7->C7_QUJE <= 0 .Or. !Empty(SC7->C7_RESIDUO)
+					DBSelectArea("SC7")
+					DBSkip()
 					Loop
-				Endif
-			Endif
+				EndIf
+			EndIf
 
 			//================================================================
 			// Consiste este item. ATENDIDOS                                
 			//================================================================
-			If mv_par14 == 3
+			If MV_PAR14 == 3
 				If SC7->C7_QUANT > SC7->C7_QUJE
-					dbSelectArea("SC7")
-					dbSkip()
+					DBSelectArea("SC7")
+					DBSkip()
 					Loop
-				Endif
-			Endif
+				EndIf
+			EndIf
 
-			If Ascan(aSavRec,Recno()) == 0		// Guardo recno p/gravacao
-				AADD(aSavRec,Recno())
-			Endif
+			If aScan(aSavRec,Recno()) == 0		// Guardo recno p/gravacao
+				aAdd(aSavRec,Recno())
+			EndIf
 
 			//================================================================
 			// Verifica se havera salto de formulario                       
 			//================================================================
 			
-			if nLinha >= 3300   
+			If nLinha >= 3300   
 				oPrint:Box(nLinhaInic,0030,nLinha,nColFinal)    				    
 				oPrint:EndPage()	// Finaliza a Pagina.
 				oPrint:StartPage()	// Inicia uma nova pagina  
 				nPagina++
 				RCOM006C(ncw)  
-			EndIF
+			EndIf
 
 			//================================================================
 			// Pesquisa Descricao do Produto                                
@@ -716,28 +716,28 @@ While SC7->(!Eof()) .And. C7_FILIAL = xFilial("SC7") .And. C7_NUM >= mv_par01 .A
 
             _nVALORIPI := MaFisRet(nConta,"IT_VALIPI")
             _nVALORICMS:= MaFisRet(nConta,"IT_VALICM")
-			IF SB1->(dbSeek( xFilial("SB1")+SC7->C7_PRODUTO)) 
-			   IF SB1->B1_TIPO = "SV"
+			If SB1->(DBSeek( xFilial("SB1")+SC7->C7_PRODUTO)) 
+			   If SB1->B1_TIPO = "SV"
                   nTotIpi += 0
                   nTotIcms+= 0
 
 			      MaFisLoad("IT_VALIPI",0,nConta)
 			      MaFisLoad("IT_VALICM",0,nConta)
-			   ELSEIF !SB1->B1_TIPO $ "IN/EM/PA" .AND. _nVALORIPI <> 0
+			   ElseIf !SB1->B1_TIPO $ "IN/EM/PA" .And. _nVALORIPI <> 0
                   _nBASEICM  := MaFisRet(nConta,"IT_BASEICM")
                   _nALIQICM  := MaFisRet(nConta,"IT_ALIQICM")
-                  _nVALORICMS:= ROUND((_nVALORIPI+_nBASEICM)*(_nALIQICM/100),2)
+                  _nVALORICMS:= Round((_nVALORIPI+_nBASEICM)*(_nALIQICM/100),2)
 
                   nTotIpi    += _nVALORIPI 
                   nTotIcms   += _nVALORICMS
 
 			      MaFisLoad("IT_BASEICM",(_nVALORIPI+_nBASEICM),nConta)
 			      MaFisLoad("IT_VALICM" ,_nVALORICMS,nConta)
-			   ELSE
+			   Else
                   nTotIpi    += _nVALORIPI
                   nTotIcms   += _nVALORICMS
-			   ENDIF
-			ENDIF
+			   EndIf
+			EndIf
 			
 			
 			//================================================================
@@ -760,23 +760,23 @@ While SC7->(!Eof()) .And. C7_FILIAL = xFilial("SC7") .And. C7_NUM >= mv_par01 .A
 			
 			lImpri  := .T.
 			
-			dbSkip()
+			DBSkip()
 		EndDo
 
-		dbGoto(nSavRec)
+		DBGoTo(nSavRec)
                                                        
 		//quando acaba de imprimir os produtos e se chega no final da pagina
-		if nLinha >= 3300                           
+		If nLinha >= 3300                           
 				oPrint:Box(nLinhaInic,0030,nLinha,nColFinal)
 				oPrint:EndPage()	// Finaliza a Pagina.
 				oPrint:StartPage()	// Inicia uma nova pagina                  
 				nLinha:=0100                              
 				nPagina++
 				RCOM006S(ncw)
-		EndIF
+		EndIf
 
         //Espaco em branco entre os produtos e a parte resumida do relatorio
-		nLinha:=IIF(nLinha < 2150,2150,nLinha)
+		nLinha:=IIf(nLinha < 2150,2150,nLinha)
 		oPrint:Line(nlinha,0030,nlinha,2360) 
 		RCOM006R(nDescProd)		// Imprime os dados complementares do PC passando o desconto dos produtos como parametro
     
@@ -788,30 +788,30 @@ While SC7->(!Eof()) .And. C7_FILIAL = xFilial("SC7") .And. C7_NUM >= mv_par01 .A
 	
 	If Len(aSavRec)>0
 		For i:=1 to Len(aSavRec)
-			dbGoto(aSavRec[i])
+			DBGoTo(aSavRec[i])
 			RecLock("SC7",.F.)  //Atualizacao do flag de Impressao
 			Replace C7_QTDREEM With (C7_QTDREEM+1)
 			Replace C7_EMITIDO With "S"
-			MsUnLock()
+			MSUnLock()
 		Next
-		dbGoto(aSavRec[Len(aSavRec)])		// Posiciona no ultimo elemento e limpa array
-	Endif
+		DBGoTo(aSavRec[Len(aSavRec)])		// Posiciona no ultimo elemento e limpa array
+	EndIf
       
 
-	Aadd(aPedMail,aPedido)
+	aAdd(aPedMail,aPedido)
     
 	aSavRec := {}
  
-	dbSkip()
+	DBSkip()
 EndDo
 
  
-dbSelectArea("SC7")
+DBSelectArea("SC7")
 dbClearFilter()
-dbSetOrder(1)
+DBSetOrder(1)
 
-dbSelectArea("SX3")
-dbSetOrder(1)
+DBSelectArea("SX3")
+DBSetOrder(1)
 
 MS_FLUSH()
 
@@ -845,28 +845,28 @@ Local nLinFinal
 // Inicializa o descricao do Produto conf. parametro digitado.
 //==============================================================
 			cDescPro := ""
-			If Empty(mv_par06)
-				mv_par06 := "B1_DESC"
+			If Empty(MV_PAR06)
+				MV_PAR06 := "B1_DESC"
 			EndIf
 			
-			If AllTrim(mv_par06) == "B1_DESC"
-				SB1->(dbSetOrder(1))
-				SB1->(dbSeek( xFilial("SB1") + SC7->C7_PRODUTO ))
+			If AllTrim(MV_PAR06) == "B1_DESC"
+				SB1->(DBSetOrder(1))
+				SB1->(DBSeek( xFilial("SB1") + SC7->C7_PRODUTO ))
 				cDescPro := AllTrim(SB1->B1_DESC)
-			ElseIf AllTrim(mv_par06) == "B5_CEME"
-				SB5->(dbSetOrder(1))
-				If SB5->(dbSeek( xFilial("SB5") + SC7->C7_PRODUTO ))
+			ElseIf AllTrim(MV_PAR06) == "B5_CEME"
+				SB5->(DBSetOrder(1))
+				If SB5->(DBSeek( xFilial("SB5") + SC7->C7_PRODUTO ))
 					cDescPro := AllTrim(SB5->B5_CEME)
 				EndIf
-			ElseIf AllTrim(mv_par06) == "C7_DESCRI"
+			ElseIf AllTrim(MV_PAR06) == "C7_DESCRI"
 				cDescPro := AllTrim(SC7->C7_DESCRI)
 
-			ElseIf AllTrim(mv_par06) == "SELECIONAR"	// Customizacao para selecionar qual descricao sera utilizada
+			ElseIf AllTrim(MV_PAR06) == "SELECIONAR"	// Customizacao para selecionar qual descricao sera utilizada
 
 				//=======================================================================
 				// Criacao da Interface                                                
 				//=======================================================================
-				if !lShowDlg
+				If !lShowDlg
  
 					DEFINE MSDIALOG oDlg TITLE "Descrição do Produto" FROM 000,000 TO 230,450 PIXEL
 					@ 001,0002	Say OemToAnsi("Codigo: " + AllTrim(SC7->C7_PRODUTO)) OF oDlg COLOR CLR_BLACK
@@ -875,52 +875,52 @@ Local nLinFinal
 					@ 050,0015	To 095,135 Title OemToAnsi("Selecione qual descrição será utilizada:")
 					@ 060,0017	Radio oRadio Var nOpcoes ITEMS OemToAnsi("Descrição Simples"),OemToAnsi("Descrição Detalhada"),OemToAnsi("Descr. Detalhada + Simples") 3D SIZE 100,10 OF oDlg PIXEL
 					@ 100,0015	CHECKBOX oShowDlg VAR lShowDlg PROMPT "Repetir Opção" SIZE 60,11 OF oDlg PIXEL
-					@ 100,0110	BMPBUTTON TYPE 01 ACTION Close(oDlg)
+					@ 100,0110	BMPBUTTON Type 01 ACTION Close(oDlg)
 					
 					Activate MSDialog oDlg Centered
-				endif
+				EndIf
 				
-				if nOpcoes == 1
+				If nOpcoes == 1
 					cDescPro := AllTrim(SC7->C7_DESCRI)
-				elseif nOpcoes == 2
-					SB1->(dbSetOrder(1))
-					SB1->(dbSeek( xFilial("SB1") + SC7->C7_PRODUTO ))
+				ElseIf nOpcoes == 2
+					SB1->(DBSetOrder(1))
+					SB1->(DBSeek( xFilial("SB1") + SC7->C7_PRODUTO ))
 					cDescPro := AllTrim(SB1->B1_I_DESCD)
-				elseif nOpcoes == 3
-					SB1->(dbSetOrder(1))
-					SB1->(dbSeek( xFilial("SB1") + SC7->C7_PRODUTO ))
+				ElseIf nOpcoes == 3
+					SB1->(DBSetOrder(1))
+					SB1->(DBSeek( xFilial("SB1") + SC7->C7_PRODUTO ))
 					cDescPro := AllTrim(SB1->B1_I_DESCD) + " - "
 					cDescPro += AllTrim(SC7->C7_DESCRI)
-				endif
+				EndIf
 			EndIf
 			
 			If Empty(cDescPro)
-				SB1->(dbSetOrder(1))
-				SB1->(dbSeek( xFilial("SB1") + SC7->C7_PRODUTO ))
+				SB1->(DBSetOrder(1))
+				SB1->(DBSeek( xFilial("SB1") + SC7->C7_PRODUTO ))
 				cDescPro := AllTrim(SB1->B1_DESC)
 			EndIf
 			
-			SA5->(dbSetOrder(1))
-			If SA5->(dbSeek(xFilial("SA5")+SC7->C7_FORNECE+SC7->C7_LOJA+SC7->C7_PRODUTO)) .And. !Empty(SA5->A5_CODPRF)
-				cDescPro := cDescPro + " ("+Alltrim(SA5->A5_CODPRF)+")"
+			SA5->(DBSetOrder(1))
+			If SA5->(DBSeek(xFilial("SA5")+SC7->C7_FORNECE+SC7->C7_LOJA+SC7->C7_PRODUTO)) .And. !Empty(SA5->A5_CODPRF)
+				cDescPro := cDescPro + " ("+AllTrim(SA5->A5_CODPRF)+")"
 			EndIf
 			
 			If SC7->C7_DESC1 != 0 .Or. SC7->C7_DESC2 != 0 .Or. SC7->C7_DESC3 != 0
 				nDescProd+= CalcDesc(SC7->C7_TOTAL,SC7->C7_DESC1,SC7->C7_DESC2,SC7->C7_DESC3)
 			Else
 				nDescProd+=SC7->C7_VLDESC
-			Endif
+			EndIf
 			
-			IF MV_PAR17 = 1
+			If MV_PAR17 = 1
 			
 			If !Empty(SC7->C7_OBS) .And. nLinObs < 1
 				nLinObs++
 				cVar:="cObs"+StrZero(nLinObs,2)
 				Eval(MemVarBlock(cVar),SC7->C7_OBS)
-			Endif
-			ENDIF
+			EndIf
+			EndIf
 			
-			nTxMoeda   := IIF(SC7->C7_TXMOEDA > 0,SC7->C7_TXMOEDA,Nil)
+			nTxMoeda   := IIf(SC7->C7_TXMOEDA > 0,SC7->C7_TXMOEDA,Nil)
 			nValTotSC7 := xMoeda(SC7->C7_TOTAL,SC7->C7_MOEDA,MV_PAR12,SC7->C7_DATPRF,MsDecimais(SC7->C7_MOEDA),nTxMoeda)
 			
 			nTotal     := nTotal + SC7->C7_TOTAL
@@ -938,7 +938,7 @@ Local nLinFinal
 				nVlUnitSC7 := xMoeda(SC7->C7_PRECO,SC7->C7_MOEDA,MV_PAR12,SC7->C7_DATPRF,MsDecimais(SC7->C7_MOEDA),nTxMoeda)   
 			EndIf
 			
-			If  mv_par08 == 2
+			If  MV_PAR08 == 2
 				cIPI:=0
 			Else
 				cIPI:=SC7->C7_IPI
@@ -954,7 +954,7 @@ oPrint:Say (nlinha,1425,transform(cQuantidade,PesqPict("SC7","C7_QUANT")),oFont1
 oPrint:Say (nlinha,1680,transform(nVlUnitSC7,"@E 99,999,999.99999"),oFont10b,,,,1)
 //oPrint:Say (nlinha,1690,transform(cIPI,PesqPict("SC7","C7_IPI")),oFont10b)
 oPrint:Say (nlinha,1930,transform(nValTotSC7,PesqPict("SC7","C7_TOTAL")),oFont10b,,,,1)
-oPrint:Say (nlinha,1970,DtoC(SC7->C7_DATPRF),oFont10b)					
+oPrint:Say (nlinha,1970,DToC(SC7->C7_DATPRF),oFont10b)					
     
 //Verifica se sera impresso o ultimo preco de venda
 If MV_PAR16 == 1
@@ -963,7 +963,7 @@ EndIf
 
 RCOM006D(cDescPro)//Descricao do produto
 
-restArea(aAreaSC7)      
+FWRestArea(aAreaSC7)      
 
 Return
 
@@ -1051,7 +1051,7 @@ Local nTotSeguro:= MaFisRet(,'NF_SEGURO')
 //Local aValIVA := MaFisRet(,"NF_VALIMP")
 //Local nValIVA := 0
 //Local aColuna := Array(8), nTotLinhas
-Local nTxMoeda  := IIF(SC7->C7_TXMOEDA > 0,SC7->C7_TXMOEDA,Nil)
+Local nTxMoeda  := IIf(SC7->C7_TXMOEDA > 0,SC7->C7_TXMOEDA,Nil)
 Local aAreaSC7  := SC7->(GetArea())               
 Local nLiPosIni    
 Local nLinInReaj
@@ -1064,7 +1064,7 @@ Local _cPedInter := ""
 //	For nG:=1 to Len(aValIVA)
 //		nValIVA+=aValIVA[nG]
 //	Next
-//Endif
+//EndIf
 
 cMensagem:= Formula(SC7->C7_MSG)
 
@@ -1093,19 +1093,19 @@ Else
 	cUrgen := "OUTROS"
 EndIf
 
-oPrint:Say (nLinha,nColInic,"URGENTE: " + IF(SC7->C7_I_URGEN="S","SIM",IF(SC7->C7_I_URGEN="F","NF","NÃO")) + "            COMPRA DIRETA: " + cUrgen ,oFont14bAr)
+oPrint:Say (nLinha,nColInic,"URGENTE: " + If(SC7->C7_I_URGEN="S","SIM",If(SC7->C7_I_URGEN="F","NF","NÃO")) + "            COMPRA DIRETA: " + cUrgen ,oFont14bAr)
 nlinha+=nSaltoLinha
 oPrint:Line(nlinha,0030,nlinha,2360) 
 
-//LOCAL DE ENTREGA E COBRANCA
+//Local DE ENTREGA E COBRANCA
 //================================================================
 // Posiciona o Arquivo de Empresa SM0.                          
 //================================================================
 cAlias := Alias()
 
-SM0->(dbSetOrder(1))   // forca o indice na ordem certa
+SM0->(DBSetOrder(1))   // forca o indice na ordem certa
 nRecnoSM0 := SM0->(Recno())
-dbSeek(SUBS(cNumEmp,1,2) + SC7->C7_FILENT)
+DBSeek(SUBS(cNumEmp,1,2) + SC7->C7_FILENT)
 
 RCOM006G(3200)               
 
@@ -1113,32 +1113,32 @@ RCOM006G(3200)
 // Imprime endereco de entrega do SM0 somente se o MV_PAR13 =" "
 //================================================================
 If Empty(MV_PAR13)            
-	oPrint:Say (nlinha,nColInic,SubStr("Local de Entrega: " + AllTrim(Substr(SM0->M0_ENDENT,1,50)) + '-' + AllTrim(SubStr(SM0->M0_CIDENT,1,35)) + '-' + SM0->M0_ESTENT + '-' + Trans(Alltrim(SM0->M0_CEPENT),cCepPict),1,75),oFont10End)
+	oPrint:Say (nlinha,nColInic,SubStr("Local de Entrega: " + AllTrim(SubStr(SM0->M0_ENDENT,1,50)) + '-' + AllTrim(SubStr(SM0->M0_CIDENT,1,35)) + '-' + SM0->M0_ESTENT + '-' + Trans(AllTrim(SM0->M0_CEPENT),cCepPict),1,75),oFont10End)
 	//nlinha+=nSaltoLinha
 Else                   
 	oPrint:Say (nlinha,nColInic,SubStr("Local de Entrega: " + SubStr(AllTrim(MV_PAR13),1,100),1,75),oFont10End)
 	//nlinha+=nSaltoLinha
-Endif   
+EndIf   
                                    
-IF Empty(mv_par15)
+If Empty(MV_PAR15)
 
-	SM0->(dbSetOrder(1))   // forca o indice na ordem certa
-	SM0->(dbSeek(SUBS(cNumEmp,1,2) + cFilAnt))   
+	SM0->(DBSetOrder(1))   // forca o indice na ordem certa
+	SM0->(DBSeek(SUBS(cNumEmp,1,2) + cFilAnt))   
 
-	oPrint:Say (nlinha,1210,SubStr("Local de Cobranca: " + AllTrim(Substr(SM0->M0_ENDCOB,1,50)) + '-' + AllTrim(SubStr(SM0->M0_CIDCOB,1,35)) + '-' + SM0->M0_ESTCOB + '-' + Trans(Alltrim(SM0->M0_CEPCOB),cCepPict),1,75),oFont10End)
+	oPrint:Say (nlinha,1210,SubStr("Local de Cobranca: " + AllTrim(SubStr(SM0->M0_ENDCOB,1,50)) + '-' + AllTrim(SubStr(SM0->M0_CIDCOB,1,35)) + '-' + SM0->M0_ESTCOB + '-' + Trans(AllTrim(SM0->M0_CEPCOB),cCepPict),1,75),oFont10End)
 	nlinha+=nSaltoLinha           
 
 Else
 
 	//Local de Cobranca                        
-	SM0->(dbSetOrder(1))   // forca o indice na ordem certa
-	SM0->(dbSeek(SUBS(cNumEmp,1,2) + mv_par15))
+	SM0->(DBSetOrder(1))   // forca o indice na ordem certa
+	SM0->(DBSeek(SUBS(cNumEmp,1,2) + MV_PAR15))
 	
-	oPrint:Say (nlinha,1210,SubStr("Local de Cobranca: " + AllTrim(Substr(SM0->M0_ENDCOB,1,50)) + '-' + AllTrim(SubStr(SM0->M0_CIDCOB,1,35)) + '-' + SM0->M0_ESTCOB + '-' + Trans(Alltrim(SM0->M0_CEPCOB),cCepPict),1,75),oFont10End)
+	oPrint:Say (nlinha,1210,SubStr("Local de Cobranca: " + AllTrim(SubStr(SM0->M0_ENDCOB,1,50)) + '-' + AllTrim(SubStr(SM0->M0_CIDCOB,1,35)) + '-' + SM0->M0_ESTCOB + '-' + Trans(AllTrim(SM0->M0_CEPCOB),cCepPict),1,75),oFont10End)
 	nlinha+=nSaltoLinha 
 		                    
-	SM0->(dbSetOrder(1))   // forca o indice na ordem certa
-	SM0->(dbSeek(SUBS(cNumEmp,1,2) + cFilAnt))        
+	SM0->(DBSetOrder(1))   // forca o indice na ordem certa
+	SM0->(DBSeek(SUBS(cNumEmp,1,2) + cFilAnt))        
 
 EndIf                    
 
@@ -1156,12 +1156,12 @@ nlinha+=nSaltoLinha
 
 oPrint:Line(nlinha,0030,nlinha,2360)   
 
-restArea(aAreaSC7)
+FWRestArea(aAreaSC7)
 
 //Condicao de pagamento + data de emissao + total das mercadorias + total das mercadorias com impostos
-dbSelectArea("SE4")
-dbSetOrder(1)
-dbSeek(xFilial("SE4") + SC7->C7_COND)          
+DBSelectArea("SE4")
+DBSetOrder(1)
+DBSeek(xFilial("SE4") + SC7->C7_COND)          
 
 PswOrder(1) //Pesquisa pelo id do usuario
 If PswSeek(_cUserDig, .T. )
@@ -1171,7 +1171,7 @@ If PswSeek(_cUserDig, .T. )
 
 EndIf
 
-dbSelectArea("SC7")                 
+DBSelectArea("SC7")                 
 
 RCOM006G(3200)
 nLiPosIni:=nlinha
@@ -1189,7 +1189,7 @@ oPrint:Line(nlinha,1377,nlinha,2360)//Divisoria total com impostos
 
 oPrint:Say (nlinha,nColInic,SubStr(SE4->E4_DESCRI,1,20),oFont14bAr)
 oPrint:Say (nlinha+10,0460,AllTrim(_cUsrNome),oFont10b)
-oPrint:Say (nlinha,0806,DtoC(SC7->C7_EMISSAO),oFont14bAr)
+oPrint:Say (nlinha,0806,DToC(SC7->C7_EMISSAO),oFont14bAr)
 
 //Total de Descontos
 oPrint:Say (nlinha,1382,"Total de Descontos:" ,oFont10)
@@ -1211,18 +1211,18 @@ oPrint:Line(nLiPosIni,1377,nlinha,1377)
 		If Empty(cObs02)
 			If Len(cObs01) > 50
 				cObs := cObs01
-				cObs01 := Substr(cObs,1,50)
+				cObs01 := SubStr(cObs,1,50)
 				For nX := 2 To 5
 					cVar  := "cObs"+StrZero(nX,2)
-					&cVar := Substr(cObs,(50*(nX-1))+1,50)
+					&cVar := SubStr(cObs,(50*(nX-1))+1,50)
 				Next nX
 			EndIf
 		Else
-			cObs01:= Substr(cObs01,1,IIf(Len(cObs01)<50,Len(cObs01),50))
-			cObs02:= Substr(cObs02,1,IIf(Len(cObs02)<50,Len(cObs01),50))
-			cObs03:= Substr(cObs03,1,IIf(Len(cObs03)<50,Len(cObs01),50))
-			cObs04:= Substr(cObs04,1,IIf(Len(cObs04)<50,Len(cObs01),50))
-			cObs05:= Substr(cObs05,1,IIf(Len(cObs05)<50,Len(cObs01),50))
+			cObs01:= SubStr(cObs01,1,IIf(Len(cObs01)<50,Len(cObs01),50))
+			cObs02:= SubStr(cObs02,1,IIf(Len(cObs02)<50,Len(cObs01),50))
+			cObs03:= SubStr(cObs03,1,IIf(Len(cObs03)<50,Len(cObs01),50))
+			cObs04:= SubStr(cObs04,1,IIf(Len(cObs04)<50,Len(cObs01),50))
+			cObs05:= SubStr(cObs05,1,IIf(Len(cObs05)<50,Len(cObs01),50))
 		EndIf  
 
 RCOM006G(3000)
@@ -1279,10 +1279,10 @@ nlinha+=nSaltoLinha
 
 oPrint:Say (nlinha,0030,cObs05,oFont11b)//Obsevacao 5
 
-oPrint:Say (nlinha,1210,IF( SC7->C7_TPFRETE $ "F","FOB",IF(SC7->C7_TPFRETE $ "C","CIF"," " )),oFont14bAr)  
+oPrint:Say (nlinha,1210,If( SC7->C7_TPFRETE $ "F","FOB",If(SC7->C7_TPFRETE $ "C","CIF"," " )),oFont14bAr)  
 
-SM4->(dbSetOrder(1))
-If SM4->(dbSeek(xFilial("SM4")+SC7->C7_REAJUST))  
+SM4->(DBSetOrder(1))
+If SM4->(DBSeek(xFilial("SM4")+SC7->C7_REAJUST))  
 	oPrint:Say (nlinha,1600,SC7->C7_REAJUST + "-" + SubStr(SM4->M4_DESCR,1,18),oFont11b)
 EndIf
 
@@ -1299,23 +1299,23 @@ oPrint:Say (nlinha,0050,STR0021,oFont11b)//Comprador
 oPrint:Say (nlinha,0430,STR0022,oFont11b)//Gerencia
 oPrint:Say (nlinha,0820,STR0023,oFont11b)//Diretoria
 
-oPrint:Say (nlinha,1210,"Transportadora" + IF( SC7->C7_I_CDTRA <> "      ", " - Código: " + SC7->C7_I_CDTRA + "  Loja: " + SC7->C7_I_LJTRA , " "),oFont11b)		
+oPrint:Say (nlinha,1210,"Transportadora" + If( SC7->C7_I_CDTRA <> "      ", " - Código: " + SC7->C7_I_CDTRA + "  Loja: " + SC7->C7_I_LJTRA , " "),oFont11b)		
 nlinha+=nSaltoLinha
 
-oPrint:Say (nlinha,1210,if( SC7->C7_I_CDTRA <> "      ", "Razão Social: " + SubStr(Posicione("SA2", 1, xFilial("SA2")+SC7->C7_I_CDTRA+SC7->C7_I_LJTRA,"A2_NOME"),1,30)," "),oFont11b)
+oPrint:Say (nlinha,1210,If( SC7->C7_I_CDTRA <> "      ", "Razão Social: " + SubStr(Posicione("SA2", 1, xFilial("SA2")+SC7->C7_I_CDTRA+SC7->C7_I_LJTRA,"A2_NOME"),1,30)," "),oFont11b)
 nlinha+=nSaltoLinha
-oPrint:Say (nlinha,1210,if( SC7->C7_I_CDTRA <> "      ", "CNPJ: " + Transform(Posicione("SA2", 1, xFilial("SA2")+SC7->C7_I_CDTRA+SC7->C7_I_LJTRA, "A2_CGC"), PesqPict("SA2","A2_CGC")), " "),oFont11b)//Gerencia
-oPrint:Say (nlinha,1750,if( SC7->C7_I_CDTRA <> "      ", "Ins. Estad.: " + Posicione("SA2", 1, xFilial("SA2")+SC7->C7_I_CDTRA+SC7->C7_I_LJTRA, "A2_INSCR"), " "),oFont11b)
-nlinha+=nSaltoLinha
-			
-oPrint:Say (nlinha,1210,if( SC7->C7_I_CDTRA <> "      ", "Cidade: " + SubStr(Posicione("SA2", 1, xFilial("SA2")+SC7->C7_I_CDTRA+SC7->C7_I_LJTRA, "A2_MUN"),1,30), " "),oFont11b)
-nlinha+=nSaltoLinha
-oPrint:Say (nlinha,1210,if( SC7->C7_I_CDTRA <> "      ", "Bairro: " + SubStr(Posicione("SA2", 1, xFilial("SA2")+SC7->C7_I_CDTRA+SC7->C7_I_LJTRA, "A2_BAIRRO"),1,25), " "),oFont11b)
-oPrint:Say (nlinha,2100,if( SC7->C7_I_CDTRA <> "      ", "Estado: " + Posicione("SA2", 1, xFilial("SA2")+SC7->C7_I_CDTRA+SC7->C7_I_LJTRA, "A2_EST"), " "),oFont11b)
-			
+oPrint:Say (nlinha,1210,If( SC7->C7_I_CDTRA <> "      ", "CNPJ: " + Transform(Posicione("SA2", 1, xFilial("SA2")+SC7->C7_I_CDTRA+SC7->C7_I_LJTRA, "A2_CGC"), PesqPict("SA2","A2_CGC")), " "),oFont11b)//Gerencia
+oPrint:Say (nlinha,1750,If( SC7->C7_I_CDTRA <> "      ", "Ins. Estad.: " + Posicione("SA2", 1, xFilial("SA2")+SC7->C7_I_CDTRA+SC7->C7_I_LJTRA, "A2_INSCR"), " "),oFont11b)
 nlinha+=nSaltoLinha
 			
-oPrint:Say (nlinha,1210,if( SC7->C7_I_CDTRA <> "      ", "Nome Fantasia: " + SubStr(Posicione("SA2", 1, xFilial("SA2")+SC7->C7_I_CDTRA+SC7->C7_I_LJTRA, "A2_NREDUZ"),1,30), " "),oFont11b)
+oPrint:Say (nlinha,1210,If( SC7->C7_I_CDTRA <> "      ", "Cidade: " + SubStr(Posicione("SA2", 1, xFilial("SA2")+SC7->C7_I_CDTRA+SC7->C7_I_LJTRA, "A2_MUN"),1,30), " "),oFont11b)
+nlinha+=nSaltoLinha
+oPrint:Say (nlinha,1210,If( SC7->C7_I_CDTRA <> "      ", "Bairro: " + SubStr(Posicione("SA2", 1, xFilial("SA2")+SC7->C7_I_CDTRA+SC7->C7_I_LJTRA, "A2_BAIRRO"),1,25), " "),oFont11b)
+oPrint:Say (nlinha,2100,If( SC7->C7_I_CDTRA <> "      ", "Estado: " + Posicione("SA2", 1, xFilial("SA2")+SC7->C7_I_CDTRA+SC7->C7_I_LJTRA, "A2_EST"), " "),oFont11b)
+			
+nlinha+=nSaltoLinha
+			
+oPrint:Say (nlinha,1210,If( SC7->C7_I_CDTRA <> "      ", "Nome Fantasia: " + SubStr(Posicione("SA2", 1, xFilial("SA2")+SC7->C7_I_CDTRA+SC7->C7_I_LJTRA, "A2_NREDUZ"),1,30), " "),oFont11b)
 			
 //Imprime as linhas das Assinaturas do comprador, gerencia e diretoria
 oPrint:Line(nLinha,0050,nlinha,0400)    //Linha comprador
@@ -1324,13 +1324,13 @@ oPrint:Line(nLinha,0830,nlinha,1180)    //Linha comprador
 
 nlinha+=nSaltoLinha
 			
-oPrint:Say (nlinha,1210,if( SC7->C7_I_CDTRA <> "      ", "Telefone: (" + AllTrim(Posicione("SA2", 1, xFilial("SA2")+SC7->C7_I_CDTRA+SC7->C7_I_LJTRA, "A2_DDD")) + ")" + Posicione("SA2", 1, xFilial("SA2")+SC7->C7_I_CDTRA+SC7->C7_I_LJTRA, "A2_TEL"), " "),oFont11b)
+oPrint:Say (nlinha,1210,If( SC7->C7_I_CDTRA <> "      ", "Telefone: (" + AllTrim(Posicione("SA2", 1, xFilial("SA2")+SC7->C7_I_CDTRA+SC7->C7_I_LJTRA, "A2_DDD")) + ")" + Posicione("SA2", 1, xFilial("SA2")+SC7->C7_I_CDTRA+SC7->C7_I_LJTRA, "A2_TEL"), " "),oFont11b)
 nlinha+=nSaltoLinha
 		
-oPrint:Say (nlinha,1210,if( SC7->C7_I_CDTRA <> "      ", "Contato: " + Posicione("SA2", 1, xFilial("SA2")+SC7->C7_I_CDTRA+SC7->C7_I_LJTRA, "A2_CONTATO"), " "),oFont11b)            
+oPrint:Say (nlinha,1210,If( SC7->C7_I_CDTRA <> "      ", "Contato: " + Posicione("SA2", 1, xFilial("SA2")+SC7->C7_I_CDTRA+SC7->C7_I_LJTRA, "A2_CONTATO"), " "),oFont11b)            
 nlinha+=nSaltoLinha
 			
-oPrint:Say (nlinha,1210,if( SC7->C7_I_CDTRA <> "      ", "Obs. Frete: " + if(SC7->C7_I_TPFRT == "1","Entregar na Transportadora","Solicitar Coleta pela Transportadora" ), " "),oFont11b)            
+oPrint:Say (nlinha,1210,If( SC7->C7_I_CDTRA <> "      ", "Obs. Frete: " + If(SC7->C7_I_TPFRT == "1","Entregar na Transportadora","Solicitar Coleta pela Transportadora" ), " "),oFont11b)            
 nlinha+=nSaltoLinha     
 			
 oPrint:Line(nlinha,0030,nlinha,2360) 
@@ -1340,7 +1340,7 @@ oPrint:Line(nlinInTran,1200,nlinha,1200)    //Coluna divisoria Transportadora
 			                                                                  
 //Colore a obs no final do relatorio
 //oPrint:FillRect({(nlinha+3),0030,nlinha+nSaltoLinha,2360},oBrush)
-If SC7->C7_TIPO == 1 .OR. SC7->C7_TIPO == 3
+If SC7->C7_TIPO == 1 .Or. SC7->C7_TIPO == 3
 	oPrint:Say (nlinha,0030,STR0081,oFont11b)//"NOTA: So aceitaremos a mercadoria se na sua Nota Fiscal constar o numero do nosso Pedido de Compras."            
 Else
 	oPrint:Say (nlinha,0030,STR0083,oFont11b)//"NOTA: So aceitaremos a mercadoria se na sua Nota Fiscal constar o numero da Autorizacao de Entrega."
@@ -1351,7 +1351,7 @@ nlinha+=nSaltoLinha
 //Imprime box 
 oPrint:Box(nLinhaInic,0030,nLinha,nColFinal)
 
-restArea(aAreaSC7)
+FWRestArea(aAreaSC7)
 
 Return
 
@@ -1365,18 +1365,18 @@ Parametros--------: numero		- N=mero de linhas
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static function RCOM006G(numero)
+Static Function RCOM006G(numero)
       
 	//quando acaba de imprimir os produtos e se chega no final da pagina     
 	//final da pagina 3300
-	if nLinha > numero                    
+	If nLinha > numero                    
 		//Imprime box 
 		oPrint:Box(nLinhaInic,0030,nLinha,nColFinal)
 		oPrint:EndPage()	// Finaliza a Pagina.
 		oPrint:StartPage()	// Inicia uma nova pagina                  
 		nLinha:=0100        
 		nPagina++
-	EndIF
+	EndIf
 
 Return
 
@@ -1428,7 +1428,7 @@ Retorno-----------: Nenhum
 */
 Static Function RCOM0061(cPedido,cItem,cSequen,cFiltro)
 
-Local aArea		:= GetArea()
+Local aArea		:= FWGetArea()
 Local aAreaSC7	:= SC7->(GetArea())
 Local cValid	:= ""
 Local nPosRef	:= 0
@@ -1436,21 +1436,21 @@ Local nItem		:= 0
 Local cItemDe	:= IIf(cItem==Nil,'',cItem)
 Local cItemAte	:= IIf(cItem==Nil,Repl('Z',Len(SC7->C7_ITEM)),cItem)
 Local cRefCols	:= '' , D
-DEFAULT cSequen	:= ""
-DEFAULT cFiltro	:= ""
+Default cSequen	:= ""
+Default cFiltro	:= ""
 
-dbSelectArea("SC7")
-dbSetOrder(1)
-If dbSeek(xFilial("SC7")+cPedido+cItemDe+Alltrim(cSequen))
+DBSelectArea("SC7")
+DBSetOrder(1)
+If DBSeek(xFilial("SC7")+cPedido+cItemDe+AllTrim(cSequen))
 	MaFisEnd()
 	MaFisIni(SC7->C7_FORNECE,SC7->C7_LOJA,"F","N","R",{})
-	While !Eof() .AND. SC7->C7_FILIAL+SC7->C7_NUM == xFilial("SC7")+cPedido .AND. ;
-			SC7->C7_ITEM <= cItemAte .AND. (Empty(cSequen) .OR. cSequen == SC7->C7_SEQUEN)
+	While !Eof() .And. SC7->C7_FILIAL+SC7->C7_NUM == xFilial("SC7")+cPedido .And. ;
+			SC7->C7_ITEM <= cItemAte .And. (Empty(cSequen) .Or. cSequen == SC7->C7_SEQUEN)
 
 		// Nao processar os Impostos se o item possuir residuo eliminado  
 		If &cFiltro
-			dbSelectArea('SC7')
-			dbSkip()
+			DBSelectArea('SC7')
+			DBSkip()
 			Loop
 		EndIf
             
@@ -1459,25 +1459,25 @@ If dbSeek(xFilial("SC7")+cPedido+cItemDe+Alltrim(cSequen))
 		MaFisIniLoad(nItem)
 
 		_aSC7 := SC7->(DBSTRUCT())
-		FOR D := 1 TO LEN(_aSC7)
+		For D := 1 TO Len(_aSC7)
 		    _cCampo := _aSC7[D][1]
-			cValid	:= StrTran(UPPER(Getsx3cache(_cCampo,"X3_VALID") )," ","")
+			cValid	:= StrTran(Upper(Getsx3cache(_cCampo,"X3_VALID") )," ","")
 			cValid	:= StrTran(cValid,"'",'"')
 			If "MAFISREF" $ cValid
 				nPosRef  := AT('MAFISREF("',cValid) + 10
-				cRefCols := Substr(cValid,nPosRef,AT('","MT120",',cValid)-nPosRef )
+				cRefCols := SubStr(cValid,nPosRef,AT('","MT120",',cValid)-nPosRef )
 				// Carrega os valores direto do SC7.           
 				MaFisLoad(cRefCols,&("SC7->"+_cCampo),nItem)
 			EndIf
-		NEXT
+		Next
 
 		MaFisEndLoad(nItem,2)
-		dbSelectArea('SC7')
-		dbSkip()
+		DBSelectArea('SC7')
+		DBSkip()
 	End
 EndIf
 
-RestArea(aAreaSC7)
-RestArea(aArea)
+FWRestArea(aAreaSC7)
+FWRestArea(aArea)
 
 Return .T.

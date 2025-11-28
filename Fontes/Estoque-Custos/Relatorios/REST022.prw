@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Igor Melgaço  | 04/04/2023 | Chamado 43327. Nova query e filtros.  
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 02/09/2024 | Chamado 48286. Incluído filtro para desconsiderar contas específicas
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 06/09/2024 | Chamado 48461. Relatório refeito, incluindo novas informações e versões analíticas e sintéticas
+Igor Melgaço  |04/04/2023| Chamado 43327. Nova query e filtros.  
+Lucas Borges  |02/09/2024| Chamado 48286. Incluído filtro para desconsiderar contas específicas
+Lucas Borges  |06/09/2024| Chamado 48461. Relatório refeito, incluindo novas informações e versões analíticas e sintéticas
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: REST022
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 14/02/2023
-===============================================================================================================================
 Descrição---------: Relatório Centro de Custo Unificado. Chamado 42999
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -45,11 +37,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 14/02/2023
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -100,11 +89,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 14/02/2022
-===============================================================================================================================
 Descrição---------: Processa impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -128,10 +114,10 @@ Local _cGrpDesp := ""
 If MV_PAR01 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"SF1")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -198,7 +184,7 @@ oReport:SetMeter(0)
 BeginSql alias _cAlias
 SELECT ANOMES, CT2_FILORI FILIAL, FIL.M0_FILIAL DESC_FIL, CT1_I_UNIF GRUPO_DESPESA, RTRIM(CT1_I_UNIF)||S.CTT_CUSTO CODIGO, S.CTT_CUSTO CC_UNIFICADO, S.CTT_DESC01 DESC_CC_UNIFICADO, SUM(CT2_VALOR) CT2_VALOR %exp:_cCampos%
   FROM %Table:CTT% CTT, SYS_COMPANY FIL, %Table:CTT% S,
-       (SELECT SUBSTR(CT2_DATA,1,6) ANOMES, CT2_FILORI, CT1_I_UNIF, CT2_CCD CCUSTO, SUM(CT2_VALOR) * -1 CT2_VALOR %exp:_cCamposD%
+       (SELECT SubStr(CT2_DATA,1,6) ANOMES, CT2_FILORI, CT1_I_UNIF, CT2_CCD CCUSTO, SUM(CT2_VALOR) * -1 CT2_VALOR %exp:_cCamposD%
           FROM %Table:CT2% CT2, %Table:CT1% CT1
          WHERE CT2.D_E_L_E_T_ = ' '
            AND CT1.D_E_L_E_T_ = ' '
@@ -209,9 +195,9 @@ SELECT ANOMES, CT2_FILORI FILIAL, FIL.M0_FILIAL DESC_FIL, CT1_I_UNIF GRUPO_DESPE
            AND CT2_DEBITO BETWEEN '3299' AND '3299ZZZZZZ'
            AND CT2_DEBITO BETWEEN %exp:MV_PAR04% AND %exp:MV_PAR05%
            AND CT1_I_UNIF BETWEEN %exp:MV_PAR08% AND %exp:MV_PAR09%
-         GROUP BY SUBSTR(CT2_DATA,1,6), CT2_FILORI, CT1_I_UNIF, CT2_CCD %exp:_cGroupD%
+         GROUP BY SubStr(CT2_DATA,1,6), CT2_FILORI, CT1_I_UNIF, CT2_CCD %exp:_cGroupD%
         UNION
-        SELECT SUBSTR(CT2_DATA,1,6) ANOMES, CT2_FILORI, CT1_I_UNIF, CT2_CCC CCUSTO, SUM(CT2_VALOR) CT2_VALOR %exp:_cCamposC%
+        SELECT SubStr(CT2_DATA,1,6) ANOMES, CT2_FILORI, CT1_I_UNIF, CT2_CCC CCUSTO, SUM(CT2_VALOR) CT2_VALOR %exp:_cCamposC%
           FROM %Table:CT2% CT2, %Table:CT1% CT1
          WHERE CT2.D_E_L_E_T_ = ' '
            AND CT1.D_E_L_E_T_ = ' '
@@ -222,7 +208,7 @@ SELECT ANOMES, CT2_FILORI FILIAL, FIL.M0_FILIAL DESC_FIL, CT1_I_UNIF GRUPO_DESPE
            AND CT2_CREDIT BETWEEN '3299' AND '3299ZZZZZZ'
            AND CT2_CREDIT BETWEEN %exp:MV_PAR04% AND %exp:MV_PAR05%
            AND CT1_I_UNIF BETWEEN %exp:MV_PAR08% AND %exp:MV_PAR09%
-         GROUP BY SUBSTR(CT2_DATA,1,6), CT2_FILORI, CT1_I_UNIF, CT2_CCC %exp:_cGroupC%
+         GROUP BY SubStr(CT2_DATA,1,6), CT2_FILORI, CT1_I_UNIF, CT2_CCC %exp:_cGroupC%
        ) MOV
  WHERE CTT.D_E_L_E_T_(+) = ' '
    AND S.D_E_L_E_T_(+) = ' '
@@ -252,15 +238,15 @@ oReport:Section(1):Init()
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(0)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->FILIAL+' - '+(_cAlias)->DESC_FIL
 	_cGrpDesp := (_cAlias)->GRUPO_DESPESA
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

@@ -2,20 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 04/07/2019 | Correção na origem do título. Chamado 29866
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 27/09/2019 | Revisão de fontes. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 12/12/2021 | Retirada função proibída para controle de transação. Chamado 38596
+Lucas Borges  |04/07/2019| Chamado 29866. Correção na origem do título.
+Lucas Borges  |27/09/2019| Chamado 28346. Revisão de fontes.
+Lucas Borges  |12/12/2021| Chamado 38596. Retirada função proibída para controle de transação.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "Protheus.ch"
+#Include "TOTVS.ch"
 #Include "FWMVCDef.ch"
 
 /*
@@ -23,11 +18,8 @@ Lucas Borges  | 12/12/2021 | Retirada função proibída para controle de transação
 Programa----------: AGLT009
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/12/2014
-===============================================================================================================================
 Descrição---------: Lançamentos avulsos para pagamento de produtores. Chamado 8374
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -50,18 +42,15 @@ _oBrowse:AddLegend( "Z08_STSJUR<>'A'" , "RED"		, "Pendente" )
 
 _oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MenuDef
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/12/2014
-===============================================================================================================================
 Descrição---------: Rotina de definição automática do menu via MVC
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: aRotina - Definições do menu principal da Rotina.
 ===============================================================================================================================
 */
@@ -83,11 +72,8 @@ Return( _aRotina )
 Programa----------: ModelDef
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/12/2014
-===============================================================================================================================
 Descrição---------: Rotina de definição do Modelo de Dados do MVC
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: oModel - Objeto do modelo de dados do MVC
 ===============================================================================================================================
 */
@@ -115,11 +101,8 @@ Return( _oModel )
 Programa----------: ViewDef
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/12/2014
-===============================================================================================================================
 Descrição---------: Rotina de definição da View do MVC
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: oView - Objeto de exibição do MVC
 ===============================================================================================================================
 */
@@ -146,11 +129,8 @@ Return( _oView )
 Programa----------: AGLT009I
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/12/2014
-===============================================================================================================================
 Descrição---------: Validação da inclusão de registros
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -201,10 +181,10 @@ DBSelectArea(_cAlias)
 DEFINE MSDIALOG _oDlg TITLE _cTit From 000,000 To 055, 240			OF _oDlg
 
 	@ 002 , 002 TO 018,300 LABEL ''		   							OF _oDlg PIXEL
-	@ 006 , 005	SAY 'Arquivo de importação: '						OF _oDlg PIXEL SIZE 060,009
+	@ 006 , 005	Say 'Arquivo de importação: '						OF _oDlg PIXEL SIZE 060,009
 	@ 004 , 065	MSGET _oArq VAR _cArq	 							OF _oDlg PIXEL SIZE 205,010 PICTURE "@!"
 	
-	DEFINE SBUTTON FROM 004 , 270 TYPE 14							OF _oDlg ENABLE ;
+	DEFINE SBUTTON FROM 004 , 270 Type 14							OF _oDlg ENABLE ;
 	ACTION ( _cArq := cGetFile(_cTip,'Informe o arquivo a Importar:',0,'SERVIDOR\',.T.,GETF_LOCALHARD+GETF_NETWORKDRIVE) , LjMsgRun('Verificando o arquivo...','Aguarde!',{|| AGLT009INI( _cArq , @_oLbx , _aHeader , _cAlias ) } ) , _oLbx:Refresh() )
 	
 	@ 020 , 002 TO _aPosObj[01][03] , _aPosObj[01][04] LABEL ""		OF _oDlg PIXEL
@@ -224,18 +204,15 @@ ACTIVATE MSDIALOG _oDlg CENTER ON INIT EnchoiceBar( _oDlg , _bOk , _bCan )
 (_cAlias)->( DBCloseArea() )
 _oTempTable:Delete()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT009INI
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/12/2014
-===============================================================================================================================
 Descrição---------: Validação da inclusão de registros
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -253,7 +230,7 @@ _cArq := Lower(AllTrim(_cArq))
 
 If !File( _cArq )
 	MsgStop("Arquivo informado é invalido!","AGLT00901")
-	Return()
+	Return
 EndIf
 
 //====================================================================================================
@@ -283,7 +260,7 @@ While !FT_FEOF()
 		aAdd(aLinha,"")
 	Next nI
 	
-	(_cAlias)->( Reclock( _cAlias , .T. ) )
+	(_cAlias)->( RecLock( _cAlias , .T. ) )
 	
 		(_cAlias)->LINHA := StrZero( nLinha , 6 )
 		
@@ -305,29 +282,26 @@ While !FT_FEOF()
 			
 		Next nI
 	
-	(_cAlias)->( MsUnlock() )
+	(_cAlias)->( MSUnLock() )
 	   
 FT_FSKIP()
 EndDo
 
 FT_FUSE()
 
-FCLOSE(nHandler)
+FClose(nHandler)
 
 (_cAlias)->( DBGoTop() )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: ITLeLin
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/12/2014
-===============================================================================================================================
 Descrição---------: Função para leitura das linhas do arquivo
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: oView - Objeto de exibição do MVC
 ===============================================================================================================================
 */
@@ -363,11 +337,8 @@ Return( aString )
 Programa----------: AGLT009GRV
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/12/2014
-===============================================================================================================================
 Descrição---------: Rotina de gravação da importação dos dados de arquivos
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -414,13 +385,13 @@ While (_cAlias)->(!Eof())
 			Z08->Z08_VALPAG	:= (_cAlias)->VALORAD
 			Z08->Z08_SALDO	:= (_cAlias)->SALDO
 			
-			Z08->( MsUnLock() )
+			Z08->( MSUnLock() )
 			
 			_nReg++
 			
 			If __lSX8
 				ConfirmSX8()
-			Endif
+			EndIf
 		
 		EndIf
 		
@@ -446,18 +417,15 @@ Else
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT009FOR
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/12/2014
-===============================================================================================================================
-Descrição---------: Função para procurar e retornar o Recno da Tabela SA2 se o fornecedor já for cadastrado.
-===============================================================================================================================
+Descrição---------: Função para procurar e retornar o Recno da Tabela SA2 se o fornecedor já For cadastrado.
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -471,12 +439,12 @@ Default _cCodPrd	:= ''
 //====================================================================================================
 // Monta e executa a consulta no cadastro de Fornecedores
 //====================================================================================================
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 	SELECT R_E_C_N_O_ REGSA2
 	FROM %Table:SA2% SA2
 	WHERE SA2.D_E_L_E_T_ =' '
 	AND A2_L_ANTIG = %exp:_cCodPrd%
-EndSQL
+EndSql
 
 If (_cAlias)->( !Eof() ) .And. !Empty( (_cAlias)->REGSA2 )
 	_nRegSA2 := (_cAlias)->REGSA2
@@ -491,11 +459,8 @@ Return( _nRegSA2 )
 Programa----------: AGLT009J
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/12/2014
-===============================================================================================================================
 Descrição---------: Rotina para imprimir os documentos jurídicos de aceite das condições de pagamento.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -763,7 +728,7 @@ If (_cAlias)->(!Eof())
 				_nLinha += 010
 				
 				_oPrint:Say( _nLinha , 0370 , _aNotas[_nX][01]										, _oFont14 )
-				_oPrint:Say( _nLinha , 1020 , DtoC( StoD( _aNotas[_nX][02] ) )						, _oFont14 )
+				_oPrint:Say( _nLinha , 1020 , DToC( SToD( _aNotas[_nX][02] ) )						, _oFont14 )
 				_oPrint:Say( _nLinha , 1980 , Transform( _aNotas[_nX][03] , '@E 999,999,999.99' )	, _oFont14 ,,,, 1 )
 				
 				_nLinha += 060
@@ -781,7 +746,7 @@ If (_cAlias)->(!Eof())
 				_nLinha += 010
 				
 				_oPrint:Say( _nLinha , 0370 , 'Adiantamento'										, _oFont14 )
-				_oPrint:Say( _nLinha , 1020 , DtoC( StoD( '20141205' ) )							, _oFont14 )
+				_oPrint:Say( _nLinha , 1020 , DToC( SToD( '20141205' ) )							, _oFont14 )
 				_oPrint:Say( _nLinha , 1980 , Transform( _nAdiant , '@E 999,999,999.99' )			, _oFont14 ,,,, 1 )
 				
 				_nLinha += 060
@@ -1084,18 +1049,15 @@ If (_cAlias)->(!Eof())
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: ImpTexto
 Autor-------------: Fabiano Dias
 Data da Criacao---: 06/09/2012
-===============================================================================================================================
 Descrição---------: Função para imprimir o texto no documento com a formatação Justificada
-===============================================================================================================================
 Parametros--------: _cTexto , _nLinha , _oPrint
-===============================================================================================================================
 Retorno-----------: Nehum
 ===============================================================================================================================
 */
@@ -1131,7 +1093,7 @@ For _nX := 1 to Len(_aTexto)
 			_cLinImpr	:= ""
 			
 			//====================================================================================================
-			// Se for possivel distribuir os espacos em branco entre os numero de palavras
+			// Se For possivel distribuir os espacos em branco entre os numero de palavras
 			//====================================================================================================
 			If _nNumEspac < _nNumPalav - 2
 			
@@ -1183,7 +1145,7 @@ For _nX := 1 to Len(_aTexto)
                          							                   
             _nPosInic:= _nX
             
-            _nX			:= _nX-1 //Para que a palavra que nao foi impressa neste loop seja impressa na proxima execucao
+            _nX			:= _nX-1 //Para que a palavra que nao foi impressa neste Loop seja impressa na proxima execucao
             _lEntrou	:= .T.
             
 	  	EndIf
@@ -1195,8 +1157,8 @@ For _nX := 1 to Len(_aTexto)
 	//====================================================================================================
 	If Len(_cLinImpr) == _nNumCarac
 	
-		_oPrint:Say( _nlinha , 350 , _cLinImpr , _oFont12 )
-		_nlinha += 040
+		_oPrint:Say( _nLinha , 350 , _cLinImpr , _oFont12 )
+		_nLinha += 040
 		
 		_cLinImpr  := ""
 		_nNumPalav := 0
@@ -1211,23 +1173,20 @@ Next _nX
 
 If Len(_cLinImpr) < _nNumCarac
 
-	_oPrint:Say( _nlinha , 350 , _cLinImpr , _oFont12 )
-	_nlinha += 50
+	_oPrint:Say( _nLinha , 350 , _cLinImpr , _oFont12 )
+	_nLinha += 50
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT009G
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/12/2014
-===============================================================================================================================
 Descrição---------: Rotina para geração de títulos no módulo Financeiro de acordo com os lançamentos selecionados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1239,10 +1198,10 @@ Local _cPerg	:= 'AGLT009F'
 
 If !Pergunte( _cPerg )
 	Aviso( "AGLT00906" , 'Operação cancelada pelo usuário!' , {'Fechar'} )
-	Return()
+	Return
 EndIf
 
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 	SELECT Z08.Z08_TERMO TERMO, Z08.Z08_CODFOR FORN, Z08.Z08_LOJFOR LOJA, SA2.A2_NOME NOME, Z08.Z08_EMISSA EMI_NF, 
 			Z08.Z08_VALOR VAL_NF, Z08.Z08_VALPAG VAL_AD, Z08.R_E_C_N_O_ REGZ08
 	FROM %Table:Z08% Z08, %Table:SA2% SA2
@@ -1255,14 +1214,14 @@ BeginSQL Alias _cAlias
 	AND Z08.Z08_LOJFOR BETWEEN %exp:MV_PAR02% AND %exp:MV_PAR04%
 	AND Z08.Z08_EMISSA BETWEEN %exp:MV_PAR05% AND %exp:MV_PAR06%
 	AND NOT EXISTS ( 
-		SELECT SE2.E2_NUM FROM %table:SE2% SE2 
+		SELECT SE2.E2_NUM FROM %Table:SE2% SE2 
 		WHERE SE2.D_E_L_E_T_ =' '
 		AND SE2.E2_FILIAL = Z08.Z08_FILIAL
 		AND SE2.E2_PREFIXO = Z08.Z08_PREFIX
 		AND SE2.E2_NUM = Z08.Z08_NUM 
 		AND SE2.E2_TIPO = Z08.Z08_TIPO)
 	ORDER BY SA2.A2_NOME, Z08.Z08_TERMO, Z08.Z08_CODFOR, Z08.Z08_LOJFOR
-EndSQL
+EndSql
 
 While (_cAlias)->( !Eof() )
 	If !Empty( (_cAlias)->REGZ08 )
@@ -1279,18 +1238,15 @@ Else
 	AGLT009DFN( _aDados )
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT009FIN
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/12/2014
-===============================================================================================================================
 Descrição---------: Rotina que gera os títulos de acordo com os parâmetros informados e os registros selecionados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1301,15 +1257,15 @@ Local _aLogPrc		:= {}
 Local _cErro		:= ''
 Local _nX, _nI		:= 0
 Local _cPerg		:= 'AGLT009G'
-Local _dDtVenc		:= StoD('')
-Local _dDtVenR		:= StoD('')
+Local _dDtVenc		:= SToD('')
+Local _dDtVenR		:= SToD('')
 Local _cCodUsr		:= RetCodUsr()
 
 Private lMsErroAuto	:= .F.
 
 If !Pergunte( _cPerg )
 	Aviso( "AGLT00908" , 'Operação cancelada pelo usuário!' , {'Fechar'} )
-	Return()
+	Return
 EndIf
 
 If MessageBox(	'Confirma a configuração do Financeiro para a geração dos títulos ?'+ CRLF +;
@@ -1343,7 +1299,7 @@ For _nI := 1 To Len(_aResumo)
 	For _nX := 1 To _aResumo[_nI][08]
 		
 		If _nX == _aResumo[_nI][08]
-			_nValTit += IIF( ( _aResumo[_nI][07] - Round( _nValTit * _nX , 2 ) ) > 0 , ( _aResumo[_nI][07] - Round( _nValTit * _nX , 2 ) ) , 0 )
+			_nValTit += IIf( ( _aResumo[_nI][07] - Round( _nValTit * _nX , 2 ) ) > 0 , ( _aResumo[_nI][07] - Round( _nValTit * _nX , 2 ) ) , 0 )
 		EndIf
 		
 		_dDtVenc	:= &( 'MV_PAR'+ StrZero( _nX + 8 , 2 ) )
@@ -1353,7 +1309,7 @@ For _nI := 1 To Len(_aResumo)
 		
 		_aTitSE2	:= {	{ "E2_PREFIXO"    , MV_PAR01					, Nil } ,; //01
 							{ "E2_NUM"        , _aResumo[_nI][09]			, Nil } ,; //02
-							{ "E2_PARCELA"    , STRZERO(_nX,2)				, Nil } ,; //03
+							{ "E2_PARCELA"    , StrZero(_nX,2)				, Nil } ,; //03
 							{ "E2_TIPO"       , 'NF'						, Nil } ,; //04
 							{ "E2_NATUREZ"    , MV_PAR03					, Nil } ,; //05
 							{ "E2_FORNECE"    , _aResumo[_nI][02]			, Nil } ,; //06
@@ -1376,7 +1332,7 @@ For _nI := 1 To Len(_aResumo)
 		
 		If lMsErroAuto
 			_cErro := AllTrim( MostraErro('C:') )
-			AAdd(	_aLogPrc , {	_aTitSE2[01][02]																			,; //Prefixo
+			aAdd(	_aLogPrc , {	_aTitSE2[01][02]																			,; //Prefixo
 									_aTitSE2[02][02]																			,; //Número
 									_aTitSE2[03][02]																			,; //Parcela
 									_aTitSE2[04][02]																			,; //Tipo
@@ -1391,7 +1347,7 @@ For _nI := 1 To Len(_aResumo)
 									_cErro																						}) //Mensagem
 			_lErroAut := .T.
 		Else
-			AAdd(	_aLogPrc , {	_aTitSE2[01][02]																			,; //Prefixo
+			aAdd(	_aLogPrc , {	_aTitSE2[01][02]																			,; //Prefixo
 									_aTitSE2[02][02]																			,; //Número
 									_aTitSE2[03][02]																			,; //Parcela
 									_aTitSE2[04][02]																			,; //Tipo
@@ -1417,7 +1373,7 @@ For _nI := 1 To Len(_aResumo)
 	EndIf
 	END TRANSACTION
 	
-	MsUnLockAll()
+	MSUnLockAll()
 	
 	_nPosIni := aScan( _aDados , {|x| x[02]+x[03] == _aTitSE2[06][02]+_aTitSE2[07][02] } )
 	
@@ -1436,7 +1392,7 @@ For _nI := 1 To Len(_aResumo)
 				Z08->Z08_NUM	:= _aTitSE2[02][02]
 				Z08->Z08_TIPO	:= _aTitSE2[04][02]
 				Z08->Z08_NATURE	:= _aTitSE2[05][02]
-			Z08->( MsUnLock() )
+			Z08->( MSUnLock() )
 			
 		_nPosIni++
 		EndDo
@@ -1452,18 +1408,15 @@ If !Empty( _aLogPrc )
 					_aLogPrc , .F. , 1 , 'Verifique o processamento dos registros...'																	 )
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT009DFN
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/12/2014
-===============================================================================================================================
 Descrição---------: Rotina que Monta a tela de processamento da integração
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1617,17 +1570,17 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From aSize[7],00 to aSize[6],aSize[5] Of oM
 	//====================================================================================================
 	// Inclui os dados dos totalizadores da tela
 	//====================================================================================================
-	@ 004 , 004 SAY "Valor Total a Pagar:"							SIZE 100,07 OF oScrPanel PIXEL
-	@ 012 , 004 SAY Transform( _nValTot  , '@E 999,999,999.99' )	SIZE 100,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
+	@ 004 , 004 Say "Valor Total a Pagar:"							SIZE 100,07 OF oScrPanel PIXEL
+	@ 012 , 004 Say Transform( _nValTot  , '@E 999,999,999.99' )	SIZE 100,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
 	
-	@ 004 , 108 SAY "Qtde. NF:"								 		SIZE 100,07 OF oScrPanel PIXEL
-	@ 012 , 108 SAY Transform( _nQtdNF   , '@E 999,999,999' )		SIZE 100,09	OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
+	@ 004 , 108 Say "Qtde. NF:"								 		SIZE 100,07 OF oScrPanel PIXEL
+	@ 012 , 108 Say Transform( _nQtdNF   , '@E 999,999,999' )		SIZE 100,09	OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
 	
-	@ 004 , 212 SAY "Qtde. Produtores:"						 		SIZE 100,07 OF oScrPanel PIXEL
-	@ 012 , 212 SAY Transform( _nQtdProd , '@E 999,999,999' )	 	SIZE 100,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
+	@ 004 , 212 Say "Qtde. Produtores:"						 		SIZE 100,07 OF oScrPanel PIXEL
+	@ 012 , 212 Say Transform( _nQtdProd , '@E 999,999,999' )	 	SIZE 100,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
 	
-	@ 004 , 316 SAY "Primeiro Vencimento:"					 		SIZE 100,07 OF oScrPanel PIXEL
-	@ 012 , 316 SAY DtoC( MV_PAR09 )							 	SIZE 100,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
+	@ 004 , 316 Say "Primeiro Vencimento:"					 		SIZE 100,07 OF oScrPanel PIXEL
+	@ 012 , 316 Say DToC( MV_PAR09 )							 	SIZE 100,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
 	
 	//====================================================================================================
 	// Monta os Botoes da Barra Superior
@@ -1651,18 +1604,15 @@ If _lGera
 	Processa( {|| AGLT009FIN( _aResumo , _aDados ) } , 'Aguarde!' , 'Iniciando o processamento...' )
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: fMontaPM8
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/12/2014
-===============================================================================================================================
 Descrição---------: Rotina que realiza a consulta dos dados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1689,14 +1639,14 @@ If nPosChv > 0
 EndIf
 
 If Empty(aLbxAux)
-	aAdd( aLbxAux , { 'Não encontrada' , '' , StoD('') , 0 } )
+	aAdd( aLbxAux , { 'Não encontrada' , '' , SToD('') , 0 } )
 EndIf
 
 If	Len(aLbxAux) > 0 .And. ValType(oLbxAux) == "O"
 	oLbxAux:SetArray(aLbxAux)
 	oLbxAux:bLine:={||{	aLbxAux[oLbxAux:nAt][01]									,; // 01
 						aLbxAux[oLbxAux:nAt][02]									,; // 02
-						DtoC( aLbxAux[oLbxAux:nAt][03] ) 							,; // 03
+						DToC( aLbxAux[oLbxAux:nAt][03] ) 							,; // 03
 						Transform( aLbxAux[oLbxAux:nAt][04] , '@E 999,999,999.99' )	}} // 04
 	oLbxAux:Refresh()
 EndIf
@@ -1708,11 +1658,8 @@ Return
 Programa----------: AGLT009MRK
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/12/2014
-===============================================================================================================================
 Descrição---------: Função para auxiliar no controle de marcação do Browse
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1735,11 +1682,8 @@ Return
 Programa----------: AGLT009R
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/12/2014
-===============================================================================================================================
 Descrição---------: Relatório para conferência Jurídica dos Termos e Valores
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1761,11 +1705,8 @@ Return
 Programa----------: AGLT009MRJ
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/12/2014
-===============================================================================================================================
 Descrição---------: Função para processamento do relatório jurídico
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1788,7 +1729,7 @@ Private _nLinha	:= 0
 
 If MV_PAR07 == 1
 	_cFiltro += " AND Z08.Z08_STSJUR = 'A' "
-	_cFiltro += " AND Z08.Z08_DATAVA BETWEEN '"+ DTOS( MV_PAR08 ) +"' AND '"+ DTOS( MV_PAR09 ) +"' "
+	_cFiltro += " AND Z08.Z08_DATAVA BETWEEN '"+ DToS( MV_PAR08 ) +"' AND '"+ DToS( MV_PAR09 ) +"' "
 Else
 	_cFiltro += " AND Z08.Z08_STSJUR <> 'A'
 EndIf
@@ -1899,18 +1840,15 @@ Else
 	Aviso( "AGLT00915" , 'O relatório não retornou nenhum registro com os filtos informados! Verifique a parametrização e tente novamente.' , {'Fechar'} )
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT009CAB
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/12/2014
-===============================================================================================================================
-Descrição---------: Rotina que processa a impressão do cabeçalho
-===============================================================================================================================
+Descrição---------: Rotina que Processa a impressão do cabeçalho
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1946,18 +1884,15 @@ _nLinha += 050
 _oPrint:Line( _nLinha , 050 , _nLinha , 2400 )
 _nLinha += 050
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT009DAD
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/12/2014
-===============================================================================================================================
-Descrição---------: Rotina que processa a impressão dos dados
-===============================================================================================================================
+Descrição---------: Rotina que Processa a impressão dos dados
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1975,24 +1910,21 @@ _oPrint:Say( _nLinha , _aPosCol[06] , _aDadAux[06] , _oFont10 ,,,, 1 )
 
 _nLinha += 035
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT009A
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/12/2014
-===============================================================================================================================
 Descrição---------: Rotina de avaliação dos termos dos produtores
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: aRotina - Definições do menu principal da Rotina.
 ===============================================================================================================================
 */
 User Function AGLT009A()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _aNotas	:= {}
 Local _aHeader	:= {'Nota','Série','Emissão','Val.Nota'}
 Local _cCodFor	:= Z08->Z08_CODFOR
@@ -2013,7 +1945,7 @@ Local _aPosAux	:= { { 002 , 002 , 157 , 293 } }
 Local _bOk		:= {|x| _lRet := .T. , _oDlg:End() }
 Local _bCancel	:= {|x| _lRet := .F. , _oDlg:End() }
 
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 	SELECT Z08.Z08_NF, Z08.Z08_SERIE, Z08.Z08_EMISSA, Z08.Z08_VALOR, Z08.Z08_VALPAG, Z08.Z08_STSJUR
 	FROM %Table:Z08% Z08
 	WHERE Z08.D_E_L_E_T_ =' '
@@ -2021,7 +1953,7 @@ BeginSQL Alias _cAlias
 	AND Z08.Z08_CODFOR = %exp:_cCodFor%
 	AND Z08.Z08_LOJFOR = %exp:_cLojFor%
 	ORDER BY Z08.Z08_EMISSA
-EndSQL
+EndSql
 
 Count To _nTotReg
 (_cAlias)->( DBGoTop() )
@@ -2038,7 +1970,7 @@ If _nTotReg > 0
 		
 		aAdd( _aNotas , {	(_cAlias)->Z08_NF										,;
 							(_cAlias)->Z08_SERIE									,;
-							StoD( (_cAlias)->Z08_EMISSA )							,;
+							SToD( (_cAlias)->Z08_EMISSA )							,;
 							Transform( (_cAlias)->Z08_VALOR , '@E 999,999,999.99' )	})
 		
 	(_cAlias)->( DBSkip() )
@@ -2058,11 +1990,11 @@ If _nTotReg > 0
 	
 	DEFINE MSDIALOG _oDlg TITLE 'Avaliação do Termo do Produtor' FROM _aCoors[1],_aCoors[2] TO _aCoors[3],_aCoors[4] PIXEL
 	
-		@_aPosAux[01][01] , 010 SAY 'Código/Nome: '+ _cCodFor +'/'+ _cLojFor +' - '+ _cNomFor +'(Status Atual: '+ _cStatus +')'	OF _oDlg PIXEL ; _aPosAux[01][01] += 010
-		@_aPosAux[01][01] , 010 SAY 'Qtde. Notas: '+ Transform( Len(_aNotas)	, '@E 999,999,999'    )							OF _oDlg PIXEL
-		@_aPosAux[01][01] , 200 SAY 'Valor Total: '+ Transform( _nValTot		, '@E 999,999,999.99' )							OF _oDlg PIXEL ; _aPosAux[01][01] += 010
-		@_aPosAux[01][01] , 010 SAY 'Val.Adiant.: '+ Transform( _nValAdt		, '@E 999,999,999.99' )							OF _oDlg PIXEL
-		@_aPosAux[01][01] , 200 SAY 'Val.  Pagar: '+ Transform( _nValLiq		, '@E 999,999,999.99' )							OF _oDlg PIXEL ; _aPosAux[01][01] += 010
+		@_aPosAux[01][01] , 010 Say 'Código/Nome: '+ _cCodFor +'/'+ _cLojFor +' - '+ _cNomFor +'(Status Atual: '+ _cStatus +')'	OF _oDlg PIXEL ; _aPosAux[01][01] += 010
+		@_aPosAux[01][01] , 010 Say 'Qtde. Notas: '+ Transform( Len(_aNotas)	, '@E 999,999,999'    )							OF _oDlg PIXEL
+		@_aPosAux[01][01] , 200 Say 'Valor Total: '+ Transform( _nValTot		, '@E 999,999,999.99' )							OF _oDlg PIXEL ; _aPosAux[01][01] += 010
+		@_aPosAux[01][01] , 010 Say 'Val.Adiant.: '+ Transform( _nValAdt		, '@E 999,999,999.99' )							OF _oDlg PIXEL
+		@_aPosAux[01][01] , 200 Say 'Val.  Pagar: '+ Transform( _nValLiq		, '@E 999,999,999.99' )							OF _oDlg PIXEL ; _aPosAux[01][01] += 010
 		
 		@_aPosAux[01][01] , _aPosAux[01][02]	LISTBOX	_oLbxAux	;
 												FIELDS	HEADER ""	;
@@ -2082,7 +2014,7 @@ If _nTotReg > 0
 									_aNotas[_oLbxAux:nAt,03] ,;
 									_aNotas[_oLbxAux:nAt,04] }}
 	    
-		@_aPosAux[01][03] - 010 , 010 SAY 'Avaliação: '								OF _oDlg PIXEL
+		@_aPosAux[01][03] - 010 , 010 Say 'Avaliação: '								OF _oDlg PIXEL
 		@_aPosAux[01][03] - 012 , 040 COMBOBOX _oCombo VAR _cCombo ITEMS _aCombo	OF _oDlg PIXEL SIZE 180,10
 	
 	ACTIVATE MSDIALOG _oDlg ON INIT EnchoiceBar(_oDlg,_bOk,_bCancel) CENTERED
@@ -2096,36 +2028,33 @@ If _nTotReg > 0
 	
 EndIf
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT009STS
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/12/2014
-===============================================================================================================================
-Descrição---------: Rotina que processa a atualização de Status dos registros
-===============================================================================================================================
+Descrição---------: Rotina que Processa a atualização de Status dos registros
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function AGLT009STS( _cCodFor , _cLojFor , _cStatus )
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cAlias	:= GetNextAlias()
 
-BeginSQL Alias _cAlias
+BeginSql Alias _cAlias
 	SELECT Z08.R_E_C_N_O_ REGZ08
 	FROM %Table:Z08% Z08
 	WHERE Z08.D_E_L_E_T_ =' '
 	AND Z08.Z08_FILIAL = %xFilial:Z08%
 	AND Z08.Z08_CODFOR = %exp:_cCodFor%
 	AND Z08.Z08_LOJFOR = %exp:_cLojFor%
-EndSQL
+EndSql
 
 If (_cAlias)->( !Eof() )
 	
@@ -2135,8 +2064,8 @@ If (_cAlias)->( !Eof() )
 		Z08->( DBGoTo( (_cAlias)->REGZ08 ) )
 		Z08->( RecLock( 'Z08' , .F. ) )
 		Z08->Z08_STSJUR := _cStatus
-		Z08->Z08_DATAVA := IIF( _cStatus == 'A' , Date() , StoD('') )
-		Z08->( MsUnLock() )
+		Z08->Z08_DATAVA := IIf( _cStatus == 'A' , Date() , SToD('') )
+		Z08->( MSUnLock() )
 		
 	(_cAlias)->( DBSkip() )
 	EndDo
@@ -2147,6 +2076,6 @@ Else
 	Aviso( "AGLT00917" , 'Falha ao localizar os registros do Produtor! Informe a área de IT/ERP.' , {'Fechar'} )
 EndIf
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
-Return()
+Return

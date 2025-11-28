@@ -1,47 +1,30 @@
-/*  
+/*
 ===============================================================================================================================
-                          ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                           
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Alexandre Villar | 31/10/2014 | Incluída tratativa para os CFOPs 1933 e 2933. Chamado 7409
--------------------------------------------------------------------------------------------------------------------------------
- Alexandre Villar | 31/10/2014 | Correção da estrutura de filtros da query. Chamado 7913   
--------------------------------------------------------------------------------------------------------------------------------
- Josué Danich     | 02/05/2018 | Unificação de rotina validCTR - Chamado 24416
--------------------------------------------------------------------------------------------------------------------------------
- Alex Wallauer    | 22/10/2019 | Tratamento para o campo NOVO CLAIM. Chamado 30921 
--------------------------------------------------------------------------------------------------------------------------------
- Alex Wallauer    | 19/02/2020 | Correção do Tratamento do campo NOVO CLAIM. Chamado 32076
-------------------------------------------------------------------------------------------------------------------------------- 
- Alex Wallauer    | 03/11/2021 | Nova Validacao para E2_MSBLQL = '1' titulo bloqueado. Chamado 38128
+Alex Wallauer |22/10/2019| Chamado 30921. Tratamento para o campo NOVO CLAIM.
+Alex Wallauer |19/02/2020| Chamado 32076. Correção do Tratamento do campo NOVO CLAIM.
+Alex Wallauer |03/11/2021| Chamado 38128. Nova Validacao para E2_MSBLQL = '1' titulo bloqueado.
 ===============================================================================================================================
 */
 
-//===========================================================================
-//| Definições de Includes                                                  |
-//===========================================================================
-
-#Include "Rwmake.ch"
-#Include "Protheus.ch"
-#Include "TopConn.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: F580LBA
 Autor-------------: Guilherme D. Gesualdo
 Data da Criacao---: 12/09/2012
-===============================================================================================================================
 Descrição---------: PE de validação de liberação automatica de baixa de titulo a pagar
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Lógico - Indicando se os dados foram validados ou não
 ===============================================================================================================================
 */
 User Function F580LBA()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local aAreaSF1	:= SF1->(GetArea()) 
 Local aAreaSD1	:= SD1->(GetArea())
 
@@ -61,7 +44,7 @@ If !Empty(_cMarca)
 
 	_cTipo := Posicione( "SF1" , 1 , xFilial("SF1") + _cNumTit + _cPreTit + _cCodFor + _cLojFor , "F1_TIPO" )
 	
-	If _cTipo == "N" .And. !( Substr(_cCodFor,1,1) $ "C/G" ) .And. !( Posicione("SA2",1,xFilial("SA2")+_cCodFor+_cLojFor,"A2_I_EXCTR") == "S")
+	If _cTipo == "N" .And. !( SubStr(_cCodFor,1,1) $ "C/G" ) .And. !( Posicione("SA2",1,xFilial("SA2")+_cCodFor+_cLojFor,"A2_I_EXCTR") == "S")
 		
 		DBSelectArea("SD1")
 		SD1->( DBSetOrder(1) )
@@ -72,14 +55,14 @@ If !Empty(_cMarca)
 			//================================================================================
 			// Verificar para os ítens com CFOP: 1352 ou 2352 e produto <> '10000000006'
 			//================================================================================
-			If ( ALLTRIM(SD1->D1_CF) == '1352' .Or. ALLTRIM(SD1->D1_CF) == '2352' ) .And. ALLTRIM(SD1->D1_COD) <> '10000000006'
+			If ( AllTrim(SD1->D1_CF) == '1352' .Or. AllTrim(SD1->D1_CF) == '2352' ) .And. AllTrim(SD1->D1_COD) <> '10000000006'
 				_lVldCTR := .T.
 			EndIf
 			
 			//================================================================================
 			// Verificar para os ítens com CFOP: 1933 ou 2933 e produto == '10000000023'
 			//================================================================================
-			If ( ALLTRIM(SD1->D1_CF) == '1933' .Or. ALLTRIM(SD1->D1_CF) == '2933' ) .And. ALLTRIM(SD1->D1_COD) == '10000000023'
+			If ( AllTrim(SD1->D1_CF) == '1933' .Or. AllTrim(SD1->D1_CF) == '2933' ) .And. AllTrim(SD1->D1_COD) == '10000000023'
 				_lVldCTR := .T.
 			EndIf
 		
@@ -87,39 +70,39 @@ If !Empty(_cMarca)
 		EndDo
 					
 		If _lVldCTR 
-			fwMsgRun( , {||  _lRet := u_validCTR( _cCodFor , _cLojFor , _cNumTit , _cPreTit )  }, "Aguarde....","Verificando lançamento do CTR..."  )
+			FWMsgRun( , {||  _lRet := u_validCTR( _cCodFor , _cLojFor , _cNumTit , _cPreTit )  }, "Aguarde....","Verificando lançamento do CTR..."  )
 		EndIf
 		
 	EndIf
 
-     IF _lRet .AND. QRYSE2->E2_I_CLAIM = "1"
+     If _lRet .And. QRYSE2->E2_I_CLAIM = "1"
      
          _lAcesso := U_ITVACESS( 'ZZL' , 3 , 'ZZL_CLAIM' , "S" )
      
          If !_lAcesso
      
-     	    U_ITMSG('Usuário sem permissão para liberar titulos com Claim = Sim',"ATENÇÃO",;
+     	    U_ITMsg('Usuário sem permissão para liberar titulos com Claim = Sim',"ATENÇÃO",;
      		   	    'Caso necessário solicite a manutenção à um usuário com acesso ou, se necessário, solicite o acesso à área de TI/ERP.', 1  )
              _lRet := .F.
      	
           EndIf
      
-     Endif
+     EndIf
      
-     IF _lRet .AND. QRYSE2->E2_MSBLQL = "1"
+     If _lRet .And. QRYSE2->E2_MSBLQL = "1"
      
-        U_ITMSG('Não é possivel liberar o Titulo por que se encontra Bloqueado',"ATENÇÃO",;
+        U_ITMsg('Não é possivel liberar o Titulo por que se encontra Bloqueado',"ATENÇÃO",;
      	  	    'Solicite o desbloqueio do Titulo para Gestor da Area.', 1  )
         _lRet := .F.
      
-     Endif
+     EndIf
 
 EndIf
 
 
-RestArea(_aArea)
-RestArea(aAreaSF1)
-RestArea(aAreaSD1)
+FWRestArea(_aArea)
+FWRestArea(aAreaSF1)
+FWRestArea(aAreaSD1)
 
 Return( _lRet )
 

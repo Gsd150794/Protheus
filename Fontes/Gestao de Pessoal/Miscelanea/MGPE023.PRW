@@ -9,13 +9,8 @@ Lucas Borges  |13/10/2024| Chamado 48465. Retirada da função de conout
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "rwmake.ch"
-#INCLUDE "TBICONN.CH"  
-#INCLUDE 'TOPCONN.CH'
+#Include "TOTVS.ch"
+
 /*
 ===============================================================================================================================
 Programa----------: MGPE023
@@ -28,7 +23,7 @@ Retorno-----------: Nenhum
 */
 User Function MGPE023()
 Local _lTela     := .T.
-Local _cTimeIni  := TIME()
+Local _cTimeIni  := Time()
 Local _lRet      := .F.
 Local _lMGPE023 
 
@@ -50,7 +45,7 @@ Begin Sequence
 
    If _lMGPE023 // Executa ou não a rotina
       If _lTela
-         FWMSGRUN( ,{|oProc|  _lRet := MGPE023EM(oProc) } , "Hora Inicial: "+_cTimeIni+" Lendo Funcionários...")
+         FWMsgRun( ,{|oProc|  _lRet := MGPE023EM(oProc) } , "Hora Inicial: "+_cTimeIni+" Lendo Funcionários...")
       Else
          //Atualização tabela SM2
          FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MGPE023"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MGPE02301"/*cMsgId*/, "MGPE02301 - Início do Processamento"/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
@@ -108,7 +103,7 @@ _aResp := MGPE023BRO() //
 
 If Len(_aResp) = 0 
     If oProc <> Nil
-        U_ITMSG("Não há dados no periodo.","Envio do E-MAIL",,3)
+        U_ITMsg("Não há dados no periodo.","Envio do E-MAIL",,3)
     Else
         FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MGPE023"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MGPE02303"/*cMsgId*/, "MGPE02303 - Não há dados no periodo."/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
     EndIf
@@ -122,7 +117,7 @@ Else
         _cMsgEml := '<html>'
         _cMsgEml += '<head><title>'+_cTit+'</title></head>'
         _cMsgEml += '<body>'
-        _cMsgEml += '<style type="text/css"><!--'
+        _cMsgEml += '<style Type="text/css"><!--'
         _cMsgEml += 'table.bordasimples { border-collapse: collapse; }'
         _cMsgEml += 'table.bordasimples tr td { border:1px solid #777777; }'
         _cMsgEml += 'td.titulos	{ font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #C6E2FF; }'
@@ -145,7 +140,7 @@ Else
         _cMsgEml += '<br>'
         _cMsgEml += '<br>'
         _cMsgEml += '    <tr>'
-        _cMsgEml += '      <td class="itens" align="left" > Caro(a), '+ Alltrim(_aResp[_nCont][3]) +' <b></b></td>'
+        _cMsgEml += '      <td class="itens" align="left" > Caro(a), '+ AllTrim(_aResp[_nCont][3]) +' <b></b></td>'
         _cMsgEml += '    </tr>'
         _cMsgEml += '<br>'
         _cMsgEml += '    <tr>'            
@@ -173,7 +168,7 @@ Else
             _cMsgEml += '<br>'
             _cMsgEml += '<table class="bordasimples" width="1300">'
             _cMsgEml += '    <tr>'
-            _cMsgEml += '		<td align="center" colspan="'+ALLTRIM(STR(LEN(_aSizes)))+'" class="grupos"><b>'+cGetAssun+'</b></td>'
+            _cMsgEml += '		<td align="center" colspan="'+AllTrim(Str(Len(_aSizes)))+'" class="grupos"><b>'+cGetAssun+'</b></td>'
             _cMsgEml += '    </tr>'
             _cMsgEml += '    <tr>'
 
@@ -195,7 +190,7 @@ Else
                 
             Next
             
-            _cMsgEml := STRTRAN(_cMsgEml,"#LISTA#",_cGetLista)
+            _cMsgEml := StrTran(_cMsgEml,"#LISTA#",_cGetLista)
 
         EndIf
 
@@ -220,17 +215,17 @@ Else
         //ITEnvMail(cFrom       ,cEmailTo ,_cEmailCo,cEmailBcc,cAssunto ,cMensagem,cAttach   ,cAccount    ,cPassword   ,cServer     ,cPortCon    ,lRelauth     ,cUserAut     ,cPassAut     ,cLogErro)
         U_ITENVMAIL(_aConfig[01], cGetPara,   cGetCc,       "",cGetAssun, _cMsgEml,        "",_aConfig[01], _aConfig[02],_aConfig[03],_aConfig[04],_aConfig[05],_aConfig[06],_aConfig[07], @_cEmlLog )
 
-        cTGetPara += Iif(Empty(Alltrim(cTGetPara)),"","; ") + cGetPara
-        cTGetCc   += Iif(Empty(Alltrim(cTGetCc)),"","; ") + cGetCc
+        cTGetPara += IIf(Empty(AllTrim(cTGetPara)),"","; ") + cGetPara
+        cTGetCc   += IIf(Empty(AllTrim(cTGetCc)),"","; ") + cGetCc
 
     Next
 
     If oProc <> Nil
-        U_ITMSG(UPPER(_cEmlLog)+CHR(13)+CHR(10)+;
+        U_ITMsg(Upper(_cEmlLog)+CHR(13)+CHR(10)+;
         "E-mail para: "+cTGetPara+;
         " Com Copia: "+cTGetCc+CHR(13)+CHR(10),"Envio do E-MAIL",,3)
     Else
-        FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MGPE023"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MGPE02304"/*cMsgId*/, "MGPE02304 - "+UPPER(_cEmlLog)+"E-mail para: "+cTGetPara+" Com Copia: "+cTGetCc/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+        FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MGPE023"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MGPE02304"/*cMsgId*/, "MGPE02304 - "+Upper(_cEmlLog)+"E-mail para: "+cTGetPara+" Com Copia: "+cTGetCc/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
     EndIf
 EndIf
 
@@ -258,7 +253,6 @@ _cFiltro += " SRF.D_E_L_E_T_ = ' ' "
 _cFiltro += " AND RF_STATUS = '1' "
 _cFiltro += " AND (RF_DFEPRO1 + RF_DABPRO1 + RF_DFEPRO2 + RF_DABPRO2 + RF_DFEPRO3 + RF_DABPRO3) < 30 "
 _cFiltro += " AND ( RF_DFERVAT + RF_DFERAAT - RF_DFERANT) > 0 "
-//_cFiltro += " AND RF_DATAFIM > '"+ DTOS(dDatabase)+"' "
 _cFiltro += " AND SRA2.RA_EMAIL <> '"+ Space(Len(SRA->RA_EMAIL))+"' "
 _cFiltro += " %"
 
@@ -275,11 +269,11 @@ BeginSql Alias _cAliasQB
 
 EndSql
 
-DbSelectArea(_cAliasQB)
+DBSelectArea(_cAliasQB)
 (_cAliasQB)->(DBGoTop())
-If !(_cAliasQB)->(EOF())
-	Do While !(_cAliasQB)->(EOF())
-		AADD(_aResp,{(_cAliasQB)->QB_FILRESP,;
+If !(_cAliasQB)->(Eof())
+	While !(_cAliasQB)->(Eof())
+		aAdd(_aResp,{(_cAliasQB)->QB_FILRESP,;
                         (_cAliasQB)->QB_MATRESP,;
                         (_cAliasQB)->QB_NOMRESP,;
                         (_cAliasQB)->QB_EMRESP})		
@@ -314,7 +308,6 @@ _cFiltro += " SRF.D_E_L_E_T_ = ' ' "
 _cFiltro += " AND RF_STATUS = '1' "
 _cFiltro += " AND (RF_DFEPRO1 + RF_DABPRO1 + RF_DFEPRO2 + RF_DABPRO2 + RF_DFEPRO3 + RF_DABPRO3) < 30 "
 _cFiltro += " AND ( RF_DFERVAT + RF_DFERAAT - RF_DFERANT) > 0 "
-//_cFiltro += " AND RF_DATAFIM > '"+ DTOS(dDatabase)+"' "
 _cFiltro += " AND QB_FILRESP = '"+_cFilialResp+"' "
 _cFiltro += " AND QB_MATRESP = '"+_cMatResp+"' "
 _cFiltro += " %"
@@ -331,17 +324,17 @@ BeginSql Alias _cAliasSRF
     ORDER BY QB_MATRESP
 EndSql
 
-DbSelectArea(_cAliasSRF)
+DBSelectArea(_cAliasSRF)
 (_cAliasSRF)->(DBGoTop())
-If !(_cAliasSRF)->(EOF())
-	Do While !(_cAliasSRF)->(EOF())
-		AADD(_aDados,{(_cAliasSRF)->RA_MAT,;
+If !(_cAliasSRF)->(Eof())
+	While !(_cAliasSRF)->(Eof())
+		aAdd(_aDados,{(_cAliasSRF)->RA_MAT,;
                         (_cAliasSRF)->RA_NOME,; 
-                        DTOC(STOD((_cAliasSRF)->RF_DATABAS)),;
-                        DTOC(STOD((_cAliasSRF)->RF_DATAFIM)),;
-                        DTOC(STOD((_cAliasSRF)->RF_DATAFIM)+ 300),;
+                        DToC(SToD((_cAliasSRF)->RF_DATABAS)),;
+                        DToC(SToD((_cAliasSRF)->RF_DATAFIM)),;
+                        DToC(SToD((_cAliasSRF)->RF_DATAFIM)+ 300),;
                         TRANSFORM( (_cAliasSRF)->RF_TOTQTD, "@E 999,999.99"),;
-                        Alltrim(Str((_cAliasSRF)->SOMA)),;
+                        AllTrim(Str((_cAliasSRF)->SOMA)),;
                         (_cAliasSRF)->RA_EMAIL,;
                         (_cAliasSRF)->RA_DEPTO,;
                         (_cAliasSRF)->RA_FILIAL})		

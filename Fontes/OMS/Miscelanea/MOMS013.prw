@@ -2,33 +2,24 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                           
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-  André Lisboa 	  | 24/08/2017 | Ajuste gerais para V12 e incluido ITLOGACS - Chamado 20782
--------------------------------------------------------------------------------------------------------------------------------
-  Julio Paz       | 10/07/2018 | Exibir comissões pendentes de meses anteriores em tela de conf.para fechamento. chamado 25429
--------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges     | 11/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
-===============================================================================================================================
+Julio Paz     |10/07/2018| chamado 25429. Exibir comissões pendentes de meses anteriores em tela de conf.para fechamento.
+Lucas Borges  |11/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
+Lucas Borges  |02/10/2025| Chamado 51526. Modificada forma para recuperar a matrícula do usuário.
+==============================================================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
 
-#Include "PROTHEUS.CH"  
-#Include "TOPCONN.CH"
-#define	MB_OK				
+#Include "TOTVS.ch"  
+#define	MB_OK
 
 /*
 ===============================================================================================================================
 Programa----------: MOMS013
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 14/03/2011
-===============================================================================================================================
 Descrição---------: Rotina responsavel por realizar o fechamento da comissao na baixa
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -39,10 +30,10 @@ Local _oSay1
 Local _oSay2     
 Local _nOpca     := 0  
 Local _cDataF    := GetMv("IT_COMFECH")  // Data do fechamento
-Local _nmes      := month(stod(substr(_cDataf,4,4)+substr(_cDataf,1,2)+'01'))
-Local _nano      := year(stod(substr(_cDataf,4,4)+substr(_cDataf,1,2)+'01'))
+Local _nmes      := month(SToD(SubStr(_cDataf,4,4)+SubStr(_cDataf,1,2)+'01'))
+Local _nano      := year(SToD(SubStr(_cDataf,4,4)+SubStr(_cDataf,1,2)+'01'))
 
-Private _cDtFecham := strzero(_nmes,2)+"/"+alltrim(str(_nano))
+Private _cDtFecham := StrZero(_nmes,2)+"/"+AllTrim(Str(_nano))
 Private _aRecnoSE3 := {}
 
 Static _oDlg
@@ -51,11 +42,11 @@ DEFINE MSDIALOG _oDlg TITLE "ROTINA DE FECHAMENTO DA COMISSÃO" FROM 000, 000  TO
 _oDlg:lMaximized:= .F.
 	_oPanel := TPanel():New(0,0,'',_oDlg,, .T., .T.,, ,40,90,.T.,.T. )
 
-    @ 007, 017 SAY _oSay1 PROMPT "Esta rotina é responsável por efetuar o fechamento mensal da comissão de acordo com o mês e ano informados pelo usuário." SIZE 217, 017 OF _oPanel COLORS 0, 16777215 PIXEL
-    @ 035, 080 SAY _oSay2 PROMPT "Mês/Ano de fechamento:" SIZE 069, 007 OF _oPanel COLORS 0, 16777215 PIXEL
+    @ 007, 017 Say _oSay1 PROMPT "Esta rotina é responsável por efetuar o fechamento mensal da comissão de acordo com o mês e ano informados pelo usuário." SIZE 217, 017 OF _oPanel COLORS 0, 16777215 PIXEL
+    @ 035, 080 Say _oSay2 PROMPT "Mês/Ano de fechamento:" SIZE 069, 007 OF _oPanel COLORS 0, 16777215 PIXEL
     @ 042, 080 MSGET _oGetDtFech VAR _cDtFecham SIZE 095, 011 OF _oPanel PICTURE "@R 99/9999" WHEN .F. COLORS 0, 16777215 PIXEL
      
-ACTIVATE MSDIALOG _oDlg ON INIT (EnchoiceBar(_oDlg,{|| IIF(MOMS013VD(),Eval({|| _nOpca:= 1,_oDlg:End(),MsgRun("AGUARDE, PROCESSANDO O FECHAMENTO DA COMISSÃO.",,{||CursorWait(), MOMS013Q("",4) , CursorArrow()})}),) },{|| _nOpca:= 0,_oDlg:End()},,),_oPanel:align:= CONTROL_ALIGN_TOP)   
+ACTIVATE MSDIALOG _oDlg ON INIT (EnchoiceBar(_oDlg,{|| IIf(MOMS013VD(),Eval({|| _nOpca:= 1,_oDlg:End(),MsgRun("AGUARDE, PROCESSANDO O FECHAMENTO DA COMISSÃO.",,{||CursorWait(), MOMS013Q("",4) , CursorArrow()})}),) },{|| _nOpca:= 0,_oDlg:End()},,),_oPanel:align:= CONTROL_ALIGN_TOP)   
 
 Return     
                  
@@ -64,11 +55,8 @@ Return
 Programa----------: MOMS013Q
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 14/03/2011
-===============================================================================================================================
 Descrição---------: Funcao responsavel por armazenar as querys utilizadas
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -78,8 +66,8 @@ Local _cFiltro:= "%"
 Local _cUpdate:= ""         
 Local lSqlOk
 Local _cDataF    := GetMv("IT_COMFECH")  // Data do fechamento
-Local _nmes      := month(stod(substr(_cDataf,4,4)+substr(_cDataf,1,2)+'01'))+1
-Local _nano      := year(stod(substr(_cDataf,4,4)+substr(_cDataf,1,2)+'01'))
+Local _nmes      := month(SToD(SubStr(_cDataf,4,4)+SubStr(_cDataf,1,2)+'01'))+1
+Local _nano      := year(SToD(SubStr(_cDataf,4,4)+SubStr(_cDataf,1,2)+'01'))
 
 Do Case
                                     
@@ -90,7 +78,7 @@ Do Case
 	
 	Case _nOpcao == 1      
 			
-		_cFiltro+= " AND SUBSTR(E3_EMISSAO,1,6) < '" + SubStr(_cDtFecham,4,4) +  SubStr(_cDtFecham,1,2) + "'"
+		_cFiltro+= " AND SubStr(E3_EMISSAO,1,6) < '" + SubStr(_cDtFecham,4,4) +  SubStr(_cDtFecham,1,2) + "'"
 		_cFiltro+= "%"
 		
 		// COUNT(*) NUMREG
@@ -99,7 +87,7 @@ Do Case
 			SELECT
 			      R_E_C_N_O_ NUMREG
 			FROM
-			      %table:SE3%
+			      %Table:SE3%
 			WHERE
 			      D_E_L_E_T_ = ' '
 			      AND E3_I_FECH <> 'S'			
@@ -113,14 +101,14 @@ Do Case
 	   
 	Case _nOpcao == 2  
        
-    	_cFiltro+= " AND SUBSTR(E3_EMISSAO,1,6) = '" + SubStr(_cDtFecham,4,4) +  SubStr(_cDtFecham,1,2) + "'"
+    	_cFiltro+= " AND SubStr(E3_EMISSAO,1,6) = '" + SubStr(_cDtFecham,4,4) +  SubStr(_cDtFecham,1,2) + "'"
 		_cFiltro+= "%"    
        
     	BeginSql alias _cAlias       		
      			SELECT
 				      COUNT(*) NUMREG
 				FROM
-				      %table:SE3%
+				      %Table:SE3%
 				WHERE
 				      D_E_L_E_T_ = ' '
 				      AND E3_I_FECH = 'S'			
@@ -138,23 +126,23 @@ Do Case
 		_cUpdate := "UPDATE " 
 		_cUpdate +=	  RetSqlName("SE3") 
 		_cUpdate += " SET E3_I_FECH = 'S' " 
-		_cUpdate += " ,E3_I_DTFEC = '" + DtoS(date())       + "' " 
+		_cUpdate += " ,E3_I_DTFEC = '" + DToS(date())       + "' " 
 		_cUpdate += " ,E3_I_HRFEC = '" + SubStr(TIME(),1,5) + "' " 
-		_cUpdate += " ,E3_I_USRFE = '" + U_UCFG001(1)        + "' " 
-		_cUpdate += " ,E3_DATA = '" + DTOS( Date() ) + "'"  
+		_cUpdate += " ,E3_I_USRFE = '" + FWSFAllUsers({__cUserID},{"USR_FILIAL"})[1][3]+FWSFAllUsers({__cUserID},{"USR_CODFUNC"})[1][3]        + "' " 
+		_cUpdate += " ,E3_DATA = '" + DToS( Date() ) + "'"  
 		_cUpdate += "WHERE D_E_L_E_T_ = ' '"
-		_cUpdate += " AND SUBSTR(E3_EMISSAO,1,6) = '" + SubStr(_cDtFecham,4,4) +  SubStr(_cDtFecham,1,2) + "'"
+		_cUpdate += " AND SubStr(E3_EMISSAO,1,6) = '" + SubStr(_cDtFecham,4,4) +  SubStr(_cDtFecham,1,2) + "'"
 		_cUpdate += " AND E3_DATA < '20010101'"
 		lSqlOk := !(TCSqlExec(_cUpdate) < 0)
 		
 		_cUpdate := "UPDATE " 
 		_cUpdate +=	  RetSqlName("SE3") 
 		_cUpdate += " SET E3_I_FECH = 'S' " 
-		_cUpdate += " ,E3_I_DTFEC = '" + DtoS(date())       + "' " 
+		_cUpdate += " ,E3_I_DTFEC = '" + DToS(date())       + "' " 
 		_cUpdate += " ,E3_I_HRFEC = '" + SubStr(TIME(),1,5) + "' " 
-		_cUpdate += " ,E3_I_USRFE = '" + U_UCFG001(1)        + "' " 
+		_cUpdate += " ,E3_I_USRFE = '" + FWSFAllUsers({__cUserID},{"USR_FILIAL"})[1][3]+FWSFAllUsers({__cUserID},{"USR_CODFUNC"})[1][3]        + "' " 
 		_cUpdate += "WHERE D_E_L_E_T_ = ' '"
-		_cUpdate += " AND SUBSTR(E3_EMISSAO,1,6) = '" + SubStr(_cDtFecham,4,4) +  SubStr(_cDtFecham,1,2) + "'"
+		_cUpdate += " AND SubStr(E3_EMISSAO,1,6) = '" + SubStr(_cDtFecham,4,4) +  SubStr(_cDtFecham,1,2) + "'"
 		_cUpdate += " AND E3_DATA > '20010101'"
 		lSqlOk2 := !(TCSqlExec(_cUpdate) < 0)
 		
@@ -163,7 +151,7 @@ Do Case
 		//Ocorreu um erro ao executar a atualizacao do fechamento da comissao.
 		//==========================================================================
 				
-		If !lSqlOk .or. !lSqlOk2        
+		If !lSqlOk .Or. !lSqlOk2        
 				
 			xMagHelpFis("INFORMAÇÃO",;
 	       			"Não foi possível realizar a atualização do fechamento da comissão para o seguinte Mês/Ano: " + _cDtFecham,;
@@ -186,38 +174,38 @@ Do Case
   				_nmes := 1
   				_nano += 1
 
-			endif
+			EndIf
 
-			PutMv("IT_COMFECH",strzero(_nmes,2) + "/" + strzero(_nano,4))
+			PutMV("IT_COMFECH",StrZero(_nmes,2) + "/" + StrZero(_nano,4))
 	
 			RecLock("ZC8",.T.)
  
  			ZC8->ZC8_FILIAL     := xFilial("ZC8")   
 			ZC8->ZC8_SEQ        := U_MOMS009C()  //Gera nova sequência do ZC8
 			ZC8->ZC8_ROTINA     := "Fechamento mensal"
-			ZC8->ZC8_DATA       := DATE()
-			ZC8->ZC8_HORA       := TIME()
-			ZC8->ZC8_USER       := CUSERNAME
-			ZC8->ZC8_CODUSU     := __CUSERID
+			ZC8->ZC8_DATA       := Date()
+			ZC8->ZC8_HORA       := Time()
+			ZC8->ZC8_USER       := cUserName
+			ZC8->ZC8_CODUSU     := __cUserId
 			ZC8->ZC8_OBS        := _cDtFecham
 			ZC8->ZC8_COMP       := _cDtFecham
  
-			MSUNLOCK()
+			MSUnLock()
 	
 			RecLock("ZC9",.F.)
  
  			ZC9->ZC9_STATUS     := "2"   
  
- 			MSUNLOCK()
+ 			MSUnLock()
 	
 			RecLock("ZC9",.T.)
  
 			ZC9->ZC9_FILIAL     := xFilial("ZC8")   
 			ZC9->ZC9_SEQ        := U_MOMS009H()  //Gera nova sequência do ZC9
-			ZC9->ZC9_COMP       := strzero(_nmes,2) + "/" + strzero(_nano,4)
+			ZC9->ZC9_COMP       := StrZero(_nmes,2) + "/" + StrZero(_nano,4)
 			ZC9->ZC9_STATUS     := "0"
 
-			MSUNLOCK()
+			MSUnLock()
 								 	    
 			MsgInfo("Fechamento da comissão efetuado com sucesso!")   
 															     						            					
@@ -234,11 +222,8 @@ Return
 Programa----------: MOMS013VD2
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 09/12/2015
-===============================================================================================================================
 Descrição---------: Valida execução do fechamento de comissões
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Lógico liberando ou não a execução do fechamento de comissões
 ===============================================================================================================================
 */
@@ -246,8 +231,8 @@ Static Function MOMS013VD2()
 
 Local _aalertas  := {}
 Local _cDataF    := GetMv("IT_COMFECH")  // Data do fechamento
-Local _nmes      := month(stod(substr(_cDataf,4,4)+substr(_cDataf,1,2)+'01'))
-Local _nano      := year(stod(substr(_cDataf,4,4)+substr(_cDataf,1,2)+'01'))
+Local _nmes      := month(SToD(SubStr(_cDataf,4,4)+SubStr(_cDataf,1,2)+'01'))
+Local _nano      := year(SToD(SubStr(_cDataf,4,4)+SubStr(_cDataf,1,2)+'01'))
 Local _cAlias	   := GetNextAlias()
 Local _cseq      := ""
 Local _aMsgItlist := {}, _aCabItList
@@ -263,76 +248,76 @@ ZZL->( DBSetOrder(3) )
 
 If !(ZZL->( DBSeek( xFilial('ZZL') + RetCodUsr() ) ) .And. ZZL->ZZL_ADMCMS == 'S')
 
-    aadd(_aalertas,"Usuário " + alltrim(substr(cUsuario,7,15)) + " sem permissão para cálculo de comissões!") 
+    aAdd(_aalertas,"Usuário " + AllTrim(SubStr(cUsuario,7,15)) + " sem permissão para cálculo de comissões!") 
  
 End If
 
 
-_cDataf := strzero(_nano,4)+strzero(_nmes,2)+"01"
+_cDataf := StrZero(_nano,4)+StrZero(_nmes,2)+"01"
 
 //verifica se não está fazendo fechamento o mês atual ou futuro
-If alltrim(str(_nano))+alltrim(strzero(_nmes,2)) >= alltrim(str(year(date())))+alltrim(strzero(month(date()),2))
+If AllTrim(Str(_nano))+AllTrim(StrZero(_nmes,2)) >= AllTrim(Str(year(date())))+AllTrim(StrZero(month(date()),2))
 
-  aadd(_aalertas,"Mês " + strzero(_nmes,2) + "/" + strzero(_nano,4) + " não terminou ainda!") 
+  aAdd(_aalertas,"Mês " + StrZero(_nmes,2) + "/" + StrZero(_nano,4) + " não terminou ainda!") 
   
-Endif
+EndIf
 
 //verifica se já foi liberado pelo financeiro
 _cQuery := " SELECT ZC8_SEQ FROM "+ RETSQLNAME('ZC8') +" ZC8 WHERE ZC8_ROTINA = 'Fechamento Financeiro' "
-_cQuery += " and ZC8_COMP = '" + strzero(_nmes,2) + "/" + strzero(_nano,4) + "' and  D_E_L_E_T_ <> '*' and ZC8_FILIAL = '" +Xfilial("ZC8") + "'"
+_cQuery += " and ZC8_COMP = '" + StrZero(_nmes,2) + "/" + StrZero(_nano,4) + "' and  D_E_L_E_T_ = ' ' and ZC8_FILIAL = '" +xFilial("ZC8") + "'"
 
 DBUseArea( .T. , "TOPCONN" , TCGenQry( ,, _cQuery ) , _cAlias , .F. , .T. )
 DBSelectArea(_cAlias)
 
-if (_cAlias)->( Eof() )
+If (_cAlias)->( Eof() )
 
-  aadd(_aalertas,"Não existe um fechamento financeiro para o período de comissões em aberto!(" + strzero(_nmes,2) + "/" + strzero(_nano,4) + ")")
-  (_cAlias)->( Dbclosearea() )  
+  aAdd(_aalertas,"Não existe um fechamento financeiro para o período de comissões em aberto!(" + StrZero(_nmes,2) + "/" + StrZero(_nano,4) + ")")
+  (_cAlias)->( DBCloseArea() )  
   
-else
+Else
 
-	_cseq := alltrim((_cAlias)->ZC8_SEQ)
-	(_cAlias)->( Dbclosearea() )
+	_cseq := AllTrim((_cAlias)->ZC8_SEQ)
+	(_cAlias)->( DBCloseArea() )
 
 	//verifica se já rodou recálculo de comissão após a liberação do financeiro
 
 	_cAlias	:= GetNextAlias()
 
 	_cQuery := " SELECT ZC8_SEQ FROM "+ RETSQLNAME('ZC8') +" ZC8 WHERE ZC8_ROTINA like 'Recalculo de Comissao%' "
-	_cQuery += " and ZC8_COMP = '" + strzero(_nmes,2) + "/" + strzero(_nano,4) + "' and  D_E_L_E_T_ <> '*'  and ZC8_FILIAL = '" +Xfilial("ZC8") + "'"
+	_cQuery += " and ZC8_COMP = '" + StrZero(_nmes,2) + "/" + StrZero(_nano,4) + "' and  D_E_L_E_T_ = ' '  and ZC8_FILIAL = '" +xFilial("ZC8") + "'"
 	
 	DBUseArea( .T. , "TOPCONN" , TCGenQry( ,, _cQuery ) , _cAlias , .F. , .T. )
 	DBSelectArea(_cAlias)
 
-	if (_cAlias)->( Eof() )
+	If (_cAlias)->( Eof() )
 
-  		aadd(_aalertas,"Não existe um recálculo de comissão após a liberação do financeiro para o período de comissões em aberto!(" + strzero(_nmes,2) + "/" + strzero(_nano,4) + ")")
-       (_cAlias)->( Dbclosearea() )
+  		aAdd(_aalertas,"Não existe um recálculo de comissão após a liberação do financeiro para o período de comissões em aberto!(" + StrZero(_nmes,2) + "/" + StrZero(_nano,4) + ")")
+       (_cAlias)->( DBCloseArea() )
   
-	else
+	Else
 	
 		//verifica se já rodou cálculo de adicionais de comissão para bonificação
-		(_cAlias)->( Dbclosearea() )
+		(_cAlias)->( DBCloseArea() )
 		_cAlias	:= GetNextAlias()
 
 		_cQuery := " SELECT ZC8_SEQ FROM "+ RETSQLNAME('ZC8') +" ZC8 WHERE ZC8_ROTINA = 'Adicionais de Comissao' "
-		_cQuery += " and ZC8_COMP = '" + strzero(_nmes,2) + "/" + strzero(_nano,4) + "' and ZC8_OBS = '2 - Bonificações'"
-		_cQuery += " and D_E_L_E_T_ <> '*' and ZC8_FILIAL = '" +Xfilial("ZC8") + "'"
+		_cQuery += " and ZC8_COMP = '" + StrZero(_nmes,2) + "/" + StrZero(_nano,4) + "' and ZC8_OBS = '2 - Bonificações'"
+		_cQuery += " and D_E_L_E_T_ = ' ' and ZC8_FILIAL = '" +xFilial("ZC8") + "'"
 
 		DBUseArea( .T. , "TOPCONN" , TCGenQry( ,, _cQuery ) , _cAlias , .F. , .T. )
 		DBSelectArea(_cAlias)
 
-		if (_cAlias)->( Eof() )
+		If (_cAlias)->( Eof() )
 
-  			aadd(_aalertas,"Não existe um cálculo de adicionais de bonificação após a liberação do financeiro para o período de comissões em aberto!(" + strzero(_nmes,2) + "/" + strzero(_nano,4) + ")")
+  			aAdd(_aalertas,"Não existe um cálculo de adicionais de bonificação após a liberação do financeiro para o período de comissões em aberto!(" + StrZero(_nmes,2) + "/" + StrZero(_nano,4) + ")")
   			
-  		Endif
+  		EndIf
 		
-		(_cAlias)->( Dbclosearea() )
+		(_cAlias)->( DBCloseArea() )
 	
-	endif
+	EndIf
 	
-endif
+EndIf
 
 //===================================================================================
 //Verifica se nao existem outros meses em aberto antereriores ao 
@@ -344,17 +329,17 @@ _cAlias:= GetNextAlias()
   
 MOMS013Q(_cAlias,1)
 
-dbSelectArea(_cAlias) 
-(_cAlias)->(dbGotop())
+DBSelectArea(_cAlias) 
+(_cAlias)->(DBGoTop())
 
-Do While ! (_cAlias)->(Eof())
+While ! (_cAlias)->(Eof())
    //If (_cAlias)->NUMREG > 0
-   //	aadd(_aalertas,"Existem comissões em aberto com o Mês/Ano inferior ao Mês/Ano informado para a realização do fechamento da comissão.(" + strzero(_nmes,2) + "/" + strzero(_nano,4) + ")")
+   //	aAdd(_aalertas,"Existem comissões em aberto com o Mês/Ano inferior ao Mês/Ano informado para a realização do fechamento da comissão.(" + StrZero(_nmes,2) + "/" + StrZero(_nano,4) + ")")
    //EndIf   
       
-   SE3->(DbGoTo((_cAlias)->NUMREG))
+   SE3->(DBGoTo((_cAlias)->NUMREG))
    
-   Aadd(_aMsgItlist, {SE3->E3_FILIAL,;   // Filial
+   aAdd(_aMsgItlist, {SE3->E3_FILIAL,;   // Filial
                       SE3->E3_VEND  ,;   // Vendedor
                       Posicione("SA3",1,xFilial("SA3")+SE3->E3_VEND,"A3_NOME"),; // Nome do Vendedor
                       SE3->E3_NUM   ,;   // No. Titulo
@@ -367,16 +352,16 @@ Do While ! (_cAlias)->(Eof())
                       SE3->E3_PORC   ,;  // % Vl.Base
                       SE3->E3_COMIS  ,;  // Comissão
                       SE3->E3_DATA   ,;  // Data Pagto
-                      "Existem comissões em aberto com o Mês/Ano inferior ao Mês/Ano informado para a realização do fechamento da comissão.(" + strzero(_nmes,2) + "/" + strzero(_nano,4) + ")" }) // Mensagem
+                      "Existem comissões em aberto com o Mês/Ano inferior ao Mês/Ano informado para a realização do fechamento da comissão.(" + StrZero(_nmes,2) + "/" + StrZero(_nano,4) + ")" }) // Mensagem
    
-   Aadd(_aRecnoSE3, SE3->(Recno()))
+   aAdd(_aRecnoSE3, SE3->(Recno()))
    
-   (_cAlias)->(DbSkip())
+   (_cAlias)->(DBSkip())
 EndDo
 
 
-dbSelectArea(_cAlias) 
-(_cAlias)->(dbCloseArea())
+DBSelectArea(_cAlias) 
+(_cAlias)->(DBCloseArea())
 
 //===================================================================================
 //Verifica se ja nao houve fechamento para a comissao para o        
@@ -388,17 +373,17 @@ _cAlias:= GetNextAlias()
   
 MOMS013Q(_cAlias,2)
 
-dbSelectArea(_cAlias) 
-(_cAlias)->(dbGotop())
+DBSelectArea(_cAlias) 
+(_cAlias)->(DBGoTop())
 
 If (_cAlias)->NUMREG > 0
         
-	aadd(_aalertas,"Não será possível realizar o fechamento da comissão para o Mês/Ano indicados, pois ja foi efetuado um fechamento para este Mês/Ano.(" + strzero(_nmes,2) + "/" + strzero(_nano,4) + ")")
+	aAdd(_aalertas,"Não será possível realizar o fechamento da comissão para o Mês/Ano indicados, pois ja foi efetuado um fechamento para este Mês/Ano.(" + StrZero(_nmes,2) + "/" + StrZero(_nano,4) + ")")
 
 EndIf   
 
-dbSelectArea(_cAlias) 
-(_cAlias)->(dbCloseArea()) 
+DBSelectArea(_cAlias) 
+(_cAlias)->(DBCloseArea()) 
 
 
 If Len(_aMsgItlist) > 0
@@ -409,11 +394,11 @@ If Len(_aMsgItlist) > 0
    If _lRet .And. Empty(_aalertas) 
       
       For _nI := 1 To Len(_aRecnoSE3)
-          SE3->(DbGoTo(_aRecnoSE3[_nI]))
+          SE3->(DBGoTo(_aRecnoSE3[_nI]))
           SE3->(RecLock("SE3",.F.))
           SE3->E3_I_FECH := 'S'
           
-          SE3->(MsUnlock())
+          SE3->(MSUnLock())
       Next
       
       For _nI := 1 To Len(_aMsgItlist)   
@@ -434,7 +419,7 @@ If Len(_aMsgItlist) > 0
           ZGD->ZGD_MENSAG  := _aMsgItlist[_nI,14]   //  Mensagem Vld
           ZGD->ZGD_USUARI  := __cUserId             //  Cod.Usuario
           ZGD->ZGD_DTLOG   := Date()                //  Dt.Grv.Log
-          ZGD->(MsUnlock())      
+          ZGD->(MSUnLock())      
       Next
    ElseIf ! _lRet .And. Empty(_aalertas)
           Return .F.      
@@ -442,7 +427,7 @@ If Len(_aMsgItlist) > 0
 EndIf
 
 //se teve qualquer alerta na verificação monta mensagem e impede o processamento
-if len(_aalertas) > 0
+If Len(_aalertas) > 0
   
     _cMensagem := "<html>"
 	_cMensagem += "<body>"
@@ -454,38 +439,35 @@ if len(_aalertas) > 0
 	_cMensagem += "</strong>
 	_cMensagem += "<hr>"
 		
-   for _ni = 1 to len(_aalertas)
+   For _nI = 1 to Len(_aalertas)
   
   		_cMensagem += "<p>"
-		_cMensagem += _aalertas[_ni] 
+		_cMensagem += _aalertas[_nI] 
 		_cMensagem += "</p>
-		if _ni < len(_aalertas) 
+		If _nI < Len(_aalertas) 
 		  _cMensagem += "<hr>"
-		endif
+		EndIf
 		
-	next
+	Next
 	
 	_cMensagem += "</body>"
 	_cMensagem += "</html>"
 				
 	MessageBox(_cMensagem, "Problema no processo", MB_OK)
   
-  	return .F.
+  	Return .F.
   	 
-endif 
+EndIf 
 
-return .T.
+Return .T.
 
 /*
 ===============================================================================================================================
 Programa----------: MOMS013VD
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 09/12/2015
-===============================================================================================================================
 Descrição---------: Monta tela de validação de fechamento de comissão
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Lógico liberando ou não a execução do fechamento de comissões
 ===============================================================================================================================
 */

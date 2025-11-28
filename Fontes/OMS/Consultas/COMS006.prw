@@ -11,7 +11,7 @@ Alex Wallauer | 21/08/2023 | Chamado 43822. Ajustes na impressão e Layout de dat
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina. 
 //====================================================================================================
-#Include "Protheus.Ch"
+#Include "TOTVS.ch"
 
 #Define TITULO "Consulta Vendedores - Log de Alterações"
 
@@ -54,15 +54,15 @@ Else//Digitar Código.
 	If ParamBox( aParamBox , "Informar os dados para a Consulta:" , @aParRet , {|| COMS006VLD( SA3->A3_COD ) } ,, .T. , , , , , .F. , .F. )
 		
 		//If aParRet[01] != SA3->A3_COD
-		    Z07->(DbSetOrder(1)) // Z07_FILIAL+Z07_ALIAS+Z07_ORDEM+Z07_CHAVE+Z07_OPCAO+Z07_CAMPO+Z07_CODUSU+Z07_DATA+Z07_HORA
+		    Z07->(DBSetOrder(1)) // Z07_FILIAL+Z07_ALIAS+Z07_ORDEM+Z07_CHAVE+Z07_OPCAO+Z07_CAMPO+Z07_CODUSU+Z07_DATA+Z07_HORA
 
 			DBSelectArea("SA3")
 			SA3->(DBSetOrder(1))
 			If !SA3->( DBSeek( xFilial("SA3") + aParRet[01] ) )
                If ! Z07->( DBSeek( xFilial("Z07") + "SA3 1" + xFilial("SA3") + aParRet[01] ) )
 				  //Aviso( 'Atenção!' , "O código de - Vendedor informado não foi encontrado." , TITULO , 0 )
-				  U_Itmsg("O código de - Vendedor informado não foi encontrado.","Atenção",,1)
-				  Return()
+				  U_ITMsg("O código de - Vendedor informado não foi encontrado.","Atenção",,1)
+				  Return
 			   EndIf 
 			EndIf
 			
@@ -156,7 +156,7 @@ Private	cCadastro	:= "["+ cCodVen +"] - " + TITULO
 Default cCodVen		:= ""
 
 If Empty(cCodVen)
-	Return()
+	Return
 EndIf
 
 //================================================================================
@@ -169,7 +169,7 @@ If !SA3->( DBSeek( xFilial("SA3") + cCodVen ) )
    _cNomeVend := "[VENDEDOR/REPRESENTANTE EXCLUIDO.]"
    If ! Z07->( DBSeek( xFilial("Z07") + "SA3 1" + xFilial("SA3") + cCodVen ) )
 	  MessageBox( "O vendedor ["+ cCodVen +"] não foi encontrado." , TITULO , 0 )	
-	  Return()
+	  Return
    EndIf
    _nRegSA3   := 0
 Else 
@@ -186,14 +186,14 @@ _cChavPesq := xFilial("SA3") + cCodVen
 DBSelectArea("Z07")
 Z07->( DBSetOrder(1) )
 
-//IF !Z07->( DBSeek( xFilial("Z07") + "SA3 1" + SA3->( A3_FILIAL + A3_COD ) ) )
+//If !Z07->( DBSeek( xFilial("Z07") + "SA3 1" + SA3->( A3_FILIAL + A3_COD ) ) )
 
-IF !Z07->( DBSeek( xFilial("Z07") + "SA3 1" + _cChavPesq ) )
+If !Z07->( DBSeek( xFilial("Z07") + "SA3 1" + _cChavPesq ) )
 	MessageBox( "O vendedor ["+ cCodVen +"] não possui histórico de alterações." , TITULO , 0 )
-	Return()
-EndIF
-PRIVATE _aColXML :={}//SÓ ZERA AQUI 
-PRIVATE _aColCapa:={}//SÓ ZERA AQUI 
+	Return
+EndIf
+Private _aColXML :={}//SÓ ZERA AQUI 
+Private _aColCapa:={}//SÓ ZERA AQUI 
 
 aAdd( aObjects, { 100 , 025 , .T. , .F. , .T. } )
 aAdd( aObjects, { 100 , 070 , .T. , .F. } )
@@ -217,13 +217,13 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From aSize[7],00 to aSize[6],aSize[5] Of oM
 	//================================================================================
 	@ aPosObj[01][01],aPosObj[01][02] MSPANEL oScrPanel PROMPT "" SIZE aPosObj[01][03],aPosObj[01][04] OF oDlg LOWERED
 	
-	@ 004 , 004 SAY "Código:" 		SIZE 025,07 OF oScrPanel PIXEL
-	@ 012 , 004 SAY _cCodVend    	SIZE 060,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
-    //@ 012 , 004 SAY SA3->A3_COD  	SIZE 060,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
+	@ 004 , 004 Say "Código:" 		SIZE 025,07 OF oScrPanel PIXEL
+	@ 012 , 004 Say _cCodVend    	SIZE 060,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
+    //@ 012 , 004 Say SA3->A3_COD  	SIZE 060,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
 
-	@ 004 , 030 SAY "Nome:" 		SIZE 025,07 OF oScrPanel PIXEL
-	@ 012 , 030 SAY _cNomeVend   	SIZE 165,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
-	//@ 012 , 030 SAY SA3->A3_NOME 	SIZE 165,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
+	@ 004 , 030 Say "Nome:" 		SIZE 025,07 OF oScrPanel PIXEL
+	@ 012 , 030 Say _cNomeVend   	SIZE 165,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
+	//@ 012 , 030 Say SA3->A3_NOME 	SIZE 165,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
 	
 	_cTitAux:=cCadastro+" do "+_cCodVend+"-"+_cNomeVend
 
@@ -261,7 +261,7 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From aSize[7],00 to aSize[6],aSize[5] Of oM
 	//================================================================================
 	DEFINE BUTTONBAR oBar SIZE 25,25 3D OF oDlg
 
-	DEFINE BUTTON aBtn[01] RESOURCE PmsBExcel()[1] OF oBar GROUP ACTION FWMSGRUN( ,{|| COMS6XMLX(_cTitAux)  },"H.I. : "+TIME()+" - Aguarde...","Gerando Excel (.XLSX)..." );//DlgToExcel({{"ARRAY","",oLbxDET:AHeaders,oLbxDET:aArray}});
+	DEFINE BUTTON aBtn[01] RESOURCE PmsBExcel()[1] OF oBar GROUP ACTION FWMsgRun( ,{|| COMS6XMLX(_cTitAux)  },"H.I. : "+TIME()+" - Aguarde...","Gerando Excel (.XLSX)..." );//DlgToExcel({{"ARRAY","",oLbxDET:AHeaders,oLbxDET:aArray}});
 	       TOOLTIP "Exportação para Excel (.XLSX)"
 	
 	aBtn[01]:cTitle := ""
@@ -274,7 +274,7 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From aSize[7],00 to aSize[6],aSize[5] Of oM
 	
 ACTIVATE MSDIALOG oDlg CENTERED
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -318,12 +318,12 @@ _cQuery += " ORDER BY Z07.Z07_CAMPO "
 _cQuery	:= ChangeQuery(_cQuery)
 DBUseArea( .T. , "TOPCONN" , TCGenQry(,,_cQuery) , _cAlias , .F. , .T. )
 
-TcSetField( _cAlias , "Z07.Z07_DATA" , "D" , 8 , 0 )
+TCSetField( _cAlias , "Z07.Z07_DATA" , "D" , 8 , 0 )
 
 DBSelectArea(_cAlias)
 (_cAlias)->(DBGoTop())
 
-(_cAlias)->( dbEval( { || _nTotReg++ } ) )
+(_cAlias)->( DBEval( { || _nTotReg++ } ) )
 
 ProcRegua(_nTotReg)
 
@@ -332,14 +332,14 @@ _nRegSA3:=(_cAlias)->REGSA3
 //================================================================================
 //| Grava os dados do Resumo                                                     |
 //================================================================================
-DO While (_cAlias)->(!Eof())
+While (_cAlias)->(!Eof())
 
     _nCont++
     IncProc("Montando estrutura "+StrZero(_nCont,6)+" de "+StrZero(_nTotReg,6)  )
 
 	aAdd( _aLbxAux , {	(_cAlias)->CAMPO							   		,; // 01
 						Posicione("SX3",2,(_cAlias)->CAMPO,"X3_DESCRIC")	,; // 02
-                       	STOD((_cAlias)->DT_ULT)								,; // 03
+                       	SToD((_cAlias)->DT_ULT)								,; // 03
                        	(_cAlias)->REGSA3					   				}) // 04
 
 
@@ -364,7 +364,7 @@ If	Len(_aLbxAux) > 0 .And. ValType(oLbxAux) == "O"
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -403,18 +403,18 @@ _cQuery += " WHERE "
 _cQuery += " Z07.D_E_L_E_T_  = ' ' "
 _cQuery += " AND	Z07.Z07_ALIAS	= 'SA3' "
 _cQuery += " AND	SA3.R_E_C_N_O_	= '"+ CValToChar(nRegSA3) +"' "
-IF !EMPTY(cCampo)
+If !Empty(cCampo)
    _cQuery += " AND	Z07.Z07_CAMPO	= '"+ cCampo +"' "
    _cQuery += " ORDER BY Z07.Z07_DATA , Z07.Z07_HORA , Z07.Z07_CODUSU , Z07.Z07_CONORG "
-ELSE
+Else
    _cQuery += " ORDER BY Z07.Z07_CAMPO, Z07.Z07_DATA , Z07.Z07_HORA , Z07.Z07_CODUSU , Z07.Z07_CONORG "
-ENDIF
+EndIf
 
 _cQuery	:= ChangeQuery(_cQuery)
 
 DBUseArea( .T. , "TOPCONN" , TCGenQry(,,_cQuery) , _cAlias , .F. , .T. )
 
-TcSetField( _cAlias , "Z07.Z07_DATA" , "D" , 8 , 0 )
+TCSetField( _cAlias , "Z07.Z07_DATA" , "D" , 8 , 0 )
 
 DBSelectArea(_cAlias)
 
@@ -423,41 +423,41 @@ DBSelectArea(_cAlias)
 //================================================================================
 //| Grava o resultado dos detalhes das alterações dos campos                     |
 //================================================================================
-DO While (_cAlias)->(!Eof())
+While (_cAlias)->(!Eof())
 
-   IF !EMPTY(cCampo)
+   If !Empty(cCampo)
    
-      aAdd( _aLbxAux , {		STOD((_cAlias)->DT_ALT)	  ,; // 01
+      aAdd( _aLbxAux , {		SToD((_cAlias)->DT_ALT)	  ,; // 01
                             		 (_cAlias)->HORA	  ,; // 02
                             		 (_cAlias)->CODUSU	  ,; // 03
       AllTrim( Capital( UsrFullName((_cAlias)->CODUSU) ) ),; // 04
    						 AllTrim((_cAlias)->CONT_ORG)     ,; // 05
    						 AllTrim((_cAlias)->CONT_ALT)     }) // 06
-   ELSE
+   Else
      
      _aCpos:={}
-	 IF (_nPos:=ASCAN(_aColCapa,{ |C| ALLTRIM(C[1]) == ALLTRIM((_cAlias)->Z07_CAMPO) }) ) > 0 
-        AADD( _aCpos , _aColCapa[_nPos,01]) // 01
-        AADD( _aCpos , _aColCapa[_nPos,02]) // 02
-        AADD( _aCpos , _aColCapa[_nPos,03]) // 03
-        AADD( _aCpos , _aColCapa[_nPos,04]) // 04
-      ELSE
-        AADD( _aCpos , " " ) // 01
-        AADD( _aCpos , " " ) // 02
-        AADD( _aCpos , " " ) // 03
-        AADD( _aCpos , " " ) // 04
-      ENDIF
+	 If (_nPos:=aScan(_aColCapa,{ |C| AllTrim(C[1]) == AllTrim((_cAlias)->Z07_CAMPO) }) ) > 0 
+        aAdd( _aCpos , _aColCapa[_nPos,01]) // 01
+        aAdd( _aCpos , _aColCapa[_nPos,02]) // 02
+        aAdd( _aCpos , _aColCapa[_nPos,03]) // 03
+        aAdd( _aCpos , _aColCapa[_nPos,04]) // 04
+      Else
+        aAdd( _aCpos , " " ) // 01
+        aAdd( _aCpos , " " ) // 02
+        aAdd( _aCpos , " " ) // 03
+        aAdd( _aCpos , " " ) // 04
+      EndIf
 
-      AADD( _aCpos , STOD((_cAlias)->DT_ALT)                              ) // 01
-      AADD( _aCpos , (_cAlias)->HORA		                              ) // 02
-      AADD( _aCpos , (_cAlias)->CODUSU	                                  ) // 03
-      AADD( _aCpos , AllTrim( Capital( UsrFullName((_cAlias)->CODUSU ) ) )) // 04
-      AADD( _aCpos , AllTrim((_cAlias)->CONT_ORG )	                      ) // 05
-      AADD( _aCpos , AllTrim((_cAlias)->CONT_ALT )	                      ) // 06
+      aAdd( _aCpos , SToD((_cAlias)->DT_ALT)                              ) // 01
+      aAdd( _aCpos , (_cAlias)->HORA		                              ) // 02
+      aAdd( _aCpos , (_cAlias)->CODUSU	                                  ) // 03
+      aAdd( _aCpos , AllTrim( Capital( UsrFullName((_cAlias)->CODUSU ) ) )) // 04
+      aAdd( _aCpos , AllTrim((_cAlias)->CONT_ORG )	                      ) // 05
+      aAdd( _aCpos , AllTrim((_cAlias)->CONT_ALT )	                      ) // 06
             
-      AADD( _aColXML , _aCpos )
+      aAdd( _aColXML , _aCpos )
 
-   ENDIF
+   EndIf
    
    (_cAlias)->( DBSkip() )
 
@@ -468,7 +468,7 @@ EndDo
 //================================================================================
 //| Monta o objeto do ListBox com os dados dos detalhes                          |
 //================================================================================
-If	!EMPTY(cCampo) .AND. Len(_aLbxAux) > 0 .And. ValType(oLbxAux) == "O"
+If	!Empty(cCampo) .And. Len(_aLbxAux) > 0 .And. ValType(oLbxAux) == "O"
                      
 	oLbxAux:SetArray(_aLbxAux)
 	oLbxAux:bLine:={||{	_aLbxAux[oLbxAux:nAt][01]	,; // 01
@@ -482,7 +482,7 @@ If	!EMPTY(cCampo) .AND. Len(_aLbxAux) > 0 .And. ValType(oLbxAux) == "O"
 
 EndIf
 
-Return()
+Return
 
 
 /*
@@ -504,23 +504,23 @@ _aCab:={}
 // Alinhamento: 1-Left   ,2-Center,3-Right
 // Formatação.: 1-General,2-Number,3-Monetário,4-DateTime
 //          Titulo das Colunas    ,Alinhamento ,Formatação, Totaliza 
-Aadd(_aCab,{"Loja"                ,1           ,1         ,.F.})
-Aadd(_aCab,{"Campo"               ,1           ,1         ,.F.})
-Aadd(_aCab,{"Última Alt."         ,2           ,4         ,.F.})
-Aadd(_aCab,{"Registro (Recno SA3)",3           ,2         ,.F.,"@E 9,999,999"})
-Aadd(_aCab,{"Data"		          ,2           ,4         ,.F.})      
-Aadd(_aCab,{"Hora"		          ,2           ,1         ,.F.})      
-Aadd(_aCab,{"Usuário"	          ,2           ,1         ,.F.})      
-Aadd(_aCab,{"Nome Usr."           ,1           ,1         ,.F.})        
-Aadd(_aCab,{"Cont. Orig."         ,1           ,1         ,.F.})      
-Aadd(_aCab,{"Cont. Alt."          ,1           ,1         ,.F.})      
+aAdd(_aCab,{"Loja"                ,1           ,1         ,.F.})
+aAdd(_aCab,{"Campo"               ,1           ,1         ,.F.})
+aAdd(_aCab,{"Última Alt."         ,2           ,4         ,.F.})
+aAdd(_aCab,{"Registro (Recno SA3)",3           ,2         ,.F.,"@E 9,999,999"})
+aAdd(_aCab,{"Data"		          ,2           ,4         ,.F.})      
+aAdd(_aCab,{"Hora"		          ,2           ,1         ,.F.})      
+aAdd(_aCab,{"Usuário"	          ,2           ,1         ,.F.})      
+aAdd(_aCab,{"Nome Usr."           ,1           ,1         ,.F.})        
+aAdd(_aCab,{"Cont. Orig."         ,1           ,1         ,.F.})      
+aAdd(_aCab,{"Cont. Alt."          ,1           ,1         ,.F.})      
 
-IF LEN(_aColXML) = 0
+If Len(_aColXML) = 0
     COMS006DET(, _nRegSA3 , "" )
-ENDIF
+EndIf
 
 U_ITGEREXCEL(,,_cTitAux,,_aCab,_aColXML,,,,,,,,.T.)
 
-U_ITMSG("Geração Concluida!  ["+DTOC(DATE())+"] ["+TIME()+"]")
+U_ITMsg("Geração Concluida!  ["+DToC(DATE())+"] ["+TIME()+"]")
 
-RETURN .T.
+Return .T.

@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 03/08/2018 | Incluído MenuDef para padronização - Chamado 25767
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 15/08/2019 | Modificada validação para deleção de registros. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 24/04/2034 | Incluída replicação dos cadastros para todas as placas do transportador. Chamado 47051
+Lucas Borges  |03/08/2018| Chamado 25767. Incluído MenuDef para padronização
+Lucas Borges  |15/08/2019| Chamado 28346. Modificada validação para deleção de registros
+Lucas Borges  |24/04/2034| Chamado 47051. Incluída replicação dos cadastros para todas as placas do transportador
 ===============================================================================================================================
 */
 
-//===========================================================================
-//| Definições de Includes                                                  |
-//===========================================================================
-#INCLUDE 'Protheus.ch' 
+#Include "TOTVS.ch" 
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT002
 Autor-------------: Abrahao P. Santos
 Data da Criacao---: 12/11/2008
-===============================================================================================================================
 Descrição---------: Rotina desenvolvida para possibilitar o cadastramento de Veiculos utilizados na coleta de leite nos retiros
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -45,9 +37,7 @@ Return
 Programa----------: MenuDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 02/08/2018
-===============================================================================================================================
 Descrição---------: Utilizacao de Menu Funcional
-===============================================================================================================================
 Parametros--------: aRotina
 					1. Nome a aparecer no cabecalho
 					2. Nome da Rotina associada
@@ -60,7 +50,6 @@ Parametros--------: aRotina
 						5 - Remove o registro corrente do Banco de Dados
 					5. Nivel de acesso
 					6. Habilita Menu Funcional
-===============================================================================================================================
 Retorno-----------: Array com opcoes da rotina
 ===============================================================================================================================
 */
@@ -80,11 +69,8 @@ Return( aRotina )
 Programa----------: AGLT002E
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 02/08/2018
-===============================================================================================================================
 Descrição---------: Funcao usada para apagar registro da ZL1
-===============================================================================================================================
 Parametros--------: cAlias,nReg,nOpc
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -101,11 +87,8 @@ Return
 Programa----------: AGLT002I
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 23/04/2024
-===============================================================================================================================
 Descrição---------: Funcao usada para incluir registro da ZL1
-===============================================================================================================================
 Parametros--------: cAlias,nReg,nOpc
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -122,11 +105,8 @@ Return
 Programa----------: AGLT002A
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 23/04/2024
-===============================================================================================================================
 Descrição---------: Funcao usada para incluir registro da ZL1
-===============================================================================================================================
 Parametros--------: cAlias,nReg,nOpc
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -143,12 +123,9 @@ Return
 Programa----------: AGLT002T
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 23/04/2024
-===============================================================================================================================
 Descrição---------: Atualiza todos os motoristas cujo transportador é o mesmo do motorista que está sendo incluído/alterado.
 					Dessa forma todos os cadastros são replicados.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -205,7 +182,7 @@ Local _nX		:=	0
 				For _nX := 1 To Len(_aFields)
 					If AllTrim(_aFields[_nX]) == "ZL1_COD"
 						(cAlias)->&(_aFields[_nX]):= GetSxeNum( "ZL1" , "ZL1_COD" )
-					ElseIf  allTrim(_aFields[_nX]) == "ZL1_MOTORI"
+					ElseIf  AllTrim(_aFields[_nX]) == "ZL1_MOTORI"
 						(cAlias)->&(_aFields[_nX]):= (_cAliasM)->ZL0_COD
 					ElseIf  AllTrim(_aFields[_nX]) == "ZL1_NOME"
 						(cAlias)->&(_aFields[_nX]):= (_cAliasM)->ZL0_NOME
@@ -213,17 +190,17 @@ Local _nX		:=	0
 						(cAlias)->&(_aFields[_nX]):= (_cAlias)->&(_aFields[_nX])
 					EndIf
 				Next _nX
-			(cAlias)->(MsUnLock())
+			(cAlias)->(MSUnLock())
 			If __lSX8
 				ConfirmSX8()
 			EndIf
 			(_cAlias)->( DBSkip() )
 		EndDo
-		(_cAlias)->(DbClosearea())
+		(_cAlias)->(DBCloseArea())
 		(_cAliasM)->( DBSkip() )
 	EndDo 
 
-	(_cAliasM)->(DbClosearea())
+	(_cAliasM)->(DBCloseArea())
 
 Return
 
@@ -232,11 +209,8 @@ Return
 Programa----------: AGLT002B
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 23/04/2024
-===============================================================================================================================
 Descrição---------: Bloqueia todos os cadastros inativos de acordo com o período informado.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -272,7 +246,7 @@ If MV_PAR01 == 1
 		_aSelFil := AdmGetFil(.F.,.F.,"ZL1")
 	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
+	aAdd(_aSelFil,cFilAnt)
 EndIf
 _cFiltro := " AND ZL1_FILIAL "+ GetRngFil( _aSelFil, "ZL1", .T.,)
 
@@ -283,7 +257,7 @@ _cUpdate+=" AND ZL1_MSBLQL <> '1'"
 _cUpdate+= _cFiltro
 _cUpdate+=" AND NOT EXISTS (SELECT 1 FROM "+RetSqlName('ZLD')
 _cUpdate+=" WHERE D_E_L_E_T_ = ' '"
-_cUpdate+=" AND ZLD_DTCOLE BETWEEN '" + DtoS(MV_PAR02) + "' AND '" + DtoS(MV_PAR03) + "' " 
+_cUpdate+=" AND ZLD_DTCOLE BETWEEN '" + DToS(MV_PAR02) + "' AND '" + DToS(MV_PAR03) + "' " 
 _cUpdate+=" AND ZLD_FILIAL = ZL1_FILIAL"
 _cUpdate+=" AND ZLD_VEICUL = ZL1_COD"
 _cUpdate+=" AND ZLD_MOTOR = ZL1_MOTORI)"
@@ -299,7 +273,7 @@ Else
 	_cUpdate+= _cFiltro
 	_cUpdate+=" AND NOT EXISTS (SELECT 1 FROM "+RetSqlName('ZLD')
 	_cUpdate+=" WHERE D_E_L_E_T_ = ' '"
-	_cUpdate+=" AND ZLD_DTCOLE BETWEEN '" + DtoS(MV_PAR02) + "' AND '" + DtoS(MV_PAR03) + "' " 
+	_cUpdate+=" AND ZLD_DTCOLE BETWEEN '" + DToS(MV_PAR02) + "' AND '" + DToS(MV_PAR03) + "' " 
 	_cUpdate+=" AND ZLD_FILIAL = ZL0_FILIAL"
 	_cUpdate+=" AND ZLD_MOTOR = ZL0_COD)"
 		

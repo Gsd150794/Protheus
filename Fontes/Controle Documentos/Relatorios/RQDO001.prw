@@ -8,12 +8,9 @@ Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 #Include "report.ch"
-#INCLUDE 'TOPCONN.CH'
+#Include 'TOPCONN.CH'
 
 /*
 ===============================================================================================================================
@@ -45,8 +42,8 @@ Begin Sequence
 
    //Italac_F3:={}         1           2         3                       4                         5            6                    7                    8             9         10         11        12
    //AD(_aItalac_F3,{"1CPO_CAMPO1",_cTabela,_nCpoChave             , _nCpoDesc                ,_bCondTab , _cTitAux            , _nTamChv , _aDados  , _nMaxSel ,_lFilAtual,_cMVRET    ,_bValida})
-   AADD(_aItalac_F3,{"MV_PAR01"   ,_cSelQDH,{|Tab|(Tab)->CODDOC},{|Tab| (Tab)->QDH_TITULO} ,          ,"Documentos"         ,          ,          ,20        ,.F.        ,       , } )
-   AADD(_aItalac_F3,{"MV_PAR03"   ,_cSelQD2,{|Tab|(Tab)->CODTIP},{|Tab| (Tab)->QD2_DESCTP} ,          ,"Tipos de Documentos",          ,          ,20        ,.F.        ,       , } )
+   aAdd(_aItalac_F3,{"MV_PAR01"   ,_cSelQDH,{|Tab|(Tab)->CODDOC},{|Tab| (Tab)->QDH_TITULO} ,          ,"Documentos"         ,          ,          ,20        ,.F.        ,       , } )
+   aAdd(_aItalac_F3,{"MV_PAR03"   ,_cSelQD2,{|Tab|(Tab)->CODTIP},{|Tab| (Tab)->QD2_DESCTP} ,          ,"Tipos de Documentos",          ,          ,20        ,.F.        ,       , } )
 
 	//====================================================================================================
     // Gera a pergunta de modo oculto, ficando disponível no botão ações relacionadas
@@ -61,7 +58,7 @@ Begin Sequence
 	
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -172,7 +169,7 @@ Begin Sequence
    _cQry += " ORDER BY QDH_DOCTO, QDH_RV, QDH_DTIMPL, QD1_DTBAIX " // QD0.R_E_C_N_O_ 
 
    If Select("TRBDOC") <> 0
-	   TRBDOC->(DbCloseArea())
+	   TRBDOC->(DBCloseArea())
    EndIf
 	
    TCQUERY _cQry NEW ALIAS "TRBDOC"	
@@ -180,13 +177,13 @@ Begin Sequence
    TCSetField('TRBDOC',"LIMITE" ,"D",8,0)
    TCSetField('TRBDOC',"QD1_DTBAIX","D",8,0)
    	
-   DbSelectArea("TRBDOC")
-   TRBDOC->(dbGoTop())
+   DBSelectArea("TRBDOC")
+   TRBDOC->(DBGoTop())
 
    Count to _ntotRegs	
    _oReport:SetMeter(_ntotRegs)	
    
-   TRBDOC->(dbGoTop())
+   TRBDOC->(DBGoTop())
 
    _cCodDoc := "" 
    _cDocFiltro := ""
@@ -195,7 +192,7 @@ Begin Sequence
    //====================================================================================================
    // Inicia processo de impressão.
    //====================================================================================================		
-   Do While !TRBDOC->(Eof())
+   While !TRBDOC->(Eof())
 		
       If _oReport:Cancel()
 		   Exit
@@ -219,7 +216,7 @@ Begin Sequence
             _cQry2 += " AND QD1_TPPEND IN ('E','R','A','I') "
           
             If Select("TRBFILTRO") <> 0
-	            TRBFILTRO->(DbCloseArea())
+	            TRBFILTRO->(DBCloseArea())
             EndIf
 	
             TCQUERY _cQry2 NEW ALIAS "TRBFILTRO"	
@@ -227,12 +224,12 @@ Begin Sequence
             _cUltimaRv := TRBFILTRO->ULTIMARV
 
             If Select("TRBFILTRO") <> 0
-	            TRBFILTRO->(DbCloseArea())
+	            TRBFILTRO->(DBCloseArea())
             EndIf
          EndIf 
 
          If TRBDOC->QDH_RV <> _cUltimaRv
-            TRBDOC->(DbSkip())
+            TRBDOC->(DBSkip())
             Loop 
          EndIf 
 
@@ -272,7 +269,7 @@ Begin Sequence
          _oSect1:Cell("QDH_DTLIM"):SetValue(TRBDOC->LIMITE)	
          _oSect1:Cell("QA2_TEXTO"):SetValue(TRBDOC->QA2_TEXTO)	
          _oSect1:Cell("WK_STATUS"):SetValue(_cStatus)	
-         _oSect1:Printline()
+         _oSect1:PrintLine()
          _oReport:ThinLine()
 
          _cCodDoc := TRBDOC->QDH_DOCTO
@@ -297,7 +294,7 @@ Begin Sequence
       
       _cRespon := Tabela("Q7",TRBDOC->QD1_TPPEND,.F.)
 
-      IncProc("Imprimindo Responsáveis: " + Alltrim(TRBDOC->QD0_MAT+"-"+_cNome))
+      IncProc("Imprimindo Responsáveis: " + AllTrim(TRBDOC->QD0_MAT+"-"+_cNome))
 
       _oSect2:Cell("QD0_AUT"):SetValue(_cCategor)
       _oSect2:Cell("QD0_MAT"):SetValue(TRBDOC->QD0_MAT)
@@ -306,9 +303,9 @@ Begin Sequence
       _oSect2:Cell("QD1_DTBAIX"):SetValue(TRBDOC->QD1_DTBAIX)
       _oSect2:Cell("WK_RESPON"):SetValue(_cRespon)                                                      
 
-      _oSect2:Printline()         
+      _oSect2:PrintLine()         
          
-      TRBDOC->(dbSkip())
+      TRBDOC->(DBSkip())
    EndDo		
    
    //====================================================================================================

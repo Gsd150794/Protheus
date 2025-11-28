@@ -2,16 +2,14 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor  |    Data    |                                             Motivo                                           
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
 Lucas Borges  | 17/03/2025 | Chamado 50218. Inclído filtro correto dos CFOPs contemplados na operação
 ===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes e Defines da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "FWMVCDEF.CH"
+
+#Include "TOTVS.ch"
+#Include "FWMVCDEF.CH"
 
 /*
 ===============================================================================================================================
@@ -27,9 +25,7 @@ User Function ACOM002
 
 Local _oBrowse	:= Nil
 
-//====================================================================================================
 // Configura e inicializa a Classe do Browse
-//====================================================================================================
 _oBrowse := FWMBrowse():New()
 _oBrowse:SetAlias('ZM5')
 _oBrowse:SetDescription('Cadastro de Descontos Tetra Pak')
@@ -78,7 +74,7 @@ Local _oModel	:= MPFormModel():New( "ACOM002M" ,/*bPreValidacao*/,{|| a002VldGrv
 Local _aAuxFWDGat:={}
 
 // Monta a estrutura dos gatilhos
-_aAuxFWDGat := FwStruTrigger('ZM5_PRODUT','ZM5_DESC','POSICIONE("SB1",1,xFilial("SB1")+M->ZM5_PRODUTO,"B1_DESC")',.F.)
+_aAuxFWDGat := FwStruTrigger('ZM5_PRODUT','ZM5_DESC','Posicione("SB1",1,xFilial("SB1")+M->ZM5_PRODUTO,"B1_DESC")',.F.)
 _oStruGrid:AddTrigger(_aAuxFWDGat[01],_aAuxFWDGat[02],_aAuxFWDGat[03],_aAuxFWDGat[04])
 
 // Monta a estrutura dos campos
@@ -155,7 +151,7 @@ Retorno---------: _lRet -> L -> .T. - Linha OK - .F. - Linha com problema
 Static Function a002LinOk(_oModel)
 
 Local _lRet		:= .T.
-If ( _oModel:isInserted() .OR. _oModel:IsModified() ) .AND. !_oModel:IsDeleted()
+If ( _oModel:isInserted() .Or. _oModel:IsModified() ) .And. !_oModel:IsDeleted()
 	_lRet := A002UnqKey(_oModel)
 	If !_lRet
 		Help(" ",1,"ACOM00201",,"Registro já cadastrado.",1,4, NIL, NIL, NIL, NIL, NIL, {"Altere o produto ou a vigência da regra"})
@@ -226,8 +222,8 @@ Static Function A002UnqKey(_oModel)
 Local _lRet		:= .T.
 Local _cAlias   := GetNextAlias()
 Local _cProd    := _oModel:GetValue('ZM5_PRODUT')
-Local _cDtIni   := DtoS(FwFldGet('ZM5_DTINI'))
-Local _cDtFim   := DtoS(FwFldGet('ZM5_DTFIM'))
+Local _cDtIni   := DToS(FwFldGet('ZM5_DTINI'))
+Local _cDtFim   := DToS(FwFldGet('ZM5_DTFIM'))
 Local _nRecno	:= _oModel:GetDataId()
 
 BeginSql alias _cAlias
@@ -254,10 +250,11 @@ Data da Criacao-: 31/07/2024
 Descrição-------: Recalcula o custo dos movimentos internos
 Parametros------: Nenhum
 Retorno---------: Nenhum
+===============================================================================================================================
 */
 User Function ACOM002R
 
-Local _aArea := GetArea()
+Local _aArea := FWGetArea()
 Local _oSelf := Nil
 
 tNewProcess():New(	"ACOM002"										,; // Função inicial
@@ -272,7 +269,7 @@ tNewProcess():New(	"ACOM002"										,; // Função inicial
 					.T.												,; // Se .T. exibe o painel de execução. Se falso, apenas executa a função sem exibir a régua de processamento.
 					.T.                                              ) // Se .T. cria apenas uma regua de processamento.
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -286,11 +283,11 @@ Local _cDecimal := "% " + CValToChar(_nDecimal)+ " %"
 Local _cCFOPS	:= "% AND D2_CF IN "+ FormatIn( AllTrim(SuperGetMV("IT_CFTETRS",.F.,"6201/5201")),'/') + "%"
 Local _cCFOPE	:= "% AND D1_CF IN "+ FormatIn( AllTrim(SuperGetMV("IT_CFTETRE",.F.,"1101/2101/1122/2122")),'/') + "%"
 If MV_PAR01 <= _dUlMes
-	FWAlertError("A data inicial de processamento é menor ou igual ao fechamento do estoque (MV_ULMES): "+DTOC(_dUlMes),"ACOM00201")
+	FWAlertError("A data inicial de processamento é menor ou igual ao fechamento do estoque (MV_ULMES): "+DToC(_dUlMes),"ACOM00201")
 	Return .F.
 EndIf
 
-DbSelectArea("SD3")
+DBSelectArea("SD3")
 
 _oSelf:SetRegua1(2)
 _oSelf:IncRegua1("Buscando dados para serem processados...")
@@ -314,7 +311,7 @@ BeginSql Alias _cAlias
 	AND D1_FORNECE = 'F00004'
 	AND D1_TIPO = 'N'
 	AND D1_DOC||D1_SERIE||D1_FORNECE||D1_LOJA||D1_COD||D1_ITEM = TRIM(D3_CHAVEF1)
-	AND D3_CUSTO1 <> ROUND(D1_CUSTO*(ZM5_AVD+ZM5_QSR+ZM5_SDESN+ZM5_LAD+ZM5_APD+ZM5_CTD)/100,%exp:_cDecimal%)
+	AND D3_CUSTO1 <> Round(D1_CUSTO*(ZM5_AVD+ZM5_QSR+ZM5_SDESN+ZM5_LAD+ZM5_APD+ZM5_CTD)/100,%exp:_cDecimal%)
 	UNION ALL
 	SELECT SD3.R_E_C_N_O_ RECNO, D2_CUSTO1*(ZM5_AVD+ZM5_QSR+ZM5_SDESN+ZM5_LAD+ZM5_APD+ZM5_CTD)/100 VALOR
 	FROM %Table:SD3% SD3, %Table:SD2% SD2, %Table:ZM5% ZM5, %Table:SD1% SD1
@@ -341,24 +338,24 @@ BeginSql Alias _cAlias
 	AND D2_CLIENTE = 'F00004'
 	AND D2_TIPO = 'N'
 	AND D2_DOC||D2_SERIE||D2_CLIENTE||D2_LOJA||D2_COD||D2_ITEM = TRIM(D3_CHAVEF2)
-	AND D3_CUSTO1 <> ROUND(D2_CUSTO1*(ZM5_AVD+ZM5_QSR+ZM5_SDESN+ZM5_LAD+ZM5_APD+ZM5_CTD)/100,%exp:_cDecimal%)
+	AND D3_CUSTO1 <> Round(D2_CUSTO1*(ZM5_AVD+ZM5_QSR+ZM5_SDESN+ZM5_LAD+ZM5_APD+ZM5_CTD)/100,%exp:_cDecimal%)
 EndSql
 
 COUNT TO _nQtdReg
-(_cAlias)->(DbGoTop())
+(_cAlias)->(DBGoTop())
 _oSelf:SetRegua1(_nQtdReg)
 
-While !(_cAlias)->(EOF())
+While !(_cAlias)->(Eof())
 	_oSelf:IncRegua1("Atualizando custo....")
-	SD3->(DbGoTo((_cAlias)->RECNO))
+	SD3->(DBGoTo((_cAlias)->RECNO))
 	SD3->(RecLock("SD3",.F.)) 
 		SD3->D3_CUSTO1 := Round((_cAlias)->VALOR,_nDecimal)
 		SD3->D3_CUSTO2 := xMoeda(SD3->D3_CUSTO1,1,2,SD3->D3_EMISSAO)
 		SD3->D3_CUSTO3 := xMoeda(SD3->D3_CUSTO1,1,3,SD3->D3_EMISSAO)
 		SD3->D3_CUSTO4 := xMoeda(SD3->D3_CUSTO1,1,4,SD3->D3_EMISSAO)
 		SD3->D3_CUSTO5 := xMoeda(SD3->D3_CUSTO1,1,5,SD3->D3_EMISSAO)
-	SD3->(MsUnlock())  
-	(_cAlias)->(dbSkip())
+	SD3->(MSUnLock())  
+	(_cAlias)->(DBSkip())
 EndDo
 (_cAlias)->(DBCloseArea())
 

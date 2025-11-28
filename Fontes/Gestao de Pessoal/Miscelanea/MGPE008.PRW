@@ -4,21 +4,14 @@
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 Lucas Borges  |23/07/2025| Chamado 51340. Ajustar função para validação de ambiente de teste
 Lucas Borges  |01/08/2025| Chamado 51453. Substituir função EncodeUtf8 por FWHttpEncode
+Lucas Borges  |14/09/2025| Chamado 51799. Implementada função para validar ambiente de teste totvs.framework.environment.Type.get()
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
+#Include "TOTVS.ch"
 
-#INCLUDE "Protheus.ch"
-#INCLUDE "Colors.ch"
-#Include "ApWizard.Ch"
-
-#Define ENTER	Chr(13)+Chr(10)
 #Define TITULO	"Planos da Unimed ou ODONTOPREV"
 
 /*
@@ -40,10 +33,8 @@ SET DATE FORMAT TO "DD/MM/YYYY"
 
 cFilOdontoPrev:=MGPE008ZP1()//Cria (se não existir) o paramentro IT_CDFILOND no ZP1 para cada filail que tem ODONTOPREV
 
-//============================================
 //Cria interface principal
-//============================================
-DO WHILE .T.
+While .T.
    _lLoop:=.F.
    tNewProcess():New(cPerg											,; // Função inicial
 					"Geração de Arquivo Texto - Planos da Unimed ou ODONTOPREV"				,; // Descrição da Rotina
@@ -56,12 +47,12 @@ DO WHILE .T.
 					''												,; // Descrição do Painel Auxiliar
 					.F.												,; // Se .T. exibe o painel de execução. Se falso, apenas executa a função sem exibir a régua de processamento.
                     .T.                                              ) // Se .T. cria apenas uma regua de processamento.
-   IF !_lLoop
-      EXIT
-   ENDIF
-ENDDO
+   If !_lLoop
+      Exit
+   EndIf
+EndDo
                     
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -75,80 +66,67 @@ Retorno---------: Nenhum
 */
 Static Function MGPE008INI(_oSelf)
 
-//===============================================================================================
-// Tenta criar o arquivo conforme parametrização
-//===============================================================================================
-Local cNome		:= GetMv( "IT_ARQUNIM" ,, "ARQ_UNIMED" ) +"_"+ DtoS( Date() ) +"_"+ StrTran( TIME() , ":" , "" )
+Local cNome		:= GetMv( "IT_ARQUNIM" ,, "ARQ_UNIMED" ) +"_"+ DToS( Date() ) +"_"+ StrTran( Time() , ":" , "" )
 Local cArqTxt	:= AllTrim( MV_PAR17 ) + cNome + ".csv"
 Local cNumLote	:= cArqTxtMem := ""
 Local nRegPro	:= 0
 _lLoop:=.T.
 
-PRIVATE _dHojeSys:=DATE()
-PRIVATE  nDiasAd := GetMv( "IT_DIASPLA" ,, 88 )//UNIMED
+Private _dHojeSys:=Date()
+Private  nDiasAd := GetMv( "IT_DIASPLA" ,, 88 )//UNIMED
 
-IF SuperGetMV("IT_AMBTEST",.F.,.T.) .AND. !EMPTY(MV_PAR09)
+If !totvs.framework.environment.Type.get() == '1' .And. !Empty(MV_PAR09) //1-Produção, 2-Homologação,3-Desenvolvimento
    _dHojeSys:=MV_PAR09
    dDataBase:=MV_PAR09
-ENDIF
+EndIf
 _lOK:=.T.
 cFilOdontoPrev:="Todas"
 If MV_PAR12  = 2 //2-ODONTO
    nDiasAd :=0
    cFilOdontoPrev:=MGPE008ZP1()//Cria (se não existir) o paramentro IT_CDFILOND no ZP1 para cada filail que tem ODONTOPREV
    nHdl:= 0
-ELSE
+Else
    nHdl:= FCreate( cArqTxt )
    If nHdl = -1
    	  //MsgStop("O arquivo: "+ cArqTxt +" nao pode ser criado! Verifique os parâmetros.","MGPE00801")
-   	  U_ITMSG("O arquivo: "+ cArqTxt +" nao pode ser criado!",'Atenção!',"Verifique os parâmetros.",1)
+   	  U_ITMsg("O arquivo: "+ cArqTxt +" nao pode ser criado!",'Atenção!',"Verifique os parâmetros.",1)
 	  _lOK:=.F.
-   ELSE
-      cArqTxtMem:= STRTRAN( cArqTxt, "\", "\ ")
-   ENDIF
-ENDIF
-//Validacao tem que ser depois do IF de cima por causa da variavel cFilOdontoPrev
-IF !(U_MGPE008P(1) .AND. U_MGPE008P(2) .AND. U_MGPE008P(3) .AND. U_MGPE008P(4) .AND. U_MGPE008P(5) .AND. U_MGPE008P(6))
-   RETURN .T.
-ENDIF
+   Else
+      cArqTxtMem:= StrTran( cArqTxt, "\", "\ ")
+   EndIf
+EndIf
+//Validacao tem que ser depois do If de cima por causa da variavel cFilOdontoPrev
+If !(U_MGPE008P(1) .And. U_MGPE008P(2) .And. U_MGPE008P(3) .And. U_MGPE008P(4) .And. U_MGPE008P(5) .And. U_MGPE008P(6))
+   Return .T.
+EndIf
 
 If _lOK
-	//===============================================================================================
 	// Inicia o Lote de Processamento
-	//===============================================================================================
 	cNumLote := U_ITInLote( "Z04" , "001" ) // 001 - Processamento de Envio
 	
-	//===============================================================================================
 	// Executa rotina de processamento do arquivo
-	//===============================================================================================
 	Processa( {|| MGPE008GER( nHdl , cNumLote , @nRegPro ) } , "Geração do Arquivo" , "Lendo registros..." )
 	
-	IF !EMPTY(cArqTxtMem)
+	If !Empty(cArqTxtMem)
 	   FClose( nHdl )
-	   IF nRegPro > 0
-           U_ITMSG("Arquivo gerado com sucesso:"+ ENTER + cArqTxtMem,'SUCESSO!',,2)
+	   If nRegPro > 0
+           U_ITMsg("Arquivo gerado com sucesso:"+ CRLF + cArqTxtMem,'SUCESSO!',,2)
 	   Else
-           U_ITMSG("Não foram encontrados registros para gerar o arquivo.",'Atenção!',"O arquivo será excluído: "+cArqTxtMem,,3)
+           U_ITMsg("Não foram encontrados registros para gerar o arquivo.",'Atenção!',"O arquivo será excluído: "+cArqTxtMem,,3)
 	   	   FErase( cArqTxt )
-	   EndIF
-	ELSE
-	   IF nRegPro > 0
-           U_ITMSG("Dados gerado com sucesso.",'SUCESSO!',,2)
+	   EndIf
+	Else
+	   If nRegPro > 0
+           U_ITMsg("Dados gerado com sucesso.",'SUCESSO!',,2)
 	   Else
-           U_ITMSG("Não foram encontrados dados para os filtros selecionados.",'Atenção!',"Verifique os filtros e tente novamente",,3)
-	   EndIF
-	EndIF
+           U_ITMsg("Não foram encontrados dados para os filtros selecionados.",'Atenção!',"Verifique os filtros e tente novamente",,3)
+	   EndIf
+	EndIf
 	
-	//===============================================================================================
 	// Fecha o Lote de Processamento
-	//===============================================================================================
-	//LjMsgRun( "Gravando dados do lote..." , "Aguarde!" , {|| U_ITFnLote( "Z04" , cNumLote ) } )
 	U_ITFnLote( "Z04" , cNumLote ) 
 	
-	//===============================================================================================
 	// Verifica o Lote
-	//===============================================================================================
-	//LjMsgRun( "Verificando dados do lote..." , "Aguarde!" , {|| U_ITVlLote( "Z06" , cNumLote ) } )
 	 U_ITVlLote( "Z06" , cNumLote ) 
 
 EndIf
@@ -187,44 +165,38 @@ Local lRet		:= .T.
 Local cMesRef	:= ""
 Local nDiaFinal	:= 0
 Local nContad	:= 0
-Local dDiaRef	:= StoD("")
+Local dDiaRef	:= SToD("")
 
-PRIVATE cTipOpe	:= ""
-PRIVATE _cAlias	:= GetNextAlias()
-PRIVATE aDadosOdonto:= {}
-PRIVATE aXlsxOdonto:= {}
+Private cTipOpe	:= ""
+Private _cAlias	:= GetNextAlias()
+Private aDadosOdonto:= {}
+Private aXlsxOdonto:= {}
 
 nRegPro := 0
 
-//===============================================================================================
 // Verifica o parâmetro de Situações na Folha
-//===============================================================================================
 If Empty( MV_PAR03 )
 	cSitFol := " ;"
 Else
-	For nI := 1 To LEN( MV_PAR03 )
+	For nI := 1 To Len( MV_PAR03 )
 		If SubStr( MV_PAR03 , nI , 1 ) <> "*"
 			cSitFol += SubStr( MV_PAR03 , nI , 1 ) + ";"
 		EndIf
 	Next nI
-	cSitFol := SubStr( cSitFol , 1 , LEN(cSitFol) - 1 )
+	cSitFol := SubStr( cSitFol , 1 , Len(cSitFol) - 1 )
 EndIf
 
-//===============================================================================================
 // Verifica o parâmetro de Categorias Funcionais
-//===============================================================================================
 If !Empty( MV_PAR02 )
-	For nI := 1 To LEN( MV_PAR02 )
+	For nI := 1 To Len( MV_PAR02 )
 		If SubStr( MV_PAR02 , nI , 1 ) <> "*"
 			cCatFun += SubStr( MV_PAR02 , nI , 1 ) + ";"
 		EndIf
 	Next nI
-	cCatFun := SubStr( cCatFun , 1 , LEN(cCatFun) - 1 )
+	cCatFun := SubStr( cCatFun , 1 , Len(cCatFun) - 1 )
 EndIf
 
-//===============================================================================================
 // Verifica a data de corte do mês atual informada nos parâmetros
-//===============================================================================================
 If Day(_dHojeSys) <= MV_PAR16
 	dDiaRef := MonthSum( _dHojeSys , 01 )
 Else
@@ -234,9 +206,7 @@ EndIf
 nDiaFinal	:= LastDay( dDiaRef )
 cMesRef		:= StrZero( Month(dDiaRef) , 2 ) + StrZero( Year( dDiaRef ) , 4 )
 
-//===============================================================================================
 // Verifica a Inclusão de funcionários no Plano de Saúde - Envio-1
-//===============================================================================================
 If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 
 	cBenef := " SELECT "
@@ -293,9 +263,9 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 	cBenef += " AND SRA.RA_SITFOLH	<> 'D' "
 	cBenef += " AND SRA.RA_SITFOLH	IN "+FormatIn( cSitFol , ";" )
 	
-	IF !Empty(cCatFun)
+	If !Empty(cCatFun)
 	   cBenef += " AND SRA.RA_CATFUNC IN "+FormatIn( cCatFun , ";" )
-	EndIF
+	EndIf
 	
 	cBenef += " AND RHK.RHK_TPFORN	= '"+ CVALTOCHAR(MV_PAR12) +"' "//1-UNIMED 2-ODONTOPREV
 	cBenef += " AND RHK.RHK_CODFOR	= '"+ CVALTOCHAR(MV_PAR13) +"' "
@@ -305,7 +275,7 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 	
 	If Select(_cAlias) > 0
 		(_cAlias)->( DBCloseArea() )
-	Endif
+	EndIf
 	
 	DBUseArea( .T. , "TOPCONN" , TcGenQry(,,cBenef) , _cAlias , .T. , .F. )
 	
@@ -326,17 +296,13 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 		IncProc( "Lendo registos... ["+ StrZero( nCtAux , 9 ) +"] de ["+ StrZero( nTotReg , 9 ) +"]" )
 		lRet := .T.
 		
-		//===============================================================================================
 		// Verifica os critérios para Inclusões
-		//===============================================================================================
-		IF MV_PAR08 == 1 .Or. ( (_cAlias)->Z05_ACAO == "E" .And. (_cAlias)->Z05_STATUS $ "PA" )
+		If MV_PAR08 == 1 .Or. ( (_cAlias)->Z05_ACAO == "E" .And. (_cAlias)->Z05_STATUS $ "PA" )
 			
-			//===============================================================================================
 			// Verifica o período de inclusão no cadstro dos funcionários
-			//===============================================================================================
-			IF (_cAlias)->RHK_PERINI <> cMesRef
+			If (_cAlias)->RHK_PERINI <> cMesRef
 				
-				AADD( aLogPro , {	(_cAlias)->RA_FILIAL	,;
+				aAdd( aLogPro , {	(_cAlias)->RA_FILIAL	,;
 									(_cAlias)->RA_MAT	 	,;
 									"00" 				,;
 									"Funcionário" 		,;
@@ -346,7 +312,7 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 				(_cAlias)->( DBSkip() )
 				Loop
 				
-			EndIF
+			EndIf
 			
 			cTipOpe := "1"
 			_cAcao	:= "I"
@@ -356,49 +322,41 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 			cTipOpe := "2"
 			_cAcao	:= "A"
 			
-		EndIF
+		EndIf
 		
-		//===============================================================================================
 		// Valida período de carência dos funcionários para inclusão no Plano
-		//===============================================================================================
-	    IF ( dDataBase - STOD((_cAlias)->RA_ADMISSA) ) < nDiasAd
-	    	AADD( aLogPro , {	(_cAlias)->RA_FILIAL	,;
+	    If ( dDataBase - SToD((_cAlias)->RA_ADMISSA) ) < nDiasAd
+	    	aAdd( aLogPro , {	(_cAlias)->RA_FILIAL	,;
 								(_cAlias)->RA_MAT	 	,;
 								"00" 				,;
 								"Funcionário" 		,;
 								(_cAlias)->RA_NOMECMP	,;
-								"A Carência do Funcionário ["+ StrZero( nDiasAd , 3 ) +" dias] ainda não foi superada ["+ StrZero( dDataBase - STOD( (_cAlias)->RA_ADMISSA ) , 3 ) +" dias de contrato] [ Admissão: "+DTOC(STOD( (_cAlias)->RA_ADMISSA ))+" ]." } )
+								"A Carência do Funcionário ["+ StrZero( nDiasAd , 3 ) +" dias] ainda não foi superada ["+ StrZero( dDataBase - SToD( (_cAlias)->RA_ADMISSA ) , 3 ) +" dias de contrato] [ Admissão: "+DToC(SToD( (_cAlias)->RA_ADMISSA ))+" ]." } )
 			(_cAlias)->( DBSkip() )
 			Loop
 	    	
 	    Else
 			
-			//===============================================================================================
 			// Valida o preenchimento do nome da mãe do Titular
-			//===============================================================================================
 			If Empty(AllTrim((_cAlias)->RA_MAE)) 
 				
-				//===============================================================================================
 				// Grava o Item processado no Lote
-				//===============================================================================================
 				U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , '' , _cAcao , "T" , "É obrigatório informar o nome da mãe do funcionário titular." } } , "0" )
 				
 				lRet := .F.
 				
-				AADD( aLogPro , {	(_cAlias)->RA_FILIAL	,;
+				aAdd( aLogPro , {	(_cAlias)->RA_FILIAL	,;
 									(_cAlias)->RA_MAT	 	,;
 									"00" 				,;
 									"Funcionário" 		,;
 									(_cAlias)->RA_NOMECMP	,;
 									"É obrigatório informar o nome da mãe do funcionário titular." } )
 			
-			EndIF
+			EndIf
 			
 			If lRet
 			
-				//===============================================================================================
 				// De/Para do estado civil para envio no arquivo
-				//===============================================================================================
 	   			Do Case
 					Case (_cAlias)->RA_ESTCIVI == 'C'
 						cEstCi:= 'C'
@@ -416,31 +374,27 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 				
 			EndIf
 		
-		EndIF
+		EndIf
 		
 		If lRet
 		
-			//===============================================================================================
 			// Prepara as informações necessárias
-			//===============================================================================================
-		IF MV_PAR12 = 1 //1-UNIMED
+		If MV_PAR12 = 1 //1-UNIMED
 			nTamLin	:= 2
-			cLin	:= Space(nTamLin) + ENTER //Variavel para criacao da linha do registros para gravacao
-			cTel	:= StrTran( SubStr( (_cAlias)->RA_TELEFON , 1 , LEN( (_cAlias)->RA_TELEFON ) - 2 ) , "-" , "" )
+			cLin	:= Space(nTamLin) + CRLF //Variavel para criacao da linha do registros para gravacao
+			cTel	:= StrTran( SubStr( (_cAlias)->RA_TELEFON , 1 , Len( (_cAlias)->RA_TELEFON ) - 2 ) , "-" , "" )
 			cDDD	:= SubStr( (_cAlias)->RA_DDDFONE , 1 , 2 )
 			cCodUni	:= AllTrim( GetAdvFVal( "SX6" , "X6_CONTEUD" , (_cAlias)->RA_FILIAL + "IT_CODUNI" , 1 , "" ) )		
-			_cDtAux	:= IIF( MV_PAR08 == 1 , DtoC(MV_PAR09) , DtoC( StoD( SubStr( (_cAlias)->RHK_PERINI , 3 , 4 ) + SubStr( (_cAlias)->RHK_PERINI , 1 , 2 ) + '01' ) ) )
+			_cDtAux	:= IIf( MV_PAR08 == 1 , DToC(MV_PAR09) , DToC( SToD( SubStr( (_cAlias)->RHK_PERINI , 3 , 4 ) + SubStr( (_cAlias)->RHK_PERINI , 1 , 2 ) + '01' ) ) )
 			
 			If (_cAlias)->RHK_PLANO == "98"
 				_cplano := _cCodPla2
 			Else
 				_cplano := _cCodPla
-			Endif
+			EndIf
 			
-			//===============================================================================================
 			//Monta a estrutura da linha do arquivo
             //Enviar: A Inclusão de funcionários no Plano de Saúde - Envio-1
-			//===============================================================================================
 			cCpo	:=	"1"										 									+ cDelim //COD_TIPO_REGISTRO
 			cCpo	+=	cCodUni																		+ cDelim //COD_EMPRESA
 			cCpo	+=	cTipOpe																		+ cDelim //COD_TIPO_OPERACAO
@@ -449,7 +403,7 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 			cCpo	+=	MGPE008TPD( AllTrim((_cAlias)->RA_NOMECMP) , 120 )							+ cDelim //NOME_ASSOCIADO
 			cCpo	+=	(_cAlias)->RA_SEXO							 								+ cDelim //IND_SEXO
 			cCpo	+=	cEstCi																		+ cDelim //IND_ESTADO_CIVIL
-			cCpo	+=	IIf( !Empty((_cAlias)->RA_NASC) , DtoC( StoD( (_cAlias)->RA_NASC ) ) , "" )	+ cDelim //DATA_NASCIMENTO
+			cCpo	+=	IIf( !Empty((_cAlias)->RA_NASC) , DToC( SToD( (_cAlias)->RA_NASC ) ) , "" )	+ cDelim //DATA_NASCIMENTO
 			cCpo	+=	_cplano						  												+ cDelim //COD_PLANO
 			cCpo	+=	""																			+ cDelim //COD_UNIMED_LCAT
 			cCpo	+=	""																			+ cDelim //COD_LOTACAO
@@ -459,7 +413,7 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 			cCpo	+=	""																			+ cDelim //DATA_TROCA_PLANO
 			cCpo	+=	""																			+ cDelim //DATA_REATIVACAO
 			cCpo	+=	_cDtAux																		+ cDelim //DT_LOTACAO
-			cCpo	+=	If( !Empty((_cAlias)->RA_ADMISSA) , DtoC( StoD( (_cAlias)->RA_ADMISSA)),"" )+ cDelim //DATA_ADMISSAO
+			cCpo	+=	If( !Empty((_cAlias)->RA_ADMISSA) , DToC( SToD( (_cAlias)->RA_ADMISSA)),"" )+ cDelim //DATA_ADMISSAO
 			cCpo	+=	""																			+ cDelim //DATA_CASAMENTO
 			cCpo	+=	(_cAlias)->RA_FILIAL+(_cAlias)->RA_MAT										+ cDelim //NUM_MATRIC_EMPRESA
 			cCpo	+=	"00"																		+ cDelim //NUM_SEQ_MATRIC_EMPRESA
@@ -513,41 +467,35 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 			cCpo	+=	""																			+ cDelim //CAMPO RESTRITO À CNU
 			cCpo	+=	cDDD																		+ cDelim //NUM_DDD_TELEFONE_1
 			cCpo	+=	AllTrim((_cAlias)->RA_DDDCELU)												+ cDelim //DDD_CELULAR_1 
-			cCpo	+=	StrTran( StrTran( AllTrim((_cAlias)->RA_NUMCELU) , "-" , "" ) , "." , "" )	+ cDelim + ENTER //NUM_CELULAR_1
+			cCpo	+=	StrTran( StrTran( AllTrim((_cAlias)->RA_NUMCELU) , "-" , "" ) , "." , "" )	+ cDelim + CRLF //NUM_CELULAR_1
 	
-			cLin := Stuff( cLin , 01 , LEN(cCPO) , cCpo )
+			cLin := Stuff( cLin , 01 , Len(cCPO) , cCpo )
 
-		ENDIF
+		EndIf
 
-	 		//===============================================================================================
 			// Gravação da Linha atual no arquivo
-			//===============================================================================================
-			_lGravouLinha:= (MV_PAR12 = 2 .AND. MGPE8Odonto("T","I",cNumLote))
-			If _lGravouLinha .OR. (MV_PAR12 = 1 .AND. FWrite( nHdl , cLin , LEN(cLin) ) == LEN(cLin))
+			_lGravouLinha:= (MV_PAR12 = 2 .And. MGPE8Odonto("T","I",cNumLote))
+			If _lGravouLinha .Or. (MV_PAR12 = 1 .And. FWrite( nHdl , cLin , Len(cLin) ) == Len(cLin))
 	  			
-				//===============================================================================================
 				// Grava o Item processado no Lote
-				//===============================================================================================
-				IF cTipOpe == "1"
+				If cTipOpe == "1"
 					U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , "00" , "I" , "F" , "Inclusão de titular gravada com sucesso!"	} } , "1" )
 				Else
 					U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , "00" , "A" , "F" , "Alteração de titular gravada com sucesso!"	} } , "1" )
-				EndIF
+				EndIf
 				
 				nRegPro++
 				
-	  		ELSEIF MV_PAR12 = 1//Para o MV_PAR12 = 2 gravo dentro da função MGPE8Odonto ("T","I",cNumLote)
+	  		ElseIf MV_PAR12 = 1//Para o MV_PAR12 = 2 gravo dentro da função MGPE8Odonto ("T","I",cNumLote)
 	  		
-				//===============================================================================================
 				// Grava o Item processado no Lote
-				//===============================================================================================
-				IF cTipOpe == "1"
+				If cTipOpe == "1"
 					U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , "00" , "I" , "F" , "Falha de gravação da linha no arquivo."	} } , "0" )
 				Else
 					U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , "00" , "A" , "F" , "Falha de gravação da linha no arquivo."	} } , "0" )
-				EndIF
+				EndIf
 				
-				AADD( aLogPro , {	(_cAlias)->RA_FILIAL	,;
+				aAdd( aLogPro , {	(_cAlias)->RA_FILIAL	,;
 										(_cAlias)->RA_MAT	 	,;
 										"00" 				,;
 										"Funcionário" 		,;
@@ -564,9 +512,7 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 	
 	(_cAlias)->( DBCloseArea() )
 	
-//===============================================================================================
 // Verifica a Inclusão de dependentes - Envio-2
-//===============================================================================================
 	cDepen := " SELECT "
 	cDepen += "     Z05.Z05_ACAO   ,"
 	cDepen += "     Z05.Z05_STATUS ,"
@@ -643,9 +589,9 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 	cDepen += " AND SRA.RA_SITFOLH		<> 'D' "
 	cDepen += " AND SRA.RA_SITFOLH		IN "+FormatIn( cSitFol , ";" )
 	
-	IF !Empty(cCatFun)
+	If !Empty(cCatFun)
 	cDepen += " AND SRA.RA_CATFUNC		IN "+FormatIn( cCatFun , ";" )
-	EndIF
+	EndIf
 	
 	cDepen += " AND RHL.RHL_TPFORN		= '"+ CVALTOCHAR(MV_PAR12) +"' "//1-UNIMED 2-ODONTOPREV
 	cDepen += " AND RHL.RHL_CODFOR		= '"+ CVALTOCHAR(MV_PAR13) +"' "
@@ -654,7 +600,7 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 	cDepen += " ORDER BY Z05_ACAO, Z05_STATUS "
 	
 	If Select(_cAlias) > 0
-		(_cAlias)->( dbCloseArea() )
+		(_cAlias)->( DBCloseArea() )
 	EndIf
 	
 	DBUseArea( .T. , "TOPCONN" , TcGenQry(,,cDepen) , _cAlias , .T. , .F. )
@@ -670,23 +616,19 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 	
 	ProcRegua( nTotReg )
 	
-	While (_cAlias)->( !EoF() )
+	While (_cAlias)->( !Eof() )
 	
 		nCtAux++
 		lRet := .T.
 		IncProc( "Lendo registos... ["+ StrZero( nCtAux , 9 ) +"] de ["+ StrZero( nTotReg , 9 ) +"]" )
 		
-		//===============================================================================================
 		// Verifica os critérios para Inclusões
-		//===============================================================================================
-		IF MV_PAR08 == 1 .Or. ( (_cAlias)->Z05_ACAO == "E" .And. (_cAlias)->Z05_STATUS $ "PA" )
+		If MV_PAR08 == 1 .Or. ( (_cAlias)->Z05_ACAO == "E" .And. (_cAlias)->Z05_STATUS $ "PA" )
 		
-			//===============================================================================================
 			// Verifica o período de inclusão no cadstro dos dependentes
-			//===============================================================================================
-			IF (_cAlias)->RHL_PERINI <> cMesRef
+			If (_cAlias)->RHL_PERINI <> cMesRef
 				
-				AADD( aLogPro , {	(_cAlias)->RA_FILIAL	,;
+				aAdd( aLogPro , {	(_cAlias)->RA_FILIAL	,;
 									(_cAlias)->RA_MAT 		,;
 									(_cAlias)->RB_COD		,;
 									"Dependente" 		,;
@@ -696,7 +638,7 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 				(_cAlias)->( DBSkip() )
 				Loop
 				
-			EndIF
+			EndIf
 			
 			cTipOpe := "1"
 			_cAcao	:= "I"
@@ -708,126 +650,102 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 			
 		EndIf
 		
-		//===============================================================================================
 		// Validação da data de Período Inicial do Funcionário Titular
-		//===============================================================================================
-		If ( dDataBase - STOD((_cAlias)->RA_ADMISSA) ) < nDiasAd
+		If ( dDataBase - SToD((_cAlias)->RA_ADMISSA) ) < nDiasAd
 			
-			//===============================================================================================
 			// Grava o Item processado no Lote
-			//===============================================================================================
-			U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , (_cAlias)->RB_COD , _cAcao , "D" , "Funcionário titular "+ALLTRIM((_cAlias)->RA_NOMECMP)+" em período de carência para adesão ao Plano de Saúde." } } , "0" )
+			U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , (_cAlias)->RB_COD , _cAcao , "D" , "Funcionário titular "+AllTrim((_cAlias)->RA_NOMECMP)+" em período de carência para adesão ao Plano de Saúde." } } , "0" )
 			
 			lRet := .F.
 			
-			AADD( aLogPro , {	(_cAlias)->RA_FILIAL	,;
+			aAdd( aLogPro , {	(_cAlias)->RA_FILIAL	,;
 								(_cAlias)->RA_MAT 		,;
 								(_cAlias)->RB_COD		,;
 								"Dependente" 		,;
 								(_cAlias)->RB_NOME		,;
-								"Funcionário titular "+ALLTRIM((_cAlias)->RA_NOMECMP)+" em período de carência para adesão ao Plano de Saúde." } )
+								"Funcionário titular "+AllTrim((_cAlias)->RA_NOMECMP)+" em período de carência para adesão ao Plano de Saúde." } )
 			
-		EndIF
+		EndIf
 		
-		//===============================================================================================
 		// Valida o preenchimento do nome da mãe do Titular
-		//===============================================================================================
 		If Empty(AllTrim((_cAlias)->RA_MAE)) 
 			
-			//===============================================================================================
 			// Grava o Item processado no Lote
-			//===============================================================================================
 			U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , (_cAlias)->RB_COD , _cAcao , "D" , "É obrigatório informar o nome da mãe do funcionário titular." } } , "0" )
 			
 			lRet := .F.
 			
-			AADD( aLogPro , {	(_cAlias)->RA_FILIAL	,;
+			aAdd( aLogPro , {	(_cAlias)->RA_FILIAL	,;
 								(_cAlias)->RA_MAT 		,;
 								(_cAlias)->RB_COD		,;
 								"Dependente" 		,;
 								(_cAlias)->RB_NOME		,;
 								"É obrigatório informar o nome da mãe do funcionário titular." } )
 		
-		EndIF
+		EndIf
 		
-		//===============================================================================================
 		// Valida grau de parentesco do dependente com o estado civil do titular
-		//===============================================================================================
 		//SÓ 1-UNIMED
-		If MV_PAR12  = 1 .AND. ((_cAlias)->RA_ESTCIVI $ 'D/Q/V' .And. (_cAlias)->RB_GRAUPAR == 'C')//SÓ 1-UNIMED
+		If MV_PAR12  = 1 .And. ((_cAlias)->RA_ESTCIVI $ 'D/Q/V' .And. (_cAlias)->RB_GRAUPAR == 'C')//SÓ 1-UNIMED
 			
-			//===============================================================================================
 			// Grava o Item processado no Lote
-			//===============================================================================================
 			U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , (_cAlias)->RB_COD , _cAcao , "D" , "Parentesco do dependente não é compativel com o estado civil do funcionario titular." } } , "0" )
 			
 			lRet := .F.
 			
-			AADD( aLogPro , {	(_cAlias)->RA_FILIAL	,;
+			aAdd( aLogPro , {	(_cAlias)->RA_FILIAL	,;
 								(_cAlias)->RA_MAT 		,;
 								(_cAlias)->RB_COD		,;
 								"Dependente" 		,;
 								(_cAlias)->RB_NOME		,;
 								"Parentesco do dependente não é compativel com o estado civil do funcionario titular." } )
 		
-		EndIF
+		EndIf
 		
-		//===============================================================================================
 		// Valida grau de parentesco do dependente
-		//===============================================================================================
 		//SÓ 1-UNIMED
-		If MV_PAR12  = 1 .AND. (_cAlias)->RB_GRAUPAR $ "E/P/O"//SÓ 1-UNIMED
+		If MV_PAR12  = 1 .And. (_cAlias)->RB_GRAUPAR $ "E/P/O"//SÓ 1-UNIMED
 			
-			//===========================================================================
 			//| Grava o Item processado no Lote                                         |
-			//===========================================================================
 			U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , (_cAlias)->RB_COD , _cAcao , "D" , "Parentesco do dependente não é compativel com o Plano de Saúde." } } , "0" )
 			
 			lRet := .F.
 			
-			AADD( aLogPro , {	(_cAlias)->RA_FILIAL	,;
+			aAdd( aLogPro , {	(_cAlias)->RA_FILIAL	,;
 				   				(_cAlias)->RA_MAT 		,;
 								(_cAlias)->RB_COD		,;
 								"Dependente" 		,;
 								(_cAlias)->RB_NOME		,;
 								"Parentesco do dependente não é compativel com o Plano de Saúde." } )
 		
-		EndIF
+		EndIf
 		
-		//===========================================================================
 		//| Valida o preenchimento do campo CPF do dependente maior de 18 anos      |
-		//===========================================================================
- 			If Empty(AllTrim((_cAlias)->RB_CIC)) //.And. ( ( _dHojeSys - StoD((_cAlias)->RB_DTNASC) ) / 365 ) > 18
+ 			If Empty(AllTrim((_cAlias)->RB_CIC)) //.And. ( ( _dHojeSys - SToD((_cAlias)->RB_DTNASC) ) / 365 ) > 18
 			
-			//===========================================================================
 			//| Grava o Item processado no Lote                                         |
-			//===========================================================================
 			U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , (_cAlias)->RB_COD , _cAcao , "D" , "É obrigatório informar o CPF do dependente maior de 18 anos." } } , "0" )
 			
 			lRet := .F.
 			
-			AADD( aLogPro , {	(_cAlias)->RA_FILIAL	,;
+			aAdd( aLogPro , {	(_cAlias)->RA_FILIAL	,;
 				   				(_cAlias)->RA_MAT 		,;
 								(_cAlias)->RB_COD		,;
 								"Dependente" 		,;
 								(_cAlias)->RB_NOME		,;
 								"É obrigatório informar o CPF do dependente." } )
 		
-		EndIF
+		EndIf
  			
-		//===========================================================================
 		//Valida a data de baixa do denpendente
-		//===========================================================================
-		IF !Empty( (_cAlias)->RB_DTBAIXA ) .And. STOD( (_cAlias)->RB_DTBAIXA ) < _dHojeSys
+		If !Empty( (_cAlias)->RB_DTBAIXA ) .And. SToD( (_cAlias)->RB_DTBAIXA ) < _dHojeSys
 			
-			//===========================================================================
 			//Grava o Item processado no Lote
-			//===========================================================================
 			U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , (_cAlias)->RB_COD , _cAcao , "D" , "Data de Baixa não permite a inclusão do dependente." } } , "0" )
 			
 			lRet := .F.
 			
-			AADD( aLogPro , {	(_cAlias)->RA_FILIAL	,;
+			aAdd( aLogPro , {	(_cAlias)->RA_FILIAL	,;
 				   				(_cAlias)->RA_MAT 		,;
 								(_cAlias)->RB_COD		,;
 								"Dependente" 		,;
@@ -836,19 +754,15 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 		
 		EndIf
 		
-		//===========================================================================
 		//Valida preenchimento do nome da mãe do Dependente
-		//===========================================================================
 		If Empty(AllTrim((_cAlias)->RB_I_MAE)) .And. (_cAlias)->RA_SEXO + (_cAlias)->RB_GRAUPAR <> 'FF'
 			
-			//===========================================================================
 			//Grava o Item processado no Lote
-			//===========================================================================
 			U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , (_cAlias)->RB_COD , _cAcao , "D" , "É obrigatório informar o nome da mãe do dependente." } } , "0" )
 			
 			lRet := .F.
 			
-			AADD( aLogPro , {	(_cAlias)->RA_FILIAL	,;
+			aAdd( aLogPro , {	(_cAlias)->RA_FILIAL	,;
 				   				(_cAlias)->RA_MAT 		,;
 								(_cAlias)->RB_COD		,;
 								"Dependente" 		,;
@@ -857,42 +771,34 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 		
 		EndIf
 		
-		//===========================================================================
 		//Valida Grau de Parentesco do Dependente x Estado Civil do Titular
-		//===========================================================================
 		//SÓ 1-UNIMED
-		If MV_PAR12  = 1 .AND. (_cAlias)->RA_ESTCIVI + (_cAlias)->RB_GRAUPAR == 'SC'//SÓ 1-UNIMED
+		If MV_PAR12  = 1 .And. (_cAlias)->RA_ESTCIVI + (_cAlias)->RB_GRAUPAR == 'SC'//SÓ 1-UNIMED
 			
-			//===========================================================================
 			//Grava o Item processado no Lote
-			//===========================================================================
 			U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , (_cAlias)->RB_COD , _cAcao , "D" , "Dependente cadastrado como 'conjuge' e funcionário titular cadastrado como 'solteiro'." } } , "0" )
 			
 			lRet := .F.
 			
-			AADD( aLogPro , {	(_cAlias)->RA_FILIAL	,;
+			aAdd( aLogPro , {	(_cAlias)->RA_FILIAL	,;
 				   				(_cAlias)->RA_MAT 		,;
 								(_cAlias)->RB_COD		,;
 								"Dependente" 		,;
 								(_cAlias)->RB_NOME		,;
-								"Dependente cadastrado como 'conjuge' e funcionário titular "+ALLTRIM((_cAlias)->RA_NOMECMP)+" cadastrado como 'solteiro'." } )
+								"Dependente cadastrado como 'conjuge' e funcionário titular "+AllTrim((_cAlias)->RA_NOMECMP)+" cadastrado como 'solteiro'." } )
 		
 		EndIf 
 		
-		//===========================================================================
 		//Valida preenchimento da data de casamento do Dependente 'conjuge'
-		//===========================================================================
 		//SÓ 1-UNIMED
 		If MV_PAR12  = 1 .AND.( (_cAlias)->RB_GRAUPAR == 'C' ) .And. Empty( (_cAlias)->RB_I_DTCA )//SÓ 1-UNIMED
 			
-			//===========================================================================
 			//Grava o Item processado no Lote
-			//===========================================================================
 			U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , (_cAlias)->RB_COD , _cAcao , "D" , "É obrigatório informar a data de casamento para o dependente cadastrado como 'conjuge'." } } , "0" )
 			
 			lRet := .F.
 			
-			AADD( aLogPro , {	(_cAlias)->RA_FILIAL	,;
+			aAdd( aLogPro , {	(_cAlias)->RA_FILIAL	,;
 				   				(_cAlias)->RA_MAT 		,;
 								(_cAlias)->RB_COD		,;
 								"Dependente" 		,;
@@ -903,9 +809,7 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 
 		If lRet 
 			
-			//===========================================================================
 			//De/Para do Estado Civil do Dependente
-			//===========================================================================
 			Do Case
 			
 				Case (_cAlias)->RB_GRAUPAR == 'C' .And. (_cAlias)->RA_ESTCIVI == 'C'
@@ -918,7 +822,7 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 					cEstCi := 'S'
 				
 		        //SÓ 1-UNIMED
-				Case MV_PAR12  = 1 .AND. ((_cAlias)->RB_GRAUPAR == 'C' .And. (_cAlias)->RA_ESTCIVI == 'V')//SÓ 1-UNIMED
+				Case MV_PAR12  = 1 .And. ((_cAlias)->RB_GRAUPAR == 'C' .And. (_cAlias)->RA_ESTCIVI == 'V')//SÓ 1-UNIMED
 					//===========================================================================
 					//Grava o Item processado no Lote
 					//===========================================================================
@@ -926,7 +830,7 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 					
 					lRet := .F.
 					
-					AADD( aLogPro , {	(_cAlias)->RA_FILIAL	,;
+					aAdd( aLogPro , {	(_cAlias)->RA_FILIAL	,;
 				   						(_cAlias)->RA_MAT 		,;
 										(_cAlias)->RB_COD		,;
 										"Dependente" 		,;
@@ -934,7 +838,7 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 										"O grau de parentesco do dependente não é válido." } )
 					
 		        //SÓ 1-UNIMED
-				Case MV_PAR12  = 1 .AND. ((_cAlias)->RB_GRAUPAR == 'E' .Or. (_cAlias)->RB_GRAUPAR == 'P' .Or. (_cAlias)->RB_GRAUPAR == 'O' )//SÓ 1-UNIMED
+				Case MV_PAR12  = 1 .And. ((_cAlias)->RB_GRAUPAR == 'E' .Or. (_cAlias)->RB_GRAUPAR == 'P' .Or. (_cAlias)->RB_GRAUPAR == 'O' )//SÓ 1-UNIMED
 					//===========================================================================
 					//Grava o Item processado no Lote
 					//===========================================================================
@@ -942,7 +846,7 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 					
 			   		lRet := .F.
 			   		
-			   		AADD( aLogPro , {	(_cAlias)->RA_FILIAL	,;
+			   		aAdd( aLogPro , {	(_cAlias)->RA_FILIAL	,;
 				   						(_cAlias)->RA_MAT 		,;
 										(_cAlias)->RB_COD		,;
 										"Dependente" 		,;
@@ -950,7 +854,7 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 										"O Grau de parentesco do dependente não é válido." } )
 
 		        //SÓ 1-UNIMED
-				Case MV_PAR12  = 1 .AND. ( (_cAlias)->RB_GRAUPAR == 'C' .And. (_cAlias)->RA_ESTCIVI == 'D' .Or. (_cAlias)->RA_ESTCIVI == 'Q' )//SÓ 1-UNIMED
+				Case MV_PAR12  = 1 .And. ( (_cAlias)->RB_GRAUPAR == 'C' .And. (_cAlias)->RA_ESTCIVI == 'D' .Or. (_cAlias)->RA_ESTCIVI == 'Q' )//SÓ 1-UNIMED
 					//===========================================================================
 					//Grava o Item processado no Lote
 					//===========================================================================
@@ -958,7 +862,7 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 					
 					lRet := .F.
 					
-					AADD( aLogPro , {	(_cAlias)->RA_FILIAL	,;
+					aAdd( aLogPro , {	(_cAlias)->RA_FILIAL	,;
 				   						(_cAlias)->RA_MAT 		,;
 										(_cAlias)->RB_COD		,;
 										"Dependente" 		,;
@@ -967,13 +871,11 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 			   		
 			EndCase
 			
-		EndIF
+		EndIf
 		
-		IF lRet
+		If lRet
 		
-			//===========================================================================
 			//De/Para do Código de Dependência
-			//===========================================================================
 			Do Case
 				Case (_cAlias)->RA_ESTCIVI == 'C' .And. (_cAlias)->RB_GRAUPAR == 'C' .And. (_cAlias)->RB_SEXO=='M' 
 					cCodDep:= '09'
@@ -987,28 +889,26 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 					cCodDep:= '30'
 			EndCase
 		
-		EndIF
+		EndIf
 		
-		IF lRet
+		If lRet
 			
-			//===========================================================================
 			//Monta linha para gravação do arquivo
 	        //Enviar: A Inclusão de dependentes - Envio-2
-			//===========================================================================
 
-		IF MV_PAR12 = 1 //1-UNIMED
+		If MV_PAR12 = 1 //1-UNIMED
 
 			cDelim	:= ";"
 			nTamLin	:= 2
 			cCodUni	:= AllTrim( GetAdvFVal( "SX6" , "X6_CONTEUD" , (_cAlias)->RA_FILIAL + "IT_CODUNI" , 1 , "" ) )
-			cLin	:= Space(nTamLin)+ENTER // Variavel para criacao da linha do registros para gravacao
-			_cDtAux := IIF( MV_PAR08 == 1 , DtoC(MV_PAR09) , DtoC( StoD( SubStr( (_cAlias)->RHL_PERINI , 3 , 4 ) + SubStr( (_cAlias)->RHL_PERINI , 1 , 2 ) + '01' ) ) )
+			cLin	:= Space(nTamLin)+CRLF // Variavel para criacao da linha do registros para gravacao
+			_cDtAux := IIf( MV_PAR08 == 1 , DToC(MV_PAR09) , DToC( SToD( SubStr( (_cAlias)->RHL_PERINI , 3 , 4 ) + SubStr( (_cAlias)->RHL_PERINI , 1 , 2 ) + '01' ) ) )
 			
 			If (_cAlias)->RHK_PLANO == "98"
 				_cplano := _cCodPla2
 			Else
 				_cplano := _cCodPla
-			Endif
+			EndIf
 			
 			cCpo	:= "1"																			+ cDelim //COD_TIPO_REGISTRO
 			cCpo	+= cCodUni																		+ cDelim //COD_EMPRESA
@@ -1018,7 +918,7 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 			cCpo	+= MGPE008TPD( AllTrim((_cAlias)->RB_NOME) , 120 )			 					+ cDelim //NOME_ASSOCIADO
 			cCpo	+= (_cAlias)->RB_SEXO						  									+ cDelim //IND_SEXO
 			cCpo	+= cEstCi								  						 				+ cDelim //IND_ESTADO_CIVIL
-			cCpo	+= If( !Empty((_cAlias)->RB_DTNASC) , DtoC( StoD( (_cAlias)->RB_DTNASC ) ) , "" )	+ cDelim //DATA_NASCIMENTO
+			cCpo	+= If( !Empty((_cAlias)->RB_DTNASC) , DToC( SToD( (_cAlias)->RB_DTNASC ) ) , "" )	+ cDelim //DATA_NASCIMENTO
 			cCpo	+= _cplano  																	+ cDelim //COD_PLANO
 			cCpo	+= ""																			+ cDelim //COD_UNIMED_LCAT
 			cCpo	+= ""																			+ cDelim //COD_LOTACAO
@@ -1029,7 +929,7 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 			cCpo	+= ""																			+ cDelim //DATA_REATIVACAO
 			cCpo	+= ""																			+ cDelim //DT_LOTACAO
 			cCpo	+= ""																			+ cDelim //DATA_ADMISSAO
-			cCpo	+= If( !Empty((_cAlias)->RB_I_DTCA) , DtoC( StoD( (_cAlias)->RB_I_DTCA ) )	, "" )	+ cDelim //DATA_CASAMENTO
+			cCpo	+= If( !Empty((_cAlias)->RB_I_DTCA) , DToC( SToD( (_cAlias)->RB_I_DTCA ) )	, "" )	+ cDelim //DATA_CASAMENTO
 			cCpo	+= (_cAlias)->RA_FILIAL + (_cAlias)->RA_MAT											+ cDelim //NUM_MATRIC_EMPRESA
 			cCpo	+= (_cAlias)->RB_COD																+ cDelim //NUM_SEQ_MATRIC_EMPRESA
 			cCpo	+= AllTrim((_cAlias)->RB_CIC)														+ cDelim //NUM_CPF
@@ -1082,63 +982,53 @@ If MV_PAR08 <> 2 // 1 = Inclusão , 2 = Exclusão , 3 = Alteração , 4 = Todos
 			cCpo	+= ""																			+ cDelim //CAMPO RESTRITO À CNU
 			cCpo	+= ""																			+ cDelim //NUM_DDD_TELEFONE_1
 			cCpo	+= ""																			+ cDelim //DDD_CELULAR_1 
-			cCpo	+= ""																			+ cDelim + ENTER //NUM_CELULAR_1
+			cCpo	+= ""																			+ cDelim + CRLF //NUM_CELULAR_1
 			
-			cLin	:= Stuff(cLin,01,LEN(cCPO),cCpo)
-		ENDIF	
-	 		//===========================================================================
+			cLin	:= Stuff(cLin,01,Len(cCPO),cCpo)
+		EndIf	
 			//| Gravação no arquivo                                                     |
-			//===========================================================================
-			_lGravouLinha:= (MV_PAR12 = 2 .AND. MGPE8Odonto("D","ID",cNumLote, AllTrim((_cAlias)->RB_NOME) ))
-			If _lGravouLinha .OR. (MV_PAR12 = 1 .AND. FWrite( nHdl , cLin , LEN(cLin) ) == LEN( cLin ) )
+			_lGravouLinha:= (MV_PAR12 = 2 .And. MGPE8Odonto("D","ID",cNumLote, AllTrim((_cAlias)->RB_NOME) ))
+			If _lGravouLinha .Or. (MV_PAR12 = 1 .And. FWrite( nHdl , cLin , Len(cLin) ) == Len( cLin ) )
 			    
-				//===========================================================================
 				//| Grava o Item processado no Lote                                         |
-				//===========================================================================
 				If cTipOpe == "1"
 					U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , (_cAlias)->RB_COD , "I" , "D" , "Inclusão do dependente gravada com sucesso!" } } , "1" )
 				Else
 					U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , (_cAlias)->RB_COD , "A" , "D" , "Alteracao do dependente gravada com sucesso!" } } , "1" )
-				EndIF
+				EndIf
 				nRegPro++
 			
-			ELSEIF MV_PAR12 = 1//Para o MV_PAR12 = 2 gravo dentro da função MGPE8Odonto ("T","I",cNumLote)
+			ElseIf MV_PAR12 = 1//Para o MV_PAR12 = 2 gravo dentro da função MGPE8Odonto ("T","I",cNumLote)
 			
-				//===========================================================================
 				//| Grava o Item processado no Lote                                         |
-				//===========================================================================
 				If cTipOpe == "1"
 					U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , (_cAlias)->RB_COD , "I" , "D" , "Falha na gravação da linha no arquivo." } } , "0" )
 				Else
 					U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , (_cAlias)->RB_COD , "A" , "D" , "Falha na gravação da linha no arquivo." } } , "0" )
-				EndIF
+				EndIf
 				
-				AADD( aLogPro , {	(_cAlias)->RA_FILIAL	,;
+				aAdd( aLogPro , {	(_cAlias)->RA_FILIAL	,;
 			   						(_cAlias)->RA_MAT 		,;
 									(_cAlias)->RB_COD		,;
 									"Dependente" 		,;
 									(_cAlias)->RB_NOME		,;
 									"Falha na gravação da Linha do Arquivo." } )
 				
-			EndIF
+			EndIf
 			
-		EndIF
+		EndIf
 			
-	(_cAlias)->( DbSkip() )
+	(_cAlias)->( DBSkip() )
 	EndDo
 	
 	(_cAlias)->( DBCloseArea() )
 
 EndIf
 
-//===========================================================================
 //Verifica a Exclusão de funcionários e dependentes - Envio-3
-//===========================================================================
 If MV_PAR08 == 2 .Or. MV_PAR08 == 4
 
-	//===========================================================================
 	//| Consulta funcionários demitidos                                         |
-	//===========================================================================
 	cBenEx := " SELECT "
 	cBenEx += " 	SRA.RA_FILIAL, "
 	cBenEx += " 	SRA.RA_MAT, "
@@ -1170,9 +1060,9 @@ If MV_PAR08 == 2 .Or. MV_PAR08 == 4
 	
 	cBenEx += " AND SRA.RA_SITFOLH	IN "+FormatIn( cSitFol , ";" )
 	
-	IF !Empty(cCatFun)
+	If !Empty(cCatFun)
 	cBenEx += " AND SRA.RA_CATFUNC	IN "+FormatIn( cCatFun , ";" )
-	EndIF
+	EndIf
 	
 	cBenEx += " AND	SRA.RA_CC		BETWEEN '"+ MV_PAR04		+"' AND '"+ MV_PAR05 +"' "
 	cBenEx += " AND	SRA.RA_MAT		BETWEEN '"+ MV_PAR06		+"' AND '"+ MV_PAR07 +"' "
@@ -1214,9 +1104,9 @@ If MV_PAR08 == 2 .Or. MV_PAR08 == 4
 	
 	cBenEx += " AND SRA.RA_SITFOLH	IN "+FormatIn( cSitFol , ";" )
 	
-	IF !Empty(cCatFun)
+	If !Empty(cCatFun)
 	cBenEx += " AND SRA.RA_CATFUNC	IN "+FormatIn( cCatFun , ";" )
-	EndIF
+	EndIf
 	
 	cBenEx += " AND	SRA.RA_CC		BETWEEN '"+ MV_PAR04		+"' AND '"+ MV_PAR05 +"' "
 	cBenEx += " AND	SRA.RA_MAT		BETWEEN '"+ MV_PAR06		+"' AND '"+ MV_PAR07 +"' "
@@ -1237,7 +1127,7 @@ If MV_PAR08 == 2 .Or. MV_PAR08 == 4
 	
 	If Select(_cAlias) > 0
 		(_cAlias)->( DBCloseArea() )
-	Endif
+	EndIf
 	
 	DBUseArea( .T. , "TOPCONN" , TcGenQry(,,cBenEx) , _cAlias , .T. , .F. )
 	
@@ -1252,21 +1142,19 @@ If MV_PAR08 == 2 .Or. MV_PAR08 == 4
 	
 	ProcRegua( nTotReg )
 	
-	While (_cAlias)->(!EOF())
+	While (_cAlias)->(!Eof())
 	
 		nCtAux++
 		IncProc( "Lendo registos... ["+ StrZero( nCtAux , 9 ) +"] de ["+ StrZero( nTotReg , 9 ) +"]" )
 		
-		//===========================================================================
 		//De/Para do Motivo de Desligamento
-		//===========================================================================
-	IF MV_PAR12 = 1 //1-UNIMED
+	If MV_PAR12 = 1 //1-UNIMED
 
-		IF (_cAlias)->RA_DEMISSA <> ' '
+		If (_cAlias)->RA_DEMISSA <> ' '
 		
-			DbSelectArea ("SRG")
-			SRG->( DbSetOrder(1) )
-			IF SRG->( DbSeek( (_cAlias)->( RA_FILIAL + RA_MAT ) ) )
+			DBSelectArea ("SRG")
+			SRG->( DBSetOrder(1) )
+			If SRG->( DBSeek( (_cAlias)->( RA_FILIAL + RA_MAT ) ) )
 				
 				If SRG->RG_TIPORES == "14"
 					cCodExc:= '5'
@@ -1274,19 +1162,17 @@ If MV_PAR08 == 2 .Or. MV_PAR08 == 4
 					cCodExc:= '3'
 				EndIf
 				
-			EndIF
+			EndIf
 					
 		Else
 			cCodExc := '1'
-		EndIF
+		EndIf
 		
-		//===========================================================================
 		//Monta linha para gravação do arquivo
         //Enviar: A Exclusão de funcionários e dependentes - funcionários demitidos  - Envio-3
-		//===========================================================================
 	  	cDelim	:= ";"
 		nTamLin	:= 2
-		cLin	:= Space(nTamLin)+ENTER // Variavel para criacao da linha do registros para gravacao
+		cLin	:= Space(nTamLin)+CRLF // Variavel para criacao da linha do registros para gravacao
 		cCodUni	:= AllTrim( GetAdvFVal( "SX6" , "X6_CONTEUD" , (_cAlias)->RA_FILIAL + "IT_CODUNI" , 1 , "" ) )
 		
 		cCpo	:=	"1"									+ cDelim //COD_TIPO_REGISTRO
@@ -1303,7 +1189,7 @@ If MV_PAR08 == 2 .Or. MV_PAR08 == 4
 		cCpo	+=	""									+ cDelim //COD_LOTACAO
 		cCpo	+=	""									+ cDelim //NOME_LOTACAO
 		cCpo	+=	""									+ cDelim //DATA_INCLUSAO
-		cCpo	+=	DtoC(nDiaFinal)						+ cDelim //DATA_EXCLUSAO
+		cCpo	+=	DToC(nDiaFinal)						+ cDelim //DATA_EXCLUSAO
 		cCpo	+=	""									+ cDelim //DATA_TROCA_PLANO
 		cCpo	+=	""									+ cDelim //DATA_REATIVACAO
 		cCpo	+=	""									+ cDelim //DT_LOTACAO
@@ -1361,46 +1247,38 @@ If MV_PAR08 == 2 .Or. MV_PAR08 == 4
 		cCpo	+=	""									+ cDelim //CAMPO RESTRITO À CNU
 		cCpo	+=	""									+ cDelim //NUM_DDD_TELEFONE_1
 		cCpo	+=	""									+ cDelim //DDD_CELULAR_1
-		cCpo	+=	""									+ cDelim +ENTER //NUM_CELULAR_1
+		cCpo	+=	""									+ cDelim +CRLF //NUM_CELULAR_1
 		
-		cLin := Stuff( cLin , 01 , LEN(cCPO) , cCpo )
-	ENDIF		
- 		//===========================================================================
+		cLin := Stuff( cLin , 01 , Len(cCPO) , cCpo )
+	EndIf		
 		//Gravação no arquivo
-		//===========================================================================
-		_lGravouLinha:= (MV_PAR12 = 2 .AND. MGPE8Odonto("T","E",cNumLote))
-		If MV_PAR12 = 1 .AND. FWrite( nHdl , cLin , LEN(cLin) ) != LEN(cLin)//Para o MV_PAR12 = 2 gravo dentro da função MGPE8Odonto ("T","I",cNumLote)
+		_lGravouLinha:= (MV_PAR12 = 2 .And. MGPE8Odonto("T","E",cNumLote))
+		If MV_PAR12 = 1 .And. FWrite( nHdl , cLin , Len(cLin) ) != Len(cLin)//Para o MV_PAR12 = 2 gravo dentro da função MGPE8Odonto ("T","I",cNumLote)
 		    
-			//===========================================================================
 			//Grava o Item processado no Lote
-			//===========================================================================
 			U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , "00" , "E" , "F" , "Falha na gravação da linha no arquivo." } } , "0" )
 			
-			AADD( aLogPro , {	(_cAlias)->RA_FILIAL	,;
+			aAdd( aLogPro , {	(_cAlias)->RA_FILIAL	,;
 								(_cAlias)->RA_MAT 		,;
 								(_cAlias)->RB_COD		,;
 								"Dependente" 		,;
 								(_cAlias)->RB_NOME		,;
 								"Falha na gravação da Linha do Arquivo." } )
 		
-		ELSEIF _lGravouLinha .OR. MV_PAR12 = 1
+		ElseIf _lGravouLinha .Or. MV_PAR12 = 1
 			
-			//===========================================================================
 			//Grava o Item processado no Lote
-			//===========================================================================
 			U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , "00" , "E" , "F" , "Exclusão de titular gravada com sucesso!" } } , "1" )
 			nRegPro++
 			
-		EndIF
+		EndIf
 		
 	(_cAlias)->( DBSkip() )
 	EndDo
 	
     (_cAlias)->( DBCloseArea() )
 	
-	//===========================================================================
 	//Consulta funcionários que pediram a exclusão do plano - Envio-4
-	//===========================================================================
 	cBenEx2 := " SELECT * "
 	cBenEx2 += " FROM "+ RetSqlName("SRA") +" SRA
 	cBenEx2 += " INNER JOIN "+ RetSqlName("RHK") +" RHK ON "
@@ -1416,9 +1294,9 @@ If MV_PAR08 == 2 .Or. MV_PAR08 == 4
 	
 	cBenEx2 += " AND SRA.RA_SITFOLH	IN "+FormatIn( cSitFol , ";" )
 	
-	IF !Empty(cCatFun)
+	If !Empty(cCatFun)
 	cBenEx2 += " AND SRA.RA_CATFUNC	IN "+FormatIn( cCatFun , ";" )
-	EndIF
+	EndIf
 	
 	cBenEx2 += " AND	SRA.RA_CC		BETWEEN '"+ MV_PAR04		+"' AND '"+ MV_PAR05 +"' "
 	cBenEx2 += " AND	SRA.RA_MAT		BETWEEN '"+ MV_PAR06		+"' AND '"+ MV_PAR07 +"' "
@@ -1431,7 +1309,7 @@ If MV_PAR08 == 2 .Or. MV_PAR08 == 4
 	
 	If Select(_cAlias) > 0
 		(_cAlias)->( DBCloseArea() )
-	Endif
+	EndIf
 	
 	DBUseArea( .T. , "TOPCONN" , TcGenQry(,,cBenEx2) , _cAlias , .T. , .F. )
 	
@@ -1443,24 +1321,20 @@ If MV_PAR08 == 2 .Or. MV_PAR08 == 4
 	
 	ProcRegua( nTotReg )
 	
-	While (_cAlias)->(!EOF())
+	While (_cAlias)->(!Eof())
 	
 		nCtAux++
 		IncProc( "Lendo registos... ["+ StrZero( nCtAux , 9 ) +"] de ["+ StrZero( nTotReg , 9 ) +"]" )
 		
-		//===========================================================================
 		//Motivo da Exclusão
 	    //Enviar: A Consulta funcionários que pediram a exclusão do plano - Envio-4
-		//===========================================================================
 		cCodExc := '1' //"A pedido do beneficiário"
 		
-		//===========================================================================
 		//Monta a linha para gravação do arquivo
-		//===========================================================================
-	IF MV_PAR12 = 1 //1-UNIMED
+	If MV_PAR12 = 1 //1-UNIMED
 		cDelim	:= ";"
 		nTamLin	:= 2
-		cLin	:= Space( nTamLin ) + ENTER // Variavel para criacao da linha do registros para gravacao
+		cLin	:= Space( nTamLin ) + CRLF // Variavel para criacao da linha do registros para gravacao
 		cCodUni	:= AllTrim( GetAdvFVal( "SX6" , "X6_CONTEUD" , (_cAlias)->RA_FILIAL + "IT_CODUNI" , 1 , "" ) )
 		
 		cCpo	:= "1"								+ cDelim //COD_TIPO_REGISTRO
@@ -1477,7 +1351,7 @@ If MV_PAR08 == 2 .Or. MV_PAR08 == 4
 		cCpo	+= ""								+ cDelim //COD_LOTACAO
 		cCpo	+= ""								+ cDelim //NOME_LOTACAO
 		cCpo	+= ""								+ cDelim //DATA_INCLUSAO
-		cCpo	+= DtoC( nDiaFinal )				+ cDelim //DATA_EXCLUSAO
+		cCpo	+= DToC( nDiaFinal )				+ cDelim //DATA_EXCLUSAO
 		cCpo	+= ""								+ cDelim //DATA_TROCA_PLANO
 		cCpo	+= ""								+ cDelim //DATA_REATIVACAO
 		cCpo	+= ""								+ cDelim //DT_LOTACAO
@@ -1535,46 +1409,38 @@ If MV_PAR08 == 2 .Or. MV_PAR08 == 4
 		cCpo	+= ""								+ cDelim //CAMPO RESTRITO À CNU
 		cCpo	+= ""								+ cDelim //NUM_DDD_TELEFONE_1
 		cCpo	+= ""								+ cDelim //DDD_CELULAR_1
-		cCpo	+= ""								+ cDelim +ENTER //NUM_CELULAR_1
+		cCpo	+= ""								+ cDelim +CRLF //NUM_CELULAR_1
 		
- 		cLin := Stuff( cLin , 01 , LEN(cCPO) , cCpo )
- 	ENDIF	
- 		//===========================================================================
+ 		cLin := Stuff( cLin , 01 , Len(cCPO) , cCpo )
+ 	EndIf	
 		//Gravação no arquivo
-		//===========================================================================
-		_lGravouLinha:= (MV_PAR12 = 2 .AND. MGPE8Odonto("T","E",cNumLote))
-		If MV_PAR12 = 1 .AND. FWrite( nHdl , cLin , LEN(cLin) ) != LEN(cLin)//Para o MV_PAR12 = 2 gravo dentro da função MGPE8Odonto ("T","I",cNumLote)
+		_lGravouLinha:= (MV_PAR12 = 2 .And. MGPE8Odonto("T","E",cNumLote))
+		If MV_PAR12 = 1 .And. FWrite( nHdl , cLin , Len(cLin) ) != Len(cLin)//Para o MV_PAR12 = 2 gravo dentro da função MGPE8Odonto ("T","I",cNumLote)
 		
-			//===========================================================================
 			//Grava o Item processado no Lote
-			//===========================================================================
 			U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , "00" , "E" , "F" , "Falha na gravação da linha no arquivo." } } , "0" )
 			
-			AADD( aLogPro , {	(_cAlias)->RA_FILIAL	,;
+			aAdd( aLogPro , {	(_cAlias)->RA_FILIAL	,;
 								(_cAlias)->RA_MAT 		,;
 								(_cAlias)->RB_COD		,;
 								"Dependente" 		,;
 								(_cAlias)->RB_NOME		,;
 								"Falha na gravação da Linha do Arquivo." } )
 			
-		ELSEIF _lGravouLinha .OR. MV_PAR12 = 1
+		ElseIf _lGravouLinha .Or. MV_PAR12 = 1
 		
-			//===========================================================================
 			//Grava o Item processado no Lote
-			//===========================================================================
 			U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , "00" , "E" , "F" , "Exclusão de titular gravada com sucesso!" } } , "1" )
 			nRegPro++
 			
 		EndIf
 		
 	    (_cAlias)->( DBSkip() )
-	Enddo
+	EndDo
 		
 	(_cAlias)->( DBCloseArea() )
 
-	//===========================================================================
 	//Consulta a exclusão de dependentes do plano - Envio-5
-	//===========================================================================
 	cBenEx3 := " SELECT "
 	cBenEx3 += " 	SRA.*, "
 	cBenEx3 += " 	SRB.*, "
@@ -1605,9 +1471,9 @@ If MV_PAR08 == 2 .Or. MV_PAR08 == 4
 	
 	cBenEx3 += " AND SRA.RA_SITFOLH	IN "+FormatIn( cSitFol , ";" )
 	
-	IF !Empty(cCatFun)
+	If !Empty(cCatFun)
 	cBenEx3 += " AND SRA.RA_CATFUNC	IN "+FormatIn( cCatFun , ";" )
-	EndIF
+	EndIf
 	
 	cBenEx3 += " AND	SRA.RA_CC			BETWEEN '"+ MV_PAR04 +"' AND '"+ MV_PAR05 +"' "
 	cBenEx3 += " AND	SRA.RA_MAT			BETWEEN '"+ MV_PAR06 +"' AND '"+ MV_PAR07 +"' "
@@ -1615,7 +1481,7 @@ If MV_PAR08 == 2 .Or. MV_PAR08 == 4
 	cBenEx3 += " AND	RHL.RHL_CODFOR		= '"+ CVALTOCHAR(MV_PAR13) +"' "
 	cBenEx3 += " AND	RHL.RHL_PLANO		= '"+ CVALTOCHAR(MV_PAR15) +"' "
 	cBenEx3 += " AND	RHL.RHL_PERFIM		<> ' ' "
-	cBenEx3 += " AND	( RHK.RHK_PERFIM	= ' ' OR RHK.RHK_PERFIM > '"+ DtoS( _dHojeSys ) +"' ) "
+	cBenEx3 += " AND	( RHK.RHK_PERFIM	= ' ' OR RHK.RHK_PERFIM > '"+ DToS( _dHojeSys ) +"' ) "
 	
 	cBenEx3 += " UNION ALL "
 
@@ -1649,9 +1515,9 @@ If MV_PAR08 == 2 .Or. MV_PAR08 == 4
 	
 	cBenEx3 += " AND SRA.RA_SITFOLH	IN "+FormatIn( cSitFol , ";" )
 	
-	IF !Empty(cCatFun)
+	If !Empty(cCatFun)
 	   cBenEx3 += " AND SRA.RA_CATFUNC	IN "+FormatIn( cCatFun , ";" )
-	EndIF
+	EndIf
 	
 	cBenEx3 += " AND	SRA.RA_CC			BETWEEN '"+ MV_PAR04 +"' AND '"+ MV_PAR05 +"' "
 	cBenEx3 += " AND	SRA.RA_MAT			BETWEEN '"+ MV_PAR06 +"' AND '"+ MV_PAR07 +"' "
@@ -1661,7 +1527,7 @@ If MV_PAR08 == 2 .Or. MV_PAR08 == 4
 	cBenEx3 += " AND	RHN.RHN_PERFIM		<> ' ' "
 	cBenEx3 += " AND	RHN.RHN_OPERAC		= '2' "
 	cBenEx3 += " AND	RHN.RHN_ORIGEM		<> '1' "
-	cBenEx3 += " AND	( RHK.RHK_PERFIM	= ' ' OR RHK.RHK_PERFIM > '"+ DtoS(_dHojeSys) +"' ) "
+	cBenEx3 += " AND	( RHK.RHK_PERFIM	= ' ' OR RHK.RHK_PERFIM > '"+ DToS(_dHojeSys) +"' ) "
 	cBenEx3 += " AND NOT EXISTS			(	SELECT RHL.RHL_MAT FROM "+ RetSqlName("RHL") +" RHL "
 	cBenEx3 += " 							WHERE "
 	cBenEx3 += " 								RHL.D_E_L_E_T_	= ' ' "
@@ -1672,7 +1538,7 @@ If MV_PAR08 == 2 .Or. MV_PAR08 == 4
 		
 	If Select(_cAlias) >0
 		(_cAlias)->( DBCloseArea() )
-	EndIF
+	EndIf
 	
 	DBUseArea( .T. , "TOPCONN" , TcGenQry(,,cBenEx3) , _cAlias , .T. , .F. )
 	
@@ -1691,15 +1557,13 @@ If MV_PAR08 == 2 .Or. MV_PAR08 == 4
 	nContad		:= 0
 	nConta		:= 0
 	
-	While (_cAlias)->(!EOF())
+	While (_cAlias)->(!Eof())
 	
 		nCtAux++
 		IncProc( "Lendo registos... ["+ StrZero( nCtAux , 9 ) +"] de ["+ StrZero( nTotReg , 9 ) +"]" )
 		
-		//===========================================================================
 		//De/Para do código de dependencia
-		//===========================================================================
-	IF MV_PAR12 = 1 //1-UNIMED
+	If MV_PAR12 = 1 //1-UNIMED
 		Do Case 
 			
 			Case (_cAlias)->RA_ESTCIVI == 'C' .And. (_cAlias)->RB_GRAUPAR == 'C' .And. (_cAlias)->RB_SEXO == 'M'
@@ -1717,7 +1581,7 @@ If MV_PAR08 == 2 .Or. MV_PAR08 == 4
 						cCodDep	:= '10'
 						nContad++
 					Else
-						cCodDep	:= Alltrim(Str(10+nContad))
+						cCodDep	:= AllTrim(Str(10+nContad))
 						nContad++
 					EndIf
 				EndIf
@@ -1731,16 +1595,14 @@ If MV_PAR08 == 2 .Or. MV_PAR08 == 4
 						cCodDep	:= '30'
 						nConta++
 					Else
-						cCodDep	:= Alltrim(Str(30+nConta))
+						cCodDep	:= AllTrim(Str(30+nConta))
 						nConta++
-					EndIF
-				EndIF
+					EndIf
+				EndIf
 		EndCase
 		
-		//===========================================================================
 		//Monta a linha para a gravação do arquivo
 	    //Enviar: A Consulta a exclusão de dependentes do plano - Envio-5
-		//===========================================================================
 		cFilia		:= (_cAlias)->RB_FILIAL
 		cMat		:= (_cAlias)->RB_MAT
 		cGraupar	:= (_cAlias)->RB_GRAUPAR
@@ -1748,7 +1610,7 @@ If MV_PAR08 == 2 .Or. MV_PAR08 == 4
 		cCodExc		:= '1' //"A pedido do beneficiário" 
 		cDelim 		:= ";"
 		nTamLin		:= 2
-		cLin   		:= Space(nTamLin) + ENTER // Variavel para criacao da linha do registros para gravacao
+		cLin   		:= Space(nTamLin) + CRLF // Variavel para criacao da linha do registros para gravacao
 		cCodUni		:= AllTrim( GetAdvFVal( "SX6" , "X6_CONTEUD" , (_cAlias)->RA_FILIAL + "IT_CODUNI" , 1 , "" ) )
 		
 		cCpo		:=	"1"									+ cDelim //COD_TIPO_REGISTRO
@@ -1765,7 +1627,7 @@ If MV_PAR08 == 2 .Or. MV_PAR08 == 4
 		cCpo		+=	""									+ cDelim //COD_LOTACAO
 		cCpo		+=	""									+ cDelim //NOME_LOTACAO
 		cCpo		+=	""									+ cDelim //DATA_INCLUSAO
-		cCpo		+=	DtoC( nDiaFinal )					+ cDelim //DATA_EXCLUSAO
+		cCpo		+=	DToC( nDiaFinal )					+ cDelim //DATA_EXCLUSAO
 		cCpo		+=	""									+ cDelim //DATA_TROCA_PLANO
 		cCpo		+=	""									+ cDelim //DATA_REATIVACAO
 		cCpo		+=	""									+ cDelim //DT_LOTACAO
@@ -1823,38 +1685,32 @@ If MV_PAR08 == 2 .Or. MV_PAR08 == 4
 		cCpo		+=	""									+ cDelim //CAMPO RESTRITO À CNU
 		cCpo		+=	""									+ cDelim //NUM_DDD_TELEFONE_1
 		cCpo		+=	""									+ cDelim //DDD_CELULAR_1
-		cCpo		+=	""									+ cDelim + ENTER //NUM_CELULAR_1
+		cCpo		+=	""									+ cDelim + CRLF //NUM_CELULAR_1
 		
- 		cLin := Stuff( cLin , 01 , LEN(cCPO) , cCpo )
- 	ENDIF	
+ 		cLin := Stuff( cLin , 01 , Len(cCPO) , cCpo )
+ 	EndIf	
 
- 		//===========================================================================
 		//Gravação no arquivo
-		//===========================================================================
-		_lGravouLinha:= (MV_PAR12 = 2 .AND. MGPE8Odonto("D","E",cNumLote,AllTrim((_cAlias)->RB_NOME)))
-		If MV_PAR12 = 1 .AND. FWrite( nHdl , cLin , LEN(cLin) ) != LEN(cLin)//Para o MV_PAR12 = 2 gravo dentro da função MGPE8Odonto ("T","I",cNumLote)
+		_lGravouLinha:= (MV_PAR12 = 2 .And. MGPE8Odonto("D","E",cNumLote,AllTrim((_cAlias)->RB_NOME)))
+		If MV_PAR12 = 1 .And. FWrite( nHdl , cLin , Len(cLin) ) != Len(cLin)//Para o MV_PAR12 = 2 gravo dentro da função MGPE8Odonto ("T","I",cNumLote)
 			
-			//===========================================================================
 			//Grava o Item processado no Lote
-			//===========================================================================
 			U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , (_cAlias)->RB_COD , "E" , "D" , "Falha na gravação da linha no arquivo." } } , "0" )
 			
-			AADD( aLogPro , {	(_cAlias)->RA_FILIAL	,;
+			aAdd( aLogPro , {	(_cAlias)->RA_FILIAL	,;
 								(_cAlias)->RA_MAT 		,;
 								(_cAlias)->RB_COD		,;
 								"Dependente" 		,;
 								(_cAlias)->RB_NOME		,;
 								"Falha na gravação da Linha do Arquivo." } )
  			
- 		ELSEIF _lGravouLinha .OR. MV_PAR12 = 1
+ 		ElseIf _lGravouLinha .Or. MV_PAR12 = 1
  		    
-	 		//===========================================================================
 			//Grava o Item processado no Lote
-			//===========================================================================
 			U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , (_cAlias)->RB_COD , "E" , "D" , "Exclusão de dependente gerada com sucesso." } } , "1" )
 			nRegPro++
 	 		
-	 	EndIF
+	 	EndIf
  	
 	(_cAlias)->( DBSkip() )
 	EndDo
@@ -1863,9 +1719,7 @@ If MV_PAR08 == 2 .Or. MV_PAR08 == 4
     
 EndIf 
 
-//===========================================================================
 //Consulta registros duplicados no cadastro
-//===========================================================================
 cDupl := " SELECT * "
 cDupl += " FROM "+ RetSqlName("SRA") +" SRA "
 cDupl += " WHERE "
@@ -1879,7 +1733,7 @@ cDupl += " 						HAVING COUNT(*) > 1 ) "
 
 If Select(_cAlias) > 0
 	(_cAlias)->( DBCloseArea() )
-Endif
+EndIf
 
 DBUseArea( .T. , "TOPCONN" , TcGenQry(,,cDupl) , _cAlias , .T. , .F. )
 
@@ -1891,132 +1745,130 @@ DBSelectArea(_cAlias)
 
 ProcRegua( nTotReg )
 
-While (_cAlias)->(!EoF())
+While (_cAlias)->(!Eof())
 
 	nCtAux++
 	IncProc( "Lendo registos... ["+ StrZero( nCtAux , 9 ) +"] de ["+ StrZero( nTotReg , 9 ) +"]" )
 	
-	AADD( aLogDup , { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , (_cAlias)->RA_NOMECMP , "Verificar duplicidade de registros" } )
+	aAdd( aLogDup , { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , (_cAlias)->RA_NOMECMP , "Verificar duplicidade de registros" } )
 
-(_cAlias)->( DbSkip() )
+(_cAlias)->( DBSkip() )
 EndDo
 
-IF LEN(aDadosOdonto) > 0//ODONTOPREV
+If Len(aDadosOdonto) > 0//ODONTOPREV
    _aCabOdo:={}
    _aCabXLX:={}
-   // Alinhamento: 1-Left   ,2-Center,3-Right
+   // Alinhamento: 1-Left   ,2-CCRLF,3-Right
    // Formatação.: 1-General,2-Number,3-Monetário,4-DateTime
    //             Titulo das Colunas ,Alinhamento ,Formatação, Totaliza?
    //   (_aCabXLX,{Titulo                  ,1           ,1         ,.F.       })
-   AADD(_aCabOdo,"Filial")
-   AADD(_aCabOdo,"Nome do titular")
-   AADD(_aCabOdo,"Nome do beneficiário")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,1           ,1         ,.F.})
-   AADD(_aCabOdo,"Identificação")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,2           ,1         ,.F.})
-   AADD(_aCabOdo,"Plano")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,2           ,1         ,.F.})
-   AADD(_aCabOdo,"Data nascimento")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,2           ,4         ,.F.})
-   AADD(_aCabOdo,"Tipo endereço")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,2           ,1         ,.F.})
-   AADD(_aCabOdo,"Endereço")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,1           ,1         ,.F.})
-   AADD(_aCabOdo,"N° do logradouro")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,1           ,1         ,.F.})
-   AADD(_aCabOdo,"Bairro")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,1           ,1         ,.F.})
-   AADD(_aCabOdo,"Complemento do endereço")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,1           ,1         ,.F.})
-   AADD(_aCabOdo,"CEP")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,2           ,1         ,.F.})
-   AADD(_aCabOdo,"UF")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,2           ,1         ,.F.})
-   AADD(_aCabOdo,"Cidade")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,1           ,1         ,.F.})
-   AADD(_aCabOdo,"Cidade beneficiário")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,1           ,1         ,.F.})
-   AADD(_aCabOdo,"Telefone residencial")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,1           ,1         ,.F.})
-   AADD(_aCabOdo,"Carteira de identidade")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,2           ,1         ,.F.})
-   AADD(_aCabOdo,"Orgão emissor")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,2           ,1         ,.F.})
-   AADD(_aCabOdo,"Estado civil")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,1           ,1         ,.F.})
-   AADD(_aCabOdo,"Departamento")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,1           ,1         ,.F.})
-   AADD(_aCabOdo,"Parentesco")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,1           ,1         ,.F.})
-   AADD(_aCabOdo,"Número da carteirinha")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,1           ,1         ,.F.})
-   AADD(_aCabOdo,"Ação")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,2           ,1         ,.F.})
-   AADD(_aCabOdo,"Número de registro")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,2           ,1         ,.F.})
-   AADD(_aCabOdo,"CPF")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,2           ,1         ,.F.})
-   AADD(_aCabOdo,"Sexo")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,2           ,1         ,.F.})
-   AADD(_aCabOdo,"Nome da mãe")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,1           ,1         ,.F.})
-   AADD(_aCabOdo,"PIS")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,1           ,1         ,.F.})
-   AADD(_aCabOdo,"N° declaração de nascido")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,1           ,1         ,.F.})
-   AADD(_aCabOdo,"Código da empresa")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,2           ,1         ,.F.}) ; nPosCodEmp := LEN(_aCabXLX)
-   AADD(_aCabOdo,"Email")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,1           ,1         ,.F.})
-   AADD(_aCabOdo,"CNS")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,1           ,1         ,.F.})
-   AADD(_aCabOdo,"Motivos de exclusão")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,1           ,1         ,.F.})
-   AADD(_aCabOdo,"Houve contribuição")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,1           ,1         ,.F.})
-   AADD(_aCabOdo,"Período")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,1           ,1         ,.F.})
-   AADD(_aCabOdo,"Informado do direito")
-   AADD(_aCabXLX,{_aCabOdo[LEN(_aCabOdo)]   ,1           ,1         ,.F.})
+   aAdd(_aCabOdo,"Filial")
+   aAdd(_aCabOdo,"Nome do titular")
+   aAdd(_aCabOdo,"Nome do beneficiário")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,1           ,1         ,.F.})
+   aAdd(_aCabOdo,"Identificação")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,2           ,1         ,.F.})
+   aAdd(_aCabOdo,"Plano")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,2           ,1         ,.F.})
+   aAdd(_aCabOdo,"Data nascimento")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,2           ,4         ,.F.})
+   aAdd(_aCabOdo,"Tipo endereço")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,2           ,1         ,.F.})
+   aAdd(_aCabOdo,"Endereço")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,1           ,1         ,.F.})
+   aAdd(_aCabOdo,"N° do logradouro")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,1           ,1         ,.F.})
+   aAdd(_aCabOdo,"Bairro")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,1           ,1         ,.F.})
+   aAdd(_aCabOdo,"Complemento do endereço")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,1           ,1         ,.F.})
+   aAdd(_aCabOdo,"CEP")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,2           ,1         ,.F.})
+   aAdd(_aCabOdo,"UF")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,2           ,1         ,.F.})
+   aAdd(_aCabOdo,"Cidade")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,1           ,1         ,.F.})
+   aAdd(_aCabOdo,"Cidade beneficiário")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,1           ,1         ,.F.})
+   aAdd(_aCabOdo,"Telefone residencial")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,1           ,1         ,.F.})
+   aAdd(_aCabOdo,"Carteira de identidade")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,2           ,1         ,.F.})
+   aAdd(_aCabOdo,"Orgão emissor")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,2           ,1         ,.F.})
+   aAdd(_aCabOdo,"Estado civil")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,1           ,1         ,.F.})
+   aAdd(_aCabOdo,"Departamento")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,1           ,1         ,.F.})
+   aAdd(_aCabOdo,"Parentesco")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,1           ,1         ,.F.})
+   aAdd(_aCabOdo,"Número da carteirinha")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,1           ,1         ,.F.})
+   aAdd(_aCabOdo,"Ação")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,2           ,1         ,.F.})
+   aAdd(_aCabOdo,"Número de registro")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,2           ,1         ,.F.})
+   aAdd(_aCabOdo,"CPF")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,2           ,1         ,.F.})
+   aAdd(_aCabOdo,"Sexo")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,2           ,1         ,.F.})
+   aAdd(_aCabOdo,"Nome da mãe")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,1           ,1         ,.F.})
+   aAdd(_aCabOdo,"PIS")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,1           ,1         ,.F.})
+   aAdd(_aCabOdo,"N° declaração de nascido")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,1           ,1         ,.F.})
+   aAdd(_aCabOdo,"Código da empresa")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,2           ,1         ,.F.}) ; nPosCodEmp := Len(_aCabXLX)
+   aAdd(_aCabOdo,"Email")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,1           ,1         ,.F.})
+   aAdd(_aCabOdo,"CNS")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,1           ,1         ,.F.})
+   aAdd(_aCabOdo,"Motivos de exclusão")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,1           ,1         ,.F.})
+   aAdd(_aCabOdo,"Houve contribuição")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,1           ,1         ,.F.})
+   aAdd(_aCabOdo,"Período")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,1           ,1         ,.F.})
+   aAdd(_aCabOdo,"Informado do direito")
+   aAdd(_aCabXLX,{_aCabOdo[Len(_aCabOdo)]   ,1           ,1         ,.F.})
 
     _aButtons:={}
-   IF LEN(aLogDup) > 0
-	  ASORT(aLogDup,,,{|x,y| x[1]+x[3] < y[1]+y[3] })
-      AADD(_aButtons,{"",{|| U_ITListBox( "Relatório de Duplicidade" , {"Filial","Matrícula","Nome","Mensagem"} , aLogDup , .T. )   },"Relatório de Duplicidade", "Relatório de Duplicidade" }) 
-   ELSE
-      AADD(_aButtons,{"",{|| U_ITMsgLog("Não houve duplicidade!", "ATENCAO",2,.F.)   },"Relatório de Duplicidade", "Relatório de Duplicidade" }) 
-   ENDIF
-   IF LEN(aLogPro) > 0
-	  ASORT(aLogPro,,,{|x,y| x[1]+x[5] < y[1]+y[5] })
-      AADD(_aButtons,{"",{|| U_ITListBox( "Mensagens do processamento:" , {"Filial","Matrícula","Código","Tipo","Nome","Mensagem"} , aLogPro , .T. )  },"Mensagens do processamento", "Mensagens do processamento" }) 
-   ELSE
-      AADD(_aButtons,{"",{|| U_ITMsgLog("Não houve mensagens!", "ATENCAO",2,.F.)   },"Mensagens do processamento", "Mensagens do processamento" }) 
-   ENDIF
+   If Len(aLogDup) > 0
+	  aSort(aLogDup,,,{|x,y| x[1]+x[3] < y[1]+y[3] })
+      aAdd(_aButtons,{"",{|| U_ITListBox( "Relatório de Duplicidade" , {"Filial","Matrícula","Nome","Mensagem"} , aLogDup , .T. )   },"Relatório de Duplicidade", "Relatório de Duplicidade" }) 
+   Else
+      aAdd(_aButtons,{"",{|| U_ITMsgLog("Não houve duplicidade!", "ATENCAO",2,.F.)   },"Relatório de Duplicidade", "Relatório de Duplicidade" }) 
+   EndIf
+   If Len(aLogPro) > 0
+	  aSort(aLogPro,,,{|x,y| x[1]+x[5] < y[1]+y[5] })
+      aAdd(_aButtons,{"",{|| U_ITListBox( "Mensagens do processamento:" , {"Filial","Matrícula","Código","Tipo","Nome","Mensagem"} , aLogPro , .T. )  },"Mensagens do processamento", "Mensagens do processamento" }) 
+   Else
+      aAdd(_aButtons,{"",{|| U_ITMsgLog("Não houve mensagens!", "ATENCAO",2,.F.)   },"Mensagens do processamento", "Mensagens do processamento" }) 
+   EndIf
    _cMsgTop:="Clique em 'Outras Ações' e escolha a Exportação para o Excel no formato desejada."
-   ASORT(aXlsxOdonto ,,,{|x,y| x[nPosCodEmp]+x[1] < y[nPosCodEmp]+y[1] })//CODIGO DA EMPRESA + NOME
-   ASORT(aDadosOdonto,,,{|x,y| x[1]+x[2]+x[4]     < y[1]+y[2]+y[4]     }) // FILIAL + NOME + IDENTIFICACAO
+   aSort(aXlsxOdonto ,,,{|x,y| x[nPosCodEmp]+x[1] < y[nPosCodEmp]+y[1] })//CODIGO DA EMPRESA + NOME
+   aSort(aDadosOdonto,,,{|x,y| x[1]+x[2]+x[4]     < y[1]+y[2]+y[4]     }) // FILIAL + NOME + IDENTIFICACAO
    //                                             _cTitAux            , _aHeader , _aCols       , _lMaxSiz , _nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel,_aButtons, _aCab  , bDblClk , _aColXML , bCondMarca,_bLegenda,_lHasOk,_bHeadClk,_aSX1)
    U_ITListBox( 'Lista dos Funcionarios e Dependentes com ODONTOPREV' , _aCabOdo , aDadosOdonto , .T.      , 1      ,_cMsgTop  ,          ,         ,         ,     ,        ,_aButtons,_aCabXLX,         , aXlsxOdonto)
 
-ELSEIF LEN(aLogPro) > 0 // UNIMED
-    //===========================================================================
+ElseIf Len(aLogPro) > 0 // UNIMED
     //Se forem encontradas inconsistências dos cadastros exibe o LOG
-    //===========================================================================
     _aButtons:={}
-   IF LEN(aLogDup) > 0
-	  ASORT(aLogDup,,,{|x,y| x[1]+x[3] < y[1]+y[3] })// FILIAL + NOME
-      AADD(_aButtons,{"",{|| U_ITListBox( "Relatório de Duplicidade:" , {"Filial","Matrícula","Nome","Mensagem"} , aLogDup , .T. )   },"Relatório de Duplicidade", "Relatório de Duplicidade" }) 
-   ELSE
-      AADD(_aButtons,{"",{|| U_ITMsgLog("Não houve duplicidade!", "ATENCAO",2,.F.)   },"Relatório de Duplicidade", "Relatório de Duplicidade" }) 
-   ENDIF
+   If Len(aLogDup) > 0
+	  aSort(aLogDup,,,{|x,y| x[1]+x[3] < y[1]+y[3] })// FILIAL + NOME
+      aAdd(_aButtons,{"",{|| U_ITListBox( "Relatório de Duplicidade:" , {"Filial","Matrícula","Nome","Mensagem"} , aLogDup , .T. )   },"Relatório de Duplicidade", "Relatório de Duplicidade" }) 
+   Else
+      aAdd(_aButtons,{"",{|| U_ITMsgLog("Não houve duplicidade!", "ATENCAO",2,.F.)   },"Relatório de Duplicidade", "Relatório de Duplicidade" }) 
+   EndIf
    _cMsgTop:='Para o "Relatório de Duplicidade" clique em "Outras Ações". '
-	ASORT(aLogPro,,,{|x,y| x[1]+x[5] < y[1]+y[5] })// FILIAL + NOME
+	aSort(aLogPro,,,{|x,y| x[1]+x[5] < y[1]+y[5] })// FILIAL + NOME
    //                      _cTitAux            , _aHeader                                                 , _aCols  , _lMaxSiz , _nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel,_aButtons, _aCab  , bDblClk , _aColXML , bCondMarca,_bLegenda,_lHasOk,_bHeadClk,_aSX1)
 	U_ITListBox( "Mensagens do processamento:" , {"Filial","Matrícula","Código","Tipo","Nome","Mensagem"} , aLogPro , .T.      ,        ,_cMsgTop  ,          ,         ,         ,     ,        ,_aButtons)
 
-EndIF
+EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2039,13 +1891,13 @@ DEFAULT nDec	:= 0
 
 Do Case
 	Case ValType(xValor) == "N"
-		IF nTam == 0
+		If nTam == 0
 			cRet := cValToChar( Round( xValor , nDec ) )
 		Else
 			cRet := AllTrim( Str( xValor , nTam , nDec ) )
-		EndIF
+		EndIf
 	Case ValType(xValor) == "D"
-		cRet := DtoS( xValor )
+		cRet := DToS( xValor )
 		cRet := SubStr( cRet , 1 , 4 ) +"-"+ SubStr( cRet , 5 , 2 ) +"-"+ SubStr( cRet , 7 ) // YYYY-MM-DD
 	Case ValType(xValor) == "C"
 		If nTam == 0
@@ -2115,7 +1967,7 @@ Retorno---------: lRet	: Define se o conteúdo passou pela validação
 User Function MGPE008P( nOpc )
 
 Local lRet		:= .T. //Se retornar .F. nao deixa sair do campo
-Local aArea		:= GetArea()
+Local aArea		:= FWGetArea()
 Local cNomeVar	:= ReadVar()
 Local aAcesso	:= FWEmpLoad(.F.)
 Local aDadAux	:= {}
@@ -2127,30 +1979,30 @@ Do Case
 	Case nOpc == 1 //"Filiais Consideradas ?"
 		xVarAux := MV_PAR01
 		_cFilsAcesso := ""
-		For _nX := 1 To LEN(aAcesso)
+		For _nX := 1 To Len(aAcesso)
 			_cFilsAcesso+=aAcesso[_nX][03]+", "
 		Next _nX
 		//-- Verifica se o campo esta vazio --//
-		If EMPTY(xVarAux)
+		If Empty(xVarAux)
 			//MsgStop("É obrigatório informar o filtro de Filiais, clique em 'selecionar todas' para utilizar todas as Filiais.","MGPE00804")
-	        U_ITMSG("Com a filial em branco, somente as filiais que o usuario tem acesso serao selecionadas: "+_cFilsAcesso+" (MV_PAR01)",'Atenção!',,1)
-			MV_PAR01:=STRTRAN( _cFilsAcesso, ", ", ";")
+	        U_ITMsg("Com a filial em branco, somente as filiais que o usuario tem acesso serao selecionadas: "+_cFilsAcesso+" (MV_PAR01)",'Atenção!',,1)
+			MV_PAR01:=StrTran( _cFilsAcesso, ", ", ";")
 			//lRet := .F.
 		//-- Verifica se o campo foi preenchido com conteudo valido --//
 		Else
 			aDadAux := U_ITLinDel( AllTrim(xVarAux) , ";" )
-			SM0->(dbSetOrder(1))
-			For _nI := 1 To LEN(aDadAux)
+			SM0->(DBSetOrder(1))
+			For _nI := 1 To Len(aDadAux)
 
-				If !SM0->(dbSeek(cEmpAnt + aDadAux[_nI]))
+				If !SM0->(DBSeek(cEmpAnt + aDadAux[_nI]))
 					//MsgStop("As 'Filiais' informadas não são válidas!. Verifique os dados digitados.","MGPE00805")
-	                U_ITMSG("Filial "+aDadAux[_nI]+" informada não existe. (MV_PAR01)",'Atenção!',"Selecione no minimo uma Filial dessa lista: "+_cFilsAcesso,1)
+	                U_ITMsg("Filial "+aDadAux[_nI]+" informada não existe. (MV_PAR01)",'Atenção!',"Selecione no minimo uma Filial dessa lista: "+_cFilsAcesso,1)
 					Exit
 				EndIf
 				
 				If !aDadAux[_nI] $ _cFilsAcesso
 					//MsgStop("O usuário não tem acesso às 'Filiais' informadas! Verifique os dados digitados.","MGPE00806")
-	                U_ITMSG("Filial "+aDadAux[_nI]+" informada o usuário não tem acesso.",'Atenção!',"Selecione no minimo uma Filial dessa lista: "+_cFilsAcesso,1)
+	                U_ITMsg("Filial "+aDadAux[_nI]+" informada o usuário não tem acesso.",'Atenção!',"Selecione no minimo uma Filial dessa lista: "+_cFilsAcesso,1)
 					Exit
 				EndIf
 			
@@ -2162,38 +2014,38 @@ Do Case
 		xVarAux := MV_PAR02
 		If Empty(xVarAux)
 			//MsgStop("É obrigatório informar o filtro de Categorias Funcionais. Clique em 'selecionar todas' para utilizar todas as Categorias.","MGPE00807")
-            U_ITMSG("É obrigatório informar o filtro de Categorias Funcionais. (MV_PAR02)",'Atenção!',"Clique em 'selecionar todas' para utilizar todas as Categorias.",1)
+            U_ITMsg("É obrigatório informar o filtro de Categorias Funcionais. (MV_PAR02)",'Atenção!',"Clique em 'selecionar todas' para utilizar todas as Categorias.",1)
 			lRet := .F.
 		Else
 			aDadAux := U_ITLinDel( AllTrim(xVarAux) ,, 1 )
 			_aSX5 := FWGetSX5("28")
-			For _nI := 1 To LEN(aDadAux)
+			For _nI := 1 To Len(aDadAux)
 				If aDadAux[_nI] == "*"
 					Loop
 				EndIf
-				If aScan( _aSX5,{|X| UPPER( Alltrim( X[3] ) ) == AllTrim(aDadAux[_nI])} ) == 0
+				If aScan( _aSX5,{|X| Upper( AllTrim( X[3] ) ) == AllTrim(aDadAux[_nI])} ) == 0
 					//MsgStop("As 'Categorias Funcionais' informadas não são válidas! Verifique os dados digitados.","MGPE00808")
-                    U_ITMSG("As 'Categorias Funcionais' informadas não são válidas. (MV_PAR02)",'Atenção!',"Verifique os dados digitados.",1)
+                    U_ITMsg("As 'Categorias Funcionais' informadas não são válidas. (MV_PAR02)",'Atenção!',"Verifique os dados digitados.",1)
 					lRet := .F.
 					Exit
 				EndIf
 			Next _nI
-		EndIF
+		EndIf
 	
 	Case nOpc == 3 //"Situações ?"
 		xVarAux := MV_PAR03
-		If EMPTY(xVarAux)
+		If Empty(xVarAux)
 			&(cNomeVar) := " "
 		Else
 			_aSX5 := FWGetSX5("31")
 			aDadAux := U_ITLinDel( xVarAux ,, 1 )
-			For _nI := 1 To LEN(aDadAux)
+			For _nI := 1 To Len(aDadAux)
 				If aDadAux[_nI] == "*"
 					Loop
 				EndIf
-				If aScan( _aSX5,{|X| UPPER( Alltrim( X[3] ) ) == AllTrim(aDadAux[_nI])} ) == 0
+				If aScan( _aSX5,{|X| Upper( AllTrim( X[3] ) ) == AllTrim(aDadAux[_nI])} ) == 0
 					//MsgStop("As 'Situações na Folha' informadas não são válidas! Verifique os dados digitados.","MGPE00809")
-                    U_ITMSG("As 'Situações na Folha' informadas não são válidas. (MV_PAR03)",'Atenção!',"Verifique os dados digitados.",1)
+                    U_ITMsg("As 'Situações na Folha' informadas não são válidas. (MV_PAR03)",'Atenção!',"Verifique os dados digitados.",1)
 					lRet := .F.
 					Exit
 				EndIf
@@ -2203,39 +2055,39 @@ Do Case
 		xVarAux := MV_PAR13
 		If Empty(xVarAux)
 			//MsgStop("É obrigatório informar o 'Código do Fornecedor'!","MGPE00810")
-            U_ITMSG("É obrigatório informar o Código do Fornecedor. (MV_PAR13)",'Atenção!',"Verifique os dados digitados.",1)
+            U_ITMsg("É obrigatório informar o Código do Fornecedor. (MV_PAR13)",'Atenção!',"Verifique os dados digitados.",1)
 			lRet := .F.
 		ElseIf !U_MGPEF3GN( MV_PAR12 ,, 1 , .T. , xVarAux )//1-UNIMED 2-ODONTOPREV
 			//MsgStop("O 'Código do Fornecedor' informado não é válido! Verifique os dados digitados.","MGPE00811")
-            U_ITMSG("O Código do Fornecedor informado não é válido. (MV_PAR12, MV_PAR13)",'Atenção!',"Verifique os dados digitados.",1)
+            U_ITMsg("O Código do Fornecedor informado não é válido. (MV_PAR12, MV_PAR13)",'Atenção!',"Verifique os dados digitados.",1)
 			lRet := .F.
 		EndIf
 	Case nOpc == 5 //"Plano ?"p
 		xVarAux := MV_PAR15
 		If Empty(xVarAux)
 			//MsgStop("É obrigatório informar o 'Código do Plano'!","MGPE00812")
-            U_ITMSG("É obrigatório informar o 'Código do Plano. (MV_PAR15)",'Atenção!',"Verifique os dados digitados.",1)
+            U_ITMsg("É obrigatório informar o 'Código do Plano. (MV_PAR15)",'Atenção!',"Verifique os dados digitados.",1)
 			lRet := .F.
 		ElseIf !U_ITMedOdo( MV_PAR12 , MV_PAR13 , MV_PAR14 , .T. , xVarAux )//1-UNIMED 2-ODONTOPREV
 			//MsgStop("O 'Código do Plano' informado não é válido! Verifique os dados digitados.","MGPE00813")
-            U_ITMSG("O 'Código do Plano' informado não é válido. (MV_PAR12, MV_PAR13, MV_PAR14, MV_PAR15)",'Atenção!',"Verifique os dados digitados.",1)
+            U_ITMsg("O 'Código do Plano' informado não é válido. (MV_PAR12, MV_PAR13, MV_PAR14, MV_PAR15)",'Atenção!',"Verifique os dados digitados.",1)
 			lRet := .F.
 		EndIf
 	Case nOpc == 6
 		xVarAux := MV_PAR16
 		If Empty(xVarAux)
 			//MsgStop( "É obrigatório informar o dia de corte para efetivações no plano!","MGPE00814")
-            U_ITMSG("É obrigatório informar o dia de corte para efetivações no plano. (MV_PAR16)",'Atenção!',"Verifique os dados digitados.",1)
+            U_ITMsg("É obrigatório informar o dia de corte para efetivações no plano. (MV_PAR16)",'Atenção!',"Verifique os dados digitados.",1)
 			lRet := .F.
 		ElseIf xVarAux <= 0 .Or. xVarAux > 31
 			//MSgStop("O dia de corte deve ser entre 1 e 31! Verifique os dados digitados.","MGPE00815")
-            U_ITMSG("O dia de corte deve ser entre 1 e 3. (MV_PAR16)",'Atenção!',"Verifique os dados digitados.",1)
+            U_ITMsg("O dia de corte deve ser entre 1 e 3. (MV_PAR16)",'Atenção!',"Verifique os dados digitados.",1)
 			lRet := .F.
-		EndIF
+		EndIf
 
 EndCase
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return(lRet)
 
@@ -2249,40 +2101,40 @@ Parametros------: Nenhum
 Retorno---------: Define se o conteúdo passou pela validação
 ===============================================================================================================================
 */
-STATIC FUNCTION MGPE008ZP1()
+Static Function MGPE008ZP1()
 
-LOCAL _cTexto:="", Z
-LOCAL aZP1:={}
-LOCAL cFilOdontoPrev:=""
-AADD(aZP1,{"01","156775"}) // CORUMBAIBA
-AADD(aZP1,{"02","156857"}) // ITAPACI
-AADD(aZP1,{"04","156863"}) // ARAGUARI
-AADD(aZP1,{"06","156776"}) // PONTALINA
-AADD(aZP1,{"09","156854"}) // IPORA
-AADD(aZP1,{"10","156858"}) // JARU
-AADD(aZP1,{"11","156780"}) // NOVA MAMORE
-AADD(aZP1,{"20","156852"}) // PASSO FUNDO
-AADD(aZP1,{"23","156859"}) // TAPEJARA
-AADD(aZP1,{"24","156856"}) // CRISSIUMAL
-AADD(aZP1,{"25","156777"}) // GIRUA
-AADD(aZP1,{"30","156781"}) // XINGUARA
-AADD(aZP1,{"31","156862"}) // CONCEICAO
-AADD(aZP1,{"40","156861"}) // TRES CORACOES
-AADD(aZP1,{"90","156855"}) // SP CD
-AADD(aZP1,{"91","156778"}) // MANAUS
-AADD(aZP1,{"92","156853"}) // SP ADM
-AADD(aZP1,{"93","156779"}) // CASCAVEL
-AADD(aZP1,{"0B","156860"}) // QUIRINOPOLIS
+Local _cTexto:="", Z
+Local aZP1:={}
+Local cFilOdontoPrev:=""
+aAdd(aZP1,{"01","156775"}) // CORUMBAIBA
+aAdd(aZP1,{"02","156857"}) // ITAPACI
+aAdd(aZP1,{"04","156863"}) // ARAGUARI
+aAdd(aZP1,{"06","156776"}) // PONTALINA
+aAdd(aZP1,{"09","156854"}) // IPORA
+aAdd(aZP1,{"10","156858"}) // JARU
+aAdd(aZP1,{"11","156780"}) // NOVA MAMORE
+aAdd(aZP1,{"20","156852"}) // PASSO FUNDO
+aAdd(aZP1,{"23","156859"}) // TAPEJARA
+aAdd(aZP1,{"24","156856"}) // CRISSIUMAL
+aAdd(aZP1,{"25","156777"}) // GIRUA
+aAdd(aZP1,{"30","156781"}) // XINGUARA
+aAdd(aZP1,{"31","156862"}) // CONCEICAO
+aAdd(aZP1,{"40","156861"}) // TRES CORACOES
+aAdd(aZP1,{"90","156855"}) // SP CD
+aAdd(aZP1,{"91","156778"}) // MANAUS
+aAdd(aZP1,{"92","156853"}) // SP ADM
+aAdd(aZP1,{"93","156779"}) // CASCAVEL
+aAdd(aZP1,{"0B","156860"}) // QUIRINOPOLIS
 
-ZP1->(DBSETORDER(2))
-FOR Z := 1 TO LEN(aZP1)
+ZP1->(DBSetOrder(2))
+For Z := 1 TO Len(aZP1)
     cFilOdontoPrev+=aZP1[Z,1]+", "
-    IF ZP1->(DBSEEK(xFilial()+aZP1[Z,1]+"IT_CDFILODO"))
+    If ZP1->(DBSeek(xFilial()+aZP1[Z,1]+"IT_CDFILODO"))
        _cTexto+="Parametro IT_CDFILODO JA cadastrado: "+aZP1[Z,1]+" "+aZP1[Z,2]+CHR(13)+CHR(10)
-       LOOP
-    ELSE
-       ZP1->(RECLOCK("ZP1",.T.))
-    ENDIF
+       Loop
+    Else
+       ZP1->(RecLock("ZP1",.T.))
+    EndIf
     ZP1->ZP1_FILPAR:=aZP1[Z,1]
     ZP1->ZP1_PARAM :="IT_CDFILODO"
     ZP1->ZP1_TIPO  :="C"
@@ -2293,12 +2145,12 @@ FOR Z := 1 TO LEN(aZP1)
     ZP1->ZP1_ROTINA:="MGPE008"
     ZP1->ZP1_DESROT:="Geracao de arquivo de dados para ODONTOPREV."
     ZP1->ZP1_FILIAL:=xFilial("ZP1")
-    ZP1->(MSUNLOCK())
+    ZP1->(MSUnLock())
     _cTexto+="Parametro IT_CDFILODO foi cadastrado com sucesso: "+aZP1[Z,1]+" "+aZP1[Z,2]+CHR(13)+CHR(10)
-NEXT
-ZP1->(DBSETORDER(1))
+Next
+ZP1->(DBSetOrder(1))
 
-RETURN cFilOdontoPrev 
+Return cFilOdontoPrev 
 
 
 /*
@@ -2311,80 +2163,80 @@ Parametros------: _cTipo,cAcao,cNumLote,cNome
 Retorno---------: Define se o conteúdo passou pela validação
 ===============================================================================================================================
 */
-STATIC FUNCTION MGPE8Odonto(_cTipo,cAcao,cNumLote,cNome)
+Static Function MGPE8Odonto(_cTipo,cAcao,cNumLote,cNome)
 
-LOCAL _aFunc :={} , T
-LOCAL _aFuncT:={}
-LOCAL _cParentesco:=""
-LOCAL _cCodEmp:=""
+Local _aFunc :={} , T
+Local _aFuncT:={}
+Local _cParentesco:=""
+Local _cCodEmp:=""
 DEFAULT cNome := (_cAlias)->RA_NOMECMP
 
-ZP1->(DBSETORDER(2))
-IF ZP1->(DBSEEK(xFilial()+(_cAlias)->RA_FILIAL+"IT_CDFILODO"))
-   _cCodEmp:=ALLTRIM(ZP1->ZP1_CONTEU)
-ELSE
+ZP1->(DBSetOrder(2))
+If ZP1->(DBSeek(xFilial()+(_cAlias)->RA_FILIAL+"IT_CDFILODO"))
+   _cCodEmp:=AllTrim(ZP1->ZP1_CONTEU)
+Else
     // Grava o Item processado no Lote
-    IF cAcao == "I"
+    If cAcao == "I"
 	   U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , "00" , "I" , "F" , "Não encontrou o parametro IT_CDFILOND para filial: "+(_cAlias)->RA_FILIAL} } , "0" )
     Else
 	   U_ITGrLote( "Z05" , cNumLote , { { (_cAlias)->RA_FILIAL , (_cAlias)->RA_MAT , "00" , "A" , "F" , "Não encontrou o parametro IT_CDFILOND para filial: "+(_cAlias)->RA_FILIAL} } , "0" )
-    EndIF
-    IF _cTipo = "D"
-	  AADD( aLogPro , {(_cAlias)->RA_FILIAL,(_cAlias)->RA_MAT,"00","Dependente",(_cAlias)->RA_NOMECMP,"Não encontrou o parametro IT_CDFILOND para filial: "+(_cAlias)->RA_FILIAL } )
-	ELSE
-	  AADD( aLogPro , {(_cAlias)->RA_FILIAL,(_cAlias)->RA_MAT,"00","Funcionário",(_cAlias)->RA_NOMECMP,"Não encontrou o parametro IT_CDFILOND para filial: "+(_cAlias)->RA_FILIAL } )
-	ENDIF
-    ZP1->(DBSETORDER(1))
-	RETURN .F. //////////////////// RETURN
-ENDIF
-ZP1->(DBSETORDER(1))
-IF _cTipo = "D"
-   _cParentesco:=If((_cAlias)->RB_GRAUPAR = 'C','Conjuge',IF((_cAlias)->RB_GRAUPAR = 'F','Filho','Outros'))
-ENDIF
+    EndIf
+    If _cTipo = "D"
+	  aAdd( aLogPro , {(_cAlias)->RA_FILIAL,(_cAlias)->RA_MAT,"00","Dependente",(_cAlias)->RA_NOMECMP,"Não encontrou o parametro IT_CDFILOND para filial: "+(_cAlias)->RA_FILIAL } )
+	Else
+	  aAdd( aLogPro , {(_cAlias)->RA_FILIAL,(_cAlias)->RA_MAT,"00","Funcionário",(_cAlias)->RA_NOMECMP,"Não encontrou o parametro IT_CDFILOND para filial: "+(_cAlias)->RA_FILIAL } )
+	EndIf
+    ZP1->(DBSetOrder(1))
+	Return .F. //////////////////// Return
+EndIf
+ZP1->(DBSetOrder(1))
+If _cTipo = "D"
+   _cParentesco:=If((_cAlias)->RB_GRAUPAR = 'C','Conjuge',If((_cAlias)->RB_GRAUPAR = 'F','Filho','Outros'))
+EndIf
 
-AADD(_aFunc,cNome                                          ) // NOME DO BENEFICIÁRIO Este campo contempla no máximo 70 caracteres,o nome deve estar escrito igual ao registro civil ou carteira de identidade, sem abreviações e sem pontos (CAMPO OBRIGATÓRIO)
-AADD(_aFunc,_cTipo                                         ) // IDENTIFICAÇÃO DO BENEFICIÁRIO PREENCHER : T PARA TITULAR ou D PARA DEPENDENTE (CAMPO OBRIGATÓRIO)
-AADD(_aFunc,"IPA"                                          ) // PLANO Informar a sigla do plano, por favor verifique qual é a sigla dos planos para sua empresa, com o representante Odontoprev (CAMPO OBRIGATÓRIO)
-AADD(_aFunc,STOD( (_cAlias)->RA_NASC )                     ) // DATA DE NASCIMENTO preencher sempre no formato DD/MM/AAAA (CAMPO OBRIGATÓRIO)
-AADD(_aFunc,"2"                                            ) // TIPO DE ENDEREÇO Profissional ou Residencial Informar 1 para endereço PROFISSIONAL Informar 2 – para endereços RESIDENCIAL
-AADD(_aFunc,STRTRAN(ALLTRIM((_cAlias)->RA_ENDEREC),';','') ) // ENDEREÇO (CAMPO OBRIGATÓRIO)
-AADD(_aFunc,STRTRAN(ALLTRIM((_cAlias)->RA_NUMENDE),';','') ) // N° DO LOGRADOURO (CAMPO OBRIGATÓRIO)
-AADD(_aFunc,LEFT( (_cAlias)->RA_BAIRRO , 20 )              ) // BAIRRO no máximo 20 CARACTERES
-AADD(_aFunc,STRTRAN(LEFT((_cAlias)->RA_COMPLEM,20),';','') ) // COMPLEMENTO DO ENDEREÇO no máximo 20 CARACTERES
-AADD(_aFunc,(_cAlias)->RA_CEP                              ) // CEP Preencher no formato 00000000 (CAMPO OBRIGATÓRIO)
-AADD(_aFunc,(_cAlias)->RA_ESTADO                           ) // ESTADO / UF Preencher com somente 2 caracteres (CAMPO OBRIGATÓRIO)
-AADD(_aFunc,(_cAlias)->RA_MUNICIP                          ) // CIDADE                                                                     
-AADD(_aFunc,""                                             ) // CIDADE BENEFICIÁRIO (Preencher somente quando o Tipo de Endereço escolhido for Profissional)
-AADD(_aFunc,""                                             ) // TELEFONE RESIDENCIAL                                                                     
-AADD(_aFunc,""                                             ) // CARTEIRA DE IDENTIDADE Preencher com no máximo 20 caracteres, este campo não deverá conter pontos, hífen ou traços
-AADD(_aFunc,""                                             ) // ORGÃO EMISSOR                                                                     
-AADD(_aFunc,""                                             ) // ESTADO CIVIL                                                                     
-AADD(_aFunc,""                                             ) // DEPARTAMENTO Este dado será impresso na carteirinha, preencha este campo somente se necessário
-AADD(_aFunc,_cParentesco                                   ) // PARENTESCO DOS DEPENDENTES Preencher com no máximo 10 caracteres: CONJUGE, FILHA, FILHO e AGREGADO (se contratado pela sua empresa) CAMPO OBRIGATÓRIO somente para dependentes
-AADD(_aFunc,""                                             ) // NÚMERO DA CARTEIRINHA Para a primeira movimentação este campo deve vir em BRANCO Este campo é obrigatório somente para para as ações: Alteração , Transferência, Exclusão, Reativação, Solicitação de 2ª via ou Inclusão de dependentes de titulares já cadastrados
-AADD(_aFunc,cAcao                                          ) // AÇÃO preencher com a letra: I para Inclusões ID para Inclusões de dependentes A para Alterações E para Exclusões T para Transferências S para pedido de 2ª vias R = Reativação (CAMPO OBRIGATÓRIO)
-AADD(_aFunc,(_cAlias)->RA_FILIAL+(_cAlias)->RA_MAT         ) // NÚMERO DE REGISTRO DO FUNCIONÁRIO NA EMPRESA, matrícula do beneficiário (CAMPO OBRIGATÓRIO)
-AADD(_aFunc,AllTrim( (_cAlias)->RA_CIC    )                ) // CPF Este campos deve ser preenchido com no máximo 11 caracteres, sem pontos e traços (CAMPO OBRIGATÓRIO PARA TITULARES E DEPENDENTES MAIORES DE 18 ANOS)
-AADD(_aFunc,AllTrim( (_cAlias)->RA_SEXO   )                ) // SEXO Preencher com a letra: F para FEMININO ou M para MASCULINO (CAMPO OBRIGATÓRIO)
-AADD(_aFunc,AllTrim( (_cAlias)->RA_MAE    )                ) // NOME DA MÃE Este campo contempla no máximo 70 caracteres, o nome deve estar escrito igual ao registro civil ou carteira de identidade, sem abreviações e sem pontos (lembramos que no caso de inclusão de dependentes não poderá ser informado o nome da mãe do beneficiário, deve ser informado o nome da mãe do DEPENDENTE) (CAMPO OBRIGATÓRIO)
-AADD(_aFunc,""                                             ) // PIS Com no máximo 11 caracteres, sem pontos e traços
-AADD(_aFunc,""                                             ) // N° DECLARAÇÃO DE NASCIDO VIVO Para nascidos a partir de 01/01/2010
-AADD(_aFunc,_cCodEmp                                       ) // CÓDIGO DA EMPRESA Preencher com o código ou identificação da sua empresa (campo obrigatório somente para movimentações de mais de uma empresa no mesmo arquivo,verifique o código da sua empresa com um representante da Operadora)
-AADD(_aFunc,""                                             ) // EMAIL                                                                     
-AADD(_aFunc,""                                             ) // CNS Cartão Nacional de Sáude
-AADD(_aFunc,""                                             ) // MOTIVOS DE EXCLUSÃO indique a letra correspondente ao motivo da exclusão A Rompimento do contrato por iniciativa do beneficiário C Inadimplência D Óbito F Inclusão indevida de beneficiários I Aponsentado Demitido K Aponsentadoria M Demissão COM justa causa (para planos coletivos) N Demissão SEM justa causa (para planos coletivos)
-AADD(_aFunc,""                                             ) // HOUVE CONTRIBUIÇÃO beneficiário contribui para o plano ?
-AADD(_aFunc,""                                             ) // PERÍODO DE CONTRIBUIÇÃO tempo em que o beneficiáriuo contribui
-AADD(_aFunc,""                                             ) // FOI INFORMADO DO DIREITO DE PERMANÊNCIA
+aAdd(_aFunc,cNome                                          ) // NOME DO BENEFICIÁRIO Este campo contempla no máximo 70 caracteres,o nome deve estar escrito igual ao registro civil ou carteira de identidade, sem abreviações e sem pontos (CAMPO OBRIGATÓRIO)
+aAdd(_aFunc,_cTipo                                         ) // IDENTIFICAÇÃO DO BENEFICIÁRIO PREENCHER : T PARA TITULAR ou D PARA DEPENDENTE (CAMPO OBRIGATÓRIO)
+aAdd(_aFunc,"IPA"                                          ) // PLANO Informar a sigla do plano, por favor verifique qual é a sigla dos planos para sua empresa, com o representante Odontoprev (CAMPO OBRIGATÓRIO)
+aAdd(_aFunc,SToD( (_cAlias)->RA_NASC )                     ) // DATA DE NASCIMENTO preencher sempre no formato DD/MM/AAAA (CAMPO OBRIGATÓRIO)
+aAdd(_aFunc,"2"                                            ) // TIPO DE ENDEREÇO Profissional ou Residencial Informar 1 para endereço PROFISSIONAL Informar 2 – para endereços RESIDENCIAL
+aAdd(_aFunc,StrTran(AllTrim((_cAlias)->RA_ENDEREC),';','') ) // ENDEREÇO (CAMPO OBRIGATÓRIO)
+aAdd(_aFunc,StrTran(AllTrim((_cAlias)->RA_NUMENDE),';','') ) // N° DO LOGRADOURO (CAMPO OBRIGATÓRIO)
+aAdd(_aFunc,LEFT( (_cAlias)->RA_BAIRRO , 20 )              ) // BAIRRO no máximo 20 CARACTERES
+aAdd(_aFunc,StrTran(LEFT((_cAlias)->RA_COMPLEM,20),';','') ) // COMPLEMENTO DO ENDEREÇO no máximo 20 CARACTERES
+aAdd(_aFunc,(_cAlias)->RA_CEP                              ) // CEP Preencher no formato 00000000 (CAMPO OBRIGATÓRIO)
+aAdd(_aFunc,(_cAlias)->RA_ESTADO                           ) // ESTADO / UF Preencher com somente 2 caracteres (CAMPO OBRIGATÓRIO)
+aAdd(_aFunc,(_cAlias)->RA_MUNICIP                          ) // CIDADE                                                                     
+aAdd(_aFunc,""                                             ) // CIDADE BENEFICIÁRIO (Preencher somente quando o Tipo de Endereço escolhido For Profissional)
+aAdd(_aFunc,""                                             ) // TELEFONE RESIDENCIAL                                                                     
+aAdd(_aFunc,""                                             ) // CARTEIRA DE IDENTIDADE Preencher com no máximo 20 caracteres, este campo não deverá conter pontos, hífen ou traços
+aAdd(_aFunc,""                                             ) // ORGÃO EMISSOR                                                                     
+aAdd(_aFunc,""                                             ) // ESTADO CIVIL                                                                     
+aAdd(_aFunc,""                                             ) // DEPARTAMENTO Este dado será impresso na carteirinha, preencha este campo somente se necessário
+aAdd(_aFunc,_cParentesco                                   ) // PARENTESCO DOS DEPENDENTES Preencher com no máximo 10 caracteres: CONJUGE, FILHA, FILHO e AGREGADO (se contratado pela sua empresa) CAMPO OBRIGATÓRIO somente para dependentes
+aAdd(_aFunc,""                                             ) // NÚMERO DA CARTEIRINHA Para a primeira movimentação este campo deve vir em BRANCO Este campo é obrigatório somente para para as ações: Alteração , Transferência, Exclusão, Reativação, Solicitação de 2ª via ou Inclusão de dependentes de titulares já cadastrados
+aAdd(_aFunc,cAcao                                          ) // AÇÃO preencher com a letra: I para Inclusões ID para Inclusões de dependentes A para Alterações E para Exclusões T para Transferências S para pedido de 2ª vias R = Reativação (CAMPO OBRIGATÓRIO)
+aAdd(_aFunc,(_cAlias)->RA_FILIAL+(_cAlias)->RA_MAT         ) // NÚMERO DE REGISTRO DO FUNCIONÁRIO NA EMPRESA, matrícula do beneficiário (CAMPO OBRIGATÓRIO)
+aAdd(_aFunc,AllTrim( (_cAlias)->RA_CIC    )                ) // CPF Este campos deve ser preenchido com no máximo 11 caracteres, sem pontos e traços (CAMPO OBRIGATÓRIO PARA TITULARES E DEPENDENTES MAIORES DE 18 ANOS)
+aAdd(_aFunc,AllTrim( (_cAlias)->RA_SEXO   )                ) // SEXO Preencher com a letra: F para FEMININO ou M para MASCULINO (CAMPO OBRIGATÓRIO)
+aAdd(_aFunc,AllTrim( (_cAlias)->RA_MAE    )                ) // NOME DA MÃE Este campo contempla no máximo 70 caracteres, o nome deve estar escrito igual ao registro civil ou carteira de identidade, sem abreviações e sem pontos (lembramos que no caso de inclusão de dependentes não poderá ser informado o nome da mãe do beneficiário, deve ser informado o nome da mãe do DEPENDENTE) (CAMPO OBRIGATÓRIO)
+aAdd(_aFunc,""                                             ) // PIS Com no máximo 11 caracteres, sem pontos e traços
+aAdd(_aFunc,""                                             ) // N° DECLARAÇÃO DE NASCIDO VIVO Para nascidos a partir de 01/01/2010
+aAdd(_aFunc,_cCodEmp                                       ) // CÓDIGO DA EMPRESA Preencher com o código ou identificação da sua empresa (campo obrigatório somente para movimentações de mais de uma empresa no mesmo arquivo,verifique o código da sua empresa com um representante da Operadora)
+aAdd(_aFunc,""                                             ) // EMAIL                                                                     
+aAdd(_aFunc,""                                             ) // CNS Cartão Nacional de Sáude
+aAdd(_aFunc,""                                             ) // MOTIVOS DE EXCLUSÃO indique a letra correspondente ao motivo da exclusão A Rompimento do contrato por iniciativa do beneficiário C Inadimplência D Óbito F Inclusão indevida de beneficiários I Aponsentado Demitido K Aponsentadoria M Demissão COM justa causa (para planos coletivos) N Demissão SEM justa causa (para planos coletivos)
+aAdd(_aFunc,""                                             ) // HOUVE CONTRIBUIÇÃO beneficiário contribui para o plano ?
+aAdd(_aFunc,""                                             ) // PERÍODO DE CONTRIBUIÇÃO tempo em que o beneficiáriuo contribui
+aAdd(_aFunc,""                                             ) // FOI INFORMADO DO DIREITO DE PERMANÊNCIA
 
-AADD(_aFuncT,(_cAlias)->RA_FILIAL                          ) // FILIAL          SÓ PARA TELA 
-AADD(_aFuncT,(_cAlias)->RA_NOMECMP                         ) // NOME DO TITULAR SÓ PARA TELA
-FOR T := 1 TO LEN(_aFunc)
-    AADD(_aFuncT,_aFunc[T])
-NEXT
-_aFuncT[4]:=IF(_aFuncT[4]="D","2-Dependente","1-Funcionario")
-AADD(aDadosOdonto,_aFunct)// para tela
+aAdd(_aFuncT,(_cAlias)->RA_FILIAL                          ) // FILIAL          SÓ PARA TELA 
+aAdd(_aFuncT,(_cAlias)->RA_NOMECMP                         ) // NOME DO TITULAR SÓ PARA TELA
+For T := 1 TO Len(_aFunc)
+    aAdd(_aFuncT,_aFunc[T])
+Next
+_aFuncT[4]:=If(_aFuncT[4]="D","2-Dependente","1-Funcionario")
+aAdd(aDadosOdonto,_aFunct)// para tela
 
-AADD(aXlsxOdonto ,_aFunc)//para gera no layout Oficial
+aAdd(aXlsxOdonto ,_aFunc)//para gera no layout Oficial
 
-RETURN .T.
+Return .T.

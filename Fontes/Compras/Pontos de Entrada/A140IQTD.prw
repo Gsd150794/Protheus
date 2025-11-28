@@ -2,43 +2,36 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 27/01/2020 | Corrigido cálculo da segunda unidade de medida. Chamado 31828
+Lucas Borges  |27/01/2020| Chamado 31828. Corrigido cálculo da segunda unidade de medida.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: A140IQTD
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 16/01/2020
-===============================================================================================================================
 Descrição---------: O Ponto de entrada é executado durante a inclusão dos itens do documento. Permite alterar os campos de 
                     quantidade, valor unitário, total e quantidade da segunda unidade de medida na importação do documento.
-                    ===============================================================================================================================
-Parametros--------: ParamIxb[01] -> C -> Produto
-                    ParamIxb[02] -> C -> Unidade de medida
-                    ParamIxb[03] -> C -> Segunda unidade de medida
-                    ParamIxb[04] -> N -> Quantidade da segunda unidade de medida
-                    ParamIxb[05] -> N -> Quantidade
-                    ParamIxb[06] -> N -> Preço unitário
-                    ParamIxb[07] -> N -> Total
-                    ParamIxb[08] -> L -> .T. - Utiliza 2ª unidade de medida / .F. - Não utiliza 2ª unidade de medida
-                    ParamIxb[09] -> C -> Fornecedor
-                    ParamIxb[10] -> C -> Loja
-                    ParamIxb[11] -> C -> Documento
-					ParamIxb[12] -> C -> Série
-					ParamIxb[13] -> C -> Tipo do Documento
-					ParamIxb[14] -> L -> .T. = Alias SA7 (Cliente) / .F. = Alias SA5 (Fornecedor)
-					ParamIxb[15] -> O -> XML do documento
-===============================================================================================================================
+Parametros--------: ParamIXB[01] -> C -> Produto
+                    ParamIXB[02] -> C -> Unidade de medida
+                    ParamIXB[03] -> C -> Segunda unidade de medida
+                    ParamIXB[04] -> N -> Quantidade da segunda unidade de medida
+                    ParamIXB[05] -> N -> Quantidade
+                    ParamIXB[06] -> N -> Preço unitário
+                    ParamIXB[07] -> N -> Total
+                    ParamIXB[08] -> L -> .T. - Utiliza 2ª unidade de medida / .F. - Não utiliza 2ª unidade de medida
+                    ParamIXB[09] -> C -> Fornecedor
+                    ParamIXB[10] -> C -> Loja
+                    ParamIXB[11] -> C -> Documento
+					ParamIXB[12] -> C -> Série
+					ParamIXB[13] -> C -> Tipo do Documento
+					ParamIXB[14] -> L -> .T. = Alias SA7 (Cliente) / .F. = Alias SA5 (Fornecedor)
+					ParamIXB[15] -> O -> XML do documento
 Retorno-----------: aRet[1] -> N -> Quantidade
                     aRet[2] -> N -> Preço unitário
                     aRet[3] -> N -> Total
@@ -47,17 +40,17 @@ Retorno-----------: aRet[1] -> N -> Quantidade
 */
 User Function A140IQTD
 
-Local _cAlias   := IIf(ParamIxb[14]==.T.,"SA7","SA5")
-Local _cFornece := ParamIxb[09]
-Local _cLoja    := ParamIxb[10]
-Local _cProduto := ParamIxb[01]
-Local _nVUnit   := ParamIxb[06]
-Local _nQuant   := ParamIxb[05]
-Local _nTotal   := ParamIxb[07]
-Local _cSegUm   := ParamIxb[03]
-Local _nQtSegun := ParamIxb[04]
+Local _cAlias   := IIf(ParamIXB[14]==.T.,"SA7","SA5")
+Local _cFornece := ParamIXB[09]
+Local _cLoja    := ParamIXB[10]
+Local _cProduto := ParamIXB[01]
+Local _nVUnit   := ParamIXB[06]
+Local _nQuant   := ParamIXB[05]
+Local _nTotal   := ParamIXB[07]
+Local _cSegUm   := ParamIXB[03]
+Local _nQtSegun := ParamIXB[04]
 Local _aRet     := {_nQuant,_nVUnit,_nTotal,_nQtSegun}
-Local _nNewQuant:= ParamIxb[05]
+Local _nNewQuant:= ParamIXB[05]
 
 DBSelectArea(_cAlias)
 (_cAlias)->( DBSetOrder(1) )

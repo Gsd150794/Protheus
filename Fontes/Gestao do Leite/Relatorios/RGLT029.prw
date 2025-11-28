@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 26/07/2019 | Corrigida a barra de progresso. Help 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 09/10/2019 | Corrigido error.log na impressão. Help 30812
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 30/10/2019 | Ajustada análise da faixa por Volume. Chamado 31033
+Lucas Borges  |26/07/2019| Chmamado 28346. Corrigida a barra de progresso.
+Lucas Borges  |09/10/2019| Chamado 30812. Corrigido error.log na impressão.
+Lucas Borges  |30/10/2019| Chamado 31033. Ajustada análise da faixa por Volume.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT029
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 19/05/2019
-===============================================================================================================================
 Descrição---------: Relatório de Produção por Faixa
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -45,11 +37,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 29/05/2019
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -98,11 +87,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 29/05/2019
-===============================================================================================================================
 Descrição---------: Realiza a impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -127,10 +113,10 @@ Local _nCountRec	:= 0
 If MV_PAR09 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZLD")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -317,11 +303,11 @@ _oTempTable:AddIndex( "01", {"ZLD_FILIAL", "ZL2_COD", "ZL9_COD", "MEDIA"} )
 _oTempTable:Create()
 
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Processando")
 oReport:SetMeter(_nCountRec)
 
-While (_cAlias)->(!EOF())
+While (_cAlias)->(!Eof())
 	_nMed:=0
 	_nAux:=0
 	_nOk:=0
@@ -355,12 +341,12 @@ While (_cAlias)->(!EOF())
 		(_cAlias2)->P01_03:= (_cAlias)->P01_03
 		(_cAlias2)->VOL_BRUT:= (_cAlias)->VOL_BRUT
 		(_cAlias2)->VOL_CRI:= (_cAlias)->VOL_CRI
-	MsUnLock()
+	MSUnLock()
 
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 //==========================================================================
 // Query do relatório da secao 1                                            
@@ -399,20 +385,20 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->ZLD_FILIAL
 	_cFaixa	:= (_cAlias)->FAIXA
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 _oTempTable:Delete()
 
 Return

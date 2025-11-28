@@ -13,9 +13,9 @@ Lucas Borges  | 14/10/2019 | Removidos os Warning na compilação da release 12.1.
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#INCLUDE "Protheus.ch"
-#INCLUDE "RwMake.ch"
-#INCLUDE "TopConn.ch"   
+#Include "TOTVS.ch"
+#Include "RwMake.ch"
+#Include "TopConn.ch"   
 
 /*
 ===============================================================================================================================
@@ -70,7 +70,7 @@ AOMS057C(1,@_aArea,@_aAlias,{"SB1","ZZP"})
 // Tela para escolha do produto. 
 //=================================
 DEFINE MSDIALOG oDlgPro TITLE "Pesquisa de Produtos" FROM 178,181 TO 665,967 PIXEL
-SetKey(VK_F5, {|| fwMsgRun(,{||  AOMS057B(cGrupo,cDescr)},"Processando registros...","Aguarde...")})
+SetKey(VK_F5, {|| FWMsgRun(,{||  AOMS057B(cGrupo,cDescr)},"Processando registros...","Aguarde...")})
 SetKey(VK_F6, {|| AOMS057I(cTESIn,cTESOut,cEstado),Close(oDlgPro) })
 
 @ 004,004 TO 045,391 LABEL "Pesquisa:"   PIXEL OF oDlgPro
@@ -85,14 +85,14 @@ oGrupo:SetFocus()
         
 @ 009,252 Say "      TES     " Size 050,006 COLOR CLR_BLACK PIXEL OF oDlgPro
 @ 016,252 Say "Dentro Estado:" Size 050,006 COLOR CLR_BLACK PIXEL OF oDlgPro
-@ 023,252 MSGet oTESIn Var cTESIn Picture "@!" F3 "SF4" Size 037,009 COLOR CLR_BLACK PIXEL OF oDlgPro VALID IIF(Len(AllTrim(cTESIn)) > 0,ExistCpo("SF4",cTESIn).And.MaAvalTes("S",cTESIn),.T.) WHEN Len(AllTrim(cEstado)) == 0                                          
+@ 023,252 MSGet oTESIn Var cTESIn Picture "@!" F3 "SF4" Size 037,009 COLOR CLR_BLACK PIXEL OF oDlgPro VALID IIf(Len(AllTrim(cTESIn)) > 0,ExistCpo("SF4",cTESIn).And.MaAvalTes("S",cTESIn),.T.) WHEN Len(AllTrim(cEstado)) == 0                                          
 
 @ 009,293 Say "     TES    " Size 040,006 COLOR CLR_BLACK PIXEL OF oDlgPro
 @ 016,293 Say "Fora Estado:" Size 040,006 COLOR CLR_BLACK PIXEL OF oDlgPro
-@ 023,293 MSGet oTESOut Var cTESOut Picture "@!" F3 "SF4" Size 037,009 COLOR CLR_BLACK PIXEL OF oDlgPro VALID IIF(Len(AllTrim(cTESOut)) > 0,ExistCpo("SF4",cTESOut).And.MaAvalTes("S",cTESOut),.T.)
+@ 023,293 MSGet oTESOut Var cTESOut Picture "@!" F3 "SF4" Size 037,009 COLOR CLR_BLACK PIXEL OF oDlgPro VALID IIf(Len(AllTrim(cTESOut)) > 0,ExistCpo("SF4",cTESOut).And.MaAvalTes("S",cTESOut),.T.)
 
 @ 016,335 Say "   Estado:  " Size 040,006 COLOR CLR_BLACK PIXEL OF oDlgPro
-@ 023,335 MSGet oEstado Var cEstado Picture "@!" F3 "12" Size 037,009 COLOR CLR_BLACK PIXEL OF oDlgPro VALID IIF(Len(AllTrim(cEstado)) > 0,ExistCpo("SX5","12" + cEstado),.T.) WHEN Len(AllTrim(cTESIn)) == 0
+@ 023,335 MSGet oEstado Var cEstado Picture "@!" F3 "12" Size 037,009 COLOR CLR_BLACK PIXEL OF oDlgPro VALID IIf(Len(AllTrim(cEstado)) > 0,ExistCpo("SX5","12" + cEstado),.T.) WHEN Len(AllTrim(cTESIn)) == 0
 
 @ 055,007 ListBox oBoxLib  Fields Headers 	" "," ","Codigo","Descricao" Size 381,163;
 ON DBLCLICK ( AOMS057M() ) Pixel Of oDlgPro
@@ -106,7 +106,7 @@ aGrd[oBoxLib:nAt,4]}}
 oBoxLib:bHeaderClick := {|| AOMS057A(), oBoxLib:Refresh()}
 
 @ 226,313 Button "Pesquisar [F5]" Size 037,012 PIXEL OF oDlgPro;
-Action(fwMsgRun(,{||  AOMS057B(cGrupo,cDescr)},"Processando registros...","Aguarde...")) 
+Action(FWMsgRun(,{||  AOMS057B(cGrupo,cDescr)},"Processando registros...","Aguarde...")) 
 @ 226,353 Button "Ok [F6]"        Size 037,012 PIXEL OF oDlgPro;
 Action(AOMS057I(cTESIn,cTESOut,cEstado),Close(oDlgPro))
 
@@ -202,7 +202,7 @@ Local _nquant := 0
 cQuery := "SELECT B1_COD, B1_I_DESCD"
 cQuery += " FROM " + RetSqlName("SB1")
 cQuery += " WHERE D_E_L_E_T_ <> '*'"
-cQuery += " AND B1_FILIAL  = '" + xFILIAL("SB1") + "'"
+cQuery += " AND B1_FILIAL  = '" + xFilial("SB1") + "'"
 cQuery += " AND B1_MSBLQL <> '1'"
 
 If !Empty(cGrupo) //Se o grupo nao esta vazio
@@ -221,11 +221,11 @@ Count to _nquant
 
 If _nquant > 10000
 
-  u_itmsg("Filtro selecionado retornou mais de 10.000 produtos!","Atenção","Modifique o filtro para trazer menos produtos na consulta",1)
+  U_ITMsg("Filtro selecionado retornou mais de 10.000 produtos!","Atenção","Modifique o filtro para trazer menos produtos na consulta",1)
   
   Return
   
-Endif
+EndIf
 
 //=====================================================
 // Limpa o array que apresenta os produtos na tela. 
@@ -235,17 +235,17 @@ aGrd := {}
 //=============================================================
 // Processa o arquivo do select preenchendo o array do Grid. 
 //=============================================================
-dbSelectArea(_cAlias)
-(_cAlias)->(dbGoTop())
+DBSelectArea(_cAlias)
+(_cAlias)->(DBGoTop())
 
-While (_cAlias)->(!EoF())
+While (_cAlias)->(!Eof())
 	
 	aAdd(aGrd, {LoadBitmap(GetResources(),"BR_VERDE"),;
 	bNbMarked 		    ,;
 	(_cAlias)->B1_COD	,;
 	(_cAlias)->B1_I_DESCD})
 	
-	(_cAlias)->(dbSkip())  
+	(_cAlias)->(DBSkip())  
 	
 EndDo
 
@@ -256,8 +256,8 @@ If Len(aGrd) <= 0
 	""}}
 EndIf
 
-dbSelectArea(_cAlias)
-(_cAlias)->(dbCloseArea())
+DBSelectArea(_cAlias)
+(_cAlias)->(DBCloseArea())
 
 oBoxLib:SetArray(aGrd)
 oBoxLib:bLine := {|| {aGrd[oBoxLib:nAt,1],;
@@ -305,7 +305,7 @@ Programa----------: AOMS057A
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 19/08/2011
 ===============================================================================================================================
-Descrição---------: Static Function auxiliar no GetArea e ResArea retornando   
+Descrição-------Staticatic Function auxiliar no GetArea e ResArea retornando   
            			o ponteiro nos Aliases descritos na chamada da Funcao.     
            			Exemplo:                                                   
            			Local _aArea  := {} // Array que contera o GetArea         
@@ -315,10 +315,10 @@ Descrição---------: Static Function auxiliar no GetArea e ResArea retornando
                                // Chama a Funcao como GetArea                             
                                AOMS057A(1,@_aArea,@_aAlias,{"SL1","SL2","SL4"})         
                                                                       
-                               // Chama a Funcao como RestArea                            
+                               // Chama a Funcao como FWRestArea                            
                                AOMS057A(2,_aArea,_aAlias)        
 ===============================================================================================================================
-Parametros--------:  nTipo   = 1=GetArea / 2=RestArea                           
+Parametros--------:  nTipo   = 1=GetArea / 2=FWRestArea                           
            			_aArea  = Array passado por referencia que contera GetArea 
            			_aAlias = Array passado por referencia que contera         
            			{Alias(), IndexOrd(), Recno()}                   
@@ -332,22 +332,22 @@ Static Function AOMS057C(_nTipo,_aArea,_aAlias,_aArqs)
 
 Local _nN := 0
 
-// Tipo 1 = GetArea()
+// Tipo 1 = FWGetArea()
 If _nTipo == 1
-	_aArea := GetArea()
+	_aArea := FWGetArea()
 	For _nN := 1 To Len(_aArqs)
-		DbSelectArea(_aArqs[_nN])
-		AAdd(_aAlias,{ _aArqs[_nN], IndexOrd(), Recno() })
+		DBSelectArea(_aArqs[_nN])
+		aAdd(_aAlias,{ _aArqs[_nN], IndexOrd(), Recno() })
 	Next
-	// Tipo 2 = RestArea()
+	// Tipo 2 = FWRestArea()
 Else
 	For _nN := 1 To Len(_aAlias)
-		DbSelectArea(_aAlias[_nN,1])
-		DbSetOrder(_aAlias[_nN,2])
-		DbGoto(_aAlias[_nN,3])
+		DBSelectArea(_aAlias[_nN,1])
+		DBSetOrder(_aAlias[_nN,2])
+		DBGoTo(_aAlias[_nN,3])
 	Next
-	RestArea(_aArea)
-Endif
+	FWRestArea(_aArea)
+EndIf
 
 Return
 
@@ -384,11 +384,11 @@ For nI := 1 To Len(aGrd)
 		//========================================================
 		// Identifica se pelo menos um produto foi selecionado. 
 		//========================================================
-		If !Empty(Alltrim(aGrd[nI,3]))
+		If !Empty(AllTrim(aGrd[nI,3]))
 		    lMark := .T.
 		EndIf
 		
-		//If !Empty(Alltrim(aCols[Len(aCols)][2])) 		
+		//If !Empty(AllTrim(aCols[Len(aCols)][2])) 		
 		/*
 		//=========================================================================
 		//Condicao inserida para que seja inserido o primeiro item na linha atual
@@ -400,7 +400,7 @@ For nI := 1 To Len(aGrd)
 			//===============================================
 			// Inicializa o Acols com uma linha em Branco. 
 			//===============================================
-			AADD(aCols,Array(Len(aHeader)+1))
+			aAdd(aCols,Array(Len(aHeader)+1))
 			
 			//=========================
 			// Incrementa os Itens.  

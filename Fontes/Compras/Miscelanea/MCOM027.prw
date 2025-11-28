@@ -9,7 +9,7 @@ Lucas Borges  |23/05/2025| Chamado 50754. Incluído tratamento para CT-e Simplifi
 ===============================================================================================================================
 */
 
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -30,7 +30,7 @@ Local _cChaveNFe := Space(44) as Character
 
 DEFINE MSDIALOG oDlgKey TITLE "Consulta chave" FROM 0,0 TO 150,305 PIXEL OF GetWndDefault()
 
-@ 12,008 SAY "Informe a Chave de acesso do documento: " PIXEL OF oDlgKey
+@ 12,008 Say "Informe a Chave de acesso do documento: " PIXEL OF oDlgKey
 @ 20,008 MSGET _cChaveNFe PICTURE "99999999999999999999999999999999999999999999" SIZE 140,10 PIXEL OF oDlgKey
 
 @ 46,035 BUTTON oBtnCon PROMPT "&Consultar" SIZE 38,11 PIXEL ACTION ConsNFeChave(_cChaveNFe)
@@ -54,7 +54,7 @@ Static Function ConsNFeChave(_cChaveNFe As Character)
 
 Local cIdEnt   As Character
 Local _cXML    As Character
-Local cUrl		:= Padr( GetNewPar("MV_SPEDURL",""), 250 ) As Character
+Local cUrl		:= PadR( GetNewPar("MV_SPEDURL",""), 250 ) As Character
 Local aSize    As Array
 Local aObjects As Array
 Local aListBox As Array
@@ -75,8 +75,8 @@ If Len(AllTrim(_cChaveNFe)) == 44
          If !Empty(aListBox)
             aSize := MsAdvSize()
             aObjects := {}
-            AAdd( aObjects, { 100, 100, .t., .t. } )
-            AAdd( aObjects, { 100, 015, .t., .f. } )
+            aAdd( aObjects, { 100, 100, .T., .T. } )
+            aAdd( aObjects, { 100, 015, .T., .F. } )
 
             aInfo := { aSize[ 1 ], aSize[ 2 ], aSize[ 3 ], aSize[ 4 ], 3, 3 }
             aPosObj := MsObjSize( aInfo, aObjects )
@@ -90,8 +90,8 @@ If Len(AllTrim(_cChaveNFe)) == 44
 
             @ aPosObj[2,1],aPosObj[2,4]-040 BUTTON oBtn1 PROMPT "OK"   		ACTION oDlg:End() OF oDlg PIXEL SIZE 035,011
             @ aPosObj[2,1],aPosObj[2,4]-080 BUTTON oBtn3 PROMPT "Baixa XML"ACTION (getXml(_cChaveNFe,_cXML)) OF oDlg PIXEL SIZE 035,011
-            @ aPosObj[2,1],aPosObj[2,4]-120 BUTTON oBtn4 PROMPT "Refresh" 	ACTION (aListBox := getListBox(cIdEnt, cUrl, _cChaveNFe,_cXML),oListBox:nAt := 1,IIF(Empty(aListBox),oDlg:End(),oListBox:Refresh())) OF oDlg PIXEL SIZE 035,011
-            @ aPosObj[2,1],aPosObj[2,4]-160 BUTTON oBtn4 PROMPT "Imprimir" ACTION (U_MCOM023D(),oListBox:nAt := 1,IIF(Empty(aListBox),oDlg:End(),oListBox:Refresh())) OF oDlg PIXEL SIZE 035,011
+            @ aPosObj[2,1],aPosObj[2,4]-120 BUTTON oBtn4 PROMPT "Refresh" 	ACTION (aListBox := getListBox(cIdEnt, cUrl, _cChaveNFe,_cXML),oListBox:nAt := 1,IIf(Empty(aListBox),oDlg:End(),oListBox:Refresh())) OF oDlg PIXEL SIZE 035,011
+            @ aPosObj[2,1],aPosObj[2,4]-160 BUTTON oBtn4 PROMPT "Imprimir" ACTION (U_MCOM023D(),oListBox:nAt := 1,IIf(Empty(aListBox),oDlg:End(),oListBox:Refresh())) OF oDlg PIXEL SIZE 035,011
 
             ACTIVATE MSDIALOG oDlg
          EndIf
@@ -143,14 +143,14 @@ oWS:cCHVNFE       := _cChaveNFe
 BeginSql alias _cAlias
    SELECT 'CKO' TIPO, (SELECT 'SIM' FROM %Table:SF1% WHERE D_E_L_E_T_ = ' ' AND F1_CHVNFE = CKO_CHVDOC AND F1_FILIAL = CKO_FILPRO) CLAS,
    CKO_DT_IMP DATA_INC, CKO_HR_IMP HORA_INC, 
-   CASE WHEN CKO_I_ALTX = 'N' THEN CKO_XMLRET ELSE CKO_I_ORIG END CKO_XMLRET
+   Case WHEN CKO_I_ALTX = 'N' THEN CKO_XMLRET Else CKO_I_ORIG END CKO_XMLRET
    FROM %Table:CKOCOL%
    WHERE D_E_L_E_T_ = ' '
    AND CKO_CHVDOC = %exp:_cChaveNFe%
    UNION ALL
    SELECT 'SF1', '', TO_CHAR(CAST( I_N_S_D_T_ AT TIME ZONE '-06:00' AS DATE), 'YYYYMMDD'),
    TO_CHAR(CAST( I_N_S_D_T_ AT TIME ZONE '-06:00' AS DATE), 'HH24:MM:SS'),
-   EMPTY_BLOB() CKO_XMLRET
+   Empty_BLOB() CKO_XMLRET
    FROM %Table:SF1%
    WHERE D_E_L_E_T_ = ' '
    AND F1_CHVNFE  = %exp:_cChaveNFe%
@@ -164,7 +164,7 @@ EndSql
 While (_cAlias)->(!Eof())
    _cAux:= ""
    If AllTrim((_cAlias)->TIPO) == 'CKO'
-      _cAux := "XML recebido pela Italac - "+ IIf(Alltrim((_cAlias)->CLAS) == 'SIM',"Escriturado","Não escriturado")
+      _cAux := "XML recebido pela Italac - "+ IIf(AllTrim((_cAlias)->CLAS) == 'SIM',"Escriturado","Não escriturado")
    ElseIf AllTrim((_cAlias)->TIPO) == 'SF1'
       _cAux := "Documento escriturado"
    EndIf
@@ -173,7 +173,7 @@ While (_cAlias)->(!Eof())
       aAdd(_aListBox,{IIf(AllTrim((_cAlias)->TIPO) == 'CKO' .And. Empty(AllTrim((_cAlias)->CLAS)),_oNo,_oOk),;
             '',;//Finalidade
             '',;//Emissao
-            DtoC(SToD((_cAlias)->DATA_INC)),;//Dt Recebimento Ambiente Nacional
+            DToC(SToD((_cAlias)->DATA_INC)),;//Dt Recebimento Ambiente Nacional
             (_cAlias)->HORA_INC,;//Hora Recebimento Ambiente Nacional
             '',;//Protocolo
             '',;//Código de retorno SEFAZ
@@ -183,9 +183,9 @@ While (_cAlias)->(!Eof())
    If Empty(_cXML)
       _cXML := (_cAlias)->CKO_XMLRET
    EndIf
-   (_cAlias)->(DbSkip())
+   (_cAlias)->(DBSkip())
 EndDo
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 //Buscando status do documento
 If oWS:CONSULTADTCHAVENFE()
@@ -193,11 +193,11 @@ If oWS:CONSULTADTCHAVENFE()
    If !Empty(_cXML)
       If "ObsContxCampo" $ _cXML
          _cXML := StrTran(_cXML,"ObsContxCampo","ObsCont xCampo")
-      Endif
+      EndIf
          
       If "ReferenceURI" $ _cXML
          _cXML := StrTran(_cXML,"ReferenceURI","Reference URI") 
-      Endif
+      EndIf
 
       _cXML := SubStr( _cXML , At( '<' , _cXML ) )
       
@@ -226,24 +226,24 @@ If oWS:CONSULTADTCHAVENFE()
          _oXML := _oFullXML:_CTeOSProc:_CteOS
       EndIf
 
-      If Substr(_cChaveNFe,21,2)=="55"
+      If SubStr(_cChaveNFe,21,2)=="55"
          _cFinalid := AllTrim(_oXML:_InfNfe:_Ide:_finNFe:Text)
          If ValType(XmlChildEx(_oXML:_InfNfe:_Ide,"_DEMI")) == "O"
-            _cDtEmissa := DToC(StoD(StrTran(AllTrim(_oXML:_InfNfe:_Ide:_DEmi:Text),"-","")))
+            _cDtEmissa := DToC(SToD(StrTran(AllTrim(_oXML:_InfNfe:_Ide:_DEmi:Text),"-","")))
          ElseIf ValType(XmlChildEx(_oXML:_InfNfe:_Ide,"_DHEMI")) == "O"
-            _cDtemissa := DToC(StoD(StrTran(Substr((_oXML:_InfNfe:_Ide:_DhEmi:Text),1,10),"-","")))
+            _cDtemissa := DToC(SToD(StrTran(SubStr((_oXML:_InfNfe:_Ide:_DhEmi:Text),1,10),"-","")))
          EndIf
-      ElseIf Substr(_cChaveNFe,21,2)$"57/67"
+      ElseIf SubStr(_cChaveNFe,21,2)$"57/67"
          _cFinalid := AllTrim(If(ValType(XmlChildEx(_oXML:_InfCte,"_IDE")) == "O",AllTrim(_oXML:_InfCte:_Ide:_tpCTe:Text),""))
-         _cDtemissa := DToC(StoD(StrTran(AllTrim(_oXML:_InfCte:_Ide:_Dhemi:Text),"-","")))
+         _cDtemissa := DToC(SToD(StrTran(AllTrim(_oXML:_InfCte:_Ide:_Dhemi:Text),"-","")))
       EndIf
    EndIf
 
    aAdd(_aListBox,{IIf(Empty(oWs:OWSCONSULTADTCHAVENFERESULT:cPROTOCOLO) .Or.  oWs:OWSCONSULTADTCHAVENFERESULT:cCODRETNFE $ _cDeneg,_oNo,_oOk),;
-                  getDesc(IIf(Substr(_cChaveNFe,21,2)=="55",'NFE','CTE'),_cFinalid),;//Finalidade
+                  getDesc(IIf(SubStr(_cChaveNFe,21,2)=="55",'NFE','CTE'),_cFinalid),;//Finalidade
                   _cDtEmissa,;//Emissao
-                  DtoC(oWs:OWSCONSULTADTCHAVENFERESULT:dRECBTO),;//Dt Recebimento Ambiente Nacional
-                  Substr(oWs:OWSCONSULTADTCHAVENFERESULT:cRECBTOTM,1,8),;//Hora Recebimento Ambiente Nacional
+                  DToC(oWs:OWSCONSULTADTCHAVENFERESULT:dRECBTO),;//Dt Recebimento Ambiente Nacional
+                  SubStr(oWs:OWSCONSULTADTCHAVENFERESULT:cRECBTOTM,1,8),;//Hora Recebimento Ambiente Nacional
                   oWs:OWSCONSULTADTCHAVENFERESULT:cPROTOCOLO,;//Protocolo
                   getDesc('EVENTO',oWs:OWSCONSULTADTCHAVENFERESULT:cCODRETNFE),;//Código de retorno SEFAZ
                   oWs:OWSCONSULTADTCHAVENFERESULT:cMSGRETNFE;//Status/Recomendação
@@ -269,19 +269,19 @@ While (_cAlias)->(!Eof())
    aAdd(_aListBox,{IIf((_cAlias)->STATUS <> 6 .And. (_cAlias)->STATUS <> 7,_oNo,_oOk),;
                   '',;//Finalidade
                   '',;//Emissao
-                   DToC(SToD((_cAlias)->DATE_EVEN)),;//DtoC(oWs:NFEMONITORLOTEEVENTORESULT:dRECBTO),;//Dt Recebimento Ambiente Nacional
+                   DToC(SToD((_cAlias)->DATE_EVEN)),;//DToC(oWs:NFEMONITORLOTEEVENTORESULT:dRECBTO),;//Dt Recebimento Ambiente Nacional
                   (_cAlias)->TIME_EVEN,;//oWs:NFEMONITORLOTEEVENTORESULT:cRECBTOTM;//Hora Recebimento Ambiente Nacional
-                  Alltrim(Str((_cAlias)->PROTOCOLO)),;//Protocolo
-                  getDesc('EVENTO',Alltrim(Str((_cAlias)->TPEVENTO))),;//Código do evento
+                  AllTrim(Str((_cAlias)->PROTOCOLO)),;//Protocolo
+                  getDesc('EVENTO',AllTrim(Str((_cAlias)->TPEVENTO))),;//Código do evento
                   (_cAlias)->CMOTEVEN;//Status/Recomendação
                })
 
-   (_cAlias)->(DbSkip())
+   (_cAlias)->(DBSkip())
 EndDo
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 //ordena por data do evento
-aSort(_aListBox,,,{|x,y| DtoS(cTod(x[4]))+x[5] < DtoS(cTod(y[4]))+y[5]})
+aSort(_aListBox,,,{|x,y| DToS(cTod(x[4]))+x[5] < DToS(cTod(y[4]))+y[5]})
 Return _aListBox
 
 /*
@@ -384,4 +384,5 @@ If !Empty(_cXML)
 Else
    FWAlertWarning("Não foi possível localizar o XML desse documento. Verifique se ele foi recebido pelo TOTVS colaboração.","MCOM02709")
 EndIf
+
 Return

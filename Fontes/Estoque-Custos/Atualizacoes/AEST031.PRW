@@ -6,14 +6,11 @@
 -------------------------------------------------------------------------------------------------------------------------------
 Lucas Borges  |09/05/2025| Chamado 50617. Corrigir chamada estática no nome das tabelas do sistema
 Lucas Borges  |14/05/2025| Chamado 50697. Corrigir seleção do alias para evitar erro no gatilho
-===============================================================================================================================
-Analista       - Programador     - Inicio     - Envio    - Chamado - Motivo de Alteração
-===============================================================================================================================
-Lucas          - Alex Wallauer   - 02/05/2025 - 06/05/25 - 50525   - Ajuste para remoção de diretório local C:\SMARTCLIENT\.
+Alex Wallauer |06/05/2025| Chamado 50525. Ajuste para remoção de diretório Local C:\SMARTCLIENT\.
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -38,33 +35,33 @@ Private     _cSeparador := "/"
 
 aLegenda 	:= {{"BR_VERMELHO","Bloqueado"}, {"BR_VERDE", "Ativo"}} 
 
-Aadd(aRotina,{"Pesquisar" 	,"AxPesqui"   		,0,1 })
-Aadd(aRotina,{"Visualizar"	,"U_AEST031I(2)"    	,0,2 })
-Aadd(aRotina,{"Incluir"		,"U_AEST031I(3)"		,0,3 })
-Aadd(aRotina,{"Alterar"		,"U_AEST031I(4)"    	,0,4 })
-Aadd(aRotina,{"Excluir"		,"U_AEST031I(5)"    	,0,5 })
-Aadd(aRotina,{"Copiar"		,"U_AEST031I(6)"    	,0,6 })
-Aadd(aRotina,{"Legenda"		,"BrwLegenda('Status das regras','Legenda',aLegenda)"  		,0,7 })
+aAdd(aRotina,{"Pesquisar" 	,"AxPesqui"   		,0,1 })
+aAdd(aRotina,{"Visualizar"	,"U_AEST031I(2)"    	,0,2 })
+aAdd(aRotina,{"Incluir"		,"U_AEST031I(3)"		,0,3 })
+aAdd(aRotina,{"Alterar"		,"U_AEST031I(4)"    	,0,4 })
+aAdd(aRotina,{"Excluir"		,"U_AEST031I(5)"    	,0,5 })
+aAdd(aRotina,{"Copiar"		,"U_AEST031I(6)"    	,0,6 })
+aAdd(aRotina,{"Legenda"		,"BrwLegenda('Status das regras','Legenda',aLegenda)"  		,0,7 })
 
-AADD(aCores,{"ZL6_MSBLQL <> '1'","BR_VERDE" })   
-AADD(aCores,{"ZL6_MSBLQL = '1'" ,"BR_VERMELHO" })    
+aAdd(aCores,{"ZL6_MSBLQL <> '1'","BR_VERDE" })   
+aAdd(aCores,{"ZL6_MSBLQL = '1'" ,"BR_VERMELHO" })    
 
-DbSelectArea("ZL6")
-DbSetOrder(1)
-aadd(aTitulos,{"Filial      ","ZL6_FILIAL","C",2,0,"@!                                           "})
-aadd(aTitulos,{"Ordem"       ,"ZL6_ORDGRU" ,"C",6,0,"@!                                           "})
-aadd(aTitulos,{"Tipo Custo  ","ZL6_TPCUS","C",6,0,"@!                                           "})
-aadd(aTitulos,{"Descr Tp Cus","ZL6_DTPCUS","C",60,0,"@!                                           "})
-aadd(aTitulos,{"Grupo Custo ","ZL6_GRPCUS","C",6,0,"@!                                           "})
-aadd(aTitulos,{"Descr Grupo ","ZL6_DGRCUS","C",40,0,"@!                                           "})
-aadd(aTitulos,{"Cod. Evento ","ZL6_CODEVE","C",6,0,"@!                                           "})
-aadd(aTitulos,{"Descr Evento","ZL6_DESEVE","C",40,0,"@!                                           "})
+DBSelectArea("ZL6")
+DBSetOrder(1)
+aAdd(aTitulos,{"Filial      ","ZL6_FILIAL","C",2,0,"@!                                           "})
+aAdd(aTitulos,{"Ordem"       ,"ZL6_ORDGRU" ,"C",6,0,"@!                                           "})
+aAdd(aTitulos,{"Tipo Custo  ","ZL6_TPCUS","C",6,0,"@!                                           "})
+aAdd(aTitulos,{"Descr Tp Cus","ZL6_DTPCUS","C",60,0,"@!                                           "})
+aAdd(aTitulos,{"Grupo Custo ","ZL6_GRPCUS","C",6,0,"@!                                           "})
+aAdd(aTitulos,{"Descr Grupo ","ZL6_DGRCUS","C",40,0,"@!                                           "})
+aAdd(aTitulos,{"Cod. Evento ","ZL6_CODEVE","C",6,0,"@!                                           "})
+aAdd(aTitulos,{"Descr Evento","ZL6_DESEVE","C",40,0,"@!                                           "})
 
-ZL6->(DbGoTop())
+ZL6->(DBGoTop())
 
 mBrowse( 6, 1,22,75,"ZL6"  ,aTitulos,,,, ,aCores)
 
-ZL6->(DbCloseArea())
+ZL6->(DBCloseArea())
 
 Return(.T.)
 
@@ -84,7 +81,7 @@ Retorno-----------: .T.
 */
 User Function AEST031I(_nOpc)
 
-Local _ni,_l
+Local _nI,_l
 Local _cCadastro	:= "Eventos Tipo de Custo - "+If(_nOpc == 3,"Incluir",If(_nOpc == 4,"Alterar",If(_nOpc == 5, "Excluir",If(_nOpc == 2, "Visualizar",If(_nOpc == 6,"Copiar","")))))
 Local _cLinok 		:= "U_AEST031L"
 Local _cTudook 		:= "U_AEST031T"
@@ -92,7 +89,7 @@ Local _nOpce 		:= If(_nOpc == 5, 1,_nOpc)
 Local _nOpcg 		:= If(_nOpc == 2 .Or. _nOpc == 5, 0 ,GD_INSERT + GD_UPDATE + GD_DELETE)
 Local _lRetMod3 	:= .T.
 Local _aButtons		:= {}
-Local _aarea		:= getarea()
+Local _aarea		:= FWGetArea()
 
 //Log de utilização
 U_ITLOGACS()
@@ -120,24 +117,24 @@ If _nOpc <> 3
 	    M->ZL6_CODEVE	:= _ccod	
 	 Else	
 	    M->ZL6_CODEVE	:= ZL6->ZL6_CODEVE
-	 Endif	
+	 EndIf	
 	 M->ZL6_DESEVE:= ZL6->ZL6_DESEVE
    M->ZL6_ORDGRU:= ZL6->ZL6_ORDGRU
-   IF ZL6->(FIELDPOS("ZL6_PRDRAT")) <> 0
-      M->ZL6_PRDRAT:= STRTRAN(M->ZL6_PRDRAT,_cSeparador,";")
-   ENDIF
+   If ZL6->(FIELDPOS("ZL6_PRDRAT")) <> 0
+      M->ZL6_PRDRAT:= StrTran(M->ZL6_PRDRAT,_cSeparador,";")
+   EndIf
 
 EndIf
 
 _aItalac_F3:={}
 _bCond:={|| ZM0->ZM0_MSBLQL <> '1'}
 
-AADD(_aItalac_F3,{"M->ZL6_REGICE","ZM0",,,_bCond,"Regras ICMS ESTATUAL"} )
-AADD(_aItalac_F3,{"M->ZL6_REGICI","ZM0",,,_bCond,"Regras ICMS INTERESTATUAL"} )
-AADD(_aItalac_F3,{"M->ZL6_REGICT","ZM0",,,_bCond,"Regras ICMS TRANSFERENCIA"} )
+aAdd(_aItalac_F3,{"M->ZL6_REGICE","ZM0",,,_bCond,"Regras ICMS ESTATUAL"} )
+aAdd(_aItalac_F3,{"M->ZL6_REGICI","ZM0",,,_bCond,"Regras ICMS INTERESTATUAL"} )
+aAdd(_aItalac_F3,{"M->ZL6_REGICT","ZM0",,,_bCond,"Regras ICMS TRANSFERENCIA"} )
 
-_cSelectSB1:="SELECT B1_COD, B1_DESC FROM "+RETSQLNAME("SB1")+" SB1 WHERE B1_TIPO = 'PA' AND D_E_L_E_T_ <> '*' ORDER BY B1_COD " 
-AADD(_aItalac_F3,{"M->ZL6_PRDRAT",_cSelectSB1,{|Tab| ALLTRIM((Tab)->B1_COD) }, {|Tab| (Tab)->B1_DESC } , ,"Produtos Tipo: [PA]",,,,.F.        ,       , } )
+_cSelectSB1:="SELECT B1_COD, B1_DESC FROM "+RETSQLNAME("SB1")+" SB1 WHERE B1_TIPO = 'PA' AND D_E_L_E_T_ = ' ' ORDER BY B1_COD " 
+aAdd(_aItalac_F3,{"M->ZL6_PRDRAT",_cSelectSB1,{|Tab| AllTrim((Tab)->B1_COD) }, {|Tab| (Tab)->B1_DESC } , ,"Produtos Tipo: [PA]",,,,.F.        ,       , } )
 
 AEST031CH(_nOpc)
 
@@ -154,7 +151,7 @@ _lRetMod3:= AEST031M3(_cCadastro,cAlias1,NIL, aCpoEnc,_cLinok,_cTudook,_nOpce,_n
 "+ZL6_SUBEVE",Nil,Nil,_aButtons,.F.,NIL	,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL,NIL	,250)
 //   20     , 21, 22,   23    , 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39
 
-DbSelectArea("ZL6")
+DBSelectArea("ZL6")
 If _lRetMod3 .And. (_nOpc == 3 ) // Inclusão
 	
 	For _l := 1 To Len(aCols)
@@ -165,17 +162,17 @@ If _lRetMod3 .And. (_nOpc == 3 ) // Inclusão
             
 			GrvCposCapa()
 			
-			For _ni := 1 to len(aheader)
+			For _nI := 1 to Len(aheader)
 			    
-			    IF ASCAN(_aRegrvCpos,ALLTRIM(aheader[_ni][2]) ) = 0
-				   ZL6->&(aheader[_ni][2]) := acols[_l][_ni]
-				ELSE
-				   ZL6->&(aheader[_ni][2]) := STRTRAN(acols[_l][_ni],_cSeparador,";")
-				ENDIF   
+			    If aScan(_aRegrvCpos,AllTrim(aheader[_nI][2]) ) = 0
+				   ZL6->&(aheader[_nI][2]) := acols[_l][_nI]
+				Else
+				   ZL6->&(aheader[_nI][2]) := StrTran(acols[_l][_nI],_cSeparador,";")
+				EndIf   
 			
 			Next
 	
-			ZL6->(MsUnLock())
+			ZL6->(MSUnLock())
 			
 		EndIf
 
@@ -189,9 +186,9 @@ ElseIf _lRetMod3 .And. (_nOpc == 4 ) // Alteração
 
 		If !aCols[_l,Len(aHeader)+1]
 
-			ZL6->(DbSetOrder(7))
+			ZL6->(DBSetOrder(7))
 
-			If ZL6->(DbSeek(M->ZL6_FILIAL+aCols [_l,aScan(aHeader,{ |x| AllTrim(x[2]) == 'ZL6_SUBEVE'} )]+M->ZL6_CODEVE+M->ZL6_TPCUS+M->ZL6_GRPCUS))
+			If ZL6->(DBSeek(M->ZL6_FILIAL+aCols [_l,aScan(aHeader,{ |x| AllTrim(x[2]) == 'ZL6_SUBEVE'} )]+M->ZL6_CODEVE+M->ZL6_TPCUS+M->ZL6_GRPCUS))
 
 				RecLock("ZL6",.F.)
 
@@ -203,24 +200,24 @@ ElseIf _lRetMod3 .And. (_nOpc == 4 ) // Alteração
 			
 			GrvCposCapa()
 
-			For _ni := 1 to len(aheader)
+			For _nI := 1 to Len(aheader)
 			
-			    IF ASCAN(_aRegrvCpos,ALLTRIM(aheader[_ni][2]) ) = 0
-				   ZL6->&(aheader[_ni][2]) := acols[_l][_ni]
-				ELSE
-				   ZL6->&(aheader[_ni][2]) := STRTRAN(acols[_l][_ni],_cSeparador,";")
-				ENDIF   
+			    If aScan(_aRegrvCpos,AllTrim(aheader[_nI][2]) ) = 0
+				   ZL6->&(aheader[_nI][2]) := acols[_l][_nI]
+				Else
+				   ZL6->&(aheader[_nI][2]) := StrTran(acols[_l][_nI],_cSeparador,";")
+				EndIf   
 			
 			Next
 			
 		Else
-			ZL6->(DbSetOrder(7))
+			ZL6->(DBSetOrder(7))
 
-			If ZL6->(DbSeek(M->ZL6_FILIAL+aCols [_l,aScan(aHeader,{ |x| AllTrim(x[2]) == 'ZL6_SUBEVE'} )]+M->ZL6_CODEVE+M->ZL6_TPCUS+M->ZL6_GRPCUS))
+			If ZL6->(DBSeek(M->ZL6_FILIAL+aCols [_l,aScan(aHeader,{ |x| AllTrim(x[2]) == 'ZL6_SUBEVE'} )]+M->ZL6_CODEVE+M->ZL6_TPCUS+M->ZL6_GRPCUS))
 
 				RecLock("ZL6",.F.)
 				ZL6->(DbDelete())
-				ZL6->(MsUnLock())
+				ZL6->(MSUnLock())
 
 			EndIf
 
@@ -236,13 +233,13 @@ ElseIf _lRetMod3 .And. (_nOpc == 5 ) // Exclusão
 	
 	For _l := 1 To Len(aCols)
 	
-		DbSetOrder(7)
+		DBSetOrder(7)
 
-		If ZL6->(DbSeek(M->ZL6_FILIAL+aCols [_l,aScan(aHeader,{ |x| AllTrim(x[2]) == 'ZL6_SUBEVE'} )]+M->ZL6_CODEVE+M->ZL6_TPCUS+M->ZL6_GRPCUS))
+		If ZL6->(DBSeek(M->ZL6_FILIAL+aCols [_l,aScan(aHeader,{ |x| AllTrim(x[2]) == 'ZL6_SUBEVE'} )]+M->ZL6_CODEVE+M->ZL6_TPCUS+M->ZL6_GRPCUS))
 
 			RecLock("ZL6",.F.)
 			ZL6->(DbDelete())
-			ZL6->(MsUnLock())
+			ZL6->(MSUnLock())
 
 		EndIf
 
@@ -254,23 +251,23 @@ ElseIf _lRetMod3 .And. (_nOpc == 6 ) // Copia
 
 		If !aCols[_l,Len(aHeader)+1]
 
-			ZL6->(DbSetOrder(7))
+			ZL6->(DBSetOrder(7))
 
 			RecLock("ZL6",.T.)
 
 			GrvCposCapa()
 			
-			For _ni := 1 to len(aheader)
+			For _nI := 1 to Len(aheader)
 			
-			    IF ASCAN(_aRegrvCpos,ALLTRIM(aheader[_ni][2]) ) = 0
-				   ZL6->&(aheader[_ni][2]) := acols[_l][_ni]
-				ELSE
-				   ZL6->&(aheader[_ni][2]) := STRTRAN(acols[_l][_ni],_cSeparador,";")
-				ENDIF   
+			    If aScan(_aRegrvCpos,AllTrim(aheader[_nI][2]) ) = 0
+				   ZL6->&(aheader[_nI][2]) := acols[_l][_nI]
+				Else
+				   ZL6->&(aheader[_nI][2]) := StrTran(acols[_l][_nI],_cSeparador,";")
+				EndIf   
 			
 			Next
 	
-			ZL6->(MsUnLock())
+			ZL6->(MSUnLock())
 			
 		EndIf
 	
@@ -281,37 +278,37 @@ ElseIf _lRetMod3 .And. (_nOpc == 6 ) // Copia
 
 Else
 
-	If _nOpc == 3 .or. _nOpc == 6
+	If _nOpc == 3 .Or. _nOpc == 6
 
 		RollBackSX8()
 
 	EndIf
 
-Endif
+EndIf
 
 
-If _lRetMod3 .And. (_nOpc = 3  .OR. _nOpc = 4) // Inclusão OU alteração
+If _lRetMod3 .And. (_nOpc = 3  .Or. _nOpc = 4) // Inclusão OU alteração
 
-	ZL6->(dbsetorder(6))
-	ZL6->(dbseek(ZL6->ZL6_FILIAL+ZL6->ZL6_TPCUS+ZL6->ZL6_GRPCUS))//+ZL6->ZL6_CODEVE)
+	ZL6->(DBSetOrder(6))
+	ZL6->(DBSeek(ZL6->ZL6_FILIAL+ZL6->ZL6_TPCUS+ZL6->ZL6_GRPCUS))//+ZL6->ZL6_CODEVE)
 	cTpCust := ZL6->ZL6_TPCUS+ZL6->ZL6_GRPCUS//+ZL6->ZL6_CODEVE
 	cFlCom := ZL6->ZL6_FILIAL
 
-	DO while !(ZL6->( eof() )) .and. ZL6->ZL6_FILIAL == cFlCom .and. cTpCust==ZL6->ZL6_TPCUS+ZL6->ZL6_GRPCUS//+ZL6->ZL6_CODEVE
+	While !(ZL6->( Eof() )) .And. ZL6->ZL6_FILIAL == cFlCom .And. cTpCust==ZL6->ZL6_TPCUS+ZL6->ZL6_GRPCUS//+ZL6->ZL6_CODEVE
 		
 		RecLock("ZL6",.F.)
 	    ZL6->ZL6_ORDGRU	:= M->ZL6_ORDGRU
-        IF ZL6->(FIELDPOS("ZL6_PRDRAT")) <> 0
-           ZL6->ZL6_PRDRAT:= STRTRAN(M->ZL6_PRDRAT,_cSeparador,";")
-        ENDIF
-		ZL6->(MsUnLock())
-		ZL6->( dbskip() )
+        If ZL6->(FIELDPOS("ZL6_PRDRAT")) <> 0
+           ZL6->ZL6_PRDRAT:= StrTran(M->ZL6_PRDRAT,_cSeparador,";")
+        EndIf
+		ZL6->(MSUnLock())
+		ZL6->( DBSkip() )
 		
-	ENDDO
+	EndDo
 
-ENDIF
+EndIf
 
-restarea(_aarea)
+FWRestArea(_aarea)
 
 Return .T.
 
@@ -330,40 +327,40 @@ Retorno-----------: .T.
 */
 Static Function AEST031CH(_nOpc)
 
-LOCAL nUsado := 0
-LOCAL _aAuxZL6 := ZL6->(DBSTRUCT())
-LOCAL _aZL6:={}
+Local nUsado := 0
+Local _aAuxZL6 := ZL6->(DBSTRUCT())
+Local _aZL6:={}
 
-aCpoEnc := STRTOKARR("ZL6_TPCUS|ZL6_DTPCUS|ZL6_GRPCUS|ZL6_DGRCUS|ZL6_CODEVE|ZL6_DESEVE|ZL6_ORDGRU|ZL6_PRDRAT|NOUSER","|")//Campos da Capa
-aAltEnc := STRTOKARR("ZL6_TPCUS|ZL6_DTPCUS|ZL6_GRPCUS|ZL6_DGRCUS|ZL6_CODEVE|ZL6_DESEVE|ZL6_ORDGRU|ZL6_PRDRAT","|")//Campos editaveis
+aCpoEnc := StrTokArr("ZL6_TPCUS|ZL6_DTPCUS|ZL6_GRPCUS|ZL6_DGRCUS|ZL6_CODEVE|ZL6_DESEVE|ZL6_ORDGRU|ZL6_PRDRAT|NOUSER","|")//Campos da Capa
+aAltEnc := StrTokArr("ZL6_TPCUS|ZL6_DTPCUS|ZL6_GRPCUS|ZL6_DGRCUS|ZL6_CODEVE|ZL6_DESEVE|ZL6_ORDGRU|ZL6_PRDRAT","|")//Campos editaveis
 
-For nUsado := 1 to len(_aAuxZL6)
-   AADD(_aZL6,{_aAuxZL6[nUsado][1], Getsx3cache(_aAuxZL6[nUsado][1],"X3_ORDEM")} )
-NEXT
+For nUsado := 1 to Len(_aAuxZL6)
+   aAdd(_aZL6,{_aAuxZL6[nUsado][1], Getsx3cache(_aAuxZL6[nUsado][1],"X3_ORDEM")} )
+Next
 
-ASORT(_aZL6,,,{|X,Y| X[2] < Y[2] })//ORDEM DE ORDEM
+aSort(_aZL6,,,{|X,Y| X[2] < Y[2] })//ORDEM DE ORDEM
 
 
 _aRegrvCpos:={}
 
-For nUsado := 1 to len(_aZL6)
+For nUsado := 1 to Len(_aZL6)
 
     _cCampo:=_aZL6[nUsado][1]
     _cF3:=Getsx3cache(_cCampo,"X3_F3")
     _cUsado:=Getsx3cache(_cCampo,"X3_USADO")
-    IF !EMPTY(_cF3)
+    If !Empty(_cF3)
        _cF3:=AVKEY(_cF3,"XB_ALIAS")
 
-       SXB->(DBSEEK(_cF3+"2"))//FUNCAO
+       SXB->(DBSeek(_cF3+"2"))//FUNCAO
 
-       IF "U_" $ UPPER(ALLTRIM(SXB->XB_CONTEM))//Se o campo tem um F3 de LISTA com ;
-          AADD(_aRegrvCpos,ALLTRIM(_cCampo))
-       ENDIF   
+       If "U_" $ Upper(AllTrim(SXB->XB_CONTEM))//Se o campo tem um F3 de LISTA com ;
+          aAdd(_aRegrvCpos,AllTrim(_cCampo))
+       EndIf   
 
-       SXB->(DBSEEK(_cF3+"5"))//RETORNO
-    ENDIF   
+       SXB->(DBSeek(_cF3+"5"))//RETORNO
+    EndIf   
     
-    If X3USO(_cUsado) .AND. ASCAN(aAltEnc,_cCampo) = 0//Tira os campos da Capa
+    If X3USO(_cUsado) .And. aScan(aAltEnc,_cCampo) = 0//Tira os campos da Capa
 
              aAdd( aHeader , {   Getsx3cache(_cCampo,"X3_TITULO")      ,;
                                  Getsx3cache(_cCampo,"X3_CAMPO")       ,;
@@ -376,7 +373,7 @@ For nUsado := 1 to len(_aZL6)
                                  Getsx3cache(_cCampo,"X3_F3")		   ,;
                                  Getsx3cache(_cCampo,"X3_CONTEXT")     })
 
-           IF _cCampo ="ZL6_OBSERV"
+           If _cCampo ="ZL6_OBSERV"
               _cCampo:="ZL6_OBSDES"//Inseri o Campo Virtual de Descrição
               aAdd( aHeader ,{   Getsx3cache(_cCampo,"X3_TITULO")      ,;
                                  Getsx3cache(_cCampo,"X3_CAMPO")       ,;
@@ -388,9 +385,9 @@ For nUsado := 1 to len(_aZL6)
                                  Getsx3cache(_cCampo,"X3_TIPO")        ,;
                                  Getsx3cache(_cCampo,"X3_F3")		   ,;
                                  Getsx3cache(_cCampo,"X3_CONTEXT")     })
-           ENDIF   
+           EndIf   
                                                
-    Endif
+    EndIf
 
 Next
 
@@ -398,180 +395,174 @@ Next
 
 ******************** LINHAS DE CONSULTA  DE DADOS DE DICONARIO FAVOR NÃO RETIRAR ESSES COMENTARIOS ************
 
-aadd(aheader,{"Ordem?","ZL6_ORDEM ","9999",4,0," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Tipo Exec","ZL6_QTD   ","@!",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","1=Positivo;2=Negativo                                                                                                           "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Infomacao"   ,"ZL6_OBSERV","@!",01,0,"PERTENCE('123456789ABCDEF')","€€€€€€€€€€€€€€ ","C","LSTMT9","R",""," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Desc. Origem","ZL6_OBSDES","@!",30,0,""                           ,"€€€€€€€€€€€€€€ ","C",""      ,"V",""," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Custo Eximpo","ZL6_EXIMPO"," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao",'"S"                                                                                                                             ',"U_AEST031E('123')                                           "," "," ",.F.,.F.})
-aadd(aheader,{"Sub Evento","ZL6_SUBEVE","@!                                           ",4,0,"!Vazio()                                                                                                                        ","€€€€€€€€€€€€€€ ","C"," ","R"," "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Descr Sub Ev","ZL6_DSUBEV","@!                                           ",60,0,"!Vazio()                                                                                                                        ","€€€€€€€€€€€€€€ ","C"," ","R"," "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Grupo Prod.","ZL6_GRPPRO","@!                                           ",254,0," ","€€€€€€€€€€€€€€ ","C","LSTSBM","R"," "," ","U_AEST031E('12358')                                         "," "," ",.F.,.F.})
-aadd(aheader,{"Nao Grupo Pr","ZL6_NGRPPR"," ",254,0," ","€€€€€€€€€€€€€€ ","C","LSTSBM","R"," "," ","U_AEST031E('12358')                                         "," "," ",.F.,.F.})
-aadd(aheader,{"Clientes","ZL6_CLIENT"," ",100,0," ","€€€€€€€€€€€€€€ ","C","SA1ADD","R"," "," ","U_AEST031E('124')                                           "," "," ",.F.,.F.})
-aadd(aheader,{"Nao Clientes","ZL6_NCLIEN"," ",100,0," ","€€€€€€€€€€€€€€ ","C","SA1ADN","R"," "," ","U_AEST031E('124')                                           "," "," ",.F.,.F.})
-aadd(aheader,{"Fornecedores","ZL6_FORNEC"," ",100,0," ","€€€€€€€€€€€€€€ ","C","SA2ADD","R"," "," ","U_AEST031E('1249')                                          "," "," ",.F.,.F.})
-aadd(aheader,{"Cod. Produto","ZL6_CODPRO","@!                                           ",180,0," ","€€€€€€€€€€€€€€ ","C","SB1ADD","R"," "," ","U_AEST031E('12358A')                                        "," "," ",.F.,.F.})
-aadd(aheader,{"Nao Cod Pro","ZL6_NCODPR"," ",180,0," ","€€€€€€€€€€€€€€ ","C","SB1ADN","R"," "," ","U_AEST031E('12358')                                         "," "," ",.F.,.F.})
-aadd(aheader,{"Nao Forneced","ZL6_NFORNE"," ",100,0," ","€€€€€€€€€€€€€€ ","C","SA2ADN","R"," "," ","U_AEST031E('1249')                                          "," "," ",.F.,.F.})
-aadd(aheader,{"Cod Natureza","ZL6_NATURE","@!                                           ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTNAT","R"," "," ","U_AEST031E('124')                                           "," "," ",.F.,.F.})
-aadd(aheader,{"Nao Natureza","ZL6_NNATUR"," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTNAT","R"," "," ","U_AEST031E('124')                                           "," "," ",.F.,.F.})
-aadd(aheader,{"Tipo Produto","ZL6_TPROD "," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTTIP","R"," "," ","U_AEST031E('12358')                                         "," "," ",.F.,.F.})
-aadd(aheader,{"Nao Tp Prod","ZL6_NTPRO "," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTTIP","R"," "," ","U_AEST031E('12358')                                         "," "," ",.F.,.F.})
-aadd(aheader,{"CF","ZL6_CF    "," ",100,0," ","€€€€€€€€€€€€€€ ","C","SD3CF ","R"," "," ","U_AEST031E('3')                                             "," "," ",.F.,.F.})
-aadd(aheader,{"Nao CF","ZL6_NCF   "," ",100,0," ","€€€€€€€€€€€€€€ ","C","SD3CF ","R"," "," ","U_AEST031E('3')                                             "," "," ",.F.,.F.})
-aadd(aheader,{"TES","ZL6_TES   "," ",100,0," ","€€€€€€€€€€€€€€ ","C","SF4LS2","R"," "," ","U_AEST031E('12')                                            "," "," ",.F.,.F.})
-aadd(aheader,{"Nao TES","ZL6_NTES  "," ",100,0," ","€€€€€€€€€€€€€€ ","C","SF4LS2","R"," "," ","U_AEST031E('12')                                            "," "," ",.F.,.F.})
-aadd(aheader,{"Tipo Nota","ZL6_TNOTA "," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTTPN","R"," "," ","U_AEST031E('12')                                            "," "," ",.F.,.F.})
-aadd(aheader,{"Nao Tp Nota","ZL6_NTNOT "," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTTPN","R"," "," ","U_AEST031E('12')                                            "," "," ",.F.,.F.})
-aadd(aheader,{"Centro Custo","ZL6_CENTRO","@!                                           ",99,0," ","€€€€€€€€€€€€€€ ","C","LSTCT2","R"," "," ","U_AEST031E('1235A')                                         "," "," ",.F.,.F.})
-aadd(aheader,{"Nao Centro C","ZL6_NCENTR"," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTCT2","R"," "," ","U_AEST031E('1235')                                          "," "," ",.F.,.F.})
-aadd(aheader,{"Tp Movimento","ZL6_TPMOV ","@!                                           ",100,0," ","€€€€€€€€€€€€€€ ","C","SF5LST","R"," "," ","U_AEST031E('3')                                             "," "," ",.F.,.F.})
-aadd(aheader,{"Nao Tp Movim","ZL6_NTPMOV"," ",100,0," ","€€€€€€€€€€€€€€ ","C","SF5LST","R"," "," ","U_AEST031E('3')                                             "," "," ",.F.,.F.})
-aadd(aheader,{"CFOP","ZL6_CFOP  ","@!                                           ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTCF2","R"," "," ","U_AEST031E('12')                                            "," "," ",.F.,.F.})
-aadd(aheader,{"Nao Cfop","ZL6_NCFOP "," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTCF2","R"," "          ,"","U_AEST031E('12')                                            "," "," ",.F.,.F.})
-aadd(aheader,{"Bloqueado?","ZL6_MSBLQL"," ",1,0," ","€€€€€€€€€€€€€€ ","C"," "     ,"R","1=Sim;2=Não","2",""," "," ",.F.,.F.})
-aadd(aheader,{"Multiplicado","ZL6_RCMUL ","@E 999.99999999",12,8," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Condicao","ZL6_CONDIC","@!                                           ",254,0," ","€€€€€€€€€€€€€€ ","C"," ","R"," "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Verbas SRC","ZL6_RCPD  "," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTSRV","R"," "," ","U_AEST031E('7')                                             "," "," ",.F.,.F.})
-aadd(aheader,{"Regras","ZL6_REGRA ","@!                                           ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","1=NORMAL;2=RESUMIDO;3=TOTAL;4=SUPRIME;5=NAOSOMA                                                                                 "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Pis Cofins?","ZL6_PISCOF"," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao                                                                                                                     "," ","U_AEST031E('1')                                             "," "," ",.F.,.F.})
-aadd(aheader,{"Conta qtde?","ZL6_CONTA "," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao                                                                                                                     "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Filiais?","ZL6_FILIS "," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTFIL","R"," "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Origem","ZL6_ORIGEM"," ",100,0," ","€€€€€€€€€€€€€€ ","C"," ","R"," "," ","U_AEST031E('3')                                             "," "," ",.F.,.F.})
-aadd(aheader,{"N Origem","ZL6_NORIGE"," ",100,0," ","€€€€€€€€€€€€€€ ","C"," ","R"," "," ","U_AEST031E('3')                                             "," "," ",.F.,.F.})
-aadd(aheader,{"Ag. Imposto?","ZL6_TXFIN "," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao                                                                                                                     "," ","U_AEST031E('4')                                             "," "," ",.F.,.F.})
-aadd(aheader,{"Beneficiario","ZL6_E5BENE"," ",100,0," ","€€€€€€€€€€€€€€ ","C"," ","R"," "," ","U_AEST031E('4')                                             "," "," ",.F.,.F.})
-aadd(aheader,{"N Benefeciar","ZL6_NE5BEN"," ",100,0," ","€€€€€€€€€€€€€€ ","C"," ","R"," "," ","U_AEST031E('4')                                             "," "," ",.F.,.F.})
-aadd(aheader,{"Prefixo","ZL6_E5PREF"," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTE5P","R"," "," ","U_AEST031E('4')                                             "," "," ",.F.,.F.})
-aadd(aheader,{"N prefixo","ZL6_NE5PRE"," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTE5P","R"," "," ","U_AEST031E('4')                                             "," "," ",.F.,.F.})
-aadd(aheader,{"Armazem","ZL6_LOCAL "," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTNNR","R"," "," ","U_AEST031E('123')                                           "," "," ",.F.,.F.})
-aadd(aheader,{"N Armazem","ZL6_NLOCAL"," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTNNR","R"," "," ","U_AEST031E('123')                                           "," "," ",.F.,.F.})
-aadd(aheader,{"Frete?","ZL6_D2FRET"," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao                                                                                                                     "," ","U_AEST031E('2A')                                            "," "," ",.F.,.F.})
-aadd(aheader,{"OBS marcado?","ZL6_D3OBS "," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao                                                                                                                     "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Estado","ZL6_ESTADO"," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTEST","R"," "," ","U_AEST031E('2')                                             "," "," ",.F.,.F.})
-aadd(aheader,{"N Estado","ZL6_NESTAD"," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTEST","R"," "," ","U_AEST031E('2')                                             "," "," ",.F.,.F.})
-aadd(aheader,{"Tipo","ZL6_E5TIPO"," ",100,0," ","€€€€€€€€€€€€€€ ","C"," ","R"," "," ","U_AEST031E('4')                                             "," "," ",.F.,.F.})
-aadd(aheader,{"N Tipo","ZL6_NE5TIP"," ",100,0," ","€€€€€€€€€€€€€€ ","C"," ","R"," "," ","U_AEST031E('4')                                             "," "," ",.F.,.F.})
-aadd(aheader,{"Seg unidade?","ZL6_TUNID "," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao                                                                                                                     "," ","U_AEST031E('3')                                             "," "," ",.F.,.F.})
-aadd(aheader,{"Divisor","ZL6_RCDIV ","@E 9.9999                                    ",12,8," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Tipo custo g","ZL6_TCUSTO"," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","1=CUSTO OPERACIONAL;2=EMBALAGEM;3=FRETE;4=INSUMO;5=OUTROS;6=PRODUTO ACABADO;7=LEITE-MP                                          "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Cod. Prod PA","ZL6_CODPR2","@!                                           ",180,0," ","€€€€€€€€€€€€€€ ","C","SB1ADD","R"," "," ","U_AEST031E('A')                                             "," "," ",.F.,.F.})
-aadd(aheader,{"Cod Leite Fr","ZL6_CODPR3","@!                                           ",180,0," ","€€€€€€€€€€€€€€ ","C","SB1ADD","R"," "," ","U_AEST031E('A')                                             "," "," ",.F.,.F.})
-aadd(aheader,{"RPA?","ZL6_RPA   ","@                                            ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao                                                                                                                     "," ","U_AEST031E('4')                                             "," "," ",.F.,.F.})
-aadd(aheader,{"Prx Mes?","ZL6_PRXMES"," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao                                                                                                                     "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Vct ou Emiss","ZL6_VENCTO"," ",1,0,'Pertence("SND")',"€€€€€€€€€€€€€€ ","C"," ","R",'S=Sim;N=Nao;D=Digitacao'," ","U_AEST031E('14')"," "," ",.F.,.F.})
-aadd(aheader,{"Vlr Icms","ZL6_VICMS ","@E 999,999,999.99                            ",18,2," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Cust Prod?","ZL6_CUSPR"," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao;A=Produto Aberto"," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Usa MIX?","ZL6_MIX   "," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao;F=Sem Frete;P=Custo Cheio;L=Custo s/ Frete"," ","U_AEST031E('3')"," "," ",.F.,.F.})
-aadd(aheader,{"Cod.Setor","ZL6_SETOR "," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTZL2","R"," "," ","U_AEST031E('K')                                             "," "," ",.F.,.F.})
-aadd(aheader,{"Cod. Evento","ZL6_EVENTO"," ",6,0," ","€€€€€€€€€€€€€€ ","C"," ","R"," "," ","U_AEST031E('K')                                             "," "," ",.F.,.F.})
-aadd(aheader,{"Cod Mix","ZL6_CODMIX"," ",6,0," ","€€€€€€€€€€€€€€ ","C","ZLE_01","R"," "," ","U_AEST031E('K')                                             "," "," ",.F.,.F.})
-aadd(aheader,{"Prd Terceiro","ZL6_TERCEI"," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao                                                                                                                     "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Mult. Tercei","ZL6_TCMUL ","@E 99.9999                                   ",7,4," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Div Terceiro","ZL6_TCDIV ","@E 99.9999                                   ",7,4," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Qtde Manual","ZL6_MQTDE ","@E 9,999,999,999.9999                        ",15,4," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Obs Manual","ZL6_MOBSER","@!                                           ",200,0," ","€€€€€€€€€€€€€€ ","C"," ","R"," "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Valor Manual","ZL6_MVALOR","@E 9,999,999,999.9999                        ",15,4," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Estoque Inic","ZL6_ESTANT","!                                            ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","1=Estoque Inicial;2=Fechamanto Anterior (ZE0)                                                                                   "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Frete Percus","ZL6_FRETPE","!",1,0,"Pertence('1234')","€€€€€€€€€€€€€€ ","C"," ","R","1=Leite;2=Soro;3=Soro C;4=Creme de Leite"," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Vlr FUNDOPEM","ZL6_VLFUOP","@E 99,999,999.99999                          ",14,5," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Dif Aliquota","ZL6_DIFALQ","@E 99,999,999.99999                          ",14,5," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Abate Descon","ZL6_ABTDES"," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao"," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Vlr ICMS Est","ZL6_VICMSE","@E 99,999,999.99999                          ",14,5," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Vlr ICMS Int","ZL6_VICMSI","@E 99,999,999.99999                          ",14,5," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
-aadd(aheader,{"Vlr ICMS Tra","ZL6_VICMST","@E 99,999,999.99999                          ",14,5," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
-AADD(aheader,{"Ordem Grupo","ZL6_ORDGRU"," ",1,0,"NaoVazio()","€€€€€€€€€€€€€€ ","C"," ","R",""," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Ordem?","ZL6_ORDEM ","9999",4,0," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Tipo Exec","ZL6_QTD   ","@!",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","1=Positivo;2=Negativo                                                                                                           "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Infomacao"   ,"ZL6_OBSERV","@!",01,0,"PERTENCE('123456789ABCDEF')","€€€€€€€€€€€€€€ ","C","LSTMT9","R",""," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Desc. Origem","ZL6_OBSDES","@!",30,0,""                           ,"€€€€€€€€€€€€€€ ","C",""      ,"V",""," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Custo Eximpo","ZL6_EXIMPO"," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao",'"S"                                                                                                                             ',"U_AEST031E('123')                                           "," "," ",.F.,.F.})
+aAdd(aheader,{"Sub Evento","ZL6_SUBEVE","@!                                           ",4,0,"!Vazio()                                                                                                                        ","€€€€€€€€€€€€€€ ","C"," ","R"," "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Descr Sub Ev","ZL6_DSUBEV","@!                                           ",60,0,"!Vazio()                                                                                                                        ","€€€€€€€€€€€€€€ ","C"," ","R"," "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Grupo Prod.","ZL6_GRPPRO","@!                                           ",254,0," ","€€€€€€€€€€€€€€ ","C","LSTSBM","R"," "," ","U_AEST031E('12358')                                         "," "," ",.F.,.F.})
+aAdd(aheader,{"Nao Grupo Pr","ZL6_NGRPPR"," ",254,0," ","€€€€€€€€€€€€€€ ","C","LSTSBM","R"," "," ","U_AEST031E('12358')                                         "," "," ",.F.,.F.})
+aAdd(aheader,{"Clientes","ZL6_CLIENT"," ",100,0," ","€€€€€€€€€€€€€€ ","C","SA1ADD","R"," "," ","U_AEST031E('124')                                           "," "," ",.F.,.F.})
+aAdd(aheader,{"Nao Clientes","ZL6_NCLIEN"," ",100,0," ","€€€€€€€€€€€€€€ ","C","SA1ADN","R"," "," ","U_AEST031E('124')                                           "," "," ",.F.,.F.})
+aAdd(aheader,{"Fornecedores","ZL6_FORNEC"," ",100,0," ","€€€€€€€€€€€€€€ ","C","SA2ADD","R"," "," ","U_AEST031E('1249')                                          "," "," ",.F.,.F.})
+aAdd(aheader,{"Cod. Produto","ZL6_CODPRO","@!                                           ",180,0," ","€€€€€€€€€€€€€€ ","C","SB1ADD","R"," "," ","U_AEST031E('12358A')                                        "," "," ",.F.,.F.})
+aAdd(aheader,{"Nao Cod Pro","ZL6_NCODPR"," ",180,0," ","€€€€€€€€€€€€€€ ","C","SB1ADN","R"," "," ","U_AEST031E('12358')                                         "," "," ",.F.,.F.})
+aAdd(aheader,{"Nao Forneced","ZL6_NFORNE"," ",100,0," ","€€€€€€€€€€€€€€ ","C","SA2ADN","R"," "," ","U_AEST031E('1249')                                          "," "," ",.F.,.F.})
+aAdd(aheader,{"Cod Natureza","ZL6_NATURE","@!                                           ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTNAT","R"," "," ","U_AEST031E('124')                                           "," "," ",.F.,.F.})
+aAdd(aheader,{"Nao Natureza","ZL6_NNATUR"," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTNAT","R"," "," ","U_AEST031E('124')                                           "," "," ",.F.,.F.})
+aAdd(aheader,{"Tipo Produto","ZL6_TPROD "," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTTIP","R"," "," ","U_AEST031E('12358')                                         "," "," ",.F.,.F.})
+aAdd(aheader,{"Nao Tp Prod","ZL6_NTPRO "," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTTIP","R"," "," ","U_AEST031E('12358')                                         "," "," ",.F.,.F.})
+aAdd(aheader,{"CF","ZL6_CF    "," ",100,0," ","€€€€€€€€€€€€€€ ","C","SD3CF ","R"," "," ","U_AEST031E('3')                                             "," "," ",.F.,.F.})
+aAdd(aheader,{"Nao CF","ZL6_NCF   "," ",100,0," ","€€€€€€€€€€€€€€ ","C","SD3CF ","R"," "," ","U_AEST031E('3')                                             "," "," ",.F.,.F.})
+aAdd(aheader,{"TES","ZL6_TES   "," ",100,0," ","€€€€€€€€€€€€€€ ","C","SF4LS2","R"," "," ","U_AEST031E('12')                                            "," "," ",.F.,.F.})
+aAdd(aheader,{"Nao TES","ZL6_NTES  "," ",100,0," ","€€€€€€€€€€€€€€ ","C","SF4LS2","R"," "," ","U_AEST031E('12')                                            "," "," ",.F.,.F.})
+aAdd(aheader,{"Tipo Nota","ZL6_TNOTA "," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTTPN","R"," "," ","U_AEST031E('12')                                            "," "," ",.F.,.F.})
+aAdd(aheader,{"Nao Tp Nota","ZL6_NTNOT "," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTTPN","R"," "," ","U_AEST031E('12')                                            "," "," ",.F.,.F.})
+aAdd(aheader,{"Centro Custo","ZL6_CENTRO","@!                                           ",99,0," ","€€€€€€€€€€€€€€ ","C","LSTCT2","R"," "," ","U_AEST031E('1235A')                                         "," "," ",.F.,.F.})
+aAdd(aheader,{"Nao Centro C","ZL6_NCENTR"," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTCT2","R"," "," ","U_AEST031E('1235')                                          "," "," ",.F.,.F.})
+aAdd(aheader,{"Tp Movimento","ZL6_TPMOV ","@!                                           ",100,0," ","€€€€€€€€€€€€€€ ","C","SF5LST","R"," "," ","U_AEST031E('3')                                             "," "," ",.F.,.F.})
+aAdd(aheader,{"Nao Tp Movim","ZL6_NTPMOV"," ",100,0," ","€€€€€€€€€€€€€€ ","C","SF5LST","R"," "," ","U_AEST031E('3')                                             "," "," ",.F.,.F.})
+aAdd(aheader,{"CFOP","ZL6_CFOP  ","@!                                           ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTCF2","R"," "," ","U_AEST031E('12')                                            "," "," ",.F.,.F.})
+aAdd(aheader,{"Nao Cfop","ZL6_NCFOP "," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTCF2","R"," "          ,"","U_AEST031E('12')                                            "," "," ",.F.,.F.})
+aAdd(aheader,{"Bloqueado?","ZL6_MSBLQL"," ",1,0," ","€€€€€€€€€€€€€€ ","C"," "     ,"R","1=Sim;2=Não","2",""," "," ",.F.,.F.})
+aAdd(aheader,{"Multiplicado","ZL6_RCMUL ","@E 999.99999999",12,8," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Condicao","ZL6_CONDIC","@!                                           ",254,0," ","€€€€€€€€€€€€€€ ","C"," ","R"," "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Verbas SRC","ZL6_RCPD  "," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTSRV","R"," "," ","U_AEST031E('7')                                             "," "," ",.F.,.F.})
+aAdd(aheader,{"Regras","ZL6_REGRA ","@!                                           ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","1=NORMAL;2=RESUMIDO;3=TOTAL;4=SUPRIME;5=NAOSOMA                                                                                 "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Pis Cofins?","ZL6_PISCOF"," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao                                                                                                                     "," ","U_AEST031E('1')                                             "," "," ",.F.,.F.})
+aAdd(aheader,{"Conta qtde?","ZL6_CONTA "," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao                                                                                                                     "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Filiais?","ZL6_FILIS "," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTFIL","R"," "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Origem","ZL6_ORIGEM"," ",100,0," ","€€€€€€€€€€€€€€ ","C"," ","R"," "," ","U_AEST031E('3')                                             "," "," ",.F.,.F.})
+aAdd(aheader,{"N Origem","ZL6_NORIGE"," ",100,0," ","€€€€€€€€€€€€€€ ","C"," ","R"," "," ","U_AEST031E('3')                                             "," "," ",.F.,.F.})
+aAdd(aheader,{"Ag. Imposto?","ZL6_TXFIN "," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao                                                                                                                     "," ","U_AEST031E('4')                                             "," "," ",.F.,.F.})
+aAdd(aheader,{"Beneficiario","ZL6_E5BENE"," ",100,0," ","€€€€€€€€€€€€€€ ","C"," ","R"," "," ","U_AEST031E('4')                                             "," "," ",.F.,.F.})
+aAdd(aheader,{"N Benefeciar","ZL6_NE5BEN"," ",100,0," ","€€€€€€€€€€€€€€ ","C"," ","R"," "," ","U_AEST031E('4')                                             "," "," ",.F.,.F.})
+aAdd(aheader,{"Prefixo","ZL6_E5PREF"," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTE5P","R"," "," ","U_AEST031E('4')                                             "," "," ",.F.,.F.})
+aAdd(aheader,{"N prefixo","ZL6_NE5PRE"," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTE5P","R"," "," ","U_AEST031E('4')                                             "," "," ",.F.,.F.})
+aAdd(aheader,{"Armazem","ZL6_LOCAL "," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTNNR","R"," "," ","U_AEST031E('123')                                           "," "," ",.F.,.F.})
+aAdd(aheader,{"N Armazem","ZL6_NLOCAL"," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTNNR","R"," "," ","U_AEST031E('123')                                           "," "," ",.F.,.F.})
+aAdd(aheader,{"Frete?","ZL6_D2FRET"," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao                                                                                                                     "," ","U_AEST031E('2A')                                            "," "," ",.F.,.F.})
+aAdd(aheader,{"OBS marcado?","ZL6_D3OBS "," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao                                                                                                                     "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Estado","ZL6_ESTADO"," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTEST","R"," "," ","U_AEST031E('2')                                             "," "," ",.F.,.F.})
+aAdd(aheader,{"N Estado","ZL6_NESTAD"," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTEST","R"," "," ","U_AEST031E('2')                                             "," "," ",.F.,.F.})
+aAdd(aheader,{"Tipo","ZL6_E5TIPO"," ",100,0," ","€€€€€€€€€€€€€€ ","C"," ","R"," "," ","U_AEST031E('4')                                             "," "," ",.F.,.F.})
+aAdd(aheader,{"N Tipo","ZL6_NE5TIP"," ",100,0," ","€€€€€€€€€€€€€€ ","C"," ","R"," "," ","U_AEST031E('4')                                             "," "," ",.F.,.F.})
+aAdd(aheader,{"Seg unidade?","ZL6_TUNID "," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao                                                                                                                     "," ","U_AEST031E('3')                                             "," "," ",.F.,.F.})
+aAdd(aheader,{"Divisor","ZL6_RCDIV ","@E 9.9999                                    ",12,8," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Tipo custo g","ZL6_TCUSTO"," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","1=CUSTO OPERACIONAL;2=EMBALAGEM;3=FRETE;4=INSUMO;5=OUTROS;6=PRODUTO ACABADO;7=LEITE-MP                                          "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Cod. Prod PA","ZL6_CODPR2","@!                                           ",180,0," ","€€€€€€€€€€€€€€ ","C","SB1ADD","R"," "," ","U_AEST031E('A')                                             "," "," ",.F.,.F.})
+aAdd(aheader,{"Cod Leite Fr","ZL6_CODPR3","@!                                           ",180,0," ","€€€€€€€€€€€€€€ ","C","SB1ADD","R"," "," ","U_AEST031E('A')                                             "," "," ",.F.,.F.})
+aAdd(aheader,{"RPA?","ZL6_RPA   ","@                                            ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao                                                                                                                     "," ","U_AEST031E('4')                                             "," "," ",.F.,.F.})
+aAdd(aheader,{"Prx Mes?","ZL6_PRXMES"," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao                                                                                                                     "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Vct ou Emiss","ZL6_VENCTO"," ",1,0,'Pertence("SND")',"€€€€€€€€€€€€€€ ","C"," ","R",'S=Sim;N=Nao;D=Digitacao'," ","U_AEST031E('14')"," "," ",.F.,.F.})
+aAdd(aheader,{"Vlr Icms","ZL6_VICMS ","@E 999,999,999.99                            ",18,2," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Cust Prod?","ZL6_CUSPR"," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao;A=Produto Aberto"," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Usa MIX?","ZL6_MIX   "," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao;F=Sem Frete;P=Custo Cheio;L=Custo s/ Frete"," ","U_AEST031E('3')"," "," ",.F.,.F.})
+aAdd(aheader,{"Cod.Setor","ZL6_SETOR "," ",100,0," ","€€€€€€€€€€€€€€ ","C","LSTZL2","R"," "," ","U_AEST031E('K')                                             "," "," ",.F.,.F.})
+aAdd(aheader,{"Cod. Evento","ZL6_EVENTO"," ",6,0," ","€€€€€€€€€€€€€€ ","C"," ","R"," "," ","U_AEST031E('K')                                             "," "," ",.F.,.F.})
+aAdd(aheader,{"Cod Mix","ZL6_CODMIX"," ",6,0," ","€€€€€€€€€€€€€€ ","C","ZLE_01","R"," "," ","U_AEST031E('K')                                             "," "," ",.F.,.F.})
+aAdd(aheader,{"Prd Terceiro","ZL6_TERCEI"," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao                                                                                                                     "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Mult. Tercei","ZL6_TCMUL ","@E 99.9999                                   ",7,4," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Div Terceiro","ZL6_TCDIV ","@E 99.9999                                   ",7,4," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Qtde Manual","ZL6_MQTDE ","@E 9,999,999,999.9999                        ",15,4," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Obs Manual","ZL6_MOBSER","@!                                           ",200,0," ","€€€€€€€€€€€€€€ ","C"," ","R"," "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Valor Manual","ZL6_MVALOR","@E 9,999,999,999.9999                        ",15,4," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Estoque Inic","ZL6_ESTANT","!                                            ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","1=Estoque Inicial;2=Fechamanto Anterior (ZE0)                                                                                   "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Frete Percus","ZL6_FRETPE","!",1,0,"Pertence('1234')","€€€€€€€€€€€€€€ ","C"," ","R","1=Leite;2=Soro;3=Soro C;4=Creme de Leite"," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Vlr FUNDOPEM","ZL6_VLFUOP","@E 99,999,999.99999                          ",14,5," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Dif Aliquota","ZL6_DIFALQ","@E 99,999,999.99999                          ",14,5," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Abate Descon","ZL6_ABTDES"," ",1,0," ","€€€€€€€€€€€€€€ ","C"," ","R","S=Sim;N=Nao"," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Vlr ICMS Est","ZL6_VICMSE","@E 99,999,999.99999                          ",14,5," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Vlr ICMS Int","ZL6_VICMSI","@E 99,999,999.99999                          ",14,5," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Vlr ICMS Tra","ZL6_VICMST","@E 99,999,999.99999                          ",14,5," ","€€€€€€€€€€€€€€ ","N"," ","R"," "," "," "," "," ",.F.,.F.})
+aAdd(aheader,{"Ordem Grupo","ZL6_ORDGRU"," ",1,0,"NaoVazio()","€€€€€€€€€€€€€€ ","C"," ","R",""," "," "," "," ",.F.,.F.})
 */
-return
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AEST031CC
 Autor-------------: Erich Buttner
 Data da Criacao---: 08/08/2013
-===============================================================================================================================
 Descrição---------: Monta acols da tela de visualização de registros
-===============================================================================================================================
 Parametros--------: _nOpc - 	2 - Visualizar
 								3 - Incluir
 								4 - Alterar
 								5 - Excluir
-===============================================================================================================================
 Retorno-----------: .T.
 ===============================================================================================================================
 */
-Static function AEST031CC(_nOpc)
+Static Function AEST031CC(_nOpc)
 
 Local _nQtdcpo := 0
-Local _ni		:= 0
+Local _nI		:= 0
 Local _nCols 	:= 0
 
-_nQtdcpo := len(aHeader)
+_nQtdcpo := Len(aHeader)
 aCols:= {}
 aAlt := {}
 
-if _nOpc == 3 
+If _nOpc == 3 
 	
 	aAdd(aCols,array(_nQtdcpo+1))
 	
-	for _ni := 1 to _nQtdcpo
+	For _nI := 1 to _nQtdcpo
 		
-		aCols[1,_ni] := Criavar(aHeader[_ni,2])
+		aCols[1,_nI] := Criavar(aHeader[_nI,2])
 		
-	next _ni
+	Next _nI
 	
 	aCols[1,_nQtdcpo+1] := .F.
 	nPosSeq		:= aScan(aHeader,{ |x| AllTrim(x[2]) == 'ZL6_SUBEVE'} )
 	aCols[1,nPosSeq] := '0001'
 
-else
+Else
 	
-	dbselectarea("ZL6")
-	dbsetorder(6)
-	dbseek(ZL6->ZL6_FILIAL+ZL6->ZL6_TPCUS+ZL6->ZL6_GRPCUS+ZL6->ZL6_CODEVE)
+	DBSelectArea("ZL6")
+	DBSetOrder(6)
+	DBSeek(ZL6->ZL6_FILIAL+ZL6->ZL6_TPCUS+ZL6->ZL6_GRPCUS+ZL6->ZL6_CODEVE)
 	cTpCust := ZL6->ZL6_TPCUS+ZL6->ZL6_GRPCUS+ZL6->ZL6_CODEVE
 	cFlCom := ZL6->ZL6_FILIAL
 
-	while !(ZL6->( eof() )) .and. ZL6->ZL6_FILIAL == cFlCom .and. cTpCust==ZL6->ZL6_TPCUS+ZL6->ZL6_GRPCUS+ZL6->ZL6_CODEVE
+	While !(ZL6->( Eof() )) .And. ZL6->ZL6_FILIAL == cFlCom .And. cTpCust==ZL6->ZL6_TPCUS+ZL6->ZL6_GRPCUS+ZL6->ZL6_CODEVE
 		
 		aAdd(aCols,array(_nQtdcpo+1))
 		_nCols++
 		
-		for _ni := 1 to _nQtdcpo
+		For _nI := 1 to _nQtdcpo
 			
-			if aHeader[_ni,10] <> "V"
+			If aHeader[_nI,10] <> "V"
 				
-				aCols[_nCols,_ni] := Fieldget(Fieldpos(aHeader[_ni,2]))
+				aCols[_nCols,_nI] := Fieldget(Fieldpos(aHeader[_nI,2]))
 				
-			else
+			Else
 				
-				aCols[_nCols,_ni] := Criavar(aHeader[_ni,2],.T.)
+				aCols[_nCols,_nI] := Criavar(aHeader[_nI,2],.T.)
 				
-			endif
+			EndIf
 			
-		next _ni
+		Next _nI
 		
 		aCols[_nCols,_nQtdcpo+1] := .F.
 		aAdd(aAlt,ZL6->( Recno() ))
-		ZL6->( dbskip() )
+		ZL6->( DBSkip() )
 		
-	enddo
+	EndDo
 	
-endif
+EndIf
 
 
-return
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AEST031M3
 Autor-------------: Marinaldo de Jesus
 Data da Criacao---: 17/11/2005
-===============================================================================================================================
 Descrição---------: Monta Enchoice e GetDados	 do modelo 3
-===============================================================================================================================
 Parametros--------: Ver descrição abaixo
-===============================================================================================================================
 Retorno-----------: _lRet ( .T. Confirma, .F. Abandona )
 ===============================================================================================================================
 */
@@ -638,10 +629,10 @@ DEFAULT _lVirtual		:= .T.
 DEFAULT _nLinhas		:= 9999
 DEFAULT lDlgPadSiga	:= .F.
 
-IF _nOpcEnchoice = 4
+If _nOpcEnchoice = 4
    aAlteraEnchoice:={"ZL6_ORDGRU","ZL6_DESEVE","ZL6_PRDRAT"}
-ENDIF
-IF (;
+EndIf
+If (;
 	( _lObjSize );
 	.or.;
 	( _lActivate );
@@ -650,24 +641,24 @@ IF (;
 	_aAdvSize		:= MsAdvSize( NIL , lDlgPadSiga )
 	_aInfoAdvSize	:= { _aAdvSize[1] , _aAdvSize[2] , _aAdvSize[3] , _aAdvSize[4] , 0 , 0 }
 
-EndIF
+EndIf
 
-IF ( _lActivate )
+If ( _lActivate )
 
 	DEFINE MSDIALOG oDlg TITLE cTitulo FROM _aAdvSize[7],0 TO _aAdvSize[6],_aAdvSize[5] OF GetWndDefault() PIXEL
 
-EndIF
+EndIf
 
 DEFAULT nSizeHeader	:= 200
 
-IF ( _lObjSize )
+If ( _lObjSize )
 
 	_aObjCoords		:= Array( 2 )
 	_aObjCoords[1]	:= { 000 , nSizeHeader	, .T. , .F. }
 	_aObjCoords[2]	:= { 000 , 000 			, .T. , .T. }
 	aObjSize		:= MsObjSize( _aInfoAdvSize , _aObjCoords )
 
-EndIF
+EndIf
 
 oEnch 		:= MsMGet():New(;
 cAliasEnchoice	,;	//01 -> cAlias	-> Alias da Tabela
@@ -711,16 +702,16 @@ oDlg					,;	//15 -> oWnd:			Objeto Dialog onde a GetDados sera Desenhada
 @aGdCols				 ;	//17 -> aParCols:		Array com as Informacoes de Detalhes
 )
 
-DEFAULT bTudoOk			:= { || (_nOpcEnchoice = 1 .OR. (EnchoTudOk( @oEnch , @aEncValid , @aEncNotValid ) .and. oGetDad1:TudoOk())) }
-DEFAULT bSet15			:= { || IF( Eval( bTudoOk ) , ( _nOpca := 1 , aGdCols := aClone( oGetDad1:aCols ) , oDlg:End() , RestKeys( _aSvKeys , .T. ) ) , _nOpca := 0 ) }
+DEFAULT bTudoOk			:= { || (_nOpcEnchoice = 1 .Or. (EnchoTudOk( @oEnch , @aEncValid , @aEncNotValid ) .And. oGetDad1:TudoOk())) }
+DEFAULT bSet15			:= { || If( Eval( bTudoOk ) , ( _nOpca := 1 , aGdCols := aClone( oGetDad1:aCols ) , oDlg:End() , RestKeys( _aSvKeys , .T. ) ) , _nOpca := 0 ) }
 DEFAULT bSet24			:= { || _nOpca := 0 , oDlg:End() , RestKeys( _aSvKeys , .T. ) }
 DEFAULT bMsDialogInit	:= { || EnchoiceBar( oDlg , bSet15 , bSet24 , NIL , _aButtons ),AlignObject( oDlg , { oEnch:oBox , oGetDad1:oBrowse } , 1 , NIL , { nSizeHeader } ), oGetDad1:Refresh()}
 
-IF ( _lActivate )
+If ( _lActivate )
 
 	ACTIVATE MSDIALOG oDlg ON INIT Eval( bMsDialogInit ) CENTERED
 
-EndIF
+EndIf
 
 RestKeys( _aSvKeys , .T. )
 
@@ -741,7 +732,7 @@ Retorno-----------: _lRet ( .T. Valida, .F. Bloqueia )
 User Function AEST031L()
 
 Local _lRet 		:= .T.
-Local _ni			:= 0
+Local _nI			:= 0
 Local _nPosSbEve	:= aScan(aHeader,{ |x| AllTrim(x[2]) == 'ZL6_SUBEVE'} )
 Local _nPosDSbEv	:= aScan(aHeader,{ |x| AllTrim(x[2]) == 'ZL6_DSUBEV'} )
 Local _nPosMValor   := aScan(aHeader,{ |x| AllTrim(x[2]) == 'ZL6_MVALOR'} )
@@ -751,50 +742,50 @@ Local _nPosOBSERV   := aScan(aHeader,{ |x| AllTrim(x[2]) == 'ZL6_OBSERV'} )
 Local _nPosPRXMES   := aScan(aHeader,{ |x| AllTrim(x[2]) == 'ZL6_PRXMES'} )
 Local _nPosPERIOD   := aScan(aHeader,{ |x| AllTrim(x[2]) == 'ZL6_PERIOD'} )
 
-For _ni := 1 To Len(aCols)
+For _nI := 1 To Len(aCols)
 
-	If !aCols[_ni,Len(aHeader)+1] 
+	If !aCols[_nI,Len(aHeader)+1] 
 	
-	    _cLinha:="Linha para corrigir: "+ALLTRIM(STR(_ni))
+	    _cLinha:="Linha para corrigir: "+AllTrim(Str(_nI))
 
-		If Empty(aCols[_ni,_nPosSbEve])
-			U_ITMSG("Preencher o codigo do Sub-Evento",'Atenção!',_cLinha,1)
+		If Empty(aCols[_nI,_nPosSbEve])
+			U_ITMsg("Preencher o codigo do Sub-Evento",'Atenção!',_cLinha,1)
 			_lRet := .F.
 		EndIf
 
-		If  Empty(aCols[_ni,_nPosDSbEv])
-			U_ITMSG("Preencher o codigo da Descrição do Sub-Evento",'Atenção!',_cLinha,1)
+		If  Empty(aCols[_nI,_nPosDSbEv])
+			U_ITMsg("Preencher o codigo da Descrição do Sub-Evento",'Atenção!',_cLinha,1)
 			_lRet := .F.
 		EndIf
 
-		If aCols[_ni,_nPosOBSERV] = "B" .AND. (Empty(aCols[_ni,_nPosMValor]) .OR. Empty(aCols[_ni,_nPosMQtde]) .OR. Empty(aCols[_ni,_nPosMObs]))
-			U_ITMSG('Os campos "Valor Manual",  "Qtde Manual" e  "Obs Manual" devem ser preencidos quando o campo Informação for igual a Manual','Atenção!',_cLinha,1)
+		If aCols[_nI,_nPosOBSERV] = "B" .And. (Empty(aCols[_nI,_nPosMValor]) .Or. Empty(aCols[_nI,_nPosMQtde]) .Or. Empty(aCols[_nI,_nPosMObs]))
+			U_ITMsg('Os campos "Valor Manual",  "Qtde Manual" e  "Obs Manual" devem ser preencidos quando o campo Informação For igual a Manual','Atenção!',_cLinha,1)
 			_lRet := .F.
 		EndIf
 
-		IF _nPosPERIOD = 0 
-		   RETURN _lRet
-		ENDIF
+		If _nPosPERIOD = 0 
+		   Return _lRet
+		EndIf
 
-		If aCols[_ni,_nPosPRXMES] = "P" .AND. Empty(aCols[_ni,_nPosPERIOD]) 
-			U_ITMSG('O campo "Periodo Dia" deve ser preenchido quando o campo Prx Mes for igual a "P" ','Atenção!',_cLinha,1)
+		If aCols[_nI,_nPosPRXMES] = "P" .And. Empty(aCols[_nI,_nPosPERIOD]) 
+			U_ITMsg('O campo "Periodo Dia" deve ser preenchido quando o campo Prx Mes For igual a "P" ','Atenção!',_cLinha,1)
 			_lRet := .F.
-		ELSEIf aCols[_ni,_nPosPRXMES] = "P" .AND. !Empty(aCols[_ni,_nPosPERIOD]) 
+		ElseIf aCols[_nI,_nPosPRXMES] = "P" .And. !Empty(aCols[_nI,_nPosPERIOD]) 
 		
-		    IF VAL(LEFT (aCols[_ni,_nPosPERIOD],2)) > 30 .OR. VAL(LEFT (aCols[_ni,_nPosPERIOD],2)) < 1 .OR.;
-		       VAL(RIGHT(aCols[_ni,_nPosPERIOD],2)) > 30 .OR. VAL(RIGHT(aCols[_ni,_nPosPERIOD],2)) < 1
+		    If Val(LEFT (aCols[_nI,_nPosPERIOD],2)) > 30 .Or. Val(LEFT (aCols[_nI,_nPosPERIOD],2)) < 1 .OR.;
+		       Val(RIGHT(aCols[_nI,_nPosPERIOD],2)) > 30 .Or. Val(RIGHT(aCols[_nI,_nPosPERIOD],2)) < 1
 
-			   U_ITMSG('O campo "Periodo Dia" esta com valores invalidos','Atenção!',"Valor validos somente de 1 a 30. "+_cLinha,1)
+			   U_ITMsg('O campo "Periodo Dia" esta com valores invalidos','Atenção!',"Valor validos somente de 1 a 30. "+_cLinha,1)
 			   _lRet := .F.
 
-			 ENDIF  
+			 EndIf  
 		EndIf
 
 	EndIf
 	
-Next _ni
+Next _nI
 
-RETURN _lRet
+Return _lRet
 
 /*
 ===============================================================================================================================
@@ -812,23 +803,23 @@ Local _lRet := .T.
 
 If nOpVld == 3
 
-	DbSelectArea("ZL6")
-	ZL6->( DbSetOrder(6) )
+	DBSelectArea("ZL6")
+	ZL6->( DBSetOrder(6) )
 	
-	If zl6->( DbSeek(XFILIAL("ZL6")+M->ZL6_TPCUS+M->ZL6_GRPCUS+M->ZL6_CODEVE) )
-		U_ITMSG("Evento de custo gerencial já cadastrado!!",'Atenção!',,1)
+	If zl6->( DBSeek(xFilial("ZL6")+M->ZL6_TPCUS+M->ZL6_GRPCUS+M->ZL6_CODEVE) )
+		U_ITMsg("Evento de custo gerencial já cadastrado!!",'Atenção!',,1)
 		_lRet := .F.
 	EndIf
 
 EndIf
 
-M->ZL6_ORDGRU:=STRZERO(VAL(M->ZL6_ORDGRU),LEN(ZL6->ZL6_ORDGRU))
+M->ZL6_ORDGRU:=StrZero(Val(M->ZL6_ORDGRU),Len(ZL6->ZL6_ORDGRU))
 
-IF _lRet
+If _lRet
    _lRet:=U_AEST031L()
-ENDIF
+EndIf
 
-RETURN _lRet
+Return _lRet
 
 /*
 ===============================================================================================================================
@@ -843,30 +834,30 @@ Retorno-----------: _ccod - próximo valor para ZL6->CODEVE
 User Function AEST031G()
 
 Local _ccod 	:= "000001"
-Local _cquery := ""
-Local _aarea	:= getarea()
+Local _cQuery := ""
+Local _aarea	:= FWGetArea()
 
-_cquery	:= " SELECT " 
-_cquery  	+= 	" MAX(ZL6_CODEVE) AS CODI" 
-_cquery  	+= 	" FROM " + RetSqlName("ZL6") + " ZL6 "
-_cquery  	+= 	" WHERE ZL6_FILIAL = '" + xFilial("ZL6") + "'"
-_cquery  	+= 	" AND (ZL6_TPCUS  = '" + alltrim(M->ZL6_TPCUS) + "' OR ZL6_TPCUS  = '" + alltrim(ZL6->ZL6_TPCUS) + "')
-_cquery  	+= 	" AND (ZL6_GRPCUS  = '" + alltrim(M->ZL6_GRPCUS) + "' OR ZL6_GRPCUS  = '" + alltrim(ZL6->ZL6_GRPCUS) +"')
-_cquery 	+= 	" AND ZL6.D_E_L_E_T_ = ' '	"
-_cquery := ChangeQuery(_cquery)
-MPSysOpenQuery(_cquery,"ZL6T")
+_cQuery	:= " SELECT " 
+_cQuery  	+= 	" MAX(ZL6_CODEVE) AS CODI" 
+_cQuery  	+= 	" FROM " + RetSqlName("ZL6") + " ZL6 "
+_cQuery  	+= 	" WHERE ZL6_FILIAL = '" + xFilial("ZL6") + "'"
+_cQuery  	+= 	" AND (ZL6_TPCUS  = '" + AllTrim(M->ZL6_TPCUS) + "' OR ZL6_TPCUS  = '" + AllTrim(ZL6->ZL6_TPCUS) + "')
+_cQuery  	+= 	" AND (ZL6_GRPCUS  = '" + AllTrim(M->ZL6_GRPCUS) + "' OR ZL6_GRPCUS  = '" + AllTrim(ZL6->ZL6_GRPCUS) +"')
+_cQuery 	+= 	" AND ZL6.D_E_L_E_T_ = ' '	"
+_cQuery := ChangeQuery(_cQuery)
+MPSysOpenQuery(_cQuery,"ZL6T")
 
 If !ZL6T->( Eof() )
-	_ccod := strzero( ( val( ZL6T->CODI) + 1 ),6 )
-Endif
+	_ccod := StrZero( ( Val( ZL6T->CODI) + 1 ),6 )
+EndIf
 
 If Select("ZL6T") > 0 
 	ZL6T->( DBCloseArea() )
 EndIf
 
-restarea(_aarea)
+FWRestArea(_aarea)
 
-RETURN _ccod
+Return _ccod
 
 /*
 ===============================================================================================================================
@@ -880,74 +871,74 @@ Retorno-----------: lógico - .T. editável, .F. só visualização
 */
 User Function AEST031E(_cnome)
 
-Local _lret 		:= .T.
+Local _lRet 		:= .T.
 
 //Nova rotina
-If _lret .and. len(_cnome) > 0 .and. alltrim(acols[n][aSCAN(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_OBSERV" })]) $ _cnome
-	return _lret
-Endif
+If _lRet .And. Len(_cnome) > 0 .And. AllTrim(acols[n][aScan(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_OBSERV" })]) $ _cnome
+	Return _lRet
+EndIf
 
 //Campos do Mix
-If _lret .and. _cnome == "K" .and.  alltrim(acols[n][aSCAN(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_MIX" })]) != "N"
-	_lret := .F.
-Endif
+If _lRet .And. _cnome == "K" .And.  AllTrim(acols[n][aScan(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_MIX" })]) != "N"
+	_lRet := .F.
+EndIf
 
 //Se está vazio o campo de informação não deixa mexer em nenhum dos outros
-If empty(alltrim(acols[n][aSCAN(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_OBSERV" })]))
-	_lret := .F.
-Endif
+If Empty(AllTrim(acols[n][aScan(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_OBSERV" })]))
+	_lRet := .F.
+EndIf
 
 //Campos para origem 1 - Notas de entrada
-If _lret .and. alltrim(acols[n][aSCAN(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_OBSERV" })]) == '1'
-	_lret := .F.
-Endif
+If _lRet .And. AllTrim(acols[n][aScan(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_OBSERV" })]) == '1'
+	_lRet := .F.
+EndIf
 
 //Campos para origem 2 - Notas de saida
-If _lret .and. alltrim(acols[n][aSCAN(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_OBSERV" })]) == '2'
-	_lret := .F.
-Endif
+If _lRet .And. AllTrim(acols[n][aScan(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_OBSERV" })]) == '2'
+	_lRet := .F.
+EndIf
 
 //Campos para origem 3 - Movimentos internos
-If _lret .and. alltrim(acols[n][aSCAN(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_OBSERV" })]) == '3' .and. _cnome != "K"
-	_lret := .F.
-Endif
+If _lRet .And. AllTrim(acols[n][aScan(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_OBSERV" })]) == '3' .And. _cnome != "K"
+	_lRet := .F.
+EndIf
 
 //Campos para origem 4 - Financeiro
-If _lret .and. alltrim(acols[n][aSCAN(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_OBSERV" })]) == '4' .and. _cnome != "K"
-	_lret := .F.
-Endif
+If _lRet .And. AllTrim(acols[n][aScan(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_OBSERV" })]) == '4' .And. _cnome != "K"
+	_lRet := .F.
+EndIf
 
 //Campos para origem 5 - Perdas de produção
-If _lret .and. alltrim(acols[n][aSCAN(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_OBSERV" })]) == '5' .and. _cnome != "K"
-	_lret := .F.
-Endif
+If _lRet .And. AllTrim(acols[n][aScan(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_OBSERV" })]) == '5' .And. _cnome != "K"
+	_lRet := .F.
+EndIf
 
 //Campos para origem 6 - MO
-If _lret .and. alltrim(acols[n][aSCAN(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_OBSERV" })]) == '6' .and. _cnome != "K"
-	_lret := .F.
-Endif
+If _lRet .And. AllTrim(acols[n][aScan(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_OBSERV" })]) == '6' .And. _cnome != "K"
+	_lRet := .F.
+EndIf
 
 //Campos para origem 7 - Horas extras
-If _lret .and. alltrim(acols[n][aSCAN(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_OBSERV" })]) == '7' .and. _cnome != "K"
-	_lret := .F.
-Endif
+If _lRet .And. AllTrim(acols[n][aScan(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_OBSERV" })]) == '7' .And. _cnome != "K"
+	_lRet := .F.
+EndIf
 
 //Campos para origem 8 - Saldos iniciais de estoque
-If _lret .and. alltrim(acols[n][aSCAN(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_OBSERV" })]) == '8' .and. _cnome != "K"
-	_lret := .F.
-Endif
+If _lRet .And. AllTrim(acols[n][aScan(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_OBSERV" })]) == '8' .And. _cnome != "K"
+	_lRet := .F.
+EndIf
 
 //Campos para origem 9 - Gestão do leite
-If _lret .and. alltrim(acols[n][aSCAN(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_OBSERV" })]) == '9' .and. _cnome != "K"
-	_lret := .F.
-Endif
+If _lRet .And. AllTrim(acols[n][aScan(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_OBSERV" })]) == '9' .And. _cnome != "K"
+	_lRet := .F.
+EndIf
 
 //Campos para origem A - Gestão do leite 
-If _lret .and. alltrim(acols[n][aSCAN(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_OBSERV" })]) == 'A' .and. _cnome != "K"
-	_lret := .F.                                                                                   
-Endif		
+If _lRet .And. AllTrim(acols[n][aScan(aHEADER, {|x| AllTrim(Upper(X[2])) == "ZL6_OBSERV" })]) == 'A' .And. _cnome != "K"
+	_lRet := .F.                                                                                   
+EndIf		
 
-Return _lret 
+Return _lRet 
 
 /*
 ===============================================================================================================================
@@ -967,7 +958,7 @@ Local _nPadR		:= 0
 
 Private nTam		:= 02
 Private aCat		:= {}
-Private MvRet		:= Alltrim( ReadVar() )
+Private MvRet		:= AllTrim( ReadVar() )
 Private MvPar		:= ""
 Private cTitulo		:= "Filiais do Sistema"
 Private MvParDef	:= ""
@@ -976,7 +967,7 @@ Default lVldAcs		:= .F.
 
 #IFDEF WINDOWS
 	oWnd := GetWndDefault()
-#ENDIF
+#EndIf
 
 //===========================================================================
 //| Recupera dados das filiais                                              |
@@ -991,12 +982,12 @@ While SM0->( !Eof() )
 			
 			If AllTrim(SM0->M0_CODIGO) == AllTrim(_aAcesso[nI][01]) .And. AllTrim(SM0->M0_CODFIL) == AllTrim(_aAcesso[nI][03])
 				
-				If !(alltrim(SM0->M0_CODFIL) == alltrim(cfilant))
+				If !(AllTrim(SM0->M0_CODFIL) == AllTrim(cfilant))
 				
-					MvParDef += alltrim(SM0->M0_CODFIL)
+					MvParDef += AllTrim(SM0->M0_CODFIL)
 					aAdd( aCat , AllTrim( SM0->M0_FILIAL ) )
 				
-				Endif
+				EndIf
 				
 				Exit
 				
@@ -1006,12 +997,12 @@ While SM0->( !Eof() )
 		
 	Else
 	
-		If !(alltrim(SM0->M0_CODFIL) == alltrim(cfilant))
+		If !(AllTrim(SM0->M0_CODFIL) == AllTrim(cfilant))
 		
-			MvParDef += alltrim(SM0->M0_CODFIL)
+			MvParDef += AllTrim(SM0->M0_CODFIL)
 			aAdd( aCat , AllTrim( SM0->M0_FILIAL ) )
 			
-		Endif
+		EndIf
 	
 	EndIf
 	
@@ -1026,9 +1017,9 @@ EndIf
 
 _nPadR := Len( &MvRet )
 
-IF TYPE("_cSeparador") <> "C"
+If Type("_cSeparador") <> "C"
    _cSeparador:=";"
-ENDIF 
+EndIf 
 
 //===========================================================================
 //| Mantém a marcação anterior                                              |
@@ -1044,9 +1035,9 @@ Else
 
 EndIf
 
-IF TYPE("_cSeparador") <> "C"
+If Type("_cSeparador") <> "C"
    _cSeparador:=";"
-ENDIF 
+EndIf 
 //====================================================================================================
 // Executa funcao que monta tela de opcoes
 //====================================================================================================
@@ -1082,32 +1073,32 @@ Retorno-----------: Lógico - Se é editável ou não
 */
 User Function AEST031U()
 
-Local _cquery := ""
-Local _aarea	:= getarea()
-Local _lret	:= .F.
+Local _cQuery := ""
+Local _aarea	:= FWGetArea()
+Local _lRet	:= .F.
 
-_cquery	:= " SELECT " 
-_cquery  	+= 	" MAX(ZL6_CODEVE) AS CODI" 
-_cquery  	+= 	" FROM " + RetSqlName("ZL6") + " ZL6 "
-_cquery  	+= 	" WHERE ZL6_FILIAL = '" + xFilial("ZL6") + "'"
-_cquery  	+= 	" AND   ZL6_TPCUS  = '" + alltrim(M->ZL6_TPCUS) + "'"
-_cquery  	+= 	" AND   ZL6_GRPCUS  = '" + alltrim(M->ZL6_GRPCUS) + "'"
-_cquery 	+= 	" AND   ZL6.D_E_L_E_T_ 	= ' '	"
+_cQuery	:= " SELECT " 
+_cQuery  	+= 	" MAX(ZL6_CODEVE) AS CODI" 
+_cQuery  	+= 	" FROM " + RetSqlName("ZL6") + " ZL6 "
+_cQuery  	+= 	" WHERE ZL6_FILIAL = '" + xFilial("ZL6") + "'"
+_cQuery  	+= 	" AND   ZL6_TPCUS  = '" + AllTrim(M->ZL6_TPCUS) + "'"
+_cQuery  	+= 	" AND   ZL6_GRPCUS  = '" + AllTrim(M->ZL6_GRPCUS) + "'"
+_cQuery 	+= 	" AND   ZL6.D_E_L_E_T_ 	= ' '	"
 
-_cQuery := ChangeQuery(_cquery)
-MPSysOpenQuery(_cquery,"ZL6T")
+_cQuery := ChangeQuery(_cQuery)
+MPSysOpenQuery(_cQuery,"ZL6T")
 
-If ( val( ZL6T->CODI) ) < ( val ( M->ZL6_CODEVE) )
-	_lret := .T.
-Endif
+If ( Val( ZL6T->CODI) ) < ( Val ( M->ZL6_CODEVE) )
+	_lRet := .T.
+EndIf
 
 If Select("ZL6T") > 0 
 	ZL6T->( DBCloseArea() )
 EndIf
 
-restarea(_aarea)
+FWRestArea(_aarea)
 
-RETURN _lret
+Return _lRet
 
 /*
 ===============================================================================================================================
@@ -1122,18 +1113,18 @@ Retorno-----------: .T.
 User Function AEST031Y()
 
 Local i := 0
-Local _aarea	:= getarea()
+Local _aarea	:= FWGetArea()
 
 Private nTam      := 0
 Private aCat      := {}
-Private MvRet     := Alltrim(ReadVar())
+Private MvRet     := AllTrim(ReadVar())
 Private MvPar     := ""
 Private cTitulo   := ""
 Private MvParDef  := ""
 
 #IFDEF WINDOWS
 	oWnd := GetWndDefault()
-#ENDIF
+#EndIf
 
 //Tratamento para carregar variaveis da lista de opcoes
 nTam:=4
@@ -1148,21 +1139,21 @@ cGrpCus+=" AND BM_GRUPO >= '0'"
 cGrpCus+=" ORDER BY BM_GRUPO"
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
+	TRB->(DBCloseArea())
+EndIf
 
 cGrpCus := ChangeQuery(cGrpCus)
 MPSysOpenQuery(cGrpCus,"TRB")
 
-while TRB->(!Eof())
+While TRB->(!Eof())
 	MvParDef += AllTrim(TRB->BM_GRUPO)
 	aAdd(aCat,AllTrim(TRB->BM_DESC))
-	TRB->(dbSkip())
-enddo
+	TRB->(DBSkip())
+EndDo
 
-IF TYPE("_cSeparador") <> "C"
+If Type("_cSeparador") <> "C"
    _cSeparador:=";"
-ENDIF 
+EndIf 
 /*
 //==========================================================================
 //Trativa abaixo para no caso de uma alteracao do campo trazer todos
@@ -1185,20 +1176,20 @@ EndIf
 //Somente altera o conteudo caso o usuario clique no botao ok
 //==========================================================================
 */
-IF TYPE("_cSeparador") <> "C"
+If Type("_cSeparador") <> "C"
    _cSeparador:=";"
-ENDIF 
+EndIf 
 
 //Executa funcao que monta tela de opcoes
 If f_Opcoes(@MvPar,cTitulo,aCat,MvParDef,12,49,.F.,nTam,nMaxSelect)
 	
 	//Tratamento para separar retorno com barra 
 	&MvRet := ""
-	for i:=1 to Len(MvPar) step nTam
-		if !(SubStr(MvPar,i,1) $ " |*")
+	For i:=1 to Len(MvPar) step nTam
+		If !(SubStr(MvPar,i,1) $ " |*")
 			&MvRet  += SubStr(MvPar,i,nTam) + _cSeparador
-		endIf
-	next i
+		EndIf
+	Next i
 	
 	//Trata para tirar o ultimo caracter
 	&MvRet := SubStr(&MvRet,1,Len(&MvRet)-1)
@@ -1208,9 +1199,9 @@ EndIf
 cRetF3:=&MvRet
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
-Restarea(_aarea)
+	TRB->(DBCloseArea())
+EndIf
+FWRestArea(_aarea)
 
 Return(.T.)         
 
@@ -1228,34 +1219,34 @@ Retorno-----------: .T.
 User Function AEST031S()
 
 Local cGrpcus := ""
-Local _lret	:= .F.
-Local _aarea	:= getarea()
+Local _lRet	:= .F.
+Local _aarea	:= FWGetArea()
 
 cGrpCus:=" SELECT A2_COD, A2_LOJA
 cGrpCus+="  FROM " + RETSQLNAME("SA2") + " A2"
 cGrpCus+=" WHERE D_E_L_E_T_ = ' ' "
 cGrpCus+=" AND A2_FILIAL = '"+xFilial("SA2")+"' "
 cGrpCus+=" AND A2_MSBLQL = '2'""
-cGrpCus+=" AND A2_COD = '" + Alltrim(SA2->A2_COD) + "'"
+cGrpCus+=" AND A2_COD = '" + AllTrim(SA2->A2_COD) + "'"
 cGrpCus+=" ORDER BY A2_LOJA"
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
+	TRB->(DBCloseArea())
+EndIf
 
 cGrpCus := ChangeQuery(cGrpCus)
 MPSysOpenQuery(cGrpCus,"TRB")
 
-If TRB->(!Eof()) .and. TRB->A2_LOJA == SA2->A2_LOJA
-	_lret := .T.
-Endif
+If TRB->(!Eof()) .And. TRB->A2_LOJA == SA2->A2_LOJA
+	_lRet := .T.
+EndIf
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
-Restarea(_aarea)
+	TRB->(DBCloseArea())
+EndIf
+FWRestArea(_aarea)
 
-Return(_lret)         
+Return(_lRet)         
 
 /*
 ===============================================================================================================================
@@ -1270,34 +1261,34 @@ Retorno-----------: .T.
 User Function AEST031R()
 
 Local cGrpcus := ""
-Local _lret	:= .F.
-Local _aarea	:= getarea()
+Local _lRet	:= .F.
+Local _aarea	:= FWGetArea()
 
 cGrpCus:=" SELECT A1_COD, A1_LOJA
 cGrpCus+="  FROM " + RETSQLNAME("SA12") + " A1"
 cGrpCus+=" WHERE D_E_L_E_T_ = ' ' "
 cGrpCus+=" AND A1_FILIAL = '"+xFilial("SA1")+"' "
 cGrpCus+=" AND A1_MSBLQL = '2'""
-cGrpCus+=" AND A1_COD = '" + Alltrim(SA1->A1_COD) + "'"
+cGrpCus+=" AND A1_COD = '" + AllTrim(SA1->A1_COD) + "'"
 cGrpCus+=" ORDER BY A1_LOJA"
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
+	TRB->(DBCloseArea())
+EndIf
 
 cGrpCus := ChangeQuery(cGrpCus)
 MPSysOpenQuery(cGrpCus,"TRB")
 
-If TRB->(!Eof()) .and. TRB->A1_LOJA == SA1->A1_LOJA
-	_lret := .T.
-Endif
+If TRB->(!Eof()) .And. TRB->A1_LOJA == SA1->A1_LOJA
+	_lRet := .T.
+EndIf
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
-Restarea(_aarea)
+	TRB->(DBCloseArea())
+EndIf
+FWRestArea(_aarea)
 
-Return(_lret)         
+Return(_lRet)         
 
 /*
 ===============================================================================================================================
@@ -1311,22 +1302,22 @@ Retorno-----------: .T.
 */
 User Function AEST031B()
 
-Local i := 0,_ni
+Local i := 0,_nI
 Local _aMvpar		:= {}
 Local _aMVAju		:= {}
 Local _aMvOri		:= {}
-Local _aarea	:= getarea()
+Local _aarea	:= FWGetArea()
 
 Private nTam      := 0
 Private aCat      := {}
-Private MvRet     := Alltrim(ReadVar())
+Private MvRet     := AllTrim(ReadVar())
 Private MvPar     := ""
 Private cTitulo   := ""
 Private MvParDef  := ""
 
 #IFDEF WINDOWS
 	oWnd := GetWndDefault()
-#ENDIF
+#EndIf
 
 //Tratamento para carregar variaveis da lista de opcoes
 nTam:=4
@@ -1343,21 +1334,21 @@ cGrpCus += " AND X5_FILIAL  = '" + xFilial("SX5") + "'"
 cGrpCus += " ORDER BY X5_CHAVE"
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
+	TRB->(DBCloseArea())
+EndIf
 
 cGrpCus := ChangeQuery(cGrpCus)
 MPSysOpenQuery(cGrpCus,"TRB")
 
-while TRB->(!Eof())
+While TRB->(!Eof())
 
-	MvParDef += strzero( val(TRB->CHAVE), ntam) 
+	MvParDef += StrZero( Val(TRB->CHAVE), ntam) 
 	aAdd(aCat,AllTrim(TRB->DESCRI))
-	aadd(_aMvAju, strzero( val(TRB->CHAVE), ntam)  )
-	aadd(_aMvOri, alltrim(TRB->CHAVE)  )
-	TRB->(dbSkip())
+	aAdd(_aMvAju, StrZero( Val(TRB->CHAVE), ntam)  )
+	aAdd(_aMvOri, AllTrim(TRB->CHAVE)  )
+	TRB->(DBSkip())
 
-enddo
+EndDo
 
 /*
 //==========================================================================
@@ -1365,9 +1356,9 @@ enddo
 //os dados que foram selecionados anteriormente.                    
 //==========================================================================
 */
-IF TYPE("_cSeparador") <> "C"
+If Type("_cSeparador") <> "C"
    _cSeparador:=";"
-ENDIF 
+EndIf 
 
 If Len(AllTrim(&MvRet)) == 0
 	
@@ -1379,9 +1370,9 @@ Else
 	_aMvPar := StrTokArr( &MvRet, _cSeparador )
 	&MvRet := ""
 
-	For _ni := 1 to len(_aMvPar)
+	For _nI := 1 to Len(_aMvPar)
 	
-		&MvRet += strzero( val(_aMvPar[_ni]), ntam) + _cSeparador		
+		&MvRet += StrZero( Val(_aMvPar[_nI]), ntam) + _cSeparador		
 	Next
 	
 	&MvRet := SubStr(&MvRet,1,Len(&MvRet)-1)
@@ -1402,23 +1393,23 @@ If f_Opcoes(@MvPar,cTitulo,aCat,MvParDef,12,49,.F.,nTam,nMaxSelect)
 	//Tratamento para separar retorno com barra 
 	&MvRet := ""
 
-	for i:=1 to Len(MvPar) step nTam
+	For i:=1 to Len(MvPar) step nTam
 
-		if !(SubStr(MvPar,i,1) $ " |*")
+		If !(SubStr(MvPar,i,1) $ " |*")
  
-           If ascan(_aMvAju, alltrim(SubStr(MvPar,i,nTam ))) > 0
+           If aScan(_aMvAju, AllTrim(SubStr(MvPar,i,nTam ))) > 0
            
-    			&MvRet  += _aMvOri[ascan(_aMvAju, alltrim(SubStr(MvPar,i,nTam )))] + _cSeparador
+    			&MvRet  += _aMvOri[aScan(_aMvAju, AllTrim(SubStr(MvPar,i,nTam )))] + _cSeparador
 			
 			Else
 			
-				&MvRet  += alltrim(SubStr(MvPar,i,nTam)) + _cSeparador
+				&MvRet  += AllTrim(SubStr(MvPar,i,nTam)) + _cSeparador
 				
-			Endif
+			EndIf
 
-		endIf
+		EndIf
 
-	next i
+	Next i
 	
 	//Trata para tirar o ultimo caracter
 	&MvRet := SubStr(&MvRet,1,Len(&MvRet)-1)
@@ -1428,9 +1419,9 @@ EndIf
 cRetF3:=&MvRet
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
-Restarea(_aarea)
+	TRB->(DBCloseArea())
+EndIf
+FWRestArea(_aarea)
 
 Return(.T.)
 
@@ -1446,22 +1437,22 @@ Retorno-----------: .T.
 */
 User Function AEST031W()
 
-Local i := 0,_ni
+Local i := 0,_nI
 Local _aMvpar		:= {}
 Local _aMVAju		:= {}
 Local _aMvOri		:= {}
-Local _aarea	:= getarea()
+Local _aarea	:= FWGetArea()
 
 Private nTam      := 0
 Private aCat      := {}
-Private MvRet     := Alltrim(ReadVar())
+Private MvRet     := AllTrim(ReadVar())
 Private MvPar     := ""
 Private cTitulo   := ""
 Private MvParDef  := ""
 
 #IFDEF WINDOWS
 	oWnd := GetWndDefault()
-#ENDIF
+#EndIf
 
 //Tratamento para carregar variaveis da lista de opcoes
 nTam:=8
@@ -1478,30 +1469,30 @@ cGrpCus+=" ORDER BY CTT_CUSTO"
 
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
+	TRB->(DBCloseArea())
+EndIf
 
 cGrpCus := ChangeQuery(cGrpCus)
 MPSysOpenQuery(cGrpCus,"TRB")
 
-while TRB->(!Eof())
+While TRB->(!Eof())
 
-	MvParDef += strzero(val(alltrim(TRB->CTT_CUSTO)),ntam)
-	aAdd(aCat,STRTRAN(AllTrim(TRB->CTT_DESC01),"-","") )
-	aadd(_aMvAju, LEFT(TRB->CTT_CUSTO,nTam)  )
-	aadd(_aMvOri, alltrim(TRB->CTT_CUSTO)  )
-	TRB->(dbSkip())
-enddo
-nMaxSelect := 50//LEN(aCat)
+	MvParDef += StrZero(Val(AllTrim(TRB->CTT_CUSTO)),ntam)
+	aAdd(aCat,StrTran(AllTrim(TRB->CTT_DESC01),"-","") )
+	aAdd(_aMvAju, LEFT(TRB->CTT_CUSTO,nTam)  )
+	aAdd(_aMvOri, AllTrim(TRB->CTT_CUSTO)  )
+	TRB->(DBSkip())
+EndDo
+nMaxSelect := 50//Len(aCat)
 /*
 //==========================================================================
 //Trativa abaixo para no caso de uma alteracao do campo trazer todos
 //os dados que foram selecionados anteriormente.                    
 //==========================================================================
 */
-IF TYPE("_cSeparador") <> "C"
+If Type("_cSeparador") <> "C"
    _cSeparador:=";"
-ENDIF 
+EndIf 
 If Len(AllTrim(&MvRet)) == 0
 	
 	MvPar:= PadR(AllTrim(StrTran(&MvRet,_cSeparador,"")),Len(aCat))
@@ -1512,9 +1503,9 @@ Else
 	_aMvPar := StrTokArr( &MvRet, _cSeparador )
 	&MvRet := ""
 
-	For _ni := 1 to len(_aMvPar)
+	For _nI := 1 to Len(_aMvPar)
 	
-		&MvRet += strzero( val(_aMvPar[_ni]), ntam) + _cSeparador		
+		&MvRet += StrZero( Val(_aMvPar[_nI]), ntam) + _cSeparador		
 	Next
 	
 	&MvRet := SubStr(&MvRet,1,Len(&MvRet)-1)
@@ -1530,32 +1521,32 @@ EndIf
 //==========================================================================
 */
 
-IF TYPE("_cSeparador") <> "C"
+If Type("_cSeparador") <> "C"
    _cSeparador:=";"
-ENDIF 
+EndIf 
 //Executa funcao que monta tela de opcoes
 If f_Opcoes(@MvPar,cTitulo,aCat,MvParDef,12,49,.F.,nTam,nMaxSelect)
 	
 	//Tratamento para separar retorno com barra 
 	&MvRet := ""
 
-	for i:=1 to Len(MvPar) step nTam
+	For i:=1 to Len(MvPar) step nTam
 
-		if !(SubStr(MvPar,i,1) $ " |*")
+		If !(SubStr(MvPar,i,1) $ " |*")
  
-           If ascan(_aMvAju, alltrim(SubStr(MvPar,i,nTam ))) > 0
+           If aScan(_aMvAju, AllTrim(SubStr(MvPar,i,nTam ))) > 0
            
-    			&MvRet  += _aMvOri[ascan(_aMvAju, alltrim(SubStr(MvPar,i,nTam )))] + _cSeparador
+    			&MvRet  += _aMvOri[aScan(_aMvAju, AllTrim(SubStr(MvPar,i,nTam )))] + _cSeparador
 			
 			Else
 			
-				&MvRet  += alltrim(SubStr(MvPar,i,nTam)) + _cSeparador
+				&MvRet  += AllTrim(SubStr(MvPar,i,nTam)) + _cSeparador
 				
-			Endif
+			EndIf
 
-		endIf
+		EndIf
 
-	next i
+	Next i
 	
 	//Trata para tirar o ultimo caracter
 	&MvRet := SubStr(&MvRet,1,Len(&MvRet)-1)
@@ -1565,9 +1556,9 @@ EndIf
 cRetF3:=&MvRet
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
-Restarea(_aarea)
+	TRB->(DBCloseArea())
+EndIf
+FWRestArea(_aarea)
 
 Return(.T.)
 
@@ -1584,18 +1575,18 @@ Retorno-----------: .T.
 User Function AEST031F()
 
 Local i := 0
-Local _aarea	:= getarea()
+Local _aarea	:= FWGetArea()
 
 Private nTam      := 0
 Private aCat      := {}
-Private MvRet     := Alltrim(ReadVar())
+Private MvRet     := AllTrim(ReadVar())
 Private MvPar     := ""
 Private cTitulo   := ""
 Private MvParDef  := ""
 
 #IFDEF WINDOWS
 	oWnd := GetWndDefault()
-#ENDIF
+#EndIf
 
 //Tratamento para carregar variaveis da lista de opcoes
 nTam:=3
@@ -1611,17 +1602,17 @@ cGrpCus+=" ORDER BY RV_COD"
 
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
+	TRB->(DBCloseArea())
+EndIf
 
 cGrpCus := ChangeQuery(cGrpCus)
 MPSysOpenQuery(cGrpCus,"TRB")
 
-while TRB->(!Eof())
+While TRB->(!Eof())
 	MvParDef += AllTrim(TRB->RV_COD)
 	aAdd(aCat,AllTrim(TRB->RV_DESC))
-	TRB->(dbSkip())
-enddo
+	TRB->(DBSkip())
+EndDo
 
 /*
 //==========================================================================
@@ -1629,9 +1620,9 @@ enddo
 //os dados que foram selecionados anteriormente.                    
 //==========================================================================
 */
-IF TYPE("_cSeparador") <> "C"
+If Type("_cSeparador") <> "C"
    _cSeparador:=";"
-ENDIF 
+EndIf 
 If Len(AllTrim(&MvRet)) == 0
 	
 	MvPar:= PadR(AllTrim(StrTran(&MvRet,_cSeparador,"")),Len(aCat))
@@ -1649,19 +1640,19 @@ EndIf
 //==========================================================================
 */
 
-IF TYPE("_cSeparador") <> "C"
+If Type("_cSeparador") <> "C"
    _cSeparador:=";"
-ENDIF 
+EndIf 
 //Executa funcao que monta tela de opcoes
 If f_Opcoes(@MvPar,cTitulo,aCat,MvParDef,12,49,.F.,nTam,nMaxSelect)
 	
 	//Tratamento para separar retorno com barra 
 	&MvRet := ""
-	for i:=1 to Len(MvPar) step nTam
-		if !(SubStr(MvPar,i,1) $ " |*")
+	For i:=1 to Len(MvPar) step nTam
+		If !(SubStr(MvPar,i,1) $ " |*")
 			&MvRet  += SubStr(MvPar,i,nTam) + _cSeparador
-		endIf
-	next i
+		EndIf
+	Next i
 	
 	//Trata para tirar o ultimo caracter
 	&MvRet := SubStr(&MvRet,1,Len(&MvRet)-1)
@@ -1671,9 +1662,9 @@ EndIf
 cRetF3:=&MvRet
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
-Restarea(_aarea)
+	TRB->(DBCloseArea())
+EndIf
+FWRestArea(_aarea)
 
 Return(.T.)
 
@@ -1690,11 +1681,11 @@ Retorno-----------: .T.
 User Function AEST031Z()
 
 Local i := 0
-Local _aarea	:= getarea()
+Local _aarea	:= FWGetArea()
 
 Private nTam      := 0
 Private aCat      := {}
-Private MvRet     := Alltrim(ReadVar())
+Private MvRet     := AllTrim(ReadVar())
 Private MvPar     := ""
 Private cTitulo   := ""
 Private MvParDef  := ""
@@ -1702,7 +1693,7 @@ Private MvParDef  := ""
 
 #IFDEF WINDOWS
 	oWnd := GetWndDefault()
-#ENDIF
+#EndIf
 
 //Tratamento para carregar variaveis da lista de opcoes
 nTam:=6
@@ -1717,21 +1708,21 @@ cGrpCus+=" AND ED_CODIGO >= '0'"
 cGrpCus+=" ORDER BY ED_CODIGO"
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
+	TRB->(DBCloseArea())
+EndIf
 
 cGrpCus := ChangeQuery(cGrpCus)
 MPSysOpenQuery(cGrpCus,"TRB")
 
-while TRB->(!Eof())
+While TRB->(!Eof())
 	MvParDef += AllTrim(TRB->ED_CODIGO)
 	aAdd(aCat,AllTrim(TRB->ED_DESCRIC))
-	TRB->(dbSkip())
-enddo
+	TRB->(DBSkip())
+EndDo
 
-IF TYPE("_cSeparador") <> "C"
+If Type("_cSeparador") <> "C"
    _cSeparador:=";"
-ENDIF 
+EndIf 
 /*
 //==========================================================================
 //Trativa abaixo para no caso de uma alteracao do campo trazer todos
@@ -1760,11 +1751,11 @@ If f_Opcoes(@MvPar,cTitulo,aCat,MvParDef,12,49,.F.,nTam,nMaxSelect)
 	
 	//Tratamento para separar retorno com barra _cSeparador
 	&MvRet := ""
-	for i:=1 to Len(MvPar) step nTam
-		if !(SubStr(MvPar,i,1) $ " |*")
+	For i:=1 to Len(MvPar) step nTam
+		If !(SubStr(MvPar,i,1) $ " |*")
 			&MvRet  += SubStr(MvPar,i,nTam) + _cSeparador
-		endIf
-	next i
+		EndIf
+	Next i
 	
 	//Trata para tirar o ultimo caracter
 	&MvRet := SubStr(&MvRet,1,Len(&MvRet)-1)
@@ -1773,9 +1764,9 @@ EndIf
 
 cRetF3:=&MvRet
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
-Restarea(_aarea)
+	TRB->(DBCloseArea())
+EndIf
+FWRestArea(_aarea)
 
 Return(.T.)
 
@@ -1792,11 +1783,11 @@ Retorno-----------: .T.
 User Function AEST031C()
 
 Local i := 0
-Local _aarea	:= getarea()
+Local _aarea	:= FWGetArea()
 
 Private nTam      := 0
 Private aCat      := {}
-Private MvRet     := Alltrim(ReadVar())
+Private MvRet     := AllTrim(ReadVar())
 Private MvPar     := ""
 Private cTitulo   := ""
 Private MvParDef  := ""
@@ -1804,7 +1795,7 @@ Private MvParDef  := ""
 
 #IFDEF WINDOWS
 	oWnd := GetWndDefault()
-#ENDIF
+#EndIf
 
 //Tratamento para carregar variaveis da lista de opcoes
 nTam:=6
@@ -1818,17 +1809,17 @@ cGrpCus+=" AND ZL5_CODGRP >= '0'"
 cGrpCus += " ORDER BY ZL5_CODGRP "
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
+	TRB->(DBCloseArea())
+EndIf
 
 cGrpCus := ChangeQuery(cGrpCus)
 MPSysOpenQuery(cGrpCus,"TRB")
 
-while TRB->(!Eof())
+While TRB->(!Eof())
 	MvParDef += AllTrim(TRB->ZL5_CODGRP)
 	aAdd(aCat,AllTrim(TRB->ZL5_DESGRP))
-	TRB->(dbSkip())
-enddo
+	TRB->(DBSkip())
+EndDo
 
 /*
 //==========================================================================
@@ -1836,9 +1827,9 @@ enddo
 //os dados que foram selecionados anteriormente.                    
 //==========================================================================
 */
-IF TYPE("_cSeparador") <> "C"
+If Type("_cSeparador") <> "C"
    _cSeparador:=";"
-ENDIF 
+EndIf 
 If Len(AllTrim(&MvRet)) == 0
 	
 	MvPar:= PadR(AllTrim(StrTran(&MvRet,_cSeparador,"")),Len(aCat))
@@ -1855,20 +1846,20 @@ EndIf
 //Somente altera o conteudo caso o usuario clique no botao ok
 //==========================================================================
 */
-IF TYPE("_cSeparador") <> "C"
+If Type("_cSeparador") <> "C"
    _cSeparador:=";"
-ENDIF 
+EndIf 
 
 //Executa funcao que monta tela de opcoes
 If f_Opcoes(@MvPar,cTitulo,aCat,MvParDef,12,49,.F.,nTam,nMaxSelect)
 	
 	//Tratamento para separar retorno com barra _cSeparador
 	&MvRet := ""
-	for i:=1 to Len(MvPar) step nTam
-		if !(SubStr(MvPar,i,1) $ " |*")
+	For i:=1 to Len(MvPar) step nTam
+		If !(SubStr(MvPar,i,1) $ " |*")
 			&MvRet  += SubStr(MvPar,i,nTam) + _cSeparador
-		endIf
-	next i
+		EndIf
+	Next i
 	
 	//Trata para tirar o ultimo caracter
 	&MvRet := SubStr(&MvRet,1,Len(&MvRet)-1)
@@ -1878,9 +1869,9 @@ EndIf
 cRetF3:=&MvRet
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
-Restarea(_aarea)
+	TRB->(DBCloseArea())
+EndIf
+FWRestArea(_aarea)
 
 Return(.T.)
 
@@ -1897,18 +1888,18 @@ Retorno-----------: .T.
 User Function AEST031Q()
 
 Local i := 0
-Local _aarea	:= getarea()
+Local _aarea	:= FWGetArea()
 
 Private nTam      := 0
 Private aCat      := {}
-Private MvRet     := Alltrim(ReadVar())
+Private MvRet     := AllTrim(ReadVar())
 Private MvPar     := ""
 Private cTitulo   := ""
 Private MvParDef  := ""
 
 #IFDEF WINDOWS
 	oWnd := GetWndDefault()
-#ENDIF
+#EndIf
 
 //Tratamento para carregar variaveis da lista de opcoes
 nTam:=10
@@ -1918,28 +1909,28 @@ cTitulo :="Prefixo Titulo"
 
 cGrpCus:=" SELECT DISTINCT E5_PREFIXO AS PREFIXO "
 cGrpCus+=" FROM " + retsqlname("SE5") + " E5" 
-cGrpCus+=" WHERE E5_DTDIGIT >= '" + (DTOS(DATE() - 90)) + "'"
+cGrpCus+=" WHERE E5_DTDIGIT >= '" + (DToS(Date() - 90)) + "'"
 cGrpCus+=" AND D_E_L_E_T_ = ' ' "
 cGrpCus+=" AND E5_FILIAL = '"+xFilial("SE5")+"' "
 cGrpCus+=" GROUP BY E5_PREFIXO "
 cGrpCus+=" ORDER BY E5_PREFIXO "
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
+	TRB->(DBCloseArea())
+EndIf
 
 cGrpCus := ChangeQuery(cGrpCus)
 MPSysOpenQuery(cGrpCus,"TRB")
 
 If TRB->(Eof())
-	U_ITMSG("Nao ha registros para a data maior ou igual a " + (DTOS(DATE() - 90)),'Atenção!',,1)
-Endif
+	U_ITMsg("Nao ha registros para a data maior ou igual a " + (DToS(Date() - 90)),'Atenção!',,1)
+EndIf
 
-while TRB->(!Eof())
-	MvParDef += (TRB->PREFIXO) + space(10 - len(TRB->PREFIXO))
+While TRB->(!Eof())
+	MvParDef += (TRB->PREFIXO) + Space(10 - Len(TRB->PREFIXO))
 	aAdd(aCat,(TRB->PREFIXO))
-	TRB->(dbSkip())
-enddo
+	TRB->(DBSkip())
+EndDo
 
 /*
 //==========================================================================
@@ -1947,9 +1938,9 @@ enddo
 //os dados que foram selecionados anteriormente.                    
 //==========================================================================
 */
-IF TYPE("_cSeparador") <> "C"
+If Type("_cSeparador") <> "C"
    _cSeparador:=";"
-ENDIF 
+EndIf 
 If Len(AllTrim(&MvRet)) == 0
 	
 	MvPar:= PadR(AllTrim(StrTran(&MvRet,_cSeparador,"")),Len(aCat))
@@ -1966,20 +1957,20 @@ EndIf
 //Somente altera o conteudo caso o usuario clique no botao ok
 //==========================================================================
 */
-IF TYPE("_cSeparador") <> "C"
+If Type("_cSeparador") <> "C"
    _cSeparador:=";"
-ENDIF 
+EndIf 
 
 //Executa funcao que monta tela de opcoes
 If f_Opcoes(@MvPar,cTitulo,aCat,MvParDef,12,49,.F.,nTam,nMaxSelect)
 	
 	//Tratamento para separar retorno com barra _cSeparador
 	&MvRet := ""
-	for i:=1 to Len(MvPar) step nTam
-		if !(SubStr(MvPar,i,1) $ " |*")
+	For i:=1 to Len(MvPar) step nTam
+		If !(SubStr(MvPar,i,1) $ " |*")
 			&MvRet  += SubStr(MvPar,i,nTam) + _cSeparador
-		endIf
-	next i
+		EndIf
+	Next i
 	
 	//Trata para tirar o ultimo caracter
 	&MvRet := SubStr(&MvRet,1,Len(&MvRet)-1)
@@ -1989,9 +1980,9 @@ EndIf
 cRetF3:=&MvRet
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
-Restarea(_aarea)
+	TRB->(DBCloseArea())
+EndIf
+FWRestArea(_aarea)
 
 Return(.T.)
 
@@ -2008,18 +1999,18 @@ Retorno-----------: .T.
 User Function AEST031X()
 
 Local i := 0
-Local _aarea	:= getarea()
+Local _aarea	:= FWGetArea()
 
 Private nTam      := 0
 Private aCat      := {}
-Private MvRet     := Alltrim(ReadVar())
+Private MvRet     := AllTrim(ReadVar())
 Private MvPar     := ""
 Private cTitulo   := ""
 Private MvParDef  := ""
 
 #IFDEF WINDOWS
 	oWnd := GetWndDefault()
-#ENDIF
+#EndIf
 
 //Tratamento para carregar variaveis da lista de opcoes
 nTam:=10
@@ -2029,28 +2020,28 @@ cTitulo :="Tipo Titulo"
 
 cGrpCus:=" SELECT DISTINCT E5_TIPO AS TIPO "
 cGrpCus+=" FROM " + retsqlname("SE5") + " E5" 
-cGrpCus+=" WHERE E5_DTDIGIT >= '" + (DTOS(DATE() - 90)) + "'"
+cGrpCus+=" WHERE E5_DTDIGIT >= '" + (DToS(Date() - 90)) + "'"
 cGrpCus+=" AND D_E_L_E_T_ = ' ' "
 cGrpCus+=" AND E5_FILIAL = '"+xFilial("SE5")+"' "
 cGrpCus+=" GROUP BY E5_TIPO "
 cGrpCus+=" ORDER BY E5_TIPO "
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
+	TRB->(DBCloseArea())
+EndIf
 
 cGrpCus := ChangeQuery(cGrpCus)
 MPSysOpenQuery(cGrpCus,"TRB")
 
 If TRB->(Eof())
-	U_ITMSG("Nao ha registros para a data maior ou igual a " + (DTOS(DATE() - 90)),'Atenção!',,1)
-Endif
+	U_ITMsg("Nao ha registros para a data maior ou igual a " + (DToS(Date() - 90)),'Atenção!',,1)
+EndIf
 
-while TRB->(!Eof())
-	MvParDef += (TRB->TIPO) + space(10-len(TRB->TIPO))
+While TRB->(!Eof())
+	MvParDef += (TRB->TIPO) + Space(10-Len(TRB->TIPO))
 	aAdd(aCat,(TRB->TIPO))
-	TRB->(dbSkip())
-enddo
+	TRB->(DBSkip())
+EndDo
 
 /*
 //==========================================================================
@@ -2058,9 +2049,9 @@ enddo
 //os dados que foram selecionados anteriormente.                    
 //==========================================================================
 */
-IF TYPE("_cSeparador") <> "C"
+If Type("_cSeparador") <> "C"
    _cSeparador:=";"
-ENDIF 
+EndIf 
 If Len(AllTrim(&MvRet)) == 0
 	
 	MvPar:= PadR(AllTrim(StrTran(&MvRet,_cSeparador,"")),Len(aCat))
@@ -2077,19 +2068,19 @@ EndIf
 //Somente altera o conteudo caso o usuario clique no botao ok
 //==========================================================================
 */
-IF TYPE("_cSeparador") <> "C"
+If Type("_cSeparador") <> "C"
    _cSeparador:=";"
-ENDIF 
+EndIf 
 //Executa funcao que monta tela de opcoes
 If f_Opcoes(@MvPar,cTitulo,aCat,MvParDef,12,49,.F.,nTam,nMaxSelect)
 	
 	//Tratamento para separar retorno com barra _cSeparador
 	&MvRet := ""
-	for i:=1 to Len(MvPar) step nTam
-		if !(SubStr(MvPar,i,1) $ " |*")
+	For i:=1 to Len(MvPar) step nTam
+		If !(SubStr(MvPar,i,1) $ " |*")
 			&MvRet  += SubStr(MvPar,i,nTam) + _cSeparador
-		endIf
-	next i
+		EndIf
+	Next i
 	
 	//Trata para tirar o ultimo caracter
 	&MvRet := SubStr(&MvRet,1,Len(&MvRet)-1)
@@ -2099,9 +2090,9 @@ EndIf
 cRetF3:=&MvRet
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
-Restarea(_aarea)
+	TRB->(DBCloseArea())
+EndIf
+FWRestArea(_aarea)
 
 Return(.T.)
 
@@ -2118,26 +2109,26 @@ Retorno-----------: .T.
 User Function AEST031J()
 
 Local i := 0
-Local _aarea	:= getarea()
+Local _aarea	:= FWGetArea()
 
 Private nTam      := 0
 Private aCat      := {}
-Private MvRet     := Alltrim(ReadVar())
+Private MvRet     := AllTrim(ReadVar())
 Private MvPar     := ""
 Private cTitulo   := ""
 Private MvParDef  := ""
 
 #IFDEF WINDOWS
 	oWnd := GetWndDefault()
-#ENDIF
+#EndIf
 
 //Tratamento para carregar variaveis da lista de opcoes
 nTam:=2
-IF FUNNAME() = "ACFG003"
+If FUNNAME() = "ACFG003"
    nMaxSelect := 26
-ELSE
+Else
    nMaxSelect := 14 //75 / 3
-ENDIF
+EndIf
 cTitulo :="Tipos de produtos"
 
 
@@ -2152,17 +2143,17 @@ cGrpCus += " AND X5_FILIAL  = '" + xFilial("SX5") + "'"
 cGrpCus += " ORDER BY X5_CHAVE"
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
+	TRB->(DBCloseArea())
+EndIf
 
 cGrpCus := ChangeQuery(cGrpCus)
 MPSysOpenQuery(cGrpCus,"TRB")
 
-while TRB->(!Eof())
-	MvParDef += alltrim(TRB->CHAVE) 
+While TRB->(!Eof())
+	MvParDef += AllTrim(TRB->CHAVE) 
 	aAdd(aCat,AllTrim(TRB->DESCRI))
-	TRB->(dbSkip())
-enddo
+	TRB->(DBSkip())
+EndDo
 
 /*
 //==========================================================================
@@ -2170,9 +2161,9 @@ enddo
 //os dados que foram selecionados anteriormente.                    
 //==========================================================================
 */
-IF TYPE("_cSeparador") <> "C"
+If Type("_cSeparador") <> "C"
    _cSeparador:=";"
-ENDIF 
+EndIf 
 If Len(AllTrim(&MvRet)) == 0
 	
 	MvPar:= PadR(AllTrim(StrTran(&MvRet,_cSeparador,"")),Len(aCat))
@@ -2189,20 +2180,20 @@ EndIf
 //Somente altera o conteudo caso o usuario clique no botao ok
 //==========================================================================
 */
-IF TYPE("_cSeparador") <> "C"
+If Type("_cSeparador") <> "C"
    _cSeparador:=";"
-ENDIF 
+EndIf 
 
 //Executa funcao que monta tela de opcoes
 If f_Opcoes(@MvPar,cTitulo,aCat,MvParDef,12,49,.F.,nTam,nMaxSelect)
 	
 	//Tratamento para separar retorno com barra _cSeparador
 	&MvRet := ""
-	for i:=1 to Len(MvPar) step nTam
-		if !(SubStr(MvPar,i,1) $ " |*")
-			&MvRet  += alltrim(SubStr(MvPar,i,nTam)) + _cSeparador
-		endIf
-	next i
+	For i:=1 to Len(MvPar) step nTam
+		If !(SubStr(MvPar,i,1) $ " |*")
+			&MvRet  += AllTrim(SubStr(MvPar,i,nTam)) + _cSeparador
+		EndIf
+	Next i
 	
 	//Trata para tirar o ultimo caracter
 	&MvRet := SubStr(&MvRet,1,Len(&MvRet)-1)
@@ -2210,9 +2201,9 @@ If f_Opcoes(@MvPar,cTitulo,aCat,MvParDef,12,49,.F.,nTam,nMaxSelect)
 EndIf
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
-Restarea(_aarea)
+	TRB->(DBCloseArea())
+EndIf
+FWRestArea(_aarea)
 
 Return(.T.)
 
@@ -2229,19 +2220,19 @@ Retorno-----------: .T.
 User Function AEST031O()
 
 Local i := 0
-Local _aarea	:= getarea()
+Local _aarea	:= FWGetArea()
 
 Private nTam      := 0
 
 Private aCat      := {}
-Private MvRet     := Alltrim(ReadVar())
+Private MvRet     := AllTrim(ReadVar())
 Private MvPar     := ""
 Private cTitulo   := ""
 Private MvParDef  := ""
 
 #IFDEF WINDOWS
 	oWnd := GetWndDefault()
-#ENDIF
+#EndIf
 
 //Tratamento para carregar variaveis da lista de opcoes
 nTam:=3
@@ -2258,21 +2249,21 @@ cGrpCus+= " 		AND X5_FILIAL  = '" + xFilial("SX5") + "'"
 cGrpCus+= " ORDER BY X5_CHAVE"
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
+	TRB->(DBCloseArea())
+EndIf
 
 cGrpCus := ChangeQuery(cGrpCus)
 MPSysOpenQuery(cGrpCus,"TRB")
 
 If TRB->(Eof())
-	U_ITMSG("Nao ha registros para a tabela ZY ",'Atenção!',,1)
-Endif
+	U_ITMsg("Nao ha registros para a tabela ZY ",'Atenção!',,1)
+EndIf
 
-while TRB->(!Eof())
+While TRB->(!Eof())
 	MvParDef += AllTrim(TRB->TIPO)
 	aAdd(aCat,AllTrim(TRB->DESCR))
-	TRB->(dbSkip())
-enddo
+	TRB->(DBSkip())
+EndDo
 
 /*
 //==========================================================================
@@ -2280,9 +2271,9 @@ enddo
 //os dados que foram selecionados anteriormente.                    
 //==========================================================================
 */
-IF TYPE("_cSeparador") <> "C"
+If Type("_cSeparador") <> "C"
    _cSeparador:=";"
-ENDIF 
+EndIf 
 If Len(AllTrim(&MvRet)) == 0
 	
 	MvPar:= PadR(AllTrim(StrTran(&MvRet,_cSeparador,"")),Len(aCat))
@@ -2299,20 +2290,20 @@ EndIf
 //Somente altera o conteudo caso o usuario clique no botao ok
 //==========================================================================
 */
-IF TYPE("_cSeparador") <> "C"
+If Type("_cSeparador") <> "C"
    _cSeparador:=";"
-ENDIF 
+EndIf 
 
 //Executa funcao que monta tela de opcoes
 If f_Opcoes(@MvPar,cTitulo,aCat,MvParDef,12,49,.F.,nTam,nMaxSelect)
 	
 	//Tratamento para separar retorno com barra _cSeparador
 	&MvRet := ""
-	for i:=1 to Len(MvPar) step nTam
-		if !(SubStr(MvPar,i,1) $ " |*")
+	For i:=1 to Len(MvPar) step nTam
+		If !(SubStr(MvPar,i,1) $ " |*")
 			&MvRet  += SubStr(MvPar,i,nTam) + _cSeparador
-		endIf
-	next i
+		EndIf
+	Next i
 	
 	//Trata para tirar o ultimo caracter
 	&MvRet := SubStr(&MvRet,1,Len(&MvRet)-1)
@@ -2321,9 +2312,9 @@ EndIf
 
 cRetF3:=SubStr(&MvRet,1,Len(&MvRet)-1)
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
-Restarea(_aarea)
+	TRB->(DBCloseArea())
+EndIf
+FWRestArea(_aarea)
 
 Return(.T.)
 
@@ -2340,18 +2331,18 @@ Retorno-----------: .T.
 User Function AEST031A()
 
 Local i				:= 0
-Local _aarea	:= getarea()
+Local _aarea	:= FWGetArea()
 
 Private nTam		:= 0
 Private aCat		:= {}
-Private MvRet		:= Alltrim(ReadVar())
+Private MvRet		:= AllTrim(ReadVar())
 Private MvPar		:= ""
 Private cTitulo		:= ""
 Private MvParDef	:= ""
 
 #IFDEF WINDOWS
 	oWnd := GetWndDefault()
-#ENDIF
+#EndIf
 
 //Tratamento para carregar variaveis da lista de opcoes
 nTam		:= 3
@@ -2370,28 +2361,28 @@ cGrpCus+=" AND F4.F4_FILIAL = '"+xFilial("SF4")+"' "
 cGrpCus+=" ORDER BY F4.F4_CODIGO "
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
+	TRB->(DBCloseArea())
+EndIf
 
 cGrpCus := ChangeQuery(cGrpCus)
 MPSysOpenQuery(cGrpCus,"TRB")
 
-while TRB->(!Eof())
+While TRB->(!Eof())
 
 	MvParDef += AllTrim(TRB->F4_CODIGO)
-	aAdd(aCat,"  " + PADR(TRB->F4_DUPLIC,3," ") + '  -   ' + TRB->F4_ICM + '  - ' + TRB->F4_CF  + '  -  ' + TRB->F4_TEXTO) 
+	aAdd(aCat,"  " + PadR(TRB->F4_DUPLIC,3," ") + '  -   ' + TRB->F4_ICM + '  - ' + TRB->F4_CF  + '  -  ' + TRB->F4_TEXTO) 
 		
-	TRB->(dbSkip())
+	TRB->(DBSkip())
 	
-enddo                                    
+EndDo                                    
 
 //========================================================================
 //Trativa abaixo para no caso de uma alteracao do campo trazer todos
 //os dados que foram selecionados anteriormente.                    
 //========================================================================
-IF TYPE("_cSeparador") <> "C"
+If Type("_cSeparador") <> "C"
    _cSeparador:=";"
-ENDIF 
+EndIf 
 
 If Len(AllTrim(&MvRet)) == 0                              
 
@@ -2409,11 +2400,11 @@ If f_Opcoes(@MvPar,cTitulo,aCat,MvParDef,12,49,.F.,nTam,nMaxSelect)
 
 	//Tratamento para separar retorno com barra _cSeparador
 	&MvRet := ""
-	for i:=1 to Len(MvPar) step nTam
-		if !(SubStr(MvPar,i,1) $ " |*")
+	For i:=1 to Len(MvPar) step nTam
+		If !(SubStr(MvPar,i,1) $ " |*")
 			&MvRet  += SubStr(MvPar,i,nTam) + _cSeparador
-		endIf
-	next i
+		EndIf
+	Next i
 	
 	//Trata para tirar o ultimo caracter
 	&MvRet := SubStr(&MvRet,1,Len(&MvRet)-1) 
@@ -2423,9 +2414,9 @@ EndIf
 cRetF3:=&MvRet
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
-Restarea(_aarea)
+	TRB->(DBCloseArea())
+EndIf
+FWRestArea(_aarea)
 
 Return(.T.)
 
@@ -2442,11 +2433,11 @@ Retorno-----------: .T.
 User Function AEST0316()
 
 Local i := 0
-Local _aarea	:= getarea()
+Local _aarea	:= FWGetArea()
 
 Private nTam      := 0
 Private aCat      := {}
-Private MvRet     := Alltrim(ReadVar())
+Private MvRet     := AllTrim(ReadVar())
 Private MvPar     := ""
 Private cTitulo   := ""
 Private MvParDef  := ""
@@ -2454,7 +2445,7 @@ Private MvParDef  := ""
 
 #IFDEF WINDOWS
 	oWnd := GetWndDefault()
-#ENDIF
+#EndIf
 
 //Tratamento para carregar variaveis da lista de opcoes
 nTam:=1
@@ -2472,7 +2463,7 @@ cGrpCus+= " 		AND X5_FILIAL  = '" + xFilial("SX5") + "'"
 cGrpCus+= " 		AND X5_CHAVE  = D1.D1_TIPO"
 cGrpCus+= " 		AND ROWNUM = 1) AS DESCR"
 cGrpCus+=" FROM " + retsqlname("SD1") + " D1" 
-cGrpCus+=" WHERE D1_EMISSAO >= '" + (DTOS(DATE() - 90)) + "'"
+cGrpCus+=" WHERE D1_EMISSAO >= '" + (DToS(Date() - 90)) + "'"
 cGrpCus+=" AND D_E_L_E_T_ = ' ' "
 cGrpCus+=" AND D1_FILIAL = '"+xFilial("SD1")+"' "
 cGrpCus+=" AND D1_TIPO >= '0'"
@@ -2488,28 +2479,28 @@ cGrpCus+= " 		AND X5_FILIAL  = '" + xFilial("SX5") + "'"
 cGrpCus+= " 		AND X5_CHAVE  = D2.D2_TIPO"
 cGrpCus+= " 		AND ROWNUM = 1) AS DESCR"
 cGrpCus+=" FROM " + retsqlname("SD2") + " D2" 
-cGrpCus+=" WHERE D2_EMISSAO >= '" + (DTOS(DATE() - 90)) + "'"
+cGrpCus+=" WHERE D2_EMISSAO >= '" + (DToS(Date() - 90)) + "'"
 cGrpCus+=" AND D_E_L_E_T_ = ' ' "
 cGrpCus+=" AND D2_TIPO >= '0'"
 cGrpCus+=" AND D2_FILIAL = '"+xFilial("SD2")+"' "
 cGrpCus+=" GROUP BY D2_TIPO "
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
+	TRB->(DBCloseArea())
+EndIf
 
 cGrpCus := ChangeQuery(cGrpCus)
 MPSysOpenQuery(cGrpCus,"TRB")
 
 If TRB->(Eof())
-	U_ITMSG("Nao ha registros para a data maior ou igual a " + (DTOS(DATE() - 90)),'Atenção!',,1)
-Endif
+	U_ITMsg("Nao ha registros para a data maior ou igual a " + (DToS(Date() - 90)),'Atenção!',,1)
+EndIf
 
-while TRB->(!Eof())
+While TRB->(!Eof())
 	MvParDef += AllTrim(TRB->TIPO)
 	aAdd(aCat,AllTrim(TRB->DESCR))
-	TRB->(dbSkip())
-enddo
+	TRB->(DBSkip())
+EndDo
 
 /*
 //==========================================================================
@@ -2517,9 +2508,9 @@ enddo
 //os dados que foram selecionados anteriormente.                    
 //==========================================================================
 */
-IF TYPE("_cSeparador") <> "C"
+If Type("_cSeparador") <> "C"
    _cSeparador:=";"
-ENDIF 
+EndIf 
 If Len(AllTrim(&MvRet)) == 0
 	
 	MvPar:= PadR(AllTrim(StrTran(&MvRet,_cSeparador,"")),Len(aCat))
@@ -2536,20 +2527,20 @@ EndIf
 //Somente altera o conteudo caso o usuario clique no botao ok
 //==========================================================================
 */
-IF TYPE("_cSeparador") <> "C"
+If Type("_cSeparador") <> "C"
    _cSeparador:=";"
-ENDIF 
+EndIf 
 
 //Executa funcao que monta tela de opcoes
 If f_Opcoes(@MvPar,cTitulo,aCat,MvParDef,12,49,.F.,nTam,nMaxSelect)
 	
 	//Tratamento para separar retorno com barra _cSeparador
 	&MvRet := ""
-	for i:=1 to Len(MvPar) step nTam
-		if !(SubStr(MvPar,i,1) $ " |*")
+	For i:=1 to Len(MvPar) step nTam
+		If !(SubStr(MvPar,i,1) $ " |*")
 			&MvRet  += SubStr(MvPar,i,nTam) + _cSeparador
-		endIf
-	next i
+		EndIf
+	Next i
 	
 	//Trata para tirar o ultimo caracter
 	&MvRet := SubStr(&MvRet,1,Len(&MvRet)-1)
@@ -2559,9 +2550,9 @@ EndIf
 cRetF3:=&MvRet
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
-Restarea(_aarea)
+	TRB->(DBCloseArea())
+EndIf
+FWRestArea(_aarea)
 
 Return(.T.)
 
@@ -2578,11 +2569,11 @@ Retorno-----------: .T.
 User Function MEST009L()
 
 Local i := 0
-Local _aarea	:= getarea()
+Local _aarea	:= FWGetArea()
 
 Private nTam      := 0
 Private aCat      := {}
-Private MvRet     := Alltrim(ReadVar())
+Private MvRet     := AllTrim(ReadVar())
 Private MvPar     := ""
 Private cTitulo   := ""
 Private MvParDef  := ""
@@ -2590,7 +2581,7 @@ Private MvParDef  := ""
 
 #IFDEF WINDOWS
 	oWnd := GetWndDefault()
-#ENDIF
+#EndIf
 
 //Tratamento para carregar variaveis da lista de opcoes
 nTam:=1
@@ -2608,7 +2599,7 @@ cGrpCus+= " 		AND X5_FILIAL  = '" + xFilial("SX5") + "'"
 cGrpCus+= " 		AND X5_CHAVE  = D1.D1_TIPO"
 cGrpCus+= " 		AND ROWNUM = 1) AS DESCR"
 cGrpCus+=" FROM " + retsqlname("SD1") + " D1" 
-cGrpCus+=" WHERE D1_EMISSAO >= '" + (DTOS(DATE() - 90)) + "'"
+cGrpCus+=" WHERE D1_EMISSAO >= '" + (DToS(Date() - 90)) + "'"
 cGrpCus+=" AND D_E_L_E_T_ = ' ' "
 cGrpCus+=" AND D1_FILIAL = '"+xFilial("SD1")+"' "
 cGrpCus+=" AND D1_TIPO >= '0'"
@@ -2624,28 +2615,28 @@ cGrpCus+= " 		AND X5_FILIAL  = '" + xFilial("SX5") + "'"
 cGrpCus+= " 		AND X5_CHAVE  = D2.D2_TIPO"
 cGrpCus+= " 		AND ROWNUM = 1) AS DESCR"
 cGrpCus+=" FROM " + retsqlname("SD2") + " D2" 
-cGrpCus+=" WHERE D2_EMISSAO >= '" + (DTOS(DATE() - 90)) + "'"
+cGrpCus+=" WHERE D2_EMISSAO >= '" + (DToS(Date() - 90)) + "'"
 cGrpCus+=" AND D_E_L_E_T_ = ' ' "
 cGrpCus+=" AND D2_TIPO >= '0'"
 cGrpCus+=" AND D2_FILIAL = '"+xFilial("SD2")+"' "
 cGrpCus+=" GROUP BY D2_TIPO "
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
+	TRB->(DBCloseArea())
+EndIf
 
 cGrpCus := ChangeQuery(cGrpCus)
 MPSysOpenQuery(cGrpCus,"TRB")
 
 If TRB->(Eof())
-	U_ITMSG("Nao ha registros para a data maior ou igual a " + (DTOS(DATE() - 90)),'Atenção!',,1)
-Endif
+	U_ITMsg("Nao ha registros para a data maior ou igual a " + (DToS(Date() - 90)),'Atenção!',,1)
+EndIf
 
-while TRB->(!Eof())
+While TRB->(!Eof())
 	MvParDef += AllTrim(TRB->TIPO)
 	aAdd(aCat,AllTrim(TRB->DESCR))
-	TRB->(dbSkip())
-enddo
+	TRB->(DBSkip())
+EndDo
 
 /*
 //==========================================================================
@@ -2653,9 +2644,9 @@ enddo
 //os dados que foram selecionados anteriormente.                    
 //==========================================================================
 */
-IF TYPE("_cSeparador") <> "C"
+If Type("_cSeparador") <> "C"
    _cSeparador:=";"
-ENDIF 
+EndIf 
 If Len(AllTrim(&MvRet)) == 0
 	
 	MvPar:= PadR(AllTrim(StrTran(&MvRet,_cSeparador,"")),Len(aCat))
@@ -2678,11 +2669,11 @@ If f_Opcoes(@MvPar,cTitulo,aCat,MvParDef,12,49,.F.,nTam,nMaxSelect)
 	
 	//Tratamento para separar retorno com barra _cSeparador
 	&MvRet := ""
-	for i:=1 to Len(MvPar) step nTam
-		if !(SubStr(MvPar,i,1) $ " |*")
+	For i:=1 to Len(MvPar) step nTam
+		If !(SubStr(MvPar,i,1) $ " |*")
 			&MvRet  += SubStr(MvPar,i,nTam) + _cSeparador
-		endIf
-	next i
+		EndIf
+	Next i
 	
 	//Trata para tirar o ultimo caracter
 	&MvRet := SubStr(&MvRet,1,Len(&MvRet)-1)
@@ -2692,13 +2683,13 @@ EndIf
 cRetF3:=&MvRet
 
 If Select("TRB") >0
-	TRB->(dbCloseArea())
-Endif
-Restarea(_aarea)
+	TRB->(DBCloseArea())
+EndIf
+FWRestArea(_aarea)
 
 Return(.T.)
 
-STATIC Function GrvCposCapa()
+Static Function GrvCposCapa()
 
 ZL6->ZL6_FILIAL:= xFilial("ZL6")
 ZL6->ZL6_TPCUS := M->ZL6_TPCUS
@@ -2708,8 +2699,8 @@ ZL6->ZL6_DGRCUS:= M->ZL6_DGRCUS
 ZL6->ZL6_CODEVE:= M->ZL6_CODEVE 
 ZL6->ZL6_DESEVE:= M->ZL6_DESEVE 
 ZL6->ZL6_ORDGRU:= M->ZL6_ORDGRU
-IF ZL6->(FIELDPOS("ZL6_PRDRAT")) <> 0
-   ZL6->ZL6_PRDRAT:= STRTRAN(M->ZL6_PRDRAT,_cSeparador,";")
-ENDIF
+If ZL6->(FIELDPOS("ZL6_PRDRAT")) <> 0
+   ZL6->ZL6_PRDRAT:= StrTran(M->ZL6_PRDRAT,_cSeparador,";")
+EndIf
 
 Return(.T.)

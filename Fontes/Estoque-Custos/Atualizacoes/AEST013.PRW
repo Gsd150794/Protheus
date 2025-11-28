@@ -1,48 +1,42 @@
 /*
 ===============================================================================================================================
-                                    ATUALIZACOES SOFRIDAS DESDE A CONSTRUCAO INICIAL
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                           
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Alex Wallauer    | 17/01/2022 | Voltar as apcoes de incluir e Excluir conforme acesso do ZE0 - Chamado 38941
- Alex Wallauer    | 18/07/2022 | Nova opcao de inclusao em massa e correcoes - Chamado 40616
- Lucas Borges     | 23/07/2025 | Chamado 51340. Ajustar função para validação de ambiente de teste
+Alex Wallauer |18/07/2022| Chamado 40616. Nova opcao de inclusao em massa e correcoes
+Lucas Borges  |23/07/2025| Chamado 51340. Ajustar função para validação de ambiente de teste
+Lucas Borges  |19/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#include "PROTHEUS.CH"
-#INCLUDE "rwmake.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: AEST013
 Autor-------------: Josue Danich
 Data da Criacao---: 01/09/2016
-===============================================================================================================================
 Descricao---------: Browse para Eventos de custo gerencial, ZE0 - Chamado 15652
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
-===============================================================================================================================*/
-User Function AEST013()
+===============================================================================================================================
+*/
+User Function AEST013
+
 Local cAlias		 :="ZE0"
 Private cCadastro	 :="Eventos de custo Gerencial"
 Private aRotina	 :={}   
 Private _aItalac_F3:={}
 
-
 bGrpCus:={||"SELECT ZL5_CODGRP, ZL5_DESGRP,ZL5_TPCUST, ZL5_DTPCUS FROM " + RetSqlName("ZL5") + " ZL5 "+;
             " WHERE ZL5_TPCUST = '"+M->ZE0_TPCUS+"' "+;
             "   AND ZL5_FILIAL = ' ' "+;
             "   AND D_E_L_E_T_ = ' ' "}
-_bValGrv:={|cOri,_aDados|IF(cOri="D" .AND. LEN(_aDados)=0,(U_ITmsg("Não existem registros de grupos para a selecao acima para essa filial.",,,3),_cRetorno:=.F.,.F.),.T.) }
+_bValGrv:={|cOri,_aDados|If(cOri="D" .And. Len(_aDados)=0,(U_ITMsg("Não existem registros de grupos para a selecao acima para essa filial.",,,3),_cRetorno:=.F.,.F.),.T.) }
 
 //AD(_aItalac_F3,{"1CPO_CAMPO1",_cTabela,_nCpoChave            , _nCpoDesc              ,_bCondTab    ,                  _cTitAux, _nTamChv , _aDados  , _nMaxSel , _lFilAtual,_cMVRET,_bValida})
-AADD(_aItalac_F3,{"M->ZE0_GRPCT",bGrpCus,{|Tab| ((Tab)->ZL5_CODGRP) }, {|Tab| ALLTRIM((Tab)->ZL5_DESGRP)+;
+aAdd(_aItalac_F3,{"M->ZE0_GRPCT",bGrpCus,{|Tab| ((Tab)->ZL5_CODGRP) }, {|Tab| AllTrim((Tab)->ZL5_DESGRP)+;
                                                                               " / Tipo Custo: "+AllTrim((Tab)->ZL5_TPCUST)+;
                                                                               " / "+AllTrim((Tab)->ZL5_DTPCUS) } , ,"Grupo Custo",          ,          ,    1     ,.F.        ,       ,_bValGrv } )
 
@@ -53,10 +47,10 @@ bGrpCus:={||"SELECT ZL6_FILIAL,ZL6_CODEVE,ZL6_DESEVE,ZL6_TPCUS,ZL6_DTPCUS,ZL6_GR
             "   AND D_E_L_E_T_ = ' ' "+;
             " GROUP BY ZL6_FILIAL,ZL6_CODEVE,ZL6_DESEVE,ZL6_TPCUS,ZL6_DTPCUS,ZL6_GRPCUS,ZL6_DGRCUS "+;
             " ORDER BY ZL6_CODEVE" }
-_bValEnv:={|cOri,_aDados|IF(cOri="D" .AND. LEN(_aDados)=0,(U_ITmsg("Não existem registros de eventos para a selecao acima para essa filial.",,,3),_cRetorno:=.F.,.F.),.T.) }
+_bValEnv:={|cOri,_aDados|If(cOri="D" .And. Len(_aDados)=0,(U_ITMsg("Não existem registros de eventos para a selecao acima para essa filial.",,,3),_cRetorno:=.F.,.F.),.T.) }
 
 //AD(_aItalac_F3,{"1CPO_CAMPO1",_cTabela,_nCpoChave            , _nCpoDesc              ,_bCondTab    ,                  _cTitAux         , _nTamChv , _aDados  , _nMaxSel , _lFilAtual,_cMVRET,_bValida})
-AADD(_aItalac_F3,{"M->ZE0_EVCUS",bGrpCus,{|Tab| ((Tab)->ZL6_CODEVE) }, {|Tab| ALLTRIM((Tab)->ZL6_DESEVE)+;
+aAdd(_aItalac_F3,{"M->ZE0_EVCUS",bGrpCus,{|Tab| ((Tab)->ZL6_CODEVE) }, {|Tab| AllTrim((Tab)->ZL6_DESEVE)+;
                                                                               " / Tipo: "+AllTrim((Tab)->ZL6_TPCUS)+;
                                                                               " / "+AllTrim((Tab)->ZL6_DTPCUS)+;
                                                                               " / Grupo: "+(Tab)->ZL6_GRPCUS+;
@@ -72,8 +66,8 @@ bEventos:={||" SELECT ZL6_FILIAL,ZL6_SUBEVE,ZL6_DSUBEV,ZL6_CODEVE,ZL6_DESEVE,ZL6
             " GROUP BY ZL6_FILIAL,ZL6_SUBEVE,ZL6_DSUBEV,ZL6_CODEVE,ZL6_DESEVE,ZL6_TPCUS,ZL6_DTPCUS,ZL6_GRPCUS,ZL6_DGRCUS "+;
             " ORDER BY ZL6_SUBEVE" }
 	
-_bValSub:={|cOri,_aDados|IF(cOri="D" .AND. LEN(_aDados)=0,(U_ITmsg("Não existem registros de sub-eventos para a selecao acima para essa filial.",,,3),_cRetorno:=.F.,.F.),.T.) }
-AADD(_aItalac_F3,{"M->ZE0_SEVCT",bEventos,{|Tab| ((Tab)->ZL6_SUBEVE) }, {|Tab| ALLTRIM((Tab)->ZL6_DSUBEV)+;
+_bValSub:={|cOri,_aDados|If(cOri="D" .And. Len(_aDados)=0,(U_ITMsg("Não existem registros de sub-eventos para a selecao acima para essa filial.",,,3),_cRetorno:=.F.,.F.),.T.) }
+aAdd(_aItalac_F3,{"M->ZE0_SEVCT",bEventos,{|Tab| ((Tab)->ZL6_SUBEVE) }, {|Tab| AllTrim((Tab)->ZL6_DSUBEV)+;
                                                                               " / Tipo: "+AllTrim((Tab)->ZL6_TPCUS)+;
                                                                               " / "+AllTrim((Tab)->ZL6_DTPCUS)+;
                                                                               " / Grupo: "+(Tab)->ZL6_GRPCUS+;
@@ -82,84 +76,79 @@ AADD(_aItalac_F3,{"M->ZE0_SEVCT",bEventos,{|Tab| ((Tab)->ZL6_SUBEVE) }, {|Tab| A
                                                                               " / "+AllTrim((Tab)->ZL6_DESEVE) } , ,"Sub-Evento Custo",          ,          ,    1     ,.F.        ,       , _bValSub})
 //AD(_aItalac_F3,{"1CPO_CAMPO1",_cTabela,_nCpoChave            , _nCpoDesc              ,_bCondTab    ,                   _cTitAux    , _nTamChv , _aDados  , _nMaxSel , _lFilAtual,_cMVRET,_bValida})
 
-AADD(aRotina,{"Pesquisar"	,"AxPesqui",0,1})
-AADD(aRotina,{"Visualizar"	,"AxVisual",0,2})
-IF U_ITVACESS( 'ZZL' , 3 , 'ZZL_FCUSTO' , "S" )
-   AADD(aRotina,{"Incluir"	   ,"U_AEST13Manut",0,3})
-ENDIF
-AADD(aRotina,{"Alterar"		,"U_AEST13Manut",0,4})
-IF U_ITVACESS( 'ZZL' , 3 , 'ZZL_FCUSTO' , "S" )
-   AADD(aRotina,{"Excluir"    ,"U_AEST13Manut",0,5})
-   AADD(aRotina,{"Importacao de dados","U_AEST13Manut",0,4})
-ENDIF	
-dbSelectArea(cAlias)
-dbSetOrder(1)
+aAdd(aRotina,{"Pesquisar"	,"AxPesqui",0,1})
+aAdd(aRotina,{"Visualizar"	,"AxVisual",0,2})
+If U_ITVACESS( 'ZZL' , 3 , 'ZZL_FCUSTO' , "S" )
+   aAdd(aRotina,{"Incluir"	   ,"U_AEST13Manut",0,3})
+EndIf
+aAdd(aRotina,{"Alterar"		,"U_AEST13Manut",0,4})
+If U_ITVACESS( 'ZZL' , 3 , 'ZZL_FCUSTO' , "S" )
+   aAdd(aRotina,{"Excluir"    ,"U_AEST13Manut",0,5})
+   aAdd(aRotina,{"Importacao de dados","U_AEST13Manut",0,4})
+EndIf	
+DBSelectArea(cAlias)
+DBSetOrder(1)
 mBrowse(6,1,22,75,cAlias)
 
-Return Nil
+Return
 /*
 ===============================================================================================================================
 Programa----------: U_AEST13Manut
 Autor-------------: Alex Wallauer
 Data da Criacao---: 13/07/2017
-===============================================================================================================================
 Descricao---------: Manutenção do ZE0
-===============================================================================================================================
 Parametros--------: cAlias,nReg,nOpc
-===============================================================================================================================
 Retorno-----------: .T.
-===============================================================================================================================*/
+===============================================================================================================================
+*/
 User Function AEST13Manut(cAlias,nReg,nOpc)
 
-PRIVATE _aDadosAnterior := {}
+Private _aDadosAnterior := {}
 
-IF nOpc = 3
-//    Return AxInclui(cAlias,nReg,nOpc;;;;;,"U_AEST13Log('I')")
-      Return AxInclui(cAlias,nReg,nOpc,;
-       /*aAcho>     */ ,;
-       /*cFunc>     */ ,;
-       /*aCpos>     */ ,;
-       /*cTudoOk>   */ 'U_AEST13Val(M->ZE0_DATARQ)',;
-       /*lF3>       */ ,;
-       /*cTransact> */ "U_AEST13Log('I')",;//Antes 
-       /*aButtons>  */ ,;
-       /*aParam>    */ ,;
-       /*aAuto>     */ ,;
-       /*lVirtual>  */ ,;
-       /*lMaximized>*/ )
+If nOpc = 3
+   Return AxInclui(cAlias,nReg,nOpc,;
+      /*aAcho>     */ ,;
+      /*cFunc>     */ ,;
+      /*aCpos>     */ ,;
+      /*cTudoOk>   */ 'U_AEST13Val(M->ZE0_DATARQ)',;
+      /*lF3>       */ ,;
+      /*cTransact> */ "U_AEST13Log('I')",;//Antes 
+      /*aButtons>  */ ,;
+      /*aParam>    */ ,;
+      /*aAuto>     */ ,;
+      /*lVirtual>  */ ,;
+      /*lMaximized>*/ )
 
-ELSEIF nOpc = 4
-   IF U_AEST13Val(ZE0->ZE0_DATARQ)
+ElseIf nOpc = 4
+   If U_AEST13Val(ZE0->ZE0_DATARQ)
       Return  AxAltera(cAlias,nReg,nOpc,,,,,,"U_AEST13Log('A')","U_AEST13Log('GUARDA')")
-   ENDIF
-ELSEIF nOpc = 5
-   IF U_AEST13Val(ZE0->ZE0_DATARQ)
+   EndIf
+ElseIf nOpc = 5
+   If U_AEST13Val(ZE0->ZE0_DATARQ)
       Return  AxDeleta(cAlias,nReg,nOpc,"U_AEST13Log('E')")
-   ENDIF
-ELSEIF nOpc = 6
-   FWMSGRUN( ,{|oproc| AEST13Imp(oproc) } ,"Processando..." ,"Iniciando o processamento..." )
-ENDIF
+   EndIf
+ElseIf nOpc = 6
+   FWMsgRun( ,{|oproc| AEST13Imp(oproc) } ,"Processando..." ,"Iniciando o processamento..." )
+EndIf
 
-Return .t.
+Return .T.
 
 /*
 ===============================================================================================================================
 Programa----------: AEST13Log()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 13/07/2017
-===============================================================================================================================
 Descricao---------: Grava o log ZE0
-===============================================================================================================================
 Parametros--------: cTipo: I ou A ou E
-===============================================================================================================================
 Retorno-----------: .T.
 ===============================================================================================================================
 */
 User Function AEST13Log(cTipo)
-LOCAL I,_aDadAlt:={}
-LOCAL _lTemDiferente:=.F.
 
-IF cTipo == 'GUARDA'//Executado antes da tela do alterar para guardar os dados anterior
+Local I,_aDadAlt:={}
+Local _lTemDiferente:=.F.
+
+If cTipo == 'GUARDA'//Executado antes da tela do alterar para guardar os dados anterior
 
    aAdd( _aDadosAnterior ,  ZE0->ZE0_QTDE    )
    aAdd( _aDadosAnterior ,  ZE0->ZE0_VALOR   )
@@ -167,9 +156,9 @@ IF cTipo == 'GUARDA'//Executado antes da tela do alterar para guardar os dados a
    aAdd( _aDadosAnterior ,  ZE0->ZE0_VDOLAR  )
    aAdd( _aDadosAnterior ,  ZE0->ZE0_LITRAG  )
    aAdd( _aDadosAnterior ,  ZE0->ZE0_LITRA2  )//Array _aDadAlt tem que ter o mesmo numero de linhas que a array _aDadosAnterior
-   RETURN .T.
+   Return .T.
 
-ELSE//IF cTipo $ "I,E"
+Else//If cTipo $ "I,E"
 
    aAdd( _aDadAlt , { "ZE0_QTDE"   ,ZE0->ZE0_QTDE   ,M->ZE0_QTDE   ,00,.F.} )
    aAdd( _aDadAlt , { "ZE0_VALOR"  ,ZE0->ZE0_VALOR  ,M->ZE0_VALOR  ,00,.F.} )
@@ -178,111 +167,105 @@ ELSE//IF cTipo $ "I,E"
    aAdd( _aDadAlt , { "ZE0_LITRAG" ,ZE0->ZE0_LITRAG ,M->ZE0_LITRAG ,00,.F.} )
    aAdd( _aDadAlt , { "ZE0_LITRA2" ,ZE0->ZE0_LITRA2 ,M->ZE0_LITRA2 ,00,.F.} )//Array _aDadAlt tem que ter o mesmo numero de linhas que a array _aDadosAnterior
 
-ENDIF
+EndIf
 
-IF cTipo = "I"
+If cTipo = "I"
    cTipo:="Inclusão"
-   FOR I := 1 TO LEN(_aDadAlt)
+   For I := 1 To Len(_aDadAlt)
        _aDadAlt[I,2]:=_aDadAlt[I,4]//Limpa a origem
        _aDadAlt[I,5]:=.T.
-   NEXT
+   Next
    _lTemDiferente:=.T.
-ELSEIF cTipo = "A"
+ElseIf cTipo = "A"
    cTipo:="Alteração"
-   FOR I := 1 TO LEN(_aDadAlt)//Array _aDadAlt tem que ter o mesmo numero de linhas que a array _aDadosAnterior
-       IF (_aDadAlt[I,2] # _aDadosAnterior[I])//Verifica se os dados estao diferentes
+   For I := 1 To Len(_aDadAlt)//Array _aDadAlt tem que ter o mesmo numero de linhas que a array _aDadosAnterior
+       If (_aDadAlt[I,2] # _aDadosAnterior[I])//Verifica se os dados estao diferentes
           _lTemDiferente:=.T.
           _aDadAlt[I,5]:=.T.
-       ENDIF
+       EndIf
        _aDadAlt[I,2]:=_aDadosAnterior[I]//Grava o valor anterior pq nesse momento os dados do arquivo já esta = ao da memoria
-   NEXT
-ELSEIF cTipo = "E"
+   Next
+ElseIf cTipo = "E"
    cTipo:="Exclusão"
     _lTemDiferente:=.T.
-   FOR I := 1 TO LEN(_aDadAlt)
+   For I := 1 To Len(_aDadAlt)
        _aDadAlt[I,3]:=_aDadAlt[I,4]//Limpa o destino
        _aDadAlt[I,5]:=.T.
-   NEXT
-ENDIF
+   Next
+EndIf
 
-IF _lTemDiferente
+If _lTemDiferente
    // Grava o LOG
    U_ITGrvLog( _aDadAlt , 'ZE0' , 1 , ZE0->( ZE0_FILIAL+ZE0_DATARQ+ZE0_GRPCT+ZE0_TPCUS+ZE0_EVCUS+ZE0_SEVCT ) , cTipo , RetCodUsr() )
    // Envia WF
    AEST13WF(_aDadAlt,cTipo,{})
-ENDIF
+EndIf
 
-RETURN .T.
-
+Return .T.
 
 /*
 ===============================================================================================================================
 Programa----------: F3ZL5Filtro()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 18/01/2022
-===============================================================================================================================
 Descricao---------: Filtro do F4 do ZL5
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: .T. ou .F.
 ===============================================================================================================================*/
-USER Function F3ZL5Filtro()//U_F3ZL5Filtro()
+User Function F3ZL5Filtro
 
-IF IsInCallStack("U_AEST013")
-   RETURN (M->ZE0_TPCUS = ZL5->ZL5_TPCUST)
-ELSE
-   RETURN (M->ZL6_TPCUS = ZL5->ZL5_TPCUST)
-ENDIF
-RETURN .T.
+If IsInCallStack("U_AEST013")
+   Return (M->ZE0_TPCUS = ZL5->ZL5_TPCUST)
+Else
+   Return (M->ZL6_TPCUS = ZL5->ZL5_TPCUST)
+EndIf
+
+Return .T.
 
 /*
 ===============================================================================================================================
 Programa----------: AEST13Val()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 18/07/2022
-===============================================================================================================================
 Descricao---------: Data : ZE0_DATARQ
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: .T. ou .F.
-===============================================================================================================================*/
-USER Function AEST13Val(cData)//U_AEST13Val(M-ZE0_DATARQ)
-LOCAL _cDatAtual:=U_ITGETMV( "IT_ULMES" ,"012001") 
-LOCAL _cDataZE0 :=SUBSTR(cData,3,4)+SUBSTR(cData ,1,2)//ZE0->ZE0_DATARQ
-_cDatAtual:=SUBSTR(_cDatAtual,3,4)+SUBSTR(_cDatAtual,1,2)
+===============================================================================================================================
+*/
+User Function AEST13Val(cData)
 
-IF _cDataZE0 <= _cDatAtual 
-   _cDatAtual:=SUBSTR(_cDatAtual,5,2)+"/"+SUBSTR(_cDatAtual,1,4)
-   U_ITmsg("Não é permitido alterar registros menor ou igual ao mes / ano: "+_cDatAtual,,,3)
-   RETURN .F.
-ENDIF
-RETURN .T.
+Local _cDatAtual:=SuperGetMV("IT_ULMES",.F.,"012001")
+Local _cDataZE0 :=SubStr(cData,3,4)+SubStr(cData ,1,2)//ZE0->ZE0_DATARQ
+_cDatAtual:=SubStr(_cDatAtual,3,4)+SubStr(_cDatAtual,1,2)
+
+If _cDataZE0 <= _cDatAtual 
+   _cDatAtual:=SubStr(_cDatAtual,5,2)+"/"+SubStr(_cDatAtual,1,4)
+   U_ITMsg("Não é permitido alterar registros menor ou igual ao mes / ano: "+_cDatAtual,,,3)
+   Return .F.
+EndIf
+
+Return .T.
 
 /*
 ===============================================================================================================================
 Programa----------: AEST13Imp()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 18/07/2022
-===============================================================================================================================
 Descricao---------: importa daodos do CSV PARA ZE0
-===============================================================================================================================
 Parametros--------: cTipo: I ou A ou E
-===============================================================================================================================
 Retorno-----------: .T.
 ===============================================================================================================================
 */
-STATIC Function AEST13Imp(oproc)
+Static Function AEST13Imp(oproc)
 
 Local _aParAux	:= {}
 Local _aParRet	:= {}
-LOCAL nI ,_lOK := .F.
+Local nI ,_lOK := .F.
 Private oMarkBRW	:= Nil
 Private cAliasAux	:= GetNextAlias()
 Private _nTotReg	:= 0
 
-MV_PAR01 := SPACE(200)
+MV_PAR01 := Space(200)
  
 aAdd( _aParAux ,{ 1 ,"Selecione arquivo:"		,MV_PAR01,"@!"		,""	,"DIR"		,"" ,100 ,.T. } ) 	
 
@@ -291,54 +274,42 @@ For nI := 1 To Len( _aParAux )
 Next nI
 
           //aParametros,cTitle                                   ,@aRet    ,[bOk]  ,[ aButtons ] [ lCentered ] [ nPosX ] [ nPosy ] [ oDlgWizard ] [ cLoad ] [ lCanSave ] [ lUserSave ] 
-IF !ParamBox( _aParAux ,"Selecione o Arquivo .CSV para Importar" ,@_aParRet,       ,/*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
+If !ParamBox( _aParAux ,"Selecione o Arquivo .CSV para Importar" ,@_aParRet,       ,/*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
 	Return .T.
 EndIf
 
-cTimeInicial:=TIME()
+cTimeInicial:=Time()
 
 oproc:cCaption := ("Abrindo arquivo...")
 ProcessMessages()
 
-IF (upper(right(alltrim(MV_PAR01),4))) == ".CSV" 
-
-	_carq := ALLTRIM(MV_PAR01)
-
+If (Upper(right(AllTrim(MV_PAR01),4))) == ".CSV" 
+	_carq := AllTrim(MV_PAR01)
 	If FT_FUSE(_carq) == -1
-	
-		u_itmsg("1-Falha ao abrir o arquivo: "+_carq,"Erro",,1)
-		
+		U_ITMsg("1-Falha ao abrir o arquivo: "+_carq,"Erro",,1)
 		Return .F.
-		
-	Endif 
+	EndIf 
 	          
   	FT_FGOTOP() //POSICIONA NO TOPO DO ARQUIVO
   	_cDados := FT_FREADLN()
 
-  	If UPPER(alltrim(_cDados)) == UPPER("ZE0_TPCUS;ZE0_GRPCT;ZE0_EVCUS;ZE0_SEVCT;ZE0_QTDE;ZE0_VALOR;ZE0_DATARQ;ZE0_VLRLT;ZE0_VDOLAR;ZE0_LITRAG;ZE0_LITRA2")///********************
+  	If Upper(AllTrim(_cDados)) == Upper("ZE0_TPCUS;ZE0_GRPCT;ZE0_EVCUS;ZE0_SEVCT;ZE0_QTDE;ZE0_VALOR;ZE0_DATARQ;ZE0_VLRLT;ZE0_VDOLAR;ZE0_LITRAG;ZE0_LITRA2")///********************
 	   _lOK := .T. 
-  	Endif
+  	EndIf
 
 	//Fecha arquivo e prepara parâmetro com arquivo convertido
 	FT_FUSE()
-
-ELSE
-
-	U_ITMSG("O arquivo informado: "+Alltrim(MV_PAR01)+" não tem extenção [ .CSV ] ",;
+Else
+	U_ITMsg("O arquivo informado: "+AllTrim(MV_PAR01)+" não tem extenção [ .CSV ] ",;
             "Arquivo inválido",;
 		    "Favor informar uma arquivo no formato [ .CSV ].")
 	Return .F.
-
 EndIf
 
-
 If _lOK 
-
 	If FT_FUSE(_carq) == -1
-		
-		u_itmsg("Falha ao abrir o arquivo: "+_carq,"Erro",,1)
+		U_ITMsg("Falha ao abrir o arquivo: "+_carq,"Erro",,1)
 		Return .F.
-
 	EndIf
 	
 	FT_FGOTOP() //POSICIONA NO TOPO DO ARQUIVO
@@ -350,86 +321,78 @@ If _lOK
 	FT_FGOTOP() //POSICIONA NO TOPO DO ARQUIVO
 	
 	If _nReg == 0 //O arquivo informado nao possui nenhuma linha de dados
-		
-		U_ITMSG("O arquivo informado para relizar a importação não possui dados.",;
+		U_ITMsg("O arquivo informado para relizar a importação não possui dados.",;
                 "Arquivo inválido",;
 				"Favor verificar se o arquivo informado esta no formato correto.")
 		Return .F.
-	
 	EndIf
 
 	_aDados := AEST13LER(oproc,_nReg) //Faz leitura dos dados
 
-	If len(_aDados) <= 0
-
-		u_itmsg( "Não foram encontrados registros válidos no arquivo!" ,"Atenção!",,1 )
+	If Len(_aDados) <= 0
+		U_ITMsg( "Não foram encontrados registros válidos no arquivo!" ,"Atenção!",,1 )
 		Return .F.
-	
 	EndIf
-
 Else
-
-	U_ITMSG("O arquivo "+_carq+" informado para relizar a importação não tem o layout padrão.",;
+	U_ITMsg("O arquivo "+_carq+" informado para relizar a importação não tem o layout padrão.",;
             "Arquivo com formato inválido",;
 			"O CSV deve ter as colunas [ ZE0_TPCUS;ZE0_GRPCT;ZE0_EVCUS;ZE0_SEVCT;ZE0_QTDE;ZE0_VALOR;ZE0_DATARQ;ZE0_VLRLT;ZE0_VDOLAR;ZE0_LITRAG;ZE0_LITRA2 ] e o mesmo deve ser salvo "+;
 		    "no Excel no formato [ CSV (separado por virgulas) ] ",1)
 		Return .F.
-	
-Endif
+EndIf
 
-
-DO WHILE LEN(_aDados) > 0 
+While Len(_aDados) > 0 
    lGravar:=.F.
    _aCab:={}
    _aSizes:={}
 
-   AADD(_aCab,"" ) 
-   AADD(_aSizes,10)
-   AADD(_aCab,Getsx3cache("ZE0_FILIAL","X3_TITULO") )//02 
-   AADD(_aSizes,20)
-   AADD(_aCab,Getsx3cache("ZE0_TPCUS" ,"X3_TITULO") )//03 
-   AADD(_aSizes,35)
-   AADD(_aCab,Getsx3cache("ZE0_GRPCT" ,"X3_TITULO") )//04 
-   AADD(_aSizes,35)
-   AADD(_aCab,Getsx3cache("ZE0_EVCUS" ,"X3_TITULO") )//05 
-   AADD(_aSizes,35)
-   AADD(_aCab,Getsx3cache("ZE0_SEVCT" ,"X3_TITULO") )//06 
-   AADD(_aSizes,35)
-   AADD(_aCab,Getsx3cache("ZE0_QTDE"  ,"X3_TITULO") )//07
-   AADD(_aSizes,35)
-   AADD(_aCab,Getsx3cache("ZE0_VALOR" ,"X3_TITULO") )//08
-   AADD(_aSizes,35)
-   AADD(_aCab,Getsx3cache("ZE0_DATARQ","X3_TITULO") )//09
-   AADD(_aSizes,35)
-   AADD(_aCab,Getsx3cache("ZE0_VLRLT" ,"X3_TITULO") )//10
-   AADD(_aSizes,35)
-   AADD(_aCab,Getsx3cache("ZE0_VDOLAR","X3_TITULO") )//11 
-   AADD(_aSizes,35)
-   AADD(_aCab,Getsx3cache("ZE0_LITRAG","X3_TITULO") )//12 
-   AADD(_aSizes,35)
-   AADD(_aCab,Getsx3cache("ZE0_LITRA2","X3_TITULO") )//13 
-   AADD(_aSizes,35)
-   AADD(_aCab,'Observacao')//14
-   AADD(_aSizes,150)
+   aAdd(_aCab,"" ) 
+   aAdd(_aSizes,10)
+   aAdd(_aCab,Getsx3cache("ZE0_FILIAL","X3_TITULO") )//02 
+   aAdd(_aSizes,20)
+   aAdd(_aCab,Getsx3cache("ZE0_TPCUS" ,"X3_TITULO") )//03 
+   aAdd(_aSizes,35)
+   aAdd(_aCab,Getsx3cache("ZE0_GRPCT" ,"X3_TITULO") )//04 
+   aAdd(_aSizes,35)
+   aAdd(_aCab,Getsx3cache("ZE0_EVCUS" ,"X3_TITULO") )//05 
+   aAdd(_aSizes,35)
+   aAdd(_aCab,Getsx3cache("ZE0_SEVCT" ,"X3_TITULO") )//06 
+   aAdd(_aSizes,35)
+   aAdd(_aCab,Getsx3cache("ZE0_QTDE"  ,"X3_TITULO") )//07
+   aAdd(_aSizes,35)
+   aAdd(_aCab,Getsx3cache("ZE0_VALOR" ,"X3_TITULO") )//08
+   aAdd(_aSizes,35)
+   aAdd(_aCab,Getsx3cache("ZE0_DATARQ","X3_TITULO") )//09
+   aAdd(_aSizes,35)
+   aAdd(_aCab,Getsx3cache("ZE0_VLRLT" ,"X3_TITULO") )//10
+   aAdd(_aSizes,35)
+   aAdd(_aCab,Getsx3cache("ZE0_VDOLAR","X3_TITULO") )//11 
+   aAdd(_aSizes,35)
+   aAdd(_aCab,Getsx3cache("ZE0_LITRAG","X3_TITULO") )//12 
+   aAdd(_aSizes,35)
+   aAdd(_aCab,Getsx3cache("ZE0_LITRA2","X3_TITULO") )//13 
+   aAdd(_aSizes,35)
+   aAdd(_aCab,'Observacao')//14
+   aAdd(_aSizes,150)
 
-   _cMsgTop:="Pedidos encontrados - H.I.: "+cTimeInicial+" H.F.: "+TIME()
+   _cMsgTop:="Pedidos encontrados - H.I.: "+cTimeInicial+" H.F.: "+Time()
 
    _cTitulo:="Importacao de dados do Csuto Gerencial"
 
-   bOk:={|oDlg| IF(U_ITMSG("Confirma Gravacao ?",'Atenção!',,3,2,2) ,(lGravar:=.T., oDlg:End() ) , )   }
+   bOk:={|oDlg| If(U_ITMsg("Confirma Gravacao ?",'Atenção!',,3,2,2) ,(lGravar:=.T., oDlg:End() ) , )   }
 
    //                        , _aCols  ,_lMaxSiz,_nTipo,_cMsgTop, _lSelUnc ,_aSizes , _nCampo , bOk , bCancel, _abuttons )
    U_ITListBox(_cTitulo,_aCab,_aDados  , .T.    , 4    ,_cMsgTop,          ,_aSizes   ,         , bOk ,        , )
                                                                                                   
-   IF lGravar
+   If lGravar
       AEST13GRV(oproc,_nReg)
-   ELSEIF  !U_ITMSG("Confirma Sair ?",'Atenção!',,3,2,2)
-       LOOP
-   ENDIF
+   ElseIf  !U_ITMsg("Confirma Sair ?",'Atenção!',,3,2,2)
+       Loop
+   EndIf
 
-   EXIT
+   Exit
 
-ENDDO
+EndDo
 
 Return .F.
 
@@ -438,152 +401,131 @@ Return .F.
 Programa----------: AEST13LER
 Autor-------------: Alex Wallauer Ferreira
 Data da Criacao---: 180/07/2022
-===============================================================================================================================
 Descrição---------: Faz a leitura de dados
-===============================================================================================================================
 Parametros--------: oproc - objeto da barra de processamento
-===============================================================================================================================
 Retorno-----------: _aDados - array com dados carregados do arquivo
 ===============================================================================================================================
 */
-
-Static function AEST13LER(oproc,_nReg)
+Static Function AEST13LER(oproc,_nReg)
 
 Local _nCont 	 := 0
 Local _cdados	 := ""
 Local _alinha	 := {}
 Local _aDados 	 := {}
-//LOCAL _cDatAtual:=U_ITGETMV( "IT_ULMES" ,"012001") 
 
-ZL6->(DBSETORDER(6))// ZL6_FILIAL    +ZL6_TPCUS  +ZL6_GRPCUS +ZL6_CODEVE +ZL6_SUBEVE
-ZE0->(DBSETORDER(6))// ZE0_FILIAL+ZE0_DATARQ +ZE0_TPCUS  +ZE0_GRPCT   +ZE0_EVCUS+ZE0_SEVCT
+ZL6->(DBSetOrder(6))// ZL6_FILIAL    +ZL6_TPCUS  +ZL6_GRPCUS +ZL6_CODEVE +ZL6_SUBEVE
+ZE0->(DBSetOrder(6))// ZE0_FILIAL+ZE0_DATARQ +ZE0_TPCUS  +ZE0_GRPCT   +ZE0_EVCUS+ZE0_SEVCT
 
 FT_FGOTOP() //POSICIONA NO TOPO DO ARQUIVO
 FT_FSKIP()
 _aChaveRepetida:={}
-DO While !FT_FEOF()  //FACA ENQUANTO NAO FOR FIM DE ARQUIVO
+While !FT_FEof()  //FACA ENQUANTO NAO For FIM DE ARQUIVO
 	
 	_nCont++ 
-	oproc:cCaption := ( "Lendo linha " + strzero(_nCont,6) + " de " + strzero(_nreg,6) + "." )
+	oproc:cCaption := ( "Lendo linha " + StrZero(_nCont,6) + " de " + StrZero(_nreg,6) + "." )
 	ProcessMessages()
 			
 	_cDados := (cFilant+";"+FT_FREADLN())
 	_aLinha := StrTokArr(_cDados,";")
 	
 	//Verifica se é final de arquivo
-	If alltrim(_cdados) = ';;;;;' .and. _nCont > 4
+	If AllTrim(_cdados) = ';;;;;' .And. _nCont > 4
 		Exit
-	Endif 	
+	EndIf 	
 	
 	//Verifica se é linha válida
-	If LEN(_aLinha) < 12	
+	If Len(_aLinha) < 12	
 		FT_FSKIP()
 		Loop		
-	Endif
+	EndIf
    
     _cErro:=""
 	
-  	 IF !SM0->(DBSEEK( cEmpAnt + _aLinha[01] ) )
+  	 If !SM0->(DBSeek( cEmpAnt + _aLinha[01] ) )
        _cErro:="[Filial nao existe: "+_cFilial+"] "
-    ENDIF
+    EndIf
 
      // ZL6_FILIAL    +ZL6_TPCUS  +ZL6_GRPCUS +ZL6_CODEVE +ZL6_SUBEVE
 
-    _aLinha[02]:=STRZERO(VAL(_aLinha[02]),LEN(ZL6->ZL6_TPCUS ))
-    _aLinha[03]:=STRZERO(VAL(_aLinha[03]),LEN(ZL6->ZL6_GRPCUS))
-    _aLinha[04]:=STRZERO(VAL(_aLinha[04]),LEN(ZL6->ZL6_CODEVE))
-    _aLinha[05]:=STRZERO(VAL(_aLinha[05]),LEN(ZL6->ZL6_SUBEVE))
+    _aLinha[02]:=StrZero(Val(_aLinha[02]),Len(ZL6->ZL6_TPCUS ))
+    _aLinha[03]:=StrZero(Val(_aLinha[03]),Len(ZL6->ZL6_GRPCUS))
+    _aLinha[04]:=StrZero(Val(_aLinha[04]),Len(ZL6->ZL6_CODEVE))
+    _aLinha[05]:=StrZero(Val(_aLinha[05]),Len(ZL6->ZL6_SUBEVE))
 
-    _aLinha[06]:=STRTRAN(_aLinha[06],".","")//Tira o seprador de milhar brasileiro
-    _aLinha[07]:=STRTRAN(_aLinha[07],".","")//Tira o seprador de milhar brasileiro
-    _aLinha[09]:=STRTRAN(_aLinha[09],".","")//Tira o seprador de milhar brasileiro
-    _aLinha[10]:=STRTRAN(_aLinha[10],".","")//Tira o seprador de milhar brasileiro
-    _aLinha[11]:=STRTRAN(_aLinha[11],".","")//Tira o seprador de milhar brasileiro
-    _aLinha[12]:=STRTRAN(_aLinha[12],".","")//Tira o seprador de milhar brasileiro
+    _aLinha[06]:=StrTran(_aLinha[06],".","")//Tira o seprador de milhar brasileiro
+    _aLinha[07]:=StrTran(_aLinha[07],".","")//Tira o seprador de milhar brasileiro
+    _aLinha[09]:=StrTran(_aLinha[09],".","")//Tira o seprador de milhar brasileiro
+    _aLinha[10]:=StrTran(_aLinha[10],".","")//Tira o seprador de milhar brasileiro
+    _aLinha[11]:=StrTran(_aLinha[11],".","")//Tira o seprador de milhar brasileiro
+    _aLinha[12]:=StrTran(_aLinha[12],".","")//Tira o seprador de milhar brasileiro
 
-    _aLinha[06]:=STRTRAN(_aLinha[06],",",".")//Troca os separadores de decimal brasileiro para o ingles
-    _aLinha[07]:=STRTRAN(_aLinha[07],",",".")//Troca os separadores de decimal brasileiro para o ingles
-    _aLinha[09]:=STRTRAN(_aLinha[09],",",".")//Troca os separadores de decimal brasileiro para o ingles
-    _aLinha[10]:=STRTRAN(_aLinha[10],",",".")//Troca os separadores de decimal brasileiro para o ingles
-    _aLinha[11]:=STRTRAN(_aLinha[11],",",".")//Troca os separadores de decimal brasileiro para o ingles
-    _aLinha[12]:=STRTRAN(_aLinha[12],",",".")//Troca os separadores de decimal brasileiro para o ingles
+    _aLinha[06]:=StrTran(_aLinha[06],",",".")//Troca os separadores de decimal brasileiro para o ingles
+    _aLinha[07]:=StrTran(_aLinha[07],",",".")//Troca os separadores de decimal brasileiro para o ingles
+    _aLinha[09]:=StrTran(_aLinha[09],",",".")//Troca os separadores de decimal brasileiro para o ingles
+    _aLinha[10]:=StrTran(_aLinha[10],",",".")//Troca os separadores de decimal brasileiro para o ingles
+    _aLinha[11]:=StrTran(_aLinha[11],",",".")//Troca os separadores de decimal brasileiro para o ingles
+    _aLinha[12]:=StrTran(_aLinha[12],",",".")//Troca os separadores de decimal brasileiro para o ingles
 
-    _aLinha[08]:=ALLTRIM(_aLinha[08])
-    IF LEN(_aLinha[08]) < 6
+    _aLinha[08]:=AllTrim(_aLinha[08])
+    If Len(_aLinha[08]) < 6
        _aLinha[08]:="0"+_aLinha[08]
-    ENDIF
+    EndIf
 
-    IF VAL(LEFT(_aLinha[08],2))   < 0     .OR.   VAL(LEFT(_aLinha[08],2))   > 12 .OR.;
-     VAL(SUBSTR(_aLinha[08],3,4)) < 2000  .OR. VAL(SUBSTR(_aLinha[08],3,4)) > 3000
+    If Val(LEFT(_aLinha[08],2))   < 0     .Or.   Val(LEFT(_aLinha[08],2))   > 12 .OR.;
+     Val(SubStr(_aLinha[08],3,4)) < 2000  .Or. Val(SubStr(_aLinha[08],3,4)) > 3000
        _cErro+="[Data arq. invalida:  "+_aLinha[08]+"] "
-    ENDIF
-
-    //IF _aLinha[08] <= _cDatAtual 
-    //   _cErro+="[Não é permitido data "+_aLinha[08]+" menor ou igual ao mes / ano: "+_cDatAtual+"] "
-    //ENDIF
+    EndIf
 
            // ZL6_FILIAL    +ZL6_TPCUS  +ZL6_GRPCUS +ZL6_CODEVE +ZL6_SUBEVE
-    _cChave1:=XFILIAL("ZL6")+_aLinha[02]+_aLinha[03]+_aLinha[04]+_aLinha[05]
-    _cChave2:=XFILIAL("ZL6")+" "+_aLinha[02]+" "+_aLinha[03]+" "+_aLinha[04]+" "+_aLinha[05]
+    _cChave1:=xFilial("ZL6")+_aLinha[02]+_aLinha[03]+_aLinha[04]+_aLinha[05]
+    _cChave2:=xFilial("ZL6")+" "+_aLinha[02]+" "+_aLinha[03]+" "+_aLinha[04]+" "+_aLinha[05]
     
-    IF !ZL6->(DBSEEK( _cChave1 ))
+    If !ZL6->(DBSeek( _cChave1 ))
        _cErro+="[Chave invalida : "+_cChave2+"] "
-    ENDIF
+    EndIf
 
             //ZE0_FILIAL +ZE0_DATARQ +ZE0_TPCUS  +ZE0_GRPCT   +ZE0_EVCUS +ZE0_SEVCT
     _cChave1:=_aLinha[01]+_aLinha[08]+_aLinha[02]+_aLinha[03]+_aLinha[04]+_aLinha[05]
     _cChave2:=_aLinha[01]+" "+_aLinha[08]+" "+_aLinha[02]+" "+_aLinha[03]+" "+_aLinha[04]+" "+_aLinha[05]
 
-	If ZE0->( Dbseek( _cChave1 ) ) //ZE0_FILIAL+ZE0_DATARQ +ZE0_TPCUS  +ZE0_GRPCT   +ZE0_EVCUS+ZE0_SEVCT
+	If ZE0->( DBSeek( _cChave1 ) ) //ZE0_FILIAL+ZE0_DATARQ +ZE0_TPCUS  +ZE0_GRPCT   +ZE0_EVCUS+ZE0_SEVCT
        _cErro+="[Chave já existe : "+_cChave2+"] "
-   ELSE
-      IF AScan(_aChaveRepetida,_cChave1) = 0
-         AADD(_aChaveRepetida,_cChave1)
-      ELSE
+   Else
+      If aScan(_aChaveRepetida,_cChave1) = 0
+         aAdd(_aChaveRepetida,_cChave1)
+      Else
          _cErro+="[Chave repetida nesse arquivo : "+_cChave2+"] "
-      ENDIF   
-   ENDIF
+      EndIf   
+   EndIf
 
-    /*IF VAL(_aLinha[06]) < 0
-       _cErro+="[Quantidade (ZE0_QTDE) invalida : "+_aLinha[06]+"] "
-    ENDIF
-    IF VAL(_aLinha[07]) < 0
-       _cErro+="[Valor (ZE0_VALOR) invalida : "+_aLinha[07]+"] "
-    ENDIF
-    IF VAL(_aLinha[09]) < 0
-       _cErro+="[Valor por litro (ZE0_VLRLT) invalida : "+_aLinha[09]+"] "
-    ENDIF
-    IF VAL(_aLinha[10]) < 0
-       _cErro+="[Valor Dolar (ZE0_VDOLAR) invalida : "+_aLinha[10]+"] "
-    ENDIF*/
-    IF VAL(_aLinha[11]) < 0
+    If Val(_aLinha[11]) < 0
        _cErro+="[Litragem (ZE0_LITRAG) invalida : "+_aLinha[11]+"] "
-    ENDIF
-    IF VAL(_aLinha[12]) < 0
+    EndIf
+    If Val(_aLinha[12]) < 0
        _cErro+="[Litragem 2 (ZE0_LITRA2) invalida : "+_aLinha[12]+"] "
-    ENDIF
+    EndIf
 
 	 aItem:={}
 	   
-   AADD(aItem,EMPTY(_cErro))// 01
-   AADD(aItem,_aLinha[01])  // 02 - ZE0_FILIAL
-   AADD(aItem,_aLinha[02])  // 03 - ZE0_TPCUS
-   AADD(aItem,_aLinha[03])  // 04 - ZE0_GRPCT
-   AADD(aItem,_aLinha[04])  // 05 - ZE0_EVCUS
-   AADD(aItem,_aLinha[05])  // 06 - ZE0_SEVCT
-   AADD(aItem,_aLinha[06])  // 07 - ZE0_QTDE
-   AADD(aItem,_aLinha[07])  // 08 - ZE0_VALOR
-   AADD(aItem,_aLinha[08])  // 09 - ZE0_DATARQ
-   AADD(aItem,_aLinha[09])  // 10 - ZE0_VLRLT
-   AADD(aItem,_aLinha[10])  // 11 - ZE0_VDOLAR
-   AADD(aItem,_aLinha[11])  // 12 - ZE0_LITRAG
-   AADD(aItem,_aLinha[12])  // 13 - ZE0_LITRA2
-   AADD(aItem,_cErro)       // 14
-   AADD(_aDados,aItem)	
+   aAdd(aItem,Empty(_cErro))// 01
+   aAdd(aItem,_aLinha[01])  // 02 - ZE0_FILIAL
+   aAdd(aItem,_aLinha[02])  // 03 - ZE0_TPCUS
+   aAdd(aItem,_aLinha[03])  // 04 - ZE0_GRPCT
+   aAdd(aItem,_aLinha[04])  // 05 - ZE0_EVCUS
+   aAdd(aItem,_aLinha[05])  // 06 - ZE0_SEVCT
+   aAdd(aItem,_aLinha[06])  // 07 - ZE0_QTDE
+   aAdd(aItem,_aLinha[07])  // 08 - ZE0_VALOR
+   aAdd(aItem,_aLinha[08])  // 09 - ZE0_DATARQ
+   aAdd(aItem,_aLinha[09])  // 10 - ZE0_VLRLT
+   aAdd(aItem,_aLinha[10])  // 11 - ZE0_VDOLAR
+   aAdd(aItem,_aLinha[11])  // 12 - ZE0_LITRAG
+   aAdd(aItem,_aLinha[12])  // 13 - ZE0_LITRA2
+   aAdd(aItem,_cErro)       // 14
+   aAdd(_aDados,aItem)	
 	
 	FT_FSKIP()
 	
-Enddo
+EndDo
 	
 Return _aDados
 
@@ -592,123 +534,96 @@ Return _aDados
 Programa----------: AEST13GRV
 Autor-------------: Alex Wallauer Ferreira
 Data da Criacao---: 18/07/2022
-===============================================================================================================================
 Descrição---------: Faz a leitura de dados
-===============================================================================================================================
 Parametros--------: oproc - objeto da barra de processamento
-===============================================================================================================================
 Retorno-----------: _aDados - array com dados carregados do arquivo
 ===============================================================================================================================
 */
-Static function AEST13GRV(oproc,_nReg)
-LOCAL _ni:=0 ; _nCont:=0
-LOCAL _aTotias:={0,0,0}
-LOCAL _cTotais:=""
+Static Function AEST13GRV(oproc,_nReg)
 
-ZE0->(DBSETORDER(6))// ZE0_FILIAL+ZE0_DATARQ +ZE0_TPCUS  +ZE0_GRPCT   +ZE0_EVCUS+ZE0_SEVCT
+Local _nI:=0 ; _nCont:=0
+Local _aTotias:={0,0,0}
+Local _cTotais:=""
 
-//ZL6->(DBSETORDER(6))// ZL6_FILIAL+ZL6_TPCUS+ZL6_GRPCUS+ZL6_CODEVE+ZL6_SUBEVE
+ZE0->(DBSetOrder(6))// ZE0_FILIAL+ZE0_DATARQ +ZE0_TPCUS  +ZE0_GRPCT   +ZE0_EVCUS+ZE0_SEVCT
 
-FOR _ni := 1 TO LEN(_aDados)
+For _nI := 1 To Len(_aDados)
 
 	_nCont++ 
-	oproc:cCaption := ( "Lendo linha " + strzero(_nCont,6) + " de " + strzero(_nreg,6) + "." )
+	oproc:cCaption := ( "Lendo linha " + StrZero(_nCont,6) + " de " + StrZero(_nreg,6) + "." )
 	ProcessMessages()
-   IF !_aDados[_ni][1]
+   If !_aDados[_nI][1]
       _aTotias[1]++
-      LOOP
-   ENDIF
-    _cChave:=_aDados[_ni,02]+_aDados[_ni,09]+_aDados[_ni,02]+_aDados[_ni,03]+_aDados[_ni,04]+_aDados[_ni,05]
+      Loop
+   EndIf
+    _cChave:=_aDados[_nI,02]+_aDados[_nI,09]+_aDados[_nI,02]+_aDados[_nI,03]+_aDados[_nI,04]+_aDados[_nI,05]
             //ZE0_FILIAL+ZE0_DATARQ +ZE0_TPCUS  +ZE0_GRPCT   +ZE0_EVCUS+ZE0_SEVCT
-/*
-	If ZE0->( Dbseek( _cChave ) ) //ZE0_FILIAL+ZE0_DATARQ +ZE0_TPCUS  +ZE0_GRPCT   +ZE0_EVCUS+ZE0_SEVCT
-	
-		//Achou registro so atualiza quantidade e valor
-		ZE0->(RecLock("ZE0",.F.))
-		ZE0->ZE0_QTDE	:= VAL(_aDados[_ni][07])
-		ZE0->ZE0_VALOR	:= VAL(_aDados[_ni][08])
-		ZE0->ZE0_VLRLT	:= VAL(_aDados[_ni][10])
-		ZE0->ZE0_VDOLAR:= VAL(_aDados[_ni][11])
-		ZE0->ZE0_LITRAG:= VAL(_aDados[_ni][12])
-		ZE0->ZE0_LITRA2:= VAL(_aDados[_ni][13])
-      _aTotias[2]++
-
-	Else*/
-	
 		//Nao achou registro cria um novo
 		ZE0->(RecLock("ZE0",.T.))
 		
-		ZE0->ZE0_FILIAL:=	_aDados[_ni][02]	
-      ZE0->ZE0_TPCUS	:=	_aDados[_ni][03]
-      ZE0->ZE0_DTPCT	:=	ALLTRIM(POSICIONE("ZL4",1,XFILIAL("ZL4")+ZE0->ZE0_TPCUS,"ZL4_DESCR"))
-      _aDados[_ni][03]:=ZE0->ZE0_DTPCT // Para o E-mail
-      ZE0->ZE0_GRPCT	:=	_aDados[_ni][04]
-		ZE0->ZE0_DGRPCT:=	ALLTRIM(POSICIONE("ZL5",3,XFILIAL("ZL5")+ZE0->ZE0_TPCUS+ZE0->ZE0_GRPCT,"ZL5_DESGRP"))
-      _aDados[_ni][04]:=ZE0->ZE0_DGRPCT // Para o E-mail
-		ZE0->ZE0_EVCUS	:=	_aDados[_ni][05]
-		ZE0->ZE0_DEVCT	:=	ALLTRIM(POSICIONE("ZL6",6,XFILIAL("ZL6")+ZE0->ZE0_TPCUS+ZE0->ZE0_GRPCT+ZE0->ZE0_EVCUS,"ZL6_DESEVE"))
-      _aDados[_ni][05]:=ZE0->ZE0_DEVCT // Para o E-mail
-		ZE0->ZE0_SEVCT	:=	_aDados[_ni][06]
-		ZE0->ZE0_DSECT	:=	ALLTRIM(POSICIONE("ZL6",6,XFILIAL("ZL6")+ZE0->ZE0_TPCUS+ZE0->ZE0_GRPCT+ZE0->ZE0_EVCUS+ZE0->ZE0_SEVCT,"ZL6_DSUBEV"))
-      _aDados[_ni][06]:=ZE0->ZE0_DSECT // Para o E-mail
-      ZE0->ZE0_QTDE	:= VAL(_aDados[_ni][07])
-		ZE0->ZE0_VALOR	:= VAL(_aDados[_ni][08])
-		ZE0->ZE0_DATARQ:= _aDados[_ni][09]
-		ZE0->ZE0_VLRLT	:= VAL(_aDados[_ni][10])
-		ZE0->ZE0_VDOLAR:= VAL(_aDados[_ni][11])
-		ZE0->ZE0_LITRAG:= VAL(_aDados[_ni][12])
-		ZE0->ZE0_LITRA2:= VAL(_aDados[_ni][13])
+		ZE0->ZE0_FILIAL:=	_aDados[_nI][02]	
+      ZE0->ZE0_TPCUS	:=	_aDados[_nI][03]
+      ZE0->ZE0_DTPCT	:=	AllTrim(Posicione("ZL4",1,xFilial("ZL4")+ZE0->ZE0_TPCUS,"ZL4_DESCR"))
+      _aDados[_nI][03]:=ZE0->ZE0_DTPCT // Para o E-mail
+      ZE0->ZE0_GRPCT	:=	_aDados[_nI][04]
+		ZE0->ZE0_DGRPCT:=	AllTrim(Posicione("ZL5",3,xFilial("ZL5")+ZE0->ZE0_TPCUS+ZE0->ZE0_GRPCT,"ZL5_DESGRP"))
+      _aDados[_nI][04]:=ZE0->ZE0_DGRPCT // Para o E-mail
+		ZE0->ZE0_EVCUS	:=	_aDados[_nI][05]
+		ZE0->ZE0_DEVCT	:=	AllTrim(Posicione("ZL6",6,xFilial("ZL6")+ZE0->ZE0_TPCUS+ZE0->ZE0_GRPCT+ZE0->ZE0_EVCUS,"ZL6_DESEVE"))
+      _aDados[_nI][05]:=ZE0->ZE0_DEVCT // Para o E-mail
+		ZE0->ZE0_SEVCT	:=	_aDados[_nI][06]
+		ZE0->ZE0_DSECT	:=	AllTrim(Posicione("ZL6",6,xFilial("ZL6")+ZE0->ZE0_TPCUS+ZE0->ZE0_GRPCT+ZE0->ZE0_EVCUS+ZE0->ZE0_SEVCT,"ZL6_DSUBEV"))
+      _aDados[_nI][06]:=ZE0->ZE0_DSECT // Para o E-mail
+      ZE0->ZE0_QTDE	:= Val(_aDados[_nI][07])
+		ZE0->ZE0_VALOR	:= Val(_aDados[_nI][08])
+		ZE0->ZE0_DATARQ:= _aDados[_nI][09]
+		ZE0->ZE0_VLRLT	:= Val(_aDados[_nI][10])
+		ZE0->ZE0_VDOLAR:= Val(_aDados[_nI][11])
+		ZE0->ZE0_LITRAG:= Val(_aDados[_nI][12])
+		ZE0->ZE0_LITRA2:= Val(_aDados[_nI][13])
       _aTotias[3]++
 
-//	Endif
-   ZE0->(MsUnlock())
+   ZE0->(MSUnLock())
 
-NEXT
+Next
 
 AEST13WF({},"Importação de dados",_aDados,oproc)
 
-_cTotais+=ALLTRIM(STR(_aTotias[1]))+" Registos Rejeitados"+CHR(13)+CHR(10)
-//_cTotais+=ALLTRIM(STR(_aTotias[2]))+" Registos Alterados"+CHR(13)+CHR(10)
-_cTotais+=ALLTRIM(STR(_aTotias[3]))+" Registos Incluidos"
+_cTotais+=AllTrim(Str(_aTotias[1]))+" Registos Rejeitados"+CHR(13)+CHR(10)
+_cTotais+=AllTrim(Str(_aTotias[3]))+" Registos Incluidos"
 
-U_ITMSG("DADOS PROCESSADOS COM SUCESSO",'Atenção!',_cTotais,IF(_aTotias[3]>0,2,3))
+U_ITMsg("DADOS PROCESSADOS COM SUCESSO",'Atenção!',_cTotais,If(_aTotias[3]>0,2,3))
 
-ZL6->(DBSETORDER(1))
-ZE0->(DBSETORDER(1))
+ZL6->(DBSetOrder(1))
+ZE0->(DBSetOrder(1))
 
-RETURN .T.
+Return .T.
 
 /*
 ===============================================================================================================================
 Programa----------: AEST13WF()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 13/07/2017
-===============================================================================================================================
 Descricao---------: Work do Log
-===============================================================================================================================
 Parametros--------: _aDadAlt,cTipo,_aDados
-===============================================================================================================================
 Retorno-----------: .T.
-===============================================================================================================================*/
+===============================================================================================================================
+*/
 Static Function AEST13WF(_aDadAlt,cTipo,_aDados,oproc)
 
 Local _aConfig	:= U_ITCFGEML('')
 Local _cHtml	:= '' , _nI , _nCont , _aSizes:={}
-Local _cEmail	:= U_ITGETMV( 'IT_EMZE0LO' , 'sistema@italac.com.br' )
+Local _cEmail	:= SuperGetMV('IT_EMZE0LO',.F.,'sistema@italac.com.br' )
 Local _cAssunto := 'Workflow - '+cTipo+' de Custo Gerencial'
 
-_cHtml += '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">'
+_cHtml += '<!DOCTYPE HTML Public "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">'
 _cHtml += '<html>'
 _cHtml += '<head>'
 _cHtml += '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"><title>Untitled Document</title>'
-_cHtml += '<style type="text/css"><!--'
+_cHtml += '<style Type="text/css"><!--'
 _cHtml += 'body,td,th { font-family: Arial, Helvetica, sans-serif; font-size: 12px;}.negrito { font-family: Arial, Helvetica, sans-serif; font-size: 12px; font-weight: bold; color: #003366;}.negrito2 { font-family: Arial, Helvetica, sans-serif; font-size: 15px; font-weight: bold; color: #003366;}.texto1 { font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: #666666;}.texto2 { font-family: Arial, Helvetica, sans-serif; font-size: 9px; color: #666666;}'
 _cHtml += 'table.bordasimples { border-collapse: collapse; }'
 _cHtml += 'table.bordasimples tr td { border:1px solid #777777; }'
-
-//_cHtml += 'td.titulos { font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #C6E2FF; }'
-//_cHtml += 'td.grupos { font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #E5E5E5; }'
-//_cHtml += 'td.itens	{ font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #FFFFFF; }'
 
 _cHtml += 'td.titulos	{ font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #C6E2FF; }'
 _cHtml += 'td.grupos	{ font-family:VERDANA; font-size:11px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #E5E5E5; }'
@@ -718,7 +633,6 @@ _cHtml += '--></style>'
 _cHtml += '</head>'
 _cHtml += '<body>'
 _cHtml += '<p class=MsoNormal>'
-//_cHtml += '<img src="http://www.italac.com.br/wp-content/themes/italac/assets/images/logo.svg" >'//alt="" width="171" height="63">
 _cHtml += '<img src="http://www.italac.com.br/wf/italac-wf.jpg" width="600" height="50"><br>'
 _cHtml += '<br>'
 
@@ -729,17 +643,17 @@ _cHtml += '<p><span class="negrito">Prezados, </span>'
 
 If !Empty(_aDadAlt)
 
-_cTexto2 := cTipo
+   _cTexto2 := cTipo
 
-_cTexto2 += " na competencia  "+TRANS(ZE0_DATARQ,"@R 99/9999")+" da Filial / Tipo / Grupo / Evento / Subevento: </span>[ "+ZE0->(ZE0_FILIAL+" / "+ZE0_TPCUS+"-"+AllTrim(ZE0_DTPCT)+" / "+ZE0_GRPCT+"-"+AllTrim(ZE0_DGRPCT)+" / "+ZE0_EVCUS+"-"+AllTrim(ZE0_DEVCT)+" / "+ZE0_SEVCT+"-"+AllTrim(ZE0_DSECT))+" ]"
+   _cTexto2 += " na competencia  "+TRANS(ZE0_DATARQ,"@R 99/9999")+" da Filial / Tipo / Grupo / Evento / Subevento: </span>[ "+ZE0->(ZE0_FILIAL+" / "+ZE0_TPCUS+"-"+AllTrim(ZE0_DTPCT)+" / "+ZE0_GRPCT+"-"+AllTrim(ZE0_DGRPCT)+" / "+ZE0_EVCUS+"-"+AllTrim(ZE0_DEVCT)+" / "+ZE0_SEVCT+"-"+AllTrim(ZE0_DSECT))+" ]"
 
-_cHtml += '<br><span class="negrito">'+_cTexto2+'</span><span class="texto1"></span></br></p>'
+   _cHtml += '<br><span class="negrito">'+_cTexto2+'</span><span class="texto1"></span></br></p>'
 
-_cHtml += '<br>'
-_cHtml += '<br>'
-_cHtml += '<p><span class="negrito">Usuário que realizou a '+cTipo+': </span>'+Alltrim(RetCodUsr())+" - "+Alltrim(UsrFullName(RetCodUsr()))
-_cHtml += '<br><span class="negrito">Data da '+cTipo+': </span>'+dtoc(dDataBase)+" as "+TIME()+'</p>'
-_cHtml += '<table width="500" border="0" cellpadding="0" cellspacing="8"> <tr> <td width="167"><P class=MsoNormal> <span class="texto2" align="center"></span></p></body></html>'
+   _cHtml += '<br>'
+   _cHtml += '<br>'
+   _cHtml += '<p><span class="negrito">Usuário que realizou a '+cTipo+': </span>'+AllTrim(RetCodUsr())+" - "+AllTrim(UsrFullName(RetCodUsr()))
+   _cHtml += '<br><span class="negrito">Data da '+cTipo+': </span>'+DToC(dDataBase)+" as "+TIME()+'</p>'
+   _cHtml += '<table width="500" border="0" cellpadding="0" cellspacing="8"> <tr> <td width="167"><P class=MsoNormal> <span class="texto2" align="center"></span></p></body></html>'
 	
 	_cHtml += '<br>'
 	_cHtml += '<table class="bordasimples" width="500">'
@@ -749,89 +663,89 @@ _cHtml += '<table width="500" border="0" cellpadding="0" cellspacing="8"> <tr> <
 	_cHtml += '      <td class="itens" align="right" width="35%"><b>Conteudo Atual</b></td>'
 	_cHtml += '    </tr>'
 	For _nI := 1 To Len( _aDadAlt )		
-	    IF _aDadAlt[_nI,5]
+	    If _aDadAlt[_nI,5]
 	       _cPicture:=PesqPict("ZE0",_aDadAlt[_nI][01])
 		   _cHtml += '    <tr>'
 		   _cHtml += '      <td class="itens" align="left" width="30%">'+ AVSX3(_aDadAlt[_nI][01],5)+'</td>'
 		   _cHtml += '      <td class="itens" align="right" width="35%">'+ Transform(_aDadAlt[_nI][02],_cPicture)+'</td>'
 		   _cHtml += '      <td class="itens" align="right" width="35%">'+ Transform(_aDadAlt[_nI][03],_cPicture)+'</td>'
 		   _cHtml += '    </tr>'
-		ENDIF
+		EndIf
 	Next _nI
 	_cHtml += '</table>'
 	
-ELSEIF !Empty(_aDados)
+ElseIf !Empty(_aDados)
 
 _cHtml += '<br>'
-_cHtml += '<p><span class="negrito">Usuário que realizou a '+cTipo+': </span>'+Alltrim(RetCodUsr())+" - "+Alltrim(UsrFullName(RetCodUsr()))
-_cHtml += '<br><span class="negrito">Data da '+cTipo+': </span>'+dtoc(dDataBase)+" as "+TIME()+'</p>'
+_cHtml += '<p><span class="negrito">Usuário que realizou a '+cTipo+': </span>'+AllTrim(RetCodUsr())+" - "+AllTrim(UsrFullName(RetCodUsr()))
+_cHtml += '<br><span class="negrito">Data da '+cTipo+': </span>'+DToC(dDataBase)+" as "+TIME()+'</p>'
 _cHtml += '<table width="500" border="0" cellpadding="0" cellspacing="8"> <tr> <td width="167"><P class=MsoNormal> <span class="texto2" align="center"></span></p></body></html>'
 _cHtml += '<br>'
 
    cGetAssun:="Dados importados: "
 
    For _nCont := 1 To Len(_aCab)
-       _aCab[_nCont] := STRTRAN( ALLTRIM(_aCab[_nCont]) , " ", "_")
-   NEXT
+       _aCab[_nCont] := StrTran( AllTrim(_aCab[_nCont]) , " ", "_")
+   Next
 
    _aSizes:={000,1,15,14,14,14,6,6,6,6,6,6,6}
 
    _cHtml += '<br>'
    _cHtml += '<table class="bordasimples" width="3100">'
    _cHtml += '    <tr>'
-   _cHtml += '		<td align="left" colspan="'+ALLTRIM(STR(LEN(_aSizes)-1))+'" class="grupos"><b>'+cGetAssun+'</b></td>'
+   _cHtml += '		<td align="left" colspan="'+AllTrim(Str(Len(_aSizes)-1))+'" class="grupos"><b>'+cGetAssun+'</b></td>'
    _cHtml += '    </tr>'
    _cHtml += '    <tr>'
-   _cHtml += '      <td class="itens" align="center" width="'+ALLTRIM(STRZERO(_aSizes[02],3))+'%"><b>'+_aCab[02]+'</b></td>'
-   _cHtml += '      <td class="itens" align="center" width="'+ALLTRIM(STRZERO(_aSizes[03],3))+'%"><b>'+_aCab[03]+'</b></td>'
-   _cHtml += '      <td class="itens" align="center" width="'+ALLTRIM(STRZERO(_aSizes[04],3))+'%"><b>'+_aCab[04]+'</b></td>'
-   _cHtml += '      <td class="itens" align="center" width="'+ALLTRIM(STRZERO(_aSizes[05],3))+'%"><b>'+_aCab[05]+'</b></td>'
-   _cHtml += '      <td class="itens" align="center" width="'+ALLTRIM(STRZERO(_aSizes[06],3))+'%"><b>'+_aCab[06]+'</b></td>'
-   _cHtml += '      <td class="itens" align="center" width="'+ALLTRIM(STRZERO(_aSizes[07],3))+'%"><b>'+_aCab[07]+'</b></td>'
-   _cHtml += '      <td class="itens" align="center" width="'+ALLTRIM(STRZERO(_aSizes[08],3))+'%"><b>'+_aCab[08]+'</b></td>'
-   _cHtml += '      <td class="itens" align="center" width="'+ALLTRIM(STRZERO(_aSizes[09],3))+'%"><b>'+_aCab[09]+'</b></td>'
-   _cHtml += '      <td class="itens" align="center" width="'+ALLTRIM(STRZERO(_aSizes[10],3))+'%"><b>'+_aCab[10]+'</b></td>'
-   _cHtml += '      <td class="itens" align="center" width="'+ALLTRIM(STRZERO(_aSizes[11],3))+'%"><b>'+_aCab[11]+'</b></td>'
-   _cHtml += '      <td class="itens" align="center" width="'+ALLTRIM(STRZERO(_aSizes[12],3))+'%"><b>'+_aCab[12]+'</b></td>'
-   _cHtml += '      <td class="itens" align="center" width="'+ALLTRIM(STRZERO(_aSizes[13],3))+'%"><b>'+_aCab[13]+'</b></td>'
+   _cHtml += '      <td class="itens" align="center" width="'+AllTrim(StrZero(_aSizes[02],3))+'%"><b>'+_aCab[02]+'</b></td>'
+   _cHtml += '      <td class="itens" align="center" width="'+AllTrim(StrZero(_aSizes[03],3))+'%"><b>'+_aCab[03]+'</b></td>'
+   _cHtml += '      <td class="itens" align="center" width="'+AllTrim(StrZero(_aSizes[04],3))+'%"><b>'+_aCab[04]+'</b></td>'
+   _cHtml += '      <td class="itens" align="center" width="'+AllTrim(StrZero(_aSizes[05],3))+'%"><b>'+_aCab[05]+'</b></td>'
+   _cHtml += '      <td class="itens" align="center" width="'+AllTrim(StrZero(_aSizes[06],3))+'%"><b>'+_aCab[06]+'</b></td>'
+   _cHtml += '      <td class="itens" align="center" width="'+AllTrim(StrZero(_aSizes[07],3))+'%"><b>'+_aCab[07]+'</b></td>'
+   _cHtml += '      <td class="itens" align="center" width="'+AllTrim(StrZero(_aSizes[08],3))+'%"><b>'+_aCab[08]+'</b></td>'
+   _cHtml += '      <td class="itens" align="center" width="'+AllTrim(StrZero(_aSizes[09],3))+'%"><b>'+_aCab[09]+'</b></td>'
+   _cHtml += '      <td class="itens" align="center" width="'+AllTrim(StrZero(_aSizes[10],3))+'%"><b>'+_aCab[10]+'</b></td>'
+   _cHtml += '      <td class="itens" align="center" width="'+AllTrim(StrZero(_aSizes[11],3))+'%"><b>'+_aCab[11]+'</b></td>'
+   _cHtml += '      <td class="itens" align="center" width="'+AllTrim(StrZero(_aSizes[12],3))+'%"><b>'+_aCab[12]+'</b></td>'
+   _cHtml += '      <td class="itens" align="center" width="'+AllTrim(StrZero(_aSizes[13],3))+'%"><b>'+_aCab[13]+'</b></td>'
    _cHtml += '    </tr>'
    _cHtml += '    #LISTA#'
    _cHtml += '</table>'
    
    _cGetLista := ""
    _nTot:=nConta:=0
-   _nTot:=LEN(_aDados)
-   _cTot:=ALLTRIM(STR(_nTot))
+   _nTot:=Len(_aDados)
+   _cTot:=AllTrim(Str(_nTot))
 
    For _nCont := 1 To Len(_aDados)
    
    	If oProc <> Nil
           nConta++
-   	   oProc:cCaption := ('Montando e-mail: '+ALLTRIM(STR(nConta))+" de "+_cTot )
+   	   oProc:cCaption := ('Montando e-mail: '+AllTrim(Str(nConta))+" de "+_cTot )
    	   ProcessMessages()
    	EndIf
    
-   	IF !_aDados[_nCont][01]
-   	   LOOP
-   	ENDIF
+   	If !_aDados[_nCont][01]
+   	   Loop
+   	EndIf
    
    	_cGetLista += '    <tr>'
-   	_cGetLista += '      <td class="itens" align="center" width="'+ALLTRIM(STRZERO(_aSizes[02],3))+'%">'+ _aDados[_nCont][02] +'</td>' 
-   	_cGetLista += '      <td class="itens" align="left"   width="'+ALLTRIM(STRZERO(_aSizes[03],3))+'%">'+ _aDados[_nCont][03] +'</td>' 
-   	_cGetLista += '      <td class="itens" align="left"   width="'+ALLTRIM(STRZERO(_aSizes[04],3))+'%">'+ _aDados[_nCont][04] +'</td>'
-   	_cGetLista += '      <td class="itens" align="left"   width="'+ALLTRIM(STRZERO(_aSizes[05],3))+'%">'+ _aDados[_nCont][05] +'</td>'
-   	_cGetLista += '      <td class="itens" align="left"   width="'+ALLTRIM(STRZERO(_aSizes[06],3))+'%">'+ _aDados[_nCont][06] +'</td>'
-   	_cGetLista += '      <td class="itens" align="right"  width="'+ALLTRIM(STRZERO(_aSizes[07],3))+'%">'+ TRANS(VAL(_aDados[_nCont][07]),"@E 999,999,999,999.9999") +'</td>'
-   	_cGetLista += '      <td class="itens" align="right"  width="'+ALLTRIM(STRZERO(_aSizes[08],3))+'%">'+ TRANS(VAL(_aDados[_nCont][08]),"@E 999,999,999,999.9999") +'</td>' 
-   	_cGetLista += '      <td class="itens" align="right"  width="'+ALLTRIM(STRZERO(_aSizes[09],3))+'%">'+ TRANS(    _aDados[_nCont][09] ,"@R 99/9999 ") +'</td>' 
-   	_cGetLista += '      <td class="itens" align="right"  width="'+ALLTRIM(STRZERO(_aSizes[10],3))+'%">'+ TRANS(VAL(_aDados[_nCont][10]),"@E 999,999,999,999.99999999") +'</td>' 
-   	_cGetLista += '      <td class="itens" align="right"  width="'+ALLTRIM(STRZERO(_aSizes[11],3))+'%">'+ TRANS(VAL(_aDados[_nCont][11]),"@E 999,999,999,999.99999999") +'</td>' 
-   	_cGetLista += '      <td class="itens" align="right"  width="'+ALLTRIM(STRZERO(_aSizes[12],3))+'%">'+ TRANS(VAL(_aDados[_nCont][12]),"@E 999,999,999,999.99") +'</td>' 
-   	_cGetLista += '      <td class="itens" align="right"  width="'+ALLTRIM(STRZERO(_aSizes[13],3))+'%">'+ TRANS(VAL(_aDados[_nCont][13]),"@E 999,999,999,999.99") +'</td>' 
+   	_cGetLista += '      <td class="itens" align="center" width="'+AllTrim(StrZero(_aSizes[02],3))+'%">'+ _aDados[_nCont][02] +'</td>' 
+   	_cGetLista += '      <td class="itens" align="left"   width="'+AllTrim(StrZero(_aSizes[03],3))+'%">'+ _aDados[_nCont][03] +'</td>' 
+   	_cGetLista += '      <td class="itens" align="left"   width="'+AllTrim(StrZero(_aSizes[04],3))+'%">'+ _aDados[_nCont][04] +'</td>'
+   	_cGetLista += '      <td class="itens" align="left"   width="'+AllTrim(StrZero(_aSizes[05],3))+'%">'+ _aDados[_nCont][05] +'</td>'
+   	_cGetLista += '      <td class="itens" align="left"   width="'+AllTrim(StrZero(_aSizes[06],3))+'%">'+ _aDados[_nCont][06] +'</td>'
+   	_cGetLista += '      <td class="itens" align="right"  width="'+AllTrim(StrZero(_aSizes[07],3))+'%">'+ TRANS(Val(_aDados[_nCont][07]),"@E 999,999,999,999.9999") +'</td>'
+   	_cGetLista += '      <td class="itens" align="right"  width="'+AllTrim(StrZero(_aSizes[08],3))+'%">'+ TRANS(Val(_aDados[_nCont][08]),"@E 999,999,999,999.9999") +'</td>' 
+   	_cGetLista += '      <td class="itens" align="right"  width="'+AllTrim(StrZero(_aSizes[09],3))+'%">'+ TRANS(    _aDados[_nCont][09] ,"@R 99/9999 ") +'</td>' 
+   	_cGetLista += '      <td class="itens" align="right"  width="'+AllTrim(StrZero(_aSizes[10],3))+'%">'+ TRANS(Val(_aDados[_nCont][10]),"@E 999,999,999,999.99999999") +'</td>' 
+   	_cGetLista += '      <td class="itens" align="right"  width="'+AllTrim(StrZero(_aSizes[11],3))+'%">'+ TRANS(Val(_aDados[_nCont][11]),"@E 999,999,999,999.99999999") +'</td>' 
+   	_cGetLista += '      <td class="itens" align="right"  width="'+AllTrim(StrZero(_aSizes[12],3))+'%">'+ TRANS(Val(_aDados[_nCont][12]),"@E 999,999,999,999.99") +'</td>' 
+   	_cGetLista += '      <td class="itens" align="right"  width="'+AllTrim(StrZero(_aSizes[13],3))+'%">'+ TRANS(Val(_aDados[_nCont][13]),"@E 999,999,999,999.99") +'</td>' 
    	_cGetLista += '    </tr>'			
    Next
    
-   _cHtml := STRTRAN(_cHtml,"#LISTA#",_cGetLista)
+   _cHtml := StrTran(_cHtml,"#LISTA#",_cGetLista)
 
 EndIf
 
@@ -850,10 +764,8 @@ _cEmlLog := ''
 //    ITEnvMail(cFrom     ,cEmailTo ,cEmailCo,cEmailBcc,cAssunto ,cMensagem,cAttach   ,cAccount    ,cPassword   ,cServer      ,cPortCon    ,lRelauth     ,cUserAut     ,cPassAut     ,cLogErro)
 U_ITENVMAIL( _aConfig[01] , _cEmail ,        ,         ,_cAssunto, _cHtml  ,         ,_aConfig[01],_aConfig[02], _aConfig[03],_aConfig[04], _aConfig[05], _aConfig[06], _aConfig[07], @_cEmlLog )
 
-IF !Empty( _cEmlLog )
+If !Empty( _cEmlLog )
     MessageBox( _cEmlLog+CHR(13)+CHR(10)+" E-mails: "+_cEmail , 'Envio do WF por e-mail' , 64 )
-EndIF
-
+EndIf
 
 Return .T.
-

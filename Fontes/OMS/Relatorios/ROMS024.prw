@@ -16,10 +16,10 @@ Lucas Borges  | 01/08/2019 | Revisão do fonte. Help 28346
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "rwmake.ch"
-#INCLUDE "topconn.ch" 
-#include "TBICONN.CH" 
+#Include "TOTVS.ch"
+#Include "rwmake.ch"
+#Include "topconn.ch" 
+#Include "TBICONN.CH" 
 
 /*
 ===============================================================================================================================
@@ -52,7 +52,7 @@ ElseIf cTipo == 1
 
 ElseIf cTipo == 2
 	_cFiltro += " AND ZZA.ZZA_SETOR IN "+ FormatIn(_cSetores,';')
-	_cFiltro += " AND ZZA.ZZA_DTEMIS BETWEEN '" + dToS(date()) + "' AND '" + dToS(date()) + "'"
+	_cFiltro += " AND ZZA.ZZA_DTEMIS BETWEEN '" + DToS(date()) + "' AND '" + DToS(date()) + "'"
 EndIf
 _cFiltro += "%"
 Processa( {|| MontaRel(_cFiltro) } , "Aguarde efetuando a impressão do RPA..." )
@@ -117,7 +117,7 @@ Count To _nCountRec //Contabiliza o numero de registros encontrados pela query
 ProcRegua(_nCountRec)
 
 DBSelectArea("ZZA")
-ZZA->(dbSetOrder(1))
+ZZA->(DBSetOrder(1))
 
 While (_cAlias)->(!Eof())
 
@@ -143,20 +143,20 @@ While (_cAlias)->(!Eof())
 			              AND E2_ORIGEM IN ('GERAZZ3', 'AOMS042')),0)
 		EndSql
 		If (_cAlias2)->QTD > 0
-			AADD(_aItens,{(_cAlias)->ZZA_RPA," VALOR SEST/SENAT e/ou VALOR INSS e/ou VALOR IRRF "})
+			aAdd(_aItens,{(_cAlias)->ZZA_RPA," VALOR SEST/SENAT e/ou VALOR INSS e/ou VALOR IRRF "})
 			_lErro := .T.
 		EndIf
 		(_cAlias2)->(DBCloseArea())
 	EndIf
 	If !_lErro
 		//Pega o conteudo do campo observacao
-		ZZA->(dbSeek(xFilial("ZZA") + (_cAlias)->ZZA_CODRPA))
+		ZZA->(DBSeek(xFilial("ZZA") + (_cAlias)->ZZA_CODRPA))
 	
 		// Trata a leitura do campo Memo
-	    _cObserv := STRTran( ZZA->ZZA_OBSERV	, Chr(13)			, ';' )
-	    _cObserv := STRTran( _cObserv			, Chr(10)			, ';' )
-	    _cObserv := STRTran( _cObserv			, Chr(10)+Chr(13)	, ';' )
-	    _cObserv := STRTran( _cObserv			, Chr(13)+Chr(10)	, ';' )
+	    _cObserv := StrTran( ZZA->ZZA_OBSERV	, Chr(13)			, ';' )
+	    _cObserv := StrTran( _cObserv			, Chr(10)			, ';' )
+	    _cObserv := StrTran( _cObserv			, Chr(10)+Chr(13)	, ';' )
+	    _cObserv := StrTran( _cObserv			, Chr(13)+Chr(10)	, ';' )
 	
 		Impress(oPrint,(_cAlias)->ZZA_RPA,(_cAlias)->ZZA_SEST,(_cAlias)->ZZA_INSS,(_cAlias)->ZZA_IRRF,;
 				(_cAlias)->ZZA_VLRBRT,(_cAlias)->A2_NOME,(_cAlias)->A2_COD,(_cAlias)->A2_END,;
@@ -215,7 +215,7 @@ Local _nLin		:= 0
 
 BeginSql alias _cAlias
 SELECT E2_EMISSAO, E2_VENCTO, E2_VENCREA, E2_VALOR
-  FROM %table:SE2%
+  FROM %Table:SE2%
  WHERE D_E_L_E_T_ = ' '
    AND E2_FILIAL = %xFilial:SE2%
    AND E2_PREFIXO = 'AUT'
@@ -225,7 +225,7 @@ SELECT E2_EMISSAO, E2_VENCTO, E2_VENCREA, E2_VALOR
 EndSql
 
 While (_cAlias)->(!Eof())
-	aadd(_aParc,{(_cAlias)->E2_VENCREA,(_cAlias)->E2_VALOR})
+	aAdd(_aParc,{(_cAlias)->E2_VENCREA,(_cAlias)->E2_VALOR})
 
 	If (_cAlias)->E2_EMISSAO == (_cAlias)->E2_VENCTO
 		_nAvista += (_cAlias)->E2_VALOR
@@ -233,10 +233,10 @@ While (_cAlias)->(!Eof())
 		_nAPrazo += (_cAlias)->E2_VALOR
 	EndIf
 			
-	(_cAlias)->(dbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 		
 oPrint:StartPage()   // Inicia uma nova página
 oPrint:Say(84,0100,"RECIBO DE PRESTAÇÃO DE SERVIÇOS - Número : " + cRecibo,oFont16n )
@@ -244,27 +244,27 @@ oPrint:Say(84,0100,"RECIBO DE PRESTAÇÃO DE SERVIÇOS - Número : " + cRecibo,oFont
 //Dados do autonomo
 oPrint:Box (150,0100,420,2300)
 oPrint:Say  (150,0120,"Nome....: "			,oFont12 )
-oPrint:Say  (150,0370,alltrim(cA2_NOME)		,oFont12n)
+oPrint:Say  (150,0370,AllTrim(cA2_NOME)		,oFont12n)
 oPrint:Say  (150,1700,"Cod.....: "			,oFont12 )
-oPrint:Say  (150,2000,alltrim(cA2_COD)		,oFont12 )
+oPrint:Say  (150,2000,AllTrim(cA2_COD)		,oFont12 )
 oPrint:Say  (200,0120,"Endereco: "			,oFont12 )
-oPrint:Say  (200,0370,alltrim(cA2_END)		,oFont12 )
+oPrint:Say  (200,0370,AllTrim(cA2_END)		,oFont12 )
 oPrint:Say  (250,0120,"Cidade..: "			,oFont12 )
-oPrint:Say  (250,0370,alltrim(cA2_MUN)		,oFont12 )
+oPrint:Say  (250,0370,AllTrim(cA2_MUN)		,oFont12 )
 oPrint:Say  (300,0120,"Bairro..: "			,oFont12 )
-oPrint:Say  (300,0370,alltrim(cA2_BAIRRO)	,oFont12 )
+oPrint:Say  (300,0370,AllTrim(cA2_BAIRRO)	,oFont12 )
 oPrint:Say  (300,1700,"CEP.....: "			,oFont12 )
-oPrint:Say  (300,2000,alltrim(cA2_CEP)		,oFont12 )
+oPrint:Say  (300,2000,AllTrim(cA2_CEP)		,oFont12 )
 If cTipAut == "1"
 	oPrint:Say  (350,0120,"CPF.....: "		,oFont12 )
-	oPrint:Say  (350,0370,alltrim(cA2_CGC)	,oFont12 )
+	oPrint:Say  (350,0370,AllTrim(cA2_CGC)	,oFont12 )
 	oPrint:Say  (350,1700,"PIS.....: "		,oFont12 )
-	oPrint:Say  (350,2000,alltrim(cRA_PIS)	,oFont12 )
+	oPrint:Say  (350,2000,AllTrim(cRA_PIS)	,oFont12 )
 Else
 	oPrint:Say  (350,0120,"CGC.....: "		,oFont12 )
-	oPrint:Say  (350,0370,alltrim(cA2_CGC)	,oFont12 )
+	oPrint:Say  (350,0370,AllTrim(cA2_CGC)	,oFont12 )
 	oPrint:Say  (350,1700,"Inscric.: "		,oFont12 )
-	oPrint:Say  (350,2000,alltrim(cA2_INSCR),oFont12 )
+	oPrint:Say  (350,2000,AllTrim(cA2_INSCR),oFont12 )
 EndIf
 
 //Dados das notas fiscais
@@ -328,7 +328,7 @@ oPrint:Box 	(_nLin+90,0100,_nLin+240,2300)
 oPrint:Say  (_nLin+140,0120,PadC("("+AllTrim(Extenso(_nTLiq))+")",100," "),oFont10n )
 
 // Impressao da condicao de pagto    
-If cOrigemRPA <> '2' //Se for diferente da rotina de fechamento do leite
+If cOrigemRPA <> '2' //Se For diferente da rotina de fechamento do leite
  	oPrint:Box 	(_nLin+260,0100,_nLin+450,2300)
   	oPrint:Say  (_nlin+265,0120,"Condição de Pagamento:",oFont12n )
 	oPrint:Say  (_nlin+305,0120,"Valor pago á Vista:",oFont12 )

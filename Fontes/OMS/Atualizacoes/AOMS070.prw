@@ -14,14 +14,15 @@
 ==================================================================================================================================================================================================================
 Antonio Ramos - Igor Melgaço  - 01/10/24 - 01/10/24 - 48692   - Calculo do total do pedido.
 Jerry         - Alex Wallauer - 11/10/24 - 11/10/24 - 48807   - Alteração das decimais da quantidade para 3 
-Jerry         - Alex Wallauer - 16/01/25 - 20/03/25 - 49396   - Alteração para quando for produto Queijo Ralado 40g (00060034701) tratar a quantidade por múltiplos da 3UM (B1_I_QT3UM). 
+Jerry         - Alex Wallauer - 16/01/25 - 20/03/25 - 49396   - Alteração para quando For produto Queijo Ralado 40g (00060034701) tratar a quantidade por múltiplos da 3UM (B1_I_QT3UM). 
+Jerry         - Julio Paz     - 07/08/25 - 14/08/25 - 51673   - Ajustar cor dos textos de digitação para temas Dark e Statndard. Quando o Tema For Dark exibir texto branco. Quando For Standard exibir texto preto.
 ==================================================================================================================================================================================================================
 */
 
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 #Include 'RwMake.ch'
 
 /*
@@ -69,7 +70,7 @@ Private _oGrid		 As Object
 Private _nLimite	:= 0 As Numeric
 Private _nPedido	:= 0 As Numeric
 Private _nSaldo		:= 0 As Numeric
-Private _ddtoper	:= DATE() As Date //ddatabase
+Private _ddtoper	:= Date() As Date //ddatabase
 Private _nchars		:= 6 As Numeric
 
 Private _cLocEnt    := Space(1) As Char
@@ -86,8 +87,8 @@ Begin Sequence
    EndIf
 
    If AOMS070VPV()
-	  u_itmsg(  'Não existe uma tabela de preços com período ativo para a inclusão de solicitações!' , "Atenção",,1)
-	  //Return()
+	  U_ITMsg(  'Não existe uma tabela de preços com período ativo para a inclusão de solicitações!' , "Atenção",,1)
+	  //Return
 	  Break
    EndIf
 
@@ -100,7 +101,7 @@ Begin Sequence
    _aInfo   := { _aSize[ 1 ] , _aSize[ 2 ] , _aSize[ 3 ] , _aSize[ 4 ] , 3 , 2 }
    _aPosAux := MsObjSize( _aInfo , _aObjAux )
 
-   DEFINE DIALOG _oDlg TITLE 'Pedido de Compra - Funcionários' PIXEL STYLE 128
+   DEFINE DIALOG _oDlg TITLE 'Pedido de Compra - Funcionários' PIXEL //STYLE 128 //JPP TESTE
 	
 	  _oDlg:lEscClose := .F.
 	
@@ -124,7 +125,7 @@ Begin Sequence
 	  _oNewPag2 := _oStepWiz:AddStep( "2" , {|_oPanel| AOMS070P02( _oPanel , _aPosAux , @_oBrowse , _aDados ) } )
 	  _oNewPag2:SetStepDescription( "Configuração do Pedido" )
 	  _oNewPag2:SetNextAction( {|| AOMS070VP2( _oBrowse , @_aDados ) } )
-	  _oNewPag2:SetCancelAction( {|| IIF( u_itmsg( 'Deseja cancelar o pedido atual?' , 'Atenção!',,2,2,2 ) , ( _oDlg:End() , .F. ) , .F. ) } )	// Define o bloco ao clicar no botão Cancelar
+	  _oNewPag2:SetCancelAction( {|| IIf( U_ITMsg( 'Deseja cancelar o pedido atual?' , 'Atenção!',,2,2,2 ) , ( _oDlg:End() , .F. ) , .F. ) } )	// Define o bloco ao clicar no botão Cancelar
 	  _oNewPag2:SetPrevWhen( {|| .F. } )
 	
 	  //====================================================================================================
@@ -133,7 +134,7 @@ Begin Sequence
 	  _oNewPag3 := _oStepWiz:AddStep( "3" , {|_oPanel| AOMS070P03( _oPanel , _aPosAux , _aDados ) } )
 	  _oNewPag3:SetStepDescription( "Confirmação do Pedido" )
 	  _oNewPag3:SetNextAction( {|| AOMS070GRV( _aDados ) , _oDlg:End() , .T. } ) 
-	  _oNewPag3:SetCancelAction( {|| IIF( u_itmsg( 'Deseja cancelar o pedido atual?' , 'Atenção!',,2,2,2 ) , ( _oDlg:End() , .F. ) , .F. ) } )	// Define o bloco ao clicar no botão Cancelar
+	  _oNewPag3:SetCancelAction( {|| IIf( U_ITMsg( 'Deseja cancelar o pedido atual?' , 'Atenção!',,2,2,2 ) , ( _oDlg:End() , .F. ) , .F. ) } )	// Define o bloco ao clicar no botão Cancelar
 	  _oNewPag3:SetPrevWhen( {|| .T. } )
 	
 	  _oStepWiz:Activate()
@@ -146,7 +147,7 @@ Begin Sequence
 
 End Sequence
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -168,17 +169,31 @@ Static Function AOMS070P01( _oPanel , _aPosAux , _oStepWiz )
 
 Local _oTGet1	:= Nil
 Local _oTGet2	:= Nil
+Local _nClrText := Nil 
+Local _nClrBack := Nil
+Local _cTheme   := Nil 
+
+_cTheme := totvs.framework.css.getNewWebAppTheme()
+If !Empty(_cTheme) .And. _cTheme == "DARK"
+	_nClrText := CLR_WHITE
+	_nClrBack := CLR_BLACK
+Else
+	_nClrText := CLR_BLACK
+	_nClrBack := CLR_WHITE
+EndIf
 
 _cMatric	:= Space( 11 )
 _cSenha		:= Space( 06 )
 
 _oSay1		:= TSay():New( 10 , ( _aPosAux[01][04] / 2 ) - 050 , {|| 'Matrícula/CPF' } , _oPanel ,,,,,, .T. ,,, 200 , 20 )
-_oTGet1		:= TGet():New( 20 , ( _aPosAux[01][04] / 2 ) - 050 , {|u| If( PCount() > 0 , _cMatric := u , _cMatric ) }	, _oPanel , 096 , 009 , "@!"  ,, 0 ,,, .F. ,, .T. ,, .F. ,, .F. , .F. ,, .F. , .F. ,, _cMatric ,,,, )
-
+//_oTGet1		:= TGet():New( 20 , ( _aPosAux[01][04] / 2 ) - 050 , {|u| If( PCount() > 0 , _cMatric := u , _cMatric ) }	, _oPanel , 096 , 009 , "@!"  ,, 0 ,,, .F. ,, .T. ,, .F. ,, .F. , .F. ,, .F. , .F. ,, _cMatric ,,,, )
+_oTGet1		:= TGet():New( 20 , ( _aPosAux[01][04] / 2 ) - 050 , {|u| If( PCount() > 0 , _cMatric := u , _cMatric ) }	, _oPanel , 096 , 009 , "@!"  ,, _nClrText ,_nClrBack,, .F. ,, .T. ,, .F. ,, .F. , .F. ,, .F. , .F. ,, _cMatric ,,,, )
+             //TGet():New(096 ,096                             , bSetGet(cCFOP)                                         , oDialog , 060  , 008, ''    ,, nClrText, nClrBack, , , , .T., '', , , .F., .F., , .F., .F., '', 'cCFOP')
 _oSay2		:= TSay():New( 40 , ( _aPosAux[01][04] / 2 ) - 050 , {|| 'Senha' }		, _oPanel ,,,,,, .T. ,,, 200 , 20 )
-_oTGet2		:= TGet():New( 50 , ( _aPosAux[01][04] / 2 ) - 050 , {|u| If( PCount() > 0 , _cSenha := u , _cSenha ) }		, _oPanel , 096 , 009 , "@K*" ,, 0 ,,, .F. ,, .T. ,, .F. , {|| _lAtivPas } , .F. , .F. ,, .F. , .T. ,, _cSenha ,,,, )
+//_oTGet2		:= TGet():New( 50 , ( _aPosAux[01][04] / 2 ) - 050 , {|u| If( PCount() > 0 , _cSenha := u , _cSenha ) }		, _oPanel , 096 , 009 , "@K*" ,, 0 ,,, .F. ,, .T. ,, .F. , {|| _lAtivPas } , .F. , .F. ,, .F. , .T. ,, _cSenha ,,,, )
+_oTGet2		:= TGet():New( 50 , ( _aPosAux[01][04] / 2 ) - 050 , {|u| If( PCount() > 0 , _cSenha := u , _cSenha ) }		, _oPanel , 096 , 009 , "@K*" ,, _nClrText ,_nClrBack,, .F. ,, .T. ,, .F. , {|| _lAtivPas } , .F. , .F. ,, .F. , .T. ,, _cSenha ,,,, )
 
-Return()
+Return
  
 /*
 ===============================================================================================================================
@@ -202,11 +217,23 @@ Local _cAlias	:= GetNextAlias()
 Local _oDlgPas	:= Nil
 Local _cGet1	:= Space(6)
 Local _cGet2	:= Space(6)
-Local _cmat2    := space(11)
+Local _cmat2    := Space(11)
+Local _nClrText := Nil 
+Local _nClrBack := Nil
+Local _cTheme   := Nil 
+
+_cTheme := totvs.framework.css.getNewWebAppTheme()
+If !Empty(_cTheme) .And. _cTheme == "DARK"
+	_nClrText := CLR_WHITE
+	_nClrBack := CLR_BLACK
+Else
+	_nClrText := CLR_BLACK
+	_nClrBack := CLR_WHITE
+EndIf
 
 Begin Sequence
    If !(Len(AllTrim(_cMatric))==6 .Or. Len(AllTrim(_cMatric)) == 11)
-	  u_itmsg( 	'Não foi informada uma identificação de funcionário válida!','Alert', 'Verifique a Matrícula/CPF informado para iniciar.',1 )
+	  U_ITMsg( 	'Não foi informada uma identificação de funcionário válida!','Alert', 'Verifique a Matrícula/CPF informado para iniciar.',1 )
 
 	  //Return( .F. )
 	  _lRet	:= .F.
@@ -215,7 +242,7 @@ Begin Sequence
 
    If _lAtivPas
 	  If Empty(_cSenha) .Or. Len( _cSenha ) < 6
-		 u_itmsg( 'Não foi informada uma senha de acesso válida!',"Atenção",	'A senha não pode ser em branco e tem que '		;
+		 U_ITMsg( 'Não foi informada uma senha de acesso válida!',"Atenção",	'A senha não pode ser em branco e tem que '		;
 										 + 'ter 6 dígitos. Se o funcionário ainda'		;
 										+  'não cadastrou uma senha digite "000000" para cadastrar uma nova.',1  )
 		 //Return( .F. )
@@ -245,7 +272,7 @@ Begin Sequence
    EndIf
 
    If !_lRet
-	  u_itmsg( 'Funcionário não encontrado na Filial "'+ xFilial('SRA') +'" com os dados de Matrícula ou CPF informado. ','Atenção'	,;
+	  U_ITMsg( 'Funcionário não encontrado na Filial "'+ xFilial('SRA') +'" com os dados de Matrícula ou CPF informado. ','Atenção'	,;
 	   								'Favor entrar em contato com o RH.' , 1  )
       Break
    EndIf
@@ -254,39 +281,39 @@ Begin Sequence
 	  //====================================================================================================
 	  // Bloquear a compra de produtos por funcionários afastados
 	  //====================================================================================================
-	  SR8->(DbSetOrder(1))  // R8_FILIAL+R8_MAT+DTOS(R8_DATAINI)+R8_TIPO
-	  SR8->(DbSeek(xFilial("SR8")+SRA->RA_MAT))
-	  Do While ! SR8->(Eof()) .And. SR8->(R8_FILIAL+R8_MAT) == xFilial("SR8")+SRA->RA_MAT
+	  SR8->(DBSetOrder(1))  // R8_FILIAL+R8_MAT+DToS(R8_DATAINI)+R8_TIPO
+	  SR8->(DBSeek(xFilial("SR8")+SRA->RA_MAT))
+	  While ! SR8->(Eof()) .And. SR8->(R8_FILIAL+R8_MAT) == xFilial("SR8")+SRA->RA_MAT
 		 If SR8->R8_DPAGOS # 0
-		    SR8->(DbSkip())
-		    LOOP		
+		    SR8->(DBSkip())
+		    Loop		
 		 EndIf
 		
 		 If SR8->R8_TIPOAFA == "006" 
 		    Exit
 		 Else	
-		    IF SR8->R8_TIPOAFA == "001"
-			   If _ddtoper >= (SR8->R8_DATAINI-15) .AND. _ddtoper <= SR8->R8_DATAFIM//) .OR. (_ddtoper >= SR8->R8_DATAINI .
-	              u_itmsg( 'Não é possivel realizar compras no periodo de ferias ou 15 dias antes das ferias programadas','Atenção',;
-						   'Perido que não pode fazer compras: '+DTOC((SR8->R8_DATAINI-15)) + " ate "+DTOC(SR8->R8_DATAFIM) , 1  )
+		    If SR8->R8_TIPOAFA == "001"
+			   If _ddtoper >= (SR8->R8_DATAINI-15) .And. _ddtoper <= SR8->R8_DATAFIM//) .Or. (_ddtoper >= SR8->R8_DATAINI .
+	              U_ITMsg( 'Não é possivel realizar compras no periodo de ferias ou 15 dias antes das ferias programadas','Atenção',;
+						   'Perido que não pode fazer compras: '+DToC((SR8->R8_DATAINI-15)) + " ate "+DToC(SR8->R8_DATAFIM) , 1  )
 			      _lRet := .F.
 				  Exit
-		       ENDIF
-            ELSE
+		       EndIf
+            Else
 			   If (Empty(SR8->R8_DATAFIM) .Or. _ddtoper <= SR8->R8_DATAFIM)
-			      IF Empty(SR8->R8_DATAFIM)
-			         _cMsg:='Perido que não pode fazer compras: desde de '+DTOC((SR8->R8_DATAINI)) 
-			      ELSE
-			         _cMsg:='Perido que não pode fazer compras: '+DTOC((SR8->R8_DATAINI)) + " ate "+DTOC(SR8->R8_DATAFIM)
-			      ENDIF
-	              u_itmsg( 'Não é possivel realizar compras no momento','Atenção',_cMsg, 1  )
+			      If Empty(SR8->R8_DATAFIM)
+			         _cMsg:='Perido que não pode fazer compras: desde de '+DToC((SR8->R8_DATAINI)) 
+			      Else
+			         _cMsg:='Perido que não pode fazer compras: '+DToC((SR8->R8_DATAINI)) + " ate "+DToC(SR8->R8_DATAFIM)
+			      EndIf
+	              U_ITMsg( 'Não é possivel realizar compras no momento','Atenção',_cMsg, 1  )
 			      _lRet := .F.
 				  Exit
-		       ENDIF
+		       EndIf
 			EndIf
-		 Endif 
+		 EndIf 
           
-		 SR8->(DbSkip())
+		 SR8->(DBSkip())
 	  EndDo   		
       If !_lRet
 	     Break
@@ -316,10 +343,11 @@ Begin Sequence
 		    
 		     TSay():New( 050 , 100 , {|| '*As senhas devem ser cadastradas com 6 dígitos!' } , _oDlgPas ,, _oFont ,,,, .T. ,,, 200 , 10 )
 		    
-			 TGet():New( 048 , 050 , {|u| If( PCount() > 0 , _cGet1 := u , _cGet1 ) } , _oDlgPas , 040 , 010 , "@K*" ,, 0 ,,, .F. ,, .T. ,, .F. ,, .F. , .F. ,, .F. , .T. ,, "_cGet1" ,,,, )
-			 TGet():New( 063 , 050 , {|u| If( PCount() > 0 , _cGet2 := u , _cGet2 ) } , _oDlgPas , 040 , 010 , "@K*" ,, 0 ,,, .F. ,, .T. ,, .F. ,, .F. , .F. ,, .F. , .T. ,, "_cGet2" ,,,, )
+			 TGet():New( 048 , 050                            , {|u| If( PCount() > 0 , _cGet1 := u , _cGet1 ) }       , _oDlgPas , 040 , 010 , "@K*" ,, _nClrText ,_nClrBack,, .F. ,, .T. ,, .F. ,, .F. , .F. ,, .F. , .T. ,, "_cGet1" ,,,, )
+			 TGet():New( 063 , 050                            , {|u| If( PCount() > 0 , _cGet2 := u , _cGet2 ) }       , _oDlgPas , 040 , 010 , "@K*" ,, _nClrText ,_nClrBack,, .F. ,, .T. ,, .F. ,, .F. , .F. ,, .F. , .T. ,, "_cGet2" ,,,, )
+//			 TGet():New( 50  , ( _aPosAux[01][04] / 2 ) - 050 , {|u| If( PCount() > 0 , _cSenha := u , _cSenha ) }		, _oPanel , 096 , 009 , "@K*" ,, _nClrText ,_nClrBack,, .F. ,, .T. ,, .F. , {|| _lAtivPas } , .F. , .F. ,, .F. , .T. ,, _cSenha ,,,, )
 		
-		      @ 082,149 BUTTON _oBtn1 PROMPT "Confirmar"	ACTION ( IIF( _cGet1 == _cGet2 .And. Len( AllTrim( _cGet1 ) ) == 6 , ( _cSenha := _cGet1 , _oDlgPas:End() ) , U_ITMSG('As senhas digitadas não conferem ou não são válidas!','Atenção!',,1) ) ) SIZE 050,012 OF _oDlgPas PIXEL
+		      @ 082,149 BUTTON _oBtn1 PROMPT "Confirmar"	ACTION ( IIf( _cGet1 == _cGet2 .And. Len( AllTrim( _cGet1 ) ) == 6 , ( _cSenha := _cGet1 , _oDlgPas:End() ) , U_ITMsg('As senhas digitadas não conferem ou não são válidas!','Atenção!',,1) ) ) SIZE 050,012 OF _oDlgPas PIXEL
 		      @ 082,200 BUTTON _oBtn2 PROMPT "Cancelar"	ACTION ( _oDlgPas:End() ) SIZE 050,012 OF _oDlgPas PIXEL
 		
 		 ACTIVATE DIALOG _oDlgPas CENTERED
@@ -327,7 +355,7 @@ Begin Sequence
 		 If !Empty(_cSenha) .And. Len( _cSenha ) == 6
 			RecLock('SRA',.F.)
 			SRA->RA_I_SENHA := Embaralha( _cSenha , 0 )
-			SRA->( MsUnLock() )
+			SRA->( MSUnLock() )
 		 EndIf
 		
 		 _cSenha := Space( 6 )
@@ -336,52 +364,52 @@ Begin Sequence
 	
 		 If SRA->RA_FILIAL <> xFilial('SRA')
 			
-			u_itmsg( 'O funcionário da matrícula atual não está cadastrado na Filial '+ xFilial('SRA'),'Atenção','Verifique os dados digitados!' ,1 )
+			U_ITMsg( 'O funcionário da matrícula atual não está cadastrado na Filial '+ xFilial('SRA'),'Atenção','Verifique os dados digitados!' ,1 )
 			
 		 ElseIf Empty( SRA->RA_DEMISSA ) .And. SRA->RA_SITFOLH <> 'D'
 		
 			SA1->( DBSetOrder(3) )
-			IF SA1->( DBSeek( xFilial('SA1') + SubStr( SRA->RA_CIC + Space( TamSX3('A1_CGC')[01] ) , 1 , TamSX3('A1_CGC')[01] ) ) )
+			If SA1->( DBSeek( xFilial('SA1') + SubStr( SRA->RA_CIC + Space( TamSX3('A1_CGC')[01] ) , 1 , TamSX3('A1_CGC')[01] ) ) )
 				
 				If SA1->A1_MSBLQL == '1'
 					
-					u_itmsg( 'O funcionário da matrícula atual está com o cadastrado de "Cliente" bloqueado no sistema',;
+					U_ITMsg( 'O funcionário da matrícula atual está com o cadastrado de "Cliente" bloqueado no sistema',;
 												'Atenção','Verifique os dados digitados e o cadastro do funcionário!' , 1 )
 					
 				Else
 					
 					If Empty( SA1->A1_LC ) .Or. SA1->A1_LC <= 0
 						
-						u_itmsg( 'O funcionário da matrícula atual está com o cadastrado de "Cliente" sem limite de crédito para compras',;
+						U_ITMsg( 'O funcionário da matrícula atual está com o cadastrado de "Cliente" sem limite de crédito para compras',;
 						 			'Atenção','Verifique os dados digitados e o cadastro do funcionário!' , 1 )
 						
 					Else
 					    
-					    If u_itmsg( 'Funcionário: '+ Capital( AllTrim( SRA->RA_NOME ) ) , 'Confirmação de Identificação',,3,2,2 )
+					    If U_ITMsg( 'Funcionário: '+ Capital( AllTrim( SRA->RA_NOME ) ) , 'Confirmação de Identificação',,3,2,2 )
 							_nLimite	:= SA1->A1_LC
 							_lRet		:= .T.
 						EndIf
 						
-					EndIF
+					EndIf
 					
 				EndIf
 			
 			Else
 			
-				u_itmsg( 'O funcionário da matrícula atual não está cadastrado como "Cliente" no sistema',;
+				U_ITMsg( 'O funcionário da matrícula atual não está cadastrado como "Cliente" no sistema',;
 				 		'Atenção','Verifique os dados digitados e o cadastro do funcionário!' , 1 )
 			
-			EndIF
+			EndIf
 			
 		Else
 		
-			u_itmsg( 'O funcionário atual não está ativo no sistema!','Atenção','Verifique a situação com o Depto. de RH !' ,1 )
+			U_ITMsg( 'O funcionário atual não está ativo no sistema!','Atenção','Verifique a situação com o Depto. de RH !' ,1 )
 		
 		EndIf
 	
 	 Else
 	
-		u_itmsg( 'Usuário e senha inválidos!' , 'Atenção!' ,,1 )
+		U_ITMsg( 'Usuário e senha inválidos!' , 'Atenção!' ,,1 )
 		
 	 EndIf
 	
@@ -397,14 +425,14 @@ Begin Sequence
 	  _cQuery += " AND Z12.Z12_MATRIC = '"+ SRA->RA_MAT +"' "
 	  _cQuery += " AND Z12.Z12_STATUS IN ('I','E') "
 	
-	  // Só traz para ajuste se for pedido incluido dentro mês ou dentro de período de 5 dias
+	  // Só traz para ajuste se For pedido incluido dentro mês ou dentro de período de 5 dias
 	  If _nchars == 6 //Procura padrão por pedido dentro do mês se parâmetro IT_PCFUNC igual à N
-	     //_cQuery += " AND SUBSTR( Z12.Z12_DATA , 1 , " + alltrim(str(_nchars)) + " ) = '"+ SubStr( DtoS( _ddtoper ) , 1 , _nchars ) +"' " 
-	     _cQuery += " AND (Z12.Z12_STATUS = 'E' AND (SUBSTR( Z12.Z12_DATA , 1 , " + alltrim(str(_nchars)) + " ) = '"+ SubStr( DtoS( _ddtoper ) , 1 , _nchars ) +"' ) OR (Z12.Z12_STATUS = 'I')) " 
+	     //_cQuery += " AND SubStr( Z12.Z12_DATA , 1 , " + AllTrim(Str(_nchars)) + " ) = '"+ SubStr( DToS( _ddtoper ) , 1 , _nchars ) +"' " 
+	     _cQuery += " AND (Z12.Z12_STATUS = 'E' AND (SubStr( Z12.Z12_DATA , 1 , " + AllTrim(Str(_nchars)) + " ) = '"+ SubStr( DToS( _ddtoper ) , 1 , _nchars ) +"' ) OR (Z12.Z12_STATUS = 'I')) " 
 	  Else  //Procura por pedido até 5 dias próximo se IT_PCFUNC igual à S
-	     //_cQuery += " AND Z12.Z12_DATA >= '" +   DtoS( _ddtoper - 5 ) +"' AND Z12.Z12_DATA <= '" +   DtoS( _ddtoper + 5 ) +"'" 
-	     _cQuery += " AND (Z12.Z12_STATUS = 'E' AND (Z12.Z12_DATA >= '" +   DtoS( _ddtoper - 5 ) +"' AND Z12.Z12_DATA <= '" +   DtoS( _ddtoper + 5 ) +"' ) OR (Z12.Z12_STATUS = 'I')) " 
-	  Endif
+	     //_cQuery += " AND Z12.Z12_DATA >= '" +   DToS( _ddtoper - 5 ) +"' AND Z12.Z12_DATA <= '" +   DToS( _ddtoper + 5 ) +"'" 
+	     _cQuery += " AND (Z12.Z12_STATUS = 'E' AND (Z12.Z12_DATA >= '" +   DToS( _ddtoper - 5 ) +"' AND Z12.Z12_DATA <= '" +   DToS( _ddtoper + 5 ) +"' ) OR (Z12.Z12_STATUS = 'I')) " 
+	  EndIf
 	
 	  MPSysOpenQuery( _cQuery , _cAlias)
 	
@@ -417,14 +445,14 @@ Begin Sequence
 		
 		If Z12->Z12_STATUS == 'E'
 		   If _nchars == 6
-			  u_itmsg('Já existe uma solicitação de hoje efetivada no período ['+ MesExtenso(_ddtoper)+'/'+ cValToChar(Year(_ddtoper));
+			  U_ITMsg('Já existe uma solicitação de hoje efetivada no período ['+ MesExtenso(_ddtoper)+'/'+ cValToChar(Year(_ddtoper));
 				 		+'] para o funcionário atual e não poderá mais ser alterado! '	,'Atenção',;
 						'Caso necessário entre em contato com a área Logística.'+ CRLF +'Solicitação: '+ Z12->Z12_CODIGO	, 1 )
 		   Else
-			  u_itmsg(	'Já existe uma solicitação efetivada no dia ['+ MesExtenso(_ddtoper)+'/'+ cValToChar(Year(_ddtoper));
+			  U_ITMsg(	'Já existe uma solicitação efetivada no dia ['+ MesExtenso(_ddtoper)+'/'+ cValToChar(Year(_ddtoper));
 				 			+'] para o funcionário atual e não poderá mais ser alterado! '	, 'Atenção',;
 						'Caso necessário entre em contato com a área Logística.'+ CRLF +'Solicitação: '+ Z12->Z12_CODIGO	 , 1 )
-		   Endif
+		   EndIf
 			
 		   _lRet := .F.
 			
@@ -482,6 +510,19 @@ Local _nPosScan	:= 0
 Local _nQtdIni	:= 0
 Local _nVrIPI  := 0
 
+Local _nClrText := Nil 
+Local _nClrBack := Nil
+Local _cTheme   := Nil 
+
+_cTheme := totvs.framework.css.getNewWebAppTheme()
+If !Empty(_cTheme) .And. _cTheme == "DARK"
+	_nClrText := CLR_WHITE
+	_nClrBack := CLR_BLACK
+Else
+	_nClrText := CLR_BLACK
+	_nClrBack := CLR_WHITE
+EndIf
+
 _nPedido	:= 0
 _aPrdAux	:= {}
 
@@ -494,8 +535,8 @@ _cQuery += " LEFT JOIN  "+ RetSqlName('SBZ') +" SBZ ON BZ_FILIAL = '"+ xFilial('
 _cQuery += " WHERE "+ RetSqlCond('Z11')
 _cQuery += " AND Z11_FILTAB LIKE '%"+ xFilial('SE1') +"%' "
 _cQuery += " AND Z11_STATUS = 'S' "
-_cQuery += " AND Z11_DATINI <= '"+ DtoS( _ddtoper ) +"' "
-_cQuery += " AND Z11_DATFIM >= '"+ DtoS( _ddtoper ) +"' "
+_cQuery += " AND Z11_DATINI <= '"+ DToS( _ddtoper ) +"' "
+_cQuery += " AND Z11_DATFIM >= '"+ DToS( _ddtoper ) +"' "
 _cQuery += " ORDER BY Z11.Z11_CODPRD "
 
 MPSysOpenQuery( _cQuery , _cAlias)
@@ -539,10 +580,10 @@ _oSayS	:= TSay():New( _aPosPan[01] + 005 , 300 , {|| 'Saldo do Pedido: '								
 _oTGetS	:= TSay():New( _aPosPan[01] + 005 , 350 , {|| AllTrim( Transform( _nSaldo , '@E 999,999,999,999.99' ) )		} , _oPanel ,,,,,, .T. ,,, 200 , 20 )
 
 _oSayR	 := TSay():New( _aPosPan[01] + 025    ,005 , {|| 'Local de Retirada: '										} , _oPanel ,,,,,, .T. ,,, 200 , 20 )
-_oLocRet := TComboBox():New(_aPosPan[01] + 025,050 , {|u|if(PCount()>0,_cLocEnt :=u,_cLocEnt)         }, _aLocEnt,60,20,_oPanel  ,,,,,,.T.,,,,,,,,,'_cLocEnt')
+_oLocRet := TComboBox():New(_aPosPan[01] + 025,050 , {|u|If(PCount()>0,_cLocEnt :=u,_cLocEnt)         }, _aLocEnt,60,20,_oPanel  ,,,,,,.T.,,,,,,,,,'_cLocEnt')
 
-          //TCBrowse():New( [ nRow ], [ nCol ], [ nWidth ], [ nHeight ], [ bLine ], [ aHeaders ], [ aColSizes ], [ oWnd ], [ cField ], [ uValue1 ], [ uValue2 ], [ bChange ], [ bLDblClick ], [ bRClick ], [ oFont ], [ oCursor ], [ nClrFore ], [ nClrBack ], [ cMsg ], [ uParam20 ], [ cAlias ], [ lPixel ], [ bWhen ], [ uParam24 ], [ bValid ], [ lHScroll ], [ lVScroll ] )
-_oBrowse := TCBrowse():New( _aPosAux[01][01] + 015 , _aPosAux[01][02] , _aPosAux[01][04] - 005 , _aPosAux[01][03] - _oPanel:OPARENT:NTOP - 030 ,, {'Produto','Descrição','1ª UM','Valor','2ª UM','Qtd. 1ª UM','Qtd. 2ª UM','Total'} , {50,50,50,50,50,50,50,50} , _oPanel ,,,,,{||},,,,,,,.F.,,.T.,,.F.,,, )
+          //TCBrowse():New( [ nRow ]               , [ nCol ]         , [ nWidth ]             , [ nHeight ]                                   , [ bLine ], [ aHeaders ]                                                                      , [ aColSizes ]             , [ oWnd ], [ cField ], [ uValue1 ], [ uValue2 ], [ bChange ], [ bLDblClick ], [ bRClick ], [ oFont ], [ oCursor ], [ nClrFore ], [ nClrBack ], [ cMsg ], [ uParam20 ], [ cAlias ], [ lPixel ], [ bWhen ], [ uParam24 ], [ bValid ], [ lHScroll ], [ lVScroll ] )
+_oBrowse := TCBrowse():New( _aPosAux[01][01] + 015 , _aPosAux[01][02] , _aPosAux[01][04] - 005 , _aPosAux[01][03] - _oPanel:OPARENT:NTOP - 030 ,          , {'Produto','Descrição','1ª UM','Valor','2ª UM','Qtd. 1ª UM','Qtd. 2ª UM','Total'} , {50,50,50,50,50,50,50,50} , _oPanel ,           ,            ,            ,            ,{||}           ,            ,          ,            , _nClrText   , _nClrBack    ,,.F.,,.T.,,.F.,,, )
            
 _oBrowse:SetArray( _aPrdAux )
 
@@ -555,10 +596,10 @@ _oBrowse:AddColumn( TCColumn():New( '% IPI'        , {|| _aPrdAux[_oBrowse:nAt][
 _oBrowse:AddColumn( TCColumn():New( 'Vr IPI'       , {|| _aPrdAux[_oBrowse:nAt][07] } ,'@E 999,999,999,999.99'	,,, "RIGHT" ,, .F. , .T. ,,,, .F. ) )
 _oBrowse:AddColumn( TCColumn():New( 'Total'        , {|| _aPrdAux[_oBrowse:nAt][08] } ,'@E 999,999,999,999.99'	,,, "RIGHT" ,, .F. , .T. ,,,, .F. ) )
 
-_oBrowse:bLDblClick		:= {|z,x| IIF( x == 05 , ( lEditCell( _aPrdAux , _oBrowse , "@E 999,999,999.999" , x ) , AOMS070VDQ( x , @_oBrowse ) ) , .F. ) , _oBrowse:Refresh() }
+_oBrowse:bLDblClick		:= {|z,x| IIf( x == 05 , ( lEditCell( _aPrdAux , _oBrowse , "@E 999,999,999.999" , x ) , AOMS070VDQ( x , @_oBrowse ) ) , .F. ) , _oBrowse:Refresh() }
 _oBrowse:lAdjustColSize	:= .F.
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -587,13 +628,13 @@ Begin Sequence
 
    If _nSaldo < 0
 	
-	  u_itmsg( 'O pedido digitado superou o limite de crédito do funcionário para compras!','Atenção','Verifique os dados digitados e tente novamente.' , 1 )
+	  U_ITMsg( 'O pedido digitado superou o limite de crédito do funcionário para compras!','Atenção','Verifique os dados digitados e tente novamente.' , 1 )
 	  _lRet := .F.
 
    Else
 	
 	  If _nPedido == 0
-		 U_ITMSG( 'Não é possível incluir um pedido vazio!','Atenção',' Verifique os dados digitados e tente novamente.' ,1 )
+		 U_ITMsg( 'Não é possível incluir um pedido vazio!','Atenção',' Verifique os dados digitados e tente novamente.' ,1 )
 		 _lRet := .F.
 	  Else
 		 For _nI := 1 To Len( _oBrowse:aArray )
@@ -660,7 +701,7 @@ Local _cHtml	:= ''
 Local _nI		:= 0
 
 If Empty(_oPanel)
-	Return()
+	Return
 EndIf
 
 DBSelectArea('SRA')
@@ -747,7 +788,7 @@ _oPanAux	:= TPanel():New( 0 , 0 , '' , _oScrAux , _oFont , .F. ,,,, 570 , 062 + 
 
 _oPanAux:cCaption := _cHtml
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -773,6 +814,18 @@ Local _nTotPed	:= 0
 Local _nConv	:= 0
 Local _nI		:= 0
 Local _cCodTPONFRAC := U_ITGETMV( "IT_VOLN3M","00060034701") As Char // QUEIJO RALADO 40 G
+Local _cTheme
+Local _nClrText
+Local _nClrBack
+
+_cTheme := totvs.framework.css.getNewWebAppTheme()
+If !Empty(_cTheme) .And. _cTheme == "DARK"
+	_nClrText := CLR_WHITE
+	_nClrBack := CLR_BLACK
+Else
+	_nClrText := CLR_BLACK
+	_nClrBack := CLR_WHITE
+EndIf
 
 _cQuery := " SELECT "
 _cQuery += "     Z11.Z11_UMSOLI AS CODVLD "
@@ -780,8 +833,8 @@ _cQuery += " FROM  "+ RetSqlName('Z11') +" Z11 "
 _cQuery += " WHERE "+ RetSqlCond('Z11')
 _cQuery += " AND Z11.Z11_FILTAB LIKE '%"+ xFilial('SE1') +"%' "
 _cQuery += " AND Z11.Z11_CODPRD = '"+ _oBrowse:aArray[_oBrowse:nAt][01] +"' "
-_cQuery += " AND Z11.Z11_DATINI <= '"+ DtoS( _ddtoper ) +"' "
-_cQuery += " AND Z11.Z11_DATFIM >= '"+ DtoS( _ddtoper ) +"' "
+_cQuery += " AND Z11.Z11_DATINI <= '"+ DToS( _ddtoper ) +"' "
+_cQuery += " AND Z11.Z11_DATFIM >= '"+ DToS( _ddtoper ) +"' "
 _cQuery += " AND Z11.Z11_STATUS = 'S' "
 
 MPSysOpenQuery( _cQuery , _cAlias)
@@ -793,7 +846,7 @@ If (_cAlias)->( !Eof() ) .And. !Empty( (_cAlias)->CODVLD )
 		
 		_nConv := Posicione('SB1',1,xFilial('SB1')+_oBrowse:aArray[_oBrowse:nAt][01],'B1_CONV')
 		
-		If ALLTRIM(_oBrowse:aArray[_oBrowse:nAt][01]) $  _cCodTPONFRAC
+		If AllTrim(_oBrowse:aArray[_oBrowse:nAt][01]) $  _cCodTPONFRAC
 		   _nConv := Posicione('SB1',1,xFilial('SB1')+_oBrowse:aArray[_oBrowse:nAt][01],'B1_I_QT3UM')
 		EndIf
 		
@@ -803,13 +856,13 @@ If (_cAlias)->( !Eof() ) .And. !Empty( (_cAlias)->CODVLD )
 		
 		If Mod( _oBrowse:aArray[_oBrowse:nAt][05] , _nConv ) > 0
 		
-			u_itmsg(	'Para o produto: '+ AllTrim( SB1->B1_DESC ) +' devem ser solicitadas as quantidades em múltiplos de: ';
+			U_ITMsg(	'Para o produto: '+ AllTrim( SB1->B1_DESC ) +' devem ser solicitadas as quantidades em múltiplos de: ';
 						+ cValtoChar( _nConv ) +'! '+ CRLF +	'[Ex. '+ cValtoChar( _nConv ) +' - '+ cValtoChar( _nConv * 2 );
 						 +' - '+ cValtoChar( _nConv * 3 ) +' ]' , 'Atenção!' , ,1 )
 			
 			_oBrowse:aArray[_oBrowse:nAt][05] := 0
 			
-		EndIF
+		EndIf
 		
 	EndIf
 	
@@ -834,13 +887,13 @@ If (_cAlias)->( !Eof() ) .And. !Empty( (_cAlias)->CODVLD )
 		_oSayS:nClrText		:= CLR_RED
 		_oTGetS:nClrText	:= CLR_RED
 	Else
-		_oSayS:nClrText		:= CLR_BLACK
-		_oTGetS:nClrText	:= CLR_BLACK
+		_oSayS:nClrText		:= _nClrText //CLR_BLACK 
+		_oTGetS:nClrText	:= _nClrText //CLR_BLACK 
 	EndIf
 
 Else
 
-	u_itmsg( 'Falha ao identificar o produto na tabela de preços!','Atenção',;
+	U_ITMsg( 'Falha ao identificar o produto na tabela de preços!','Atenção',;
 			' Execute a rotina de solicitação novamente para atualizar a tabela, caso o erro persista informe o departamento responsável.' , 1 )
 
 EndIf
@@ -857,7 +910,7 @@ Data da Criacao-: 24/08/2015
 ===============================================================================================================================
 Descrição-------: Rotina para validar a digitação de quantidades dos pedidos
 ===============================================================================================================================
-Parametros------: _adados - array com dados do pedido
+Parametros------: _aDados - array com dados do pedido
 ===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
@@ -873,8 +926,8 @@ Local _cCodZ12	:= ''
 Local _cFilLocEnt := U_ITGETMV( 'IT_FILLOCEN' , "92;" )
 
 Begin Sequence
-   If XFilial("SRA") $ _cFilLocEnt // Empty(_cLocEnt) 
-      Do While .T.
+   If xFilial("SRA") $ _cFilLocEnt // Empty(_cLocEnt) 
+      While .T.
          U_AOMS070l()
 		 If ! Empty(_cLocEnt)
 		    Exit
@@ -889,7 +942,7 @@ Begin Sequence
    _cQuery += " WHERE "+ RETSQLCOND('Z12')
    _cQuery += " AND Z12.Z12_MATRIC = '"+ _cMatric +"' "
    _cQuery += " AND Z12.Z12_STATUS = 'I' "
-   //_cQuery += " AND SUBSTR( Z12.Z12_DATA , 1 , " + alltrim(str(_nchars)) + " )   = '"+ SubStr( DtoS( _ddtoper ) , 1 , _nchars ) +"' "
+   //_cQuery += " AND SubStr( Z12.Z12_DATA , 1 , " + AllTrim(Str(_nchars)) + " )   = '"+ SubStr( DToS( _ddtoper ) , 1 , _nchars ) +"' "
 
    MPSysOpenQuery( _cQuery , _cAlias)
    
@@ -921,39 +974,39 @@ Begin Sequence
    Z12->Z12_STATUS		:= 'I'
    Z12->Z12_LOCENT     := _cLocEnt  
 
-   Z12->( MsUnLock() )
+   Z12->( MSUnLock() )
 
    //====================================================================================================
    // Zera os itens da solicitação para poder gravar novamente
    //====================================================================================================
    // A exclusão física de registros da tabela Z13 foi substituida pela exclusão lógica.
    //====================================================================================================
-   Z13->(DbSetOrder(1)) // Z13_FILIAL+Z13_CODPED+Z13_ITEM 
-   Z13->(DbSeek(Z12->Z12_FILIAL + Z12->Z12_CODIGO))
-   Do While ! Z13->(Eof()) .And. Z13->(Z13_FILIAL+Z13_CODPED) == Z12->Z12_FILIAL + Z12->Z12_CODIGO 
+   Z13->(DBSetOrder(1)) // Z13_FILIAL+Z13_CODPED+Z13_ITEM 
+   Z13->(DBSeek(Z12->Z12_FILIAL + Z12->Z12_CODIGO))
+   While ! Z13->(Eof()) .And. Z13->(Z13_FILIAL+Z13_CODPED) == Z12->Z12_FILIAL + Z12->Z12_CODIGO 
       Z13->(RecLock("Z13",.F.))
       Z13->(DbDelete())
-      Z13->(MsUnLock())
+      Z13->(MSUnLock())
    
-      Z13->(DbSkip())
+      Z13->(DBSkip())
    EndDo
 
    //====================================================================================================
    // A exclusão física de registros da tabela Z13 foi substituida pela exclusão lógica.
    //==================================================================================================== 
    /*
-   _cQuery := " DELETE "   // Alterar esta linha para utilizar RECLOCK() 
+   _cQuery := " DELETE "   // Alterar esta linha para utilizar RecLock() 
    _cQuery += " FROM   "+ RETSQLNAME('Z13') +" Z13 "
    _cQuery += " WHERE  "+ RETSQLCOND('Z13')
    _cQuery	+= " AND Z13.Z13_CODPED = '"+ Z12->Z12_CODIGO +"' "
 
    If ( TcSqlExec( _cQuery ) < 0 )
 	
-	  u_itmsg( 'Ocorreu um erro durante a gravação da solicitação! Informe a equipe de TI/Sistemas.' , 'Atenção!' , 1 )
+	  U_ITMsg( 'Ocorreu um erro durante a gravação da solicitação! Informe a equipe de TI/Sistemas.' , 'Atenção!' , 1 )
 	  Alert( TCSQLError() )
 	  DisarmTransaction()
-	  Return()
-   EndIF
+	  Return
+   EndIf
    */
 
    For _nI := 1 To Len( _aDados )
@@ -989,7 +1042,7 @@ Begin Sequence
          Z13->Z13_PIPI     := _aDados[_nI][09]
          Z13->Z13_VRIPI    := _aDados[_nI][10]
 
-         Z13->( MsUnLock() )
+         Z13->( MSUnLock() )
 
       EndIf
 
@@ -997,9 +1050,9 @@ Begin Sequence
 
    End Transaction 
 
-   MsUnLockAll()
+   MSUnLockAll()
 
-   If u_itmsg( 'Solicitação ['+ Z12->Z12_CODIGO +'] gravada com sucesso! Deseja imprimir?' , "Processo concluído",,3,2,2)
+   If U_ITMsg( 'Solicitação ['+ Z12->Z12_CODIGO +'] gravada com sucesso! Deseja imprimir?' , "Processo concluído",,3,2,2)
 	
 	  U_ROMS011()
 	
@@ -1007,7 +1060,7 @@ Begin Sequence
 
 End Sequence
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1028,20 +1081,20 @@ User Function AOMS070E()
 Local _xAcesso		:= U_ITACSUSR( 'ZZL_ADMPFU' , 'S' )
 
 Private _oBrwEfe	:= FWMBrowse():New()
-Private _ddtoper	:= date()
+Private _ddtoper	:= Date()
 
 //====================================================================================================
 // Validação do acesso do usuário
 //====================================================================================================
 If ValType( _xAcesso ) == 'N' .And. _xAcesso == 0
 
-	u_itmsg( 'Usuário não está cadastrado na Gestão de Usuários do Configurador Italac!' ,'Atenção',,1 )
-	Return()
+	U_ITMsg( 'Usuário não está cadastrado na Gestão de Usuários do Configurador Italac!' ,'Atenção',,1 )
+	Return
 
 ElseIf !_xAcesso
 	
-	u_itmsg( 'Usuário sem acesso à rotina de efetivação dos pedidos de funcionários!' , 'Atenção',,1)
-	Return()
+	U_ITMsg( 'Usuário sem acesso à rotina de efetivação dos pedidos de funcionários!' , 'Atenção',,1)
+	Return
 	
 EndIf
 
@@ -1062,7 +1115,7 @@ _oBrwEfe:AddLegend( 'Z12_STATUS == "E"' , 'RED'		, 'Solicitação Efetivada' )
 
 _oBrwEfe:Activate()
 
-Return()
+Return
 
 Static Function AOMS070EFE( _nOpc )
 
@@ -1073,21 +1126,21 @@ Local _cAlias	:= ''
 
 If _nOpc == 1
 	
-	IF Z12->Z12_STATUS == 'I'
+	If Z12->Z12_STATUS == 'I'
 	
-		If u_itmsg( 'Confirma a efetivação da solicitação ['+ Z12->Z12_CODIGO +'] ?' , 'Atenção!',,2,2,2 )
+		If U_ITMsg( 'Confirma a efetivação da solicitação ['+ Z12->Z12_CODIGO +'] ?' , 'Atenção!',,2,2,2 )
 			
-			FwMsgRun( ,{|| AOMS070GEF() },'Aguarde!' ,'Efetivando o pedido...'    )
+			FWMsgRun( ,{|| AOMS070GEF() },'Aguarde!' ,'Efetivando o pedido...'    )
 
 		Else
 			
-			u_itmsg( 'Operação cancelada pelo usuário!' , "Atenção",,1 )
+			U_ITMsg( 'Operação cancelada pelo usuário!' , "Atenção",,1 )
 			
 		EndIf
 	
 	Else
 		
-		u_itmsg( 'O registro selecionado '+ IIF( Z12->Z12_STATUS == 'C' , 'foi Cancelado!' , 'já foi Efetivado! [Pedido:'+ Z12->Z12_PEDSC5 +']' ) ,"Atenção",,1 )
+		U_ITMsg( 'O registro selecionado '+ IIf( Z12->Z12_STATUS == 'C' , 'foi Cancelado!' , 'já foi Efetivado! [Pedido:'+ Z12->Z12_PEDSC5 +']' ) ,"Atenção",,1 )
 		
 	EndIf
 	
@@ -1099,7 +1152,7 @@ ElseIf _nOpc == 2
 		_cQuery += "    Z12.R_E_C_N_O_ AS REGZ12 "
 		_cQuery += " FROM  "+ RetSqlName('Z12') +" Z12 "
 		_cQuery += " WHERE "+ RetSqlCond('Z12')
-		_cQuery += " AND Z12.Z12_DATA   BETWEEN '"+ DTOS(MV_PAR01) +"' AND '"+ DTOS(MV_PAR02) +"' "
+		_cQuery += " AND Z12.Z12_DATA   BETWEEN '"+ DToS(MV_PAR01) +"' AND '"+ DToS(MV_PAR02) +"' "
 		_cQuery += " AND Z12.Z12_CODIGO BETWEEN '"+ MV_PAR03       +"' AND '"+ MV_PAR04       +"' "
 		_cQuery += " AND Z12.Z12_STATUS = 'I' "
 		
@@ -1133,7 +1186,7 @@ ElseIf _nOpc == 2
 		
 		If Empty(_aDadSol)
 			
-			u_itmsg(  'Não foram encontrados registros para processar!',"Atenção",' Verifique os filtros e tente novamente.' , ,1 )
+			U_ITMsg(  'Não foram encontrados registros para processar!',"Atenção",' Verifique os filtros e tente novamente.' , ,1 )
 			
 		Else
 			
@@ -1143,7 +1196,7 @@ ElseIf _nOpc == 2
 			
 			Else
 				
-				u_itmsg('Operação cancelada pelo usuário!' , 'Atenção',,1 )
+				U_ITMsg('Operação cancelada pelo usuário!' , 'Atenção',,1 )
 				
 			EndIf
 			
@@ -1151,7 +1204,7 @@ ElseIf _nOpc == 2
 		
 	Else
 		
-		u_itmsg( 'Operação cancelada pelo usuário!' , 'Atenção',,1 )
+		U_ITMsg( 'Operação cancelada pelo usuário!' , 'Atenção',,1 )
 		
 	EndIf
 
@@ -1159,15 +1212,15 @@ ElseIf _nOpc == 3
 	
 	If Z12->Z12_STATUS == 'E'
 	
-		If u_itmsg( 'Confirma o estorno da efetivação da solicitação ['+ Z12->Z12_CODIGO +'] ?' , 'Atenção!',,2,2,2 )
+		If U_ITMsg( 'Confirma o estorno da efetivação da solicitação ['+ Z12->Z12_CODIGO +'] ?' , 'Atenção!',,2,2,2 )
 			
-			FwMsgRun( , {|| AOMS070EXC() }, 'Aguarde!','Estornando o pedido...'   )
+			FWMsgRun( , {|| AOMS070EXC() }, 'Aguarde!','Estornando o pedido...'   )
 			
 		EndIf
 	
 	Else
 	
-		u_itmsg( 'A solicitação atual não está efetivada!','Atenção','Somente solicitações efetivadas podem ser estornadas.',1  )
+		U_ITMsg( 'A solicitação atual não está efetivada!','Atenção','Somente solicitações efetivadas podem ser estornadas.',1  )
 	
 	EndIf
 
@@ -1175,25 +1228,25 @@ ElseIf _nOpc == 4
 	
 	If Z12->Z12_STATUS == 'E'
 		
-		u_itmsg( 'A solicitação atual encontra-se efetivada e não poderá ser cancelada!','Atenção','Para cancelar a solicitação é necessário estornar o pedido de venda.',1)				
+		U_ITMsg( 'A solicitação atual encontra-se efetivada e não poderá ser cancelada!','Atenção','Para cancelar a solicitação é necessário estornar o pedido de venda.',1)				
 		
-		If u_itmsg( 'Deseja efetuar o estorno da solicitação ['+ Z12->Z12_CODIGO +'] ?' , 'Atenção!',,3,2,2 )
+		If U_ITMsg( 'Deseja efetuar o estorno da solicitação ['+ Z12->Z12_CODIGO +'] ?' , 'Atenção!',,3,2,2 )
 			
-			FwMsgRun( , {|| AOMS070EXC() }, 'Aguarde!','Estornando o pedido...'   )
+			FWMsgRun( , {|| AOMS070EXC() }, 'Aguarde!','Estornando o pedido...'   )
 			
 		EndIf
 		
 	ElseIf Z12->Z12_STATUS == 'C'
 	
-		u_itmsg( 'A solicitação atual já foi cancelada! ', 'Atenção','Verifique o registro selecionado. ',1)
+		U_ITMsg( 'A solicitação atual já foi cancelada! ', 'Atenção','Verifique o registro selecionado. ',1)
 	
 	EndIf
 	
 	If Z12->Z12_STATUS == 'I'
 	
-		If u_itmsg( 'Confirma o cancelamento da solicitação ['+ Z12->Z12_CODIGO +'] ?' , 'Atenção!',,3,2,2 )
+		If U_ITMsg( 'Confirma o cancelamento da solicitação ['+ Z12->Z12_CODIGO +'] ?' , 'Atenção!',,3,2,2 )
 			
-			FwMsgRun( , {|| AOMS070CAN() }, 'Aguarde!','Cancelando o pedido...'   )
+			FWMsgRun( , {|| AOMS070CAN() }, 'Aguarde!','Cancelando o pedido...'   )
 			
 		EndIf
 	
@@ -1203,7 +1256,7 @@ EndIf
 
 _oBrwEfe:Refresh()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1247,7 +1300,7 @@ Begin Sequence
 
    If Empty( _aDadSol )
 	  _aDadSol := { { .T. } }
-   EndIF
+   EndIf
 
    For _nI := 1 To Len( _aDadSol )
 	
@@ -1276,7 +1329,7 @@ Begin Sequence
 				
 				   DBSelectArea('SA1')
 				   SA1->( DBSetOrder(3) )
-				   IF SA1->( DBSeek( xFilial('SA1') + SubStr( SRA->RA_CIC + Space( TamSX3('A1_CGC')[01] ) , 1 , TamSX3('A1_CGC')[01] ) ) )
+				   If SA1->( DBSeek( xFilial('SA1') + SubStr( SRA->RA_CIC + Space( TamSX3('A1_CGC')[01] ) , 1 , TamSX3('A1_CGC')[01] ) ) )
 					
 					  If SA1->A1_MSBLQL == '1'
 							
@@ -1292,7 +1345,7 @@ Begin Sequence
 								
 							_lRet := .T.
 							
-						 EndIF
+						 EndIf
 							
 					  EndIf
 					
@@ -1300,7 +1353,7 @@ Begin Sequence
 					
 					  aAdd( _aLog , { 'O funcionário da matrícula ['+ Z12->Z12_MATRIC +'] não está cadastrado como "Cliente" no sistema!' } )
 					
-				   EndIF
+				   EndIf
 					
 				Else
 				
@@ -1310,7 +1363,7 @@ Begin Sequence
 			 Else
 				aAdd( _aLog , { 'A Matrícula ou CPF informado ['+ Z12->Z12_MATRIC +'] não é válido!' } )
 				
-			 EndIF
+			 EndIf
 			
 			 If _lRet
 			
@@ -1321,20 +1374,20 @@ Begin Sequence
 					_cTpConv	:= SB1->B1_TIPCONV
 					_nNewFat	:= SB1->B1_I_FATCO
 					_nQtd2UM	:= 0
-					IF EMPTY(_cLocal)
+					If Empty(_cLocal)
 					   _cLocal1:=Posicione( "SBZ" , 1 , xFilial("SBZ") + Z13->Z13_CODPRD , "BZ_LOCPAD" )
-					ELSE   
+					Else   
 					   _cLocal1:=_cLocal
-					ENDIF					
+					EndIf					
 					
 					If _cTpConv == "M"
-						_nQtd2UM := IIF( _nConv == 0 , _nNewFat * Z13->Z13_QTD , _nConv * Z13->Z13_QTD )
+						_nQtd2UM := IIf( _nConv == 0 , _nNewFat * Z13->Z13_QTD , _nConv * Z13->Z13_QTD )
 					Else
-						_nQtd2UM := IIF( _nConv == 0 , Z13->Z13_QTD / _nNewFat , Z13->Z13_QTD / _nConv )
+						_nQtd2UM := IIf( _nConv == 0 , Z13->Z13_QTD / _nNewFat , Z13->Z13_QTD / _nConv )
 					EndIf
 					
 					aAdd( _aItens , {	{ "C6_FILIAL"	, _cFilPed						   		, Nil },;
-										{ "C6_ITEM"   	, STRZERO( VAL( Z13->Z13_ITEM ) , 2 )	, Nil },;
+										{ "C6_ITEM"   	, StrZero( Val( Z13->Z13_ITEM ) , 2 )	, Nil },;
 										{ "C6_PRODUTO"	, Z13->Z13_CODPRD						, Nil },;
 										{ "C6_UM"    	, SB1->B1_UM							, Nil },;
 										{ "C6_QTDVEN" 	, Z13->Z13_QTD							, Nil },;
@@ -1370,22 +1423,22 @@ Begin Sequence
 				   cFilAnt := _cFilPed
 				
 				   If !SM0->( DBSeek( cEmpAnt + cFilAnt ) )
-				      u_itmsg( "Falha ao posicionar na Filial correta para geração dos pedidos. Empresa: " + cEmpAnt + " Filial: " + cFilAnt,"Atenção",,1 )
+				      U_ITMsg( "Falha ao posicionar na Filial correta para geração dos pedidos. Empresa: " + cEmpAnt + " Filial: " + cFilAnt,"Atenção",,1 )
 				   EndIf
 				
-				   cNumEmp := SM0->M0_CODIGO + ALLTRIM(SM0->M0_CODFIL)
+				   cNumEmp := SM0->M0_CODIGO + AllTrim(SM0->M0_CODFIL)
 				
-				   FwMsgRun( , {|| MSEXECAUTO( {|x,y,z| Mata410(x,y,z) } , _aCabec , _aItens , 3 ) }, "Aguarde!","Gerando o pedido de venda..."   ) 
+				   FWMsgRun( , {|| MSEXECAUTO( {|x,y,z| Mata410(x,y,z) } , _aCabec , _aItens , 3 ) }, "Aguarde!","Gerando o pedido de venda..."   ) 
 				
 				   _cFilSC5	:= SC5->C5_FILIAL
 				   _cPedSC5	:= SC5->C5_NUM
 				   cFilAnt		:= _cFilBkp
 				
 				   If !SM0->( DBSeek( cEmpAnt + cFilAnt ) )
-				      u_itmsg( "Falha ao posicionar o retorno na Filial atual. Empresa: " + cEmpAnt + " Filial: " + cFilAnt,"Atenção",,1 )
+				      U_ITMsg( "Falha ao posicionar o retorno na Filial atual. Empresa: " + cEmpAnt + " Filial: " + cFilAnt,"Atenção",,1 )
 				   EndIf
 				
-				   cNumEmp := SM0->M0_CODIGO + ALLTRIM(SM0->M0_CODFIL)
+				   cNumEmp := SM0->M0_CODIGO + AllTrim(SM0->M0_CODFIL)
 				
 				   If Empty( _cPedSC5 ) .Or. lMsErroAuto
 				
@@ -1393,10 +1446,10 @@ Begin Sequence
 					     RollBackSX8()
 				      EndIf
 					
-				      u_itmsg( 'Falhou ao gerar o Pedido de Venda automaticamente, verifique o registro de Log!' , 'Atenção',,1 )
+				      U_ITMsg( 'Falhou ao gerar o Pedido de Venda automaticamente, verifique o registro de Log!' , 'Atenção',,1 )
 				      MostraErro()
 				      DisarmTransaction()
-				      MsUnlockAll()
+				      MSUnLockAll()
 					
 				      _lFluxoNormal := .F. 
 			          _aLog := {} 
@@ -1410,14 +1463,14 @@ Begin Sequence
 				      RecLock( "Z12" , .F. )
 				      Z12->Z12_PEDSC5	:= _cFilSC5 + _cPedSC5
 				      Z12->Z12_STATUS	:= 'E'
-				      Z12->( MsUnLock() )
+				      Z12->( MSUnLock() )
 					
 				      aAdd( _aLog , { "Criado o Pedido de Venda [Filial: "+ _cFilSC5 +'/'+"Pedido: "+ _cPedSC5 +"] para a solicitação ["+ Z12->Z12_CODIGO +"]" } )
 				   EndIf
 				
 				End Transaction
 				
-				MsUnlockAll()
+				MSUnLockAll()
 				
 				If ! _lFluxoNormal 
 				   Break
@@ -1440,7 +1493,7 @@ EndIf
 
 U_ITListBox( 'Resumo do processamento:' , {'Mensagens'} , _aLog , .F. , 1 )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1470,14 +1523,14 @@ If _cFilPed <> cFilAnt
 	cFilAnt := _cFilPed
 	
 	If !SM0->( DBSeek( cEmpAnt + cFilAnt ) )
-	     u_itmsg( "Falha ao posicionar na Filial correta para geração dos pedidos. Empresa: " + cEmpAnt + " Filial: " + cFilAnt,"Atenção",,1 )
+	     U_ITMsg( "Falha ao posicionar na Filial correta para geração dos pedidos. Empresa: " + cEmpAnt + " Filial: " + cFilAnt,"Atenção",,1 )
 	EndIf
 	
-	cNumEmp := SM0->M0_CODIGO + ALLTRIM(SM0->M0_CODFIL)
+	cNumEmp := SM0->M0_CODIGO + AllTrim(SM0->M0_CODFIL)
 
 EndIf
 
-DbSelectArea("SC5")
+DBSelectArea("SC5")
 SC5->( DBSetOrder(1) )
 If SC5->( DBSeek( Z12->Z12_PEDSC5 ) )
 
@@ -1540,23 +1593,23 @@ If SC5->( DBSeek( Z12->Z12_PEDSC5 ) )
 		RecLock( 'Z12' , .F. )
 		Z12->Z12_PEDSC5	:= ''
 		Z12->Z12_STATUS	:= 'I'
-		Z12->( MsUnLock() )
+		Z12->( MSUnLock() )
 		
-		u_itmsg( 'Pedido estornado com sucesso!' , "Concluído",,2 )
+		U_ITMsg( 'Pedido estornado com sucesso!' , "Concluído",,2 )
 		
 	EndIf
 
 Else
 
-	u_itmsg( 	'Não foi encontrado o pedido no Financeiro  relacionado à solicitação selecionada!','Atenção',;
+	U_ITMsg( 	'Não foi encontrado o pedido no Financeiro  relacionado à solicitação selecionada!','Atenção',;
 						'O STATUS da solicitação será estornado  porém é recomendado verificar se o título foi realmente excluído no  Financeiro.',3 )
 	
 	RecLock( 'Z12' , .F. )
 	Z12->Z12_PEDSC5	:= ''
 	Z12->Z12_STATUS	:= 'I'
-	Z12->( MsUnLock() )
+	Z12->( MSUnLock() )
 	
-	u_itmsg( 'Pedido estornado com sucesso!' ,"Concluído",,2 )
+	U_ITMsg( 'Pedido estornado com sucesso!' ,"Concluído",,2 )
 
 EndIf
 
@@ -1565,14 +1618,14 @@ If cFilAnt <> _cFilBkp
 	cFilAnt := _cFilBkp
 	
 	If !SM0->( DBSeek( cEmpAnt + cFilAnt ) )
-	     u_itmsg( "Falha ao posicionar o retorno na Filial atual. Empresa: " + cEmpAnt + " Filial: " + cFilAnt,"Atenção",,1 )
+	     U_ITMsg( "Falha ao posicionar o retorno na Filial atual. Empresa: " + cEmpAnt + " Filial: " + cFilAnt,"Atenção",,1 )
 	EndIf
 	
-	cNumEmp := SM0->M0_CODIGO + ALLTRIM(SM0->M0_CODFIL)
+	cNumEmp := SM0->M0_CODIGO + AllTrim(SM0->M0_CODFIL)
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1602,13 +1655,13 @@ Local _xAcesso	:= .T.//U_ITACSUSR( 'ZZL_ADMPFU' , 'S' )
 //====================================================================================================
 If ValType( _xAcesso ) == 'N' .And. _xAcesso == 0
 
-	u_itmsg( 'Usuário não está cadastrado na Gestão de Usuários do Configurador Italac!',"Atenção",,1 )
-	Return()
+	U_ITMsg( 'Usuário não está cadastrado na Gestão de Usuários do Configurador Italac!',"Atenção",,1 )
+	Return
 
 ElseIf ( ValType( _xAcesso ) == 'L' .And. !_xAcesso ) .Or. ValType( _xAcesso ) <> 'L'
 	
-	u_itmsg( 'Usuário sem acesso à rotina de "reset" de senha dos funcionários!',"Atenção",,1 )
-	Return()
+	U_ITMsg( 'Usuário sem acesso à rotina de "reset" de senha dos funcionários!',"Atenção",,1 )
+	Return
 	
 EndIf
 
@@ -1651,53 +1704,53 @@ If _nOpc == 1
 		EndIf
 		
 		If !_lExec
-			u_itmsg( 'A Matrícula ou CPF informado não é válido na Filial atual!',"Atenção",'Informe uma matrícula ou CPF válido para iniciar.' , ,1 )
+			U_ITMsg( 'A Matrícula ou CPF informado não é válido na Filial atual!',"Atenção",'Informe uma matrícula ou CPF válido para iniciar.' , ,1 )
 		EndIf
 		
-	EndIF
+	EndIf
 	
 	If _lExec
 	
 		If SRA->RA_FILIAL <> xFilial('SRA')
 			
-			u_itmsg( 'O funcionário da matrícula atual não está cadastrado na Filial '+ xFilial('SRA') ,"Atenção", ' Verifique os dados digitados!' , 1 )
+			U_ITMsg( 'O funcionário da matrícula atual não está cadastrado na Filial '+ xFilial('SRA') ,"Atenção", ' Verifique os dados digitados!' , 1 )
 			
 		ElseIf Empty( SRA->RA_DEMISSA ) .And. SRA->RA_SITFOLH <> 'D'
 		
 			DBSelectArea('SA1')
 			SA1->( DBSetOrder(3) )
-			IF SA1->( DBSeek( xFilial('SA1') + SubStr( SRA->RA_CIC + Space( TamSX3('A1_CGC')[01] ) , 1 , TamSX3('A1_CGC')[01] ) ) )
+			If SA1->( DBSeek( xFilial('SA1') + SubStr( SRA->RA_CIC + Space( TamSX3('A1_CGC')[01] ) , 1 , TamSX3('A1_CGC')[01] ) ) )
 				
 				If SA1->A1_MSBLQL == '1'
 					
-					u_itmsg( 'O funcionário da matrícula atual está com o cadastrado de "Cliente" bloqueado no sistema','Atenção',;
+					U_ITMsg( 'O funcionário da matrícula atual está com o cadastrado de "Cliente" bloqueado no sistema','Atenção',;
 									'Verifique os dados digitados e o cadastro do funcionário!' , 1)
 					
 				Else
 					
 					If Empty( SA1->A1_LC ) .Or. SA1->A1_LC <= 0
 						
-						u_itmsg( 'O funcionário da matrícula atual está com o cadastrado de "Cliente" sem limite de crédito para compras',"Atenção",;
+						U_ITMsg( 'O funcionário da matrícula atual está com o cadastrado de "Cliente" sem limite de crédito para compras',"Atenção",;
 						 			'Verifique os dados digitados e o cadastro do funcionário!' , 1 )
 						
 					Else
 					    
 					    _lExec := .T.
 						
-					EndIF
+					EndIf
 					
 				EndIf
 			
 			Else
 			
-				u_itmsg( 'O funcionário da matrícula atual não está cadastrado como "Cliente" no sistema','Atenção',;
+				U_ITMsg( 'O funcionário da matrícula atual não está cadastrado como "Cliente" no sistema','Atenção',;
 								'Verifique os dados digitados e o cadastro do funcionário!' , 1 )
 			
-			EndIF
+			EndIf
 			
 		Else
 		
-			u_itmsg( 'O funcionário atual não está ativo no sistema!','Atenção','Verifique a situação com o Depto. de RH !' , 1 )
+			U_ITMsg( 'O funcionário atual não está ativo no sistema!','Atenção','Verifique a situação com o Depto. de RH !' , 1 )
 		
 		EndIf
 	
@@ -1724,29 +1777,29 @@ If _nOpc == 1
 		
 		ACTIVATE DIALOG _oDlgRes CENTERED
 		
-		If _nOpc == 1 .And. u_itmsg( 'Confirma a exclusão da senha do funcionário?' , 'Atenção!',,3,2,2 )
+		If _nOpc == 1 .And. U_ITMsg( 'Confirma a exclusão da senha do funcionário?' , 'Atenção!',,3,2,2 )
 			
 			RecLock('SRA',.F.)
 			SRA->RA_I_SENHA := ''
-			SRA->( MsUnLock() )
+			SRA->( MSUnLock() )
 			
-			u_itmsg(  'Operação realizada com sucesso!' ,'Concluído',,2 )
+			U_ITMsg(  'Operação realizada com sucesso!' ,'Concluído',,2 )
 			
 		Else
 		
-			u_itmsg( 'Operação cancelada pelo usuário!' , 'Atenção',,1 )
+			U_ITMsg( 'Operação cancelada pelo usuário!' , 'Atenção',,1 )
 		
 		EndIf
 	
-	EndIF
+	EndIf
 
 Else
 
-	u_itmsg( 'Operação cancelada pelo usuário!' , 'Atenção',,1 )
+	U_ITMsg( 'Operação cancelada pelo usuário!' , 'Atenção',,1 )
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1766,9 +1819,9 @@ Static Function AOMS070CAN()
 
 RecLock('Z12',.F.)
 Z12->Z12_STATUS := 'C'
-Z12->( MsUnLock() )
+Z12->( MSUnLock() )
 
-Return()
+Return
 
 
 /*
@@ -1786,7 +1839,7 @@ Retorno---------: _cret - lógico indicando se conseguiu gerar novo código
 */
 Static Function AOMS070NEW()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cRet		:= ''
 Local _cQuery	:= " SELECT MAX( Z12.Z12_CODIGO ) AS CODIGO FROM "+ RETSQLNAME('Z12') +" Z12 WHERE "+ RETSQLCOND('Z12')
 Local _cAlias	:= GetNextAlias()
@@ -1815,7 +1868,7 @@ EndIf
 
 (_cAlias)->( DBCloseArea() )
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return( _cRet )
 
@@ -1845,8 +1898,8 @@ _cQuery += " FROM  "+ RetSqlName('Z11') +" Z11 "
 _cQuery += " WHERE "+ RetSqlCond('Z11')
 _cQuery += " AND Z11_FILTAB LIKE '%"+ xFilial('SE1') +"%' "
 _cQuery += " AND Z11_STATUS = 'S' "
-_cQuery += " AND Z11_DATINI <= '"+ DtoS( _ddtoper ) +"' "
-_cQuery += " AND Z11_DATFIM >= '"+ DtoS( _ddtoper ) +"' "
+_cQuery += " AND Z11_DATINI <= '"+ DToS( _ddtoper ) +"' "
+_cQuery += " AND Z11_DATFIM >= '"+ DToS( _ddtoper ) +"' "
 _cQuery += " ORDER BY Z11.Z11_CODPRD "
 
 MPSysOpenQuery( _cQuery , _cAlias)
@@ -1894,7 +1947,7 @@ Static Function AOMS070RLT()
 	_cQuery += " WHERE "+ RetSqlCond('Z12,SRA')
 	_cQuery += " AND Z12.Z12_MATRIC = SRA.RA_MAT
 	_cQuery += " AND Z12.Z12_STATUS = 'E'
-	_cQuery += " AND Z12.Z12_DATA   BETWEEN '"+ DTOS(MV_PAR01) +"' AND '"+ DTOS(MV_PAR02) +"' "
+	_cQuery += " AND Z12.Z12_DATA   BETWEEN '"+ DToS(MV_PAR01) +"' AND '"+ DToS(MV_PAR02) +"' "
 	_cQuery += " AND Z12.Z12_CODIGO BETWEEN '"+ MV_PAR03       +"' AND '"+ MV_PAR04       +"' "
 	
 	If !Empty( MV_PAR05 )
@@ -1906,13 +1959,13 @@ Static Function AOMS070RLT()
     MPSysOpenQuery( _cQuery , _cAlias)
 	
 	(_cAlias)->( DBGoTop() )
-	Do While (_cAlias)->( !Eof() )
+	While (_cAlias)->( !Eof() )
 		
 		aAdd( _aDadSol , {	(_cAlias)->CODIGO															,;
 							(_cAlias)->MATRICULA														,;
 							AllTrim( (_cAlias)->NOME )						 							,;
 							AllTrim( Transform( (_cAlias)->VALOR , '@E 999,999,999,999.99' ) )			,;
-							DtoC( StoD( (_cAlias)->DT_INC ) )											,;
+							DToC( SToD( (_cAlias)->DT_INC ) )											,;
 							AllTrim( (_cAlias)->HORA )													,;
 							SubStr( (_cAlias)->PEDIDO , 1 , 2 ) +'/'+ SubStr( (_cAlias)->PEDIDO , 3 )	,;
 							AllTrim(Upper(U_ITRetBox( (_cAlias)->LOCALENT ,"Z12_LOCENT")))})
@@ -1923,18 +1976,18 @@ Static Function AOMS070RLT()
 	(_cAlias)->( DBCloseArea() )
 
 	If Empty( _aDadSol )
-		u_itmsg('Não foram encontradas solicitações efetivadas com os dados informados!' , 'Atenção',,1 )
+		U_ITMsg('Não foram encontradas solicitações efetivadas com os dados informados!' , 'Atenção',,1 )
 	Else
 		U_ITListBox( 'Relação de solicitações "EFETIVADAS"' , {'Código','Matrícula','Nome','Valor','Data','Hora','Fil/Pedido',"Local de Entrega"} , _aDadSol , .T. , 1 ,,, {50,50,200,50,50,50,50} )
 	EndIf
 
  Else
  
- 	u_itmsg( 'Operação cancelada pelo usuário!' , 'Atenção',,1 )
+ 	U_ITMsg( 'Operação cancelada pelo usuário!' , 'Atenção',,1 )
  
  EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1942,7 +1995,7 @@ Programa--------: AOMS070L
 Autor-----------: Julio de Paula Paz
 Data da Criacao-: 15/05/2019
 ===============================================================================================================================
-Descrição-------: Exibe tela para o usuário informar o local de entrega.
+Descrição-------: Exibe tela para o usuário informar o Local de entrega.
 ===============================================================================================================================
 Parametros------: Nenhum
 ===============================================================================================================================
@@ -1956,7 +2009,7 @@ Local _nOpc := 0
 Begin Sequence
    DEFINE DIALOG _oDlgLoc TITLE "Local de Retirada Produtos" FROM 0,0 TO 140,260 PIXEL
 	  _oSayR	 := TSay():New( 018   ,005 , {|| 'Local de Retirada: '					   }, _oDlgLoc ,,,,,, .T. ,,, 200 , 20 )
-      _oLocRet   := TComboBox():New(018,050 , {|u|if(PCount()>0,_cLocEnt :=u,_cLocEnt)     }, _aLocEnt,60,20,_oDlgLoc  ,,,,,,.T.,,,,,,,,,'_cLocEnt')
+      _oLocRet   := TComboBox():New(018,050 , {|u|If(PCount()>0,_cLocEnt :=u,_cLocEnt)     }, _aLocEnt,60,20,_oDlgLoc  ,,,,,,.T.,,,,,,,,,'_cLocEnt')
    
 	  @ 046,010 BUTTON _oBtn1 PROMPT "Confirmar"	ACTION ( _nOpc := 1 , _oDlgLoc:End() ) SIZE 050,012 OF _oDlgLoc PIXEL
 	  @ 046,060 BUTTON _oBtn2 PROMPT "Cancelar"	ACTION ( _nOpc := 0 , _oDlgLoc:End() ) SIZE 050,012 OF _oDlgLoc PIXEL

@@ -9,7 +9,7 @@ Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para cont
 ===============================================================================================================================
 */
 
-#Include "Protheus.Ch"
+#Include "TOTVS.ch"
 #Include "FWMVCDef.Ch"
 
 #Define		TITULO	"Avaliação de Clientes com Bloqueio de Desconto de Contrato"
@@ -50,7 +50,7 @@ Else
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -108,12 +108,12 @@ Begin Sequence
 
    If _nTotReg <= 0
 	  (_cAliasQry)->( DBCloseArea() )
-	  U_Itmsg(  "Não foram encontrados Clientes bloqueados por desconto contratual!" ,"Atenção!" ,,1 )
+	  U_ITMsg(  "Não foram encontrados Clientes bloqueados por desconto contratual!" ,"Atenção!" ,,1 )
 	  Break
    EndIf
 
    If Select(cAliasAux) > 0
-	  (cAliasAux)->(Dbclosearea())
+	  (cAliasAux)->(DBCloseArea())
    EndIf
 
    _otemp := FWTemporaryTable():New( cAliasAux, _aCpos )
@@ -127,7 +127,7 @@ Begin Sequence
    ProcRegua(_nTotReg)
 
    (_cAliasQry)->( DBGoTop() )
-   Do While (_cAliasQry)->( !Eof() )
+   While (_cAliasQry)->( !Eof() )
 
       (cAliasAux)->( RecLock( cAliasAux , .T. ) )
       (cAliasAux)->CLIENTE	 := (_cAliasQry)->CLIENTE
@@ -136,7 +136,7 @@ Begin Sequence
       (cAliasAux)->REDE		 := Capital( AllTrim( Posicione( "ACY" , 1 , xFilial("ACY") + (_cAliasQry)->REDE , "ACY_DESCRI" ) ) )
       (cAliasAux)->CODREDE  := (_cAliasQry)->REDE
       (cAliasAux)->CGC		 := AOMS130CGC( (_cAliasQry)->CGC )
-      (cAliasAux)->DAT_CAD	 := StoD( (_cAliasQry)->DAT_CAD )
+      (cAliasAux)->DAT_CAD	 := SToD( (_cAliasQry)->DAT_CAD )
       (cAliasAux)->REGSA1	 := (_cAliasQry)->REGSA1
       (cAliasAux)->BLOQDESC := (_cAliasQry)->BLOQDESC
       (cAliasAux)->BLOQUI   := (_cAliasQry)->BLOQUI
@@ -154,7 +154,7 @@ Begin Sequence
    aAdd( _aFields , { "Rede"			            , {|| (cAliasAux)->CODREDE }			                     , "C" , "@!" , 0 , TamSX3("ACY_DESCRI")[01]	, 0 } )
    aAdd( _aFields , { "Nome Rede"		         , {|| (cAliasAux)->REDE }			                        , "C" , "@!" , 0 , TamSX3("ACY_DESCRI")[01]	, 0 } )
    aAdd( _aFields , { "CPF/CNPJ"			         , {|| (cAliasAux)->CGC }  			                        , "C" , "@!" , 0 , TamSX3("A1_CGC")[01]		, 0 } )
-   aAdd( _aFields , { "Dt. Cadastro"		      , {|| DtoC((cAliasAux)->DAT_CAD) }	                     , "C" , "@!" , 0 , 10						, 0 } )
+   aAdd( _aFields , { "Dt. Cadastro"		      , {|| DToC((cAliasAux)->DAT_CAD) }	                     , "C" , "@!" , 0 , 10						, 0 } )
    aAdd( _aFields , { "Cliente Bloquedo"	      , {|| If((cAliasAux)->BLOQUI=="1"  ,"Sim","Não") }       , "C" , "@!" , 0 , 10	, 0 } )
    aAdd( _aFields , { "Bloqueio Desc.Contratual", {|| If((cAliasAux)->BLOQDESC=="1","Sim","Não") }       , "C" , "@!" , 0 , 10	, 0 } )
 
@@ -179,10 +179,10 @@ Begin Sequence
 End Sequence 
 
 If Select(cAliasAux) > 0
-   (cAliasAux)->(Dbclosearea())
+   (cAliasAux)->(DBCloseArea())
 EndIf
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -222,7 +222,7 @@ DBSelectArea("SA1")
 SA1->( DBGoTo(nRegSA1) )
 AxVisual( "SA1" , nRegSA1 , 2 )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -239,18 +239,18 @@ Static Function AOMS130CPS( _nTotReg )
 Local _aCpos := {}
 
 aAdd( _aCpos , { "MARCA"		, "C" , 1							   , 0 } )
-AAdd( _aCpos , { "CLIENTE"		, "C" , TamSX3("A1_COD")[01]		, 0 } )
-AAdd( _aCpos , { "LOJA"			, "C" , TamSX3("A1_LOJA")[01]		, 0 } )
-AAdd( _aCpos , { "NOME"			, "C" , TamSX3("A1_NOME")[01]		, 0 } )
-AAdd( _aCpos , { "REDE"			, "C" , TamSX3("ACY_DESCRI")[01]	, 0 } )
-AAdd( _aCpos , { "CODREDE"		, "C" , TamSX3("A1_GRPVEN")[01]	, 0 } )
-AAdd( _aCpos , { "CGC"			, "C" , 18							   , 0 } )
-AAdd( _aCpos , { "DAT_CAD"		, "D" , 8						    	, 0 } )
-AAdd( _aCpos , { "REGSA1"		, "N" , 9							   , 0 } )
-AAdd( _aCpos , { "BLOQDESC"	    , "C" , 1							, 0 } )
-AAdd( _aCpos , { "BLOQUI"	    , "C" , 1						    	, 0 } )
-//AAdd( _aCpos , { "ULT_FAT"		, "D" , 8							, 0 } )
-//AAdd( _aCpos , { "DT_REAV"		, "D" , 8							, 0 } )	// Data da Reavaliação
+aAdd( _aCpos , { "CLIENTE"		, "C" , TamSX3("A1_COD")[01]		, 0 } )
+aAdd( _aCpos , { "LOJA"			, "C" , TamSX3("A1_LOJA")[01]		, 0 } )
+aAdd( _aCpos , { "NOME"			, "C" , TamSX3("A1_NOME")[01]		, 0 } )
+aAdd( _aCpos , { "REDE"			, "C" , TamSX3("ACY_DESCRI")[01]	, 0 } )
+aAdd( _aCpos , { "CODREDE"		, "C" , TamSX3("A1_GRPVEN")[01]	, 0 } )
+aAdd( _aCpos , { "CGC"			, "C" , 18							   , 0 } )
+aAdd( _aCpos , { "DAT_CAD"		, "D" , 8						    	, 0 } )
+aAdd( _aCpos , { "REGSA1"		, "N" , 9							   , 0 } )
+aAdd( _aCpos , { "BLOQDESC"	    , "C" , 1							, 0 } )
+aAdd( _aCpos , { "BLOQUI"	    , "C" , 1						    	, 0 } )
+//aAdd( _aCpos , { "ULT_FAT"		, "D" , 8							, 0 } )
+//aAdd( _aCpos , { "DT_REAV"		, "D" , 8							, 0 } )	// Data da Reavaliação
 
 Return( _aCpos )
 
@@ -269,7 +269,7 @@ Static Function AOMS130CGC( cCGCAux )
 Local cRet	:= ""
 Local cAux	:= AllTrim( cCGCAux )
 
-IF Len( cAux ) > 11
+If Len( cAux ) > 11
 
 	cAux := PadL( cAux , 14 , "0" )
 	cRet := Transform( cAux , "@R! NN.NNN.NNN/NNNN-99" )
@@ -279,7 +279,7 @@ Else
 	cAux := PadL( cAux , 11 , "0" )
 	cRet := Transform( cAux , "@R 999.999.999-99" )
 	
-EndIF
+EndIf
 
 Return( cRet )
 
@@ -338,7 +338,7 @@ Else
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -376,13 +376,13 @@ Begin Sequence
       @ 040,005 Say "Nome Rede"	Size 100,009 OF _oDlgP PIXEL COLOR CLR_BLUE
 	   @ 040,060 MsGet _oDscGrupo	Var _cDscGrupo	Size 90,009 OF _oDlgP PIXEL COLOR CLR_BLACK Picture "@!" WHEN .F.
 	
-	  DEFINE SBUTTON FROM 070,60 TYPE 1 ENABLE ACTION ( _nOpca := 1 , _oDlgP:End() ) OF _oDlgP
-	  DEFINE SBUTTON FROM 070,120 TYPE 2 ENABLE ACTION ( _nOpca := 0 , _oDlgP:End() ) OF _oDlgP
+	  DEFINE SBUTTON FROM 070,60 Type 1 ENABLE ACTION ( _nOpca := 1 , _oDlgP:End() ) OF _oDlgP
+	  DEFINE SBUTTON FROM 070,120 Type 2 ENABLE ACTION ( _nOpca := 0 , _oDlgP:End() ) OF _oDlgP
 
    ACTIVATE MSDIALOG _oDlgP CENTERED
 
    If _nOpca == 1
-      If ! U_ItMsg("Confirma a Atualização do Cadastro de Clientes?", "Atenção", "",2,2,2) 
+      If ! U_ITMsg("Confirma a Atualização do Cadastro de Clientes?", "Atenção", "",2,2,2) 
          Break
       EndIf 
      
@@ -392,22 +392,22 @@ Begin Sequence
       (cAliasAux)->BLOQUI   := _cBloqDesc  //If(_cBloqDesc == _aBloqDesc[1],"1","2") 
       (cAliasAux)->( MSUnLock() )
 
-      SA1->(DbGoTo((cAliasAux)->REGSA1))
+      SA1->(DBGoTo((cAliasAux)->REGSA1))
 
       SA1->(RecLock("SA1", .F.))
       SA1->A1_I_BLQDC := _cBloqDesc  //If(_cBloqDesc == _aBloqDesc[1],"1","2") //_cBloqDesc
       SA1->A1_GRPVEN  := _cGrupo
       SA1->A1_I_NGRPC := _cDscGrupo
-      SA1->(MsUnLock())
+      SA1->(MSUnLock())
 
       _oMarkBRW:Refresh()
    EndIf 
 
 End Sequence 
 
-(cAliasAux)->(DbGoTo(_nRegAtu))
+(cAliasAux)->(DBGoTo(_nRegAtu))
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -452,7 +452,7 @@ aLegenda :=	{	{"BR_VERMELHO"	, "Bloqueado por Desconto Contratual"	},;
 
 BrwLegenda("Rotina de Avaliação de Clientes.","Legenda",aLegenda)
 
-return
+Return
 
 /*
 ===============================================================================================================================
@@ -481,28 +481,28 @@ Begin Sequence
       @ 004,003 ComboBox	_cComboBx1	Items _aComboBx1 Size 213,010 OF _oDlgP PIXEL
 	  @ 020,003 MsGet		_oGet1	Var _cGet1		Size 212,009 OF _oDlgP PIXEL COLOR CLR_BLACK Picture "@!"
 	
-	  DEFINE SBUTTON FROM 004,227 TYPE 1 ENABLE ACTION ( _nOpca := 1 , _oDlgP:End() ) OF _oDlgP
-	  DEFINE SBUTTON FROM 021,227 TYPE 2 ENABLE ACTION ( _nOpca := 0 , _oDlgP:End() ) OF _oDlgP
+	  DEFINE SBUTTON FROM 004,227 Type 1 ENABLE ACTION ( _nOpca := 1 , _oDlgP:End() ) OF _oDlgP
+	  DEFINE SBUTTON FROM 021,227 Type 2 ENABLE ACTION ( _nOpca := 0 , _oDlgP:End() ) OF _oDlgP
 
    ACTIVATE MSDIALOG _oDlgP CENTERED
 
    If _nOpca == 1
-      If ALLTRIM(_cComboBx1) == ALLTRIM(_aComboBx1[1])
-         (cAliasAux)->(DbSetOrder(1))
+      If AllTrim(_cComboBx1) == AllTrim(_aComboBx1[1])
+         (cAliasAux)->(DBSetOrder(1))
       Else
-         (cAliasAux)->(DbSetOrder(2))        
+         (cAliasAux)->(DBSetOrder(2))        
       EndIf 
    
       If ! (cAliasAux)->(MsSeek(RTrim(_cGet1)))
-         U_ITMSG("Registro não encontrado.","Atenção",,1)
-         (cAliasAux)->(DbSetOrder(1))
-         (cAliasAux)->(DbGoTo(_nRegAtu))
+         U_ITMsg("Registro não encontrado.","Atenção",,1)
+         (cAliasAux)->(DBSetOrder(1))
+         (cAliasAux)->(DBGoTo(_nRegAtu))
       Else 
-         (cAliasAux)->(DbSetOrder(1))
+         (cAliasAux)->(DBSetOrder(1))
          _oMarkBRW:Refresh()
       EndIf 
    EndIf
 
 End Sequence
 
-Return Nil
+Return

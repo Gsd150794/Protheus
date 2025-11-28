@@ -11,9 +11,9 @@ Lucas Borges      | 15/10/2019 | Removidos os Warning na compilação da release 1
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#include "protheus.ch"
-#include "topconn.ch"
-#include "rwmake.ch"
+#Include "TOTVS.ch"
+#Include "topconn.ch"
+#Include "rwmake.ch"
 
 /*
 ===============================================================================================================================
@@ -36,7 +36,7 @@ Retorno---------: Se placa pode ser cadastrada ou nao
 */
 User Function AOMS019(cPlaca, nCampo)
 
-	Local aArea 	:= GetArea()
+	Local aArea 	:= FWGetArea()
 	Local cQuery	:= ""
 	Local lRet		:= .F.
 	Local cVeiculo	:= ""
@@ -58,47 +58,47 @@ User Function AOMS019(cPlaca, nCampo)
 	cQuery += " WHERE D_E_L_E_T_ = ' ' AND DA3_I_PLVG = '" + cPlaca + "'"
 
 	dbUseArea( .T., "TOPCONN", TcGenQry(,,cQuery), "TEMP", .T., .F. )
-	dbSelectArea("TEMP")
+	DBSelectArea("TEMP")
 
-	if ( !eof() )
+	If ( !Eof() )
 		lRet		:= .T.
 		cVeiculo	:= TEMP->DA3_COD
 	end
 
-	TEMP->(dbCloseArea())
+	TEMP->(DBCloseArea())
 		
-	if ((nCampo == 1) .and. (!lRet))
+	If ((nCampo == 1) .And. (!lRet))
 	
-		if ((cPlaca == M->DA3_I_PLCV) .or. (cPlaca == M->DA3_I_PLVG))
+		If ((cPlaca == M->DA3_I_PLCV) .Or. (cPlaca == M->DA3_I_PLVG))
 			MsgAlert("A placa  " + cPlaca + " já foi utilizada neste mesmo veículo.","Alerta")
 			cPlaca	:= Space(8)
 			lRet	:= .T.
-		endif
+		EndIf
 		
-	elseif ((nCampo == 2) .and. (!lRet))
+	ElseIf ((nCampo == 2) .And. (!lRet))
 
-		if ((cPlaca == M->DA3_PLACA) .or. (cPlaca == M->DA3_I_PLVG))
+		If ((cPlaca == M->DA3_PLACA) .Or. (cPlaca == M->DA3_I_PLVG))
 			MsgAlert("A placa  " + cPlaca + " já foi utilizada neste mesmo veículo.","Alerta")
 			cPlaca := Space(8)
 			lRet	:= .T.
-		endif
+		EndIf
 	
-	elseif ((nCampo == 3) .and. (!lRet))
+	ElseIf ((nCampo == 3) .And. (!lRet))
 
-		if ((cPlaca == M->DA3_PLACA) .or. (cPlaca == M->DA3_I_PLCV))
+		If ((cPlaca == M->DA3_PLACA) .Or. (cPlaca == M->DA3_I_PLCV))
 			MsgAlert("A placa  " + cPlaca + " já foi utilizada neste mesmo veículo.","Alerta")
 			cPlaca := Space(8)
 			lRet	:= .T.
-		endif
+		EndIf
 
-	endif
+	EndIf
 	
-	if (lRet)
-		if !MsgYesNo("A placa  " + cPlaca + " esta cadastrada no veículo " + cVeiculo + "." + Chr(13) + Chr(10) + "Deseja continuar o cadastro desta placa?","Atencao")
+	If (lRet)
+		If !MsgYesNo("A placa  " + cPlaca + " esta cadastrada no veículo " + cVeiculo + "." + Chr(13) + Chr(10) + "Deseja continuar o cadastro desta placa?","Atencao")
 			cPlaca := Space(8)
-		endif
-	endif
+		EndIf
+	EndIf
 	
-	RestArea(aArea)
+	FWRestArea(aArea)
 	
-return cPlaca
+Return cPlaca

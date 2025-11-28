@@ -13,9 +13,9 @@ Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 #Include "report.ch"
-#INCLUDE 'TOPCONN.CH'
+#Include 'TOPCONN.CH'
 
 /*
 ===============================================================================================================================
@@ -52,7 +52,7 @@ Begin Sequence
 	
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -276,11 +276,11 @@ Begin Sequence
    EndIf
 
    If ! Empty(MV_PAR02) // De Emissao  
-      _cQry += " AND F2_EMISSAO >= '"+Dtos(MV_PAR02)+"' "
+      _cQry += " AND F2_EMISSAO >= '"+DToS(MV_PAR02)+"' "
    EndIf
    
    If ! Empty(MV_PAR03) // Até Emissao 
-      _cQry += " AND F2_EMISSAO <= '"+Dtos(MV_PAR03)+"' "
+      _cQry += " AND F2_EMISSAO <= '"+DToS(MV_PAR03)+"' "
    EndIf
    
    If ! Empty(MV_PAR04) // De Cliente 
@@ -337,7 +337,7 @@ Begin Sequence
    EndIf
 
    If Select("TRBSF2") <> 0
-	  TRBSF2->(DbCloseArea())
+	  TRBSF2->(DBCloseArea())
    EndIf
 	
    TCQUERY _cQry NEW ALIAS "TRBSF2"	
@@ -347,17 +347,17 @@ Begin Sequence
    TCSetField('TRBSF2',"BXFATURA","D",8,0)
    TCSetField('TRBSF2',"BXCTE","D",8,0)
       	
-   DbSelectArea("TRBSF2")
-   TRBSF2->(dbGoTop())
+   DBSelectArea("TRBSF2")
+   TRBSF2->(DBGoTop())
 
    Count to _ntotRegs	
    _oReport:SetMeter(_ntotRegs)	
    
-   TRBSF2->(dbGoTop())
+   TRBSF2->(DBGoTop())
    //====================================================================================================
    // Inicia processo de impressão.
    //====================================================================================================		
-   Do While !TRBSF2->(Eof())
+   While !TRBSF2->(Eof())
 		
       If _oReport:Cancel()
 		 Exit
@@ -376,9 +376,9 @@ Begin Sequence
          //====================================================================================================		 
          _dData  := TRBSF2->F2_EMISSAO
          _cCondicao := "(_dData  == TRBSF2->F2_EMISSAO)"
-         IncProc("Imprimindo Data Emissão: "+Dtoc(_dData))
+         IncProc("Imprimindo Data Emissão: "+DToC(_dData))
          _oSect1_A:Cell("F2_EMISSAO"):SetValue(TRBSF2->F2_EMISSAO)
-		 _oSect1_A:Printline()
+		 _oSect1_A:PrintLine()
       ElseIf _nOrdReport == 2   
          //====================================================================================================
          // Inicializando a primeira seção
@@ -394,11 +394,11 @@ Begin Sequence
          _cLoja   := TRBSF2->F2_LOJA
          _cNome   := TRBSF2->A1_NOME
          _cCondicao := "(_cCodigo+_cLoja+_cNome == TRBSF2->(F2_CLIENTE+F2_LOJA+A1_NOME))"           
-         IncProc("Imprimindo Cliente: "+Alltrim(_cCodigo+"-"+_cLoja+"-"+_cNome))
+         IncProc("Imprimindo Cliente: "+AllTrim(_cCodigo+"-"+_cLoja+"-"+_cNome))
          _oSect1_B:Cell("F2_CLIENTE"):SetValue(TRBSF2->F2_CLIENTE)
 		 _oSect1_B:Cell("F2_LOJA"):SetValue(TRBSF2->F2_LOJA)				
 		 _oSect1_B:Cell("A1_NOME"):SetValue(TRBSF2->A1_NOME)				
-		 _oSect1_B:Printline()         
+		 _oSect1_B:PrintLine()         
       Else
          //====================================================================================================
          // Inicializando a primeira seção
@@ -414,12 +414,12 @@ Begin Sequence
          _cLoja   := TRBSF2->F2_I_LTRA
          _cNome   := TRBSF2->A2_NOME  
          _cCondicao := "(_cCodigo+_cLoja+_cNome == TRBSF2->(F2_I_CTRA+F2_I_LTRA+A2_NOME))"
-         IncProc("Imprimindo Transportador: "+Alltrim(_cCodigo+"-"+_cLoja+"-"+_cNome))
+         IncProc("Imprimindo Transportador: "+AllTrim(_cCodigo+"-"+_cLoja+"-"+_cNome))
          // Imprimindo primeira seção
          _oSect1_C:Cell("F2_I_CTRA"):SetValue(TRBSF2->F2_I_CTRA)
 		 _oSect1_C:Cell("F2_I_LTRA"):SetValue(TRBSF2->F2_I_LTRA)				
 		 _oSect1_C:Cell("A2_NOME"):SetValue(TRBSF2->A2_NOME)				
-		 _oSect1_C:Printline()         
+		 _oSect1_C:PrintLine()         
       EndIf
 
       //====================================================================================================
@@ -433,7 +433,7 @@ Begin Sequence
          _oSect2_C:init()
       EndIf
 	  				
-      Do While &(_cCondicao)
+      While &(_cCondicao)
 		 _oReport:IncMeter()
 		 
 		 //====================================================================================================
@@ -473,17 +473,17 @@ Begin Sequence
          // Determina o tipo de operação com base na CFOP
          //====================================================================================================		      		
          _cOperCfop := Posicione("ZAY",1,xFilial("ZAY")+TRBSF2->D2_CF,"ZAY_TPOPER")
-         If Alltrim(_cOperCfop) == "V" // VENDA
+         If AllTrim(_cOperCfop) == "V" // VENDA
             _cOperCfop := "VENDA"
-         ElseIf Alltrim(_cOperCfop) == "T" // TRANSFERENCIA
+         ElseIf AllTrim(_cOperCfop) == "T" // TRANSFERENCIA
             _cOperCfop := "TRANSFERENCIA"
-         ElseIf Alltrim(_cOperCfop) == "B" // BONIFICACAO
+         ElseIf AllTrim(_cOperCfop) == "B" // BONIFICACAO
             _cOperCfop := "BONIFICACAO"
-         ElseIf Alltrim(_cOperCfop) == "R" // REMESSA
+         ElseIf AllTrim(_cOperCfop) == "R" // REMESSA
             _cOperCfop := "REMESSA"
-         ElseIf Alltrim(_cOperCfop) == "Z" // AMOSTRA 
+         ElseIf AllTrim(_cOperCfop) == "Z" // AMOSTRA 
             _cOperCfop := "AMOSTRA"
-         ElseIf Alltrim(_cOperCfop) == "O" // OUTROS
+         ElseIf AllTrim(_cOperCfop) == "O" // OUTROS
             _cOperCfop := "OUTROS"           
          EndIf 
 		 
@@ -499,7 +499,7 @@ Begin Sequence
 		
 		 //====================================================================================================
          // Imprimindo SIM/NAO na coluna com devolução. Quando o valor da devolução é maior que zero, "SIM" 
-         // houve devolução. Quando for zero, "NAO" houve devolução.
+         // houve devolução. Quando For zero, "NAO" houve devolução.
          //====================================================================================================		      		
          _cValdev := "NAO"		
          If TRBSF2->VALORDEV > 0
@@ -554,9 +554,9 @@ Begin Sequence
             _oSect2_A:Cell("A1_MUN"):SetValue(TRBSF2->A1_MUN)
             _oSect2_A:Cell("A1_EST"):SetValue(TRBSF2->A1_EST)	
             _oSect2_A:Cell("ZZN_CTRANS"):SetValue(TRBSF2->ZZN_CTRANS)	
-            _oSect2_A:Cell("BXCTE"):SetValue(Iif(Empty(TRBSF2->BXCTE),TRBSF2->BXFATURA,TRBSF2->BXCTE))	
+            _oSect2_A:Cell("BXCTE"):SetValue(IIf(Empty(TRBSF2->BXCTE),TRBSF2->BXFATURA,TRBSF2->BXCTE))	
 
-            _oSect2_A:Printline()
+            _oSect2_A:PrintLine()
          //====================================================================================================
          // Imprimindo segunda seção "Cliente"
          //====================================================================================================		 
@@ -603,9 +603,9 @@ Begin Sequence
             _oSect2_B:Cell("A1_MUN"):SetValue(TRBSF2->A1_MUN)
             _oSect2_B:Cell("A1_EST"):SetValue(TRBSF2->A1_EST)	
             _oSect2_B:Cell("ZZN_CTRANS"):SetValue(TRBSF2->ZZN_CTRANS)	
-            _oSect2_B:Cell("BXCTE"):SetValue(Iif(Empty(TRBSF2->BXCTE),TRBSF2->BXFATURA,TRBSF2->BXCTE))	
+            _oSect2_B:Cell("BXCTE"):SetValue(IIf(Empty(TRBSF2->BXCTE),TRBSF2->BXFATURA,TRBSF2->BXCTE))	
 
-            _oSect2_B:Printline()
+            _oSect2_B:PrintLine()
          //====================================================================================================
          // Imprimindo segunda seção "Transportador"
          //====================================================================================================		 
@@ -617,7 +617,7 @@ Begin Sequence
             _oSect2_C:Cell("F2_CLIENTE"):SetValue(TRBSF2->F2_CLIENTE)
             _oSect2_C:Cell("F2_LOJA"):SetValue(TRBSF2->F2_LOJA)
             _oSect2_C:Cell("A1_NOME"):SetValue(TRBSF2->A1_NOME)     
-            _oSect2_C:Cell("WK_TEMPO"):SetValue(DATE() - TRBSF2->F2_EMISSAO)
+            _oSect2_C:Cell("WK_TEMPO"):SetValue(Date() - TRBSF2->F2_EMISSAO)
             _oSect2_C:Cell("F2_I_DTRC"):SetValue(TRBSF2->F2_I_DTRC)
             _oSect2_C:Cell("WKOPERCFOP"):SetValue(_cOperCfop)
             _oSect2_C:Cell("F2_VALBRUT"):SetValue(TRBSF2->F2_VALBRUT)// Vlr.Total da Nota
@@ -652,12 +652,12 @@ Begin Sequence
             _oSect2_C:Cell("A1_MUN"):SetValue(TRBSF2->A1_MUN) 
             _oSect2_C:Cell("A1_EST"):SetValue(TRBSF2->A1_EST) 
             _oSect2_C:Cell("ZZN_CTRANS"):SetValue(TRBSF2->ZZN_CTRANS)	
-            _oSect2_C:Cell("BXCTE"):SetValue(Iif(Empty(TRBSF2->BXCTE),TRBSF2->BXFATURA,TRBSF2->BXCTE))	
+            _oSect2_C:Cell("BXCTE"):SetValue(IIf(Empty(TRBSF2->BXCTE),TRBSF2->BXFATURA,TRBSF2->BXCTE))	
             
-            _oSect2_C:Printline()
+            _oSect2_C:PrintLine()
          EndIf     
          
-         TRBSF2->(dbSkip())
+         TRBSF2->(DBSkip())
       EndDo		
       
       If _nOrdReport == 1 // "Data de emissão 
@@ -702,7 +702,7 @@ Begin Sequence
 	     _oSect1_C:Finish()
       EndIf
       
-   Enddo     
+   EndDo     
 
 End Sequence
 
@@ -720,17 +720,17 @@ Parametros--------: _cCodFilial == Codigo da filial.
 Retorno-----------: _aRet = dados das notas fiscais vinculdas ao pedido troca nf.
 ===============================================================================================================================
 */
-static Function ROMS043T(_cCodFilial, _cNrPedido)
+Static Function ROMS043T(_cCodFilial, _cNrPedido)
 Local _aRet := {}
 Local _aOrd := SaveOrd({"SF2","SC5"})
 
 Begin Sequence
    // F2_FILIAL+F2_I_PEDID > K = 20
-   SF2->(DbSetOrder(20))
-   SC5->(DbSetOrder(1))
-   If SC5->(DbSeek(_cCodFilial + _cNrPedido))
+   SF2->(DBSetOrder(20))
+   SC5->(DBSetOrder(1))
+   If SC5->(DBSeek(_cCodFilial + _cNrPedido))
       If SC5->C5_I_TRCNF == "S" // É troca nota?
-         If SF2->(DbSeek(SC5->C5_I_FILFT + SC5->C5_I_PDFT))
+         If SF2->(DBSeek(SC5->C5_I_FILFT + SC5->C5_I_PDFT))
             _aRet := { SC5->C5_I_FILFT,;    // 1
                        SF2->F2_DOC,;        // 2
                        SF2->F2_SERIE,;      // 3

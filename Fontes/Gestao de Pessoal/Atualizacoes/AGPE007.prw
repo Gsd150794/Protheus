@@ -4,21 +4,16 @@
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     |08/03/2024| Chamado 45006 - Ajustar variável __cUserId em ambiente Scheduller p/ Protheus criar e preencher.
 Igor Melgaço  |23/08/2024| Chamado 47047 - Retirada de dados de email do Fernando no fonte.
 Lucas Borges  |13/10/2024| Chamado 48465. Retirada da função de conout
 Lucas Borges  |23/07/2025| Chamado 51340. Ajustar função para validação de ambiente de teste
 =============================================================================================================================== 
 */
 
-//====================================================================================================
-// Definicoes de Includes e Defines da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 #Include 'FWMVCDef.ch'
-#INCLUDE "TopConn.ch"
-#include "APWEBSRV.CH" 
-#INCLUDE "TBICONN.CH" 
+#Include "TopConn.ch"
+#Include "TBICONN.CH" 
   
 /*
 ===============================================================================================================================
@@ -31,7 +26,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AGPE007()
-Local _aArea   := GetArea()
+Local _aArea   := FWGetArea()
 Local _oBrowse
 Private _cTitulo  
 Private _aItalac_F3 := {}
@@ -40,7 +35,7 @@ _cSelectX5 := " SELECT X5_DESCRI FROM "+ RetSQLName("SX5") +" WHERE D_E_L_E_T_ =
 _cSelectX5 += " AND X5_TABELA = '41'"
 
 //AD(_aItalac_F3,{"MV_PAR15"    ,_cTabela   ,_nCpoChave                , _nCpoDesc               ,_bCondTab , _cTitAux         , _nTamChv , _aDados  , _nMaxSel , _lFilAtual,_cMVRET,_bValida})
-AADD(_aItalac_F3,{"M->ZGZ_MOTIVO"  ,_cSelectX5,{|Tab| (Tab)->X5_DESCRI} ,{|Tab|(Tab)->X5_DESCRI} ,          ,"Lista de Motivos de Aumento", 2        ,          , 1   } ) 
+aAdd(_aItalac_F3,{"M->ZGZ_MOTIVO"  ,_cSelectX5,{|Tab| (Tab)->X5_DESCRI} ,{|Tab|(Tab)->X5_DESCRI} ,          ,"Lista de Motivos de Aumento", 2        ,          , 1   } ) 
 
 Begin Sequence   
    _cTitulo := "Cadastro de Classificação de Funcionários"   
@@ -58,9 +53,9 @@ Begin Sequence
 
 End Sequence       
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -98,8 +93,8 @@ Retorno-----------: Nenhum
 Static Function ModelDef()
 
 Local _oModel    := Nil 
-Local _oStruCab  := FWFormStruct(1, 'ZGZ', {|cCampo| AllTRim(cCampo) $ "ZGZ_DTOCOR;"})
-Local _oStruGrid := FWFormStruct(1, 'ZGZ', {|cCampo| AllTRim(cCampo) $ "ZGZ_MAT;ZGZ_NOME;ZGZ_CARGO;ZGZ_SALARI;ZGZ_CODMOT;ZGZ_MOTIVO;ZGZ_TIPO;ZGZ_TMPFUN;ZGZ_CODCAR;ZGZ_DESCAR;ZGZ_SALPRO;ZGZ_OBSERV;ZGZ_SITUAC;ZGZ_OBSAPR;ZGZ_USRNMI;ZGZ_DTINCL;ZGZ_HRINCL;ZGZ_USRNMA;ZGZ_DTALT;ZGZ_HRALT;"}) //fModStruct()
+Local _oStruCab  := FWFormStruct(1, 'ZGZ', {|cCampo| AllTrim(cCampo) $ "ZGZ_DTOCOR;"})
+Local _oStruGrid := FWFormStruct(1, 'ZGZ', {|cCampo| AllTrim(cCampo) $ "ZGZ_MAT;ZGZ_NOME;ZGZ_CARGO;ZGZ_SALARI;ZGZ_CODMOT;ZGZ_MOTIVO;ZGZ_TIPO;ZGZ_TMPFUN;ZGZ_CODCAR;ZGZ_DESCAR;ZGZ_SALPRO;ZGZ_OBSERV;ZGZ_SITUAC;ZGZ_OBSAPR;ZGZ_USRNMI;ZGZ_DTINCL;ZGZ_HRINCL;ZGZ_USRNMA;ZGZ_DTALT;ZGZ_HRALT;"}) //fModStruct()
  
 _oModel := MPFormModel():New('AGPE007M', {||U_AGPE007I()} /*bPreValidacao*/, /*{|| fValidGrid()}*/, /*bCommit*/, /*bCancel*/ )
  
@@ -131,8 +126,8 @@ Retorno-----------: Nenhum
 Static Function ViewDef()
 Local _oView     := NIL
 Local _oModel    := FWLoadModel('AGPE007')
-Local _oStruCab  := FWFormStruct(2, "ZGZ", {|cCampo| AllTRim(cCampo) $ "ZGZ_DTOCOR;"})
-Local _oStruGRID := FWFormStruct(2, "ZGZ", {|cCampo| AllTRim(cCampo) $ "ZGZ_MAT;ZGZ_NOME;ZGZ_CARGO;ZGZ_SALARI;ZGZ_CODMOT;ZGZ_MOTIVO;ZGZ_TIPO;ZGZ_TMPFUN;ZGZ_CODCAR;ZGZ_DESCAR;ZGZ_SALPRO;ZGZ_OBSERV;ZGZ_SITUAC;ZGZ_OBSAPR;ZGZ_USRNMI;ZGZ_DTINCL;ZGZ_HRINCL;ZGZ_USRNMA;ZGZ_DTALT;ZGZ_HRALT;"}) //FViewStruct()
+Local _oStruCab  := FWFormStruct(2, "ZGZ", {|cCampo| AllTrim(cCampo) $ "ZGZ_DTOCOR;"})
+Local _oStruGRID := FWFormStruct(2, "ZGZ", {|cCampo| AllTrim(cCampo) $ "ZGZ_MAT;ZGZ_NOME;ZGZ_CARGO;ZGZ_SALARI;ZGZ_CODMOT;ZGZ_MOTIVO;ZGZ_TIPO;ZGZ_TMPFUN;ZGZ_CODCAR;ZGZ_DESCAR;ZGZ_SALPRO;ZGZ_OBSERV;ZGZ_SITUAC;ZGZ_OBSAPR;ZGZ_USRNMI;ZGZ_DTINCL;ZGZ_HRINCL;ZGZ_USRNMA;ZGZ_DTALT;ZGZ_HRALT;"}) //FViewStruct()
  
 _oStruCab:SetNoFolder()
  
@@ -223,7 +218,7 @@ Begin Sequence
       DBUseArea( .T. , "TOPCONN" , TcGenQry(,,_cSelectX5) , "QRYSX5" , .T. , .F. )  
       
       _lRet := .F.
-      Do While ! QRYSX5->(Eof())
+      While ! QRYSX5->(Eof())
          If _cCod == Upper(AllTrim(QRYSX5->X5_CHAVE))
             _lRet := .T.
             _cMotivo := AllTrim(QRYSX5->X5_DESCRI)
@@ -231,7 +226,7 @@ Begin Sequence
             Exit 
          EndIf 
 
-         QRYSX5->(DbSkip())
+         QRYSX5->(DBSkip())
       EndDo
 
    ElseIf _cCampo == "ZGZ_CODCAR"
@@ -277,7 +272,7 @@ Begin Sequence
    
    If ! _oModelGRID:IsInserted() 
          
-      U_Itmsg("Este campo não pode ser alterado.","Atenção",,1)  
+      U_ITMsg("Este campo não pode ser alterado.","Atenção",,1)  
 
       _lRet := .F.  
    EndIf 
@@ -364,8 +359,8 @@ Local _cUserName, _cTempoFunc
 Local _cCodMatric
 
 Begin Sequence 
-  If Type("__CUSERID") = "C" .And. ! Empty(__CUSERID)
-     _cUserName := UsrFullName(__cUserID)
+  If Type("__cUserId") = "C" .And. ! Empty(__cUserId)
+     _cUserName := UsrFullName(__cUserId)
   Else 
      _cUserName := "  "
   EndIf 
@@ -411,7 +406,7 @@ User Function AGPE007S()//U_AGPE007S
 Private _cFilial 
 Private _lSchedule := FWGetRunSchedule()
 
-IF _lSchedule
+If _lSchedule
 
    //=============================================================================
    // Ativa a filial "01" apenas para leitura das filiais do parâmetro.
@@ -432,13 +427,13 @@ IF _lSchedule
     
    U_AGPE007C()
 
-ELSE
+Else
    
-   FWMSGRUN(,{|oProc| U_AGPE007C(oProc) },"Aguarde! Enviando WF...","Aguarde! Enviando WF...")
+   FWMsgRun(,{|oProc| U_AGPE007C(oProc) },"Aguarde! Enviando WF...","Aguarde! Enviando WF...")
 
-ENDIF
+EndIf
 
-Return NIL
+Return
 
 /*
 ===============================================================================================================================
@@ -456,21 +451,21 @@ Local _nDifSalario, _nPercAumento
 Local  _aDados
 Local _cEmailDest := U_ITGETMV( "IT_EMAILAPR", "")
 Local _cTitulo    := "Listagem Classificação de Funcionários Pendentes de Aprovação"
-LOCAL _cPict  :="@E 999,999,999,999.99"
+Local _cPict  :="@E 999,999,999,999.99"
 Local _cSituacao
 //Local _cDirExcel  := "\spool"
 
-IF !_lSchedule
+If !_lSchedule
    PswOrder(1)
-   PswSeek(__cUserID,.T.)
+   PswSeek(__cUserId,.T.)
    aUsuario:=PswRet()	
-   _cEmailDest :=Alltrim(aUsuario[1,14])
-ENDIF
+   _cEmailDest :=AllTrim(aUsuario[1,14])
+EndIf
 
-IF EMPTY(_cEmailDest)
+If Empty(_cEmailDest)
    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "AGPE007"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "AGPE00701"/*cMsgId*/, "AGPE00701 - Parametro IT_EMAILAPR não preenchido para a essa filial: "+cFilAnt/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
-   RETURN .F.
-ENDIF
+   Return .F.
+EndIf
 
 Begin Sequence
    //=================================================================
@@ -483,16 +478,16 @@ Begin Sequence
    _cQry += " ORDER BY ZGZ_FILIAL , ZGZ_DTOCOR , ZGZ_MAT "
  
    If Select("QRYZGZ") <> 0
-	  QRYZGZ->(DbCloseArea())
+	  QRYZGZ->(DBCloseArea())
    EndIf
 	
    TCQUERY _cQry NEW ALIAS "QRYZGZ"	
    TCSetField( "QRYZGZ", "ZGZ_DTOCOR", "D", 8, 0)	
 
-   DbSelectArea("QRYZGZ")
+   DBSelectArea("QRYZGZ")
    Count To _nTotRegs
 
-   QRYZGZ->(dbGoTop())
+   QRYZGZ->(DBGoTop())
 
    If _nTotRegs == 0 
       Break 
@@ -506,12 +501,12 @@ Begin Sequence
    _aTotais := {0,0,0}
    _aFiliais:= {}
    _cFilQ:=QRYZGZ->ZGZ_FILIAL
-   Do While !QRYZGZ->(Eof())
+   While !QRYZGZ->(Eof())
       
       _nDifSalario  := QRYZGZ->ZGZ_SALPRO - QRYZGZ->ZGZ_SALARI
       If QRYZGZ->ZGZ_SALARI == 0
          _nPercAumento := 100
-      ELSEIf _nDifSalario == 0
+      ElseIf _nDifSalario == 0
          _nPercAumento := 0
       Else    
          _nPercAumento := _nDifSalario / QRYZGZ->ZGZ_SALARI * 100 
@@ -528,8 +523,8 @@ Begin Sequence
          _cSituacao := "Rejeitado" 
       EndIf 
 
-      Aadd(_aDados,{QRYZGZ->ZGZ_FILIAL,;
-                    DTOC(QRYZGZ->ZGZ_DTOCOR),; 
+      aAdd(_aDados,{QRYZGZ->ZGZ_FILIAL,;
+                    DToC(QRYZGZ->ZGZ_DTOCOR),; 
                     QRYZGZ->ZGZ_MAT,;
                     QRYZGZ->ZGZ_NOME,;
                     QRYZGZ->ZGZ_CARGO,;
@@ -544,13 +539,13 @@ Begin Sequence
                     _cSituacao,;
                     QRYZGZ->ZGZ_OBSERV})
 
-      QRYZGZ->(DbSkip())
-      IF _cFilQ <> QRYZGZ->ZGZ_FILIAL
-         AADD(_aFiliais,{ACLONE(_aDados),ACLONE(_aTotais),_cFilQ})
+      QRYZGZ->(DBSkip())
+      If _cFilQ <> QRYZGZ->ZGZ_FILIAL
+         aAdd(_aFiliais,{ACLONE(_aDados),ACLONE(_aTotais),_cFilQ})
          _aDados  := {}
          _aTotais := {0,0,0}
          _cFilQ:=QRYZGZ->ZGZ_FILIAL
-      ENDIF
+      EndIf
       
    EndDo
    
@@ -558,23 +553,23 @@ Begin Sequence
    // Envia e-mail de WorkFlow POR FILIAL
    //=============================================================
    _cMenEnvio  := ""
-   FOR F := 1 TO LEN(_aFiliais)
+   For F := 1 TO Len(_aFiliais)
        _cNomeFilial:= _aFiliais[F,3] + "-" + AllTrim( Posicione('SM0',1,cEmpAnt+_aFiliais[F,3],'M0_FILIAL') )
        U_AGPE007E(_lSchedule,oProc,_cEmailDest,_cTitulo+" - "+_cNomeFilial,"Listagem dos Funcionários Pendentes de Aprovação.",_aFiliais[F,1],_aFiliais[F,2])
    Next
    
-   IF !_lSchedule
+   If !_lSchedule
       bBloco:={|| U_ITMsgLog( _cMenEnvio , "ATENCAO") }
-      U_Itmsg(_cMenEnvio,"Atenção","Clique em Ver Detalhes para conferir todos os envios de e-mail",2,,,,,,bBloco)  
-   ENDIF
+      U_ITMsg(_cMenEnvio,"Atenção","Clique em Ver Detalhes para conferir todos os envios de e-mail",2,,,,,,bBloco)  
+   EndIf
 
 End Sequence
 
 If Select("QRYZGZ") <> 0
-   QRYZGZ->(DbCloseArea())
+   QRYZGZ->(DBCloseArea())
 EndIf
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -593,34 +588,34 @@ Local _cMsgEml := ""
 Local _nPCriado:=0
 Local _nACriado:=0
 Local _nRCriado:=0 , _nI
-LOCAL _cPict   :="@E 999,999,999,999.99"
-LOCAL _aCab    := {} // Array com o cabeçalho das colunas do relatório.
+Local _cPict   :="@E 999,999,999,999.99"
+Local _aCab    := {} // Array com o cabeçalho das colunas do relatório.
 
     
 Begin Sequence 
 
 // Alinhamento( 1-Left,2-Center,3-Right )
-Aadd(_aCab,{"Filial"			       ,2})//01
-Aadd(_aCab,{"Dt.Reajuste"	       ,2})//02 
-Aadd(_aCab,{"Matricula"			    ,2})//03
-Aadd(_aCab,{"Nome"			       ,1})//04
-Aadd(_aCab,{"Cargo Atual"			 ,1})//05
-Aadd(_aCab,{"Salario Atual"		 ,3})//06
-Aadd(_aCab,{"Motivo"		          ,2})//07 xx
-Aadd(_aCab,{"Desc.Motivo Reajuste",1})//08
-Aadd(_aCab,{"Novo Cargo"			 ,1})//09 xx
-Aadd(_aCab,{"Desc.Novo Cargo"		 ,1})//10
-Aadd(_aCab,{"Salario Proposto"	 ,3})//11
-Aadd(_aCab,{"Diferença Salarial"	 ,3})//12
-Aadd(_aCab,{"% Aumento"	          ,3})//13
-Aadd(_aCab,{"Situação"			    ,1})//14
-Aadd(_aCab,{"Observação"			 ,1})//15
-//Aadd(_aCab,{"Observação " ,1})//16
+aAdd(_aCab,{"Filial"			       ,2})//01
+aAdd(_aCab,{"Dt.Reajuste"	       ,2})//02 
+aAdd(_aCab,{"Matricula"			    ,2})//03
+aAdd(_aCab,{"Nome"			       ,1})//04
+aAdd(_aCab,{"Cargo Atual"			 ,1})//05
+aAdd(_aCab,{"Salario Atual"		 ,3})//06
+aAdd(_aCab,{"Motivo"		          ,2})//07 xx
+aAdd(_aCab,{"Desc.Motivo Reajuste",1})//08
+aAdd(_aCab,{"Novo Cargo"			 ,1})//09 xx
+aAdd(_aCab,{"Desc.Novo Cargo"		 ,1})//10
+aAdd(_aCab,{"Salario Proposto"	 ,3})//11
+aAdd(_aCab,{"Diferença Salarial"	 ,3})//12
+aAdd(_aCab,{"% Aumento"	          ,3})//13
+aAdd(_aCab,{"Situação"			    ,1})//14
+aAdd(_aCab,{"Observação"			 ,1})//15
+//aAdd(_aCab,{"Observação " ,1})//16
 
 _cMsgEml := '<html>'
 _cMsgEml += '<head><title>'+_cAssunto+'</title></head>'
 _cMsgEml += '<body>'
-_cMsgEml += '<style type="text/css"><!--'
+_cMsgEml += '<style Type="text/css"><!--'
 _cMsgEml += 'table.bordasimples { border-collapse: collapse; }'
 _cMsgEml += 'table.bordasimples tr td { border:1px solid #777777; }'
 _cMsgEml += 'td.titulos	{ font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #C6E2FF; }'
@@ -649,7 +644,7 @@ _cMsgEml += '      <td class="itens" >'+ _cMensagem +'</td>'
 _cMsgEml += '    </tr>'
 _cMsgEml += '    <tr>'
 _cMsgEml += '      <td class="itens" align="center" width="20%"><b>Data:</b></td>'
-_cMsgEml += '      <td class="itens" align="left" >'+ Dtoc(Date()) +'</td>'
+_cMsgEml += '      <td class="itens" align="left" >'+ DToC(Date()) +'</td>'
 _cMsgEml += '    </tr>'
 _cMsgEml += '    <tr>'
 _cMsgEml += '      <td class="itens" align="center" width="20%"><b>Hora:</b></td>'
@@ -660,7 +655,7 @@ _cMsgEml += '      <td class="itens" align="center" width="30%"><b>Observação:</
 _cMsgEml += '      <td class="itens" align="left" >#OBS#</td>'
 _cMsgEml += '    </tr>'
 
-If _aTotais # NIL .AND. !Empty(_aTotais)  .AND. Len( _aTotais ) > 0
+If _aTotais # NIL .And. !Empty(_aTotais)  .And. Len( _aTotais ) > 0
    _cObsT:='<b>ATUAL......:</b> R$ '   +TRANSFORM(_aTotais[1],_cPict)+CHR(13)+CHR(10)
    _cObsT+='<b>PROPOSTO:</b> R$ ' +TRANSFORM(_aTotais[2],_cPict)+CHR(13)+CHR(10)
    _cObsT+='<b>DIFERENÇA:</b> R$ '+TRANSFORM(_aTotais[3],_cPict)+CHR(13)+CHR(10)
@@ -669,26 +664,26 @@ If _aTotais # NIL .AND. !Empty(_aTotais)  .AND. Len( _aTotais ) > 0
    _cMsgEml += '      <td class="itens" align="center" width="30%"><b>Totais dos Salarios:</b></td>'
    _cMsgEml += '      <td class="itens" >'+_cObsT +'</td>'
    _cMsgEml += '    </tr>'
-ENDIF
+EndIf
 
 If _lSchedule
     _cAssunto += ' - Processamento agendado (Schedule)'
    _cMsgEml += ' <tr>'
    _cMsgEml += '   <td class="titulos" align="center" colspan="2"><font color="red">Esta é uma mensagem automática. Por favor não responder!</font></td>'
    _cMsgEml += ' </tr>'
-ENDIF
+EndIf
 _cMsgEml += '</table>'
 
 
 ////////////////////////    DETALHAMENTO DOS PRODUTOS   /////////////////////////////////////////////
-If _aLog # NIL .AND. !Empty(_aLog)  .AND. Len( _aLog ) > 0
+If _aLog # NIL .And. !Empty(_aLog)  .And. Len( _aLog ) > 0
 	//         01  02  03  04   05  06        07       08  09  10   11  12   13   14   15   16 
 	_aSizes:={"1","1","1","10","10","6","xx","9","xx","10","6","6","4","01","13","xx"}
 
 	_cMsgEml += '<br>'
 	_cMsgEml += '<table class="bordasimples" width="2300">'
 	_cMsgEml += '    <tr>'
-	_cMsgEml += '      <td align="center" colspan="'+ALLTRIM(STR(Len(_aSizes)-3))+'" class="grupos"><b>Classificação de Funcionários - '+_cMensagem+'</b></td>'
+	_cMsgEml += '      <td align="center" colspan="'+AllTrim(Str(Len(_aSizes)-3))+'" class="grupos"><b>Classificação de Funcionários - '+_cMensagem+'</b></td>'
 	_cMsgEml += '    </tr>'
 	_cMsgEml += '    <tr>'
 	_cMsgEml += '      <td class="itens" align="center" width="'+_aSizes[14]+'%"><b>Status</b></td>'
@@ -711,8 +706,8 @@ If _aLog # NIL .AND. !Empty(_aLog)  .AND. Len( _aLog ) > 0
 	
 	If !_lSchedule
        _nConta:= Len( _aLog )
-       _cTot  :=ALLTRIM(STR(_nConta))
-       _nTam  :=LEN(_cTot)
+       _cTot  :=AllTrim(Str(_nConta))
+       _nTam  :=Len(_cTot)
        _nConta:=0
 	EndIf
 
@@ -721,7 +716,7 @@ If _aLog # NIL .AND. !Empty(_aLog)  .AND. Len( _aLog ) > 0
 	    If !_lSchedule
          _nConta++
          If oProc <> Nil  
-		      oProc:cCaption := ("Enviando : "+ALLTRIM(STRZERO(_nConta,_nTam)) +" de "+ _cTot)
+		      oProc:cCaption := ("Enviando : "+AllTrim(StrZero(_nConta,_nTam)) +" de "+ _cTot)
 		      ProcessMessages()
          EndIf 
 	    EndIf
@@ -731,10 +726,10 @@ If _aLog # NIL .AND. !Empty(_aLog)  .AND. Len( _aLog ) > 0
 		 If _aLog[_nI][014] = "Pendente"
    	    _cMsgEml += '      <td class="amarelo" align="center" width="'+_aSizes[14]+'%"><b>'+_aLog[_nI][14]+'</b></td>'
           _nPCriado++
-		 ELSEIf _aLog[_nI][014] = "Aprovado"
+		 ElseIf _aLog[_nI][014] = "Aprovado"
           _cMsgEml += '      <td class="aceito"  align="center" width="'+_aSizes[14]+'%"><b>'+_aLog[_nI][14]+'</b></td>'
           _nACriado++
-		 ELSEIf _aLog[_nI][014] = "Rejeitado"
+		 ElseIf _aLog[_nI][014] = "Rejeitado"
    	    _cMsgEml += '      <td class="recusa"  align="center" width="'+_aSizes[14]+'%"><b>'+_aLog[_nI][14]+'</b></td>'
           _nRCriado++
 		 EndIf
@@ -763,11 +758,11 @@ If _aLog # NIL .AND. !Empty(_aLog)  .AND. Len( _aLog ) > 0
 
 EndIf
 
-_cObsT:=STRZERO(_nPCriado,2)+' Pendentes (Amarelo) '+CHR(13)+CHR(10)
-_cObsT+=STRZERO(_nACriado,2)+' Aprovados (Verde) '+CHR(13)+CHR(10)
-_cObsT+=STRZERO(_nRCriado,2)+' Rejeitados (Vermelho) '+CHR(13)+CHR(10)
+_cObsT:=StrZero(_nPCriado,2)+' Pendentes (Amarelo) '+CHR(13)+CHR(10)
+_cObsT+=StrZero(_nACriado,2)+' Aprovados (Verde) '+CHR(13)+CHR(10)
+_cObsT+=StrZero(_nRCriado,2)+' Rejeitados (Vermelho) '+CHR(13)+CHR(10)
 
-_cMsgEml:=STRTRAN(_cMsgEml,"#OBS#",_cObsT)
+_cMsgEml:=StrTran(_cMsgEml,"#OBS#",_cObsT)
 
 _cMsgEml += '</center>'
 _cMsgEml += '    <br>'
@@ -793,7 +788,7 @@ _cMsgEml += '</html>'
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -813,21 +808,21 @@ Local _cFuncao := Space(5)
 Local _aFuncoes := {}
 Local _nI 
 
-// 1) R7_FILIAL+R7_MAT+DTOS(R7_DATA)+R7_TIPO // Matricula + Data Aumento + Tipo Aumento
+// 1) R7_FILIAL+R7_MAT+DToS(R7_DATA)+R7_TIPO // Matricula + Data Aumento + Tipo Aumento
 
-// 2) R7_FILIAL+R7_MAT+DTOS(R7_DATA)+R7_SEQ+R7_TIPO // Matricula + Data Aumento + Sequencia + Tipo Aumento 
+// 2) R7_FILIAL+R7_MAT+DToS(R7_DATA)+R7_SEQ+R7_TIPO // Matricula + Data Aumento + Sequencia + Tipo Aumento 
 
 Begin Sequence 
    
-   SR7->(DbSetOrder(2)) // R7_FILIAL+R7_MAT+DTOS(R7_DATA)+R7_SEQ+R7_TIPO // Matricula + Data Aumento + Sequencia + Tipo Aumento 
+   SR7->(DBSetOrder(2)) // R7_FILIAL+R7_MAT+DToS(R7_DATA)+R7_SEQ+R7_TIPO // Matricula + Data Aumento + Sequencia + Tipo Aumento 
    SR7->(MsSeek(xFilial("SR7")+_cCodMatr))
    
-   Do While ! SR7->(Eof()) .And. SR7->(R7_FILIAL+R7_MAT) == xFilial("SR7")+_cCodMatr
-      Aadd(_aFuncoes,{Dtos(SR7->R7_DATA),SR7->R7_FUNCAO,SR7->R7_DATA,SR7->(Recno())}) 
-      SR7->(DbSkip())
+   While ! SR7->(Eof()) .And. SR7->(R7_FILIAL+R7_MAT) == xFilial("SR7")+_cCodMatr
+      aAdd(_aFuncoes,{DToS(SR7->R7_DATA),SR7->R7_FUNCAO,SR7->R7_DATA,SR7->(Recno())}) 
+      SR7->(DBSkip())
    EndDo 
 
-   ASort(_aFuncoes, , , { | x,y | x[1]+x[2] < y[1]+y[2] } )
+   aSort(_aFuncoes, , , { | x,y | x[1]+x[2] < y[1]+y[2] } )
 
    For _nI := 1 To Len(_aFuncoes)
        If _cFuncao <> _aFuncoes[_nI,2]  // SR7->R7_FUNCAO

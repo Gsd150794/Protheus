@@ -4,14 +4,13 @@
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Aex Wallauer  |27/11/2018| Chamado 27100. Retirada da função OrdBagExt() da chamada do DBSETINDEX().
 Lucas Borges  |08/10/2024| Chamado 48465. Retirada manipulação do SX1
 Lucas Borges  |22/06/2025| Chamado 50617. Revisões diversas visando padronizar os fontes
+Lucas Borges  |02/10/2025| Chamado 51526. Modificada forma para recuperar a matrícula do usuário.
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "Colors.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -41,7 +40,7 @@ If !_lAcesso
 	Return
 EndIf
 
-Do While .T.
+While .T.
    If !Pergunte(_cPerg,.T.)   
       Return
    EndIf  
@@ -92,7 +91,7 @@ Begin Transaction
 Begin Sequence
 
 // Insere os dados no arquivo temporario criado                    
-FWMSGRUN( ,{|oProc| _lLoop:=MFIN010XP(@_cAlias,oProc) } ,'Aguarde!','Lendo os dados...'  )
+FWMsgRun( ,{|oProc| _lLoop:=MFIN010XP(@_cAlias,oProc) } ,'Aguarde!','Lendo os dados...'  )
 
 If _lLoop
    Break
@@ -101,7 +100,7 @@ EndIf
 // Faz o calculo automatico de dimensoes de objetos     
 _aSize := MSADVSIZE()                    
 // Obtem tamanhos das telas                                            
-aAdd( aObjects, { 0, 0, .t., .t., .t. } )
+aAdd( aObjects, { 0, 0, .T., .T., .T. } )
 aInfo    := { _aSize[ 1 ], _aSize[ 2 ], _aSize[ 3 ], _aSize[ 4 ], 3, 3 } 
 aPosObj1 := MsObjSize( aInfo, aObjects,  , .T. ) 
 
@@ -139,14 +138,14 @@ DEFINE MSDIALOG _oDlg1 TITLE "ROTINA DE ALTERAÇÃO DE DADOS DOS TÍTULOS A RECEBER
 	oBrowse:oBrowse:bLDblClick := { || MFIN010ST(_cAlias , (_cAlias)->STATUS) }
 	oBrowse:oBrowse:bAdd := {||.F.} // não inclui novos itens MsGetDb()
 
-ACTIVATE MSDIALOG _oDlg1 ON INIT (EnchoiceBar(_oDlg1, {|| IF(U_MFIN10Val("OK") ,;
+ACTIVATE MSDIALOG _oDlg1 ON INIT (EnchoiceBar(_oDlg1, {|| If(U_MFIN10Val("OK") ,;
                                                              Eval({|| nOpca := 1,_oDlg1:End() }),) },;
                                                              {|| nOpca := 2,_oDlg1:End()},,_aBotoes),;
                                    _oPanel:Align := CONTROL_ALIGN_TOP,;
                                    oBrowse:oBrowse:Align := CONTROL_ALIGN_ALLCLIENT,oBrowse:oBrowse:Refresh() )
 
 If nOpca = 1 
-   FWMSGRUN( ,{|oProc| MFIN010AV(_cAlias,oProc) } ,'Aguarde!','Gravando os dados...'  )
+   FWMsgRun( ,{|oProc| MFIN010AV(_cAlias,oProc) } ,'Aguarde!','Gravando os dados...'  )
    _lLoop:=.T.
 Else
    _lLoop:=.F.
@@ -198,11 +197,11 @@ aAdd(aStruct,{"E1_NUM"    })// ,"C",09,1,1   })// Coluna do aHeader 05
 aAdd(aStruct,{"E1_PARCELA"})// ,"C",02,1,1   })// Coluna do aHeader 06
 aAdd(aStruct,{"E1_TIPO"   })// ,"C",03,1,1   })// Coluna do aHeader 07
 aAdd(aStruct,{"E1_VENCREA"})// ,"D",08,1,1   })// Coluna do aHeader 08 CAMPO EDITAVEL
-_cColunas+=ALLTRIM(STR(LEN(aStruct)+3))+","
+_cColunas+=AllTrim(Str(Len(aStruct)+3))+","
 aAdd(aStruct,{"E1_HIST"   })// ,"C",20,1,0   })// Coluna do aHeader 09 CAMPO EDITAVEL
-_cColunas+=ALLTRIM(STR(LEN(aStruct)+3))+","
+_cColunas+=AllTrim(Str(Len(aStruct)+3))+","
 aAdd(aStruct,{"E1_I_CART" })// ,"C",20,1,0   })// Coluna do aHeader 10 CAMPO EDITAVEL
-_cColunas+=ALLTRIM(STR(LEN(aStruct)+3))
+_cColunas+=AllTrim(Str(Len(aStruct)+3))
 aAdd(aStruct,{"E1_NATUREZ"})// ,"C",10,1,0   })// Coluna do aHeader 11
 aAdd(aStruct,{"E1_CLIENTE"})// ,"C",06,1,0   })// Coluna do aHeader 12
 aAdd(aStruct,{"E1_LOJA"   })// ,"C",04,1,0   })// Coluna do aHeader 13
@@ -213,9 +212,9 @@ aAdd(aStruct,{"E1_VALOR"  })// ,"N",17,2,0   })// Coluna do aHeader 17
 //aAdd(aStruct,{"E1_NUMBOR" })
 
 aCampos:={}
-FOR I := 1 TO LEN(aStruct)
+For I := 1 TO Len(aStruct)
     aAdd(aCampos, aStruct[I,1] )//Le os dados do SX3 dentro da função E_CriaTrab
-NEXT
+Next
 aHeader:={}//        1           2           3                      4                    5                 6               7       8       9         10
 //aAdd(aHeader,{X3Titulo() ,x3_Campo    ,x3_picture           ,x3_tamanho           ,x3_decimal          ,x3_valid    ,x3_usado,x3_tipo,x3_arquivo,x3_context}))
 aAdd(aHeader  ,{""         ,"STATUS"   ,"@BMP"               ,4                    ,0                   ,""          ,""      ,""     ,""        ,"" })
@@ -225,13 +224,13 @@ aAdd(aHeader  ,{"Filial"   ,"E1_FILIAL","@!"                 ,2                 
 cTab:=CriaTrab(Nil,.F.)
 cArqTRB1:=E_CriaTrab(,aSemSX3,cTab,,)//Cria o Temporario e abre, e preenche a aHeader baseados nos campos do SX3 do aCampos
 
-FOR I := 1 TO LEN(aHeader)
-   IF aHeader[I,2] = "E1_VENCREA"
+For I := 1 TO Len(aHeader)
+   If aHeader[I,2] = "E1_VENCREA"
       aHeader[I,6]:= "U_MFIN10Val('DATA',M->E1_VENCREA)"
-  ELSE
+  Else
       aHeader[I,6]:=".T."//Regravava o valid padrão do SX3
   EndIf    
-NEXT
+Next
 
 // Cria os indices para o arquivo.                                 
 Private cIndTRB1  := "E1_FILIAL+E1_PREFIXO+E1_NUM+E1_PARCELA"  
@@ -279,27 +278,27 @@ EndIf
 //=========================================
 // Filial
 //=========================================
-_cFiltro += IIf( !Empty( MV_PAR02 ) , " AND E1.E1_FILIAL IN "+ FormatIn( Alltrim( MV_PAR02 ) , ';' )	, "" )
+_cFiltro += IIf( !Empty( MV_PAR02 ) , " AND E1.E1_FILIAL IN "+ FormatIn( AllTrim( MV_PAR02 ) , ';' )	, "" )
 
 //=========================================		      	
 // Emissao de - Ate
 //=========================================
 If !Empty(MV_PAR03) .And. !Empty(MV_PAR04)	
-	_cFiltro += " AND E1.E1_EMISSAO BETWEEN '" + dtos(MV_PAR03) + "' AND '" + dtos(MV_PAR04) + "'"
+	_cFiltro += " AND E1.E1_EMISSAO BETWEEN '" + DToS(MV_PAR03) + "' AND '" + DToS(MV_PAR04) + "'"
 EndIf     
 
 //=========================================		
 // Vencimento Real De - Ate
 //=========================================
 If !Empty(MV_PAR05) .And. !Empty(MV_PAR06)	
-	_cFiltro  += " AND E1.E1_VENCREA BETWEEN '" + dtos(MV_PAR05) + "' AND '" + dtos(MV_PAR06) + "'"
+	_cFiltro  += " AND E1.E1_VENCREA BETWEEN '" + DToS(MV_PAR05) + "' AND '" + DToS(MV_PAR06) + "'"
 EndIf   
 
 //=========================================
 // Vencimento original De - Ate
 //=========================================
 If !Empty(MV_PAR07) .And. !Empty(MV_PAR08)	
-	_cFiltro  += " AND E1.E1_VENCTO BETWEEN '" + dtos(MV_PAR07) + "' AND '" + dtos(MV_PAR08) + "'"
+	_cFiltro  += " AND E1.E1_VENCTO BETWEEN '" + DToS(MV_PAR07) + "' AND '" + DToS(MV_PAR08) + "'"
 EndIf   
 
 //=========================================		
@@ -354,41 +353,41 @@ _cQuery+="	ORDER BY  E1_FILIAL,E1_PREFIXO,E1_NUM,E1_PARCELA "
 _cQuery := ChangeQuery(_cQuery)
 MPSysOpenQuery(_cQuery,_cAliasSE1)
 
-If (_cAliasSE1)->(EOF())
+If (_cAliasSE1)->(Eof())
 	FWAlertWarning("Não foram encontrados registros para esses filtros. Selecione outros filtros.","MFIN01001")
 	Return .T.
 EndIf
 
 DBSelectArea(_cAliasSE1)
 COUNT TO xTotal
-xTotal:=ALLTRIM(STR(xTotal))
+xTotal:=AllTrim(Str(xTotal))
 (_cAliasSE1)->(DBGoTop())
 
 SE1->(DBSetOrder(1))
 
-Do While (_cAliasSE1)->(!EOF())
+While (_cAliasSE1)->(!Eof())
 	
     nConta++
-    oProc:cCaption := "Lendo Titulo: "+ALLTRIM(STR(nConta))+ " de "+xTotal
+    oProc:cCaption := "Lendo Titulo: "+AllTrim(Str(nConta))+ " de "+xTotal
     ProcessMessages()
 	SE1->(DBGoTo((_cAliasSE1)->SE1REC))
-	SE1->(MsUnLock())	
+	SE1->(MSUnLock())	
 	SE1->(RecLock("SE1",.F.))// Bloqueia os titulos selecionados na pesquisa, para que não seja possivel enquanto esta rotina estiver sendo utilizada a sua alteracao
 	
 	(cTab)->(DBAPPEND())
 	AVREPLACE("SE1",cTab)
 
     (cTab)->STATUS := "LBNO"
-    (cTab)->LEGEND := IF( SE1->E1_VALOR == SE1->E1_SALDO ,'BR_VERDE','BR_AZUL' )
+    (cTab)->LEGEND := If( SE1->E1_VALOR == SE1->E1_SALDO ,'BR_VERDE','BR_AZUL' )
     (cTab)->SE1REC := (_cAliasSE1)->SE1REC
 	// Se estiver vazio procura no cadastro de clientes
-	If EMPTY(SE1->E1_NOMCLI)
-		(cTab)->E1_NOMCLI := POSICIONE("SA1",1,xfilial("SA1") + SE1->E1_CLIENTE + SE1->E1_LOJA,"A1_NOME")
+	If Empty(SE1->E1_NOMCLI)
+		(cTab)->E1_NOMCLI := Posicione("SA1",1,xFilial("SA1") + SE1->E1_CLIENTE + SE1->E1_LOJA,"A1_NOME")
 	EndIf
   			
-	(_cAliasSE1)->(DbSkip())            
+	(_cAliasSE1)->(DBSkip())            
 	
-ENDDO
+EndDo
 
 U_ITLOGACS('MFIN010')
 (_cAliasSE1)->(DBCloseArea())
@@ -409,7 +408,7 @@ Retorno-----------: Nenhum
 */  
 Static Function MFIN010ST(cTab,_cStatus)
 
-If ALLTRIM(STR(oBrowse:oBrowse:nColPos,2)) $ _cColunas//Colunas editaveis 8 , 9 , 10 
+If AllTrim(Str(oBrowse:oBrowse:nColPos,2)) $ _cColunas//Colunas editaveis 8 , 9 , 10 
 	If (cTab)->STATUS = "LBOK"
 		Return EVAL(b2Click)
 	EndIf
@@ -436,7 +435,7 @@ Else
 	EndIf
 EndIf
 	
-_nQtdTit:= Iif(_nQtdTit<0,0,_nQtdTit)
+_nQtdTit:= IIf(_nQtdTit<0,0,_nQtdTit)
 
 _oQtda:Refresh()	
 _oTotd:Refresh()
@@ -463,10 +462,10 @@ Private _dData	:=(_cAlias)->E1_VENCREA As Date
 Private _cHist	:=(_cAlias)->E1_HIST As Character
 Private _cCart	:=(_cAlias)->E1_I_CART As Character
 Private _lData	:= .T. As Logical
-Private _lHist	:= !EMPTY((_cAlias)->E1_HIST) As Logical
-Private _lCart	:= !EMPTY((_cAlias)->E1_I_CART) As Logical
+Private _lHist	:= !Empty((_cAlias)->E1_HIST) As Logical
+Private _lCart	:= !Empty((_cAlias)->E1_I_CART) As Logical
 	
-If nBotao = 3 .AND. !MFIN10Get()//Altera Marcados
+If nBotao = 3 .And. !MFIN10Get()//Altera Marcados
    Return .F.
 EndIf
 
@@ -478,7 +477,7 @@ EndIf
 
 (_cAlias)->(DBGoTop())
 
-Do While (_cAlias)->(!Eof())
+While (_cAlias)->(!Eof())
 	If nBotao = 2//Des/Marca todos
 		(_cAlias)->STATUS = _cStatus
 		If (_cAlias)->STATUS = "LBOK"
@@ -489,7 +488,7 @@ Do While (_cAlias)->(!Eof())
 				_nTotTit +=  &(_cAlias+'->E1_VALOR')
 			EndIf
 		EndIf
-		(_cAlias)->(dbSkip())
+		(_cAlias)->(DBSkip())
 		Loop
 	EndIf
 
@@ -505,7 +504,7 @@ Do While (_cAlias)->(!Eof())
               (_cAlias)->E1_I_CART:=_cCart
 		   EndIf
 		EndIf
-		(_cAlias)->(dbSkip())
+		(_cAlias)->(DBSkip())
 		Loop
 	EndIf
 	
@@ -530,7 +529,7 @@ Do While (_cAlias)->(!Eof())
 			_nTotTit -=  &(_cAlias+'->E1_VALOR')
 		EndIf
 	EndIf
-	(_cAlias)->(dbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 _nQtdTit:= IIf(_nQtdTit<0,0,_nQtdTit)
@@ -583,12 +582,12 @@ Retorno-----------: Nenhum
 Static Function MFIN010DT
 
 (_cAlias)->(DBGoTop())
-DO While (_cAlias)->(!Eof())
+While (_cAlias)->(!Eof())
    SE1->(DBGoTo( (_cAlias)->SE1REC ))
-   SE1->(MsUnLock())
-   (_cAlias)->(dbSkip())
+   SE1->(MSUnLock())
+   (_cAlias)->(DBSkip())
 EndDo
-SE1->(MsUnLockAll())
+SE1->(MSUnLockAll())
 
 Return .T.
 
@@ -617,33 +616,34 @@ Private nGravados:= 0 As Numeric
 (_cAlias)->(DBGoTop())
 
 aAdd( _aLog , "FUNÇÃO MFIN010 - ALTERAÇÃO DE DADOS DE TITULOS A RECEBER"	)	
-aAdd( _aLog , "DATA DO INICIO DO PROCESSAMENTO: "+ DTOC( DATE() )	)
+aAdd( _aLog , "DATA DO INICIO DO PROCESSAMENTO: "+ DToC( Date() )	)
 aAdd( _aLog , "HORA DO INICIO DO PROCESSAMENTO: "+ TIME())
-aAdd( _aLog , "USUARIO: " + U_UCFG001(1) + " - " + U_UCFG001(2) )               
+aAdd( _aLog , "USUARIO: " + FWSFAllUsers({__cUserID},{"USR_FILIAL"})[1][3]+FWSFAllUsers({__cUserID},{"USR_CODFUNC"})[1][3] +;
+		 " - " + FWSFAllUsers({__cUserID},{"USR_NOME"})[1][3])
 aAdd( _aLog , "")
 aAdd( _aLog , "PARÂMETROS: "	)	
-aAdd( _aLog , "Naturezas........:" + ALLTRIM(MV_PAR01))
-aAdd( _aLog , "Filiais..........:" + ALLTRIM(MV_PAR02))
-aAdd( _aLog , "Emissao de.......:" + dtoc(MV_PAR03))
-aAdd( _aLog , "Emissao Ate......:" + dtoc(MV_PAR04))
-aAdd( _aLog , "Venc. Real de....:" + dtoc(MV_PAR05))
-aAdd( _aLog , "Venc. Real Ate...:" + dtoc(MV_PAR06))
-aAdd( _aLog , "Venc. Orig. de...:" + dtoc(MV_PAR07))
-aAdd( _aLog , "Venc. Orig. Ate..:" + dtoc(MV_PAR08))
-aAdd( _aLog , "Cliente De.......:" + ALLTRIM(MV_PAR09))
-aAdd( _aLog , "Loja De..........:" + ALLTRIM(MV_PAR10))
-aAdd( _aLog , "Cliente Ate......:" + ALLTRIM(MV_PAR11))
-aAdd( _aLog , "Loja Ate.........:" + ALLTRIM(MV_PAR12))
-aAdd( _aLog , "Prefixo Titulo...:" + ALLTRIM(MV_PAR13))
-aAdd( _aLog , "Tipo Titulo......:" + ALLTRIM(MV_PAR14))
-aAdd( _aLog , "No. Titulo de....:" + ALLTRIM(MV_PAR15))
-aAdd( _aLog , "No. Titulo Ate...:" + ALLTRIM(MV_PAR16))
+aAdd( _aLog , "Naturezas........:" + AllTrim(MV_PAR01))
+aAdd( _aLog , "Filiais..........:" + AllTrim(MV_PAR02))
+aAdd( _aLog , "Emissao de.......:" + DToC(MV_PAR03))
+aAdd( _aLog , "Emissao Ate......:" + DToC(MV_PAR04))
+aAdd( _aLog , "Venc. Real de....:" + DToC(MV_PAR05))
+aAdd( _aLog , "Venc. Real Ate...:" + DToC(MV_PAR06))
+aAdd( _aLog , "Venc. Orig. de...:" + DToC(MV_PAR07))
+aAdd( _aLog , "Venc. Orig. Ate..:" + DToC(MV_PAR08))
+aAdd( _aLog , "Cliente De.......:" + AllTrim(MV_PAR09))
+aAdd( _aLog , "Loja De..........:" + AllTrim(MV_PAR10))
+aAdd( _aLog , "Cliente Ate......:" + AllTrim(MV_PAR11))
+aAdd( _aLog , "Loja Ate.........:" + AllTrim(MV_PAR12))
+aAdd( _aLog , "Prefixo Titulo...:" + AllTrim(MV_PAR13))
+aAdd( _aLog , "Tipo Titulo......:" + AllTrim(MV_PAR14))
+aAdd( _aLog , "No. Titulo de....:" + AllTrim(MV_PAR15))
+aAdd( _aLog , "No. Titulo Ate...:" + AllTrim(MV_PAR16))
 aAdd( _aLog , "")
 
-nPulaLog:=LEN(_aLog)
+nPulaLog:=Len(_aLog)
 
 Count To xTotal
-xTotal:=ALLTRIM(STR(xTotal))
+xTotal:=AllTrim(Str(xTotal))
 (_cAlias)->(DBGoTop())
 
 SE1->(DBSetOrder(1))
@@ -651,9 +651,9 @@ SE1->(DBSetOrder(1))
 nModulo	:= 6
 cModulo := "FIN"
 
-Do While (_cAlias)->(!Eof())
+While (_cAlias)->(!Eof())
     nConta++
-    oProc:cCaption := "Lendo Titulo: "+ALLTRIM(STR(nConta))+ " de "+xTotal+", Gravados: "+ALLTRIM(STR(nGravados))
+    oProc:cCaption := "Lendo Titulo: "+AllTrim(Str(nConta))+ " de "+xTotal+", Gravados: "+AllTrim(Str(nGravados))
     ProcessMessages()
 	
 	If (_cAlias)->STATUS == "LBOK"// Somente registros marcados 
@@ -663,12 +663,12 @@ Do While (_cAlias)->(!Eof())
 			(_cAlias)->E1_HIST   <> SE1->E1_HIST   .OR.;
 			(_cAlias)->E1_I_CART <> SE1->E1_I_CART
 		
-		    SE1->(MsUnLock())
+		    SE1->(MSUnLock())
 	
 	        // Muda filial do ambiente e salva dados
 	        cFilant := (_cAlias)->E1_FILIAL
 			_dVenc 	:= SE1->E1_VENCREA
-			_cHist 	:= ALLTRIM(SE1->E1_HIST)
+			_cHist 	:= AllTrim(SE1->E1_HIST)
 			_cCar  	:= SE1->E1_I_CART
 			
 			_aAutoSE1:={}        
@@ -696,24 +696,24 @@ Do While (_cAlias)->(!Eof())
 		    
 			If lMsErroAuto
                 _cErro:=mostraerro()
-				aAdd( _aLog ,"5-Erro ao alterar o seguinte título: " + SE1->E1_FILIAL+"/"+SE1->E1_NUM +"/" + SE1->E1_PARCELA + " do Cliente: " + SE1->E1_CLIENTE + "/" + SE1->E1_LOJA+ " - " + posicione("SA1",1,xfilial("SA1")+SE1->E1_CLIENTE+SE1->E1_LOJA,"A1_NREDUZ")+" ["+_cErro+"]" )
+				aAdd( _aLog ,"5-Erro ao alterar o seguinte título: " + SE1->E1_FILIAL+"/"+SE1->E1_NUM +"/" + SE1->E1_PARCELA + " do Cliente: " + SE1->E1_CLIENTE + "/" + SE1->E1_LOJA+ " - " + Posicione("SA1",1,xFilial("SA1")+SE1->E1_CLIENTE+SE1->E1_LOJA,"A1_NREDUZ")+" ["+_cErro+"]" )
 			Else
 		        If _dVenc <> SE1->E1_VENCREA
-				   aAdd( _aLog ,"1-O título: " + SE1->E1_FILIAL+"/"+SE1->E1_NUM +"/" + SE1->E1_PARCELA+ " do Cliente: " + SE1->E1_CLIENTE+ "/" + SE1->E1_LOJA + " - " + posicione("SA1",1,xfilial("SA1")+SE1->E1_CLIENTE+SE1->E1_LOJA,"A1_NREDUZ") + ", teve vencimento real alterado de " + DTOC(_dVenc) + " para " + DTOC(SE1->E1_VENCREA) )
+				   aAdd( _aLog ,"1-O título: " + SE1->E1_FILIAL+"/"+SE1->E1_NUM +"/" + SE1->E1_PARCELA+ " do Cliente: " + SE1->E1_CLIENTE+ "/" + SE1->E1_LOJA + " - " + Posicione("SA1",1,xFilial("SA1")+SE1->E1_CLIENTE+SE1->E1_LOJA,"A1_NREDUZ") + ", teve vencimento real alterado de " + DToC(_dVenc) + " para " + DToC(SE1->E1_VENCREA) )
 			    EndIf	
 			    If _cHist <> SE1->E1_HIST   
-				   aAdd( _aLog ,"2-O título: " + SE1->E1_FILIAL+"/"+SE1->E1_NUM +"/" + SE1->E1_PARCELA+ " do Cliente: " + SE1->E1_CLIENTE+ "/" + SE1->E1_LOJA + " - " + posicione("SA1",1,xfilial("SA1")+SE1->E1_CLIENTE+SE1->E1_LOJA,"A1_NREDUZ") + ", teve Historico alterado de "       + _cHist       + " para " + SE1->E1_HIST  )
+				   aAdd( _aLog ,"2-O título: " + SE1->E1_FILIAL+"/"+SE1->E1_NUM +"/" + SE1->E1_PARCELA+ " do Cliente: " + SE1->E1_CLIENTE+ "/" + SE1->E1_LOJA + " - " + Posicione("SA1",1,xFilial("SA1")+SE1->E1_CLIENTE+SE1->E1_LOJA,"A1_NREDUZ") + ", teve Historico alterado de "       + _cHist       + " para " + SE1->E1_HIST  )
 			    EndIf	
 			    If _cCar <> SE1->E1_I_CART
-				   aAdd( _aLog ,"3-O título: " + SE1->E1_FILIAL+"/"+SE1->E1_NUM +"/" + SE1->E1_PARCELA+ " do Cliente: " + SE1->E1_CLIENTE+ "/" + SE1->E1_LOJA + " - " + posicione("SA1",1,xfilial("SA1")+SE1->E1_CLIENTE+SE1->E1_LOJA,"A1_NREDUZ") + ", teve carteira cr alterado de "     + _cCar        + " para " + SE1->E1_I_CART)
+				   aAdd( _aLog ,"3-O título: " + SE1->E1_FILIAL+"/"+SE1->E1_NUM +"/" + SE1->E1_PARCELA+ " do Cliente: " + SE1->E1_CLIENTE+ "/" + SE1->E1_LOJA + " - " + Posicione("SA1",1,xFilial("SA1")+SE1->E1_CLIENTE+SE1->E1_LOJA,"A1_NREDUZ") + ", teve carteira cr alterado de "     + _cCar        + " para " + SE1->E1_I_CART)
 			    EndIf	
                 nGravados++
 			EndIf       
   		Else
-  			aAdd( _aLog ,"4-Não houve alterações no seguinte título: " + SE1->E1_FILIAL+"/"+SE1->E1_NUM +"/" + SE1->E1_PARCELA + " do Cliente: " + SE1->E1_CLIENTE + "/" + SE1->E1_LOJA+ " - " + POSICIONE("SA1",1,xfilial("SA1")+SE1->E1_CLIENTE+SE1->E1_LOJA,"A1_NREDUZ") )
+  			aAdd( _aLog ,"4-Não houve alterações no seguinte título: " + SE1->E1_FILIAL+"/"+SE1->E1_NUM +"/" + SE1->E1_PARCELA + " do Cliente: " + SE1->E1_CLIENTE + "/" + SE1->E1_LOJA+ " - " + Posicione("SA1",1,xFilial("SA1")+SE1->E1_CLIENTE+SE1->E1_LOJA,"A1_NREDUZ") )
   		EndIf	
 	EndIf
-    (_cAlias)->(dbSkip())
+    (_cAlias)->(DBSkip())
 EndDo
 
 //Volta o ambiente
@@ -749,15 +749,15 @@ Do Case
 			_lRet:= .F.
 		EndIf
 	Case _cOrigem = "DATA"
-        If _xDado < DATE()
-			FWAlertWarning("Data menor que hoje. Digite uma data maior que "+DTOC(DATE()),"MFIN01003")
+        If _xDado < Date()
+			FWAlertWarning("Data menor que hoje. Digite uma data maior que "+DToC(DATE()),"MFIN01003")
 			_lRet:= .F.
 		 ElseIf _xDado <> DataValida(_xDado)
-			FWAlertWarning("Data digitada será alterada para o proximo dia util: "+DTOC(DataValida(_xDado)),"MFIN01004")
+			FWAlertWarning("Data digitada será alterada para o proximo dia util: "+DToC(DataValida(_xDado)),"MFIN01004")
 			_xDado:=DataValida(_xDado)
 		 EndIf
 	Case _cOrigem = "CART"
-        IF !EMPTY(_xDado) .AND. !EXISTCPO("ZAR",_xDado)
+        If !Empty(_xDado) .And. !EXISTCPO("ZAR",_xDado)
 			_lRet:= .F.
 		EndIf
 EndCase
@@ -780,10 +780,10 @@ Local _aCols	:= {} As Array
 Local _nI		:= 0 As Numeric
 Local nConta	:= 0 As Numeric
 Local _oFile	:= Nil As Object
-Local _cArq2	:= SuperGetMV("IT_DIRLOG",.F.,"\temp\") + "MFIN010_" + DTOS(DATE()) + "_"  As Character
-Local _cTime 	:= TIME() As Character
+Local _cArq2	:= SuperGetMV("IT_DIRLOG",.F.,"\temp\") + "MFIN010_" + DToS(DATE()) + "_"  As Character
+Local _cTime 	:= Time() As Character
 
-_cArq2 += SUBSTR(_cTime, 1, 2) + SUBSTR(_cTime, 4, 2) + SUBSTR(_cTime, 7, 2) + ".txt"
+_cArq2 += SubStr(_cTime, 1, 2) + SubStr(_cTime, 4, 2) + SubStr(_cTime, 7, 2) + ".txt"
 _oFile:= FWFileWriter():New(_cArq2)
 
 If !_oFile:Create()
@@ -791,19 +791,19 @@ If !_oFile:Create()
 EndIf
 
 aAdd( _aLog , "")
-aAdd( _aLog ,"DATA DO FIM DO PROCESSAMENTO: "+ DTOC( DATE() )	)
-aAdd( _aLog ,"HORA DO FIM DO PROCESSAMENTO: "+ TIME() )
+aAdd( _aLog ,"DATA DO FIM DO PROCESSAMENTO: "+ DToC( Date() )	)
+aAdd( _aLog ,"HORA DO FIM DO PROCESSAMENTO: "+ Time() )
 
 For _nI := 1 To Len(_aLog)
     nConta++
-    oProc:cCaption := "Gravando Logs: "+ALLTRIM(STR(nConta))+ " de "+ALLTRIM(STR(Len(_aLog)))+", Alterados OK: "+ALLTRIM(STR(nGravados))
+    oProc:cCaption := "Gravando Logs: "+AllTrim(Str(nConta))+ " de "+AllTrim(Str(Len(_aLog)))+", Alterados OK: "+AllTrim(Str(nGravados))
     ProcessMessages()
 
     If _oFile:Create()
 	   _oFile:Write(_aLog[_nI]+CRLF)
 	EndIf
-    If _nI > nPulaLog .AND. _nI < (Len(_aLog)-2)
-       aAdd(_aCols, {LEFT(_aLog[_nI],1),SUBSTR(_aLog[_nI],3) } )
+    If _nI > nPulaLog .And. _nI < (Len(_aLog)-2)
+       aAdd(_aCols, {LEFT(_aLog[_nI],1),SubStr(_aLog[_nI],3) } )
     EndIf   
 Next _nI
 
@@ -840,7 +840,7 @@ Local nAltu1 :=12 As Numeric
 Local nTam2  :=50 As Numeric
 Local nPula  :=16 As Numeric
 Local lOK    :=.F. As Logical
-Local bOk    :={|| If(!_lData .OR. U_MFIN10Val("DATA",_dData), ( lOK:=.T. , oDlgGet:End() ) , ) } As Codeblock
+Local bOk    :={|| If(!_lData .Or. U_MFIN10Val("DATA",_dData), ( lOK:=.T. , oDlgGet:End() ) , ) } As Codeblock
 Local bCancel:={|| lOK:=.F. , (oDlgGet:End()) } As Codeblock
 
 If !U_MFIN10Val("OK")
@@ -851,18 +851,18 @@ DEFINE MSDIALOG oDlgGet TITLE "Altera Dados dos Titulo Marcados " FROM 0,0 TO 16
    
 @001,001 MSPANEL oPanDesp Prompt "" Size 145,050 of oDlgGet
 
-@nLinha,nCol0 CHECKBOX _lData PROMPT "" OF oPanDesp SIZE 040,040 ON CLICK ( IF(_lData,_oData:Enable(),_oData:Disable()),_oData:Refresh() )
-@nLinha,nCol1 SAY "Data"          PIXEL OF oPanDesp
+@nLinha,nCol0 CHECKBOX _lData PROMPT "" OF oPanDesp SIZE 040,040 ON CLICK ( If(_lData,_oData:Enable(),_oData:Disable()),_oData:Refresh() )
+@nLinha,nCol1 Say "Data"          PIXEL OF oPanDesp
 @nLinha,nCol2 MSGET _oData VAR _dData PIXEL SIZE nTam2,9 Picture "@D" OF oPanDesp WHEN _lData VALID U_MFIN10Val("DATA",_dData)
 nLinha+=nPula
 
-@nLinha,nCol0 CHECKBOX _lHist PROMPT "" OF oPanDesp SIZE 040,040 ON CLICK ( IF(_lHist,_oHist:Enable(),_oHist:Disable()),_oHist:Refresh() )
-@nLinha,nCol1 SAY "Historico"     PIXEL OF oPanDesp
+@nLinha,nCol0 CHECKBOX _lHist PROMPT "" OF oPanDesp SIZE 040,040 ON CLICK ( If(_lHist,_oHist:Enable(),_oHist:Disable()),_oHist:Refresh() )
+@nLinha,nCol1 Say "Historico"     PIXEL OF oPanDesp
 @nLinha,nCol2 MSGET _oHist VAR _cHist PIXEL SIZE nTam2+20,9 Picture "@!" OF oPanDesp WHEN _lHist VALID .T.
 nLinha+=nPula
 
-@nLinha,nCol0 CHECKBOX _lCart PROMPT "" OF oPanDesp SIZE 040,040 ON CLICK ( IF(_lCart,_oCart:Enable(),_oCart:Disable()),_oCart:Refresh() )
-@nLinha,nCol1 SAY "Carteira CR" PIXEL OF oPanDesp
+@nLinha,nCol0 CHECKBOX _lCart PROMPT "" OF oPanDesp SIZE 040,040 ON CLICK ( If(_lCart,_oCart:Enable(),_oCart:Disable()),_oCart:Refresh() )
+@nLinha,nCol1 Say "Carteira CR" PIXEL OF oPanDesp
 @nLinha,nCol2 MSGET _oCart VAR _cCart PIXEL SIZE nTam2,9 Picture "@!" OF oPanDesp WHEN _lCart VALID U_MFIN10Val("CART",_cCart) F3 "ZAR"
 nLinha+=nPula
 

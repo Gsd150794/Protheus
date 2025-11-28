@@ -13,9 +13,9 @@
 // Definicoes de Includes da Rotina.
 //====================================================================================================
 
-#INCLUDE "Protheus.Ch"
-#INCLUDE "RwMake.ch"
-#INCLUDE "TopConn.CH"
+#Include "TOTVS.ch"
+#Include "RwMake.ch"
+#Include "TopConn.CH"
 
 #DEFINE _ENTER CHR(13)+CHR(10)         
 
@@ -27,14 +27,14 @@ Data da Criacao---: 03/08/2009
 ===============================================================================================================================
 Descrição---------: PE para inclusão de campos no grid de montagem de carga
 ===============================================================================================================================
-Parametros--------: PARAMIXB - Array com as caracteristicas dos campos do arquivo temporario.   
+Parametros--------: ParamIXB - Array com as caracteristicas dos campos do arquivo temporario.   
 ===============================================================================================================================
 Retorno-----------: aret - Array com os campos incluídos.
 ===============================================================================================================================
 */
 User Function DL200BRW()
 
-Local aRet     := PARAMIXB
+Local aRet     := ParamIXB
 Local aCpos    := {} 
 Local nX       := 0
 Local _nPosTraco
@@ -42,7 +42,7 @@ Local _nPosTraco
 //====================================================================================================
 //Arrays de controle dos campos que deverao ser mostrados no Grid da rotina de Montagem de Carga.   
 //====================================================================================================
-aCpos := ALLTRIM(GetMv("IT_CMPCARG"))
+aCpos := AllTrim(GetMv("IT_CMPCARG"))
 aCpos := If(Empty(aCpos),{},&aCpos)
 
 For nX := 1 To Len(aCpos)
@@ -51,7 +51,7 @@ For nX := 1 To Len(aCpos)
 	_cx3_tipo := getsx3cache(aCpos[nX],"X3_TIPO")
 	_cx3_titulo := getsx3cache(aCpos[nX],"X3_TITULO")
 
-	If alltrim(aCpos[nX]) == alltrim(_cx3_campo)
+	If AllTrim(aCpos[nX]) == AllTrim(_cx3_campo)
 
 	   _nPosTraco := At("_",_cx3_campo)
        If _nPosTraco == 0
@@ -61,27 +61,27 @@ For nX := 1 To Len(aCpos)
 	   //==============================================================
 	   // Tratamento para que o nome do campo nao exceda 10 digitos. 
 	   //==============================================================
-	   If Len("PED"+Substr(_cx3_campo,_nPosTraco,Len(ALLTRIM(_cx3_campo))-2)) > 10 // Len("PED"+Substr(_cx3_campo,3,Len(ALLTRIM(_cx3_campo))-2)) > 10
+	   If Len("PED"+SubStr(_cx3_campo,_nPosTraco,Len(AllTrim(_cx3_campo))-2)) > 10 // Len("PED"+SubStr(_cx3_campo,3,Len(AllTrim(_cx3_campo))-2)) > 10
 			//================================================================
 			// Para campos numerico passar mais um parametro com a mascara. 
 			//================================================================
 			If _cx3_tipo == "N"
-				AADD(aRet,{"PED"+Substr(_cx3_campo,_nPosTraco,7),,ALLTRIM(_cx3_titulo),If(TamSx3(_cx3_campo)[2]>0,"99999999."+Replicate("9",TamSx3(_cx3_campo)[2]),"99999999") })
+				aAdd(aRet,{"PED"+SubStr(_cx3_campo,_nPosTraco,7),,AllTrim(_cx3_titulo),If(TamSX3(_cx3_campo)[2]>0,"99999999."+Replicate("9",TamSX3(_cx3_campo)[2]),"99999999") })
 			Else
-				AADD(aRet,{"PED"+Substr(_cx3_campo,_nPosTraco,7),,ALLTRIM(_cx3_titulo)})
+				aAdd(aRet,{"PED"+SubStr(_cx3_campo,_nPosTraco,7),,AllTrim(_cx3_titulo)})
 			EndIf
 		Else
 			//================================================================
 			// Para campos numerico passar mais um parametro com a mascara. 
 			//================================================================		
 			If _cx3_tipo == "N"
-				AADD(aRet,{"PED"+Substr(_cx3_campo,_nPosTraco,Len(ALLTRIM(_cx3_campo))-2),,ALLTRIM(_cx3_titulo),If(TamSx3(_cx3_campo)[2]>0,"99999999."+Replicate("9",TamSx3(_cx3_campo)[2]),"99999999") })
+				aAdd(aRet,{"PED"+SubStr(_cx3_campo,_nPosTraco,Len(AllTrim(_cx3_campo))-2),,AllTrim(_cx3_titulo),If(TamSX3(_cx3_campo)[2]>0,"99999999."+Replicate("9",TamSX3(_cx3_campo)[2]),"99999999") })
 			Else
-				AADD(aRet,{"PED"+Substr(_cx3_campo,_nPosTraco,Len(ALLTRIM(_cx3_campo))-2),,ALLTRIM(_cx3_titulo)})
+				aAdd(aRet,{"PED"+SubStr(_cx3_campo,_nPosTraco,Len(AllTrim(_cx3_campo))-2),,AllTrim(_cx3_titulo)})
 			EndIf
 		EndIf
 	Else
-		U_ITMSG("O campo "+ALLTRIM(aCpos[nX])+" informado no parametro IT_CMPCARG, nao existe.","Atenção",;
+		U_ITMsg("O campo "+AllTrim(aCpos[nX])+" informado no parametro IT_CMPCARG, nao existe.","Atenção",;
 		"Cadastre o mesmo atraves do modulo Configurador ou retire-o do parametro. "+;
 		"Este campo é apresentado no Grid da rotina de Montagem de Carga.",1)
 	EndIf

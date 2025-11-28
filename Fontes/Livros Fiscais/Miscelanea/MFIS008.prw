@@ -1,28 +1,21 @@
 /*
 ===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO                             
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#include 'protheus.ch'
-#include "topconn.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa--------: MFIS008
 Autor-----------: Igor Melgaco
 Data da Criacao-: 03/05/2022
-===============================================================================================================================
 Descrição-------: CHAMADO 39972 - Rotina para limpeza de códigos de ajuste com valor zerado da Tabela CDA.
-===============================================================================================================================
 Parametros------: NENHUM
-===============================================================================================================================
 Retorno---------: NENHUM
 ===============================================================================================================================
 
@@ -33,26 +26,23 @@ não geram valor, e assim crie uma TES separada sem o código de ajuste amarrado.
 */
 User Function MFIS008()
 
-   fwMsgRun( , {|| MFIS008A() } ,'Processando...' , 'Aguarde!' )
+   FWMsgRun( , {|| MFIS008A() } ,'Processando...' , 'Aguarde!' )
 
 Return
-
 
 /*
 ===============================================================================================================================
 Programa----------: MFIS008A
 Autor-------------: Igor Melgaco
 Data da Criacao---: 03/05/2022
-===============================================================================================================================
 Descrição---------: Executa a query e o processamento da exclusão
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function MFIS008A()
-Local cQuery   := ""
+
+Local _cAlias   := GetNextAlias()
 Local cCodAjus := U_ITGETMV("ITCODLAN",'GO40000029') 
 Local i        := 0
 Local aLog     := {}
@@ -61,39 +51,34 @@ Local _cTitulo := "Registros a deletar"
 
 aCab := {"","Filial","Especie","Numero","Serie","Cliente/Fornecedor","Loja","Valor","Cod. Lanc.","Recno"}
 
-If Select("TRB_CDA") <> 0
-	TRB_CDA->( DBCloseArea() )
-EndIf
 
-cQuery := " SELECT CDA_FILIAL,CDA_ESPECI,CDA_NUMERO,CDA_SERIE,CDA_CLIFOR,CDA_LOJA, CDA_VALOR,CDA_CODLAN,R_E_C_N_O_ "
-cQuery += " FROM " + RetSqlName("CDA") + " CDA " 
-cQuery += " WHERE CDA_VALOR = 0 "
-cQuery += "  AND CDA_CODLAN = '"+cCodAjus+"' "
-cQuery += "  AND D_E_L_E_T_ = ' ' "
-cQuery += "  AND CDA_FILIAL = '" + xFilial("CDA") + "' "
+BeginSql alias _cAlias
+   SELECT CDA_FILIAL,CDA_ESPECI,CDA_NUMERO,CDA_SERIE,CDA_CLIFOR,CDA_LOJA, CDA_VALOR,CDA_CODLAN,R_E_C_N_O_
+   FROM %Table:CDA%
+   WHERE CDA_VALOR = 0
+   AND CDA_CODLAN = %exp:cCodAjus%
+   AND D_E_L_E_T_ = ' ' "
+   AND CDA_FILIAL = %xFilial:CDA%
+EndSql
 
-TCQUERY cQuery NEW ALIAS "TRB_CDA"
+While (_cAlias)->(!Eof())
 
-DbSelectArea("TRB_CDA")
-TRB_CDA->( DBGoTop() )
-While TRB_CDA->(!EOF())
-
-   AADD(aLog,{.F.,;
-   TRB_CDA->CDA_FILIAL,;
-   TRB_CDA->CDA_ESPECI,;
-   TRB_CDA->CDA_NUMERO,;
-   TRB_CDA->CDA_SERIE,;
-   TRB_CDA->CDA_CLIFOR,;
-   TRB_CDA->CDA_LOJA,;
-   TRB_CDA->CDA_VALOR,;
-   TRB_CDA->CDA_CODLAN,;
-   TRB_CDA->R_E_C_N_O_})
+   aAdd(aLog,{.F.,;
+   (_cAlias)->CDA_FILIAL,;
+   (_cAlias)->CDA_ESPECI,;
+   (_cAlias)->CDA_NUMERO,;
+   (_cAlias)->CDA_SERIE,;
+   (_cAlias)->CDA_CLIFOR,;
+   (_cAlias)->CDA_LOJA,;
+   (_cAlias)->CDA_VALOR,;
+   (_cAlias)->CDA_CODLAN,;
+   (_cAlias)->R_E_C_N_O_})
    
-   TRB_CDA->(DbSkip())
+   (_cAlias)->(DBSkip())
 
 EndDo
 
-TRB_CDA->(DbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 If Len(aLog) > 0
    _lRet := U_ITListBox(_cTitulo,aCab,aLog   , .T.    , 2    ,_cTitulo /*_cMsgTop*/,          ,        ,         ,     ,        ,          ,       ,         ,          , /*bCondMarca*/)
@@ -102,20 +87,20 @@ If Len(aLog) > 0
 
       For i := 1 to Len(aLog)
          If aLog[i,1]
-            DbSelectArea("CDA")
-            CDA->(DbGoTo(aLog[i,10]))
+            DBSelectArea("CDA")
+            CDA->(DBGoTo(aLog[i,10]))
             CDA->(RecLock("CDA", .F.))
             DbDelete()
-            MsUnlock()
+            MSUnLock()
 
          EndIf
       Next
 
-      U_ITMSG("Processamento concluído!","Atenção",,2)
+      U_ITMsg("Processamento concluído!","Atenção",,2)
 
    EndIf
 Else
-   U_ITMSG("Não encontrado registros para deleção!","Atenção",,2)
+   U_ITMsg("Não encontrado registros para deleção!","Atenção",,2)
 EndIf
 
 Return

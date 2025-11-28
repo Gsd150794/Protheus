@@ -2,28 +2,24 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                           
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "FISR020.CH"
+#Include "TOTVS.ch"
+#Include "FISR020.CH"
 /*
 ===============================================================================================================================
 Programa----------: RFIS009
 Autor-------------: Igor Melgaço
 Data da Criacao---: 24/10/2022
-===============================================================================================================================
 Descrição---------: Impressão do relatório de conferência SPED-PIS/COFINS. Chamado 41042
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: .T.
 ===============================================================================================================================
 */
-USER Function RFIS009()
+User Function RFIS009()
 Local	cNomWiz			:=	""
 Local	aWizard			:=	{}    
 
@@ -36,7 +32,7 @@ Private	lEnd 			:= .F.
 If TRepInUse()
 	cNomWiz			:=	"FSR020"
 	If !(MontWiz(cNomWiz))
-		Return	//Se o wizard for cancelado aborto o processamento.
+		Return	//Se o wizard For cancelado aborto o processamento.
 	EndIf
 	If (!xMagLeWiz(cNomWiz, @aWizard, .T. ))
 		Return	//Se por algum motivo a leitura do CFP falhar aborto a rotina.
@@ -87,13 +83,13 @@ Private aTrbs		:=	{}
 
 If FindFunction( "GetParAuto" )
 	aRetAuto := GetParAuto( "FISR020TESTCASE" )
-	lAutomato := Iif( valtype(aRetAuto) == "A" .and. Len( aRetAuto ) > 0, .T., .F. ) 
+	lAutomato := IIf( ValType(aRetAuto) == "A" .And. Len( aRetAuto ) > 0, .T., .F. ) 
 	If lAutomato
 		aWizard := aRetAuto[1] 
 	EndIf 
 EndIf
 
-lDetalhado := Iif(Substr(aWizard[1][2],1,1) == "1",.T.,.F.)
+lDetalhado := IIf(SubStr(aWizard[1][2],1,1) == "1",.T.,.F.)
 
 If lDetalhado
 	//Tratamento do legado imprimindo informações detalhadas	
@@ -123,11 +119,11 @@ If lDetalhado
 	If !lAutomato		
 		For nI:= 1 To Len( aTrbs )
 			If File( aTrbs[ni,1] + GetDBExtension() )
-				DbSelectArea( aTrbs[ni,2] )
-				DbCloseArea()
+				DBSelectArea( aTrbs[ni,2] )
+				DBCloseArea()
 				Ferase( aTrbs[ni,1] + GetDBExtension() )
 				Ferase( aTrbs[ni,1] + OrdBagExt() )
-			Endif	
+			EndIf	
 		Next
 	EndIf
 Else
@@ -136,20 +132,20 @@ Else
 	If File( aWizard[1][1] )
 		SntCriaTab()	
 		Processa({|lEnd| ProcArqSnt(aWizard[1][1],@cPer,@lEnd)},,,.T.)		
-		IF !lEnd
+		If !lEnd
 			oReport:SetTitle(STR0762  +  cPer)//"Conferência EFD PIS/COFINS - Período: "	
 			If !lAutomato
 				oReport:PrintDialog()
 			EndIf
-		EndIF		
+		EndIf		
 	Else 
 		If !lAutomato
 			xMagHelpFis(STR0008,STR0011,STR0010)	//"Atenção"###"Arquivo inexistente no diretório especificado."###"Selecione um arquivo válido para utilização desta rotina. Este arquivo deve ser gerado de acordo com as implementações do boletim técnico da rotina."
 		Else 
 			Help(,,"NOARQ",,STR0011+STR0010,1,0) //"Atenção"###"Arquivo inexistente no diretório especificado."###"Selecione um arquivo válido para utilização desta rotina. Este arquivo deve ser gerado de acordo com as implementações do boletim técnico da rotina."
-		ENDIF
-	EndIF	
-EndIF
+		EndIf
+	EndIf	
+EndIf
 
 Return oReport
 
@@ -275,7 +271,7 @@ For nX := 1 To Len(aTitulo)
 	nCont	:=	aScan(aTrbs,{|x| x[3] == cReg })
 	cAlias	:=	aTrbs[nCont,02]	
 
-	dbSelectArea(cAlias)
+	DBSelectArea(cAlias)
 	If (nPosReg	:=	aScan(aRegra,{|aX| aX[1]==cReg}))>0
 		aAdd( aReg, TRSection():New(oReport,noacento(OemToAnsi(aTitulo[nX][1])),{cAlias},{STR0014},/*Campos do SX3*/,/*Campos do SIX*/,,,,,,,,,1,,,,,,,) )
 		aReg[Len(aReg)]:SetNoFilter({cAlias})		
@@ -302,7 +298,7 @@ For nX := 1 To Len(aTitulo)
 				If (nPosReg2 := aScan(aTitulo,{|aX| SubStr(aX[1],1,4)==cReg}))>0
 					nCont	:=	aScan(aTrbs,{|x| x[3] == cReg })
 					cAlias	:=	aTrbs[nCont,02]
-					dbSelectArea(cAlias)
+					DBSelectArea(cAlias)
 					
 					aAdd( aReg, TRSection():New(aReg[nPosPai],noacento(OemToAnsi(aTitulo[nPosReg2][1])),{cAlias},/*{Array com as ordens do relatório}*/,/*Campos do SX3*/,/*Campos do SIX*/,,,,,,,,,1,,,,,,,)) 
 					aReg[Len(aReg)]:NLEFTMARGIN := 4
@@ -325,7 +321,7 @@ For nX := 1 To Len(aTitulo)
 								nCont	:=	aScan(aTrbs,{|x| x[3] == cReg })
 								cAlias	:=	aTrbs[nCont,02]
 				
-								dbSelectArea(cAlias)
+								DBSelectArea(cAlias)
 								
 								aAdd( aReg, TRSection():New(aReg[nPosPai2],noacento(OemToAnsi(aTitulo[nPosReg3][1])),{cAlias},/*{Array com as ordens do relatório}*/,/*Campos do SX3*/,/*Campos do SIX*//*,,,,,,,,,1,,,,,,,*/))
 								aReg[Len(aReg)]:NLEFTMARGIN := 8
@@ -348,7 +344,7 @@ For nX := 1 To Len(aTitulo)
 											nCont	:=	aScan(aTrbs,{|x| x[3] == cReg })
 											cAlias	:=	aTrbs[nCont,02]
 							
-											dbSelectArea(cAlias)
+											DBSelectArea(cAlias)
 											
 											aAdd( aReg, TRSection():New(aReg[nPosPai3],noacento(OemToAnsi(aTitulo[nPosReg4][1])),{cAlias},/*{Array com as ordens do relatório}*/,/*Campos do SX3*/,/*Campos do SIX*//*,,,,,,,,,1,,,,,,,*/))
 											aReg[Len(aReg)]:NLEFTMARGIN := 12
@@ -371,7 +367,7 @@ For nX := 1 To Len(aTitulo)
 														nCont	:=	aScan(aTrbs,{|x| x[3] == cReg })
 														cAlias	:=	aTrbs[nCont,02]
 										
-														dbSelectArea(cAlias)
+														DBSelectArea(cAlias)
 														
 														aAdd( aReg, TRSection():New(aReg[nPosPai4],noacento(OemToAnsi(aTitulo[nPosReg5][1])),{cAlias},/*{Array com as ordens do relatório}*/,/*Campos do SX3*/,/*Campos do SIX*//*,,,,,,,,,1,,,,,,,*/))
 														aReg[Len(aReg)]:NLEFTMARGIN := 16
@@ -394,7 +390,7 @@ For nX := 1 To Len(aTitulo)
 																	nCont	:=	aScan(aTrbs,{|x| x[3] == cReg })
 																	cAlias	:=	aTrbs[nCont,02]
 													
-																	dbSelectArea(cAlias)
+																	DBSelectArea(cAlias)
 
 																	aAdd( aReg, TRSection():New(aReg[nPosPai5],noacento(OemToAnsi(aTitulo[nPosReg6][1])),{cAlias},/*{Array com as ordens do relatório}*/,/*Campos do SX3*/,/*Campos do SIX*//*,,,,,,,,,1,,,,,,,*/))
 																	aReg[Len(aReg)]:NLEFTMARGIN := 20
@@ -418,7 +414,7 @@ For nX := 1 To Len(aTitulo)
 																				nCont	:=	aScan(aTrbs,{|x| x[3] == cReg })
 																				cAlias	:=	aTrbs[nCont,02]
 														
-																				dbSelectArea(cAlias)
+																				DBSelectArea(cAlias)
         		                                        	
 																				aAdd( aReg, TRSection():New(aReg[nPosPai6],noacento(OemToAnsi(aTitulo[nPosReg7][1])),{cAlias},/*{Array com as ordens do relatório}*/,/*Campos do SX3*/,/*Campos do SIX*//*,,,,,,,,,1,,,,,,,*/))
 																				aReg[Len(aReg)]:NLEFTMARGIN := 20
@@ -534,7 +530,7 @@ For nX := 1 To Len(aTitulo)
 	    Return
 	EndIf   
 	
-	dbSelectArea(cAlias)
+	DBSelectArea(cAlias)
 	If (nPosReg	:=	aScan(aRegra,{|aX| aX[1]==cReg}))>0
 		If Len(aRegra[nPosReg])>1
 			For nY := 2 To Len(aRegra[nPosReg])
@@ -545,7 +541,7 @@ For nX := 1 To Len(aTitulo)
 				If (nPosReg2 := aScan(aTitulo,{|aX| SubStr(aX[1],1,4)==cReg}))>0
 					nCont	:=	aScan(aTrbs,{|x| x[3] == cReg })
 					cAlias2	:=	aTrbs[nCont,02]				
-					dbSelectArea(cAlias2)
+					DBSelectArea(cAlias2)
 					
 					b2Relation	:=	&("{||"+cAlias+"->RELAC}")
 					b2ParFilter	:=	&("{||"+cAlias2+"->RELAC=="+cAlias+"->RELAC}")
@@ -562,7 +558,7 @@ For nX := 1 To Len(aTitulo)
 							If (nPosReg3 := aScan(aTitulo,{|aX| SubStr(aX[1],1,4)==cReg}))>0							
 								nCont	:=	aScan(aTrbs,{|x| x[3] == cReg })
 								cAlias3	:=	aTrbs[nCont,02]							
-								dbSelectArea(cAlias3)
+								DBSelectArea(cAlias3)
 								
 								b3Relation	:=	&("{||"+cAlias2+"->RELAC2}")
 								b3ParFilter	:=	&("{||"+cAlias3+"->RELAC2=="+cAlias2+"->RELAC2}")
@@ -579,7 +575,7 @@ For nX := 1 To Len(aTitulo)
 										If (nPosReg4 := aScan(aTitulo,{|aX| SubStr(aX[1],1,4)==cReg}))>0										
 											nCont	:=	aScan(aTrbs,{|x| x[3] == cReg })
 											cAlias4	:=	aTrbs[nCont,02]
-											dbSelectArea(cAlias4)
+											DBSelectArea(cAlias4)
 											
 											b4Relation	:=	&("{||"+cAlias3+"->RELAC3}")
 											b4ParFilter	:=	&("{||"+cAlias4+"->RELAC3=="+cAlias3+"->RELAC3}")
@@ -596,7 +592,7 @@ For nX := 1 To Len(aTitulo)
 													If (nPosReg5 := aScan(aTitulo,{|aX| SubStr(aX[1],1,4)==cReg}))>0													
 														nCont	:=	aScan(aTrbs,{|x| x[3] == cReg })
 														cAlias5	:=	aTrbs[nCont,02]													
-														dbSelectArea(cAlias5)
+														DBSelectArea(cAlias5)
 														
 														b5Relation	:=	&("{||"+cAlias4+"->RELAC4}")
 														b5ParFilter	:=	&("{||"+cAlias5+"->RELAC4=="+cAlias4+"->RELAC4}")
@@ -613,7 +609,7 @@ For nX := 1 To Len(aTitulo)
 																If (nPosReg6 := aScan(aTitulo,{|aX| SubStr(aX[1],1,4)==cReg}))>0															
 																	nCont	:=	aScan(aTrbs,{|x| x[3] == cReg })
 																	cAlias6	:=	aTrbs[nCont,02]
-																	dbSelectArea(cAlias6)											
+																	DBSelectArea(cAlias6)											
 																	
 																	b6Relation	:=	&("{||"+cAlias5+"->RELAC5}")
 																	b6ParFilter	:=	&("{||"+cAlias6+"->RELAC5=="+cAlias5+"->RELAC5}")
@@ -630,7 +626,7 @@ For nX := 1 To Len(aTitulo)
 																			If (nPosReg7 := aScan(aTitulo,{|aX| SubStr(aX[1],1,4)==cReg}))>0															
 																				nCont	:=	aScan(aTrbs,{|x| x[3] == cReg })
 																				cAlias7	:=	aTrbs[nCont,02]
-																				dbSelectArea(cAlias7)											
+																				DBSelectArea(cAlias7)											
 																			
 																				b7Relation	:=	&("{||"+cAlias6+"->RELAC6}")
 																				b7ParFilter	:=	&("{||"+cAlias7+"->RELAC6=="+cAlias6+"->RELAC6}")
@@ -759,7 +755,7 @@ Local	nRecFilho6	:=	0
 FT_FUSE(cFile)
 FT_FGOTOP()
 ProcRegua(FT_FLastRec())
-Do While !FT_FEOF()
+While !FT_FEOF()
 	cLinha	:=	FT_FREADLN()
 	aCmps	:=	RetCntCmp( cLinha )
 	nCmp	:=	1
@@ -774,7 +770,7 @@ Do While !FT_FEOF()
 		cAlias	:=	aTrbs[nPos][2]
     	nX		:=	nPos
 
-		dbSelectArea(cAlias)
+		DBSelectArea(cAlias)
 		RecLock(cAlias,.T.)		
 		
 		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -957,7 +953,7 @@ Do While !FT_FEOF()
 				EndIf
 			EndIf
 		Next nI
-		MsUnLock()
+		MSUnLock()
 	EndIf
 	
 	FT_FSKIP()
@@ -999,7 +995,7 @@ Local	cPictALI1	:=	"@E 9999.99"			//Alíquotas com 2 casas
 Local	cPictALI2	:=	"@E 9999.9999"			//Alíquotas com 4 casas
  
 cFile		:=	aWizard[1][1]
-Procregua(12)
+ProcRegua(12)
 If File( cFile )
 	IncProc("Gerando estrutura...")
 	FT_FUSE(cFile)
@@ -6843,7 +6839,7 @@ Função que retorna os campos do registro formatado em array
 @param 	cLinha   	-> Linha do arquivo que está sendo processado
 
 		
-@return aLinha		-> Array com os valores do registro formatado em array.
+@Return aLinha		-> Array com os valores do registro formatado em array.
 			
 @author Erick Dias 
 @since  09/12/2013
@@ -6852,25 +6848,25 @@ Função que retorna os campos do registro formatado em array
 //-------------------------------------------------------------------
 Static Function RetCmpSnt( cLinha )
 
-Local nPos		:= At("|",SubStr(cLinha,1,len(cLinha))) 
+Local nPos		:= At("|",SubStr(cLinha,1,Len(cLinha))) 
 Local cField	:= ""
 Local aLinha	:= {}
 
-cLinha	:= Substr(cLinha,nPos+1,len(cLinha))
-nPos	:= At("|",SubStr(cLinha,1,len(cLinha))) 
+cLinha	:= SubStr(cLinha,nPos+1,Len(cLinha))
+nPos	:= At("|",SubStr(cLinha,1,Len(cLinha))) 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³Montando array com os campos do registro ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 While nPos > 0
-	cField := Substr(cLinha,1,nPos-1)
-	AADD(aLinha,StrTran(AllTrim(cField),",","."))
-	cLinha := Substr(cLinha,nPos+1,len(cLinha))
-	nPos  := At("|",SubStr(cLinha,1,len(cLinha)))
+	cField := SubStr(cLinha,1,nPos-1)
+	aAdd(aLinha,StrTran(AllTrim(cField),",","."))
+	cLinha := SubStr(cLinha,nPos+1,Len(cLinha))
+	nPos  := At("|",SubStr(cLinha,1,Len(cLinha)))
 EndDo
 
-If len(cLinha) > 0
-	AADD(aLinha,StrTran(AllTrim(cField),",","."))
-EndIF
+If Len(cLinha) > 0
+	aAdd(aLinha,StrTran(AllTrim(cField),",","."))
+EndIf
   
 Return( aLinha )
 
@@ -6882,7 +6878,7 @@ Função que cria tabelas temporárias para impressão do relatório Sintético
 @param 	cPeríodo   	-> Objeto TREPORT
 
 		
-@return Nil
+@Return
 			
 @author Erick Dias 
 @since  09/12/2013
@@ -7050,7 +7046,7 @@ Função que irá percorrer o arquivo e gravar as informações nas tabelas temporári
 @param 	cFile   	-> Caminho do arquivo texto que será processado
 
 		
-@return Nil
+@Return
 			
 @author Erick Dias 
 @since  09/12/2013
@@ -7067,7 +7063,7 @@ Auxiliares.
 
 @param 	aCmps   	-> Array com valores e informações do registro do arquivo texto.
 		
-@return Nil
+@Return
 			
 @author Erick Dias 
 @since  09/12/2013
@@ -7101,10 +7097,10 @@ Append From &cFile  SDF
 cArq := CriaTrab(aCmp)
 dbUseArea(.T.,__LocalDriver, cArq, "TXT")
 
-Append From "TXTA" FOR Substr(TXTA->TEXTO,2,4) $ "0000/0110/0111/A100/C100/C180/C380/C481/C491/C601/D200/D300/D350/D600/F100/0111/F600/M210/M610/M105/M505/M100/M500/M200/M600/1100/1500/1300/1700/I100"    
-(cAliasTXT)->(DbGoTop ())
+Append From "TXTA" For SubStr(TXTA->TEXTO,2,4) $ "0000/0110/0111/A100/C100/C180/C380/C481/C491/C601/D200/D300/D350/D600/F100/0111/F600/M210/M610/M105/M505/M100/M500/M200/M600/1100/1500/1300/1700/I100"    
+(cAliasTXT)->(DBGoTop ())
 ProcRegua((cAliasTXT)->(RecCount()))
-Do While !(cAliasTXT)->(Eof ())	
+While !(cAliasTXT)->(Eof ())	
 	nLinha++
 	IncProc(STR0687 + STR0688+ Str(nLinha)) 
 	If Interrupcao(lEnd)
@@ -7112,97 +7108,97 @@ Do While !(cAliasTXT)->(Eof ())
 	EndIf
 	
 	cSubStr	:= SubStr((cAliasTXT)->TEXTO,2,4)	
-	IF cSubStr$ "0000"
+	If cSubStr$ "0000"
 		aCmps	:=	RetCmpSnt( (cAliasTXT)->TEXTO)		
-		cPer:= 	MesExtenso(Substr(aCmps[6],3,2)) + " de " + Substr(aCmps[6],5,4)
-	ElseIF cSubStr$ "0110"
+		cPer:= 	MesExtenso(SubStr(aCmps[6],3,2)) + " de " + SubStr(aCmps[6],5,4)
+	ElseIf cSubStr$ "0110"
 		aCmps		:=	RetCmpSnt( (cAliasTXT)->TEXTO )
 		cRegime	:= aCmps[2]
 		If Len(aCmps) >=5
 			cIndRegime:= aCmps[5] 
-		EndIF	
-	ElseIF cSubStr$ "0111/A100/C100/C180/C380/C481/C491/C601/D200/D300/D350/D600/F100"
+		EndIf	
+	ElseIf cSubStr$ "0111/A100/C100/C180/C380/C481/C491/C601/D200/D300/D350/D600/F100"
 		cBloco	:= ""
 		nValor	:= 0
 		aCmps	:=	RetCmpSnt( (cAliasTXT)->TEXTO )
 		
-		IF cSubStr$ "0111"
+		If cSubStr$ "0111"
 			//Valores de receita registro 0111
-			Reclock("RECE",.T.)
+			RecLock("RECE",.T.)
 			RECE->BLOCO	:= "1"
 			RECE->RTNC		:= Val(aCmps[2])
 			RECE->RNT		:= Val(aCmps[3])
 			RECE->RE		:= Val(aCmps[4])
 			RECE->RC		:= Val(aCmps[5])
 			RECE->TotalR	:= Val(aCmps[6])		
-			MsUnLock()		
+			MSUnLock()		
 					
-		ElseIF cSubStr$ "A100"
+		ElseIf cSubStr$ "A100"
 			//Valores de receita do bloco A	
-			If aCmps[2] == "1" .AND. aCmps[5] == "00"  //Verifica se é prestação de serviço e não está cancelado 
+			If aCmps[2] == "1" .And. aCmps[5] == "00"  //Verifica se é prestação de serviço e não está cancelado 
 				cBloco	:= "A"
-				nValor	:= VAl(aCmps[12])
-			EndIF
-		ElseIF cSubStr$ "C100"	
-			If aCmps[2] == "1" .AND. aCmps[6] == "00"  //Verifica se é saída e é um documento regular				
+				nValor	:= Val(aCmps[12])
+			EndIf
+		ElseIf cSubStr$ "C100"	
+			If aCmps[2] == "1" .And. aCmps[6] == "00"  //Verifica se é saída e é um documento regular				
 				cBloco	:= "C"
-				nValor	:= VAl(aCmps[12])			
-			EndIF
+				nValor	:= Val(aCmps[12])			
+			EndIf
 	
-		ElseIF cSubStr$ "C180"	
+		ElseIf cSubStr$ "C180"	
 			cBloco	:= "C"
-			nValor	:= VAl(aCmps[8])
+			nValor	:= Val(aCmps[8])
 	
-		ElseIF cSubStr$ "C380"	
+		ElseIf cSubStr$ "C380"	
 			cBloco	:= "C"
 			nValor	:= Val(aCmps[7])		
 			
-		ElseIF cSubStr$ "C481"	
+		ElseIf cSubStr$ "C481"	
 			cBloco	:= "C"
 			nValor	:= Val(aCmps[7])
 	 
-		ElseIF cSubStr$ "C491"	
+		ElseIf cSubStr$ "C491"	
 			cBloco	:= "C"
-			nValor	:= VAl(aCmps[5])		
+			nValor	:= Val(aCmps[5])		
 			
-		ElseIF cSubStr$ "C601"	
+		ElseIf cSubStr$ "C601"	
 			cBloco	:= "C"
-			nValor	:= VAl(aCmps[3])		
+			nValor	:= Val(aCmps[3])		
 	
-		ElseIF cSubStr$ "D200"	
+		ElseIf cSubStr$ "D200"	
 			cBloco	:= "D"
-			nValor	:= VAl(aCmps[10])	
+			nValor	:= Val(aCmps[10])	
 	
-		ElseIF cSubStr$ "D300"	
-			cBloco	:= "D"
-			nValor	:= Val(aCmps[10])		
-	
-		ElseIF cSubStr$ "D350"	
+		ElseIf cSubStr$ "D300"	
 			cBloco	:= "D"
 			nValor	:= Val(aCmps[10])		
 	
-		ElseIF cSubStr$ "D600"	
+		ElseIf cSubStr$ "D350"	
+			cBloco	:= "D"
+			nValor	:= Val(aCmps[10])		
+	
+		ElseIf cSubStr$ "D600"	
 			cBloco	:= "D"
 			nValor	:= Val(aCmps[10])
 	
-		ElseIF cSubStr$ "F100"	
+		ElseIf cSubStr$ "F100"	
 			If aCmps[2] == "1"
 				cBloco	:= "F"
 				nValor	:= Val(aCmps[6])
-			EndIF		
+			EndIf		
 
-		ElseIF cSubStr$ "I100"
+		ElseIf cSubStr$ "I100"
 			cBloco	:= "I"
 			nValor	:= Val(aCmps[2])
-		EndIF	
+		EndIf	
 		
-		IF nValor > 0
+		If nValor > 0
 			If RECE->(MsSeek(cBloco))
-				Reclock("RECE",.F.)
+				RecLock("RECE",.F.)
 			Else
-				Reclock("RECE",.T.)
+				RecLock("RECE",.T.)
 				RECE->BLOCO	:= cBloco
-			EndIF
+			EndIf
 			
 			If cBloco == "A"
 				RECE->RecSer += nValor			
@@ -7214,42 +7210,42 @@ Do While !(cAliasTXT)->(Eof ())
 				RECE->OUTREC += nValor			
 			ElseIf cBloco == "I"
 				RECE->InstFin += nValor			
-			EndIF
+			EndIf
 			RECE->TotalD	+= nValor
-			MsUnLock()
-		EndIF				
+			MSUnLock()
+		EndIf				
 		
 	ElseIf cSubStr== "F600"
 		aCmps	:=	RetCmpSnt( (cAliasTXT)->TEXTO )
-		IF !Empty(aCmps[2])
+		If !Empty(aCmps[2])
 			If RETE->(MsSeek(aCmps[2]))
-				Reclock("RETE",.F.)
+				RecLock("RETE",.F.)
 			Else
-				Reclock("RETE",.T.)
+				RecLock("RETE",.T.)
 				RETE->INDRET	:= aCmps[2]
-			EndIF
+			EndIf
 				
 			RETE->VLRPIS	+= Val(aCmps[9])		
 			RETE->VLRCOF	+= Val(aCmps[10])
-			MsUnLock()
-		EndIF
+			MSUnLock()
+		EndIf
 		
 	ElseIf cSubStr$ "M200/M350/M600/"
 		aCmps	:=	RetCmpSnt( (cAliasTXT)->TEXTO )	
 		
-		IF cSubStr$ "M200/M600"
-			cTrib	:= Iif(cSubStr== "M200","1","2")
+		If cSubStr$ "M200/M600"
+			cTrib	:= IIf(cSubStr== "M200","1","2")
 			
-			If cRegime $ "1/3" //Se regime Não Cumultivo ou ambos processa informações não cumulativa			
+			If cRegime $ "1/3" //Se regime Não Cumultivo ou ambos Processa informações não cumulativa			
 				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 				//³Valores Apuração Não Cumulativo³
 				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 				If APUN->(MsSeek(cTrib))
-					Reclock("APUN",.F.)
+					RecLock("APUN",.F.)
 				Else
-					Reclock("APUN",.T.)
+					RecLock("APUN",.T.)
 					APUN->TRIB	:= cTrib
-				EndIF
+				EndIf
 					
 				APUN->VLRDEB		+= Val(aCmps[2])
 				APUN->VLRCREDPER	+= Val(aCmps[3])
@@ -7257,176 +7253,176 @@ Do While !(cAliasTXT)->(Eof ())
 				APUN->VLRRET		+= Val(aCmps[6])
 				APUN->VLROUTDED	+= Val(aCmps[7])			
 				APUN->VLRPAG		+= Val(aCmps[8])						
-				MsUnLock()
-			EndIF
+				MSUnLock()
+			EndIf
 			
 			If cRegime $ "2/3" //Se regime Cumulativo ou ambos gerar informações cumulativo			
 				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 				//³Valores Apuração Cumulativo³
 				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 				If APUC->(MsSeek(cTrib))
-					Reclock("APUC",.F.)
+					RecLock("APUC",.F.)
 				Else
-					Reclock("APUC",.T.)
+					RecLock("APUC",.T.)
 					APUC->TRIB	:= cTrib
-				EndIF
+				EndIf
 					
 				APUC->VLRDEB		+= Val(aCmps[9])
 				APUC->VLRRET		+= Val(aCmps[10])
 				APUC->VLROUTDED	+= Val(aCmps[11])
 				APUC->VLRPAG		+= Val(aCmps[12])
-				MsUnLock()
-			EndIF
+				MSUnLock()
+			EndIf
 					
-		ElseIF cSubStr== "M350"
+		ElseIf cSubStr== "M350"
 			
 			If cRegime $ "1/3"
 				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 				//³Valores Apuração Não Cumulativo³
 				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 				If APUN->(MsSeek("1"))
-					Reclock("APUN",.F.)
+					RecLock("APUN",.F.)
 				Else
-					Reclock("APUN",.T.)
+					RecLock("APUN",.T.)
 					APUN->TRIB	:= "1"
-				EndIF
+				EndIf
 				APUN->FOLHASAL	+= Val(aCmps[6])						
-				MsUnLock()	
-			EndIF		
+				MSUnLock()	
+			EndIf		
 			
 			If cRegime $ "2/3"
 				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 				//³Valores Apuração Não Cumulativo³
 				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 				If APUC->(MsSeek("1"))
-					Reclock("APUC",.F.)
+					RecLock("APUC",.F.)
 				Else
-					Reclock("APUC",.T.)
+					RecLock("APUC",.T.)
 					APUC->TRIB	:= "1"
-				EndIF				
+				EndIf				
 				APUC->FOLHASAL	+= Val(aCmps[6])
-				MsUnLock()	
-			EndIF
+				MSUnLock()	
+			EndIf
 			
-		EndIF
+		EndIf
 	
 	ElseIf cSubStr$ "M105/M505"
 
 		aCmps	:=	RetCmpSnt( (cAliasTXT)->TEXTO )		
-		cTrib	:= Iif(cSubStr== "M105","1","2")
+		cTrib	:= IIf(cSubStr== "M105","1","2")
 		
 		If BASC->(MsSeek(cTrib+aCmps[2]))
-			Reclock("BASC",.F.)
+			RecLock("BASC",.F.)
 		Else
-			Reclock("BASC",.T.)
+			RecLock("BASC",.T.)
 			BASC->TRIB		:= cTrib
 			BASC->CODBCC	:= aCmps[2]			
-		EndIF
+		EndIf
 		BASC->BASECALC	+= Val(aCmps[7])
 		BASC->BASECALCQT	+= Val(aCmps[9])
-		MsUnLock()
+		MSUnLock()
 
 	ElseIf cSubStr$ "M100/M500/M210/M610"			
 		aCmps	:=	RetCmpSnt( (cAliasTXT)->TEXTO )		
-		IF cSubStr$ "M100/M500"	 .AND. cRegime $ "1/3"	
+		If cSubStr$ "M100/M500"	 .And. cRegime $ "1/3"	
 			
 			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 			//³Composição Créditos³
 			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ			
-			cTrib	:= Iif(cSubStr== "M100","1","2")
-			cAliq	:= Iif(Val(aCmps[5])>0,aCmps[5],aCmps[7]) //Verificação da alíquota			
+			cTrib	:= IIf(cSubStr== "M100","1","2")
+			cAliq	:= IIf(Val(aCmps[5])>0,aCmps[5],aCmps[7]) //Verificação da alíquota			
 			
 			If CRED->(MsSeek(cTrib+aCmps[2]+cAliq))
-				Reclock("CRED",.F.)
+				RecLock("CRED",.F.)
 			Else
-				Reclock("CRED",.T.)
+				RecLock("CRED",.T.)
 				CRED->COD	:= aCmps[2]
 				CRED->ALIQ	:= cAliq
 				CRED->TRIB	:= cTrib				
-			EndIF
+			EndIf
 
-			CRED->NALIQ		+= Iif(Val(aCmps[5])>0,Val(aCmps[5]),Val(aCmps[7]))
-			CRED->BASECALC	+= Iif(Val(aCmps[4])>0,Val(aCmps[4]),Val(aCmps[6]))
+			CRED->NALIQ		+= IIf(Val(aCmps[5])>0,Val(aCmps[5]),Val(aCmps[7]))
+			CRED->BASECALC	+= IIf(Val(aCmps[4])>0,Val(aCmps[4]),Val(aCmps[6]))
 			CRED->CREDDISP	+= Val(aCmps[8])
 			CRED->ACRESCIMO	+= Val(aCmps[9])				
 			CRED->REDUCAO		+= Val(aCmps[10])
 			CRED->CREDDIF		+= Val(aCmps[11])															
 			CRED->CREDAPUR	+= Val(aCmps[12])
-			MsUnLock()
+			MSUnLock()
 		
 
-		ElseIF cSubStr$ "M210/M610"
+		ElseIf cSubStr$ "M210/M610"
 			
 			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 			//³Composição Débitos ³
 			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-			cTrib	:= Iif(cSubStr== "M210","1","2")
-			cAliq	:= Iif(aCmps[2]$"03/53",aCmps[7],aCmps[5]) //Verificação da alíquota	
+			cTrib	:= IIf(cSubStr== "M210","1","2")
+			cAliq	:= IIf(aCmps[2]$"03/53",aCmps[7],aCmps[5]) //Verificação da alíquota	
 			
 			If DEBI->(MsSeek(cTrib+aCmps[2]+cAliq))
-				Reclock("DEBI",.F.)
+				RecLock("DEBI",.F.)
 			Else
-				Reclock("DEBI",.T.)
+				RecLock("DEBI",.T.)
 				DEBI->COD	:= aCmps[2]
 				DEBI->ALIQ	:= cAliq
 				DEBI->TRIB	:= cTrib				
-			EndIF
+			EndIf
 			
-			DEBI->NALIQ		:= Iif(aCmps[2]$"03/53",Val(aCmps[7]),Val(aCmps[5]))
-			DEBI->BASECALC	:= Iif(aCmps[2]$"03/53",Val(aCmps[6]),Val(aCmps[4])) //Verificação da base de cálculo  
+			DEBI->NALIQ		:= IIf(aCmps[2]$"03/53",Val(aCmps[7]),Val(aCmps[5]))
+			DEBI->BASECALC	:= IIf(aCmps[2]$"03/53",Val(aCmps[6]),Val(aCmps[4])) //Verificação da base de cálculo  
 			DEBI->VLCONTRIB	:= Val(aCmps[8])
 			DEBI->ACRESCIMO	:= Val(aCmps[9])
 			DEBI->REDUCAO		:= Val(aCmps[10])
 			DEBI->DIFER		:= Val(aCmps[11])
 			DEBI->DIFERANT	:= Val(aCmps[12])
 			DEBI->DEBAPUR		:= Val(aCmps[13])
-			MsUnLock()
+			MSUnLock()
 					
-		EndIF
+		EndIf
 			
-	ElseIF cSubStr$ "1100/1500"
+	ElseIf cSubStr$ "1100/1500"
 		If cRegime $ "1/3"
 			aCmps	:=	RetCmpSnt( (cAliasTXT)->TEXTO )		
 			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 			//³Saldos de Créditos ³
 			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-			cTrib	:= Iif(cSubStr== "1100","1","2")			
+			cTrib	:= IIf(cSubStr== "1100","1","2")			
 			If SCRE->(MsSeek(cTrib+ SubStr(aCmps[2],1,2) + "/"+ SubStr(aCmps[2],3,4)+aCmps[5]))
-				Reclock("SCRE",.F.)
+				RecLock("SCRE",.F.)
 			Else
-				Reclock("SCRE",.T.)
+				RecLock("SCRE",.T.)
 				SCRE->TRIB	:= cTrib				
 				SCRE->PER	:= SubStr(aCmps[2],1,2) + "/"+ SubStr(aCmps[2],3,4)
 				SCRE->COD	:= aCmps[5]
-			EndIF
+			EndIf
 			SCRE->CREDPER	:= Val(aCmps[12])
 			SCRE->CREDUTI	:= Val(aCmps[13])
 			SCRE->SALDO	:= Val(aCmps[18])			
-			MsUnLock()			
-		EndIF
+			MSUnLock()			
+		EndIf
 
-	ElseIF cSubStr$ "1300/1700"
+	ElseIf cSubStr$ "1300/1700"
 		aCmps	:=	RetCmpSnt( (cAliasTXT)->TEXTO )		
 		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 		//³Saldos de Retenções³
 		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-		cTrib	:= Iif(cSubStr== "1300","1","2")			
+		cTrib	:= IIf(cSubStr== "1300","1","2")			
 		If SRET->(MsSeek(cTrib+SubStr(aCmps[3],1,2) + "/"+ SubStr(aCmps[2],3,4)+aCmps[2]))
-			Reclock("SRET",.F.)
+			RecLock("SRET",.F.)
 		Else
-			Reclock("SRET",.T.)
+			RecLock("SRET",.T.)
 			SRET->TRIB		:= cTrib				
 			SRET->PER		:= SubStr(aCmps[3],1,2) + "/"+ SubStr(aCmps[3],3,4)
 			SRET->INDNAT	:= aCmps[2]
-		EndIF
+		EndIf
 
 		SRET->VLRET		:= Val(aCmps[4])	
 		SRET->VLRETUTI	:= Val(aCmps[5])+Val(aCmps[6])+Val(aCmps[7])
 		SRET->SALDO		:= Val(aCmps[8])
-		MsUnLock()
+		MSUnLock()
 	
-	EndIF
-	(cAliasTXT)->(dbSkip())  
+	EndIf
+	(cAliasTXT)->(DBSkip())  
 EndDo
 
 Return
@@ -7435,9 +7431,9 @@ Return
 //-------------------------------------------------------------------
 /*/{Protheus.doc} ReportPri2
 	
-Função que cria estrutura das section do relatório Sintético
+Função que cria estrutura das Section do relatório Sintético
 		
-@return oReport	-> Objeto TReport
+@Return oReport	-> Objeto TReport
 			
 @author Erick Dias 
 @since  11/12/2013
@@ -7506,7 +7502,7 @@ Função que chama as demais funções para realizar impressão
 
 @param 	oReport   	-> Objeto Treport
 		
-@return Nil
+@Return
 			
 @author Erick Dias 
 @since  11/12/2013
@@ -7546,7 +7542,7 @@ Função que realiza a impressão da composição da receita
 
 @param 	oReport   	-> Objeto Treport
 		
-@return Nil
+@Return
 			
 @author Erick Dias 
 @since  11/12/2013
@@ -7568,8 +7564,8 @@ Local nTotalD		:= 0
 Local nInstFin		:= 0 
 Local oTFont 		:= TFont():New('Arial',,10,.T.)
 
-dbSelectArea("RECE")
-RECE->(DbGoTop())
+DBSelectArea("RECE")
+RECE->(DBGoTop())
 
 While !RECE->(Eof())
 	
@@ -7589,10 +7585,10 @@ While !RECE->(Eof())
 		nOUTREC	:= RECE->OUTREC
 	ElseIf RECE->BLOCO == "I"
 		nInstFin	:= RECE->InstFin
-	EndIF	
+	EndIf	
 	nTotalD	+= RECE->TotalD
-	RECE->(dbSkip())
-EnddO
+	RECE->(DBSkip())
+EndDo
 
 oReport:SkipLine()
 oReport:Say(295,1000,STR0689,oTFont) //"Composição das Receitas"
@@ -7675,7 +7671,7 @@ Função que realiza a impressao da composição das retenções
 
 @param 	oReport   	-> Objeto Treport
 		
-@return Nil
+@Return
 			
 @author Erick Dias 
 @since  11/12/2013
@@ -7701,8 +7697,8 @@ Local nTotCof		:= 0
 Local nCont		:= 0
 Local oTFont 		:= TFont():New('Arial',,10,.T.)
 
-dbSelectArea("RETE")
-RETE->(DbGoTop())
+DBSelectArea("RETE")
+RETE->(DBGoTop())
 
 While !RETE->(Eof())
 	
@@ -7724,12 +7720,12 @@ While !RETE->(Eof())
 	ElseIf RETE->INDRET == "99"
 		nPis99 		+=	RETE->VLRPIS
 		nCof99		+=	RETE->VLRCOF	
-	EndIF	
+	EndIf	
 	nTotPis	+= RETE->VLRPIS
 	nTotCof	+= RETE->VLRCOF
 	
-	RETE->(dbSkip())
-EnddO
+	RETE->(DBSkip())
+EndDo
 
 If nPis01 + nPis02 + nPis03 + nPis04 + nPis05 + nPis99 >0
 
@@ -7752,42 +7748,42 @@ If nPis01 + nPis02 + nPis03 + nPis04 + nPis05 + nPis99 >0
 			oReport:Section(2):Cell("TEXTO"):SetBlock({|| STR0712 })//"RETENÇÃO COFINS"
 			oReport:Section(2):Cell("VALOR"):SetBlock({||})
 			oReport:Section(2):PrintLine()
-		EndIF
+		EndIf
 		
 		oReport:SkipLine()	   
 		oReport:Section(2):Cell("TEXTO"):SetBlock({|| STR0703 })//"(+) Retenção por Órgãos, Autarquias e Fundações Federais"
-		oReport:Section(2):Cell("VALOR"):SetBlock({||Iif(nCont==1,nPis01,nCof01)})
+		oReport:Section(2):Cell("VALOR"):SetBlock({||IIf(nCont==1,nPis01,nCof01)})
 		oReport:Section(2):PrintLine()
 		
 		oReport:SkipLine()
 		oReport:Section(2):Cell("TEXTO"):SetBlock({|| STR0704 })//"(+) Retenção por outras Entidades da Administração Pública Federal"
-		oReport:Section(2):Cell("VALOR"):SetBlock({||Iif(nCont==1,nPis02,nCof02)})
+		oReport:Section(2):Cell("VALOR"):SetBlock({||IIf(nCont==1,nPis02,nCof02)})
 		oReport:Section(2):PrintLine()
 		
 		oReport:SkipLine()
 		oReport:Section(2):Cell("TEXTO"):SetBlock({|| STR0705 })//"(+) Retenção por Pessoas Jurídicas de Direito Privado"
-		oReport:Section(2):Cell("VALOR"):SetBlock({||Iif(nCont==1,nPis03,nCof03)})
+		oReport:Section(2):Cell("VALOR"):SetBlock({||IIf(nCont==1,nPis03,nCof03)})
 		oReport:Section(2):PrintLine()
 		
 		oReport:SkipLine()
 		oReport:Section(2):Cell("TEXTO"):SetBlock({|| STR0706 })//"(+) Recolhimento por Sociedade Cooperativa"
-		oReport:Section(2):Cell("VALOR"):SetBlock({||Iif(nCont==1,nPis04,nCof04)})
+		oReport:Section(2):Cell("VALOR"):SetBlock({||IIf(nCont==1,nPis04,nCof04)})
 		oReport:Section(2):PrintLine()
 		
 		oReport:SkipLine()
 		oReport:Section(2):Cell("TEXTO"):SetBlock({|| STR0707 })//"(+) Retenção por Fabricante de Máquinas e Veículos"
-		oReport:Section(2):Cell("VALOR"):SetBlock({||Iif(nCont==1,nPis05,nCof05)})
+		oReport:Section(2):Cell("VALOR"):SetBlock({||IIf(nCont==1,nPis05,nCof05)})
 		oReport:Section(2):PrintLine() 
 		
 		oReport:SkipLine()
 		oReport:Section(2):Cell("TEXTO"):SetBlock({|| STR0708 })//"(+) Outras Retenções"
-		oReport:Section(2):Cell("VALOR"):SetBlock({||Iif(nCont==1,nPis99,nCof99)})
+		oReport:Section(2):Cell("VALOR"):SetBlock({||IIf(nCont==1,nPis99,nCof99)})
 		oReport:Section(2):PrintLine()
 	
 		oReport:FatLine()
 		
 		oReport:Section(2):Cell("TEXTO"):SetBlock({|| STR0709 })//"Total das Retenções"
-		oReport:Section(2):Cell("VALOR"):SetBlock({||Iif(nCont==1,nTotPis,nTotCof)})
+		oReport:Section(2):Cell("VALOR"):SetBlock({||IIf(nCont==1,nTotPis,nTotCof)})
 		oReport:Section(2):PrintLine()
 		oReport:SkipLine()
 	
@@ -7795,7 +7791,7 @@ If nPis01 + nPis02 + nPis03 + nPis04 + nPis05 + nPis99 >0
 	
 	oReport:EndPage()	 
 	
-EndIF   	
+EndIf   	
 
 Return
 
@@ -7806,7 +7802,7 @@ Função que realiza a impressao da apuração regime não cumulativo
 
 @param 	oReport   	-> Objeto Treport
 		
-@return Nil
+@Return
 			
 @author Erick Dias 
 @since  11/12/2013
@@ -7817,8 +7813,8 @@ Static Function PrApuNC(oReport)
 
 Local oTFont 		:= TFont():New('Arial',,10,.T.)
 
-dbSelectArea("APUN")
-APUN->(DbGoTop())
+DBSelectArea("APUN")
+APUN->(DBGoTop())
 
 While !APUN->(Eof())
 	
@@ -7826,7 +7822,7 @@ While !APUN->(Eof())
 		oReport:SkipLine()
 		oReport:Say(295,980,STR0710,oTFont)//"Apuração (Regime Não Cumulativo)"
 		oReport:Section(5):Init()
-	EndIF
+	EndIf
 
 	If APUN->TRIB == "1"
 		oReport:SkipLine(3)
@@ -7841,7 +7837,7 @@ While !APUN->(Eof())
 		oReport:Section(5):Cell("TEXTO"):SetBlock({|| STR0722 })// "COFINS"
 		oReport:Section(5):Cell("VALOR"):SetBlock({||})
 		oReport:Section(5):PrintLine()
-	EndIF
+	EndIf
 
 	oReport:SkipLine()
 	oReport:Section(5):Cell("TEXTO"):SetBlock({|| STR0713 })//"Valor do Débito"
@@ -7879,10 +7875,10 @@ While !APUN->(Eof())
 		oReport:Section(5):Cell("TEXTO"):SetBlock({|| STR0719 })//"PIS Folha de Salário"
 		oReport:Section(5):Cell("VALOR"):SetBlock({||APUN->FOLHASAL})
 		oReport:Section(5):PrintLine()
-	EndIF
+	EndIf
 
-	APUN->(dbSkip())
-EnddO
+	APUN->(DBSkip())
+EndDo
 
 oReport:EndPage()	    	
 
@@ -7896,7 +7892,7 @@ Função que realiza a impressão da apuração regime Cumulativo
 
 @param 	oReport   	-> Objeto Treport
 		
-@return Nil
+@Return
 			
 @author Erick Dias 
 @since  11/12/2013
@@ -7907,8 +7903,8 @@ Static Function PrApuC(oReport)
 
 Local oTFont 		:= TFont():New('Arial',,10,.T.)
 
-dbSelectArea("APUC")
-APUC->(DbGoTop())
+DBSelectArea("APUC")
+APUC->(DBGoTop())
 
 While !APUC->(Eof())		
 
@@ -7916,7 +7912,7 @@ While !APUC->(Eof())
 		oReport:SkipLine()
 		oReport:Say(295,980,STR0723,oTFont)//"Apuração (Regime Cumulativo)"
 		oReport:Section(6):Init()
-	EndIF
+	EndIf
 	
 	If APUC->TRIB == "1"
 		oReport:SkipLine(3)
@@ -7931,7 +7927,7 @@ While !APUC->(Eof())
 		oReport:Section(6):Cell("TEXTO"):SetBlock({|| STR0722 })// "COFINS"
 		oReport:Section(6):Cell("VALOR"):SetBlock({||})
 		oReport:Section(6):PrintLine()
-	EndIF
+	EndIf
 
 	oReport:SkipLine()   
 	oReport:Section(6):Cell("TEXTO"):SetBlock({|| STR0713 })//"Valor do Débito"
@@ -7960,10 +7956,10 @@ While !APUC->(Eof())
 		oReport:Section(6):Cell("VALOR"):SetBlock({||APUC->FOLHASAL})
 		oReport:Section(6):PrintLine()
 		oReport:SkipLine()
-	EndIF
+	EndIf
 
-	APUC->(dbSkip())
-EnddO
+	APUC->(DBSkip())
+EndDo
 
 oReport:EndPage()	    	
 
@@ -7976,7 +7972,7 @@ Função que realizará a impressão da composição dos Créditos
 
 @param 	oReport   	-> Objeto Treport
 		
-@return Nil
+@Return
 			
 @author Erick Dias 
 @since  11/12/2013
@@ -7988,8 +7984,8 @@ Static Function PrtCred(oReport)
 Local nCont		:= 0
 Local oTFont 		:= TFont():New('Arial',,10,.T.)
 
-dbSelectArea("CRED")
-CRED->(DbGoTop())
+DBSelectArea("CRED")
+CRED->(DBGoTop())
 
 While !CRED->(Eof())
 	
@@ -8003,9 +7999,9 @@ While !CRED->(Eof())
 		oReport:Section(4):Cell("TEXTO"):SetBlock({|| " " })
 		oReport:Section(4):Cell("VALOR"):SetBlock({||})		
 		oReport:Section(4):PrintLine()	
-	EndIF	
+	EndIf	
 	
-	oReport:Section(4):Cell("TEXTO"):SetBlock({||  Iif(CRED->TRIB == "1",STR0744,STR0745)  + " - " + NomeSnt("436",CRED->COD) + STR0728 + CRED->ALIQ})//Crédito de PIS + Código da Contribuição + alíquota
+	oReport:Section(4):Cell("TEXTO"):SetBlock({||  IIf(CRED->TRIB == "1",STR0744,STR0745)  + " - " + NomeSnt("436",CRED->COD) + STR0728 + CRED->ALIQ})//Crédito de PIS + Código da Contribuição + alíquota
 	oReport:Section(4):Cell("VALOR"):SetBlock({||})
 	oReport:Section(4):PrintLine()	
 
@@ -8043,10 +8039,10 @@ While !CRED->(Eof())
 	If nCont == 4
 		nCont	:= 0
 		oReport:EndPage()
-	EndIF
+	EndIf
 	
-	CRED->(dbSkip())
-EnddO
+	CRED->(DBSkip())
+EndDo
 oReport:EndPage()	    	
 
 Return
@@ -8058,7 +8054,7 @@ Função que realizará a impressão da composição dos débitos
 
 @param 	oReport   	-> Objeto Treport
 		
-@return Nil
+@Return
 			
 @author Erick Dias 
 @since  11/12/2013
@@ -8070,8 +8066,8 @@ Static Function PrtDebito(oReport)
 Local nCont		:= 0
 Local oTFont 		:= TFont():New('Arial',,10,.T.)
 
-dbSelectArea("DEBI")
-DEBI->(DbGoTop())
+DBSelectArea("DEBI")
+DEBI->(DBGoTop())
 
 While !DEBI->(Eof())
 	
@@ -8084,9 +8080,9 @@ While !DEBI->(Eof())
 		oReport:Section(3):Cell("TEXTO"):SetBlock({|| " " })
 		oReport:Section(3):Cell("VALOR"):SetBlock({||})
 		oReport:Section(3):PrintLine()	
-	EndIF	
+	EndIf	
 		
-	oReport:Section(3):Cell("TEXTO"):SetBlock({|| Iif(DEBI->TRIB == "1","PIS","COFINS")  + " - " + NomeSnt("435",DEBI->COD) + STR0728 + DEBI->ALIQ })//Débito de PIS + Código da Contribuição + alíquota
+	oReport:Section(3):Cell("TEXTO"):SetBlock({|| IIf(DEBI->TRIB == "1","PIS","COFINS")  + " - " + NomeSnt("435",DEBI->COD) + STR0728 + DEBI->ALIQ })//Débito de PIS + Código da Contribuição + alíquota
 	oReport:Section(3):Cell("VALOR"):SetBlock({||})
 	oReport:Section(3):PrintLine()		
 
@@ -8130,10 +8126,10 @@ While !DEBI->(Eof())
 	If nCont == 4
 		nCont	:= 0
 		oReport:EndPage()
-	EndIF
+	EndIf
 	
-	DEBI->(dbSkip())
-EnddO
+	DEBI->(DBSkip())
+EndDo
 
 oReport:EndPage()	    	
 
@@ -8146,7 +8142,7 @@ Função que realizará a impressão do saldo de crédito
 
 @param 	oReport   	-> Objeto Treport
 		
-@return Nil
+@Return
 			
 @author Erick Dias 
 @since  11/12/2013
@@ -8158,8 +8154,8 @@ Static Function PrtSldCred(oReport)
 Local nCont		:= 0
 Local oTFont 		:= TFont():New('Arial',,10,.T.)
 
-dbSelectArea("SCRE")
-SCRE->(DbGoTop())
+DBSelectArea("SCRE")
+SCRE->(DBGoTop())
 
 While !SCRE->(Eof())
 	
@@ -8171,9 +8167,9 @@ While !SCRE->(Eof())
 		oReport:SkipLine(3)
 		oReport:Section(7):Cell("TEXTO"):SetBlock({|| " " })
 		oReport:Section(7):PrintLine()	
-	EndIF	
+	EndIf	
 	
-	oReport:Section(7):Cell("TEXTO"):SetBlock({|| Iif(SCRE->TRIB == "1",STR0749,STR0751 ) + SCRE->PER + " - " + NomeSnt("436",SCRE->COD)})//CRÉDITO DE PIS PERÍODO ALÍQUOTA
+	oReport:Section(7):Cell("TEXTO"):SetBlock({|| IIf(SCRE->TRIB == "1",STR0749,STR0751 ) + SCRE->PER + " - " + NomeSnt("436",SCRE->COD)})//CRÉDITO DE PIS PERÍODO ALÍQUOTA
 
 	oReport:Section(7):Cell("VALOR"):SetBlock({||})
 	oReport:Section(7):PrintLine()	
@@ -8200,10 +8196,10 @@ While !SCRE->(Eof())
 	If nCont == 6
 		nCont	:= 0
 		oReport:EndPage()
-	EndIF
+	EndIf
 	
-	SCRE->(dbSkip())
-EnddO
+	SCRE->(DBSkip())
+EndDo
 
 oReport:EndPage()	    	
 
@@ -8216,7 +8212,7 @@ Função que irá imprimir saldo de retenção na fonte
 
 @param 	oReport   	-> Objeto Treport
 		
-@return Nil
+@Return
 			
 @author Erick Dias 
 @since  11/12/2013
@@ -8228,8 +8224,8 @@ Static Function PrtSldRet(oReport)
 Local nCont		:= 0
 Local oTFont 		:= TFont():New('Arial',,10,.T.)
 
-dbSelectArea("SRET")
-SRET->(DbGoTop())
+DBSelectArea("SRET")
+SRET->(DBGoTop())
 
 While !SRET->(Eof())
 	
@@ -8241,8 +8237,8 @@ While !SRET->(Eof())
 		oReport:SkipLine(3)
 		oReport:Section(8):Cell("TEXTO"):SetBlock({|| " " })
 		oReport:Section(8):PrintLine()	
-	EndIF
-	oReport:Section(8):Cell("TEXTO"):SetBlock({|| Iif(SRET->TRIB == "1",STR0756,STR0758) + SRET->PER + " - " + NomeSnt("F600",SRET->INDNAT)})//Débito de PIS + Código da Contribuição + alíquota
+	EndIf
+	oReport:Section(8):Cell("TEXTO"):SetBlock({|| IIf(SRET->TRIB == "1",STR0756,STR0758) + SRET->PER + " - " + NomeSnt("F600",SRET->INDNAT)})//Débito de PIS + Código da Contribuição + alíquota
 
 	oReport:Section(8):Cell("VALOR"):SetBlock({||})
 	oReport:Section(8):PrintLine()	
@@ -8269,10 +8265,10 @@ While !SRET->(Eof())
 	If nCont == 6
 		nCont	:= 0
 		oReport:EndPage()
-	EndIF
+	EndIf
 	
-	SRET->(dbSkip())
-EnddO
+	SRET->(DBSkip())
+EndDo
 
 oReport:EndPage()	    	
 
@@ -8286,7 +8282,7 @@ Função que irá imprimir a composição da base de cálculo do crédito
 
 @param 	oReport   	-> Objeto Treport
 		
-@return Nil
+@Return
 			
 @author Erick Dias 
 @since  16/12/2013
@@ -8298,8 +8294,8 @@ Static Function PrtCodBcc(oReport)
 Local nCont		:= 0
 Local oTFont 		:= TFont():New('Arial',,10,.T.)
 
-dbSelectArea("BASC")
-BASC->(DbGoTop())
+DBSelectArea("BASC")
+BASC->(DBGoTop())
 
 While !BASC->(Eof())
 	
@@ -8311,8 +8307,8 @@ While !BASC->(Eof())
 		oReport:SkipLine(3)
 		oReport:Section(9):Cell("TEXTO"):SetBlock({|| " " })
 		oReport:Section(9):PrintLine()	
-	EndIF	
-	oReport:Section(9):Cell("TEXTO"):SetBlock({|| Iif(BASC->TRIB == "1","PIS - ","COFINS - ") + NomeSnt("437",BASC->CODBCC)})	
+	EndIf	
+	oReport:Section(9):Cell("TEXTO"):SetBlock({|| IIf(BASC->TRIB == "1","PIS - ","COFINS - ") + NomeSnt("437",BASC->CODBCC)})	
 	oReport:Section(9):Cell("VALOR"):SetBlock({||})
 	oReport:Section(9):PrintLine()	
 		
@@ -8333,10 +8329,10 @@ While !BASC->(Eof())
 	If nCont == 10
 		nCont	:= 0
 		oReport:EndPage()
-	EndIF
+	EndIf
 	
-	BASC->(dbSkip())
-EnddO
+	BASC->(DBSkip())
+EndDo
 
 oReport:EndPage()	    	
 
@@ -8349,7 +8345,7 @@ Função que fecha os arquivos de trabalho abertos
 
 @param 	cNomeTab   	-> Nome da tabela
 		
-@return Nil
+@Return
 			
 @author Erick Dias 
 @since  13/12/2013
@@ -8359,7 +8355,7 @@ Função que fecha os arquivos de trabalho abertos
 
 Static Function FechaArq(cNomeTab)
 
-(cNomeTab)->(DbCloseArea())
+(cNomeTab)->(DBCloseArea())
 FErase(cArqRel+GetDBExtension())
 FErase(cArqRel+IndexExt())
 
@@ -8373,7 +8369,7 @@ Função que irá retornar a descrição referente a códigos de tabelas utilizadas no
 @param 	ctab   	-> Tabela
 			cCod   	-> Código
 		
-@return Nil
+@Return
 			
 @author Erick Dias 
 @since  16/12/2013
@@ -8442,7 +8438,7 @@ If cTab == "437"
 			cDescr:= "Estoque de abertura de bens"
 	EndCase
 
-ElseIF cTab == "435"
+ElseIf cTab == "435"
 
 	Do Case
 
@@ -8490,7 +8486,7 @@ ElseIF cTab == "435"
 			
 	EndCase
 
-ElseIF cTab == "436"
+ElseIf cTab == "436"
 	Do Case
 
 		Case cCod == "101"
@@ -8582,7 +8578,7 @@ ElseIF cTab == "436"
 			
 	EndCase
 
-ElseIF cTab == "F600"
+ElseIf cTab == "F600"
 	Do Case
 
 		Case cCod == "01"
@@ -8610,7 +8606,7 @@ EndIf
 //Por padrão se não encontrar descrição para o código, irá retornar o próprio código. 
 If Empty(cDescr)
 	cDescr := "Código : " + cCod
-EndIF
+EndIf
 
 Return cDescr
 

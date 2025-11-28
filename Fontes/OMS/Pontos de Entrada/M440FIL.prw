@@ -32,15 +32,15 @@ _lresp := Pergunte( _cPerg , .T. )
 
 If !_lresp
 
-	MV_PAR01:=MV_PAR02:=MV_PAR03:=MV_PAR04:=MV_PAR05:=MV_PAR16:=MV_PAR17:=SPACE(100)
-    MV_PAR06:=SPACE(6)
+	MV_PAR01:=MV_PAR02:=MV_PAR03:=MV_PAR04:=MV_PAR05:=MV_PAR16:=MV_PAR17:=Space(100)
+    MV_PAR06:=Space(6)
     MV_PAR07:=2
     MV_PAR08:=2
     MV_PAR09:= DDATABASE - 180
     MV_PAR10:= DDATABASE
     MV_PAR11:= 1
-    MV_PAR12:= SPACE(LEN(SC5->C5_NUM))
-    MV_PAR13:= SPACE(LEN(SC5->C5_NUM))
+    MV_PAR12:= Space(Len(SC5->C5_NUM))
+    MV_PAR13:= Space(Len(SC5->C5_NUM))
 	
 EndIf
 
@@ -55,14 +55,14 @@ If MV_PAR11 != 2
         _cFiltro += " .And. ( "
     EndIf 
    
-	_cfiltro += "  C5_FILIAL == '" + cfilant + "')"
+	_cFiltro += "  C5_FILIAL == '" + cfilant + "')"
 	
-Endif
+EndIf
 
 //====================================================================================================
 // Filtra por data de emissão do pedido
 //====================================================================================================
-If !Empty(MV_PAR09) .and. !Empty(MV_PAR10) .and. _lresp
+If !Empty(MV_PAR09) .And. !Empty(MV_PAR10) .And. _lresp
 
   If Empty(_cFiltro)
     	_cFiltro += " ( "
@@ -70,14 +70,14 @@ If !Empty(MV_PAR09) .and. !Empty(MV_PAR10) .and. _lresp
         _cFiltro += " .And. ( "
     EndIf 
 	
-	_cFiltro += " C5_EMISSAO >= STOD('"+DTOS(MV_PAR09)+"') .AND. C5_EMISSAO <= STOD('"+DTOS(MV_PAR10)+"') ) "
+	_cFiltro += " C5_EMISSAO >= SToD('"+DToS(MV_PAR09)+"') .And. C5_EMISSAO <= SToD('"+DToS(MV_PAR10)+"') ) "
 
 EndIf
 
 //====================================================================================================
 // Filtra por data de entrega do pedido
 //====================================================================================================
-If !Empty(MV_PAR14) .and. !Empty(MV_PAR15) .and. _lresp
+If !Empty(MV_PAR14) .And. !Empty(MV_PAR15) .And. _lresp
 
   If Empty(_cFiltro)
     	_cFiltro += " ( "
@@ -85,7 +85,7 @@ If !Empty(MV_PAR14) .and. !Empty(MV_PAR15) .and. _lresp
         _cFiltro += " .And. ( "
     EndIf 
 	
-	_cFiltro += " C5_I_DTENT >= STOD('"+DTOS(MV_PAR14)+"') .AND. C5_I_DTENT <= STOD('"+DTOS(MV_PAR15)+"') ) "
+	_cFiltro += " C5_I_DTENT >= SToD('"+DToS(MV_PAR14)+"') .And. C5_I_DTENT <= SToD('"+DToS(MV_PAR15)+"') ) "
 
 EndIf
 
@@ -109,7 +109,7 @@ If !Empty(MV_PAR01)
 		_cFiltro += " C5_I_EST == '" + _aAux[_nI] +"'"
 		
 		If _nI <> Len(_aAux)
-			_cFiltro += " .OR. "
+			_cFiltro += " .Or. "
 		EndIf
 		
 	Next _nI
@@ -136,7 +136,7 @@ If !Empty(MV_PAR02)
 		_cFiltro += "C5_I_CMUN == '"+ _aAux[_nI] +"'"
 		
 		If _nI <> Len(_aAux)
-			_cFiltro += " .OR. "
+			_cFiltro += " .Or. "
 		EndIf
 		
 	Next _nI
@@ -163,7 +163,7 @@ If !Empty(MV_PAR03)
 		_cFiltro += "C5_VEND1 == '"+ _aAux[_nI] +"'" 
 		
 		If _nI <> Len(_aAux) 
-			_cFiltro += " .OR. "
+			_cFiltro += " .Or. "
 		EndIf
 		
 	Next _nI
@@ -190,7 +190,7 @@ If !Empty(MV_PAR04)
 		_cFiltro += "C5_VEND2 == '"+ _aAux[_nI] +"'" 
 		
 		If _nI <> Len(_aAux)
-			_cFiltro += " .OR. "
+			_cFiltro += " .Or. "
 		EndIf
 		
 	Next _nI
@@ -217,7 +217,7 @@ If !Empty(MV_PAR16)
 		_cFiltro += "C5_VEND4 == '"+ _aAux[_nI] +"'" 
 		
 		If _nI <> Len(_aAux)
-			_cFiltro += " .OR. "
+			_cFiltro += " .Or. "
 		EndIf
 		
 	Next _nI
@@ -245,7 +245,7 @@ If !Empty(MV_PAR05)
 		_cFiltro += "C5_I_GRPVE == '"+ _aAux[_nI] +"'"
 		
 		If _nI <> Len(_aAux)
-			_cFiltro += " .OR. "
+			_cFiltro += " .Or. "
 		EndIf
 		
 	Next _nI
@@ -279,7 +279,7 @@ Else
 	_cFiltro += " .And. ( "
 EndIf
 		
-_cFiltro += " Empty(C5_LIBEROK) .AND. Empty(C5_NOTA) .AND. Empty(C5_BLQ) "
+_cFiltro += " Empty(C5_LIBEROK) .And. Empty(C5_NOTA) .And. Empty(C5_BLQ) "
 _cFiltro += " ) "
 
 //====================================================================================================
@@ -300,7 +300,7 @@ If !Empty(MV_PAR17)
 		_cFiltro += "C5_I_AGEND == '"+ _aAux[_nI] +"'"
 		
 		If _nI <> Len(_aAux)
-			_cFiltro += " .OR. "
+			_cFiltro += " .Or. "
 		EndIf
 		
 	Next _nI
@@ -312,7 +312,7 @@ EndIf
 //====================================================================================================
 // Filtra por pedido
 //====================================================================================================
-If (!Empty(MV_PAR12) .OR. !Empty(MV_PAR13)) .and. _lresp
+If (!Empty(MV_PAR12) .Or. !Empty(MV_PAR13)) .And. _lresp
 
    If Empty(_cFiltro)
       _cFiltro += " ( "
@@ -320,19 +320,19 @@ If (!Empty(MV_PAR12) .OR. !Empty(MV_PAR13)) .and. _lresp
       _cFiltro += " .And. ( "
    EndIf 
 	
-   IF !Empty(MV_PAR12)
+   If !Empty(MV_PAR12)
 	  _cFiltro += " C5_NUM >= '"+MV_PAR12+"' "
-   ENDIF
+   EndIf
 
-   IF !Empty(MV_PAR13) 
+   If !Empty(MV_PAR13) 
        
-      IF !Empty(MV_PAR12)
-         _cFiltro += " .AND. "
-      ENDIF
+      If !Empty(MV_PAR12)
+         _cFiltro += " .And. "
+      EndIf
 
       _cFiltro += " C5_NUM <= '"+MV_PAR13+"' "
 
-   ENDIF
+   EndIf
 
    _cFiltro += " ) "
 
@@ -355,7 +355,7 @@ If !Empty(_cFiltro)
    	_cFiltro += " .And. "
 EndIf
 
-_cFiltro+= " (C5_I_BLPRC <> 'B' .And. C5_I_BLPRC <> 'R' .And. C5_I_BLCRE <> 'B' .and. C5_I_BLCRE <> 'R') "
+_cFiltro+= " (C5_I_BLPRC <> 'B' .And. C5_I_BLPRC <> 'R' .And. C5_I_BLCRE <> 'B' .And. C5_I_BLCRE <> 'R') "
 
 
 Return( _cFiltro )
@@ -366,27 +366,27 @@ Programa----------: M440LC
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 25/09/2018
 Descrição---------: Valida armazém do pedido de vendas
-Parametros--------: _clocal - String com armazéns válidos
+Parametros--------: _cLocal - String com armazéns válidos
 Retorno-----------: _cret - lógico indicando validação ou não
 ===============================================================================================================================
 */
 User Function M440LC(_clocal)
 Local _cret := .T.
 
-SC6->(Dbsetorder(1))
-If SC6->(Dbseek(SC5->C5_FILIAL+SC5->C5_NUM))
+SC6->(DBSetOrder(1))
+If SC6->(DBSeek(SC5->C5_FILIAL+SC5->C5_NUM))
 
-	Do while SC5->C5_FILIAL == SC6->C6_FILIAL .AND. SC5->C5_NUM == SC6->C6_NUM
+	While SC5->C5_FILIAL == SC6->C6_FILIAL .And. SC5->C5_NUM == SC6->C6_NUM
 
-		If !(alltrim(SC6->C6_LOCAL) $ _clocal)
+		If !(AllTrim(SC6->C6_LOCAL) $ _clocal)
 	
 			_cret := .F.
 			Exit
 		
-		Endif
+		EndIf
 		
-	Enddo
+	EndDo
 	
-Endif
+EndIf
 	
 Return _cret

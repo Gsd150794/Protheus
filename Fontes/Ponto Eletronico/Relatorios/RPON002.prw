@@ -5,15 +5,15 @@
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
 Igor Melgaço  |11/11/2024| Chamado 49005. Ajustes para exibir descrição de abono
-Igor Melgaço  |06/05/2025| Chamado 50525. Ajuste para remoção de diretório local C:\SMARTCLIENT\.
+Igor Melgaço  |06/05/2025| Chamado 50525. Ajuste para remoção de diretório Local C:\SMARTCLIENT\.
 Lucas Borges  |27/06/2025| Chamado 50617. Revisões diversas visando padronizar os fontes
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
-#INCLUDE "PONR010.CH"
-#INCLUDE "RPTDEF.CH"  
-#INCLUDE "FWPrintSetup.ch" 
+#Include "TOTVS.ch"
+#Include "PONR010.CH"
+#Include "RPTDEF.CH"  
+#Include "FWPrintSetup.ch" 
 
 /*
 ===============================================================================================================================
@@ -40,7 +40,7 @@ Local aOrdem		:= {STR0004 , STR0005 , STR0006 , STR0007, STR0038, STR0060, STR00
 Local cHtml			:= '' As Character
 Local cAviso		:= '' as Character
 Local aFilesOpen	:= {"SP5", "SPN", "SP8", "SPG","SPB","SPL","SPC", "SPH", "SPF"} As Array
-Local bCloseFiles	:= {|cFiles| If( Select(cFiles) > 0, (cFiles)->( DbCloseArea() ), NIL) } As Codeblock
+Local bCloseFiles	:= {|cFiles| If( Select(cFiles) > 0, (cFiles)->( DBCloseArea() ), NIL) } As Codeblock
 Local oPrinter		:= Nil As Object
 Local oSetup		:= Nil As Object
 Local cPathTemp  	:= GetTempPath() As Character
@@ -114,7 +114,7 @@ DEFAULT lTerminal := .F.
 #DEFINE oFontO 			TFont():New( "Verdana", 08, 08, , .T., , , , .T., .F. )//Marcacoes
 #DEFINE oFont06 		TFont():New( "Verdana", 06, 06, , .T., , , , .T., .F. )//CodeBar
 
-lPortal   := IF( lPortal == NIL , .F. , lPortal )   
+lPortal   := If( lPortal == NIL , .F. , lPortal )   
 
 // Parƒmetro MV_COLMARC										   
 nColunas := SuperGetmv("MV_COLMARC")
@@ -131,12 +131,12 @@ nColunas *= 2
 If !( lTerminal )
 	aDevice := {}
 	// Define os Tipos de Impressao validos 
-	AADD(aDevice,"DISCO") 
-	AADD(aDevice,"SPOOL") 
-	AADD(aDevice,"EMAIL") 
-	AADD(aDevice,"EXCEL") 
-	AADD(aDevice,"HTML" ) 
-	AADD(aDevice,"PDF"  )  
+	aAdd(aDevice,"DISCO") 
+	aAdd(aDevice,"SPOOL") 
+	aAdd(aDevice,"EMAIL") 
+	aAdd(aDevice,"EXCEL") 
+	aAdd(aDevice,"HTML" ) 
+	aAdd(aDevice,"PDF"  )  
 	
 	// Realiza as configuracoes necessarias para a impressao 
 	nPrintType := aScan(aDevice,{|x| x == cDevice }) 
@@ -162,7 +162,7 @@ If !( lTerminal )
 		Return
 	EndIf
 	// Indique o caminho onde será gravado o PDF
-	If UPPER(oPrinter:cPathPDF) == "C:\" .OR. EMPTY(oPrinter:cPathPDF)
+	If Upper(oPrinter:cPathPDF) == "C:\" .Or. Empty(oPrinter:cPathPDF)
 	   oPrinter:cPathPDF := cPathTemp
 	EndIf
 	If oPrinter:nModalResult = 2//APERTOU O CANCELA
@@ -201,48 +201,48 @@ If _oFile:Exists()
 EndIf
 
 // Carregando variaveis MV_PAR?? para Variaveis do Sistema.     
-FilialDe	:= IF( !lTerminal , MV_PAR01, cFilTerminal )			//Filial  De
-FilialAte	:= IF( !lTerminal , MV_PAR02, cFilTerminal )			//Filial  Ate
-CcDe		:= IF( !lTerminal , MV_PAR03, SRA->RA_CC   )			//Centro de Custo De
-CcAte		:= IF( !lTerminal , MV_PAR04, SRA->RA_CC   )			//Centro de Custo Ate
-TurDe		:= IF( !lTerminal , MV_PAR05, SRA->RA_TNOTRAB)			//Turno De
-TurAte		:= IF( !lTerminal , MV_PAR06, SRA->RA_TNOTRAB)			//Turno Ate
-MatDe		:= IF( !lTerminal , MV_PAR07, cMatTerminal)				//Matricula De
-MatAte		:= IF( !lTerminal , MV_PAR08, cMatTerminal)				//Matricula Ate
-NomDe		:= IF( !lTerminal , MV_PAR09, SRA->RA_NOME)				//Nome De
-NomAte		:= IF( !lTerminal , MV_PAR10, SRA->RA_NOME)				//Nome Ate
-cSit		:= IF( !lTerminal , MV_PAR11, fSituacao( NIL , .F. ))	//Situacao
-cCat		:= IF( !lTerminal , MV_PAR12, fCategoria( NIL , .F. ))	//Categoria
-nImpHrs		:= IF( !lTerminal , MV_PAR13, 3 )						//Imprimir horas Calculadas/Inform/Ambas/NA
-nImpAut		:= IF( !lTerminal , MV_PAR14, 1 )						//Demonstrar horas Autoriz/Nao Autorizadas
-nCopias		:= IF( !lTerminal , If(MV_PAR15>0,MV_PAR15,1),1)		//N£mero de C¢pias
-lSemMarc	:= IF( !lTerminal , (MV_PAR16==1)	, .F. )				//Imprime para Funcion rios sem Marca‡oes
-cMenPad1	:= IF( !lTerminal , MV_PAR17, "" )						//Mensagem padr„o anterior a Assinatura
-cMenPad2	:= IF( !lTerminal , MV_PAR18, "" )						//Mens. padr„o anterior a Assinatura(Cont.)
-dPerIni     := IF( !lTerminal ,;
-                    MV_PAR19,Stod( Subst( cPerAponta , 1 , 8 ) ))	//Data Contendo o Inicio do Periodo de Apontamento
-dPerFim     := IF( !lTerminal ,;
-                    MV_PAR20,Stod( Subst( cPerAponta , 9 , 8 ) ))	//Data Contendo o Fim  do Periodo de Apontamento
-lSexagenal	:= IF( !lTerminal , (MV_PAR21==1), .T.  )				//Horas em  (Sexagenal/Centesimal)
-lImpRes		:= IF( !lTerminal , (MV_PAR22==1), .F.	)				//Imprime eventos a partir do resultado ?
-lImpTroca   := IF( !lTerminal , (MV_PAR23==1), .F.	)				//Imprime Descricao Troca de Turnos ou o Atual 
-lImpExcecao := IF( !lTerminal , (MV_PAR24==1), .F.	)				//Imprime Descricao da Excecao no Lugar da do Afastamento  
-DeptoDe		:= IF( !lTerminal , MV_PAR25, SRA->RA_DEPTO   )			//Departamento De
-DeptoAte	:= IF( !lTerminal , MV_PAR26, SRA->RA_DEPTO   )			//Departamento Ate
-lImpMarc 	:= IF( !lTerminal , MV_PAR27==1, .T.   )		 		//Imprime marcações? .T.
-lCodeBar 	:= IF( !lTerminal , MV_PAR28==1, .F.   ) 				//Imprime código de barras? .F.
-lBigLine 	:= IF( !lTerminal , MV_PAR29==1, .T.   ) 				//Destaca linhas? .T.
-lImpBh 		:= IF( !lTerminal , MV_PAR30==1, .F.   ) 				//Imprime banco de horas
+FilialDe	:= If( !lTerminal , MV_PAR01, cFilTerminal )			//Filial  De
+FilialAte	:= If( !lTerminal , MV_PAR02, cFilTerminal )			//Filial  Ate
+CcDe		:= If( !lTerminal , MV_PAR03, SRA->RA_CC   )			//Centro de Custo De
+CcAte		:= If( !lTerminal , MV_PAR04, SRA->RA_CC   )			//Centro de Custo Ate
+TurDe		:= If( !lTerminal , MV_PAR05, SRA->RA_TNOTRAB)			//Turno De
+TurAte		:= If( !lTerminal , MV_PAR06, SRA->RA_TNOTRAB)			//Turno Ate
+MatDe		:= If( !lTerminal , MV_PAR07, cMatTerminal)				//Matricula De
+MatAte		:= If( !lTerminal , MV_PAR08, cMatTerminal)				//Matricula Ate
+NomDe		:= If( !lTerminal , MV_PAR09, SRA->RA_NOME)				//Nome De
+NomAte		:= If( !lTerminal , MV_PAR10, SRA->RA_NOME)				//Nome Ate
+cSit		:= If( !lTerminal , MV_PAR11, fSituacao( NIL , .F. ))	//Situacao
+cCat		:= If( !lTerminal , MV_PAR12, fCategoria( NIL , .F. ))	//Categoria
+nImpHrs		:= If( !lTerminal , MV_PAR13, 3 )						//Imprimir horas Calculadas/Inform/Ambas/NA
+nImpAut		:= If( !lTerminal , MV_PAR14, 1 )						//Demonstrar horas Autoriz/Nao Autorizadas
+nCopias		:= If( !lTerminal , If(MV_PAR15>0,MV_PAR15,1),1)		//N£mero de C¢pias
+lSemMarc	:= If( !lTerminal , (MV_PAR16==1)	, .F. )				//Imprime para Funcion rios sem Marca‡oes
+cMenPad1	:= If( !lTerminal , MV_PAR17, "" )						//Mensagem padr„o anterior a Assinatura
+cMenPad2	:= If( !lTerminal , MV_PAR18, "" )						//Mens. padr„o anterior a Assinatura(Cont.)
+dPerIni     := If( !lTerminal ,;
+                    MV_PAR19,SToD( Subst( cPerAponta , 1 , 8 ) ))	//Data Contendo o Inicio do Periodo de Apontamento
+dPerFim     := If( !lTerminal ,;
+                    MV_PAR20,SToD( Subst( cPerAponta , 9 , 8 ) ))	//Data Contendo o Fim  do Periodo de Apontamento
+lSexagenal	:= If( !lTerminal , (MV_PAR21==1), .T.  )				//Horas em  (Sexagenal/Centesimal)
+lImpRes		:= If( !lTerminal , (MV_PAR22==1), .F.	)				//Imprime eventos a partir do resultado ?
+lImpTroca   := If( !lTerminal , (MV_PAR23==1), .F.	)				//Imprime Descricao Troca de Turnos ou o Atual 
+lImpExcecao := If( !lTerminal , (MV_PAR24==1), .F.	)				//Imprime Descricao da Excecao no Lugar da do Afastamento  
+DeptoDe		:= If( !lTerminal , MV_PAR25, SRA->RA_DEPTO   )			//Departamento De
+DeptoAte	:= If( !lTerminal , MV_PAR26, SRA->RA_DEPTO   )			//Departamento Ate
+lImpMarc 	:= If( !lTerminal , MV_PAR27==1, .T.   )		 		//Imprime marcações? .T.
+lCodeBar 	:= If( !lTerminal , MV_PAR28==1, .F.   ) 				//Imprime código de barras? .F.
+lBigLine 	:= If( !lTerminal , MV_PAR29==1, .T.   ) 				//Destaca linhas? .T.
+lImpBh 		:= If( !lTerminal , MV_PAR30==1, .F.   ) 				//Imprime banco de horas
 
-_cSetorDe  := IF( !lTerminal , MV_PAR31, "" )   // Filtro Setor Inicial
-_cSetorAte := IF( !lTerminal , MV_PAR32, "" )   // Filtro Setor Final
-_cRegraDe  := IF( !lTerminal , MV_PAR33, "" )   // Filtro Regra de Apontamento Inicial
-_cRegraAte := IF( !lTerminal , MV_PAR34, "" )   // Filtro Regra de Apontamento Final
-_nOrdemImp := IF( !lTerminal , MV_PAR35, "" )   // Ordem de Impressão do Relatório
-_nImpRef   := IF( !lTerminal , MV_PAR36, 1 )    // Imprime Refeições
+_cSetorDe  := If( !lTerminal , MV_PAR31, "" )   // Filtro Setor Inicial
+_cSetorAte := If( !lTerminal , MV_PAR32, "" )   // Filtro Setor Final
+_cRegraDe  := If( !lTerminal , MV_PAR33, "" )   // Filtro Regra de Apontamento Inicial
+_cRegraAte := If( !lTerminal , MV_PAR34, "" )   // Filtro Regra de Apontamento Final
+_nOrdemImp := If( !lTerminal , MV_PAR35, "" )   // Ordem de Impressão do Relatório
+_nImpRef   := If( !lTerminal , MV_PAR36, 1 )    // Imprime Refeições
 // Redefine o Tamanho das Mensagens Padroes					   
-cMenpad1 := IF(Empty( cMenPad1 ) , Space( 30 ) , cMenPad1 )
-cMenpad2 := IF(Empty( cMenPad2 ) , Space( 19 ) , cMenPad2 )
+cMenpad1 := If(Empty( cMenPad1 ) , Space( 30 ) , cMenPad1 )
+cMenpad2 := If(Empty( cMenPad2 ) , Space( 19 ) , cMenPad2 )
 
 Begin Sequence
 
@@ -258,12 +258,12 @@ Begin Sequence
 		    Aeval(aFilesOpen, bCloseFiles)
 		Else
 		   cHtml := HtmlDefault( cAviso , cHtml )   
-		Endif    
+		EndIf    
 	ElseIf !( nLastKey == 27 )
 	
 		If Pn090Open(@cHtml, @cAviso)
 
-			If Empty( dPerIni ) .or. Empty( dPerFim )
+			If Empty( dPerIni ) .Or. Empty( dPerFim )
 				Help(" ",1,"PONFORAPER" , , OemToAnsi( STR0039 ) , 5 , 0  )	//'Periodo de Apontamento Invalido.'
 				Break
 			EndIf
@@ -327,7 +327,7 @@ Local lMvSubAbAp	:= .F. As Logical
 Local _nni 			:= 0 As Numeric
 Local _nsoma        := 1 As Numeric
 
-Private aFuncFunc  := {SPACE(1), SPACE(1), SPACE(1), SPACE(1), SPACE(1), SPACE(1)} As Array
+Private aFuncFunc  := {Space(1), Space(1), Space(1), Space(1), Space(1), Space(1)} As Array
 Private aMarcacoes := {} As Array
 Private aTabPadrao := {} As Array
 Private aTabCalend := {} As Array
@@ -362,7 +362,7 @@ For nX:=1 to Len(cSit)
 	EndIf
 Next nX
 
-If !Empty(cSituacao) .and. Subs(cSituacao,Len(cSituacao),1) == ","
+If !Empty(cSituacao) .And. Subs(cSituacao,Len(cSituacao),1) == ","
 	cSituacao := Subs(cSituacao,1,Len(cSituacao)-1)
 EndIf     
 
@@ -375,7 +375,7 @@ For nX:=1 to Len(cCat)
 	EndIf
 Next nX
 
-If !Empty(cCategoria) .and. Subs(cCategoria,Len(cCategoria),1) == ","
+If !Empty(cCategoria) .And. Subs(cCategoria,Len(cCategoria),1) == ","
 	cCategoria := Subs(cCategoria,1,Len(cCategoria)-1)
 EndIf 
 
@@ -407,19 +407,19 @@ If !Empty(cCategoria)
 	cWhere += " AND SRA.RA_CATFUNC IN ( " + cCategoria + ") "
 EndIf
 
-If !Empty(_cSetorDe)  //:= IF( !lTerminal , MV_PAR31, "" )   // Filtro Setor Inicial 
+If !Empty(_cSetorDe)  //:= If( !lTerminal , MV_PAR31, "" )   // Filtro Setor Inicial 
    cWhere += " AND SRA.RA_I_SETOR >= '" + _cSetorDe + "' "
 EndIf
 
-If !Empty(_cSetorAte) //:= IF( !lTerminal , MV_PAR32, "" )   // Filtro Setor Final
+If !Empty(_cSetorAte) //:= If( !lTerminal , MV_PAR32, "" )   // Filtro Setor Final
    cWhere += " AND SRA.RA_I_SETOR <= '" + _cSetorAte + "' "
 EndIf
 
-If !Empty(_cRegraDe)  //:= IF( !lTerminal , MV_PAR33, "" )   // Filtro Regra de Apontamento Inicial
+If !Empty(_cRegraDe)  //:= If( !lTerminal , MV_PAR33, "" )   // Filtro Regra de Apontamento Inicial
    cWhere += " AND SRA.RA_REGRA >= '" + _cRegraDe + "' "
 EndIf
 
-If !Empty(_cRegraAte) //:= IF( !lTerminal , MV_PAR34, "" )   // Filtro Regra de Apontamento Final
+If !Empty(_cRegraAte) //:= If( !lTerminal , MV_PAR34, "" )   // Filtro Regra de Apontamento Final
    cWhere += " AND SRA.RA_REGRA <= '" + _cRegraAte + "' "
 EndIf
 
@@ -457,27 +457,27 @@ If !( lTerminal )
 	EndSql
 	 	
 	_nni :=  (cAliasQTD)->QTDREG 
-	(cAliasQTD)->(DbCloseArea())
+	(cAliasQTD)->(DBCloseArea())
 EndIf
 
 If lCodeBar
-	DbSelectArea("RS4")
-	RS4->(DbSetOrder(1))
+	DBSelectArea("RS4")
+	RS4->(DBSetOrder(1))
 EndIf
 
-dbSelectArea('SRA')
-SRA->( dbSetOrder( 1 ) )	
+DBSelectArea('SRA')
+SRA->( DBSetOrder( 1 ) )	
 
 // Processa o Cadastro de Funcionarios						   
 While (cAliasSRA)->( !Eof() )
 
 	//Posiciona no funcionário atual
-	SRA->(DbSeek((cAliasSRA)->RA_FILIAL + (cAliasSRA)->RA_MAT))
+	SRA->(DBSeek((cAliasSRA)->RA_FILIAL + (cAliasSRA)->RA_MAT))
 	
-	// So Faz Validacoes Quando nao for Terminal					   
+	// So Faz Validacoes Quando nao For Terminal					   
 	If !( lTerminal ) 
 		If ValType(osay) = "O"
-			osay:cCaption := ("Processando relatório  - Registro " + strzero(_nsoma,6) + " de " + strzero(_nni,6) + "...")
+			osay:cCaption := ("Processando relatório  - Registro " + StrZero(_nsoma,6) + " de " + StrZero(_nni,6) + "...")
 			ProcessMessages()
 			_nsoma++
  		EndIf
@@ -487,8 +487,8 @@ While (cAliasSRA)->( !Eof() )
 		EndIf
 
 		// Consiste controle de acessos e filiais validas               
-		If SRA->( !( RA_FILIAL $ fValidFil() ) .or. !Eval( cAcessaSRA ) )
-			(cAliasSRA)->( dbSkip() )
+		If SRA->( !( RA_FILIAL $ fValidFil() ) .Or. !Eval( cAcessaSRA ) )
+			(cAliasSRA)->( DBSkip() )
 			Loop
 		EndIf
 
@@ -497,8 +497,8 @@ While (cAliasSRA)->( !Eof() )
 		// Se o Funcionario Foi Demitido Anteriormente ao Inicio do Perio
 		// do Solicitado Desconsidera-o								   
 		//====================================================================
-		If !Empty(SRA->RA_DEMISSA) .and. ( SRA->RA_DEMISSA < dIniCale )
-			(cAliasSRA)->( dbSkip() )
+		If !Empty(SRA->RA_DEMISSA) .And. ( SRA->RA_DEMISSA < dIniCale )
+			(cAliasSRA)->( DBSkip() )
 			Loop
 		EndIf
 
@@ -528,13 +528,13 @@ While (cAliasSRA)->( !Eof() )
 		fInfo( @aInfo , cLastFil )
 	
 		// Carrega as Tabelas de Horario Padrao						  
-		If ( lSPJExclu .or. Empty( aTabPadrao ) )
+		If ( lSPJExclu .Or. Empty( aTabPadrao ) )
 			aTabPadrao := {}
 			fTabTurno( @aTabPadrao , If( lSPJExclu , cLastFil , NIL ) )
 		EndIf
 
 		// Carrega TODOS os Eventos da Filial						  
-		If ( Empty( aId ) .or. ( lSP9Exclu ) )
+		If ( Empty( aId ) .Or. ( lSP9Exclu ) )
 			aId := {}
 			CarId( fFilFunc("SP9") , @aId , "*" )
 		EndIf
@@ -569,27 +569,27 @@ While (cAliasSRA)->( !Eof() )
 		   
 		// Retorna Turno/Sequencia das Marca‡”es Acumuladas			 
 		If ( lImpAcum )
-			If SPF->( dbSeek( SRA->( RA_FILIAL + RA_MAT ) + Dtos( dPerIni) ) ) .and. !Empty(SPF->PF_SEQUEPA)
+			If SPF->( DBSeek( SRA->( RA_FILIAL + RA_MAT ) + DToS( dPerIni) ) ) .And. !Empty(SPF->PF_SEQUEPA)
 				cTurno	:= SPF->PF_TURNOPA
 				cSeq	:= SPF->PF_SEQUEPA
 			Else
 				// Tenta Achar a Sequencia Inicial utilizando RetSeq()
-				If !RetSeq(cSeq,@cTurno,dPerIni,dPerFim,dDataBase,aTabPadrao,@cSeq) .or. Empty( cSeq )
+				If !RetSeq(cSeq,@cTurno,dPerIni,dPerFim,dDataBase,aTabPadrao,@cSeq) .Or. Empty( cSeq )
 					// Tenta Achar a Sequencia Inicial utilizando fQualSeq()		  
 					cSeq := fQualSeq( NIL , aTabPadrao , dPerIni , @cTurno )
 				EndIf
 			EndIf
 
 			If ( Empty(cTurno) )
-				SPF->( dbSeek( SRA->( RA_FILIAL + RA_MAT ) ) )
-				Do While	( !EOF() ) .AND.;
+				SPF->( DBSeek( SRA->( RA_FILIAL + RA_MAT ) ) )
+				While	( !Eof() ) .AND.;
 						 	( SRA->RA_FILIAL + SRA->RA_MAT == SPF->PF_FILIAL + SPF->PF_MAT )
-					If ( SPF->PF_DATA >= dPerIni .AND. SPF->PF_DATA <= dPerFim )						
+					If ( SPF->PF_DATA >= dPerIni .And. SPF->PF_DATA <= dPerFim )						
 						cTurno	:= SPF->PF_TURNOPA
 						cSeq	:= SPF->PF_SEQUEPA
 						Exit
 					Else
-						SPF->( dbSkip() )
+						SPF->( DBSkip() )
 					EndIf
 				EndDo
 			EndIf
@@ -602,7 +602,7 @@ While (cAliasSRA)->( !Eof() )
 		
 		// Obtem Codigo e Descricao da Funcao do Trabalhador na Epoca   
 		fBuscaCC(dMarcFim, @aFuncFunc[1], @aFuncFunc[2], Nil, .F. , .T.  ) 
-		aFuncFunc[2]:= Substr(aFuncFunc[2], 1, 25)
+		aFuncFunc[2]:= SubStr(aFuncFunc[2], 1, 25)
 		fBuscaFunc(dMarcFim, @aFuncFunc[3], @aFuncFunc[4],@aFuncFunc[6],.T. )
 		If Empty(aFuncFunc[6])
 			aFuncFunc[6] := DescCateg(SRA->RA_CATFUNC , 25)
@@ -668,7 +668,7 @@ While (cAliasSRA)->( !Eof() )
 		// aPeriodos[nX,4] --> Fim do Periodo para considerar as   marca
 		//                     coes e tabela							  
 		//====================================================================
-		If ( !fMontaAimp( aTabCalend, aMarcacoes, @aImp,dMarcIni,dMarcFim, lTerminal, lImpAcum) .and. !( lSemMarc ) )
+		If ( !fMontaAimp( aTabCalend, aMarcacoes, @aImp,dMarcIni,dMarcFim, lTerminal, lImpAcum) .And. !( lSemMarc ) )
 			Loop
 		EndIf
 
@@ -680,19 +680,19 @@ While (cAliasSRA)->( !Eof() )
 			If !( lTerminal )
 				oPrinter:StartPage()
 				If lCodeBar
-					cCodeBar := cEmpAnt + SRA->RA_FILIAL + SRA->RA_MAT + DtoS(dPerIni) + DtoS(dPerFim) + DtoS(dDataBase) + StrTran(Time(),":","")
+					cCodeBar := cEmpAnt + SRA->RA_FILIAL + SRA->RA_MAT + DToS(dPerIni) + DToS(dPerFim) + DToS(dDataBase) + StrTran(Time(),":","")
 				EndIf
 				fImpFun( aImp , nColunas, ,oPrinter )
 				If lCodeBar //Grava o código de barras gerado na tabela RS4
 					RecLock("RS4",.T.)
 					RS4->RS4_FILIAL := SRA->RA_FILIAL
 					RS4->RS4_MAT	:= SRA->RA_MAT
-					RS4->RS4_PER	:= DtoS(dPerIni) + DtoS(dPerFim) 
+					RS4->RS4_PER	:= DToS(dPerIni) + DToS(dPerFim) 
 					RS4->RS4_DATAI	:= dPerIni
 					RS4->RS4_DATAF	:= dPerFim
 					RS4->RS4_CODEBA	:= cCodeBar
 					RS4->RS4_STATUS	:= "2" //Pendente
-					MsUnLock()
+					MSUnLock()
 				EndIf
 				oPrinter:EndPage()				
 			Else
@@ -711,11 +711,11 @@ While (cAliasSRA)->( !Eof() )
 		
 	Next nX
 
-    (cAliasSRA)->( dbSkip() )
+    (cAliasSRA)->( DBSkip() )
 
 End While
 
-(cAliasSRA)->(DbCloseArea())
+(cAliasSRA)->(DBCloseArea())
 
 Return( cHtml )
 
@@ -756,7 +756,7 @@ Local nValAux		:= 0 As Numeric
 Local nContEve		:= 0 As Numeric
 Local oBrushC	    := TBrush():New( ,  RGB(228, 228, 228)  ) As Object
 Local oBrushI	    := TBrush():New( ,  RGB(242, 242, 242)  ) As Object
-local lBrush		:= .F. As Logical
+Local lBrush		:= .F. As Logical
 Local _nI			:= 0 As Numeric
 Local _nJ			:= 0 As Numeric
 Local _dDataInic	:= CtoD('//') As Date
@@ -779,7 +779,7 @@ If ( lTerminal )
 	cHtml += 	'<head>'  + CRLF
 	cHtml += 		'<title>RH Online</title>'  + CRLF
 	cHtml +=		'<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">'  + CRLF
-	cHtml +=		'<link rel="stylesheet" href="css/rhonline.css" type="text/css">'  + CRLF
+	cHtml +=		'<link rel="stylesheet" href="css/rhonline.css" Type="text/css">'  + CRLF
 	cHtml +=	'</head>'  + CRLF
 	cHtml +=	'<body bgcolor="#FFFFFF" text="#000000">' + CRLF
 	cHtml +=		'<table width="515" border="0" cellspacing="0" cellpadding="0">'  + CRLF
@@ -822,30 +822,30 @@ For nX := 1 To nLenImp
 	
 		oPrinter:Box( nLin, nCol	, nLin+13, nColTot, "-6" )			// Caixa da linha total
 		
-		If lBigLine .and. nX%2 == 0 //Pinta somente as linhas pares
+		If lBigLine .And. nX%2 == 0 //Pinta somente as linhas pares
 			oPrinter:Fillrect( {nLin+1, nCol+1, nLin+12, nColTot-1 }, oBrushI, "-2") // Quadro na Cor Cinza
 		EndIf
 		
 		oPrinter:Line( nLin, nPxData	, nLin+13, nPxData	, 0 , "-6") 	// Linha Pos Data
 
-		oPrinter:SayAlign(nLin,nCol+2,DtoC(aImp[nX,1]),oFontM,500,100,,ALIGN_H_LEFT)
+		oPrinter:SayAlign(nLin,nCol+2,DToC(aImp[nX,1]),oFontM,500,100,,ALIGN_H_LEFT)
 		oPrinter:SayAlign(nLin,nPxData+2,DiaSemana(aImp[nX,1],8),oFontM,nPxSemana-nPxData,100,,ALIGN_H_LEFT)
 		
 		nMin := Len(aImp[nX])
 				
-		If Len(aImp[nX]) >= 4 .or. !lImpMarc
+		If Len(aImp[nX]) >= 4 .Or. !lImpMarc
 			For nPosES := 1 to Len(aNaES)
 				oPrinter:Line( nLin, aNaES[nPosES]-6, nLin+13, aNaES[nPosES]-6, 0 , "-6")	
 				nY := nPosES + 3
-				If lImpMarc .and. nY <= nMin
-					oPrinter:SayAlign(nLin,aNaES[nPosES]+2,substr(aImp[nX,nY],1,30),oFontM,500,100,,ALIGN_H_LEFT)
-					oPrinter:SayAlign(nLin+5,aNaES[nPosES]+2,substr(aImp[nX,nY],30,60),oFontM,500,100,,ALIGN_H_LEFT)
+				If lImpMarc .And. nY <= nMin
+					oPrinter:SayAlign(nLin,aNaES[nPosES]+2,SubStr(aImp[nX,nY],1,30),oFontM,500,100,,ALIGN_H_LEFT)
+					oPrinter:SayAlign(nLin+5,aNaES[nPosES]+2,SubStr(aImp[nX,nY],30,60),oFontM,500,100,,ALIGN_H_LEFT)
 				EndIf
 			Next nPosES
 		Else
 			oPrinter:Line( nLin, aNaES[1]-6, nLin+13, aNaES[1]-6, 0 , "-6")
 			oPrinter:SayAlign(nLin,aNaES[1],aImp[nX,2],oFontM,Len(aNaES)*40,100,,ALIGN_H_CENTER)
-		Endif
+		EndIf
 	        
 	    // Localiza e imprime o turno para data	
 		//==============================================================================
@@ -853,7 +853,7 @@ For nX := 1 To nLenImp
 		// http://tdn.totvs.com/pages/releaseview.action?pageId=6082431 
 		//==============================================================================
 		    
-		_nI := Ascan(aTabCalend,{|x| x[48] ==  aImp[nX,1]})
+		_nI := aScan(aTabCalend,{|x| x[48] ==  aImp[nX,1]})
 		    
 		If _nI > 0
 	       _nJ := _nI
@@ -869,7 +869,7 @@ For nX := 1 To nLenImp
 		    EndIf
 
 		    If aTabCalend[_nI,3] > 0
-		      cturno += substr(strzero((aTabCalend[_nI,3]*100),4),1,2) + ":" + substr(strzero((aTabCalend[_nI,3]*100),4),3,2) + " "
+		      cturno += SubStr(StrZero((aTabCalend[_nI,3]*100),4),1,2) + ":" + SubStr(StrZero((aTabCalend[_nI,3]*100),4),3,2) + " "
 		    EndIf
 		Next _nI
 		    
@@ -880,41 +880,41 @@ For nX := 1 To nLenImp
 		oPrinter:Line( nLin, nPxObser	, nLin+13	, nPxObser, 0 , "-6")	
 		oPrinter:Line( nLin, nPxData+36  	, nLin+13	, nPxData+36, 0 , "-6")	
 		
-		If lImpMarc //Imprime abonos,He,Faltas,adicionais apenas se for para imprimir marcações.
+		If lImpMarc //Imprime abonos,He,Faltas,adicionais apenas se For para imprimir marcações.
 			If ValType(aImp[nX,3]) == "A"
 				oPrinter:SayAlign(nLin,nPxAbonos+2,aImp[nX,3,2],oFontM,500,100,,ALIGN_H_LEFT)
-				If Len(alltrim(aImp[nX,3,1])) < 20
+				If Len(AllTrim(aImp[nX,3,1])) < 20
 					oPrinter:SayAlign(nLin,nPxObser+2,aImp[nX,3,1],oFontM,500,100,,ALIGN_H_LEFT)
 				Else	
-					oPrinter:SayAlign(nLin,nPxObser+2,substr(aImp[nX,3,1],1,24),oFontO,500,100,,ALIGN_H_LEFT)     
-					//oPrinter:SayAlign(nLin+5,nPxObser+2,substr(aImp[nX,3,1],25,24),oFontO,500,100,,ALIGN_H_LEFT)  // Imprimir apenas os 24 primeiros digitos.
+					oPrinter:SayAlign(nLin,nPxObser+2,SubStr(aImp[nX,3,1],1,24),oFontO,500,100,,ALIGN_H_LEFT)     
+					//oPrinter:SayAlign(nLin+5,nPxObser+2,SubStr(aImp[nX,3,1],25,24),oFontO,500,100,,ALIGN_H_LEFT)  // Imprimir apenas os 24 primeiros digitos.
 				EndIf
 			Else
-				If Len(alltrim(aImp[nX,3])) < 20
+				If Len(AllTrim(aImp[nX,3])) < 20
 					oPrinter:SayAlign(nLin,nPxObser+2,aImp[nX,3],oFontM,500,100,,ALIGN_H_LEFT)
 				Else
-					oPrinter:SayAlign(nLin,nPxObser+2,substr(aImp[nX,3],1,24),oFontO,500,100,,ALIGN_H_LEFT)
-					//oPrinter:SayAlign(nLin+5,nPxObser+2,substr(aImp[nX,3],25,24),oFontO,500,100,,ALIGN_H_LEFT)  // Imprimir apenas os 24 primeiros digitos.
+					oPrinter:SayAlign(nLin,nPxObser+2,SubStr(aImp[nX,3],1,24),oFontO,500,100,,ALIGN_H_LEFT)
+					//oPrinter:SayAlign(nLin+5,nPxObser+2,SubStr(aImp[nX,3],25,24),oFontO,500,100,,ALIGN_H_LEFT)  // Imprimir apenas os 24 primeiros digitos.
 				EndIf
 			EndIf
          
          If Len(aResultPDI) > 0
 			   cObs := RPON002OBS(aImp[nX,1])
-            If Empty(Alltrim(aImp[nX,3])) .AND. !Empty(cObs)
+            If Empty(AllTrim(aImp[nX,3])) .And. !Empty(cObs)
                oPrinter:SayAlign(nLin,nPxObser+2,cObs,oFontO,500,100,,ALIGN_H_LEFT)
             EndIf
          EndIf
 
 			If Len(aResult) > 0
 				nValAux := 0
-				Aeval(aResult, {|x| If( x[1] == DtoS(aImp[nX,1]) .and. x[2] == "1", nValAux := __TimeSum(nValAux,x[3]),Nil )} )
+				Aeval(aResult, {|x| If( x[1] == DToS(aImp[nX,1]) .And. x[2] == "1", nValAux := __TimeSum(nValAux,x[3]),Nil )} )
 				If nValAux > 0
 					oPrinter:SayAlign(nLin,nPxHE+2,StrTran(StrZero(nValAux,5,2),'.',':'),oFontM,500,100,,ALIGN_H_LEFT)
 					nValAux := 0
 				EndIf
 				//Apenas gero as horas de Absenteismo na ultima linha do Dia.
 				If nX == Len(aImp) .Or. aScan(aImp,{|x| x[1] == aImp[nX,1]},nX + 1) == 0
-					Aeval(aResult, {|x| If( x[1] == DtoS(aImp[nX,1]) .and. x[2] =="2", nValAux := __TimeSum(nValAux,x[3]),Nil )} )
+					Aeval(aResult, {|x| If( x[1] == DToS(aImp[nX,1]) .And. x[2] =="2", nValAux := __TimeSum(nValAux,x[3]),Nil )} )
 					If nValAux > 0
 						oPrinter:SayAlign(nLin,nPxFalta+2,StrTran(StrZero(nValAux,5,2),'.',':'),oFontM,500,100,,ALIGN_H_LEFT)
 						nValAux := 0
@@ -927,7 +927,7 @@ For nX := 1 To nLenImp
 		If ( lZebrado := ( nX%2 == 0.00 ) )
 			cHtml += '<tr bgcolor="#FAFBFC">' + CRLF
 			cHtml += 	'<td class="dados_2" bgcolor="#FAFBFC" nowrap><div align="center">' + CRLF
-			cHtml += 		Dtoc(aImp[nX,1]) + CRLF
+			cHtml += 		DToC(aImp[nX,1]) + CRLF
 			cHtml += 	'</td>' + CRLF
 			cHtml += 	'<td class="dados_2" bgcolor="#FAFBFC" nowrap><div align="left">' + CRLF
 			cHtml +=		DiaSemana(aImp[nX,1]) + CRLF
@@ -935,7 +935,7 @@ For nX := 1 To nLenImp
 		Else
 			cHtml += '<tr>' + CRLF
 			cHtml += 	'<td class="dados_2" nowrap><div align="center">' + CRLF
-			cHtml += 		Dtoc(aImp[nX,1]) + CRLF
+			cHtml += 		DToC(aImp[nX,1]) + CRLF
 			cHtml += 	'</td>' + CRLF
 			cHtml += 	'<td class="dados_2" nowrap><div align="left">' + CRLF
 			cHtml +=		DiaSemana(aImp[nX,1]) + CRLF
@@ -948,7 +948,7 @@ For nX := 1 To nLenImp
 		EndIf
 		nLenImpnX := Len(aImp[nX])
 		For nY := 4 To nLenImpnX
-			IF ( lZebrado )
+			If ( lZebrado )
 				cHtml += 	'<td class="dados_2" bgcolor="#FAFBFC" nowrap><div align="center">' + CRLF
 				cHtml += 		aImp[nX,nY] + CRLF
 				cHtml += 	'</td>' + CRLF
@@ -956,7 +956,7 @@ For nX := 1 To nLenImp
 				cHtml += 	'<td class="dados_2" nowrap><div align="center">' + CRLF
 				cHtml += 		aImp[nX,nY] + CRLF
 				cHtml += 	'</td>' + CRLF
-			EndIF	
+			EndIf	
 		Next nY
 		
 		//-- Trata Abonos e Excecoes
@@ -1054,8 +1054,8 @@ If !( lTerminal )
 	EndIf	
 		
 		
-	//-- Se existirem totais, e se for selecionada sua impress„o, ser„o impressos.
-	If lImpMarc .and. Len(aTotais) > 0 .and. nImpHrs # 4
+	//-- Se existirem totais, e se For selecionada sua impress„o, ser„o impressos.
+	If lImpMarc .And. Len(aTotais) > 0 .And. nImpHrs # 4
 		If nLin > nLinTot - 40
 			fImpSign(oPrinter)
 			oPrinter:EndPage()
@@ -1084,19 +1084,19 @@ If !( lTerminal )
 		EndIf		 
 		
 		oPrinter:Line( nLin, nColCod1	, nLin+13, nColCod1		, 0 , "-6")
-		If nImpHrs == 1 .or. nImpHrs == 3
+		If nImpHrs == 1 .Or. nImpHrs == 3
 			oPrinter:Line( nLin, nColDesc1	, nLin+13, nColDesc1	, 0 , "-6")
 		EndIf
 		oPrinter:Line( nLin, nColCalc1	, nLin+13, nColCalc1	, 0 , "-6")
 		oPrinter:Line( nLin, nColInf1	, nLin+13, nColInf1		, 0 , "-6")
 		oPrinter:Line( nLin, nColCod2	, nLin+13, nColCod2		, 0 , "-6")
-		If nImpHrs == 1 .or. nImpHrs == 3
+		If nImpHrs == 1 .Or. nImpHrs == 3
 			oPrinter:Line( nLin, nColDesc2	, nLin+13, nColDesc2	, 0 , "-6")
 		EndIf
 		oPrinter:Line( nLin, nColCalc2	, nLin+13, nColCalc2	, 0 , "-6")
 		oPrinter:Line( nLin, nColInf2	, nLin+13, nColInf2		, 0 , "-6")
 		oPrinter:Line( nLin, nColCod3	, nLin+13, nColCod3		, 0 , "-6")
-		If nImpHrs == 1 .or. nImpHrs == 3
+		If nImpHrs == 1 .Or. nImpHrs == 3
 			oPrinter:Line( nLin, nColDesc3	, nLin+13, nColDesc3	, 0 , "-6")
 		EndIf
 		oPrinter:Line( nLin, nColCalc3	, nLin+13, nColCalc3	, 0 , "-6")
@@ -1104,7 +1104,7 @@ If !( lTerminal )
 		oPrinter:SayAlign(nLin,nCol+2,STR0064,oFontP,500,100,,ALIGN_H_LEFT)				//Codigo
 		oPrinter:SayAlign(nLin,nColCod1+2,STR0065,oFontP,500,100,,ALIGN_H_LEFT)			//Descrição
 		
-		If nImpHrs == 1 .or. nImpHrs == 3
+		If nImpHrs == 1 .Or. nImpHrs == 3
 			oPrinter:SayAlign(nLin,nColDesc1+2,STR0066,oFontP,500,100,,ALIGN_H_LEFT)	//Calculado
 		EndIf
 		
@@ -1113,7 +1113,7 @@ If !( lTerminal )
 		oPrinter:SayAlign(nLin,nColInf1+2,STR0064,oFontP,500,100,,ALIGN_H_LEFT)			//Codigo
 		oPrinter:SayAlign(nLin,nColCod2+2,STR0065,oFontP,500,100,,ALIGN_H_LEFT)			//Descrição
 		
-		If nImpHrs == 1 .or. nImpHrs == 3		
+		If nImpHrs == 1 .Or. nImpHrs == 3		
 			oPrinter:SayAlign(nLin,nColDesc2+2,STR0066,oFontP,500,100,,ALIGN_H_LEFT)	//Calculado
 		EndIf
 		oPrinter:SayAlign(nLin,nColCalc2+2,STR0067,oFontP,500,100,,ALIGN_H_LEFT)		//Informado
@@ -1121,7 +1121,7 @@ If !( lTerminal )
 		oPrinter:SayAlign(nLin,nColInf2+2,STR0064,oFontP,500,100,,ALIGN_H_LEFT)			//Codigo
 		oPrinter:SayAlign(nLin,nColCod3+2,STR0065,oFontP,500,100,,ALIGN_H_LEFT)			//Descrição
 		
-		If nImpHrs == 1 .or. nImpHrs == 3		
+		If nImpHrs == 1 .Or. nImpHrs == 3		
 			oPrinter:SayAlign(nLin,nColDesc3+2,STR0066,oFontP,500,100,,ALIGN_H_LEFT)	//Calculado
 		EndIf
 		oPrinter:SayAlign(nLin,nColCalc3+2,STR0067,oFontP,500,100,,ALIGN_H_LEFT)		
@@ -1141,7 +1141,7 @@ If !( lTerminal )
 					nMetade := nLin
 				EndIf
 				oPrinter:Box(  nMetade, nCol	, nMetade+13, nColTot	, "-6" )
-				If lBigLine .and. lBrush
+				If lBigLine .And. lBrush
 					oPrinter:Fillrect( {nMetade+1, nCol+1, nMetade+12, nColTot-1 }, oBrushI, "-2") // Quadro na Cor Cinza
 					lBrush := .F.
 				Else
@@ -1268,7 +1268,7 @@ For nDia := 0 To nDias
 	EndIf	
 	
 	//-- o Array aTabcalend ‚ setado para a 1a Entrada do dia em quest„o.
-	If ( nTab := aScan(aTabCalend, {|x| x[1] == dData .and. x[4] == '1E' }) ) == 0.00
+	If ( nTab := aScan(aTabCalend, {|x| x[1] == dData .And. x[4] == '1E' }) ) == 0.00
 		Loop
 	EndIf
 	
@@ -1276,17 +1276,17 @@ For nDia := 0 To nDias
 	nMarc := aScan(aMarcacoes, { |x| x[3] == aTabCalend[nTab, 2] })
 
 	//-- Consiste Afastamentos, Demissoes ou Transferencias.
-	If ( ( lAfasta := aTabCalend[ nTab , 24 ] ) .or. SRA->( RA_SITFOLH $ 'DúT' .and. dData > RA_DEMISSA ) )
+	If ( ( lAfasta := aTabCalend[ nTab , 24 ] ) .Or. SRA->( RA_SITFOLH $ 'DúT' .And. dData > RA_DEMISSA ) )
 		lAfasta		:= .T.
-		cTipAfas	:= IF(!Empty(aTabCalend[ nTab , 25 ]),aTabCalend[ nTab , 25 ],fDemissao(SRA->RA_SITFOLH, SRA->RA_RESCRAI) )
-		cDescAfas	:= Alltrim(fDescAfast( cTipAfas, TamSx3("RCM_DESCRI")[1], Nil, SRA->( RA_SITFOLH == 'D' .and. dData > RA_DEMISSA ), aTabCalend[ nTab , 47 ], SRA->RA_FILIAL ))
+		cTipAfas	:= If(!Empty(aTabCalend[ nTab , 25 ]),aTabCalend[ nTab , 25 ],fDemissao(SRA->RA_SITFOLH, SRA->RA_RESCRAI) )
+		cDescAfas	:= AllTrim(fDescAfast( cTipAfas, TamSX3("RCM_DESCRI")[1], Nil, SRA->( RA_SITFOLH == 'D' .And. dData > RA_DEMISSA ), aTabCalend[ nTab , 47 ], SRA->RA_FILIAL ))
 	EndIf
 
 	//Verifica Regra de Apontamento ( Trabalha Feriado ? )
 	lTrabaFer := ( PosSPA( aTabCalend[ nTab , 23 ] , cFilSPA , "PA_FERIADO" , 01 ) == "S" )
 
 	//-- Consiste Feriados.
-	If ( lFeriado := aTabCalend[ nTab , 19 ] )  .AND. !lTrabaFer
+	If ( lFeriado := aTabCalend[ nTab , 19 ] )  .And. !lTrabaFer
 		cOcorr := aTabCalend[ nTab , 22 ]
 	EndIf
 
@@ -1302,12 +1302,12 @@ For nDia := 0 To nDias
 	cOrdem  := aTabCalend[nTab,2]
 	cTipDia := aTabCalend[nTab,6]
 
-    //-- Se a Data da marcacao for Posterior a Admissao
+    //-- Se a Data da marcacao For Posterior a Admissao
 	If dData >= SRA->RA_ADMISSA
 		//-- Se Afastado
-		If ( lAfasta  .AND. aTabCalend[nTab,10] <> 'E' ) .OR. ( lAfasta  .AND. aTabCalend[nTab,10] == 'E' .AND. ( !lImpExcecao .OR. !aTabCalend[nTab,32] ) )
+		If ( lAfasta  .And. aTabCalend[nTab,10] <> 'E' ) .Or. ( lAfasta  .And. aTabCalend[nTab,10] == 'E' .And. ( !lImpExcecao .Or. !aTabCalend[nTab,32] ) )
 			cOcorr := cDescAfas 
-		//-- Se nao for Afastado
+		//-- Se nao For Afastado
 		Else                    
 
 		    //-- Se tiver EXCECAO para o Dia  ------------------------------------------------
@@ -1346,7 +1346,7 @@ For nDia := 0 To nDias
 					//-- Se trabalha no Feriado
 					Else                  
 					    //-- Se Dia Trabalhado e Nao fez Marcacao
-				    	If cTipDia == 'S' .and. Empty(nMarc)
+				    	If cTipDia == 'S' .And. Empty(nMarc)
 							cOcorr := STR0020  // '** Ausente **'
 				    	ElseIf cTipDia == 'D'
 							cOcorr := STR0021  // '** D.S.R. **'  
@@ -1358,7 +1358,7 @@ For nDia := 0 To nDias
 					EndIf
 		    	Else                                    
 		    	    //-- Se Dia Trabalhado e Nao fez Marcacao
-			    	If cTipDia == 'S' .and. Empty(nMarc)
+			    	If cTipDia == 'S' .And. Empty(nMarc)
 						cOcorr := STR0020  // '** Ausente **'
 			    	ElseIf cTipDia == 'D'
 						cOcorr := STR0021  // '** D.S.R. **'
@@ -1390,7 +1390,7 @@ For nDia := 0 To nDias
 	    	If cOcorr == STR0020  // '** Ausente **'
 			  	aAdd( aImp[Len(aImp)], cOcorr ) // '** Ausente **'
 			Else
-				If !empty(cOcorr)
+				If !Empty(cOcorr)
 					aAdd( aImp[Len(aImp)],	Space(01)) 
 				  	aAdd( aImp[Len(aImp)], cOcorr )
 					aAdd( aImp,{})
@@ -1427,16 +1427,16 @@ For nDia := 0 To nDias
 
 	//-- Marca‡oes ocorridas na data.
 	If nMarc > 0
-		While nMarc <= nLenMarc .and. cOrdem == aMarcacoes[nMarc,3]
+		While nMarc <= nLenMarc .And. cOrdem == aMarcacoes[nMarc,3]
 			nContMarc ++
-			aAdd( aImp[Len(aImp)], StrTran(StrZero(aMarcacoes[nMarc,2],5,2),'.',':') + If(aMarcacoes[nMarc,28]<>"O","*","") ) //Se nao for original, inclui asterisco na frente da marcacao
+			aAdd( aImp[Len(aImp)], StrTran(StrZero(aMarcacoes[nMarc,2],5,2),'.',':') + If(aMarcacoes[nMarc,28]<>"O","*","") ) //Se nao For original, inclui asterisco na frente da marcacao
 			nMarc ++
 		End While
 	EndIf
 
 Next nDia
 
-If lImpMarc .and. !lTerminal //Carrega o array aResult para exibicao das HE, faltas e adc. noturno.
+If lImpMarc .And. !lTerminal //Carrega o array aResult para exibicao das HE, faltas e adc. noturno.
 	aResult := {}
     aResultPDI := {}
 	fGetApo(@aResult, dInicio, dFim, lImpAcum)
@@ -1521,19 +1521,19 @@ If !( lTerminal )
 	
 	nLin += 18	
 	
-	cDet := STR0071  + PADR( If(Len(aInfo)>0,aInfo[03],SM0->M0_NOMECOM) , 50)  // 'Empresa: '
+	cDet := STR0071  + PadR( If(Len(aInfo)>0,aInfo[03],SM0->M0_NOMECOM) , 50)  // 'Empresa: '
 	oPrinter:SayAlign(nLin,nCol,cDet,oFontP,500,100,,ALIGN_H_LEFT)
 	
 	If ( Len(aInfo) > 0 ) .And. ( aInfo[28] == 1 )
-		cDet := STR0095  + PADR(Transform( If(!Empty(aInfo[27]), aInfo[27], SM0->M0_CEI),'@R ##.###.#####/##'),50)   // 'CEI: '
+		cDet := STR0095  + PadR(Transform( If(!Empty(aInfo[27]), aInfo[27], SM0->M0_CEI),'@R ##.###.#####/##'),50)   // 'CEI: '
 	ElseIf ( Len(aInfo) > 0 ) .And. ( aInfo[28] == 3 )
-		cDet := STR0096  + PADR(Transform( If((aInfo[08]#""), aInfo[08], SM0->M0_CGC),'@R ###.###.###-##'),50)   // 'CPF: '
+		cDet := STR0096  + PadR(Transform( If((aInfo[08]#""), aInfo[08], SM0->M0_CGC),'@R ###.###.###-##'),50)   // 'CPF: '
 	Else
-		cDet := STR0075  + PADR(Transform( If(Len(aInfo)>0,aInfo[08],SM0->M0_CGC),'@R ##.###.###/####-##'),50)   // 'CGC: '
+		cDet := STR0075  + PadR(Transform( If(Len(aInfo)>0,aInfo[08],SM0->M0_CGC),'@R ##.###.###/####-##'),50)   // 'CGC: '
 	EndIf
 	oPrinter:SayAlign(nLin,nColCab12,cDet,oFontP,500,100,,ALIGN_H_LEFT)
 	
-	cDet := PADR( If(Len(aInfo)>0,aInfo[04],SM0->M0_EndCob) , 50)
+	cDet := PadR( If(Len(aInfo)>0,aInfo[04],SM0->M0_EndCob) , 50)
 	oPrinter:SayAlign(nLin,nColCab13,cDet,oFontP,500,100,,ALIGN_H_LEFT)
 	
 	nLin += 13
@@ -1544,17 +1544,17 @@ If !( lTerminal )
 	cDet := STR0072  + AllTrim(SRA->RA_FILIAL) + ' - ' + SRA->RA_MAT  // ' Matr..: '
 	oPrinter:SayAlign(nLin,nCol,cDet,oFontP,500,100,,ALIGN_H_LEFT)
 	
-	cDet := STR0074  + IF(!EMPTY(SRA->RA_NSOCIAL),SRA->RA_NSOCIAL,SRA->RA_NOME)  // ' Nome..: '
+	cDet := STR0074  + If(!Empty(SRA->RA_NSOCIAL),SRA->RA_NSOCIAL,SRA->RA_NOME)  // ' Nome..: '
 	oPrinter:SayAlign(nLin,nColCab12,cDet,oFontP,500,100,,ALIGN_H_LEFT)
 	
-	cDet := STR0060 + ": " + AllTrim(SRA->RA_DEPTO)  + " - " + POSICIONE("SQB",1,SRA->RA_FILIAL+SRA->RA_DEPTO,"QB_DESCRIC") // 'Departamento: '
+	cDet := STR0060 + ": " + AllTrim(SRA->RA_DEPTO)  + " - " + Posicione("SQB",1,SRA->RA_FILIAL+SRA->RA_DEPTO,"QB_DESCRIC") // 'Departamento: '
 	oPrinter:SayAlign(nLin,nColCab13,cDet,oFontP,500,100,,ALIGN_H_LEFT)
 	
 	nLin += 13
 	cDet := STR0078  + aFuncFunc[6] // ' Categ.: '
 	oPrinter:SayAlign(nLin,nCol,cDet,oFontP,500,100,,ALIGN_H_LEFT)
 	
-	cDet := STR0077  + PADR(AllTrim(aFuncFunc[1]) + ' - ' + aFuncFunc[2] , 50) // 'C.C...: '
+	cDet := STR0077  + PadR(AllTrim(aFuncFunc[1]) + ' - ' + aFuncFunc[2] , 50) // 'C.C...: '
 	oPrinter:SayAlign(nLin,nColCab12,cDet,oFontP,500,100,,ALIGN_H_LEFT)
 	
 	cDet := STR0076  + AllTrim(aFuncFunc[3]) + ' - ' + aFuncFunc[4]  // 'Funcao: '
@@ -1627,19 +1627,19 @@ If !( lTerminal )
 		EndIf		 
 		
 		oPrinter:Line( nLin, nColCod1	, nLin+13, nColCod1		, 0 , "-6")
-		If nImpHrs == 1 .or. nImpHrs == 3
+		If nImpHrs == 1 .Or. nImpHrs == 3
 			oPrinter:Line( nLin, nColDesc1	, nLin+13, nColDesc1	, 0 , "-6")
 		EndIf
 		oPrinter:Line( nLin, nColCalc1	, nLin+13, nColCalc1	, 0 , "-6")
 		oPrinter:Line( nLin, nColInf1	, nLin+13, nColInf1		, 0 , "-6")
 		oPrinter:Line( nLin, nColCod2	, nLin+13, nColCod2		, 0 , "-6")
-		If nImpHrs == 1 .or. nImpHrs == 3
+		If nImpHrs == 1 .Or. nImpHrs == 3
 			oPrinter:Line( nLin, nColDesc2	, nLin+13, nColDesc2	, 0 , "-6")
 		EndIf
 		oPrinter:Line( nLin, nColCalc2	, nLin+13, nColCalc2	, 0 , "-6")
 		oPrinter:Line( nLin, nColInf2	, nLin+13, nColInf2		, 0 , "-6")
 		oPrinter:Line( nLin, nColCod3	, nLin+13, nColCod3		, 0 , "-6")
-		If nImpHrs == 1 .or. nImpHrs == 3
+		If nImpHrs == 1 .Or. nImpHrs == 3
 			oPrinter:Line( nLin, nColDesc3	, nLin+13, nColDesc3	, 0 , "-6")
 		EndIf
 		oPrinter:Line( nLin, nColCalc3	, nLin+13, nColCalc3	, 0 , "-6")		
@@ -1647,7 +1647,7 @@ If !( lTerminal )
 		oPrinter:SayAlign(nLin,nCol+2,STR0064,oFontP,500,100,,ALIGN_H_LEFT) //Codigo
 		oPrinter:SayAlign(nLin,nColCod1+2,STR0065,oFontP,500,100,,ALIGN_H_LEFT) //Descricao
 		
-		If nImpHrs == 1 .or. nImpHrs == 3 //Calculado
+		If nImpHrs == 1 .Or. nImpHrs == 3 //Calculado
 			oPrinter:SayAlign(nLin,nColDesc1+2,STR0066,oFontP,500,100,,ALIGN_H_LEFT)
 		EndIf
 		
@@ -1656,13 +1656,13 @@ If !( lTerminal )
 		oPrinter:SayAlign(nLin,nColInf1+2,STR0064,oFontP,500,100,,ALIGN_H_LEFT) //Codigo
 		oPrinter:SayAlign(nLin,nColCod2+2,STR0065,oFontP,500,100,,ALIGN_H_LEFT) //Descricao
 		
-		If nImpHrs == 1 .or. nImpHrs == 3 //Calculado		
+		If nImpHrs == 1 .Or. nImpHrs == 3 //Calculado		
 			oPrinter:SayAlign(nLin,nColDesc2+2,STR0066,oFontP,500,100,,ALIGN_H_LEFT)
 		EndIf
 		oPrinter:SayAlign(nLin,nColCalc2+2,STR0067,oFontP,500,100,,ALIGN_H_LEFT) //Informado
 		oPrinter:SayAlign(nLin,nColInf2+2,STR0064,oFontP,500,100,,ALIGN_H_LEFT) //Codigo
 		oPrinter:SayAlign(nLin,nColCod3+2,STR0065,oFontP,500,100,,ALIGN_H_LEFT) //Descricao
-		If nImpHrs == 1 .or. nImpHrs == 3 //Calculado		
+		If nImpHrs == 1 .Or. nImpHrs == 3 //Calculado		
 			oPrinter:SayAlign(nLin,nColDesc3+2,STR0066,oFontP,500,100,,ALIGN_H_LEFT)
 		EndIf
 		oPrinter:SayAlign(nLin,nColCalc3+2,STR0067,oFontP,500,100,,ALIGN_H_LEFT)//Informado
@@ -1714,7 +1714,7 @@ Else
     cHtml +=									'<tr>' + CRLF
     cHtml +=										'<td colspan="' + AllTrim( Str( nColunas + 5 ) ) + '" class="etiquetas_1" bgcolor="#FAFBFC"><hr size="1"></td>' + CRLF
     cHtml +=									'</tr>' + CRLF
-EndIF
+EndIf
 	
 Return( cHtml )
 
@@ -1740,14 +1740,14 @@ Local cFilSP9   	:= xFilial( "SP9" , SRA->RA_FILIAL ) As Character
 Local cFilSRV		:= xFilial( "SRV" , SRA->RA_FILIAL ) As Character
 Local cImpHoras 	:= If(nImpHrs==1,"C",If(nImpHrs==2,"I","*")) As Character//-- Calc/Info/Ambas
 Local cAutoriza 	:= If(nImpAut==1,"A",If(nImpAut==2,"N","*"))  As Character//-- Aut./N.Aut./Ambas
-Local cAliasRes		:= IF( lImpAcum , "SPL" , "SPB" ) As Character
-Local cAliasApo		:= IF( lImpAcum , "SPH" , "SPC" ) As Character
+Local cAliasRes		:= If( lImpAcum , "SPL" , "SPB" ) As Character
+Local cAliasApo		:= If( lImpAcum , "SPH" , "SPC" ) As Character
 Local bAcessaSPC 	:= &("{ || " + ChkRH("PONR010","SPC","2") + "}") As Codeblock
 Local bAcessaSPH 	:= &("{ || " + ChkRH("PONR010","SPH","2") + "}") As Codeblock
 Local bAcessaSPB 	:= &("{ || " + ChkRH("PONR010","SPB","2") + "}") As Codeblock
 Local bAcessaSPL 	:= &("{ || " + ChkRH("PONR010","SPL","2") + "}") As Codeblock
-Local bAcessRes		:= IF( lImpAcum , bAcessaSPH , bAcessaSPC ) As Codeblock
-Local bAcessApo		:= IF( lImpAcum , bAcessaSPL , bAcessaSPB ) As Codeblock
+Local bAcessRes		:= If( lImpAcum , bAcessaSPH , bAcessaSPC ) As Codeblock
+Local bAcessApo		:= If( lImpAcum , bAcessaSPL , bAcessaSPB ) As Codeblock
 Local nColSpc   	:= 0.00 As Numeric
 Local nCtSpc    	:= 0.00 As Numeric
 Local nPass     	:= 0.00 As Numeric
@@ -1765,7 +1765,7 @@ If ( lImpRes )
 				dMarcFim		,;
 				bAcessRes		,;
 				cAliasRes)
-	//-- Converte as horas para sexagenal quando impressao for a partir do resultado
+	//-- Converte as horas para sexagenal quando impressao For a partir do resultado
 	If ( lSexagenal )	// Sexagenal
 		For nCtSpc := 1 To Len(aTotSpc)
 			For nColSpc := 2 To 4
@@ -1788,8 +1788,8 @@ fTotaliza(;
 			lMvAbosEve,;
 			lMvSubAbAp;
 	 	)
-//-- Converte as horas para Centesimal quando impressao for a partir do apontamento
-If !( lImpRes ) .and. !( lSexagenal ) // Centesimal
+//-- Converte as horas para Centesimal quando impressao For a partir do apontamento
+If !( lImpRes ) .And. !( lSexagenal ) // Centesimal
 	For nCtSpc :=1 To Len(aTotSpc)
 		For nColSpc :=2 To 4
 			aTotSpc[nCtSpc,nColSpc]:=fConvHr(aTotSpc[nCtSpc,nColSpc],'D')
@@ -1805,7 +1805,7 @@ If nImpHrs # 4  //-- Se solicitado para Listar Totais de Horas
 			If PosSrv( aTotSpc[nPass,1] , cFilSRV , NIL , 01 )
 		   	   nHorasCal 	:= aTotSpc[nPass,2] //-- Calculado - Abonado
 			   nHorasInf 	:= aTotSpc[nPass,3] //-- Informado
-			   If nHorasCal > 0 .and. cImpHoras $ 'Cú*' .or. nHorasInf > 0 .and. cImpHoras $ 'Iú*'
+			   If nHorasCal > 0 .And. cImpHoras $ 'Cú*' .Or. nHorasInf > 0 .And. cImpHoras $ 'Iú*'
 			  	  cHorCal := If(cImpHoras$'Cú*',Transform(nHorasCal, '@E 999.99'),Space(9)) + Space(1)
 				  cHorInf := If(cImpHoras$'Iú*',Transform(nHorasInf, '@E 999.99'),Space(9))
 				  aAdd(aTotais, { aTotSpc[nPass,1], SRV->RV_DESC , cHorCal, cHorInf } )
@@ -1815,7 +1815,7 @@ If nImpHrs # 4  //-- Se solicitado para Listar Totais de Horas
 			//-- Impressao a Partir do Movimento
 			nHorasCal 	:= aTotSpc[nPass,2] //-- Calculado - Abonado
 			nHorasInf 	:= aTotSpc[nPass,3] //-- Informado
-			If nHorasCal > 0 .and. cImpHoras $ 'Cú*' .or. nHorasInf > 0 .and. cImpHoras $ 'Iú*'
+			If nHorasCal > 0 .And. cImpHoras $ 'Cú*' .Or. nHorasInf > 0 .And. cImpHoras $ 'Iú*'
 				cHorCal := If(cImpHoras$'Cú*',Transform(nHorasCal, '@E 999.99'),Space(9)) + Space(1)
 				cHorInf := If(cImpHoras$'Iú*',Transform(nHorasInf, '@E 999.99'),Space(9))
 				aAdd(aTotais, { aTotSpc[nPass,1] , DescPDPon(aTotSpc[nPass,1], cFilSP9 ) , cHorCal, cHorInf } )
@@ -1826,7 +1826,7 @@ If nImpHrs # 4  //-- Se solicitado para Listar Totais de Horas
 	//-- Acrescenta as informacoes referentes aos eventos associados aos motivos de abono
 	//-- Condicoes: Se nao For Impressao de Resultados 
 	//-- 			e Se For para Imprimir Horas Calculadas ou Ambas
-	If !( lImpRes ) .and. (nImpHrs == 1 .or. nImpHrs == 3) 
+	If !( lImpRes ) .And. (nImpHrs == 1 .Or. nImpHrs == 3) 
 		For nX := 1 To Len(aCodAbono) 
 			// Converte as horas para Centesimal
 			If !( lSexagenal ) // Centesimal
@@ -1891,8 +1891,8 @@ Local nQTABONO		:= 0.00 As Numeric
 Local lRemonta		:= .F. As Logical
 Local lContinua		:= .F. As Logical
 
-If ( cAlias )->(dbSeek( cFil + cMat ) )
-	While (cAlias)->( !Eof() .and. cFil+cMat == &(cPrefix+"_FILIAL")+&(cPrefix+"_MAT") )
+If ( cAlias )->(DBSeek( cFil + cMat ) )
+	While (cAlias)->( !Eof() .And. cFil+cMat == &(cPrefix+"_FILIAL")+&(cPrefix+"_MAT") )
         
         dData	:= (cAlias)->(&(cPrefix+"_DATA"))  	//-- Data do Apontamento
         cPD		:= (cAlias)->(&(cPrefix+"_PD"))    	//-- Codigo do Evento
@@ -1904,12 +1904,12 @@ If ( cAlias )->(dbSeek( cFil + cMat ) )
 		cCC		:= (cAlias)->(&(cPrefix+"_CC")) 		//-- Centro de Custos
 		
 		If (cAlias)->( !Eval(bAcessa) )
-			(cAlias)->( dbSkip() )
+			(cAlias)->( DBSkip() )
 			Loop
 		EndIf
 		
-		If dData < dMarcIni .or. dDATA > dMarcFim 
-			(cAlias)->( dbSkip() )
+		If dData < dMarcIni .Or. dDATA > dMarcFim 
+			(cAlias)->( DBSkip() )
 			Loop
 		EndIf
         
@@ -1917,7 +1917,7 @@ If ( cAlias )->(dbSeek( cFil + cMat ) )
         //-- Trata a Qtde de Abonos
         aJustifica 	:= {} //-- Reinicializa aJustifica
         nEfetAbono	:=	0.00
-		If nQuanti == 0 .and. fAbonos( dData , cPD , NIL , @aJustifica , cTPMARCA , cCC , aAbonosPer ) > 0
+		If nQuanti == 0 .And. fAbonos( dData , cPD , NIL , @aJustifica , cTPMARCA , cCC , aAbonosPer ) > 0
             
             //-- Corre Todos os Abonos
 			For nX := 1 To Len(aJustifica)
@@ -1976,7 +1976,7 @@ If ( cAlias )->(dbSeek( cFil + cMat ) )
 						// Para que esse processo seja feito o Parametro MV_SUBABAP  deve
 						// ra ter o Conteudo igual a "S"								   
 						//====================================================================
-						If ( ( lMvSubAbAp ) .and. !Empty( cEvento ) )
+						If ( ( lMvSubAbAp ) .And. !Empty( cEvento ) )
 						   //-- Se o motivo  nao possui abono associado
 						   //-- Calcula o total de horas a abonar efetivamente 
 						   If ( nPos := aScan( aCodAbono, { |x| x[1] == cEvento } ) ) > 0
@@ -1999,13 +1999,13 @@ If ( cAlias )->(dbSeek( cFil + cMat ) )
 	         
 	        //-- Obtem a posicao no Calendario para a Data
 	        
-	        If ( nPos 	:= aScan(aTabCalend, {|x| x[1] ==dDATA .and. x[4] == '1E' }) ) > 0 
+	        If ( nPos 	:= aScan(aTabCalend, {|x| x[1] ==dDATA .And. x[4] == '1E' }) ) > 0 
 			    //-- Obtem o Turno vigente na Data
 			    cTno	:=	aTabCalend[nPos,14]  
 			    //-- Carrega ou recupera os codigos correspondentes a horas extras na Data
 			    cCodExtras	:= ''
 			    lRemonta	:= .F.
-				If ( cAutoriza $ "A|N" .AND. !Empty(ALLTRIM(cPdi) ) ) 
+				If ( cAutoriza $ "A|N" .And. !Empty(AllTrim(cPdi) ) ) 
 					lRemonta	:= .T.
 				EndIf	
 			    CarExtAut( @cCodExtras , cTno , cAutoriza , lRemonta )
@@ -2015,7 +2015,7 @@ If ( cAlias )->(dbSeek( cFil + cMat ) )
 			    EndIf   
 			EndIf      
 	                 
-	        //-- Se o Evento for Alguma HE Solicitada (Autorizada ou Nao Autorizada) 
+	        //-- Se o Evento For Alguma HE Solicitada (Autorizada ou Nao Autorizada) 
 	        //-- Ou  Valido Qquer Evento (Autorizado e Nao Autorizado)
 	        //-- OU  Evento possui um identificador correspondente a Evento Autorizado ou Nao Autorizado.
 			//-- Ou  Evento e' referente a banco de horas 
@@ -2025,7 +2025,7 @@ If ( cAlias )->(dbSeek( cFil + cMat ) )
 					lContinua	:= .T.
 				EndIf	
 			Else
-				If ( lExtra .or. cAutoriza == '*' .or. (aScan(aId,{|aEvento| ( aEvento[1] == cCodigo .and. Right(aEvento[2],1) == cAutoriza ) .Or. ( aEvento[1] == cCodigo .And. cAutoriza == 'A' .And. Empty(aEvento[2]) .And. aEvento[4] == "S" ) }  ) > 0.00))
+				If ( lExtra .Or. cAutoriza == '*' .Or. (aScan(aId,{|aEvento| ( aEvento[1] == cCodigo .And. Right(aEvento[2],1) == cAutoriza ) .Or. ( aEvento[1] == cCodigo .And. cAutoriza == 'A' .And. Empty(aEvento[2]) .And. aEvento[4] == "S" ) }  ) > 0.00))
 					lContinua	:= .T.
 				EndIf
 			EndIf
@@ -2046,7 +2046,7 @@ If ( cAlias )->(dbSeek( cFil + cMat ) )
 	            EndIf
 	        EndIf
         EndIf
-		(cAlias)->( dbSkip() )
+		(cAlias)->( DBSkip() )
 	End While
 EndIf
 
@@ -2074,16 +2074,16 @@ Local cPrefix := "" As Character
 
 cPrefix		:= SubStr(cAlias,-2)
 
-If ( cAlias )->( dbSeek( cFil + cMat ) )
-	While (cAlias)->( !Eof() .and. cFil+cMat == &(cPrefix+"_FILIAL")+&(cPrefix+"_MAT") )
+If ( cAlias )->( DBSeek( cFil + cMat ) )
+	While (cAlias)->( !Eof() .And. cFil+cMat == &(cPrefix+"_FILIAL")+&(cPrefix+"_MAT") )
 
-		If (cAlias)->( &(cPrefix+"_DATA") < dDataIni .or. &(cPrefix+"_DATA") > dDataFim )
-			(cAlias)->( dbSkip() )
+		If (cAlias)->( &(cPrefix+"_DATA") < dDataIni .Or. &(cPrefix+"_DATA") > dDataFim )
+			(cAlias)->( DBSkip() )
 			Loop
 		EndIf
 
 		If (cAlias)->( !Eval(bAcessa) )
-			(cAlias)->( dbSkip() )
+			(cAlias)->( DBSkip() )
 			Loop
 		EndIf
 
@@ -2092,9 +2092,9 @@ If ( cAlias )->( dbSeek( cFil + cMat ) )
 		Else
 			If _nImpRef = 2
 				DBSelectArea("SRV")
-				SRV->(DbSetOrder(1))
-				If SRV->(Dbseek(xFilial("SRV")+(cAlias)->( &(cPrefix+"_PD") )))
-					If  SRV->RV_CODFOL <> '0050' .AND. SRV->RV_CODFOL <> '0212' 
+				SRV->(DBSetOrder(1))
+				If SRV->(DBSeek(xFilial("SRV")+(cAlias)->( &(cPrefix+"_PD") )))
+					If  SRV->RV_CODFOL <> '0050' .And. SRV->RV_CODFOL <> '0212' 
 						aAdd(aTotais,{(cAlias)->( &(cPrefix+"_PD") ),(cAlias)->( &(cPrefix+"_HORAS") ),0,0 })
 					EndIf
 				Else
@@ -2104,7 +2104,7 @@ If ( cAlias )->( dbSeek( cFil + cMat ) )
 				aAdd(aTotais,{(cAlias)->( &(cPrefix+"_PD") ),(cAlias)->( &(cPrefix+"_HORAS") ),0,0 })
 			EndIf
 		EndIf
-		(cAlias)->( dbSkip() )
+		(cAlias)->( DBSkip() )
 	EndDo
 EndIf
 
@@ -2146,14 +2146,14 @@ While !Empty(cCbox)
    nCont:=AT(";",cCbox) 
    nIgual:=AT("=",cCbox)
    cString:=AllTrim(SubStr(cCbox,1,nCont-1)) //Opcao
-   IF nCont == 0
+   If nCont == 0
        aAdd(aRet,{SubStr(cString,1,nigual-1),SubStr(cString,nigual+1)})
       Exit
    Else
        aAdd(aRet,{SubStr(cString,1,nigual-1),SubStr(cString,nigual+1)})
-   Endif 
+   EndIf 
    cCbox:=SubStr(cCbox,nCont+1)
-Enddo
+EndDo
    
 Return( aRet )
 
@@ -2203,16 +2203,16 @@ Local dAdmissa	:= SRA->RA_ADMISSA As Date
 Local dPerIni   := Ctod("//") As Date
 Local dPerFim   := Ctod("//") As Date
 
-SPO->( dbSetOrder( 1 ) )
-SPO->( dbSeek( cFilSPO , .F. ) )
-While SPO->( !Eof() .and. PO_FILIAL == cFilSPO )
+SPO->( DBSetOrder( 1 ) )
+SPO->( DBSeek( cFilSPO , .F. ) )
+While SPO->( !Eof() .And. PO_FILIAL == cFilSPO )
                        
     dPerIni := SPO->PO_DATAINI
     dPerFim := SPO->PO_DATAFIM  
 
     //-- Filtra Periodos de Apontamento a Serem considerados em funcao do Periodo Solicitado
-    If dPerFim < dDataIni .OR. dPerIni > dDataFim                                                      
-		SPO->( dbSkip() )  
+    If dPerFim < dDataIni .Or. dPerIni > dDataFim                                                      
+		SPO->( DBSkip() )  
 		Loop  
     EndIf
 
@@ -2223,14 +2223,14 @@ While SPO->( !Eof() .and. PO_FILIAL == cFilSPO )
 		Exit
 	EndIf
 
-	SPO->( dbSkip() )
+	SPO->( DBSkip() )
 
 EndDo
 
-If ( aScan( aPeriodos , { |x| x[1] == dIniAtu .and. x[2] == dFimAtu } ) == 0.00 )
+If ( aScan( aPeriodos , { |x| x[1] == dIniAtu .And. x[2] == dFimAtu } ) == 0.00 )
 	dPerIni := dIniAtu
 	dPerFim	:= dFimAtu 
-	If !(dPerFim < dDataIni .OR. dPerIni > dDataFim)
+	If !(dPerFim < dDataIni .Or. dPerIni > dDataFim)
 		If ( dPerFim >= dAdmissa )
 			aAdd(aPeriodos, { dPerIni, dPerFim, Max(dPerIni,dDataIni), Min(dPerFim,dDataFim) } )
 		EndIf
@@ -2275,19 +2275,19 @@ Else
 	Default aExtrasTno	:= {} 
 		
 	//-- Procura Tabela (Filial + Turno corrente)
-	If ( lFound	:= ( SP4->( dbSeek( cFilSP4 + cTnoCad , .F. ) ) ) )
+	If ( lFound	:= ( SP4->( DBSeek( cFilSP4 + cTnoCad , .F. ) ) ) )
 	   cTno		:=	cTnoCad
 	   lFound	:=	.T.
 	Else      
 	    //-- Procura Tabela (Filial)    
 	    cTno	:= Space(Len(SP4->P4_TURNO))
-		lFound	:= SP4->( dbSeek(  cFilSP4 + cTno , .F.) )
+		lFound	:= SP4->( DBSeek(  cFilSP4 + cTno , .F.) )
 	EndIf    
 	
 	//-- Se Existe Tabela de HE
 	If ( lFound )
 	   //-- Verifica se a Tabela de HE para o Turno ainda nao foi carregada
-   	   If (lRemonta) .OR. (ncTurno:=aScan(aExtrasTno,{|aTurno| aTurno[1]  == cFilSP4 .and. aTurno[2] == cTno} )) == 0.00
+   	   If (lRemonta) .Or. (ncTurno:=aScan(aExtrasTno,{|aTurno| aTurno[1]  == cFilSP4 .And. aTurno[2] == cTno} )) == 0.00
 	      //-- Se nao Encontrou Carrega Tabela para Filial e Turno especificos
 	      GetTabExtra( @aTabExtra , cFilSP4 , cTno , .F. , .F. )     
 	      //-- Posiciona no inicio da Tabela de HE da Filial Solicitada
@@ -2296,11 +2296,11 @@ Else
 			  //-- Corre C¢digos de Hora Extra da Filial
 			  For nX:=1 To naTabExtra
 					//-- Se Ambos os Tipos de Eventos ou Autorizados
-					If cAutoriza == '*' .or. (cAutoriza == 'A' .and. !Empty(aTabExtra[nX,4]))
+					If cAutoriza == '*' .Or. (cAutoriza == 'A' .And. !Empty(aTabExtra[nX,4]))
 						cCodExtras += aTabExtra[nX,4]+'A' //-- Cod Autorizado                
 					EndIf
 					//-- Se Ambos os Tipos de Eventos ou Nao Autorizados					
-					If cAutoriza == '*' .or. (cAutoriza == 'N' .and. !Empty(aTabExtra[nX,5]))
+					If cAutoriza == '*' .Or. (cAutoriza == 'N' .And. !Empty(aTabExtra[nX,5]))
 						cCodExtras += aTabExtra[nX,5]+'N' //-- Cod Nao Autorizado                
 					EndIf
 			  Next nX
@@ -2335,9 +2335,9 @@ Static Function CarId(cFil As Character,aId As Array,cAutoriza As Character)
 Local nPos	:= 0.00 As Numeric
 
 //-- Preenche o Array aCodAut com os Eventos (Menos DSR Mes Ant.)
-SP9->( dbSeek( cFil , .T. ) )
-While SP9->( !Eof() .and. cFil == P9_FILIAL ) 
-	If ( ( Right(SP9->P9_IDPON,1) == cAutoriza ) .or. ( cAutoriza == "*" ) )
+SP9->( DBSeek( cFil , .T. ) )
+While SP9->( !Eof() .And. cFil == P9_FILIAL ) 
+	If ( ( Right(SP9->P9_IDPON,1) == cAutoriza ) .Or. ( cAutoriza == "*" ) )
 		aAdd( aId , Array( 04 ) )
 		nPos := Len( aId )
 		aId[ nPos , 01 ] := SP9->P9_CODIGO	//-- Codigo do Evento 
@@ -2345,7 +2345,7 @@ While SP9->( !Eof() .and. cFil == P9_FILIAL )
 		aId[ nPos , 03 ] := SP9->P9_CODFOL	//-- Codigo do da Verba Folha
 		aId[ nPos , 04 ] := SP9->P9_BHORAS	//-- Evento para B.Horas
 	EndIf
-	SP9->( dbSkip() )
+	SP9->( DBSkip() )
 EndDo
 
 Return( NIL )
@@ -2374,8 +2374,8 @@ Local cJoinFil	:= "" As Character
 cWhere += "%"
 cWhere += cPrefixo + "FILIAL = '" + SRA->RA_FILIAL + "' AND "
 cWhere += cPrefixo + "MAT = '" + SRA->RA_MAT + "' AND "
-cWhere += cPrefixo + "DATA >= '" + DtoS(dInicio) + "' AND "
-cWhere += cPrefixo + "DATA <= '" + DtoS(dFim) + "' "
+cWhere += cPrefixo + "DATA >= '" + DToS(dInicio) + "' AND "
+cWhere += cPrefixo + "DATA <= '" + DToS(dFim) + "' "
 cWhere += "%"
 
 If lImpAcum
@@ -2400,14 +2400,14 @@ Else
 	BeginSql Alias cAliasQry
 	
 	 	SELECT             
-			SPC.PC_DATA, SPC.PC_PDI, SPC.PC_PD, SPC.PC_QUANTC, SPC.PC_QUANTI, SP9.P9_CLASEV, SP9.P9_IDPON, (CASE WHEN SPC.PC_PDI <> ' ' THEN SP9.P9_DESC ELSE ''   END) AS  P9_DESC
+			SPC.PC_DATA, SPC.PC_PDI, SPC.PC_PD, SPC.PC_QUANTC, SPC.PC_QUANTI, SP9.P9_CLASEV, SP9.P9_IDPON, (Case WHEN SPC.PC_PDI <> ' ' THEN SP9.P9_DESC Else ''   END) AS  P9_DESC
 		FROM 
 			%Table:SPC% SPC
 		INNER JOIN %Table:SP9% SP9
-		ON %exp:cJoinFil% AND SP9.%NotDel% AND (CASE WHEN SPC.PC_PDI <> ' ' THEN SPC.PC_PDI ELSE SPC.PC_PD   END) = SP9.P9_CODIGO			
+		ON %exp:cJoinFil% AND SP9.%NotDel% AND (Case WHEN SPC.PC_PDI <> ' ' THEN SPC.PC_PDI Else SPC.PC_PD   END) = SP9.P9_CODIGO			
 		WHERE
 			%Exp:cWhere%  AND SPC.%NotDel%
-		ORDER BY SPC.PC_DATA, (CASE WHEN SPC.PC_PDI <> ' ' THEN SPC.PC_PDI ELSE SPC.PC_PD   END)
+		ORDER BY SPC.PC_DATA, (Case WHEN SPC.PC_PDI <> ' ' THEN SPC.PC_PDI Else SPC.PC_PD   END)
 	EndSql 	
 EndIf
 
@@ -2420,17 +2420,17 @@ While !(cAliasQry)->(Eof())
 		(cAliasQry)->(aAdd(aResult,{&(cPrefixo+"DATA"),"3",If(&(cPrefixo+"QUANTI")>0,&(cPrefixo+"QUANTI"),&(cPrefixo+"QUANTC")),(cAliasQry)->P9_DESC}))
 	EndIf
    
-   If !Empty(Alltrim((cAliasQry)->PC_PDI))  //Abono
+   If !Empty(AllTrim((cAliasQry)->PC_PDI))  //Abono
 		(cAliasQry)->(aAdd(aResultPDI,{&(cPrefixo+"DATA"),"3",If(&(cPrefixo+"QUANTI")>0,&(cPrefixo+"QUANTI"),&(cPrefixo+"QUANTC")),(cAliasQry)->P9_DESC}))
 	EndIf	
-	(cAliasQry)->(DbSkip())
+	(cAliasQry)->(DBSkip())
 EndDo
 
-(cAliasQry)->(DbCloseArea())
+(cAliasQry)->(DBCloseArea())
 
 FWRestArea(aArea)
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -2452,7 +2452,7 @@ oPrinter:SayAlign(nLinTot-40,nCol+400,Replicate("_",50),oFontP,nColTot,100,,ALIG
 
 oPrinter:SayAlign(nLinTot-30,nCol+400,"GOIASMINAS INDUSTRIA DE LATICINIOS LTDA.",oFontP,nColTot,100,,ALIGN_H_LEFT) 	
 	
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -2478,16 +2478,16 @@ nDebito		:= 0
 nCredito	:= 0
 nSaldoAtu	:= 0
 
-dbSelectArea( "SPI" )
-SPI->(dbSetOrder(2))
-SPI->(dbSeek( SRA->RA_FILIAL + SRA->RA_MAT ))
-While SPI->( !Eof() .and. PI_FILIAL+PI_MAT == SRA->( RA_FILIAL+RA_MAT ) )
+DBSelectArea( "SPI" )
+SPI->(DBSetOrder(2))
+SPI->(DBSeek( SRA->RA_FILIAL + SRA->RA_MAT ))
+While SPI->( !Eof() .And. PI_FILIAL+PI_MAT == SRA->( RA_FILIAL+RA_MAT ) )
 
 	PosSP9(SPI->PI_PD,SRA->RA_FILIAL,"P9_TIPOCOD")
 		// Totaliza Saldo Anterior
 		If SPI->PI_DATA < dPerIni
-			If !(SPI->PI_STATUS == 'B' .AND. SPI->PI_DTBAIX < dPerIni)
-				If (SPI->PI_STATUS == 'B' .AND. SPI->PI_DTBAIX <= dPerFim)
+			If !(SPI->PI_STATUS == 'B' .And. SPI->PI_DTBAIX < dPerIni)
+				If (SPI->PI_STATUS == 'B' .And. SPI->PI_DTBAIX <= dPerFim)
 					If SP9->P9_TIPOCOD $  "1*3"
 						nValor := SPI->PI_QUANT
 					   	If lSexagenal
@@ -2526,7 +2526,7 @@ While SPI->( !Eof() .and. PI_FILIAL+PI_MAT == SRA->( RA_FILIAL+RA_MAT ) )
 				EndIf
 			EndIf
 		ElseIf SPI->PI_DATA <= dPerFim
-			If !(SPI->PI_STATUS == 'B' .AND. SPI->PI_DTBAIX <= dPerFim)
+			If !(SPI->PI_STATUS == 'B' .And. SPI->PI_DTBAIX <= dPerFim)
 				If SP9->P9_TIPOCOD $  "1*3"
 					nValor := SPI->PI_QUANT
 				   	If lSexagenal
@@ -2545,12 +2545,12 @@ While SPI->( !Eof() .and. PI_FILIAL+PI_MAT == SRA->( RA_FILIAL+RA_MAT ) )
 			EndIf	
 		Else
 			Exit
-		Endif
+		EndIf
 
-	SPI->(dbSkip())
-Enddo
+	SPI->(DBSkip())
+EndDo
 
-If nSaldoAnt <> 0 .or. nCredito > 0 .or. nDebito > 0
+If nSaldoAnt <> 0 .Or. nCredito > 0 .Or. nDebito > 0
 	lRet := .T.
 	If lSexagenal
 		nSaldoAtu := __TimeSum(nSaldoAtu, __TimeSub( __TimeSum( nSaldoAnt , nCredito ) , nDebito ))
@@ -2617,9 +2617,9 @@ If Len(aSitFunc) > 0
 
 					//Se tiver mais de um registro a situacao sai apenas na primeira linha e nas demais apenas o periodo
 					If Empty( aAfast )
-						aAdd( aAfast, { STR0088 + cSitu + " - " + STR0089 + dToC(aAux[nX][3]) + " a " + dToC(aAux[nX][4]) } ) //"Sit...: "#"Período: "
+						aAdd( aAfast, { STR0088 + cSitu + " - " + STR0089 + DToC(aAux[nX][3]) + " a " + DToC(aAux[nX][4]) } ) //"Sit...: "#"Período: "
 					Else
-						aAdd( aAfast, { Space( Len(STR0088)+Len(cSitu)+3 ) + STR0089 + dToC(aAux[nX][3]) + " a " + dToC(aAux[nX][4]) } ) //"Período: "	
+						aAdd( aAfast, { Space( Len(STR0088)+Len(cSitu)+3 ) + STR0089 + DToC(aAux[nX][3]) + " a " + DToC(aAux[nX][4]) } ) //"Período: "	
 					EndIf
 				EndIf
 				
@@ -2684,10 +2684,10 @@ Static Function RPON002OBS(dData As Date)
 Local i := 1 As Numeric
 Local cResult := "" As Character
 
-i := Ascan(aResultPDI,{|x| x[1] = DTOS(dData)})
+i := aScan(aResultPDI,{|x| x[1] = DToS(dData)})
 
 If i > 0
-   cResult := Iif(aResultPDI[i,3] > 0,Alltrim(Transform(aResultPDI[i,3],"@E 999,999.99")) + "Hrs ","") + Alltrim(aResultPDI[i,4])
+   cResult := IIf(aResultPDI[i,3] > 0,AllTrim(Transform(aResultPDI[i,3],"@E 999,999.99")) + "Hrs ","") + AllTrim(aResultPDI[i,4])
 EndIf
 
 Return cResult

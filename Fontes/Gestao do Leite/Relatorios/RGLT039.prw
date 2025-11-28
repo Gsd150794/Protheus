@@ -2,16 +2,16 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 30/07/2019 | Chamado 28346. Revisão de fontes
-Lucas Borges  | 21/07/2021 | Chamado 37147. Tratamento para produtores familiares (A2_L_CLASS=L)
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Lucas Borges  |30/07/2019| Chamado 28346. Revisão de fontes
+Lucas Borges  |21/07/2021| Chamado 37147. Tratamento para produtores familiares (A2_L_CLASS=L)
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "REPORT.CH"
+#Include "TOTVS.ch"
+#Include "REPORT.CH"
 
 /*
 ===============================================================================================================================
@@ -45,7 +45,7 @@ oReport:SetTotalInLine(.F.)
 //================================================================================
 //| Definção da secao - setor e tipo classif. do produtor                        |
 //================================================================================
-DEFINE SECTION oSetor				OF oReport					TITLE "Setor" TABLES "ZL3","SA2","ZL2"
+DEFINE Section oSetor				OF oReport					TITLE "Setor" TABLES "ZL3","SA2","ZL2"
 oSetor:SetBorder("TOP",2)
 
 DEFINE CELL NAME "ZL3_SETOR"		OF oSetor ALIAS "ZL3"		TITLE "Código"
@@ -55,7 +55,7 @@ DEFINE CELL NAME "CLASSIFICACAO"	OF oSetor ALIAS ""			TITLE "Classif. Produtor"
 //================================================================================
 //| Definição da secao - dados do produtor                                       |
 //================================================================================
-DEFINE SECTION oProdutores			OF oSetor					TITLE "Produtores" TABLES "SA2"
+DEFINE Section oProdutores			OF oSetor					TITLE "Produtores" TABLES "SA2"
 oProdutores:SetBorder("TOP",2)
 
 DEFINE CELL NAME "A2_COD"			OF oProdutores ALIAS "SA2"	TITLE "Código"
@@ -101,7 +101,7 @@ Local _nCountRec	:= 0
 //====================================================================================================
 // Monta filtro de acordo com a tabela de origem
 //====================================================================================================
-_cFiltro += " AND SA2.A2_L_DTDES = '" + StrZero( Month( MV_PAR01 ) , 2 ) + AllTrim( STR( Year( MV_PAR01 ) ) ) + "'"
+_cFiltro += " AND SA2.A2_L_DTDES = '" + StrZero( Month( MV_PAR01 ) , 2 ) + AllTrim( Str( Year( MV_PAR01 ) ) ) + "'"
 
 //Se preencheu os setores, já fiz a validação de acesso no SX1
 //Se não preencheu e não tem acesso a todos, filtra de forma que não retorme registros
@@ -130,7 +130,7 @@ oReport:SetMeter(0)
 
    	BeginSql alias _cAlias
 		SELECT SA2.A2_COD, SA2.A2_LOJA, SA2.A2_NOME, SA2.A2_CGC, SA2.A2_L_SIGSI,
-		       CASE
+		       Case
 		         WHEN SA2.A2_L_CLASS = 'I' THEN
 		          'INDIVIDUAL'
 		         WHEN SA2.A2_L_CLASS = 'C' THEN
@@ -141,7 +141,7 @@ oReport:SetMeter(0)
 		          'RESP. FAMILIAR'
 				 WHEN SA2.A2_L_CLASS = 'F' AND (SA2.A2_L_TANQ <> SA2.A2_COD OR SA2.A2_L_TANLJ = SA2.A2_LOJA) THEN
 		          'USR. FAMILIAR'
-		         ELSE
+		         Else
 		          'SEM CLAS.'
 		       END CLASSIFICACAO,
 		       ZL3.ZL3_COD, ZL3.ZL3_DESCRI, ZL3.ZL3_SETOR, ZL2.ZL2_DESCRI
@@ -173,7 +173,7 @@ oReport:SetMeter(0)
 oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
@@ -186,7 +186,7 @@ oReport:Section(1):Section(1):SetParentFilter( {|cParam| (_cAlias)->( ZL3_SETOR 
 //================================================================================
 //Chama o processamento da impressão do Relatório
 //================================================================================
-oReport:Section(1):Section(1):Cell("CGC"):SetBlock( { || Transform((_cAlias)->A2_CGC, IIF(Len(Alltrim((_cAlias)->A2_CGC))>11,"@R! NN.NNN.NNN/NNNN-99","@R 999.999.999-99")) } )
+oReport:Section(1):Section(1):Cell("CGC"):SetBlock( { || Transform((_cAlias)->A2_CGC, IIf(Len(AllTrim((_cAlias)->A2_CGC))>11,"@R! NN.NNN.NNN/NNNN-99","@R 999.999.999-99")) } )
 oReport:Section(1):Print(.T.)
 
 (_cAlias)->(DBCloseArea())

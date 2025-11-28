@@ -2,64 +2,48 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 17/09/2019 | Retirada chamada da função itputx1. Chamado 28346 
+Lucas Borges  |17/09/2019| Retirada chamada da função itputx1. Chamado 28346 
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RPON012
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 07/08/2018                            .
-===============================================================================================================================
 Descrição---------: Relatório de Crachas. Chamado 25734.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function RPON012()
+
 Local _oReport := nil
 Private _aOrder := {"Filial","Matricula","Nr.Crachá"}
 Private _oSect1_A := Nil
 
 Private _nOrdReport := 1
-
-Begin Sequence	
 	
-   //====================================================================================================
-   // Gera a pergunta de modo oculto, ficando disponível no botão ações relacionadas
-   //====================================================================================================
-   Pergunte("RPON012",.F.)	          
+// Gera a pergunta de modo oculto, ficando disponível no botão ações relacionadas
+Pergunte("RPON012",.F.)	          
 
-   //====================================================================================================
-   // Chama a montagem do relatório.
-   //====================================================================================================	
-   _oReport := RPON012D("RPON012")
-   _oReport:PrintDialog()
+// Chama a montagem do relatório.
+_oReport := RPON012D("RPON012")
+_oReport:PrintDialog()
 	
-End Sequence
-
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: RPON012D
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 07/08/2018
-===============================================================================================================================
 Descrição---------: Realiza as definições do relatório. (ReportDef)
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -71,9 +55,7 @@ Begin Sequence
    _oReport:SetLandscape()    
    _oReport:SetTotalInLine(.F.)
 
-   //====================================================================================================
    // Define as totalizações e quebra por seção.
-   //====================================================================================================	
    //TRFunction():New(oSection2:Cell("B1_COD"),NIL,"COUNT",,,,,.F.,.T.)
    _oReport:SetTotalInLine(.F.)
    
@@ -103,11 +85,8 @@ Return(_oReport)
 Programa----------: RPON012P
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 07/08/2018
-===============================================================================================================================
 Descrição---------: Realiza a impressão do relatório. (ReportPrint)
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -120,9 +99,7 @@ Local _cCodFil, _cDescFilial
 Local _nCodMatr
 
 Begin Sequence                    
-   //====================================================================================================
    // Ativa a seção do relatório conforme a ordem de emissão do relatório.
-   //====================================================================================================	
    _nOrdReport := _oReport:GetOrder()
 
    If _nOrdReport == 1 // Filial
@@ -134,9 +111,7 @@ Begin Sequence
    EndIf
    _oSect1_A:Enable() 
       
-   //====================================================================================================
    // Monta a query de dados.
-   //====================================================================================================	
    _cQry := " SELECT A.ICARD, A.NUMECRAC, B.IDCOLAB, E.NOMEPESS, D.DESCTIPOCOLA, B.DATAINIC, B.HORAINIC, B.DATAFINA, B.HORAFINA, C.CODIMATR, C.CODIEMPR "
    _cQry += " FROM suricato.TBCADASCRACH A RIGHT OUTER JOIN suricato.TBHISTOCRACH B ON A.ICARD = B.ICARD "
    _cQry += " JOIN suricato.TBCOLAB C ON C.IDCOLAB = B.IDCOLAB "
@@ -149,36 +124,32 @@ Begin Sequence
    EndIf
    
    If MV_PAR05  == 1 // Situação do Crachá = Ativo
-      _cQry += " AND ((B.DATAFINA < to_date('"+Dtoc(Date())+"','DD/MM/YY') AND B.HORAFINA = 0)) OR (B.DATAFINA > to_date('"+Dtoc(Date())+"','DD/MM/YY')) "
+      _cQry += " AND ((B.DATAFINA < to_date('"+DToC(Date())+"','DD/MM/YY') AND B.HORAFINA = 0)) OR (B.DATAFINA > to_date('"+DToC(Date())+"','DD/MM/YY')) "
    ElseIf MV_PAR05  == 2 // Baixados  
-      _cQry += " AND B.DATAFINA < to_date('"+Dtoc(Date())+"','DD/MM/YY') AND B.HORAFINA > 0 "
+      _cQry += " AND B.DATAFINA < to_date('"+DToC(Date())+"','DD/MM/YY') AND B.HORAFINA > 0 "
    EndIf
    
    _cQry := _cQry + _cOrder
    
    If Select("TRBPTO") <> 0
-	  TRBPTO->(DbCloseArea())
+	  TRBPTO->(DBCloseArea())
    EndIf
 	
    DBUseArea( .T. , "TOPCONN" , TcGenQry(,,_cQry) , "TRBPTO" , .T. , .F. )
    	
-   DbSelectArea("TRBPTO")
-   TRBPTO->(dbGoTop())
+   DBSelectArea("TRBPTO")
+   TRBPTO->(DBGoTop())
 
    Count to _ntotRegs	
    _oReport:SetMeter(_ntotRegs)	
    
-   //====================================================================================================
    // Inicializando a primeira seção
-   //====================================================================================================		 
    _oSect1_A:Init()
    
-   //====================================================================================================
    // Inicia processo de impressão.
-   //====================================================================================================		
-   TRBPTO->(dbGoTop())
+   TRBPTO->(DBGoTop())
    
-   Do While !TRBPTO->(Eof())
+   While !TRBPTO->(Eof())
 		
       If _oReport:Cancel()
 		 Exit
@@ -186,23 +157,19 @@ Begin Sequence
       
       _cCodFil := StrZero(TRBPTO->CODIEMPR,2)
       
-      //====================================================================================================
       // Filtro por filial
-      //====================================================================================================		   
       If ! Empty(MV_PAR01) // Nome Colaborador
          If ! _cCodFil $ MV_PAR01
-            TRBPTO->(DbSkip())
+            TRBPTO->(DBSkip())
             Loop
          EndIf
       EndIf
 
-      //====================================================================================================
       // Filtro por código de matricula
-      //====================================================================================================		
       If !Empty(MV_PAR02)  // Matricula de
          _nCodMatr := Val(RPON012M(MV_PAR02))
          If TRBPTO->CODIMATR < _nCodMatr
-            TRBPTO->(DbSkip())
+            TRBPTO->(DBSkip())
             Loop 
          EndIf
          //_cQry +=  " AND C.CODIMATR >= " + RPON012M(MV_PAR02)+" "
@@ -211,20 +178,17 @@ Begin Sequence
       If ! Empty(MV_PAR03) // Matricula ate
          _nCodMatr := Val(RPON012M(MV_PAR03))
          If TRBPTO->CODIMATR > _nCodMatr
-            TRBPTO->(DbSkip())
+            TRBPTO->(DBSkip())
             Loop 
          EndIf
-         //_cQry +=  " AND C.CODIMATR <= " + RPON012M(MV_PAR03)+" "
       EndIf
 
-      //====================================================================================================
       // Grava e imprime os dados do relatório.
-      //====================================================================================================		
 	  _oReport:IncMeter()
 	  
 	  //_cCodFil := StrZero(TRBPTO->CODIEMPR,2)
 	  
-	  _nI := Ascan(_aFiliais,{|x| x[5] == _cCodFil})
+	  _nI := aScan(_aFiliais,{|x| x[5] == _cCodFil})
 	  If _nI > 0 
 	     _cDescFilial := _aFiliais[_nI,7]
 	  Else
@@ -269,9 +233,9 @@ Begin Sequence
       EndIf
       
       // Situação do Crachá 
-      If (Dtos(TRBPTO->DATAFINA) < Dtos(Date()) .And. TRBPTO->HORAFINA == 0) .Or. (Dtos(TRBPTO->DATAFINA) > Dtos(Date())) // Ativo       
+      If (DToS(TRBPTO->DATAFINA) < DToS(Date()) .And. TRBPTO->HORAFINA == 0) .Or. (DToS(TRBPTO->DATAFINA) > DToS(Date())) // Ativo       
          _cSituacao := "ATIVO"
-      ElseIf Dtos(TRBPTO->DATAFINA) <= Dtos(Date()) .And. TRBPTO->HORAFINA > 0 // Baixados  
+      ElseIf DToS(TRBPTO->DATAFINA) <= DToS(Date()) .And. TRBPTO->HORAFINA > 0 // Baixados  
          _cSituacao := "BAIXADO" 
       Else
          _cSituacao := "INATIVOS" 
@@ -279,22 +243,16 @@ Begin Sequence
       
       _oSect1_A:Cell("SITUACAO"):SetValue(_cSituacao)    // Situação
 	  
-	  _oSect1_A:Printline()
+	  _oSect1_A:PrintLine()
          
-      TRBPTO->(dbSkip())
+      TRBPTO->(DBSkip())
    EndDo		
       
-   //====================================================================================================
    // Imprime linha separadora.
-   //====================================================================================================	
    _oReport:ThinLine()
    
-   //====================================================================================================
    // Finaliza primeira seção.
-   //====================================================================================================	 	  
    _oSect1_A:Finish()
-	     
-
 End Sequence
 
 Return
@@ -304,11 +262,8 @@ Return
 Programa----------: RPON012L
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 10/08/2018
-===============================================================================================================================
 Descrição---------: Converte e retorna um tempo em minutos passados como parâmetro no formato hora e minutos (hh:mm).
-===============================================================================================================================
 Parametros--------: _nTempo = Temmpo em minutos
-==============================================================================================================================
 Retorno-----------: _cRet = tempo em minutos convertido para o formato hh:mm
 ===============================================================================================================================
 */
@@ -337,13 +292,10 @@ Return _cRet
 Programa----------: RPON012M
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 15/08/2018
-===============================================================================================================================
 Descrição---------: Verifica se o conteúdo de um campo é numerico.
-===============================================================================================================================
 Parametros--------: _cDado = Dado a ser verificado.
-==============================================================================================================================
 Retorno-----------: _cRet = " " se o parêmtro estiver vazio,
-                    _cRet = _cDado se o dado estiver preenchido e for numerico.
+                    _cRet = _cDado se o dado estiver preenchido e For numerico.
                     _cRet = "9999999' se existir letras em _cDado.
 ===============================================================================================================================
 */
@@ -356,7 +308,7 @@ Begin Sequence
       Break
    EndIf
    
-   _cDado := Alltrim(_cDado)
+   _cDado := AllTrim(_cDado)
    _cRet := _cDado
    
    For _nI := 1 To Len(_cDado)

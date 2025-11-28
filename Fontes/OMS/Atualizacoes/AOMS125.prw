@@ -8,11 +8,11 @@
 ===============================================================================================================================
 */
 
-#INCLUDE "FWMBROWSE.CH"
-#INCLUDE "FWMVCDEF.CH"
-#INCLUDE "PROTHEUS.CH" 
-#INCLUDE "TOPCONN.CH"
-#INCLUDE "RWMAKE.CH"
+#Include "FWMBROWSE.CH"
+#Include "FWMVCDEF.CH"
+#Include "TOTVS.ch" 
+#Include "TOPCONN.CH"
+#Include "RWMAKE.CH"
 
 /*
 ===============================================================================================================================
@@ -36,7 +36,7 @@ _oBrowse:SetMenuDef( 'AOMS125' )
 _oBrowse:SetDescription("Cadastro de Operador Logístico")
 _oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -83,7 +83,7 @@ _aGatAux := FwStruTrigger( 'Z23_ZONAEN', 'Z23_NZONA', 'Posicione("Z25",1,xFilial
 _oStruZ23:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 //Z23_TRANS
-_aGatAux := FwStruTrigger( 'Z23_TRANS', 'Z23_LOJA', 'Posicione("SA2",1,xFilial("SA2")+M->Z23_TRANS+Alltrim(M->Z23_LOJA),"A2_LOJA")', .F. )
+_aGatAux := FwStruTrigger( 'Z23_TRANS', 'Z23_LOJA', 'Posicione("SA2",1,xFilial("SA2")+M->Z23_TRANS+AllTrim(M->Z23_LOJA),"A2_LOJA")', .F. )
 _oStruZ23:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 _aGatAux := FwStruTrigger( 'Z23_TRANS', 'Z23_NOME', 'Posicione("SA2",1,xFilial("SA2")+M->Z23_TRANS+M->Z23_LOJA,"A2_NOME")', .F. )
@@ -169,11 +169,11 @@ ElseIf _nOperation == MODEL_OPERATION_UPDATE
 EndIf
 
 If _lValida
-    Z23->(DbSetOrder(1))
-    If Z23->( Dbseek(xFilial("Z23")+_cTransp+_cLoja+_cZona) )
+    Z23->(DBSetOrder(1))
+    If Z23->( DBSeek(xFilial("Z23")+_cTransp+_cLoja+_cZona) )
         _lReturn := .F.
 
-		U_ITMSG("Chave (Transportadora + Loja + Zona de Entrega) informada já consta no cadastro. ",;
+		U_ITMsg("Chave (Transportadora + Loja + Zona de Entrega) informada já consta no cadastro. ",;
                 "Atenção",;
                 "Verifique e modifique o chave digitada.  ",3 , , , .T.)	
           

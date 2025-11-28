@@ -2,35 +2,30 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 23/01/2025 | Chamado 49641. Implementada faixa de início e fim para pagamento do excedente de matéria gorda
-Lucas Borges  | 30/03/2025 | Chamado 50280. Modificado cálculo para Extrato Seco Total (EST)
-Lucas Borges  | 25/04/2025 | Chamado 50532. Incluído filtro de CFOP
+Lucas Borges  |25/04/2025| Chamado 50532. Incluído filtro de CFOP
+Lucas Borges  |01/10/2025| Chamado 52143. Incluido filtro para fornecedore Centro Leite
+Lucas Borges  |01/10/2025| Chamado 52144. Incluído tratamento para o campo ZLX_PEDANT - Pedágio Antecipado
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT035
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/08/2022
-===============================================================================================================================
 Descrição---------: Resumo de Valores - Leite de Terceiros
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function RGLT035()
+User Function RGLT035
 
-Local oReport
+Local oReport := Nil As Object
+
 Pergunte("RGLT035",.F.)
 //Inferface de Impressão
 oReport := ReportDef()
@@ -43,19 +38,16 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/08/2022
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function ReportDef()
+Static Function ReportDef() As Object
 
-Local oReport := Nil
-Local oSection := Nil
-Local _aOrdem   := {"Filial+Produto"}
+Local oReport   := Nil As Object
+Local oSection  := Nil As Object
+Local _aOrdem   := {"Filial+Produto"} As Array
 
 //Criacao do componente de impressao
 //TReport():New
@@ -102,7 +94,9 @@ TRCell():New(oSection,"ICMS_TOT",/*Table*/,"Result."+CRLF+"Cr. ICMS"/*cTitle*/,'
 TRCell():New(oSection,"ICMS_COM",/*Table*/,"Cr. ICMS"+CRLF+"NFC"/*cTitle*/,'@E 999,999.99'/*Picture*/,10/*Tamanho*/,/*lPixel*/,/*{||bBlock}*/,"RIGHT"/*cAlign*/,/*lLineBreak*/,"RIGHT"/*cHeaderAlign*/,/*lCellBreak*/,/*nColSpace*/,.T./*lAutoSize*/,/*nClrBack*/,/*nClrFore*/,/*lBold*/)
 TRCell():New(oSection,"ICMS_DEV",/*Table*/,"Déb. ICMS"+CRLF+"NFD"/*cTitle*/,'@E 999,999.99'/*Picture*/,10/*Tamanho*/,/*lPixel*/,/*{||bBlock}*/,"RIGHT"/*cAlign*/,/*lLineBreak*/,"RIGHT"/*cHeaderAlign*/,/*lCellBreak*/,/*nColSpace*/,.T./*lAutoSize*/,/*nClrBack*/,/*nClrFore*/,/*lBold*/)
 TRCell():New(oSection,"ZLX_ICMSFR",/*Table*/,"Cr. ICMS"+CRLF+"Frete"/*cTitle*/,'@E 999,999.99'/*Picture*/,10/*Tamanho*/,/*lPixel*/,/*{||bBlock}*/,"RIGHT"/*cAlign*/,/*lLineBreak*/,"RIGHT"/*cHeaderAlign*/,/*lCellBreak*/,/*nColSpace*/,.T./*lAutoSize*/,/*nClrBack*/,/*nClrFore*/,/*lBold*/)
+TRCell():New(oSection,"PEDANT",/*Table*/,"Pedágio"+CRLF+"Antecipado"/*cTitle*/,'@E 999,999,999.99'/*Picture*/,14/*Tamanho*/,/*lPixel*/,/*{||bBlock}*/,"RIGHT"/*cAlign*/,/*lLineBreak*/,"RIGHT"/*cHeaderAlign*/,/*lCellBreak*/,/*nColSpace*/,.T./*lAutoSize*/,/*nClrBack*/,/*nClrFore*/,/*lBold*/)
 TRCell():New(oSection,"VLR_FRETE",/*Table*/,"Valor"+CRLF+"Frete"/*cTitle*/,'@E 999,999,999.99'/*Picture*/,14/*Tamanho*/,/*lPixel*/,/*{||bBlock}*/,"RIGHT"/*cAlign*/,/*lLineBreak*/,"RIGHT"/*cHeaderAlign*/,/*lCellBreak*/,/*nColSpace*/,.T./*lAutoSize*/,/*nClrBack*/,/*nClrFore*/,/*lBold*/)
+TRCell():New(oSection,"VLR_FRETEPED",/*Table*/,"Valor Frete"+CRLF+"+Ped.Antecip."/*cTitle*/,'@E 999,999,999.99'/*Picture*/,14/*Tamanho*/,/*lPixel*/,/*{||bBlock}*/,"RIGHT"/*cAlign*/,/*lLineBreak*/,"RIGHT"/*cHeaderAlign*/,/*lCellBreak*/,/*nColSpace*/,.T./*lAutoSize*/,/*nClrBack*/,/*nClrFore*/,/*lBold*/)
 TRCell():New(oSection,"VOL_TRNSP",/*Table*/,"Volume"+CRLF+"Transp."/*cTitle*/,'@E 999,999,999'/*Picture*/,11/*Tamanho*/,/*lPixel*/,/*{||bBlock}*/,"RIGHT"/*cAlign*/,/*lLineBreak*/,"RIGHT"/*cHeaderAlign*/,/*lCellBreak*/,/*nColSpace*/,.T./*lAutoSize*/,/*nClrBack*/,/*nClrFore*/,/*lBold*/)
 TRCell():New(oSection,"CST_FRETG",/*Table*/,"C.Frete"+CRLF+"Geral"/*cTitle*/,'@E 99.9999'/*Picture*/,7/*Tamanho*/,/*lPixel*/,/*{||bBlock}*/,"RIGHT"/*cAlign*/,/*lLineBreak*/,"RIGHT"/*cHeaderAlign*/,/*lCellBreak*/,/*nColSpace*/,.T./*lAutoSize*/,/*nClrBack*/,/*nClrFore*/,/*lBold*/)
 TRCell():New(oSection,"CST_FRETR",/*Table*/,"C.Frete"+CRLF+"Real"/*cTitle*/,'@E 99.9999'/*Picture*/,7/*Tamanho*/,/*lPixel*/,/*{||bBlock}*/,"RIGHT"/*cAlign*/,/*lLineBreak*/,"RIGHT"/*cHeaderAlign*/,/*lCellBreak*/,/*nColSpace*/,.T./*lAutoSize*/,/*nClrBack*/,/*nClrFore*/,/*lBold*/)
@@ -115,37 +109,36 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 29/07/2022
-===============================================================================================================================
 Descrição---------: Processa impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function ReportPrint(oReport,_aOrdem)
+Static Function ReportPrint(oReport As Object,_aOrdem As Array)
 
-Local _cFiltro	:= "%"
-Local _cFilDeb  := "% %"
-Local _cFilSD1  := "% %"
-Local _cAlias	  := GetNextAlias()
-Local _aSelFil	:= {}
-Local _nOrdem	  := oReport:Section(1):GetOrder() 
-Local _lPlanilha:= oReport:nDevice == 4
-Local _cFilial	:= ""
-Local _cProduto := ""
-Local _cProceden := ""
-Local _cCampos  := ""
-Local _aQuebras := {'oQbrProc','oQbrProd'}
-Local _nX       := 0
+Local _cFiltro  := "%" As Character
+Local _cFilDeb  := "% %" As Character
+Local _cFilSD1  := "% %" As Character
+Local _cFilSA2  := "% %" As Character
+Local _cAlias	  := GetNextAlias() As Character
+Local _aSelFil	:= {} As Array
+Local _nOrdem	  := oReport:Section(1):GetOrder()  As Numeric
+Local _lPlanilha:= oReport:nDevice == 4 As Logical
+Local _cFilial	:= "" As Character
+Local _cProduto := "" As Character
+Local _cProceden := "" As Character
+Local _cCampos  := "" As Character
+Local _aQuebras := {'oQbrProc','oQbrProd'} As Array
+Local _nX       := 0 As Numeric
+
 //Chama função que permitirá a seleção das filiais
 If MV_PAR01 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZZX")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -190,7 +183,9 @@ For _nX := 1 to Len(_aQuebras)
   TRFunction():New(oReport:Section(1):Cell("ICMS_COM")/*oCell*/,/*cName*/,"SUM"/*cFunction*/,&(_aQuebras[_nX])/*oBreak*/,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,/*lEndPage*/,/*oParent*/,/*bCondition*/,/*lDisable*/,/*bCanPrint*/)
   TRFunction():New(oReport:Section(1):Cell("ICMS_DEV")/*oCell*/,/*cName*/,"SUM"/*cFunction*/,&(_aQuebras[_nX])/*oBreak*/,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,/*lEndPage*/,/*oParent*/,/*bCondition*/,/*lDisable*/,/*bCanPrint*/)
   TRFunction():New(oReport:Section(1):Cell("ZLX_ICMSFR")/*oCell*/,/*cName*/,"SUM"/*cFunction*/,&(_aQuebras[_nX])/*oBreak*/,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,/*lEndPage*/,/*oParent*/,/*bCondition*/,/*lDisable*/,/*bCanPrint*/)
+  TRFunction():New(oReport:Section(1):Cell("PEDANT")/*oCell*/,/*cName*/,"SUM"/*cFunction*/,&(_aQuebras[_nX])/*oBreak*/,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,/*lEndPage*/,/*oParent*/,/*bCondition*/,/*lDisable*/,/*bCanPrint*/)
   TRFunction():New(oReport:Section(1):Cell("VLR_FRETE")/*oCell*/,/*cName*/,"SUM"/*cFunction*/,&(_aQuebras[_nX])/*oBreak*/,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,/*lEndPage*/,/*oParent*/,/*bCondition*/,/*lDisable*/,/*bCanPrint*/)
+  TRFunction():New(oReport:Section(1):Cell("VLR_FRETEPED")/*oCell*/,/*cName*/,"SUM"/*cFunction*/,&(_aQuebras[_nX])/*oBreak*/,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,/*lEndPage*/,/*oParent*/,/*bCondition*/,/*lDisable*/,/*bCanPrint*/)
   TRFunction():New(oReport:Section(1):Cell("VOL_TRNSP")/*oCell*/,/*cName*/,"SUM"/*cFunction*/,&(_aQuebras[_nX])/*oBreak*/,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,/*lEndPage*/,/*oParent*/,/*bCondition*/,/*lDisable*/,/*bCanPrint*/)
   TRFunction():New(oReport:Section(1):Cell("CST_FRETG")/*oCell*/,/*cName*/,"AVERAGE"/*cFunction*/,&(_aQuebras[_nX])/*oBreak*/,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,/*lEndPage*/,/*oParent*/,/*bCondition*/,/*lDisable*/,/*bCanPrint*/)
   TRFunction():New(oReport:Section(1):Cell("CST_FRETR")/*oCell*/,/*cName*/,"AVERAGE"/*cFunction*/,&(_aQuebras[_nX])/*oBreak*/,/*cTitle*/,/*cPicture*/,/*uFormula*/,.F./*lEndSection*/,.F./*lEndReport*/,/*lEndPage*/,/*oParent*/,/*bCondition*/,/*lDisable*/,/*bCanPrint*/)
@@ -210,6 +205,8 @@ If !_lPlanilha
   oReport:Section(1):Cell("ZAP_EST"):Disable()
   oReport:Section(1):Cell("VLR_PGEST"):Disable()
   oReport:Section(1):Cell("CST_LEST"):Disable()
+  oReport:Section(1):Cell("PEDANT"):Disable()
+  oReport:Section(1):Cell("VLR_FRETEPED"):Disable()
 EndIf
 
 //====================================================================================================
@@ -240,6 +237,13 @@ EndIf
 
 _cCampos := "%, SA2.A2_NREDUZ %"
 
+//Centro Leite
+If MV_PAR14 == 1
+	_cFilSA2 := "% AND A2_L_CENTR = '1' %"
+ElseIf MV_PAR14 == 2
+	_cFilSA2 := "% AND A2_L_CENTR = '2' %"
+EndIf
+
 //==========================================================================
 // Query do relatório da secao 1                                            
 //==========================================================================
@@ -247,36 +251,36 @@ oReport:Section(1):BeginQuery()
 
 BeginSql Alias _cAlias
 SELECT ZZX_FILIAL, ZZX_CODPRD, X5_DESCRI DESCRI, ZLX_TIPOLT, ORD_PRC, A2_NREDUZ, VLR_LITRO, ZLX_VOLNF, ZLX_VOLREC, ZLX_DIFVOL, ZLX_VLRNF,
-       VL_A_PAGAR - (CASE WHEN FUNDESA > 0 THEN ROUND(ZLX_VOLREC*0.000841,2) ELSE 0 END) VL_A_PAGAR,
+       VL_A_PAGAR - (Case WHEN FUNDESA > 0 THEN Round(ZLX_VOLREC*0.000841,2) Else 0 END) VL_A_PAGAR,
         ZAP_GORD, QTD_MG_KG, QTD_EMG_KG, VLR_PGMG, CST_LMG, ZAP_EST, QTD_EST_KG, VLR_PGEST, CST_LEST, 
-       CASE WHEN (ROUND((VL_A_PAGAR-VLR_PGMG)/ZLX_VOLREC,2)*ZLX_DIFVOL)-VLR_NFC > 0 THEN (ROUND((VL_A_PAGAR-VLR_PGMG)/ZLX_VOLREC,2)*ZLX_DIFVOL)-VLR_NFC ELSE 0 END VLR_NFC, 
-       CASE WHEN (ROUND((VL_A_PAGAR-VLR_PGMG)/ZLX_VOLREC,2)*ZLX_DIFVOL)+ZLX_VLRNF-VL_A_PAGAR-VLR_NFD > 0 THEN (ROUND((VL_A_PAGAR-VLR_PGMG)/ZLX_VOLREC,2)*ZLX_DIFVOL)+ZLX_VLRNF-VL_A_PAGAR-VLR_NFD ELSE 0 END VLR_NFD, 
+       Case WHEN (Round((VL_A_PAGAR-VLR_PGMG)/ZLX_VOLREC,2)*ZLX_DIFVOL)-VLR_NFC > 0 THEN (Round((VL_A_PAGAR-VLR_PGMG)/ZLX_VOLREC,2)*ZLX_DIFVOL)-VLR_NFC Else 0 END VLR_NFC, 
+       Case WHEN (Round((VL_A_PAGAR-VLR_PGMG)/ZLX_VOLREC,2)*ZLX_DIFVOL)+ZLX_VLRNF-VL_A_PAGAR-VLR_NFD > 0 THEN (Round((VL_A_PAGAR-VLR_PGMG)/ZLX_VOLREC,2)*ZLX_DIFVOL)+ZLX_VLRNF-VL_A_PAGAR-VLR_NFD Else 0 END VLR_NFD, 
        ZLX_ICMSNF+VLR_ICMSC-VLR_ICMSD ICMS_TOT, 
-       CASE WHEN (ROUND((VL_A_PAGAR-VLR_PGMG)/ZLX_VOLREC,2)*ZLX_DIFVOL)-VLR_NFC > 0 AND D1_PICM > 0 THEN ((ROUND((VL_A_PAGAR-VLR_PGMG)/ZLX_VOLREC,2)*ZLX_DIFVOL)-VLR_NFC)*D1_PICM/100 ELSE 0 END ICMS_COM,
-       CASE WHEN (ROUND((VL_A_PAGAR-VLR_PGMG)/ZLX_VOLREC,2)*ZLX_DIFVOL)+ZLX_VLRNF-VL_A_PAGAR-VLR_NFD > 0 AND D1_PICM > 0 THEN ((ROUND((VL_A_PAGAR-VLR_PGMG)/ZLX_VOLREC,2)*ZLX_DIFVOL)+ZLX_VLRNF-VL_A_PAGAR-VLR_NFD)*D1_PICM/100 ELSE 0 END ICMS_DEV,
-       ZLX_ICMSFR, VLR_FRETE, VOL_TRNSP, CST_FRETG, CST_FRETR, QTD_TRNSP
+       Case WHEN (Round((VL_A_PAGAR-VLR_PGMG)/ZLX_VOLREC,2)*ZLX_DIFVOL)-VLR_NFC > 0 AND D1_PICM > 0 THEN ((Round((VL_A_PAGAR-VLR_PGMG)/ZLX_VOLREC,2)*ZLX_DIFVOL)-VLR_NFC)*D1_PICM/100 Else 0 END ICMS_COM,
+       Case WHEN (Round((VL_A_PAGAR-VLR_PGMG)/ZLX_VOLREC,2)*ZLX_DIFVOL)+ZLX_VLRNF-VL_A_PAGAR-VLR_NFD > 0 AND D1_PICM > 0 THEN ((Round((VL_A_PAGAR-VLR_PGMG)/ZLX_VOLREC,2)*ZLX_DIFVOL)+ZLX_VLRNF-VL_A_PAGAR-VLR_NFD)*D1_PICM/100 Else 0 END ICMS_DEV,
+       ZLX_ICMSFR, PEDANT, VLR_FRETE, VLR_FRETEPED, VOL_TRNSP, CST_FRETG, CST_FRETR, QTD_TRNSP
        FROM (
       SELECT ZZX.ZZX_FILIAL, ZZX.ZZX_CODPRD, SX5.X5_DESCRI, ZLX.ZLX_TIPOLT,
-       CASE
+       Case
          WHEN ZLX.ZLX_TIPOLT = 'P' THEN '1'
          WHEN ZLX.ZLX_TIPOLT = 'F' THEN '2'
          WHEN ZLX.ZLX_TIPOLT = 'T' THEN '3'
        END ORD_PRC
        , SA2.A2_COD, SA2.A2_LOJA, SA2.A2_NREDUZ, 
-      NVL(DECODE(SUM(ZLX.ZLX_VOLREC), 0, 0, ROUND((
-        CASE
+      NVL(DECODE(SUM(ZLX.ZLX_VOLREC), 0, 0, Round((
+        Case
             WHEN ZZX.ZZX_CODPRD = '004' THEN 0
-            WHEN C7_L_EXEST > 0 THEN ROUND(SUM((ZLX.ZLX_VOLREC * COALESCE(ROUND(ZAP.ZAP_EST, 2), 0) / 100)) * C7_L_EXEST,2) /*QTD_EST_KG*/
-            ELSE SUM(ZLX.ZLX_VOLREC * ENT.C7_PRECO)
+            WHEN C7_L_EXEST > 0 THEN Round(SUM((ZLX.ZLX_VOLREC * COALESCE(Round(ZAP.ZAP_EST, 2), 0) / 100)) * C7_L_EXEST,2) /*QTD_EST_KG*/
+            Else SUM(ZLX.ZLX_VOLREC * ENT.C7_PRECO)
         END +
         SUM((((ZAP.ZAP_GORD - ENT.C7_L_PMGB) * ZLX.ZLX_VOLREC) / 100) * 
-            CASE
-                WHEN NVL(ROUND(ZAP_GORD, 2), 0) > ENT.C7_L_PMGB AND
-                      NVL(ROUND(ZAP_GORD, 2), 0) <= ENT.C7_L_PMGB2 THEN
+            Case
+                WHEN NVL(Round(ZAP_GORD, 2), 0) > ENT.C7_L_PMGB AND
+                      NVL(Round(ZAP_GORD, 2), 0) <= ENT.C7_L_PMGB2 THEN
                   ENT.C7_L_EXEMG
-                WHEN NVL(ROUND(ZAP_GORD, 2), 0) > ENT.C7_L_PMGB2 THEN
+                WHEN NVL(Round(ZAP_GORD, 2), 0) > ENT.C7_L_PMGB2 THEN
                   ENT.C7_L_EXEM2
-                ELSE
+                Else
                   0
               END
             )) /
@@ -285,52 +289,52 @@ SELECT ZZX_FILIAL, ZZX_CODPRD, X5_DESCRI DESCRI, ZLX_TIPOLT, ORD_PRC, A2_NREDUZ,
        SUM(ZLX.ZLX_VOLREC) ZLX_VOLREC,
        SUM(ZLX.ZLX_DIFVOL) ZLX_DIFVOL,
        SUM(ZLX.ZLX_VLRNF) ZLX_VLRNF,
-       NVL(ROUND(
-        CASE
+       NVL(Round(
+        Case
             WHEN ZZX.ZZX_CODPRD = '004' THEN 0
-            WHEN C7_L_EXEST > 0 THEN ROUND(SUM((ZLX.ZLX_VOLREC * COALESCE(ROUND(ZAP.ZAP_EST, 2), 0) / 100)) * C7_L_EXEST,2) /*QTD_EST_KG*/
-            ELSE SUM(ZLX.ZLX_VOLREC * ENT.C7_PRECO)
+            WHEN C7_L_EXEST > 0 THEN Round(SUM((ZLX.ZLX_VOLREC * COALESCE(Round(ZAP.ZAP_EST, 2), 0) / 100)) * C7_L_EXEST,2) /*QTD_EST_KG*/
+            Else SUM(ZLX.ZLX_VOLREC * ENT.C7_PRECO)
           END +
-        SUM((((NVL(ROUND(ZAP_GORD,2),0) - ENT.C7_L_PMGB) * ZLX.ZLX_VOLREC) / 100) *
-       CASE
-          WHEN NVL(ROUND(ZAP_GORD, 2), 0) > ENT.C7_L_PMGB AND
-                NVL(ROUND(ZAP_GORD, 2), 0) <= ENT.C7_L_PMGB2 THEN
+        SUM((((NVL(Round(ZAP_GORD,2),0) - ENT.C7_L_PMGB) * ZLX.ZLX_VOLREC) / 100) *
+       Case
+          WHEN NVL(Round(ZAP_GORD, 2), 0) > ENT.C7_L_PMGB AND
+                NVL(Round(ZAP_GORD, 2), 0) <= ENT.C7_L_PMGB2 THEN
             ENT.C7_L_EXEMG
-          WHEN NVL(ROUND(ZAP_GORD, 2), 0) > ENT.C7_L_PMGB2 THEN
+          WHEN NVL(Round(ZAP_GORD, 2), 0) > ENT.C7_L_PMGB2 THEN
             ENT.C7_L_EXEM2
-          ELSE
+          Else
             0
         END
        ),2),0) + NVL(AVG(FIN.E2_VALOR), 0) - NVL(SUM(FUNRURAL), 0) VL_A_PAGAR,
-       ROUND(AVG(NVL(ROUND(ZAP.ZAP_GORD,2),0)),2) ZAP_GORD,
-       ROUND(SUM((ZLX.ZLX_VOLREC * NVL(ROUND(ZAP.ZAP_GORD,2),0) / 100)),2) QTD_MG_KG,
-       NVL(ROUND(SUM((((ROUND(ZAP.ZAP_GORD,2) - ENT.C7_L_PMGB) * ZLX.ZLX_VOLREC) / 100)), 4), 0) QTD_EMG_KG,
-       NVL(ROUND(SUM((((ROUND(ZAP.ZAP_GORD,2) - ENT.C7_L_PMGB) * ZLX.ZLX_VOLREC) / 100) *
-       CASE
-          WHEN NVL(ROUND(ZAP_GORD, 2), 0) > ENT.C7_L_PMGB AND
-                NVL(ROUND(ZAP_GORD, 2), 0) <= ENT.C7_L_PMGB2 THEN
+       Round(AVG(NVL(Round(ZAP.ZAP_GORD,2),0)),2) ZAP_GORD,
+       Round(SUM((ZLX.ZLX_VOLREC * NVL(Round(ZAP.ZAP_GORD,2),0) / 100)),2) QTD_MG_KG,
+       NVL(Round(SUM((((Round(ZAP.ZAP_GORD,2) - ENT.C7_L_PMGB) * ZLX.ZLX_VOLREC) / 100)), 4), 0) QTD_EMG_KG,
+       NVL(Round(SUM((((Round(ZAP.ZAP_GORD,2) - ENT.C7_L_PMGB) * ZLX.ZLX_VOLREC) / 100) *
+       Case
+          WHEN NVL(Round(ZAP_GORD, 2), 0) > ENT.C7_L_PMGB AND
+                NVL(Round(ZAP_GORD, 2), 0) <= ENT.C7_L_PMGB2 THEN
             ENT.C7_L_EXEMG
-          WHEN NVL(ROUND(ZAP_GORD, 2), 0) > ENT.C7_L_PMGB2 THEN
+          WHEN NVL(Round(ZAP_GORD, 2), 0) > ENT.C7_L_PMGB2 THEN
             ENT.C7_L_EXEM2
-          ELSE
+          Else
             0
         END
        ), 2), 0) VLR_PGMG,
-       NVL(DECODE(SUM(ZLX.ZLX_VOLREC), 0, 0, ROUND(SUM((((ROUND(ZAP.ZAP_GORD,2) - ENT.C7_L_PMGB) * ZLX.ZLX_VOLREC) / 100) * 
-       CASE
-          WHEN NVL(ROUND(ZAP_GORD, 2), 0) > ENT.C7_L_PMGB AND
-                NVL(ROUND(ZAP_GORD, 2), 0) <= ENT.C7_L_PMGB2 THEN
+       NVL(DECODE(SUM(ZLX.ZLX_VOLREC), 0, 0, Round(SUM((((Round(ZAP.ZAP_GORD,2) - ENT.C7_L_PMGB) * ZLX.ZLX_VOLREC) / 100) * 
+       Case
+          WHEN NVL(Round(ZAP_GORD, 2), 0) > ENT.C7_L_PMGB AND
+                NVL(Round(ZAP_GORD, 2), 0) <= ENT.C7_L_PMGB2 THEN
             ENT.C7_L_EXEMG
-          WHEN NVL(ROUND(ZAP_GORD, 2), 0) > ENT.C7_L_PMGB2 THEN
+          WHEN NVL(Round(ZAP_GORD, 2), 0) > ENT.C7_L_PMGB2 THEN
             ENT.C7_L_EXEM2
-          ELSE
+          Else
             0
         END
        ) /SUM(ZLX.ZLX_VOLREC),4)),0) CST_LMG,
-       ROUND(AVG(NVL(ROUND(ZAP.ZAP_EST,2),0)),2) ZAP_EST,
-       ROUND(SUM((ZLX.ZLX_VOLREC * NVL(ROUND(ZAP.ZAP_EST,2),0) / 100)),2) QTD_EST_KG,
-              NVL(ROUND(SUM((((ZAP.ZAP_EST - ENT.C7_L_PMEST) * ZLX.ZLX_VOLREC) / 100) * ENT.C7_L_EXEST), 2), 0) VLR_PGEST,
-       NVL(DECODE(SUM(ZLX.ZLX_VOLREC), 0, 0, ROUND(SUM((((ZAP.ZAP_EST - ENT.C7_L_PMEST) * ZLX.ZLX_VOLREC) / 100) * ENT.C7_L_EXEST) /
+       Round(AVG(NVL(Round(ZAP.ZAP_EST,2),0)),2) ZAP_EST,
+       Round(SUM((ZLX.ZLX_VOLREC * NVL(Round(ZAP.ZAP_EST,2),0) / 100)),2) QTD_EST_KG,
+              NVL(Round(SUM((((ZAP.ZAP_EST - ENT.C7_L_PMEST) * ZLX.ZLX_VOLREC) / 100) * ENT.C7_L_EXEST), 2), 0) VLR_PGEST,
+       NVL(DECODE(SUM(ZLX.ZLX_VOLREC), 0, 0, Round(SUM((((ZAP.ZAP_EST - ENT.C7_L_PMEST) * ZLX.ZLX_VOLREC) / 100) * ENT.C7_L_EXEST) /
                             SUM(ZLX.ZLX_VOLREC),4)),0) CST_LEST,
        NVL(SUM(ENT.D1_TOTAL),0) VLR_NFC,
        NVL(SUM(ENT.D2_TOTAL),0) VLR_NFD,
@@ -339,11 +343,13 @@ SELECT ZZX_FILIAL, ZZX_CODPRD, X5_DESCRI DESCRI, ZLX_TIPOLT, ORD_PRC, A2_NREDUZ,
        NVL(SUM(ENT.D2_VALICM),0) VLR_ICMSD,
        NVL(SUM(FUNDESA),0) FUNDESA,
        ENT.D1_PICM,
+       NVL(SUM(ZLX.ZLX_PEDANT),0) PEDANT,
        NVL(SUM(ZLX.ZLX_ICMSFR),0) ZLX_ICMSFR,
        NVL(SUM(ZLX.ZLX_VLRFRT + ZLX.ZLX_PEDAGI),0) VLR_FRETE,
-       SUM(CASE WHEN ZZV.ZZV_PERCUR = '2' THEN ZLX_VOLREC ELSE 0 END ) VOL_TRNSP,
-       DECODE(SUM(ZLX.ZLX_VOLREC), 0, 0, ROUND(SUM(ZLX.ZLX_VLRFRT + ZLX.ZLX_PEDAGI) / SUM(ZLX.ZLX_VOLREC), 4)) CST_FRETG,
-       DECODE(SUM(CASE WHEN ZZV.ZZV_PERCUR = '2' THEN ZLX_VOLREC ELSE 0 END ), 0, 0, ROUND(SUM(ZLX.ZLX_VLRFRT + ZLX.ZLX_PEDAGI) / SUM(CASE WHEN ZZV.ZZV_PERCUR = '2' THEN ZLX_VOLREC ELSE 0 END ), 4)) CST_FRETR,
+       NVL(SUM(ZLX.ZLX_VLRFRT + ZLX.ZLX_PEDAGI + ZLX.ZLX_PEDANT),0) VLR_FRETEPED,
+       SUM(Case WHEN ZZV.ZZV_PERCUR = '2' THEN ZLX_VOLREC Else 0 END ) VOL_TRNSP,
+       DECODE(SUM(ZLX.ZLX_VOLREC), 0, 0, Round(SUM(ZLX.ZLX_VLRFRT + ZLX.ZLX_PEDAGI) / SUM(ZLX.ZLX_VOLREC), 4)) CST_FRETG,
+       DECODE(SUM(Case WHEN ZZV.ZZV_PERCUR = '2' THEN ZLX_VOLREC Else 0 END ), 0, 0, Round(SUM(ZLX.ZLX_VLRFRT + ZLX.ZLX_PEDAGI) / SUM(Case WHEN ZZV.ZZV_PERCUR = '2' THEN ZLX_VOLREC Else 0 END ), 4)) CST_FRETR,
        COUNT(1) QTD_TRNSP
   FROM %Table:ZLX% ZLX, %Table:ZZX% ZZX, %Table:SA2% SA2, %Table:SX5% SX5, %Table:ZZV% ZZV,
   (SELECT ZAP.ZAP_FILIAL, ZAP.ZAP_CODIGO, AVG(ZAP.ZAP_GORD) ZAP_GORD, AVG(ZAP.ZAP_EST) ZAP_EST FROM %Table:ZAP% ZAP WHERE ZAP.D_E_L_E_T_ = ' '
@@ -393,7 +399,7 @@ SELECT ZZX_FILIAL, ZZX_CODPRD, X5_DESCRI DESCRI, ZLX_TIPOLT, ORD_PRC, A2_NREDUZ,
                SC7.C7_L_PMEST, SC7.C7_L_EXEMG, SC7.C7_L_EXEM2, SD1.D1_PICM
        ) ENT,
   (SELECT SE2.E2_FILIAL, SE2.E2_FORNECE, SE2.E2_LOJA, 
-       SUM(CASE WHEN SE2.E2_ORIGEM = 'AGLT022' THEN SE2.E2_VALOR+SE2.E2_ACRESC-SE2.E2_DECRESC ELSE (SE2.E2_VALOR+SE2.E2_ACRESC-SE2.E2_DECRESC)*-1 END) E2_VALOR FROM %Table:SE2% SE2
+       SUM(Case WHEN SE2.E2_ORIGEM = 'AGLT022' THEN SE2.E2_VALOR+SE2.E2_ACRESC-SE2.E2_DECRESC Else (SE2.E2_VALOR+SE2.E2_ACRESC-SE2.E2_DECRESC)*-1 END) E2_VALOR FROM %Table:SE2% SE2
        WHERE SE2.D_E_L_E_T_ = ' '
        AND SE2.E2_VENCTO BETWEEN %exp:MV_PAR10% AND %exp:MV_PAR11%
        AND (%exp:_cFilDeb% /*(SE2.E2_ORIGEM IN ('AGLT011', 'AGLT016') AND SE2.E2_TIPO = 'NDF') OR */
@@ -426,6 +432,7 @@ SELECT ZZX_FILIAL, ZZX_CODPRD, X5_DESCRI DESCRI, ZLX_TIPOLT, ORD_PRC, A2_NREDUZ,
    AND ZLX.ZLX_FORNEC = SA2.A2_COD
    AND ZLX.ZLX_LJFORN = SA2.A2_LOJA
    AND ZZX.ZZX_CODIGO = ZLX.ZLX_CODANA
+   %exp:_cFilSA2%
    AND ZLX.ZLX_DTENTR BETWEEN %exp:MV_PAR06% AND %exp:MV_PAR07%
    AND ZZX.ZZX_FORNEC BETWEEN %exp:MV_PAR02% AND %exp:MV_PAR04%
    AND ZZX.ZZX_LJFORN BETWEEN %exp:MV_PAR03% AND %exp:MV_PAR05%
@@ -453,16 +460,16 @@ oReport:Section(1):Init()
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(0)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
   oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->ZZX_FILIAL
 	_cProduto := (_cAlias)->ZZX_CODPRD+' - '+AllTrim((_cAlias)->DESCRI)
   _cTipo:= oReport:Section(1):Cell("ZLX_TIPOLT"):GetCBox()
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

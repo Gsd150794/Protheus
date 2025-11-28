@@ -4,22 +4,17 @@
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     |02/02/2023| Chamado 42807 - Correções na exibição da hora de emissão do pedido do portal no Workflow. 
-Igor Melgaço  |12/03/2024| Chamado 45575 - Ajuste para conversão de texto do Assunto do email em padrao UTF8.
 Lucas Borges  |09/10/2024| Chamado 48465. Retirada da função de conout
 Lucas Borges  |01/08/2025| Chamado 51453. Substituir função U_ITEncode por FWHttpEncode
-===============================================================================================================================
+Lucas Borges  |19/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
+==============================================================================================================================================================
+Analista - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
+=============================================================================================================================================================================================
+Jerry    - Julio Paz     - 29/09/25 - 05/11/25 - 52216   - Alterar a rotina para encerrar o processamento quanto não existirem dados de pedidos do portal para liberação e para o workflow.
+=============================================================================================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-
-#INCLUDE "Protheus.ch"
-#INCLUDE "RwMake.ch"
-#Include "TopConn.ch" 
-
-#DEFINE _ENTER CHR(13)+CHR(10)
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -61,21 +56,21 @@ Begin Sequence
    //====================================================================
    // Liga ou Desliga a integração Workflow Pedidos Vendas do Portal.
    //====================================================================
-   _LigaDesWS := U_ITGETMV('IT_LIGAWFPV', .T.) 
+   _LigaDesWS := SuperGetMV('IT_LIGAWFP',.F.,.T.) 
    If ! _LigaDesWS
       Break 
    EndIf 
 
-   _cHostWF := U_ItGetMv("IT_WFHOSTS","http://wfteste.italac.com.br:4034/")
+   _cHostWF := SuperGetMV("IT_WFHOSTS",.T.,"http://wfteste.italac.com.br:4034/")
    cLogo	 := _cHostWF + "htm/logo_novo.jpg"
 
-   _cEmailCopia:=""  // U_ItGetMv("IT_EMAILWFG","")
+   _cEmailCopia:=""
    _cMV_WFMLBOX:= AllTrim(GetMV('MV_WFMLBOX'))
    lWFHTML	    := GetMv("MV_WFHTML")
 
    PutMV("MV_WFHTML",.T.)   
    
-   _nDiaEnvWF := U_ITGETMV('IT_DIASWFPV', 2 ) 
+   _nDiaEnvWF := SuperGetMV('IT_DIASWFV',.F.,2) 
 
    _cQry := " SELECT DISTINCT ZW_FILIAL, ZW_IDPED, ZW_VEND1, ZW_ENVWF, ZW_EMISSAO, ZW_TIMEEMI "
    _cQry += " FROM " + RetSqlName("SZW") + " SZW "
@@ -84,15 +79,15 @@ Begin Sequence
    _cQry += " AND ZW_NUMPED = ' ' "
    _cQry += " AND ZW_I_HTML <> ' ' "
    _cQry += " AND ZW_BLOPRC = 'B' "  
-   _cQry += " AND ZW_DTENVIO <= '" + Dtos(Date() - _nDiaEnvWF) + "' " // _nDiaEnvWF
-//   _cQry += " AND ZW_DTENVIO <= '" + Dtos(Date()-2) + "' " 
+   _cQry += " AND ZW_DTENVIO <= '" + DToS(Date() - _nDiaEnvWF) + "' " // _nDiaEnvWF
    _cQry += " ORDER BY ZW_ENVWF, ZW_VEND1 "
 
    If Select("TRBSZW") <> 0
 	  TRBSZW->(DBCloseArea())
    EndIf
 
-   DbUseArea(.T., "TOPCONN", TcGenQry(,,_cQry), "TRBSZW", .T., .F.)
+   _cQry := ChangeQuery(_cQry)
+   MPSysOpenQuery(_cQry,"TRBSZW")
    
    _aDados   := {}
    _cTipoEnv := ""
@@ -101,43 +96,39 @@ Begin Sequence
       _cTipoEnv := TRBSZW->ZW_ENVWF 
    EndIf 
 
-   Do While !TRBSZW->(Eof())
-
-      //_aData := FWDateTimeToLocal(AllTrim(TRBSZW->ZW_TIMEEMI),4)
-      //_cHora := _aData[2]
+   While !TRBSZW->(Eof())
       _cHora := U_MOMS057H(AllTrim(TRBSZW->ZW_TIMEEMI))
 
       //            //       1                 2               3               4             5   6   7         8                    9          10           11 
-      Aadd(_aDados,{TRBSZW->ZW_FILIAL, TRBSZW->ZW_IDPED, TRBSZW->ZW_VEND1, TRBSZW->ZW_ENVWF, "", "", "",StoD(TRBSZW->ZW_EMISSAO),_cHora,TRBSZW->ZW_EMISSAO, ""})
+      aAdd(_aDados,{TRBSZW->ZW_FILIAL, TRBSZW->ZW_IDPED, TRBSZW->ZW_VEND1, TRBSZW->ZW_ENVWF, "", "", "",SToD(TRBSZW->ZW_EMISSAO),_cHora,TRBSZW->ZW_EMISSAO, ""})
 	
-	   TRBSZW->(dbSkip())
+	   TRBSZW->(DBSkip())
    EndDo
 
-   SA3->(DbSetOrder(1)) // A3_FILIAL+A3_COD 
+   SA3->(DBSetOrder(1)) // A3_FILIAL+A3_COD 
 
    For _nI := 1 To Len(_aDados)
   
        _cCodVend := U_ITKEY(_aDados[_nI,3],"A3_COD")
        
        If _aDados[_nI,4] == "C"
-          _cCodSup := Posicione("SA3", 1, XFilial("SA3") + _cCodVend, "A3_SUPER")
-       Else 
-          _cCodSup := Posicione("SA3", 1, XFilial("SA3") + _cCodVend, "A3_GEREN")
+          _cCodSup := Posicione("SA3", 1, xFilial("SA3") + _cCodVend, "A3_SUPER")
+       Else
+          _cCodSup := Posicione("SA3", 1, xFilial("SA3") + _cCodVend, "A3_GEREN")
        EndIf 
 
-       _cCoord     := Posicione("SA3", 1, XFilial("SA3") + _cCodVend, "A3_SUPER")
-       _cNomeCoord := Posicione("SA3", 1, XFilial("SA3") + _cCoord  , "A3_NOME")
+       _cCoord     := Posicione("SA3", 1, xFilial("SA3") + _cCodVend, "A3_SUPER")
+       _cNomeCoord := Posicione("SA3", 1, xFilial("SA3") + _cCoord  , "A3_NOME")
 
-       _cEmailSup := Posicione("SA3", 1, XFilial("SA3") + _cCodSup , "A3_EMAIL")
-       //_cNomeSup  := Posicione("SA3", 1, XFilial("SA3") + _cCodVend, "A3_NOME")
-       _cNomeSup  := Posicione("SA3", 1, XFilial("SA3") + _cCodSup , "A3_NOME")
+       _cEmailSup := Posicione("SA3", 1, xFilial("SA3") + _cCodSup , "A3_EMAIL")
+       _cNomeSup  := Posicione("SA3", 1, xFilial("SA3") + _cCodSup , "A3_NOME")
        
-       _cEmailAdi := Posicione("SA3", 1, XFilial("SA3") + _cCodSup , "A3_I_EMWF")
+       _cEmailAdi := Posicione("SA3", 1, xFilial("SA3") + _cCodSup , "A3_I_EMWF")
        If ! Empty(_cEmailAdi)
           If ! Empty(_cEmailSup)
-             _cEmailSup := AllTrim(_cEmailSup) +"; "+ Alltrim(_cEmailAdi)
-          Else 
-             _cEmailSup := Alltrim(_cEmailAdi)
+             _cEmailSup := AllTrim(_cEmailSup) +"; "+ AllTrim(_cEmailAdi)
+          Else
+             _cEmailSup := AllTrim(_cEmailAdi)
           EndIf
        EndIf 
    
@@ -148,8 +139,11 @@ Begin Sequence
 
    Next 
 
-   //ASORT(_aDados, , , { | x,y | x[5]+x[1]+x[2]+x[3] < y[5]+y[1]+y[2]+y[3] } )
-   ASORT(_aDados, , , { | x,y | x[5]+x[10]+x[9] < y[5]+y[10]+y[9] } )
+   If Empty(_aDados)  
+      Break
+   EndIf 
+
+   aSort(_aDados, , , { | x,y | x[5]+x[10]+x[9] < y[5]+y[10]+y[9] } )
 
    _cCodVend := _aDados[1,5]
 
@@ -162,7 +156,7 @@ Begin Sequence
 		   _aDadosEnv := {}
 	   EndIf 
 
-      Aadd(_aDadosEnv , Aclone(_aDados[_nI]))
+      aAdd(_aDadosEnv , aClone(_aDados[_nI]))
    
    Next 
 
@@ -194,6 +188,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function MOMS057E(_aDadosEnv)
+
 Local _aTotais, _nI 
 Local _cCliente
 Local _cDestino 
@@ -221,12 +216,12 @@ Begin Sequence
    cMailTo		:= _aDadosEnv[1,6]  
   
 	chtmltexto	:= wfloadfile("\workflow\emp01\" + chtmlfile )//Carrega o arquivo 
-	chtmltexto	:= strtran( chtmltexto, cmailto, "WFHTTPRET.APL" )//Procura e troca a string
+	chtmltexto	:= StrTran( chtmltexto, cmailto, "WFHTTPRET.APL" )//Procura e troca a string
 	wfsavefile("\workflow\emp"+cEmpAnt+"\" + chtmlfile, chtmltexto)//Grava o arquivo de volta
 			
 	RastreiaWF(_cMailID + '.' + _cTaskID , _oProcess:fProcCode, "1001", "Lista de Pedidos de Vendas do Portal Pendente Aprovação", "")
    
-   SZW->(DbSetOrder(1)) // ZW_FILIAL+ZW_IDPED 
+   SZW->(DBSetOrder(1)) // ZW_FILIAL+ZW_IDPED 
 
    _cDestino := ""
 
@@ -241,18 +236,18 @@ Begin Sequence
           EndIf 
        EndIf 
 
-       _cNomeVend  := Posicione("SA3", 1, XFilial("SA3") + _aDadosEnv[_nI,3] , "A3_NOME") // _aDadosEnv[_nI,7]
+       _cNomeVend  := Posicione("SA3", 1, xFilial("SA3") + _aDadosEnv[_nI,3] , "A3_NOME") // _aDadosEnv[_nI,7]
 
        SZW->(MsSeek(U_ITKEY(_aDadosEnv[_nI,1],"ZW_FILIAL") + U_ITKEY(_aDadosEnv[_nI,2],"ZW_IDPED")))
      
        _aTotais :=  U_MOMS057T(_aDadosEnv[_nI,1],_aDadosEnv[_nI,2])
 
-       _cCliente := AllTrim(Posicione("SA1", 1, XFilial("SA1") + SZW->(ZW_CLIENTE + ZW_LOJACLI), "A1_NOME"))
+       _cCliente := AllTrim(Posicione("SA1", 1, xFilial("SA1") + SZW->(ZW_CLIENTE + ZW_LOJACLI), "A1_NOME"))
 
        aAdd( _oProcess:oHtml:ValByName("itens.COORDENA")	, _aDadosEnv[_nI,11]	) // aAdd( _oProcess:oHtml:ValByName("itens.COORDENA")	, _aDadosEnv[_nI,7]	) 
 	    aAdd( _oProcess:oHtml:ValByName("itens.PEDIDO")	, _aDadosEnv[_nI,2]	)
 		 aAdd( _oProcess:oHtml:ValByName("itens.VENDEDOR")	, _cNomeVend)
-		 aAdd( _oProcess:oHtml:ValByName("itens.EMISSAO")	, Dtoc(SZW->ZW_EMISSAO) + "  " + _aDadosEnv[_nI,9] )
+		 aAdd( _oProcess:oHtml:ValByName("itens.EMISSAO")	, DToC(SZW->ZW_EMISSAO) + "  " + _aDadosEnv[_nI,9] )
 		 aAdd( _oProcess:oHtml:ValByName("itens.CLIENTE")	, _cCliente )
        aAdd( _oProcess:oHtml:ValByName("itens.LINK")	   , SZW->ZW_I_HTML )
        aAdd( _oProcess:oHtml:ValByName("itens.cTxtLnk")	, "Clique Aqui!"	)
@@ -286,7 +281,7 @@ Begin Sequence
 
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -300,33 +295,34 @@ Retorno-----------: _aRet = {Valor total, Peso total}
 ===============================================================================================================================
 */
 User Function MOMS057T(_cCodFilial, _cIdPedidoV)
+
 Local _aRet := {0,0}
 Local _nRecAtu := SZW->(Recno())
 
 Begin Sequence
-   SB1->(DbSetOrder(1)) // B1_FILIAL+B1_COD
+   SB1->(DBSetOrder(1)) // B1_FILIAL+B1_COD
 
-   SZW->(DbSetOrder(1)) // ZW_FILIAL+ZW_IDPED 
+   SZW->(DBSetOrder(1)) // ZW_FILIAL+ZW_IDPED 
 
    SZW->(MsSeek(_cCodFilial + _cIdPedidoV))
 
    _nVlrTot	  := 0
    _nPesoTot  := 0
 
-   Do While ! SZW->(Eof()) .And. SZW->(ZW_FILIAL+ZW_IDPED) == _cCodFilial + _cIdPedidoV
+   While ! SZW->(Eof()) .And. SZW->(ZW_FILIAL+ZW_IDPED) == _cCodFilial + _cIdPedidoV
       SB1->(MsSeek(xFilial("SB1")+SZW->ZW_PRODUTO))
 
       _nVlrTot	  += (SZW->ZW_QTDVEN * SZW->ZW_PRCVEN)
       _nPesoTot  += (SZW->ZW_QTDVEN * SB1->B1_PESBRU)   
 
-      SZW->(DbSkip())
+      SZW->(DBSkip())
    EndDo
    
    _aRet := {_nVlrTot, _nPesoTot}
 
 End Sequence
 
-SZW->(DbGoTo(_nRecAtu))
+SZW->(DBGoTo(_nRecAtu))
 
 Return _aRet
 
@@ -343,6 +339,7 @@ Retorno-----------: _cHora = A hora do campo.
 ===============================================================================================================================
 */
 User Function MOMS057H(_cDataHora)
+
 Local _cHora := "00:00"
 Local _nFator1 := 60
 Local _nFator2 := 60
@@ -353,7 +350,7 @@ Local _nMinuto
 Local _nDataHora
 Local _nHorario 
 
-Begin SEQUENCE
+Begin Sequence
    If Empty(_cDataHora)
       Break 
    EndIf 

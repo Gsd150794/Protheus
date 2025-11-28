@@ -2,24 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                           
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Alex Wallauer    | 14/05/2018 | Incluidos tratamentos para o campo novo ZGH_NATURE - Chamado 23254
--------------------------------------------------------------------------------------------------------------------------------
- Alex Wallauer    | 06/03/2018 | Incluidos tratamentos para o campo ZGH_NATURE na integração - Chamado 28358
--------------------------------------------------------------------------------------------------------------------------------
- Josué  Danich    | 26/06/2019 | Ajustes para loboguara - Chamado 28886      
--------------------------------------------------------------------------------------------------------------------------------
- Julio Paz        | 16/12/2019 | Criação da Sub regra Amarração Bloco H - Chamado 31211. 
--------------------------------------------------------------------------------------------------------------------------------
- Alex Wallauer    | 26/02/2020 | Ajustes na validação do campo ZGH_TIPOPD e criação da integração - Chamado 32129
-------------------------------------------------------------------------------------------------------------------------------
- Jonathan         | 28/09/2020 | Remoção de bugs apontados pelo Totvs CodeAnalysis. Chamado: 34262
-------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges      | 24/07/2025 | Chamado 51340. Ajustar função para validação de ambiente de teste
+Jonathan      |28/09/2020| Chamado 34262. Remoção de bugs apontados pelo Totvs CodeAnalysis
+Lucas Borges  |24/07/2025| Chamado 51340. Ajustar função para validação de ambiente de teste
+Lucas Borges  |14/09/2025| Chamado 51799. Implementada função para validar ambiente de teste totvs.framework.environment.Type.get()
 ===============================================================================================================================
 */
 
+#Include "TOTVS.ch"
 #Include 'FWMVCDEF.CH'
 
 /*
@@ -27,11 +18,8 @@ Lucas Borges      | 24/07/2025 | Chamado 51340. Ajustar função para validação de
 Programa--------: AFIS008
 Autor-----------: Josué Danich Prestes
 Data da Criacao-: 06/11/2017
-===============================================================================================================================
 Descrição-------: Cadastro de regras do Sped 500 - Chamado 21797
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -51,15 +39,13 @@ Return(Nil)
 Programa----------: ModelDef
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 06/11/2017
-===============================================================================================================================
 Descrição---------: Rotina para montagem do modelo de dados para o processamento
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function ModelDef()
+
 Local oStruZGH	:= FWFormStruct(1,"ZGH")
 Local oModel	:= Nil
 
@@ -76,15 +62,13 @@ Return(oModel)
 Programa----------: ViewDef
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 06/11/2017
-===============================================================================================================================
 Descrição---------: Rotina para montar a View de Dados para exibição
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function ViewDef()
+
 Local oModel	:= FWLoadModel('AFIS008')
 Local oStruZGH	:= FWFormStruct(2,'ZGH')
 Local oView		:= Nil
@@ -134,16 +118,14 @@ Return(oView)
 Programa----------: MenuDef
 Autor-------------:Josué Danich Prestes
 Data da Criacao---: 06/11/2017
-===============================================================================================================================
 Descrição---------: Rotina para criação do menu da tela principal
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: _aRotina - Array com as opções de menu
 ===============================================================================================================================
 */
 Static Function MenuDef()
-LOCAL _aRotina := {}
+
+Local _aRotina := {}
 
 ADD OPTION _aRotina Title 'Visualizar'			Action 'VIEWDEF.AFIS008'	OPERATION 2 ACCESS 0
 ADD OPTION _aRotina Title 'Incluir'   			Action 'VIEWDEF.AFIS008'	OPERATION 3 ACCESS 0
@@ -152,7 +134,6 @@ ADD OPTION _aRotina Title 'Alterar'   			Action 'VIEWDEF.AFIS008'	OPERATION 4 AC
 ADD OPTION _aRotina Title 'Excluir'				Action 'VIEWDEF.AFIS008'	OPERATION 5 ACCESS 0
 ADD OPTION _aRotina Title 'Imprimir' 			Action 'VIEWDEF.AFIS008'	OPERATION 2 ACCESS 0
 ADD OPTION _aRotina Title 'Simulador'  			Action 'U_AFIS008Teste'	    OPERATION 2 ACCESS 0
-//ADD OPTION _aRotina Title 'Importar'   			Action 'U_AFIS008Integ'	    OPERATION 2 ACCESS 0
 
 Return(_aRotina)
 
@@ -161,16 +142,14 @@ Return(_aRotina)
 Programa----------: AFIS008M
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 06/11/2017
-===============================================================================================================================
 Descrição---------: Pontos de entrada da rotina
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: _xret - lógico de retorno
 ===============================================================================================================================
 */
-user function AFIS008M()
-Local aParam     := PARAMIXB
+User Function AFIS008M()
+
+Local aParam     := ParamIXB
 Local oObj       := ''
 Local cIdPonto   := ''
 Local cIdModel   := ''
@@ -180,99 +159,99 @@ oObj       := aParam[1]
 cIdPonto   := aParam[2]
 cIdModel   := aParam[3]
 
-If cIdPonto == 'MODELPOS' .AND. (Inclui .OR. Altera)
+If cIdPonto == 'MODELPOS' .And. (Inclui .Or. Altera)
 	
-    If EMPTY(M->ZGH_NATURE) .AND. EMPTY(M->ZGH_IMPOST) .AND. EMPTY(M->ZGH_ALIQ) .and. EMPTY(M->ZGH_TIPOPD)
+    If Empty(M->ZGH_NATURE) .And. Empty(M->ZGH_IMPOST) .And. Empty(M->ZGH_ALIQ) .And. Empty(M->ZGH_TIPOPD)
 		
-		If ( !EMPTY(alltrim(oobj:GetValue("ZGHMASTER","ZGH_FORNER"))) .OR. !EMPTY(alltrim(oobj:GetValue("ZGHMASTER","ZGH_FORLOJ"))) ) .AND.;
-			( !EMPTY(alltrim(oobj:GetValue("ZGHMASTER","ZGH_CLIENT"))) .OR. !EMPTY(alltrim(oobj:GetValue("ZGHMASTER","ZGH_CLILOJ"))) )
+		If ( !Empty(AllTrim(oobj:GetValue("ZGHMASTER","ZGH_FORNER"))) .Or. !Empty(AllTrim(oobj:GetValue("ZGHMASTER","ZGH_FORLOJ"))) ) .AND.;
+			( !Empty(AllTrim(oobj:GetValue("ZGHMASTER","ZGH_CLIENT"))) .Or. !Empty(AllTrim(oobj:GetValue("ZGHMASTER","ZGH_CLILOJ"))) )
 			
 			Help( ,, 'Atenção',, 'Forncedor+Loja ou Clente+Loja não podem ser preenchidos ao mesmo tempo!', 1, 0 )
 			_xret := .F.
 			
-		Endif
+		EndIf
 		
-		If EMPTY(alltrim(oobj:GetValue("ZGHMASTER","ZGH_GRUPO"))) .AND. EMPTY(alltrim(oobj:GetValue("ZGHMASTER","ZGH_PRODUT")))
+		If Empty(AllTrim(oobj:GetValue("ZGHMASTER","ZGH_GRUPO"))) .And. Empty(AllTrim(oobj:GetValue("ZGHMASTER","ZGH_PRODUT")))
 			Help( ,, 'Atenção',, 'Grupo ou produto precisam ser preenchidos!', 1, 0 )
 			_xret := .F.
-		Endif
+		EndIf
 		
-		If !EMPTY(alltrim(oobj:GetValue("ZGHMASTER","ZGH_GRUPO"))) .AND. !EMPTY(alltrim(oobj:GetValue("ZGHMASTER","ZGH_PRODUT")))
+		If !Empty(AllTrim(oobj:GetValue("ZGHMASTER","ZGH_GRUPO"))) .And. !Empty(AllTrim(oobj:GetValue("ZGHMASTER","ZGH_PRODUT")))
 			Help( ,, 'Atenção',, 'Grupo e produto não podem ser preenchidos ao mesmo tempo!', 1, 0 )
 			_xret := .F.
-		Endif
+		EndIf
 		
-		If EMPTY(alltrim(oobj:GetValue("ZGHMASTER","ZGH_CFOP"))) .AND. EMPTY(ALLTRIM(oobj:GetValue("ZGHMASTER","ZGH_TPMOV")))
+		If Empty(AllTrim(oobj:GetValue("ZGHMASTER","ZGH_CFOP"))) .And. Empty(AllTrim(oobj:GetValue("ZGHMASTER","ZGH_TPMOV")))
 			Help( ,, 'Atenção',, 'Cfop ou tipo de movimento precisam ser preenchidos!', 1, 0 )
 			_xret := .F.
-		Endif
+		EndIf
 		
-		If !EMPTY(alltrim(oobj:GetValue("ZGHMASTER","ZGH_CFOP"))) .AND. !EMPTY(alltrim(oobj:GetValue("ZGHMASTER","ZGH_TPMOV")))
+		If !Empty(AllTrim(oobj:GetValue("ZGHMASTER","ZGH_CFOP"))) .And. !Empty(AllTrim(oobj:GetValue("ZGHMASTER","ZGH_TPMOV")))
 			Help( ,, 'Atenção',, 'Cfop e tipo de movimento não podem ser preenchidos ao mesmo tempo!', 1, 0 )
 			_xret := .F.
-		Endif
+		EndIf
 		
-		If  !EMPTY(alltrim(oobj:GetValue("ZGHMASTER","ZGH_FORNER"))) .AND. !EMPTY(ALLTRIM(oobj:GetValue("ZGHMASTER","ZGH_TPMOV"))) .AND. ALLTRIM(oobj:GetValue("ZGHMASTER","ZGH_TPMOV")) # 'E'
+		If  !Empty(AllTrim(oobj:GetValue("ZGHMASTER","ZGH_FORNER"))) .And. !Empty(AllTrim(oobj:GetValue("ZGHMASTER","ZGH_TPMOV"))) .And. AllTrim(oobj:GetValue("ZGHMASTER","ZGH_TPMOV")) # 'E'
 			Help( ,, 'Atenção',, 'Quando Forncedor e Tipo de Movimento preenchidos, Tipo de Movimento só pode ser Entrada', 1, 0 )
 			_xret := .F.
-		Endif
-		If  !EMPTY(alltrim(oobj:GetValue("ZGHMASTER","ZGH_CLIENT"))) .AND. !EMPTY(ALLTRIM(oobj:GetValue("ZGHMASTER","ZGH_TPMOV"))) .AND. ALLTRIM(oobj:GetValue("ZGHMASTER","ZGH_TPMOV")) # 'S'
+		EndIf
+		If  !Empty(AllTrim(oobj:GetValue("ZGHMASTER","ZGH_CLIENT"))) .And. !Empty(AllTrim(oobj:GetValue("ZGHMASTER","ZGH_TPMOV"))) .And. AllTrim(oobj:GetValue("ZGHMASTER","ZGH_TPMOV")) # 'S'
 			Help( ,, 'Atenção',, 'Quando Cliente e Tipo de Movimento preenchidos, Tipo de Movimento só pode ser Saida', 1, 0 )
 			_xret := .F.
-		Endif
+		EndIf
 		
-		If  !EMPTY(alltrim(oobj:GetValue("ZGHMASTER","ZGH_FORNER"))) .AND. !EMPTY(ALLTRIM(oobj:GetValue("ZGHMASTER","ZGH_CFOP"))) .AND. ALLTRIM(oobj:GetValue("ZGHMASTER","ZGH_CFOP")) >= "5000"
+		If  !Empty(AllTrim(oobj:GetValue("ZGHMASTER","ZGH_FORNER"))) .And. !Empty(AllTrim(oobj:GetValue("ZGHMASTER","ZGH_CFOP"))) .And. AllTrim(oobj:GetValue("ZGHMASTER","ZGH_CFOP")) >= "5000"
 			Help( ,, 'Atenção',, 'Quando Forncedor e CFOP preenchidos, CFOP só pode menor que 5000', 1, 0 )
 			_xret := .F.
-		Endif
-		If  !EMPTY(alltrim(oobj:GetValue("ZGHMASTER","ZGH_CLIENT"))) .AND. !EMPTY(ALLTRIM(oobj:GetValue("ZGHMASTER","ZGH_CFOP"))) .AND. ALLTRIM(oobj:GetValue("ZGHMASTER","ZGH_CFOP")) < "5000"
+		EndIf
+		If  !Empty(AllTrim(oobj:GetValue("ZGHMASTER","ZGH_CLIENT"))) .And. !Empty(AllTrim(oobj:GetValue("ZGHMASTER","ZGH_CFOP"))) .And. AllTrim(oobj:GetValue("ZGHMASTER","ZGH_CFOP")) < "5000"
 			Help( ,, 'Atenção',, 'Quando Cliente e CFOP preenchidos, CFOP só pode maior que 5000', 1, 0 )
 			_xret := .F.
-		Endif
+		EndIf
 		
-		ZGH->(DBSETORDER(3))//ZGH_FILIAL+ZGH_CLIENT+ZGH_CLILOJ+ZGH_FORNER+ZGH_FORLOJ+ZGH_GRUPO+ZGH_PRODUT+ZGH_CFOP+ZGH_TPMOV
-		If  Inclui .AND. ZGH->(DBSEEK(xFilial("ZGH")+ M->(ZGH_CLIENT+ZGH_CLILOJ+ZGH_FORNER+ZGH_FORLOJ+ZGH_GRUPO+ZGH_PRODUT+ZGH_CFOP+ZGH_TPMOV) )) .And. Empty(M->ZGH_TIPOPD)
+		ZGH->(DBSetOrder(3))//ZGH_FILIAL+ZGH_CLIENT+ZGH_CLILOJ+ZGH_FORNER+ZGH_FORLOJ+ZGH_GRUPO+ZGH_PRODUT+ZGH_CFOP+ZGH_TPMOV
+		If  Inclui .And. ZGH->(DBSeek(xFilial("ZGH")+ M->(ZGH_CLIENT+ZGH_CLILOJ+ZGH_FORNER+ZGH_FORLOJ+ZGH_GRUPO+ZGH_PRODUT+ZGH_CFOP+ZGH_TPMOV) )) .And. Empty(M->ZGH_TIPOPD)
 			Help( ,, 'Atenção',, 'Chave Cliente + Fornecedor + Grupo + Produto + CFOP + Tp Movimento já cadastrados', 1, 0 )
 			_xret := .F.
-		Endif
+		EndIf
 		
-	ELSEIf !EMPTY(M->ZGH_NATURE)
+	ElseIf !Empty(M->ZGH_NATURE)
 		
-		ZGH->(DBSETORDER(4))//ZGH_FILIAL+ZGH_NATURE
+		ZGH->(DBSetOrder(4))//ZGH_FILIAL+ZGH_NATURE
 		nSalvaRec:=ZGH->(RECNO())//Para alteração
-		If  ZGH->(DBSEEK(xFilial("ZGH")+M->ZGH_NATURE )) .AND. (Inclui .OR. nSalvaRec <> ZGH->(RECNO()))
+		If  ZGH->(DBSeek(xFilial("ZGH")+M->ZGH_NATURE )) .And. (Inclui .Or. nSalvaRec <> ZGH->(RECNO()))
 			Help( ,, 'Atenção',, 'Natureza já foi cadastrada para outra conta: '+ZGH->ZGH_CONTA, 1, 0 )
 			_xret := .F.
-		Endif
-		ZGH->(DBGOTO(nSalvaRec))
+		EndIf
+		ZGH->(DBGoTo(nSalvaRec))
 
-	ELSEIf !Empty(M->ZGH_TIPOPD)
+	ElseIf !Empty(M->ZGH_TIPOPD)
 		
-		ZGH->(DbSetOrder(6))
+		ZGH->(DBSetOrder(6))
 		nSalvaRec:=ZGH->(RECNO())//Para alteração
-		If ZGH->(DbSeek(xFilial("ZGH")+M->ZGH_TIPOPD)) .AND. (Inclui .OR. nSalvaRec <> ZGH->(RECNO()))
+		If ZGH->(DBSeek(xFilial("ZGH")+M->ZGH_TIPOPD)) .And. (Inclui .Or. nSalvaRec <> ZGH->(RECNO()))
 			Help( ,, 'Atenção',, 'O TIPO DE PRODUTO já foi cadastrada para outra conta: '+ZGH->ZGH_CONTA, 1, 0 )
 			_xret := .F.
 		EndIf
-		ZGH->(DBGOTO(nSalvaRec))
+		ZGH->(DBGoTo(nSalvaRec))
 		
-	ELSEIf !EMPTY(M->ZGH_IMPOST) .OR. !EMPTY(M->ZGH_ALIQ)
+	ElseIf !Empty(M->ZGH_IMPOST) .Or. !Empty(M->ZGH_ALIQ)
 		
-		ZGH->(DBSETORDER(5))//ZGH_FILIAL+ZGH_IMPOST+ZGH_ALIQ
+		ZGH->(DBSetOrder(5))//ZGH_FILIAL+ZGH_IMPOST+ZGH_ALIQ
 		nSalvaRec:=ZGH->(RECNO())//Para alteração
-		If EMPTY(M->ZGH_IMPOST) .OR. EMPTY(M->ZGH_ALIQ)
+		If Empty(M->ZGH_IMPOST) .Or. Empty(M->ZGH_ALIQ)
 			Help( ,, 'Atenção',, 'O imposto e a aliquota devem ser informados juntos', 1, 0 )
 			_xret := .F.
-		ELSEIf ZGH->(DBSEEK(xFilial("ZGH")+M->ZGH_IMPOST+STR(M->ZGH_ALIQ,7,4))) .AND. (Inclui .OR. nSalvaRec <> ZGH->(RECNO()))
+		ElseIf ZGH->(DBSeek(xFilial("ZGH")+M->ZGH_IMPOST+Str(M->ZGH_ALIQ,7,4))) .And. (Inclui .Or. nSalvaRec <> ZGH->(RECNO()))
 			Help( ,, 'Atenção',, 'Imposto + aliquota já cadastrados', 1, 0 )
 			_xret := .F.
-		Endif
-		ZGH->(DBGOTO(nSalvaRec))
+		EndIf
+		ZGH->(DBGoTo(nSalvaRec))
 
-	ENDIF
+	EndIf
 	
 	
-Endif
+EndIf
 
 Return _xret
 
@@ -281,50 +260,46 @@ Return _xret
 Programa----------: AFIS008Teste()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 08/12/2017
-===============================================================================================================================
 Descrição---------: opcao de teste da rotina
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-USER FUNCTION AFIS008Teste()
-LOCAL aFixos:={}
+User Function AFIS008Teste()
+
+Local aFixos:={}
 
 aRotina:={}
-AADD( aRotina,	{ "Visualizar" ,"AxVisual"		, 0 , 2})
-AADD( aRotina,	{ "Buscar"     ,"U_AFIS008Busca()"	, 0 , 4})
+aAdd( aRotina,	{ "Visualizar" ,"AxVisual"		, 0 , 2})
+aAdd( aRotina,	{ "Buscar"     ,"U_AFIS008Busca()"	, 0 , 4})
 cCadastro:="Itens da NF do SPEE 500"
 
-AADD(aFixos,{AVSX3("FT_CLIEFOR" ,5),"FT_CLIEFOR"                                              })
-AADD(aFixos,{AVSX3("FT_LOJA"    ,5),"FT_LOJA"                                                 })
-AADD(aFixos,{AVSX3("FT_CLIENT"  ,5),"FT_CLIENT"                                               })
-AADD(aFixos,{AVSX3("FT_LOJENT"  ,5),"FT_LOJENT"                                               })
-AADD(aFixos,{AVSX3("FT_PRODUTO" ,5),"FT_PRODUTO"                                              })
-AADD(aFixos,{AVSX3("B1_GRUPO"   ,5),{|| E_Field2(SFT->FT_PRODUTO,"SB1",1,"B1_GRUPO") }})
-AADD(aFixos,{AVSX3("FT_TIPOMOV" ,5),"FT_TIPOMOV"                                              })
-AADD(aFixos,{AVSX3("FT_CFOP"    ,5),"FT_CFOP"                                                 })
+aAdd(aFixos,{AVSX3("FT_CLIEFOR" ,5),"FT_CLIEFOR"                                              })
+aAdd(aFixos,{AVSX3("FT_LOJA"    ,5),"FT_LOJA"                                                 })
+aAdd(aFixos,{AVSX3("FT_CLIENT"  ,5),"FT_CLIENT"                                               })
+aAdd(aFixos,{AVSX3("FT_LOJENT"  ,5),"FT_LOJENT"                                               })
+aAdd(aFixos,{AVSX3("FT_PRODUTO" ,5),"FT_PRODUTO"                                              })
+aAdd(aFixos,{AVSX3("B1_GRUPO"   ,5),{|| E_Field2(SFT->FT_PRODUTO,"SB1",1,"B1_GRUPO") }})
+aAdd(aFixos,{AVSX3("FT_TIPOMOV" ,5),"FT_TIPOMOV"                                              })
+aAdd(aFixos,{AVSX3("FT_CFOP"    ,5),"FT_CFOP"                                                 })
 
 mBrowse(,,,,"SFT",aFixos)
 
-RETURN .T.
+Return .T.
 
 /*
 ===============================================================================================================================
 Programa----------: AFIS008Busca()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 08/12/2017
-===============================================================================================================================
 Descrição---------: opcao de teste da rotina
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================*/
-USER FUNCTION AFIS008Busca()
-LOCAL cConta
-PRIVATE _nRecZGH:=0//Usada dentro do PE SPDPIS07
+User Function AFIS008Busca()
+
+Local cConta
+Private _nRecZGH:=0//Usada dentro do PE SPDPIS07
 
 cConta:=ExecBlock("SPDPIS07", .F., .F.,{;
             SFT->FT_FILIAL,;
@@ -337,209 +312,206 @@ cConta:=ExecBlock("SPDPIS07", .F., .F.,{;
 			SFT->FT_PRODUTO})
 
 
-IF _nRecZGH # 0
-   ZGH->(DBGOTO( _nRecZGH ) )
+If _nRecZGH # 0
+   ZGH->(DBGoTo( _nRecZGH ) )
    cCadastro:="Registro da conta encontrado: "+cConta
    AxVisual( "ZGH", _nRecZGH , 2 )
-ELSE
-   U_ITMSG("Registro da conta NÃO encontrado","Atenção",,3)
-ENDIF
+Else
+   U_ITMsg("Registro da conta NÃO encontrado","Atenção",,3)
+EndIf
 
-RETURN .T.
+Return .T.
 
 /*
 ===============================================================================================================================
 Programa----------: AFIS008Val()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 08/12/2017
-===============================================================================================================================
 Descrição---------: Chamado dos valid user dos campos - X3_VLDUSER - Mesmo coisa que o gatilho
-===============================================================================================================================
 Parametros--------: _cCampo: descrição simpres do campo que chamou
-===============================================================================================================================
 Retorno-----------: .T.
 ===============================================================================================================================*/
-USER FUNCTION AFIS008Val(_cCampo)
+User Function AFIS008Val(_cCampo)
+
 Local _oModel:=FWModelActive(),V
 Local _aCpo:={"ZGH_FORNER","ZGH_FORLOJ","ZGH_DESFOR","ZGH_CLIENT","ZGH_CLILOJ","ZGH_DESCLI","ZGH_GRUPO","ZGH_DGRUPO",;
               "ZGH_PRODUT","ZGH_DPROD","ZGH_CFOP","ZGH_TPMOV","ZGH_NATURE","ZGH_NATDES","ZGH_TIPOPD"}
 
-FOR V := 1 TO LEN(_aCpo)
+For V := 1 TO Len(_aCpo)
     _cCpo:=_aCpo[V]
     _xVal:=&("M->"+_cCpo)
     _oModel:GETVALUE( "ZGHMASTER" , _cCpo  )
-NEXT
+Next
 
-DO CASE
+Do Case
 
-   CASE _cCampo = "NAT"
-	    If !EMPTY(M->ZGH_NATURE) 
-           SED->(DBSETORDER(1))
-	       If !SED->(DBSEEK(xFilial()+M->ZGH_NATURE ))
+   Case _cCampo = "NAT"
+	    If !Empty(M->ZGH_NATURE) 
+           SED->(DBSetOrder(1))
+	       If !SED->(DBSeek(xFilial()+M->ZGH_NATURE ))
 		      Help( ,, 'Atenção',, "Codigo da Natureza NÃO cadastrada", 1, 0 )
-              RETURN .F.
-           ENDIF
-	       M->ZGH_NATDES:=POSICIONE("SED",1,XFILIAL("SED")+M->ZGH_NATURE,"ED_DESCRIC")
+              Return .F.
+           EndIf
+	       M->ZGH_NATDES:=Posicione("SED",1,xFilial("SED")+M->ZGH_NATURE,"ED_DESCRIC")
 	       M->ZGH_TIPOPD := Space(2)  
-	    ELSE
-	       M->ZGH_NATDES:=SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_NATDES")))
-	    ENDIF                    
+	    Else
+	       M->ZGH_NATDES:=Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_NATDES")))
+	    EndIf                    
 
-   CASE _cCampo = "FOR"
-	    If !EMPTY(M->ZGH_FORNER) 
-           SA2->(DBSETORDER(1))
-	       If !SA2->(DBSEEK(xFilial("SA2")+M->ZGH_FORNER+ALLTRIM(M->ZGH_FORLOJ ) ))
+   Case _cCampo = "For"
+	    If !Empty(M->ZGH_FORNER) 
+           SA2->(DBSetOrder(1))
+	       If !SA2->(DBSeek(xFilial("SA2")+M->ZGH_FORNER+AllTrim(M->ZGH_FORLOJ ) ))
 		      Help( ,, 'Atenção',, "Codigo do Fornecedor NÃO cadastrado", 1, 0 )
-            RETURN .F.
-           ENDIF
-	       M->ZGH_DESFOR:=POSICIONE("SA2",1,XFILIAL("SA2")+M->ZGH_FORNER+ALLTRIM(M->ZGH_FORLOJ),"A2_NREDUZ")
-	       M->ZGH_CLIENT:=SPACE(LEN(ZGH->ZGH_CLIENT))
-           M->ZGH_CLILOJ:=SPACE(LEN(ZGH->ZGH_CLILOJ))
-           M->ZGH_DESCLI:=SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DESCLI")))
+            Return .F.
+           EndIf
+	       M->ZGH_DESFOR:=Posicione("SA2",1,xFilial("SA2")+M->ZGH_FORNER+AllTrim(M->ZGH_FORLOJ),"A2_NREDUZ")
+	       M->ZGH_CLIENT:=Space(Len(ZGH->ZGH_CLIENT))
+           M->ZGH_CLILOJ:=Space(Len(ZGH->ZGH_CLILOJ))
+           M->ZGH_DESCLI:=Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DESCLI")))
            M->ZGH_TIPOPD := Space(2)  
-	    ELSE
-	       M->ZGH_FORLOJ:=SPACE(LEN(ZGH->ZGH_FORLOJ))
-           M->ZGH_DESFOR:=SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DESFOR")))
-	    ENDIF
+	    Else
+	       M->ZGH_FORLOJ:=Space(Len(ZGH->ZGH_FORLOJ))
+           M->ZGH_DESFOR:=Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DESFOR")))
+	    EndIf
 
-   CASE _cCampo = "CLI"
-	    If !EMPTY(M->ZGH_CLIENT) 
-           SA1->(DBSETORDER(1))
-	       If !SA1->(DBSEEK(xFilial("SA1")+M->ZGH_CLIENT+ALLTRIM(M->ZGH_CLILOJ) ))
+   Case _cCampo = "CLI"
+	    If !Empty(M->ZGH_CLIENT) 
+           SA1->(DBSetOrder(1))
+	       If !SA1->(DBSeek(xFilial("SA1")+M->ZGH_CLIENT+AllTrim(M->ZGH_CLILOJ) ))
 		      Help( ,, 'Atenção',, "Codigo do Cliente NÃO cadastrado", 1, 0 )
-            RETURN .F.
-           ENDIF
-	       M->ZGH_DESCLI:=POSICIONE("SA1",1,XFILIAL("SA1")+M->ZGH_CLIENT+ALLTRIM(M->ZGH_CLILOJ),"A1_NREDUZ")
-	       M->ZGH_FORNER:=SPACE(LEN(ZGH->ZGH_FORNER))
-           M->ZGH_FORLOJ:=SPACE(LEN(ZGH->ZGH_FORLOJ))
-           M->ZGH_DESFOR:=SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DESFOR")))      
+            Return .F.
+           EndIf
+	       M->ZGH_DESCLI:=Posicione("SA1",1,xFilial("SA1")+M->ZGH_CLIENT+AllTrim(M->ZGH_CLILOJ),"A1_NREDUZ")
+	       M->ZGH_FORNER:=Space(Len(ZGH->ZGH_FORNER))
+           M->ZGH_FORLOJ:=Space(Len(ZGH->ZGH_FORLOJ))
+           M->ZGH_DESFOR:=Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DESFOR")))      
            M->ZGH_TIPOPD := Space(2)  
-	    ELSE
-	       M->ZGH_CLILOJ:=SPACE(LEN(ZGH->ZGH_CLILOJ))
-           M->ZGH_DESCLI:=SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DESCLI")))
-	    ENDIF
+	    Else
+	       M->ZGH_CLILOJ:=Space(Len(ZGH->ZGH_CLILOJ))
+           M->ZGH_DESCLI:=Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DESCLI")))
+	    EndIf
 
-   CASE _cCampo = "GRU"
-	    If !EMPTY(M->ZGH_GRUPO) 
-	       M->ZGH_DGRUPO:=POSICIONE('SBM',1,XFILIAL('SBM')+M->ZGH_GRUPO,"BM_DESC")
-	       M->ZGH_PRODUT:=SPACE(LEN(ZGH->ZGH_PRODUT))
-           M->ZGH_DPROD :=SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DPROD")))
+   Case _cCampo = "GRU"
+	    If !Empty(M->ZGH_GRUPO) 
+	       M->ZGH_DGRUPO:=Posicione('SBM',1,xFilial('SBM')+M->ZGH_GRUPO,"BM_DESC")
+	       M->ZGH_PRODUT:=Space(Len(ZGH->ZGH_PRODUT))
+           M->ZGH_DPROD :=Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DPROD")))
            M->ZGH_TIPOPD := Space(2)  
            
-	    ELSE
-           M->ZGH_DGRUPO:=SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DGRUPO")))
-	    ENDIF
+	    Else
+           M->ZGH_DGRUPO:=Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DGRUPO")))
+	    EndIf
 
-   CASE _cCampo = "PROD"
-	    If !EMPTY(M->ZGH_PRODUT) 
-	       M->ZGH_DPROD :=POSICIONE('SB1',1,XFILIAL('SB1')+M->ZGH_PRODUT,"B1_DESC")
-	       M->ZGH_GRUPO :=SPACE(LEN(ZGH->ZGH_GRUPO))
-           M->ZGH_DGRUPO:=SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DGRUPO")))   
+   Case _cCampo = "PROD"
+	    If !Empty(M->ZGH_PRODUT) 
+	       M->ZGH_DPROD :=Posicione('SB1',1,xFilial('SB1')+M->ZGH_PRODUT,"B1_DESC")
+	       M->ZGH_GRUPO :=Space(Len(ZGH->ZGH_GRUPO))
+           M->ZGH_DGRUPO:=Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DGRUPO")))   
            M->ZGH_TIPOPD := Space(2)  
-	    ELSE
-           M->ZGH_DPROD :=SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DPROD")))
-	    ENDIF
+	    Else
+           M->ZGH_DPROD :=Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DPROD")))
+	    EndIf
 
-   CASE _cCampo = "CFOP"
-	    If !EMPTY(M->ZGH_CFOP) 
-	       M->ZGH_TPMOV :=SPACE(LEN(ZGH->ZGH_TPMOV))
+   Case _cCampo = "CFOP"
+	    If !Empty(M->ZGH_CFOP) 
+	       M->ZGH_TPMOV :=Space(Len(ZGH->ZGH_TPMOV))
 	       M->ZGH_TIPOPD := Space(2)  
-	    ENDIF
+	    EndIf
 
-   CASE _cCampo = "TPMOV"
-	    If !EMPTY(M->ZGH_TPMOV) 
-	       M->ZGH_CFOP :=SPACE(LEN(ZGH->ZGH_CFOP))  
+   Case _cCampo = "TPMOV"
+	    If !Empty(M->ZGH_TPMOV) 
+	       M->ZGH_CFOP :=Space(Len(ZGH->ZGH_CFOP))  
 	       M->ZGH_TIPOPD := Space(2)  
-	    ENDIF
+	    EndIf
    
-ENDCASE
+EndCase
 
-IF  _cCampo = "ALQ"
-	M->ZGH_CLIENT:=SPACE(LEN(ZGH->ZGH_CLIENT))
-	M->ZGH_CLILOJ:=SPACE(LEN(ZGH->ZGH_CLILOJ))
-	M->ZGH_DESCLI:=SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DESCLI")))
-	M->ZGH_FORNER:=SPACE(LEN(ZGH->ZGH_FORNER))
-	M->ZGH_FORLOJ:=SPACE(LEN(ZGH->ZGH_FORLOJ))
-	M->ZGH_DESFOR:=SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DESFOR")))
-	M->ZGH_PRODUT:=SPACE(LEN(ZGH->ZGH_PRODUT))
-	M->ZGH_DPROD :=SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DPROD")))
-	M->ZGH_GRUPO :=SPACE(LEN(ZGH->ZGH_GRUPO))
-	M->ZGH_DGRUPO:=SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DGRUPO")))
-	M->ZGH_TPMOV :=SPACE(LEN(ZGH->ZGH_TPMOV))
-	M->ZGH_CFOP  :=SPACE(LEN(ZGH->ZGH_CFOP))
-	M->ZGH_NATURE:=SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_NATURE")))
-	M->ZGH_NATDES:=SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_NATDES")))
+If  _cCampo = "ALQ"
+	M->ZGH_CLIENT:=Space(Len(ZGH->ZGH_CLIENT))
+	M->ZGH_CLILOJ:=Space(Len(ZGH->ZGH_CLILOJ))
+	M->ZGH_DESCLI:=Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DESCLI")))
+	M->ZGH_FORNER:=Space(Len(ZGH->ZGH_FORNER))
+	M->ZGH_FORLOJ:=Space(Len(ZGH->ZGH_FORLOJ))
+	M->ZGH_DESFOR:=Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DESFOR")))
+	M->ZGH_PRODUT:=Space(Len(ZGH->ZGH_PRODUT))
+	M->ZGH_DPROD :=Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DPROD")))
+	M->ZGH_GRUPO :=Space(Len(ZGH->ZGH_GRUPO))
+	M->ZGH_DGRUPO:=Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DGRUPO")))
+	M->ZGH_TPMOV :=Space(Len(ZGH->ZGH_TPMOV))
+	M->ZGH_CFOP  :=Space(Len(ZGH->ZGH_CFOP))
+	M->ZGH_NATURE:=Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_NATURE")))
+	M->ZGH_NATDES:=Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_NATDES")))
     M->ZGH_TIPOPD:= Space(2)  
-ELSEIF  _cCampo = "NAT"
-	M->ZGH_CLIENT:=SPACE(LEN(ZGH->ZGH_CLIENT))
-	M->ZGH_CLILOJ:=SPACE(LEN(ZGH->ZGH_CLILOJ))
-	M->ZGH_DESCLI:=SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DESCLI")))
-	M->ZGH_FORNER:=SPACE(LEN(ZGH->ZGH_FORNER))
-	M->ZGH_FORLOJ:=SPACE(LEN(ZGH->ZGH_FORLOJ))
-	M->ZGH_DESFOR:=SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DESFOR")))
-	M->ZGH_PRODUT:=SPACE(LEN(ZGH->ZGH_PRODUT))
-	M->ZGH_DPROD :=SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DPROD")))
-	M->ZGH_GRUPO :=SPACE(LEN(ZGH->ZGH_GRUPO))
-	M->ZGH_DGRUPO:=SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DGRUPO")))
-	M->ZGH_TPMOV :=SPACE(LEN(ZGH->ZGH_TPMOV))
-	M->ZGH_CFOP  :=SPACE(LEN(ZGH->ZGH_CFOP))
+ElseIf  _cCampo = "NAT"
+	M->ZGH_CLIENT:=Space(Len(ZGH->ZGH_CLIENT))
+	M->ZGH_CLILOJ:=Space(Len(ZGH->ZGH_CLILOJ))
+	M->ZGH_DESCLI:=Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DESCLI")))
+	M->ZGH_FORNER:=Space(Len(ZGH->ZGH_FORNER))
+	M->ZGH_FORLOJ:=Space(Len(ZGH->ZGH_FORLOJ))
+	M->ZGH_DESFOR:=Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DESFOR")))
+	M->ZGH_PRODUT:=Space(Len(ZGH->ZGH_PRODUT))
+	M->ZGH_DPROD :=Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DPROD")))
+	M->ZGH_GRUPO :=Space(Len(ZGH->ZGH_GRUPO))
+	M->ZGH_DGRUPO:=Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DGRUPO")))
+	M->ZGH_TPMOV :=Space(Len(ZGH->ZGH_TPMOV))
+	M->ZGH_CFOP  :=Space(Len(ZGH->ZGH_CFOP))
     M->ZGH_IMPOST:=" "
     M->ZGH_ALIQ  :=0
     M->ZGH_TIPOPD := Space(2)  
 ElseIf _cCampo = "TIPOPRD" 
 	If ! Empty(M->ZGH_TIPOPD)           	   
-	   M->ZGH_CLIENT := SPACE(LEN(ZGH->ZGH_CLIENT))
-	   M->ZGH_CLILOJ := SPACE(LEN(ZGH->ZGH_CLILOJ))
-	   M->ZGH_DESCLI := SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DESCLI")))
-	   M->ZGH_FORNER := SPACE(LEN(ZGH->ZGH_FORNER))
-	   M->ZGH_FORLOJ := SPACE(LEN(ZGH->ZGH_FORLOJ))
-	   M->ZGH_DESFOR := SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DESFOR")))
-	   M->ZGH_PRODUT := SPACE(LEN(ZGH->ZGH_PRODUT))
-	   M->ZGH_DPROD  := SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DPROD")))
-	   M->ZGH_GRUPO  := SPACE(LEN(ZGH->ZGH_GRUPO))
-	   M->ZGH_DGRUPO := SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DGRUPO")))
-	   M->ZGH_TPMOV  := SPACE(LEN(ZGH->ZGH_TPMOV))
-	   M->ZGH_CFOP   := SPACE(LEN(ZGH->ZGH_CFOP))
-	   M->ZGH_NATURE := SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_NATURE")))
-	   M->ZGH_NATDES := SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_NATDES")))
+	   M->ZGH_CLIENT := Space(Len(ZGH->ZGH_CLIENT))
+	   M->ZGH_CLILOJ := Space(Len(ZGH->ZGH_CLILOJ))
+	   M->ZGH_DESCLI := Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DESCLI")))
+	   M->ZGH_FORNER := Space(Len(ZGH->ZGH_FORNER))
+	   M->ZGH_FORLOJ := Space(Len(ZGH->ZGH_FORLOJ))
+	   M->ZGH_DESFOR := Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DESFOR")))
+	   M->ZGH_PRODUT := Space(Len(ZGH->ZGH_PRODUT))
+	   M->ZGH_DPROD  := Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DPROD")))
+	   M->ZGH_GRUPO  := Space(Len(ZGH->ZGH_GRUPO))
+	   M->ZGH_DGRUPO := Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_DGRUPO")))
+	   M->ZGH_TPMOV  := Space(Len(ZGH->ZGH_TPMOV))
+	   M->ZGH_CFOP   := Space(Len(ZGH->ZGH_CFOP))
+	   M->ZGH_NATURE := Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_NATURE")))
+	   M->ZGH_NATDES := Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_NATDES")))
     EndIf 
-ELSE
-	M->ZGH_NATURE:=SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_NATURE")))
-	M->ZGH_NATDES:=SPACE(LEN(_OMODEL:GETVALUE("ZGHMASTER","ZGH_NATDES")))
+Else
+	M->ZGH_NATURE:=Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_NATURE")))
+	M->ZGH_NATDES:=Space(Len(_OMODEL:GETVALUE("ZGHMASTER","ZGH_NATDES")))
     M->ZGH_IMPOST:=" "
     M->ZGH_ALIQ  :=0
     M->ZGH_TIPOPD := Space(2)  
-ENDIF
+EndIf
 
-FOR V := 1 TO LEN(_aCpo)
+For V := 1 TO Len(_aCpo)
     _cCpo:=_aCpo[V]
     _xVal:=&("M->"+_cCpo)
     _nTam:=AVSX3(_cCpo,3)//X3_TAMANHO
     _oModel:LoadValue( "ZGHMASTER" , _cCpo , LEFT(_xVal,_nTam) )
-NEXT
+Next
 
-RETURN .T.
+Return .T.
+
 /*
 ===============================================================================================================================
 Programa----------: AFIS008Integ()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 26/12/2017
-===============================================================================================================================
 Descrição---------: Integra arquivo CSV 
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-USER FUNCTION AFIS008Integ()
-LOCAL aSemSX3  :={} , nI
-PRIVATE _cFileCSV:="",cNomArq:=""
-PRIVATE cAliasWK := GetNextAlias()
+User Function AFIS008Integ()
 
-PRIVATE _aCols:={}
+Local aSemSX3  :={} , nI
+Private _cFileCSV:="",cNomArq:=""
+Private cAliasWK := GetNextAlias()
 
-_cTimeIni:=TIME()
+Private _aCols:={}
+
+_cTimeIni:=Time()
 
 //_cFileCSV := cGetFile( "Documento Texto |*.CSV" ,"Selecione o CSV para apendar e validar",0,"C:\LIXO\AFIS008\",.T.,GETF_LOCALHARD)
 _aParAux:={}
@@ -551,36 +523,36 @@ For nI := 1 To Len( _aParAux )
 Next
 cTitle:="Selecione o CSV para apendar e validar"
 //        aParametros,cTitle  ,aRet     ,bOk ,aButtons,lCentered,nPosX,nPosY,oDlgWizard,cLoad,lCanSave,lUserSave
-IF !ParamBox( _aParAux ,cTitle,@_aParRet,    ,        ,         ,     ,     ,          ,     ,.T.     ,.T. )
+If !ParamBox( _aParAux ,cTitle,@_aParRet,    ,        ,         ,     ,     ,          ,     ,.T.     ,.T. )
 	Return .T.
 EndIf
 _cFileCSV :=MV_PAR01
 
-If !EMPTY(_cFileCSV)
+If !Empty(_cFileCSV)
 	
 	If !File(_cFileCSV)
-		U_ITMSG("Arquivo "+_cFileCSV+" NÃO encontrado","Atenção",,3)
-		RETURN .F.
-	ENDIF
+		U_ITMsg("Arquivo "+_cFileCSV+" NÃO encontrado","Atenção",,3)
+		Return .F.
+	EndIf
 	
-	_cTimeIni:=TIME()
+	_cTimeIni:=Time()
 	
 	aCampos:={}
 	//Layout do CSV SEGUIR A ORDEM ABAIXO
-	AADD(aSemSX3,{"ZGH_FILIAL","C",LEN(ZGH->ZGH_FILIAL),0})
-	AADD(aSemSX3,{"ZGH_CONTA", "C",LEN(ZGH->ZGH_CONTA ),0})
-	AADD(aSemSX3,{"ZGH_CLIENT","C",LEN(ZGH->ZGH_CLIENT),0})
-	AADD(aSemSX3,{"ZGH_CLILOJ","C",LEN(ZGH->ZGH_CLILOJ),0})
-	AADD(aSemSX3,{"ZGH_FORNER","C",LEN(ZGH->ZGH_FORNER),0})
-	AADD(aSemSX3,{"ZGH_FORLOJ","C",LEN(ZGH->ZGH_FORLOJ),0})
-	AADD(aSemSX3,{"ZGH_PRODUT","C",LEN(ZGH->ZGH_PRODUT),0})
-	AADD(aSemSX3,{"ZGH_GRUPO", "C",LEN(ZGH->ZGH_GRUPO ),0})
-	AADD(aSemSX3,{"ZGH_CFOP",  "C",LEN(ZGH->ZGH_CFOP  ),0})
-	AADD(aSemSX3,{"ZGH_TPMOV", "C",LEN(ZGH->ZGH_TPMOV ),0})
-	AADD(aSemSX3,{"ZGH_NATURE","C",LEN(ZGH->ZGH_NATURE),0})
-	AADD(aSemSX3,{"ZGH_TIPOPD","C",LEN(ZGH->ZGH_TIPOPD),0})
-	AADD(aSemSX3,{"WK_MARCA"  ,"L",001,0})
-	AADD(aSemSX3,{"WK_MSG"    ,"C",100,0})
+	aAdd(aSemSX3,{"ZGH_FILIAL","C",Len(ZGH->ZGH_FILIAL),0})
+	aAdd(aSemSX3,{"ZGH_CONTA", "C",Len(ZGH->ZGH_CONTA ),0})
+	aAdd(aSemSX3,{"ZGH_CLIENT","C",Len(ZGH->ZGH_CLIENT),0})
+	aAdd(aSemSX3,{"ZGH_CLILOJ","C",Len(ZGH->ZGH_CLILOJ),0})
+	aAdd(aSemSX3,{"ZGH_FORNER","C",Len(ZGH->ZGH_FORNER),0})
+	aAdd(aSemSX3,{"ZGH_FORLOJ","C",Len(ZGH->ZGH_FORLOJ),0})
+	aAdd(aSemSX3,{"ZGH_PRODUT","C",Len(ZGH->ZGH_PRODUT),0})
+	aAdd(aSemSX3,{"ZGH_GRUPO", "C",Len(ZGH->ZGH_GRUPO ),0})
+	aAdd(aSemSX3,{"ZGH_CFOP",  "C",Len(ZGH->ZGH_CFOP  ),0})
+	aAdd(aSemSX3,{"ZGH_TPMOV", "C",Len(ZGH->ZGH_TPMOV ),0})
+	aAdd(aSemSX3,{"ZGH_NATURE","C",Len(ZGH->ZGH_NATURE),0})
+	aAdd(aSemSX3,{"ZGH_TIPOPD","C",Len(ZGH->ZGH_TIPOPD),0})
+	aAdd(aSemSX3,{"WK_MARCA"  ,"L",001,0})
+	aAdd(aSemSX3,{"WK_MSG"    ,"C",100,0})
 	
 	
 	_oTemp:= FWTemporaryTable():New(cAliasWK,aSemSX3)
@@ -588,52 +560,52 @@ If !EMPTY(_cFileCSV)
 	_oTemp:Create()
 	cNomArq:=_oTemp:GetRealName()
 	
-ELSEIF SuperGetMV("IT_AMBTEST",.F.,.T.)
+ElseIf !totvs.framework.environment.Type.get() == '1' //1-Produção, 2-Homologação,3-Desenvolvimento
 
-ELSE
-    RETURN .F.//********************************* SAI FORA
-ENDIF
+Else
+    Return .F.//********************************* SAI FORA
+EndIf
 
 nPosChave:=15//POSICAO DA CHAVE COMPLETA
 
 _nRepet:=0
 _cTot  :=""
 lRet:=.T.
-FWMSGRUN( ,{|oproc| lRet:=AFIS008Ler(oproc) } ,"Aguarde... Processando: "+cNomArq )
-IF !lRet
-   (cAliasWK)->(dbCloseArea())
-   RETURN .F.
-ENDIF
-_cTitAux:='REGRAS SPEED 500 - HrI: '+_cTimeIni+" / HrF: "+TIME()+" / Total: "+_cTot+" / Repetidos: "+STRZERO(_nRepet,7)+" / Arq.: "+cNomArq
+FWMsgRun( ,{|oproc| lRet:=AFIS008Ler(oproc) } ,"Aguarde... Processando: "+cNomArq )
+If !lRet
+   (cAliasWK)->(DBCloseArea())
+   Return .F.
+EndIf
+_cTitAux:='REGRAS SPEED 500 - HrI: '+_cTimeIni+" / HrF: "+TIME()+" / Total: "+_cTot+" / Repetidos: "+StrZero(_nRepet,7)+" / Arq.: "+cNomArq
 
-DO WHILE LEN(_aCols) > 0
+While Len(_aCols) > 0
 
    _AHEADER:={" ",'FILIAL','CONTA','COD. CLIENTE','LOJA','COD, FORN','LOJA','PRODUTO','GRUPO','CFOP','TIPO','NATUREZA','TP PRODRO','OBSERVACAO',"CHAVE"}
    _ASIZES :={ 10,      30,     40,            40,    30,         40,    30,      50,      40,    40,    30,        50,        30 ,         200,    100}
 
    nPosResu:=nPosChave-1//POSICAO DA MENSAGEM
    aBotoes:={}                                           
-   AADD( aBotoes , { "" , {|| FWMSGRUN(,{ |oProc| AFIS008GRV(oproc,.T.) }, "","") },"","ANALISE dos dados"} )
-   AADD( aBotoes , { "" , {|| AVISO("ATENCAO",oLbxAux:aArray[oLbxAux:nAt][ nPosResu ],{"Fechar"},3) }	, "" , "Ver Resultado"		  } )
+   aAdd( aBotoes , { "" , {|| FWMsgRun(,{ |oProc| AFIS008GRV(oproc,.T.) }, "","") },"","ANALISE dos dados"} )
+   aAdd( aBotoes , { "" , {|| AVISO("ATENCAO",oLbxAux:aArray[oLbxAux:nAt][ nPosResu ],{"Fechar"},3) }	, "" , "Ver Resultado"		  } )
 //    ITListBox(_cTitAux       , _aHeader, _aCols, _lMaxSiz , _nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel, _abuttons )
 	_LOK:=U_ITLISTBOX( _cTitAux,_AHEADER , _aCols, .T.      , 4      ,          ,          ,_ASIZES  ,         ,     ,        , aBotoes )
-	IF _LOK
-		IF U_ITMSG("Confirma a GRAVACAO dos dados?",'Atenção!',,3,2,2)
-           FWMSGRUN( ,{|oproc| AFIS008GRV(oproc,.F.) } ,"Aguarde", "Gravando..." )
-		ELSE
-		   LOOP
-		ENDIF
-	ENDIF
-	EXIT
-ENDDO
+	If _LOK
+		If U_ITMsg("Confirma a GRAVACAO dos dados?",'Atenção!',,3,2,2)
+           FWMsgRun( ,{|oproc| AFIS008GRV(oproc,.F.) } ,"Aguarde", "Gravando..." )
+		Else
+		   Loop
+		EndIf
+	EndIf
+	Exit
+EndDo
 
-IF LEN(_aCols) = 0
+If Len(_aCols) = 0
 
 	_aParAux:={}
 	_aParRet:={}
 	MV_PAR91:="1-GRAVACAO DOS DADOS"
 	
-	AADD( _aParAux , {2,"Escolah uma Opção:",MV_PAR91, {"1-GRAVACAO DOS DADOS",;
+	aAdd( _aParAux , {2,"Escolah uma Opção:",MV_PAR91, {"1-GRAVACAO DOS DADOS",;
 	                                                    "2-ANALISE DOS DADOS"},100,".T.",.T.,".T."})
 	
 	For nI := 1 To Len( _aParAux )
@@ -641,33 +613,33 @@ IF LEN(_aCols) = 0
 	Next nI
 	
 	
-	DO WHILE .T.		
+	While .T.		
 		//        aParametros ,cTitle                 ,aRet      ,bOk                     ,aButtons,lCentered,nPosX,nPosY,oDlgWizard,cLoad,lCanSave,lUserSave
-		IF ParamBox( _aParAux , "Selecione uma Opcao" , @_aParRet, {|| !EMPTY(MV_PAR01) } ,        , .T.     ,     ,     ,          ,     , .F.    , .F. )
+		If ParamBox( _aParAux , "Selecione uma Opcao" , @_aParRet, {|| !Empty(MV_PAR01) } ,        , .T.     ,     ,     ,          ,     , .F.    , .F. )
 			
 			
-			IF MV_PAR01 = "1"
-				FWMSGRUN( ,{|oproc| AFIS008GRV(oproc,.F.) } ,"Aguarde", "Gravando..." )
-				EXIT
-			ELSE
-				FWMSGRUN( ,{|oproc| AFIS008GRV(oproc,.T.) } ,"Analisando...", "Analisando..." )
-				LOOP
-			ENDIF
+			If MV_PAR01 = "1"
+				FWMsgRun( ,{|oproc| AFIS008GRV(oproc,.F.) } ,"Aguarde", "Gravando..." )
+				Exit
+			Else
+				FWMsgRun( ,{|oproc| AFIS008GRV(oproc,.T.) } ,"Analisando...", "Analisando..." )
+				Loop
+			EndIf
 			
-		ENDIF
+		EndIf
 
-		EXIT
+		Exit
 
-	ENDDO
+	EndDo
 	
-ENDIF
+EndIf
 
-(cAliasWK)->(dbCloseArea())  
-IF TYPE("_otemp") = "O"
+(cAliasWK)->(DBCloseArea())  
+If Type("_otemp") = "O"
    _oTemp:Delete()
-ENDIF   
+EndIf   
 
-RETURN .T.
+Return .T.
 
 
 /*
@@ -675,33 +647,30 @@ RETURN .T.
 Programa----------: AFIS008Ler()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 27/12/2017
-===============================================================================================================================
 Descrição---------: Ler e valida arquivo CSV 
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-STATIC FUNCTION AFIS008Ler(oproc)
-LOCAL _cTimeIni:=TIME()
+Static Function AFIS008Ler(oproc)
 
-IF !EMPTY(_cFileCSV)
+Local _cTimeIni:=Time()
+
+If !Empty(_cFileCSV)
    oproc:cCaption := "Apendando, Aguarde... Hora Inicial :"+_cTimeIni+" / Arq.: "+cNomArq
    ProcessMessages()
-   IF !AFIS008Ape(oProc)
-      RETURN .F.
-   ENDIF
-ENDIF
+   If !AFIS008Ape(oProc)
+      Return .F.
+   EndIf
+EndIf
 
-ZGH->(DBSETORDER(3))//ZGH_FILIAL+ZGH_CLIENT+ZGH_CLILOJ+ZGH_FORNER+ZGH_FORLOJ+ZGH_GRUPO+ZGH_PRODUT+ZGH_CFOP+ZGH_TPMOV
+ZGH->(DBSetOrder(3))//ZGH_FILIAL+ZGH_CLIENT+ZGH_CLILOJ+ZGH_FORNER+ZGH_FORLOJ+ZGH_GRUPO+ZGH_PRODUT+ZGH_CFOP+ZGH_TPMOV
 _nConta:=(cAliasWK)->(LASTREC())
-_cTot:=ALLTRIM(STR(_nConta))
+_cTot:=AllTrim(Str(_nConta))
 
 oproc:cCaption := "Processando, Aguarde... Hora Inicial :"+_cTimeIni+" / Arq.: "+cNomArq
 ProcessMessages()
 
-//cQuery := "SELECT ZGH_FILIAL,ZGH_CLIENT,ZGH_CLILOJ,ZGH_FORNER,ZGH_FORLOJ,ZGH_GRUPO,ZGH_PRODUT,ZGH_CFOP,ZGH_TPMOV,ZGH_CONTA,ZGH.R_E_C_N_O_ ZGH_REC "
 cQuery := "SELECT ZGH.R_E_C_N_O_ ZGH_REC "
 cQuery += " FROM "+cNomArq+" ZGH "
 cQuery += " WHERE ZGH.D_E_L_E_T_ = ' ' AND ZGH_FILIAL||ZGH_CLIENT||ZGH_CLILOJ||ZGH_FORNER||ZGH_FORLOJ||ZGH_GRUPO||ZGH_PRODUT||ZGH_CFOP||ZGH_TPMOV||ZGH_NATURE||ZGH_TIPOPD IN "
@@ -711,35 +680,35 @@ cQuery += "                                GROUP BY (ZGH_FILIAL||ZGH_CLIENT||ZGH
 cQuery += " ORDER BY ZGH_FILIAL,ZGH_CLIENT,ZGH_CLILOJ,ZGH_FORNER,ZGH_FORLOJ,ZGH_GRUPO,ZGH_PRODUT,ZGH_CFOP,ZGH_TPMOV,ZGH_NATURE,ZGH_TIPOPD,ZGH_CONTA "
 
 cAliasAux:="ZHG_QRY"
-If select(cAliasAux) > 0
-   (cAliasAux)->(DbCloseArea())
+If Select(cAliasAux) > 0
+   (cAliasAux)->(DBCloseArea())
 EndIf
 		
 dbUseArea( .T., "TOPCONN", TCGENQRY(,,cQuery),cAliasAux, .F., .T.)
 
 COUNT TO _nConta
 
-IF _nConta = 0
-	U_ITMSG("Não foi encontrado resgistros com Chave repetida.","ANALISE DE CHAVES DUPLICADAS",,2)
-	RETURN .T.
-ENDIF
+If _nConta = 0
+	U_ITMsg("Não foi encontrado resgistros com Chave repetida.","ANALISE DE CHAVES DUPLICADAS",,2)
+	Return .T.
+EndIf
 
-_cTot2:=ALLTRIM(STR(_nConta))
+_cTot2:=AllTrim(Str(_nConta))
 
 _nConta:=0
 _nRepet:=0
 _aCols:={}
-DBSELECTAREA( cAliasWK )
+DBSelectArea( cAliasWK )
 
-(cAliasAux)->(DbGotop())
-DO While (cAliasAux)->(!Eof())
+(cAliasAux)->(DBGoTop())
+While (cAliasAux)->(!Eof())
 
-    (cAliasWK)->(DbGoto( (cAliasAux)->ZGH_REC ))
+    (cAliasWK)->(DBGoTo( (cAliasAux)->ZGH_REC ))
     _nConta++
-    oproc:cCaption := "HI: "+_cTimeIni+" - Validando Regra: "+STRZERO(_nConta,7)+" / "+_cTot2+" - "+STRZERO(_nRepet,7)+" / Arq.: "+cNomArq
+    oproc:cCaption := "HI: "+_cTimeIni+" - Validando Regra: "+StrZero(_nConta,7)+" / "+_cTot2+" - "+StrZero(_nRepet,7)+" / Arq.: "+cNomArq
     ProcessMessages()
 
-   IF (_nPos2:=ASCAN(_aCols,{|C|C[nPosChave]==(cAliasWK)->(ZGH_FILIAL+;
+   If (_nPos2:=aScan(_aCols,{|C|C[nPosChave]==(cAliasWK)->(ZGH_FILIAL+;
                                                            ZGH_CLIENT+;
                                                            ZGH_CLILOJ+;
                                                            ZGH_FORNER+;
@@ -754,35 +723,35 @@ DO While (cAliasAux)->(!Eof())
        _nRepet+=2
         
         _aCols[_nPos2,1]:=.F.
-        IF (cAliasWK)->ZGH_CONTA # _aCols[_nPos2,3] //_aDupli[_nPos,2] 
+        If (cAliasWK)->ZGH_CONTA # _aCols[_nPos2,3] //_aDupli[_nPos,2] 
            //Atualiza _aCols Anterior
-           _aCols[_nPos2,nPosChave-1]:="[Chave repetida] [Com Conta diferente ("+ALLTRIM((cAliasWK)->ZGH_CONTA)+")] "
+           _aCols[_nPos2,nPosChave-1]:="[Chave repetida] [Com Conta diferente ("+AllTrim((cAliasWK)->ZGH_CONTA)+")] "
            //Atualiza _aCols Atual
            _cMsg:="[Chave repetida] [Com Conta diferente ("+_aCols[_nPos2,3]+")] "//_aDupli[_nPos,2]
-        ELSE
+        Else
            //Atualiza _aCols Anterior
            _aCols[_nPos2,nPosChave-1]:="[Chave repetida 1] "
            //Atualiza _aCols Atual
            _cMsg:="[Chave repetida 2] "
-        ENDIF
+        EndIf
         _nRecWKSalva:=(cAliasWK)->(RECNO())
         //Atualiza cAliasWK Anterior
-        (cAliasWK)->(DBGOTO(_aCols[_nPos2,nPosChave+1]))
+        (cAliasWK)->(DBGoTo(_aCols[_nPos2,nPosChave+1]))
         (cAliasWK)->WK_MARCA:=.F.
         (cAliasWK)->WK_MSG  :=_aCols[_nPos2,nPosChave-1]
          //Atualiza cAliasWK Atual
-        (cAliasWK)->(DBGOTO(_nRecWKSalva))
+        (cAliasWK)->(DBGoTo(_nRecWKSalva))
         (cAliasWK)->WK_MARCA:=.F.
         (cAliasWK)->WK_MSG  :=_cMsg
 
-   ELSE
+   Else
 
       (cAliasWK)->WK_MARCA:=.T.
       _cMsg:=""
 
-   ENDIF
+   EndIf
 
-   AADD(_aCols,{(cAliasWK)->WK_MARCA,; //01
+   aAdd(_aCols,{(cAliasWK)->WK_MARCA,; //01
                 ZGH_FILIAL,;           //02
                 (cAliasWK)->ZGH_CONTA,;//03
                 ZGH_CLIENT,;           //04
@@ -799,229 +768,222 @@ DO While (cAliasAux)->(!Eof())
                 (cAliasWK)->(ZGH_FILIAL+ZGH_CLIENT+ZGH_CLILOJ+ZGH_FORNER+ZGH_FORLOJ+ZGH_GRUPO+ZGH_PRODUT+ZGH_CFOP+ZGH_TPMOV+ZGH_NATURE+ZGH_TIPOPD),;//15 - chave completa
                 (cAliasWK)->(RECNO()) })//16
   
-  (cAliasAux)->(DbSkip())
+  (cAliasAux)->(DBSkip())
 
 EndDo
 
-_cTitAux:='REGRAS SPEED 500 - HrI: '+_cTimeIni+" / HrF: "+TIME()+" / Total: "+_cTot+" / Repetidos: "+STRZERO(_nRepet,7)+" / Arq.: "+cNomArq
+_cTitAux:='REGRAS SPEED 500 - HrI: '+_cTimeIni+" / HrF: "+TIME()+" / Total: "+_cTot+" / Repetidos: "+StrZero(_nRepet,7)+" / Arq.: "+cNomArq
 
-IF LEN(_aCols) # 0 .AND. SuperGetMV("IT_AMBTEST",.F.,.T.)
+If Len(_aCols) # 0 .And. !totvs.framework.environment.Type.get() == '1' //1-Produção, 2-Homologação,3-Desenvolvimento
    oproc:cCaption := _cTitAux
    _AHEADER:={" ",'FILIAL','CONTA','COD. CLIENTE','LOJA','COD, FORN','LOJA','PRODUTO','GRUPO','CFOP','TIPO','NATUREZA','TP PROD','OBSERVACAO',"CHAVE"}
    DlgToExcel( { { "ARRAY" , _cTitAux , _aHeader , _aCols } } )//já gera pq caso que pode cair
-ENDIF
-
-If select(cAliasAux) > 0
-   (cAliasAux)->(DbCloseArea())
 EndIf
 
-RETURN .T.
+If Select(cAliasAux) > 0
+   (cAliasAux)->(DBCloseArea())
+EndIf
+
+Return .T.
 
 /*
 ===============================================================================================================================
 Programa----------: AFIS008Ape
 Autor-------------: Alex Wallauer
 Data da Criacao---: 27/02/2020
-===============================================================================================================================
 Descrição---------: Processamento de Importação de DADOS DO TYT
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-STATIC Function AFIS008Ape(oProc)
+Static Function AFIS008Ape(oProc)
 
 oProc:cCaption := ("Lendo dados de devoluções...")
 ProcessMessages()
   
    
-_cArq := ALLTRIM(_cFileCSV)
-IF UPPER(RIGHT(_cArq,3)) <> "CSV" .OR. FT_FUSE(_cArq) == -1
-	U_ITMSG("Não foi possível abrir o arquivo informado.",;
+_cArq := AllTrim(_cFileCSV)
+If Upper(RIGHT(_cArq,3)) <> "CSV" .Or. FT_FUSE(_cArq) == -1
+	U_ITMsg("Não foi possível abrir o arquivo informado.",;
 	"Arquivo inválido","O arquivo informado deve ser .CSV ou verificar se o arquivo informado esta correto.",1)
-	RETURN .F.
-ENDIF
+	Return .F.
+EndIf
 
 
 FT_FGOTOP() //POSICIONA NO TOPO DO ARQUIVO
 _cDados := FT_FREADLN()
 	
-If ! "FILIAL;CONT CONTABI;COD. CLIENTE;LOJ CLIENTE;COD. FORNECE;LOJ FORNCEDO;PRODUTO;GRUPO;CFOP;TIPO MOVIMEN;COD. NATUREZ;TIPO PROD." $ UPPER(ALLTRIM(_cDados))
-	U_ITMSG("Arquivo informado com o cabeçalho incorreto.",;
+If ! "FILIAL;CONT CONTABI;COD. CLIENTE;LOJ CLIENTE;COD. FORNECE;LOJ FORNCEDO;PRODUTO;GRUPO;CFOP;TIPO MOVIMEN;COD. NATUREZ;TIPO PROD." $ Upper(AllTrim(_cDados))
+	U_ITMsg("Arquivo informado com o cabeçalho incorreto.",;
             "Arquivo inválido","O arquivo deve conter o cabeçalho: Filial;Cont Contabi;Cod. Cliente;Loj Cliente;Cod. Fornece;Loj Forncedo;Produto;Grupo;CFOP;Tipo Movimen;Cod. Naturez;Tipo Prod.",1)
-	RETURN .F.
-ENDIF
+	Return .F.
+EndIf
 	
 _cTot:=FT_FLASTREC()-1
-_cTot:=ALLTRIM(STR(_cTot))
-_nTam:=LEN(_cTot)
+_cTot:=AllTrim(Str(_cTot))
+_nTam:=Len(_cTot)
 _nCont:=_nConta:=0
 
 _aLinRepetido={}
-SB1->(DBSETORDER(1))
-DA1->(DBSETORDER(1))
-SA1->(DBSETORDER(1))
+SB1->(DBSetOrder(1))
+DA1->(DBSetOrder(1))
+SA1->(DBSetOrder(1))
 
 FT_FGOTOP() //POSICIONA NO TOPO DO ARQUIVO
 FT_FSKIP()//PULA OS TITULOS
  	
-DO WHILE !FT_FEOF()  //FACA ENQUANTO NAO FOR FIM DE ARQUIVO
+While !FT_FEOF()  //FACA ENQUANTO NAO For FIM DE ARQUIVO
  	
 	_nCont++
-	oProc:cCaption := ("Processando Dados: "+ STRZERO(_nCont,_nTam) +" de "+ _cTot)
+	oProc:cCaption := ("Processando Dados: "+ StrZero(_nCont,_nTam) +" de "+ _cTot)
 	ProcessMessages()
 	
-	_cDados := ALLTRIM(FT_FREADLN())
-	_cDados := STRTRAN(_cDados,'"','')//Tem que ter ate 6 colunas
-	_cDados := STRTRAN(_cDados,',','.')//Campos com decimais
+	_cDados := AllTrim(FT_FREADLN())
+	_cDados := StrTran(_cDados,'"','')//Tem que ter ate 6 colunas
+	_cDados := StrTran(_cDados,',','.')//Campos com decimais
 	
 	//Verifica se é final de arquivo
-	IF EMPTY(ALLTRIM(_cDados)) .OR. ALLTRIM(_cDados) = ';;;;;;;;;;;;;' 
-		EXIT
-	ENDIF
+	If Empty(AllTrim(_cDados)) .Or. AllTrim(_cDados) = ';;;;;;;;;;;;;' 
+		Exit
+	EndIf
 
-    IF ASCAN(_aLinRepetido,_cDados) = 0
-        AADD(_aLinRepetido,_cDados)    
-    ELSE
+    If aScan(_aLinRepetido,_cDados) = 0
+        aAdd(_aLinRepetido,_cDados)    
+    Else
        FT_FSKIP()
-       LOOP
-    ENDIF
+       Loop
+    EndIf
   	
 	_aLinhas:= StrTokArr2(_cDados,";",.T.)
 
-	IF EMPTY(VAL(_aLinhas[01])) 
+	If Empty(Val(_aLinhas[01])) 
        FT_FSKIP()
-       LOOP
-	ENDIF
+       Loop
+	EndIf
 	
-    IF(LEN(_aLinhas) > 00,(cAliasWK)->(DBAPPEND())              ,)
-	IF(LEN(_aLinhas) > 00,(cAliasWK)->ZGH_FILIAL := STRZERO(VAL(_aLinhas[01]),2),)
-	IF(LEN(_aLinhas) > 01,(cAliasWK)->ZGH_CONTA  := _aLinhas[02],)
-	IF(LEN(_aLinhas) > 02,(cAliasWK)->ZGH_CLIENT := _aLinhas[03],)
-	IF(LEN(_aLinhas) > 03,(cAliasWK)->ZGH_CLILOJ := _aLinhas[04],)
-	IF(LEN(_aLinhas) > 04,(cAliasWK)->ZGH_FORNER := _aLinhas[05],)
-	IF(LEN(_aLinhas) > 05,(cAliasWK)->ZGH_FORLOJ := _aLinhas[06],)
-	IF(LEN(_aLinhas) > 06,(cAliasWK)->ZGH_PRODUT := _aLinhas[07],)
-	IF(LEN(_aLinhas) > 07,(cAliasWK)->ZGH_GRUPO  := _aLinhas[08],)
-	IF(LEN(_aLinhas) > 08,(cAliasWK)->ZGH_CFOP   := _aLinhas[09],)
-	IF(LEN(_aLinhas) > 09,(cAliasWK)->ZGH_TPMOV  := _aLinhas[10],)
-	IF(LEN(_aLinhas) > 10,(cAliasWK)->ZGH_NATURE := _aLinhas[11],)
-	IF(LEN(_aLinhas) > 11,(cAliasWK)->ZGH_TIPOPD := _aLinhas[12],)
+    If(Len(_aLinhas) > 00,(cAliasWK)->(DBAPPEND())              ,)
+	If(Len(_aLinhas) > 00,(cAliasWK)->ZGH_FILIAL := StrZero(Val(_aLinhas[01]),2),)
+	If(Len(_aLinhas) > 01,(cAliasWK)->ZGH_CONTA  := _aLinhas[02],)
+	If(Len(_aLinhas) > 02,(cAliasWK)->ZGH_CLIENT := _aLinhas[03],)
+	If(Len(_aLinhas) > 03,(cAliasWK)->ZGH_CLILOJ := _aLinhas[04],)
+	If(Len(_aLinhas) > 04,(cAliasWK)->ZGH_FORNER := _aLinhas[05],)
+	If(Len(_aLinhas) > 05,(cAliasWK)->ZGH_FORLOJ := _aLinhas[06],)
+	If(Len(_aLinhas) > 06,(cAliasWK)->ZGH_PRODUT := _aLinhas[07],)
+	If(Len(_aLinhas) > 07,(cAliasWK)->ZGH_GRUPO  := _aLinhas[08],)
+	If(Len(_aLinhas) > 08,(cAliasWK)->ZGH_CFOP   := _aLinhas[09],)
+	If(Len(_aLinhas) > 09,(cAliasWK)->ZGH_TPMOV  := _aLinhas[10],)
+	If(Len(_aLinhas) > 10,(cAliasWK)->ZGH_NATURE := _aLinhas[11],)
+	If(Len(_aLinhas) > 11,(cAliasWK)->ZGH_TIPOPD := _aLinhas[12],)
 
     FT_FSKIP()
 
-ENDDO
+EndDo
 
 FT_FUSE()
 
-RETURN .T.
-	
+Return .T.	
 
 /*
 ===============================================================================================================================
 Programa----------: AFIS008Grv()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 27/12/2017
-===============================================================================================================================
 Descrição---------: Grava os dados lidos do CSV
-===============================================================================================================================
 Parametros--------: oproc,_lAnalizar
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-STATIC FUNCTION AFIS008Grv(oproc,_lAnalizar)
-LOCAL _nConta:=_nCont2:=0//,_nQbg:=250
-LOCAL _cTimeIni:=TIME()
+Static Function AFIS008Grv(oproc,_lAnalizar)
+
+Local _nConta:=_nCont2:=0//,_nQbg:=250
+Local _cTimeIni:=Time()
 _aCols:={}
 
 _nConta:=(cAliasWK)->(LASTREC())
-_cTot:=ALLTRIM(STR(_nConta))
+_cTot:=AllTrim(Str(_nConta))
 _nConta:=0
 _nRepet:=0
 oproc:cCaption := "Gravando, Aguarde... Hora Inicial :"+_cTimeIni
 ProcessMessages()
-ZGH->(DBSETORDER(3))//ZGH_FILIAL+ZGH_CLIENT+ZGH_CLILOJ+ZGH_FORNER+ZGH_FORLOJ+ZGH_GRUPO+ZGH_PRODUT+ZGH_CFOP+ZGH_TPMOV
-DBSELECTAREA( cAliasWK )
-(cAliasWK)->(DBGOTOP())
-DO While (cAliasWK)->(!Eof())
+ZGH->(DBSetOrder(3))//ZGH_FILIAL+ZGH_CLIENT+ZGH_CLILOJ+ZGH_FORNER+ZGH_FORLOJ+ZGH_GRUPO+ZGH_PRODUT+ZGH_CFOP+ZGH_TPMOV
+DBSelectArea( cAliasWK )
+(cAliasWK)->(DBGoTop())
+While (cAliasWK)->(!Eof())
     _nConta++
-    oproc:cCaption := "HI: "+_cTimeIni+" - Gravando Regra: "+STRZERO(_nConta,6)+" / "+_cTot+" - "+STRZERO(_nRepet,7)//+" / Arq.: "+cNomArq
+    oproc:cCaption := "HI: "+_cTimeIni+" - Gravando Regra: "+StrZero(_nConta,6)+" / "+_cTot+" - "+StrZero(_nRepet,7)//+" / Arq.: "+cNomArq
     ProcessMessages()
   
-   IF !EMPTY((cAliasWK)->WK_MSG) //.OR. !(cAliasWK)->WK_MARCA 
+   If !Empty((cAliasWK)->WK_MSG) //.OR. !(cAliasWK)->WK_MARCA 
       _nRepet++
-      AADD(_aCols,{(cAliasWK)->WK_MARCA,ZGH_FILIAL,ZGH_CONTA,ZGH_CLIENT,ZGH_CLILOJ,ZGH_FORNER,ZGH_FORLOJ,ZGH_PRODUT,ZGH_GRUPO,ZGH_CFOP,ZGH_TPMOV,ZGH_TIPOPD,;
+      aAdd(_aCols,{(cAliasWK)->WK_MARCA,ZGH_FILIAL,ZGH_CONTA,ZGH_CLIENT,ZGH_CLILOJ,ZGH_FORNER,ZGH_FORLOJ,ZGH_PRODUT,ZGH_GRUPO,ZGH_CFOP,ZGH_TPMOV,ZGH_TIPOPD,;
                    (cAliasWK)->WK_MSG,"IGNORADO" })
-      (cAliasWK)->(DbSkip())
-      LOOP
-   ENDIF
+      (cAliasWK)->(DBSkip())
+      Loop
+   EndIf
    _lGrava:=.F.
-   If !EMPTY((cAliasWK)->ZGH_NATURE) 
-      ZGH->(DBSETORDER(4))//ZGH_FILIAL+ZGH_NATURE
-	  If !ZGH->(DBSEEK(xFilial("ZGH")+(cAliasWK)->ZGH_NATURE ))
+   If !Empty((cAliasWK)->ZGH_NATURE) 
+      ZGH->(DBSetOrder(4))//ZGH_FILIAL+ZGH_NATURE
+	  If !ZGH->(DBSeek(xFilial("ZGH")+(cAliasWK)->ZGH_NATURE ))
          _lGrava:=.T.
-      ENDIF
-   ELSEIf !EMPTY((cAliasWK)->ZGH_TIPOPD) 
-      ZGH->(DBSETORDER(6))//ZGH_FILIAL+ZGH_TIPOPD
-      IF !ZGH->(DBSEEK((cAliasWK)->(ZGH_FILIAL+ZGH_TIPOPD)))
+      EndIf
+   ElseIf !Empty((cAliasWK)->ZGH_TIPOPD) 
+      ZGH->(DBSetOrder(6))//ZGH_FILIAL+ZGH_TIPOPD
+      If !ZGH->(DBSeek((cAliasWK)->(ZGH_FILIAL+ZGH_TIPOPD)))
          _lGrava:=.T.
-      ENDIF
-   ELSE
-      ZGH->(DBSETORDER(3))//ZGH_FILIAL+ZGH_CLIENT+ZGH_CLILOJ+ZGH_FORNER+ZGH_FORLOJ+ZGH_GRUPO+ZGH_PRODUT+ZGH_CFOP+ZGH_TPMOV
-      IF !ZGH->(DBSEEK((cAliasWK)->(ZGH_FILIAL+ZGH_CLIENT+ZGH_CLILOJ+ZGH_FORNER+ZGH_FORLOJ+ZGH_GRUPO+ZGH_PRODUT+ZGH_CFOP+ZGH_TPMOV)))
+      EndIf
+   Else
+      ZGH->(DBSetOrder(3))//ZGH_FILIAL+ZGH_CLIENT+ZGH_CLILOJ+ZGH_FORNER+ZGH_FORLOJ+ZGH_GRUPO+ZGH_PRODUT+ZGH_CFOP+ZGH_TPMOV
+      If !ZGH->(DBSeek((cAliasWK)->(ZGH_FILIAL+ZGH_CLIENT+ZGH_CLILOJ+ZGH_FORNER+ZGH_FORLOJ+ZGH_GRUPO+ZGH_PRODUT+ZGH_CFOP+ZGH_TPMOV)))
          _lGrava:=.T.
-      ENDIF
-   ENDIF
+      EndIf
+   EndIf
 
-   IF _lGrava
+   If _lGrava
       _nCont2++
-      IF !_lAnalizar
-         ZGH->(RECLOCK("ZGH",.T.))
+      If !_lAnalizar
+         ZGH->(RecLock("ZGH",.T.))
          AVREPLACE(cAliasWK,"ZGH")
          ZGH->ZGH_FILIAL:=(cAliasWK)->ZGH_FILIAL
-         ZGH->(MSUNLOCK())
+         ZGH->(MSUnLock())
          _cMsg:="[Cadastrado com sucesso]"
-      ELSE
+      Else
          _cMsg:="[Regra OK]"
-      ENDIF   
+      EndIf   
 
-      AADD(_aCols,{.T.,ZGH_FILIAL,ZGH_CONTA,ZGH_CLIENT,ZGH_CLILOJ,ZGH_FORNER,ZGH_FORLOJ,ZGH_PRODUT,ZGH_GRUPO,ZGH_CFOP,ZGH_TPMOV,ZGH_NATURE,ZGH_TIPOPD,;
+      aAdd(_aCols,{.T.,ZGH_FILIAL,ZGH_CONTA,ZGH_CLIENT,ZGH_CLILOJ,ZGH_FORNER,ZGH_FORLOJ,ZGH_PRODUT,ZGH_GRUPO,ZGH_CFOP,ZGH_TPMOV,ZGH_NATURE,ZGH_TIPOPD,;
                    _cMsg,(cAliasWK)->WK_MSG})
-   ELSE
+   Else
       _nRepet++
-      _cMsg:="[Já cadastrado no sistema] "+IF( (cAliasWK)->ZGH_CONTA # ZGH->ZGH_CONTA,"[Com Conta diferente ("+ZGH->ZGH_CONTA+")] "," ") 
-      AADD(_aCols,{.F.,ZGH_FILIAL,ZGH_CONTA,ZGH_CLIENT,ZGH_CLILOJ,ZGH_FORNER,ZGH_FORLOJ,ZGH_PRODUT,ZGH_GRUPO,ZGH_CFOP,ZGH_TPMOV,ZGH_NATURE,ZGH_TIPOPD,;
+      _cMsg:="[Já cadastrado no sistema] "+If( (cAliasWK)->ZGH_CONTA # ZGH->ZGH_CONTA,"[Com Conta diferente ("+ZGH->ZGH_CONTA+")] "," ") 
+      aAdd(_aCols,{.F.,ZGH_FILIAL,ZGH_CONTA,ZGH_CLIENT,ZGH_CLILOJ,ZGH_FORNER,ZGH_FORLOJ,ZGH_PRODUT,ZGH_GRUPO,ZGH_CFOP,ZGH_TPMOV,ZGH_NATURE,ZGH_TIPOPD,;
                    _cMsg,(cAliasWK)->WK_MSG})
-   ENDIF
+   EndIf
 
-   (cAliasWK)->(DbSkip())
+   (cAliasWK)->(DBSkip())
 
 EndDo
 
-IF LEN(_aCols) > 0
+If Len(_aCols) > 0
 
-   IF _lAnalizar
-      _cTitAux:='INTEGRAÇÃO DE REGRAS SPEED 500 - HrI: '+_cTimeIni+" / HrF: "+TIME()+" / Foram analizados "+_cTot+" / já cadastros: "+STRZERO(_nRepet,7)+" / Arq.: "+cNomArq
-   ELSE  
-      _cTitAux:='INTEGRAÇÃO DE REGRAS SPEED 500 - HrI: '+_cTimeIni+" / HrF: "+TIME()+" / Foram gravadas "+ALLTRIM(STR(_nCont2))+" de "+_cTot+" / já cadastros: "+STRZERO(_nRepet,7)+" / Arq.: "+cNomArq
-   ENDIF  
+   If _lAnalizar
+      _cTitAux:='INTEGRAÇÃO DE REGRAS SPEED 500 - HrI: '+_cTimeIni+" / HrF: "+TIME()+" / Foram analizados "+_cTot+" / já cadastros: "+StrZero(_nRepet,7)+" / Arq.: "+cNomArq
+   Else  
+      _cTitAux:='INTEGRAÇÃO DE REGRAS SPEED 500 - HrI: '+_cTimeIni+" / HrF: "+TIME()+" / Foram gravadas "+AllTrim(Str(_nCont2))+" de "+_cTot+" / já cadastros: "+StrZero(_nRepet,7)+" / Arq.: "+cNomArq
+   EndIf  
    _AHEADER:={" ",'FILIAL','CONTA','COD. CLIENTE','LOJA','COD, FORN','LOJA','PRODUTO','GRUPO','CFOP','TIPO','NATUREZA','TP PROD','OBSERVACAO1','OBSERVACAO2'}
    _ASIZES :={ 10,      30,     40,            40,    30,         40,    30,      50,      40,    40,    30,        50,       30,         200,          100}
-// DlgToExcel( { { "ARRAY" , _cTitAux , _aHeader , _aCols } } )//já gera pq caso que pode cair
-   
+  
    //ITLISTBOX( _CTITAUX,_AHEADER , _ACOLS,_LMAXSIZ,_NTIPO,_CMSGTOP , _LSELUNC , _ASIZES , _NCAMPO , BOK , BCANCEL )
    U_ITLISTBOX( _cTitAux,_AHEADER , _aCols, .T.    , 4    ,         ,          ,_ASIZES  , )
 
-ELSE
+Else
 
-   IF !_lAnalizar
-      U_ITMSG("Foram gravadas "+ALLTRIM(STR(_nCont2))+" de "+_cTot+" Regras. HrI: "+_cTimeIni+" / HrF: "+TIME()+" / Arq.: "+cNomArq,'Atenção!',,2)
-   ELSE   
-      U_ITMSG("TUDO OK",'Atenção!',,2)
-   ENDIF
+   If !_lAnalizar
+      U_ITMsg("Foram gravadas "+AllTrim(Str(_nCont2))+" de "+_cTot+" Regras. HrI: "+_cTimeIni+" / HrF: "+TIME()+" / Arq.: "+cNomArq,'Atenção!',,2)
+   Else   
+      U_ITMsg("TUDO OK",'Atenção!',,2)
+   EndIf
 
-ENDIF
+EndIf
 
-RETURN .T.
+Return .T.

@@ -15,7 +15,7 @@
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include 'Protheus.Ch'
+#Include "TOTVS.ch"
 #Include 'FWMVCDef.Ch'
 
 #Define CRLF Chr(13)+Chr(10)
@@ -47,7 +47,7 @@ _oBrowse:SetAlias( 'ZC6' )
 _oBrowse:SetDescription( 'Comissão - Cálculo de Bonificações' )
 _oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -157,22 +157,22 @@ User Function MOMS015C()
 
 Local _aParam	:= {}
 Local _aParRet	:= {}
-Local _cDtRef	:= SubStr( DtoS( MonthSub( dDataBase , 1 ) ) , 1 , 6 )
+Local _cDtRef	:= SubStr( DToS( MonthSub( dDataBase , 1 ) ) , 1 , 6 )
 Local _cAnoMes	:= SubStr( _cDtRef , 5 , 2 ) +'/'+ SubStr( _cDtRef , 1 , 4 )
-Private _aret := {}
+Private _aRet := {}
 
 If !U_ITACSUSR( 'ZZL_ADMCMS' , 'S' )
-	u_itmsg( 'Usuário sem acesso ao processamento de cálculo de Comissões!','Atenção!',' Verifique com a área de TI/ERP' , 1 )
-	Return()
+	U_ITMsg( 'Usuário sem acesso ao processamento de cálculo de Comissões!','Atenção!',' Verifique com a área de TI/ERP' , 1 )
+	Return
 EndIf
 
 
 If MOMS015VLF()
 
-	u_itmsg('Não é possível recalcular as comissões para um período que já foi fechado. '										+;
+	U_ITMsg('Não é possível recalcular as comissões para um período que já foi fechado. '										+;
 				'O período atual ['+ SubStr( _cDtRef , 5 , 2 ) +'/'+ SubStr( _cDtRef , 1 , 4 ) +'] não pode mais ser processado. '	,;
 				'Atenção!' ,, 1 )	
-	Return()
+	Return
 	
 EndIf
 
@@ -183,7 +183,7 @@ If .not. u_MOMS005VD(2)
 	  
   Return
 	  
-Endif
+EndIf
 
 //================================================================================
 // Monta a parametrização das perguntas iniciais
@@ -192,13 +192,13 @@ aAdd( _aParam , { 1 , "Mes/Ano: "		, _cAnoMes		, "@!" , '.T.' ,          , '.F.'
 
 _aParRet := { _aParam[01][03] }
 
-If Parambox( _aParam , 'Configuração do Processamento!' , @_aParRet ,,,,,,, .F. , .F. )
+If ParamBox( _aParam , 'Configuração do Processamento!' , @_aParRet ,,,,,,, .F. , .F. )
 	
-	_aret := {}
-	FWMSGRUN( ,{|oproc| _aret := MOMS015EXE( _cDtRef,oproc ) } , 'Aguarde!' , 'Iniciando o processamento...' )
+	_aRet := {}
+	FWMsgRun( ,{|oproc| _aRet := MOMS015EXE( _cDtRef,oproc ) } , 'Aguarde!' , 'Iniciando o processamento...' )
 	
-	_ahdrAux := _aret[1]
-	_arestot := _aret[2]
+	_ahdrAux := _aRet[1]
+	_arestot := _aRet[2]
 	
 	U_ITListBox( 'Cálculo de Comissão' , _aHdrAux , _aResTot , .T. , 1 , 'Detalhes do processamento:' )
 	
@@ -211,23 +211,23 @@ If Parambox( _aParam , 'Configuração do Processamento!' , @_aParRet ,,,,,,, .F. 
  	ZC8->ZC8_FILIAL     := xFilial("ZC8")   
 	ZC8->ZC8_SEQ        := U_MOMS009C()  //Gera nova sequência do ZC8
 	ZC8->ZC8_ROTINA     := "Adicionais de Comissao"
-	ZC8->ZC8_DATA       := DATE()
-	ZC8->ZC8_HORA       := TIME()
-	ZC8->ZC8_USER       := CUSERNAME
-	ZC8->ZC8_CODUSU     := __CUSERID
+	ZC8->ZC8_DATA       := Date()
+	ZC8->ZC8_HORA       := Time()
+	ZC8->ZC8_USER       := cUserName
+	ZC8->ZC8_CODUSU     := __cUserId
 	ZC8->ZC8_OBS        := '2 - Bonificações'
 	ZC8->ZC8_COMP       := _cAnoMes
  
-	MSUNLOCK()
+	MSUnLock()
 	
 	
 Else
 
-	u_itmsg( 'Operação cancelada pelo usuário!' , 'Atenção!',,1 )
+	U_ITMsg( 'Operação cancelada pelo usuário!' , 'Atenção!',,1 )
 
 EndIf
 	
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -240,7 +240,7 @@ Descrição---------: Processamento do Cálculo das Comissões
 Parametros--------: _cDtRef - Data de referência
 					oproc - objeto da barra de processamento
 ===============================================================================================================================
-Retorno-----------: _aret - array com header e acols do itlist de resultado do processamento
+Retorno-----------: _aRet - array com header e acols do itlist de resultado do processamento
 ===============================================================================================================================
 */
 
@@ -269,7 +269,7 @@ Local _aHdrAux	:= {	'Cód. Vendedor'			,; //01
 Local _cAlias	:= GetNextAlias()
 Local _cAliCms	:= GetNextAlias()
 Local _cQuery	:= ''
-Local _cDtIni	:= DtoS( CtoD( '01/' + MV_PAR01  ) )
+Local _cDtIni	:= DToS( CtoD( '01/' + MV_PAR01  ) )
 Local _cDtFim	:= SubStr( _cDtIni , 1 , 6 ) + '31'
 Local _cCodVen	:= ''
 Local _nI       := 0
@@ -287,7 +287,7 @@ Begin Transaction
 //================================================================================
 // Verifica e apaga os registros anteriores
 //================================================================================
-fwMsgRun(, {|oproc| MOMS015DEL( _cDtIni , _cDtRef) } ,'Excluindo cálculos anteriores...' , 'Aguarde!'  )
+FWMsgRun(, {|oproc| MOMS015DEL( _cDtIni , _cDtRef) } ,'Excluindo cálculos anteriores...' , 'Aguarde!'  )
 
 //================================================================================
 // Consulta os dados conforme os parâmetros para calcular as comissões
@@ -437,7 +437,7 @@ If _nTotReg > 0
 	//================================================================================
 	// Chama rotina que verifica e registra os Totalizadores e Títulos de Comissão
 	//================================================================================
-	fwmsgrun( ,{|oproc| MOMS015SUP( _cDtRef,oproc ) } , 'Verificando dados das bonificações...' , 'Aguarde!'  )
+	FWMsgRun( ,{|oproc| MOMS015SUP( _cDtRef,oproc ) } , 'Verificando dados das bonificações...' , 'Aguarde!'  )
 	
 	For _nI := 1 To Len(_aDados)
 		aAdd( _aResTot , _aDados[_nI] )
@@ -449,9 +449,9 @@ EndIf
 
 End Transaction
 
-_aret := {_aHdrAux, _aResTot}
+_aRet := {_aHdrAux, _aResTot}
 
-Return _aret
+Return _aRet
 
 /*
 ===============================================================================================================================
@@ -481,7 +481,7 @@ Local _nValLiq		:= 0
 Local _nValCms		:= 0
 
 Default _aDados		:= {}
-Default _cDtRef		:= SubStr( DtoS( MonthSub( dDataBase , 1 ) ) , 1 , 6 )
+Default _cDtRef		:= SubStr( DToS( MonthSub( dDataBase , 1 ) ) , 1 , 6 )
 Default _cCodVen	:= ''
 
 //================================================================================
@@ -561,7 +561,7 @@ For _nI := 1 To Len( _aDadZC7 )
 	ZC7->ZC7_PERCMS := _aDadZC7[_nI][16]
 	ZC7->ZC7_VALCMS := _aDadZC7[_nI][17]
 	
-	ZC7->( MsUnlock() )
+	ZC7->( MSUnLock() )
 	
 	//================================================================================
 	// Verifica se o produto atual gera comissão para o coordenador
@@ -622,7 +622,7 @@ For _nI := 1 To Len( _aDadZC7 )
 		ZC7->ZC7_PERCMS := _nPerCom
 		ZC7->ZC7_VALCMS := Round( _aDadZC7[_nI][15] * ( _nPerCom / 100 ) , 2 )
 		
-		ZC7->( MsUnLock() )
+		ZC7->( MSUnLock() )
 		
 	EndIf
 	
@@ -685,7 +685,7 @@ For _nI := 1 To Len( _aDadZC7 )
 		ZC7->ZC7_PERCMS := _nPerCom
 		ZC7->ZC7_VALCMS := Round( _aDadZC7[_nI][15] * ( _nPerCom / 100 ) , 2 )
 		
-		ZC7->( MsUnLock() )
+		ZC7->( MSUnLock() )
 		
 	EndIf
 	
@@ -748,14 +748,14 @@ For _nI := 1 To Len( _aDadZC7 )
 		ZC7->ZC7_PERCMS := _nPerCom
 		ZC7->ZC7_VALCMS := Round( _aDadZC7[_nI][15] * ( _nPerCom / 100 ) , 2 )
 		
-		ZC7->( MsUnLock() )
+		ZC7->( MSUnLock() )
 		
 	EndIf
 	
 
 Next _nI
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -828,7 +828,7 @@ EndIf
 
 (_cAlias)->( DBCloseArea() )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -902,7 +902,7 @@ _cQuery := " SELECT COUNT(*) AS CONTADOR "
 _cQuery += " FROM "+ RetSqlName('SE3') +" SE3 "
 _cQuery += " WHERE "
 _cQuery += "     D_E_L_E_T_ = ' ' "
-_cQuery += " AND E3_EMISSAO BETWEEN '"+ SubStr( DtoS( MonthSub( dDatabase , 1 ) ) , 1 , 6 ) +"01' AND '"+ SubStr( DtoS( MonthSub( dDatabase , 1 ) ) , 1 , 6 ) +"31' "
+_cQuery += " AND E3_EMISSAO BETWEEN '"+ SubStr( DToS( MonthSub( dDatabase , 1 ) ) , 1 , 6 ) +"01' AND '"+ SubStr( DToS( MonthSub( dDatabase , 1 ) ) , 1 , 6 ) +"31' "
 _cQuery += " AND E3_I_FECH  = 'S' "
 
 If Select(_cAlias) > 0
@@ -932,7 +932,7 @@ Programa----------: MOMS015DEL
 Autor-------------: Alexandre Villar
 Data da Criacao---: 06/10/2014
 ===============================================================================================================================
-Descrição---------: Rotina que processa a exclusão dos registros do período atual.
+Descrição---------: Rotina que Processa a exclusão dos registros do período atual.
 ===============================================================================================================================
 Parametros--------: _cDTini - data inicial do processamento
 					_cDTref - data de referência do processamento
@@ -979,7 +979,7 @@ While (_cAlias1)->( !Eof() )
 			SE3->( DBGoTo( _aRegSE3[_nI] ) )
 			SE3->( RecLock( 'SE3' , .F. ) )
 			SE3->( DBDelete() )
-			SE3->( MsUnLock() )
+			SE3->( MSUnLock() )
 		
 		Next _nI
 		
@@ -996,7 +996,7 @@ While (_cAlias1)->( !Eof() )
 			
 			ZC7->( RecLock( 'ZC7' , .F. ) )
 			ZC7->( DBDelete() )
-			ZC7->( MsUnlock() )
+			ZC7->( MSUnLock() )
 			
 		ZC7->( DBSkip() )
 		EndDo
@@ -1005,14 +1005,14 @@ While (_cAlias1)->( !Eof() )
 	
 	ZC6->( RecLock( 'ZC6' , .F. ) )
 	ZC6->( DBDelete() )
-	ZC6->( MsUnLock() )
+	ZC6->( MSUnLock() )
 
 (_cAlias1)->( DBSkip() )
 EndDo
 
 (_cAlias1)->( DBCloseArea() )
 	
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1020,7 +1020,7 @@ Programa----------: MOMS015SUP
 Autor-------------: Alexandre Villar
 Data da Criacao---: 14/10/2014
 ===============================================================================================================================
-Descrição---------: Rotina que processa a identificação e contabilização dos registros para geração do SE3
+Descrição---------: Rotina que Processa a identificação e contabilização dos registros para geração do SE3
 ===============================================================================================================================
 Parametros--------: _cDtref - Data de referência
 					oproc - objeto da barra de processamento
@@ -1046,7 +1046,7 @@ _cQuery := " SELECT * "
 _cQuery += " FROM "+ RetSqlName('ZC7') +" ZC7 "
 _cQuery += " WHERE "
 _cQuery += "     ZC7.D_E_L_E_T_ = ' ' "
-_cQuery += " AND SUBSTR( ZC7_CHAVE , 7 , 6 ) = '"+ _cDtRef +"' "
+_cQuery += " AND SubStr( ZC7_CHAVE , 7 , 6 ) = '"+ _cDtRef +"' "
 _cQuery += " AND NOT EXISTS ( SELECT * FROM "+ RetSqlName('ZC6') +" ZC6 "
 _cQuery +=                  " WHERE "
 _cQuery +=                  "     ZC6.D_E_L_E_T_ = ' ' "
@@ -1105,7 +1105,7 @@ If _nTotReg > 0
 		ZC6->ZC6_VALLIQ	:= _nValLiq
 		ZC6->ZC6_PERCOM	:= _nPerCms
 		
-		ZC6->( MsUnLock() )
+		ZC6->( MSUnLock() )
 		
 		If _nValCms > 0
 			
@@ -1113,14 +1113,14 @@ If _nTotReg > 0
 			
 			SE3->E3_FILIAL 	:= '01'
 			SE3->E3_VEND   	:= _cCodVen
-			SE3->E3_EMISSAO := LastDay( StoD( _cDtRef + '01' ) )
-			SE3->E3_DATA    := LastDay( StoD( _cDtRef + '01' ) )
+			SE3->E3_EMISSAO := LastDay( SToD( _cDtRef + '01' ) )
+			SE3->E3_DATA    := LastDay( SToD( _cDtRef + '01' ) )
 			SE3->E3_BASE    := _nValLiq
 			SE3->E3_PORC    := _nPerCms
 			SE3->E3_COMIS   := ( _nValCms * -1 )
 			SE3->E3_I_ORIGE := 'MOMS015'
 			
-			SE3->( MsUnLock() )
+			SE3->( MSUnLock() )
 			
 		EndIf
 		
@@ -1128,7 +1128,7 @@ If _nTotReg > 0
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1156,8 +1156,8 @@ Local oLbxHIS		:= Nil
 Local aPosObj   	:= {}
 Local aObjects  	:= {}
 Local aSize     	:= MsAdvSize()
-Local bSelDados		:= {|| fwmsgrun(,{|lEnd| MOMS015I( @oLbxCAB ) }, "Aguarde...", "Selecionando dados..." ) }
-Local bMontaHIS		:= {|| IIF( !Empty(oLbxCAB:aArray) , MOMS015H( @oLbxHIS , oLbxCAB:aArray[oLbxCAB:nAt][07] ) , ) }
+Local bSelDados		:= {|| FWMsgRun(,{|lEnd| MOMS015I( @oLbxCAB ) }, "Aguarde...", "Selecionando dados..." ) }
+Local bMontaHIS		:= {|| IIf( !Empty(oLbxCAB:aArray) , MOMS015H( @oLbxHIS , oLbxCAB:aArray[oLbxCAB:nAt][07] ) , ) }
 
 Local oBar			:= Nil
 Local aBtn 	    	:= Array(02)
@@ -1195,13 +1195,13 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From aSize[7],00 to aSize[6],aSize[5] Of oM
 	//================================================================================
 	@ aPosObj[01][01],aPosObj[01][02] MSPANEL oScrPanel PROMPT "" SIZE aPosObj[01][03],aPosObj[01][04] OF oDlg LOWERED
 
-	@ 004 , 004 SAY "Vendedor:"	  													SIZE 025,07 OF oScrPanel PIXEL
-	@ 012 , 004 SAY ZC6->ZC6_CODVEN												 	SIZE 060,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
+	@ 004 , 004 Say "Vendedor:"	  													SIZE 025,07 OF oScrPanel PIXEL
+	@ 012 , 004 Say ZC6->ZC6_CODVEN												 	SIZE 060,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
     
 	_cNomVen := Capital( AllTrim( Posicione('SA3',1,xFilial('SA3')+ZC6->ZC6_CODVEN,'A3_NOME') ) )
 	
-	@ 004 , 055 SAY "Nome:"															SIZE 165,07 OF oScrPanel PIXEL
-	@ 012 , 055 SAY _cNomVen														SIZE 165,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
+	@ 004 , 055 Say "Nome:"															SIZE 165,07 OF oScrPanel PIXEL
+	@ 012 , 055 Say _cNomVen														SIZE 165,09 OF oScrPanel PIXEL FONT oBold COLOR CLR_BLUE
 	
 	//================================================================================
 	// Parte 02 - Resumo dos períodos calculados
@@ -1251,7 +1251,7 @@ DEFINE MSDIALOG oDlg TITLE cCadastro From aSize[7],00 to aSize[6],aSize[5] Of oM
 	
 ACTIVATE MSDIALOG oDlg CENTERED ON INIT IIf( Empty(oLbxCAB:aArray) , ( Aviso( 'Atenção!' , "O Pedido ["+ SC5->C5_FILIAL +"/"+ SC5->C5_NUM +"] não possui histórico de alterações." , {'Fechar'} , 2 ) , oDlg:End() ) , )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1327,7 +1327,7 @@ If Len(_aLbxAux) > 0 .And. ValType(oLbxAux) == "O"
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1421,4 +1421,4 @@ If	Len(_aLbxAux) > 0 .And. ValType(oLbxAux) == "O"
 
 EndIf
 
-Return()
+Return

@@ -2,29 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MCOM018
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 17/05/2022
-===============================================================================================================================
 Descrição---------: Rotina para informar a chave do CT-e para geração do 610110-Prestação de Serviço em Desacordo. Esses docu-
 					mentos geralmente tem algum problema e não é possível gerar sua classificação por vias normais. Para que 
 					não seja necessário liberar a inclusão desse documento pelo IT_FISBXML, o documento é incluído como pre-nota
 					e sua chave informada aqui, possibilitando a manifestação sem classficação. Chamado 40131 e 40132
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -39,7 +33,7 @@ Local _oBtnOut as Object
 If Empty(SF1->F1_STATUS) .And. AllTrim(SF1->F1_ESPECIE) = 'CTE' .And. Empty(SF1->F1_CHVNFE)
 	DEFINE MSDIALOG _oDlgKey TITLE "Informa chave CT-e" FROM 0,0 TO 150,380 PIXEL OF GetWndDefault()
 			
-	@ 12,008 SAY "Informa a chave a ser gravada no CT-e para casos de recusa da operação." PIXEL OF _oDlgKey
+	@ 12,008 Say "Informa a chave a ser gravada no CT-e para casos de recusa da operação." PIXEL OF _oDlgKey
 	@ 33,008 MSGET _cChave SIZE 160,10 PIXEL OF _oDlgKey Valid (!Empty(_cChave))
 	@ 50,055 BUTTON _oBtnCon PROMPT "&Confirma" SIZE 38,11 PIXEL ACTION (_nOpc := 1, _oDlgKey:End())
 	@ 50,095 BUTTON _oBtnOut PROMPT "&Cancela" SIZE 38,11 PIXEL ACTION _oDlgKey:End()
@@ -58,10 +52,11 @@ If Empty(SF1->F1_STATUS) .And. AllTrim(SF1->F1_ESPECIE) = 'CTE' .And. Empty(SF1-
 		Else
 			RecLock("SF1", .F.)
 				SF1->F1_CHVNFE := _cChave
-			MsUnlock()
+			MSUnLock()
 		EndIf
 	EndIf
 Else
 	MsgStop("Opção disponível apenas para CT-e sem chave informada e que não foi classificado.", "MCOM01804")
 EndIf
+
 Return

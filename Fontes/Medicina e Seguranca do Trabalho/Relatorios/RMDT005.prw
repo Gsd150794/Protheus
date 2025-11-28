@@ -2,34 +2,31 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Igor Melgaco | 29/09/2022 | Chamado 41383 - Incluido parametro de filtro de Situação.
- ------------------------------------------------------------------------------------------------------------------------------
- Alex Wallauer| 18/04/2023 | Chamado 47002 - Fernando. Correção de linhas duplicadas e geração do XLXS.
--------------------------------------------------------------------------------------------------------------------------------
- Igor Melgaco | 03/07/2024 | Chamado 47730 - André. Inclusão do campo vencido.  
- ==============================================================================================================================
+Igor Melgaco  |29/09/2022| Chamado 41383 - Incluido parametro de filtro de Situação.
+Alex Wallauer |18/04/2023| Chamado 47002 - Fernando. Correção de linhas duplicadas e geração do XLXS.
+Igor Melgaco  |03/07/2024| Chamado 47730 - André. Inclusão do campo vencido.  
+==============================================================================================================================
 */
-#include "report.ch"
-#include "protheus.ch" 
-#include "topconn.ch"
+
+#Include "report.ch"
+#Include "TOTVS.ch" 
 
 Static _cAlias := ""
+
 /*
 ===============================================================================================================================
 Programa----------: RMDT005
 Autor-------------: Igor Melgaço
 Data da Criacao---: 19/08/2022
-===============================================================================================================================
 Descrição---------: Relatorio de EPI em uso. Chamado 41009
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function RMDT005()
+
 Local nA 
 Local _aParRet   := {}
 Local _aParAux   := {}
@@ -47,27 +44,27 @@ Private _nCont		:= 0
 
 _aUso := {"S-Sim","N-Nao"}
 
-MV_PAR01 := SPACE(100)
-MV_PAR02 := SPACE(100)
-MV_PAR03 := SPACE(100)
+MV_PAR01 := Space(100)
+MV_PAR02 := Space(100)
+MV_PAR03 := Space(100)
 MV_PAR04 := Space(1)
 MV_PAR05 := CTOD("")
 MV_PAR06 := Space(5)
 
 _aItalac_F3:={}
 
-_cSelecSQB := "SELECT QB_FILIAL, QB_DEPTO, QB_DESCRIC FROM "+RETSQLNAME("SQB")+" SQB WHERE  D_E_L_E_T_ <> '*'  ORDER BY QB_DEPTO " 
-_cSelecSB1 := "SELECT B1_COD, B1_DESC FROM "+RETSQLNAME("SB1")+" SB1 WHERE  B1_GRUPO = '0805' AND D_E_L_E_T_ <> '*'  ORDER BY B1_COD " 
+_cSelecSQB := "SELECT QB_FILIAL, QB_DEPTO, QB_DESCRIC FROM "+RETSQLNAME("SQB")+" SQB WHERE  D_E_L_E_T_ = ' '  ORDER BY QB_DEPTO " 
+_cSelecSB1 := "SELECT B1_COD, B1_DESC FROM "+RETSQLNAME("SB1")+" SB1 WHERE  B1_GRUPO = '0805' AND D_E_L_E_T_ = ' '  ORDER BY B1_COD " 
 
-AADD(_aItalac_F3,{"MV_PAR02" ,_cSelecSQB,{|Tab| (Tab)->QB_FILIAL + " - "+ (Tab)->QB_DEPTO },{|Tab| (Tab)->QB_DESCRIC } ,,"Filial - Departamento"   ,          ,          ,60        ,.T.        ,       , } )
-AADD(_aItalac_F3,{"MV_PAR03" ,_cSelecSB1,{|Tab| (Tab)->B1_COD}   ,{|Tab| (Tab)->B1_DESC}     ,,"EPI's"           ,          ,          ,60        ,.T.        ,       , } )
+aAdd(_aItalac_F3,{"MV_PAR02" ,_cSelecSQB,{|Tab| (Tab)->QB_FILIAL + " - "+ (Tab)->QB_DEPTO },{|Tab| (Tab)->QB_DESCRIC } ,,"Filial - Departamento"   ,          ,          ,60        ,.T.        ,       , } )
+aAdd(_aItalac_F3,{"MV_PAR03" ,_cSelecSB1,{|Tab| (Tab)->B1_COD}   ,{|Tab| (Tab)->B1_DESC}     ,,"EPI's"           ,          ,          ,60        ,.T.        ,       , } )
 
-AADD( _aParAux , { 1 , "Filial"         	 , MV_PAR01, "@!" , "" ,"LSTFIL", "" , 100 , .F. } )
-AADD( _aParAux , { 1 , "Departamento"		 , MV_PAR02, "@!" , "" ,"F3ITLC", "" , 100 , .F. } )
-AADD( _aParAux , { 1 , "EPI"            	 , MV_PAR03, "@!" , "" ,"F3ITLC", "" , 100 , .F. } ) 
-AADD( _aParAux , { 2 , "Em Uso"         	 , MV_PAR04, _aUso, 060,".T.",.T. ,".T."}) 
-AADD( _aParAux , { 1 , "Entrega a partir De" , MV_PAR05, "@D" , "" , ""	, "" , 050 , .F.  })
-AADD( _aParAux , { 1 , "Situacao"	    	 , MV_PAR06, "@!" , "fSituacao()" ,""      , "" , 100 , .F. } ) 
+aAdd( _aParAux , { 1 , "Filial"         	 , MV_PAR01, "@!" , "" ,"LSTFIL", "" , 100 , .F. } )
+aAdd( _aParAux , { 1 , "Departamento"		 , MV_PAR02, "@!" , "" ,"F3ITLC", "" , 100 , .F. } )
+aAdd( _aParAux , { 1 , "EPI"            	 , MV_PAR03, "@!" , "" ,"F3ITLC", "" , 100 , .F. } ) 
+aAdd( _aParAux , { 2 , "Em Uso"         	 , MV_PAR04, _aUso, 060,".T.",.T. ,".T."}) 
+aAdd( _aParAux , { 1 , "Entrega a partir De" , MV_PAR05, "@D" , "" , ""	, "" , 050 , .F.  })
+aAdd( _aParAux , { 1 , "Situacao"	    	 , MV_PAR06, "@!" , "fSituacao()" ,""      , "" , 100 , .F. } ) 
 
 For nA := 1 To Len( _aParAux )
     aAdd( _aParRet , _aParAux[nA][03] )
@@ -94,7 +91,7 @@ oReport:nFontBody	:= 08
 oReport:cFontBody	:= "Courier New"
 oReport:nLineHeight	:= 45 // Define a altura da linha.
 
-//	DEFINE SECTION oSecEntr_1 OF oReport TITLE ""  TABLES "TNF"  //ORDERS _aOrd
+//	DEFINE Section oSecEntr_1 OF oReport TITLE ""  TABLES "TNF"  //ORDERS _aOrd
     oSecEntr_1 := TRSection():New(oReport, "Dados", {""} , , .F. , .T. )
 
 
@@ -111,37 +108,28 @@ oReport:nLineHeight	:= 45 // Define a altura da linha.
    DEFINE CELL NAME "TNF_QTDENT"	   OF oSecEntr_1 ALIAS "TN3"  TITLE "Qtd Entrega"     SIZE 10 PICTURE "@E 99,999,999,999.99" 
    DEFINE CELL NAME "TNF_DTENTR"	   OF oSecEntr_1 ALIAS "TNF"  TITLE "Data Entrega"    SIZE 10 
    DEFINE CELL NAME "TNF_DTDEVO"	   OF oSecEntr_1 ALIAS "TNF"  TITLE "Data Devolucao"  SIZE 10 
-   DEFINE CELL NAME "TNF_DIASUSO"	OF oSecEntr_1 ALIAS "TNF"  TITLE "Dias de Uso"     SIZE 20 BLOCK {||Iif(Empty(Dtos(QRY1->TNF_DTDEVO)) , DateDiffDay(QRY1->TNF_DTENTR,dDataBase),DateDiffDay(QRY1->TNF_DTDEVO,QRY1->TNF_DTENTR)) } PICTURE "@E 99,999,999,999" 
+   DEFINE CELL NAME "TNF_DIASUSO"	OF oSecEntr_1 ALIAS "TNF"  TITLE "Dias de Uso"     SIZE 20 BLOCK {||IIf(Empty(DToS(QRY1->TNF_DTDEVO)) , DateDiffDay(QRY1->TNF_DTENTR,dDataBase),DateDiffDay(QRY1->TNF_DTDEVO,QRY1->TNF_DTENTR)) } PICTURE "@E 99,999,999,999" 
 
-   bBlock := {||Iif(Iif(Empty(Dtos(QRY1->TNF_DTDEVO)) , DateDiffDay(QRY1->TNF_DTENTR,dDataBase),DateDiffDay(QRY1->TNF_DTDEVO,QRY1->TNF_DTENTR)) > Iif(QRY1->TN3_DURABI>0,QRY1->TN3_DURABI,9999999),"Sim","")}
+   bBlock := {||IIf(IIf(Empty(DToS(QRY1->TNF_DTDEVO)) , DateDiffDay(QRY1->TNF_DTENTR,dDataBase),DateDiffDay(QRY1->TNF_DTDEVO,QRY1->TNF_DTENTR)) > IIf(QRY1->TN3_DURABI>0,QRY1->TN3_DURABI,9999999),"Sim","")}
 
- //TRCell():New( <oParent> , <cName>     , <cAlias> , <cTitle> , <cPicture> , <nSize> , <lPixel> , <bBlock> , <cAlign> , <lLineBreak> , <cHeaderAlign> , <lCellBreak> , <nColSpace> , <lAutoSize> , <nClrBack> , <nClrFore> , <lBold> ) 
    TRCell():New( oSecEntr_1,"TNF_VENCIDO", "TNF"    , "Vencido?", ""        ,   25    ,          ,  bBlock  ,          ,              ,                ,              ,             ,             ,            , CLR_RED    ,   .T.   )
-
-
-   //TRFunction():New(/*Cell*/,/*cId*/,/*Function*/,/*oBreak*/,/*cTitle*/,/*cPicture*/,/*uFormula*/,/*lEndSection*/,/*lEndReport*/,/*lEndPage*/,/*Section*/)
-	//TRFunction():New(oSecEntr_1:Cell("TNF_QTDENT"),,"SUM",,,"@E 99,999,999,999.99",,.F.,.T.,.F.,oSecEntr_1)
-
-//oSecEntr_1:Disable()
 
 oReport:PrintDialog()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: RMDT005PR
 Autor-------------: Igor Melgaço
 Data da Criacao---: 19/08/2022
-===============================================================================================================================
 Descrição---------: Executa relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function RMDT005PR( oReport )
+
 Local _cFiltro := "% "
 Local _aRet := {}
 Local cConv := ""
@@ -154,7 +142,7 @@ If !Empty(MV_PAR01)
 
 	_cFiltro += " AND TNF_FILIAL IN " + FormatIn(MV_PAR01,";") 
 	
-Endif
+EndIf
 
 If !Empty(MV_PAR02) 
 	
@@ -179,7 +167,7 @@ EndIf
 
 If !Empty(MV_PAR05) 
 	
-    _cFiltro += " AND TNF.TNF_DTENTR  >= '" + DTOS(MV_PAR05) + "' " 
+    _cFiltro += " AND TNF.TNF_DTENTR  >= '" + DToS(MV_PAR05) + "' " 
 
 EndIf
 
@@ -206,12 +194,12 @@ _cFiltro += " %"
 			SELECT DISTINCT TNF_FILIAL, RA_MAT, RA_NOME, RA_SITFOLH, RJ_DESC, QB_DESCRIC, TNF_CODEPI, B1_DESC, 
 					        TNF_NUMCAP, TN3_DTVENC, TNF_QTDENT, TNF_DTENTR, TNF_DTDEVO, TN3_DURABI
 
-			FROM %table:TNF% TNF
-                LEFT JOIN %table:TN3% TN3 ON (TN3.TN3_FILIAL = TNF.TNF_FILIAL AND TNF.TNF_CODEPI = TN3.TN3_CODEPI AND TNF.TNF_FORNEC = TN3.TN3_FORNEC AND TNF.TNF_NUMCAP = TN3.TN3_NUMCAP AND TN3.%notDel%)
-                LEFT JOIN %table:SB1% SB1 ON (TN3.TN3_CODEPI = SB1.B1_COD     AND SB1.%notDel%)
-                LEFT JOIN %table:SRA% SRA ON (SRA.RA_FILIAL  = TNF.TNF_FILIAL AND SRA.RA_MAT     = TNF.TNF_MAT    AND SRA.%notDel%)
-                LEFT JOIN %table:SQB% SQB ON (SQB.QB_FILIAL  = SRA.RA_FILIAL  AND SRA.RA_DEPTO   = SQB.QB_DEPTO   AND SQB.%notDel%)
-				LEFT JOIN %table:SRJ% SRJ ON (SRA.RA_CODFUNC = SRJ.RJ_FUNCAO  AND SRJ.%notDel%)
+			FROM %Table:TNF% TNF
+                LEFT JOIN %Table:TN3% TN3 ON (TN3.TN3_FILIAL = TNF.TNF_FILIAL AND TNF.TNF_CODEPI = TN3.TN3_CODEPI AND TNF.TNF_FORNEC = TN3.TN3_FORNEC AND TNF.TNF_NUMCAP = TN3.TN3_NUMCAP AND TN3.%notDel%)
+                LEFT JOIN %Table:SB1% SB1 ON (TN3.TN3_CODEPI = SB1.B1_COD     AND SB1.%notDel%)
+                LEFT JOIN %Table:SRA% SRA ON (SRA.RA_FILIAL  = TNF.TNF_FILIAL AND SRA.RA_MAT     = TNF.TNF_MAT    AND SRA.%notDel%)
+                LEFT JOIN %Table:SQB% SQB ON (SQB.QB_FILIAL  = SRA.RA_FILIAL  AND SRA.RA_DEPTO   = SQB.QB_DEPTO   AND SQB.%notDel%)
+				LEFT JOIN %Table:SRJ% SRJ ON (SRA.RA_CODFUNC = SRJ.RJ_FUNCAO  AND SRJ.%notDel%)
 
 			WHERE TNF.%notDel%
               %Exp:_cFiltro%
@@ -224,23 +212,20 @@ _cFiltro += " %"
 
 oSecEntr_1:Print(.T.)
 
-Return()
-
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: RMDT005FOR
 Autor-------------: Igor Melgaço
 Data da Criacao---: 19/08/2022
-===============================================================================================================================
 Descrição---------: Função para tratar o MV_PAR02
-===============================================================================================================================
 Parametros--------: cCampo - Departamentos selecionados
-===============================================================================================================================
 Retorno-----------: {_cFilial,_cDepto} - Filial e Departamentos para filtro na query
 ===============================================================================================================================
 */
 Static Function RMDT005FOR(cCampo)
+
 Local _aFilDepto := {}
 Local _cDepto    := ""
 Local _cFilial   := ""
@@ -251,8 +236,8 @@ Local i := 0
 _aFilDepto := StrTokArr(cCampo,";")
 
 For i := 1 To Len(_aFilDepto)
-	_cFilial += Iif(Empty(Alltrim(_cFilial)),"",",") + "'" + Subs(_aFilDepto[i],1,_nTamFilial) + "'"
-	_cDepto  += Iif(Empty(Alltrim(_cDepto)),"",",") + "'" + Subs(_aFilDepto[i]+Space(_nTamProd),6,_nTamProd) + "'"
+	_cFilial += IIf(Empty(AllTrim(_cFilial)),"",",") + "'" + Subs(_aFilDepto[i],1,_nTamFilial) + "'"
+	_cDepto  += IIf(Empty(AllTrim(_cDepto)),"",",") + "'" + Subs(_aFilDepto[i]+Space(_nTamProd),6,_nTamProd) + "'"
 Next
 
 _cFilial := "("+_cFilial+")"
@@ -260,21 +245,18 @@ _cDepto  := "("+_cDepto+")"
 
 Return({_cFilial,_cDepto})
 
-
 /*
 ===============================================================================================================================
 Programa----------: RMDT005TR
 Autor-------------: Igor Melgaço
 Data da Criacao---: 19/08/2022
-===============================================================================================================================
 Descrição---------: Função para tratar o MV_PAR06
-===============================================================================================================================
 Parametros--------: cCampo - Situação 
-===============================================================================================================================
 Retorno-----------: cConv - Campo convertido
 ===============================================================================================================================
 */
 Static Function RMDT005TR(cCampo)
+
 Local i := 0
 Local cConv := ""
 

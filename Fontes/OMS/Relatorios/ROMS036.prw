@@ -12,8 +12,8 @@ Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
-#include "protheus.ch"
-#INCLUDE 'TOPCONN.CH' 
+#Include "TOTVS.ch"
+#Include 'TOPCONN.CH' 
 #DEFINE CRLF Chr(13)+Chr(10)
 
 /*
@@ -38,9 +38,9 @@ Private cAliasQRY2 := GetNextAlias()
 _aItalac_F3 :={}
 
 _cSelectSA1:="SELECT DISTINCT A1_COD, A1_NOME, A1_LOJA   FROM "+RETSQLNAME("SA1")+" SA1 WHERE A1_MSBLQL <> '1' AND D_E_L_E_T_ = ' ' ORDER BY A1_COD, A1_LOJA " 
-_bCondSA1  := NIL//{|| IF(MV_PAR07="2",(A1_MSBLQL = "1"),(A1_MSBLQL <> "1")) }
-//AADD(_aItalac_F3,{"MV_PAR02","SA1",SA1->(FIELDPOS("A1_COD")),{|| SA1->A1_LOJA+"-"+SA1->A1_NOME } ,_bCondSA1 ,"Clientes",,,} )
-AADD(_aItalac_F3,{"MV_PAR07",_cSelectSA1,{|Tab| (Tab)->A1_COD + (Tab)->A1_LOJA }, {|Tab| (Tab)->A1_NOME } ,_bCondSA1 ,"Clientes",,,30,.F.        ,       , } )
+_bCondSA1  := NIL//{|| If(MV_PAR07="2",(A1_MSBLQL = "1"),(A1_MSBLQL <> "1")) }
+//aAdd(_aItalac_F3,{"MV_PAR02","SA1",SA1->(FIELDPOS("A1_COD")),{|| SA1->A1_LOJA+"-"+SA1->A1_NOME } ,_bCondSA1 ,"Clientes",,,} )
+aAdd(_aItalac_F3,{"MV_PAR07",_cSelectSA1,{|Tab| (Tab)->A1_COD + (Tab)->A1_LOJA }, {|Tab| (Tab)->A1_NOME } ,_bCondSA1 ,"Clientes",,,30,.F.        ,       , } )
 
 Pergunte("ROMS036",.T.)
 
@@ -48,15 +48,15 @@ oReport := Report()
 oReport	:PrintDialog()
 
 If Select(cAliasQRY) <> 0
-   (cAliasQRY)->(DbCloseArea())
+   (cAliasQRY)->(DBCloseArea())
 EndIf
 
 If Select(cAliasQRY2) <> 0
-   (cAliasQRY2)->(DbCloseArea())
+   (cAliasQRY2)->(DBCloseArea())
 EndIf
 
 If Select("TRBZE2") <> 0
-   TRBZE2->(DbCloseArea())
+   TRBZE2->(DBCloseArea())
 EndIf
 
 Return
@@ -92,7 +92,7 @@ oSection1:SetTotalInLine(.F.)
 
 TRCell():New(oSection1,"NOTA"		,/*Tabela*/,"Nota Fiscal"		,/*Picture*/			,15		,/*lPixel*/	,{||NOTA	}/*Block*/	)
 TRCell():New(oSection1,"SERIE"		,/*Tabela*/,"Serie"				,/*Picture*/			,03		,/*lPixel*/	,{||SERIE	}/*Block*/	)
-TRCell():New(oSection1,"EMISSAO"	,/*Tabela*/,"Emissao"			,/*Picture*/			,15		,/*lPixel*/	,{||stod(EMISSAO)	}/*Block*/	)
+TRCell():New(oSection1,"EMISSAO"	,/*Tabela*/,"Emissao"			,/*Picture*/			,15		,/*lPixel*/	,{||SToD(EMISSAO)	}/*Block*/	)
 TRCell():New(oSection1,"CLIENTE"	,/*Tabela*/,"Cliente"			,/*Picture*/			,06		,/*lPixel*/	,{||CLIENTE	}/*Block*/	)
 TRCell():New(oSection1,"LOJA"		,/*Tabela*/,"Loja"	  			,/*Picture*/			,04		,/*lPixel*/	,{||LOJA	}/*Block*/	)
 TRCell():New(oSection1,"NOME"		,/*Tabela*/,"Nome"		    	,/*Picture*/ 			,60		,/*lPixel*/	,{||NOME	}/*Block*/	)
@@ -122,7 +122,7 @@ Return oReport
 Programa--------: PrintRel
 Autor-----------: Erick Buttner
 Data da Criacao-: 30/09/2013
-Descrição-------: Função que processa a impressão do relatório
+Descrição-------: Função que Processa a impressão do relatório
 Parametros------: Nenhum
 Retorno---------: Nenhum
 ===============================================================================================================================
@@ -137,7 +137,7 @@ If ! Empty(MV_PAR01) // Filial/Filiais
    cFiltro +=  " AND D2.D2_FILIAL IN " + FormatIn(MV_PAR01,";")
 EndIf
 
-cFiltro += 	" AND F2.F2_EMISSAO BETWEEN '"+DtoS(MV_PAR02)+"' AND '"+DtoS(MV_PAR03)+"' "
+cFiltro += 	" AND F2.F2_EMISSAO BETWEEN '"+DToS(MV_PAR02)+"' AND '"+DToS(MV_PAR03)+"' "
 
 If MV_PAR05 = 1 //Com Saldo
 	cFiltro += 	" AND (D2.D2_QUANT - D2.D2_QTDEDEV) > 0 "
@@ -151,7 +151,7 @@ ElseIf MV_PAR06 = 2 //Não Chep
 	cFiltro += 	" AND C5_I_OPER = '51' "
 EndIf
 
-If !Empty(Alltrim(MV_PAR07))
+If !Empty(AllTrim(MV_PAR07))
 	cFiltro += 	" AND D2.D2_CLIENTE || D2.D2_LOJA IN " + FormatIn(MV_PAR07,";")
 EndIf
 
@@ -179,10 +179,10 @@ If MV_PAR04 = 1 //Com abatimento de notas de devolução
 		A1.A1_I_CCHEP CHEP,
 		(D2.D2_QUANT-D2.D2_QTDEDEV) QUANT
 
-	FROM %table:SD2% D2
-	    LEFT JOIN %table:SA1% A1 ON (D2.D2_CLIENTE = A1.A1_COD AND D2_LOJA = A1.A1_LOJA AND A1.%notDel% )
-	    LEFT JOIN %table:SF2% F2 ON (F2.F2_FILIAL = D2.D2_FILIAL AND F2.F2_DOC = D2.D2_DOC AND F2.F2_SERIE = D2.D2_SERIE AND F2.F2_CLIENTE = D2.D2_CLIENTE AND F2.F2_LOJA = D2.D2_LOJA AND F2.%notDel% )
-		LEFT JOIN %table:SC5% C5 ON (D2.D2_FILIAL = C5.C5_FILIAL AND C5.C5_NUM = D2.D2_PEDIDO AND C5.%notDel% )
+	FROM %Table:SD2% D2
+	    LEFT JOIN %Table:SA1% A1 ON (D2.D2_CLIENTE = A1.A1_COD AND D2_LOJA = A1.A1_LOJA AND A1.%notDel% )
+	    LEFT JOIN %Table:SF2% F2 ON (F2.F2_FILIAL = D2.D2_FILIAL AND F2.F2_DOC = D2.D2_DOC AND F2.F2_SERIE = D2.D2_SERIE AND F2.F2_CLIENTE = D2.D2_CLIENTE AND F2.F2_LOJA = D2.D2_LOJA AND F2.%notDel% )
+		LEFT JOIN %Table:SC5% C5 ON (D2.D2_FILIAL = C5.C5_FILIAL AND C5.C5_NUM = D2.D2_PEDIDO AND C5.%notDel% )
 	WHERE D2.D_E_L_E_T_ = ' '
 		AND D2.D2_COD 	= '08130000002'
 
@@ -214,10 +214,10 @@ Else
 		D2.D2_LOCAL ARMAZEM,
 		A1.A1_I_CCHEP CHEP 
 
-	FROM %table:SD2% D2
-	    LEFT JOIN %table:SA1% A1 ON (D2.D2_CLIENTE = A1.A1_COD AND D2_LOJA = A1.A1_LOJA AND A1.%notDel% )
-	    LEFT JOIN %table:SF2% F2 ON (F2.F2_FILIAL = D2.D2_FILIAL AND F2.F2_DOC = D2.D2_DOC AND F2.F2_SERIE = D2.D2_SERIE AND F2.F2_CLIENTE = D2.D2_CLIENTE AND F2.F2_LOJA = D2.D2_LOJA AND F2.%notDel% )
-		LEFT JOIN %table:SC5% C5 ON (C5.C5_NUM = D2.D2_PEDIDO AND C5.%notDel% )
+	FROM %Table:SD2% D2
+	    LEFT JOIN %Table:SA1% A1 ON (D2.D2_CLIENTE = A1.A1_COD AND D2_LOJA = A1.A1_LOJA AND A1.%notDel% )
+	    LEFT JOIN %Table:SF2% F2 ON (F2.F2_FILIAL = D2.D2_FILIAL AND F2.F2_DOC = D2.D2_DOC AND F2.F2_SERIE = D2.D2_SERIE AND F2.F2_CLIENTE = D2.D2_CLIENTE AND F2.F2_LOJA = D2.D2_LOJA AND F2.%notDel% )
+		LEFT JOIN %Table:SC5% C5 ON (C5.C5_NUM = D2.D2_PEDIDO AND C5.%notDel% )
 	WHERE D2.D_E_L_E_T_ = ' '
 		AND D2.D2_COD  = '08130000002'
 
@@ -229,7 +229,7 @@ Else
 
 	oSection1:EndQuery()  
 
-Endif
+EndIf
 
 _cFilial := (cAliasQRY)->FILIAL
 _Filial := _cFilial + '-' + FWFilialName(,_cFilial)
@@ -238,7 +238,7 @@ oReport:Section(1):Init()
 oReport:Section(1):PrintLine() 
 oReport:Section(1):Section(1):Init()
 
-While (cAliasQRY)->(!EoF())
+While (cAliasQRY)->(!Eof())
     
 	If oReport:Cancel()
 	   Exit
@@ -258,7 +258,7 @@ While (cAliasQRY)->(!EoF())
     EndIf
     
     oReport:Section(1):Section(1):PrintLine() 
-	dbSkip()
+	DBSkip()
 EndDo
 
 oReport:Section(1):SetPageBreak(.T.)
@@ -271,7 +271,7 @@ oReport:Section(1):Section(1):Finish()
 _cQry := "SELECT ZE2_FILIAL, ZE2_DTCONT, ZE2_PALTOT "
 _cQry += " FROM " + RetSqlName("ZE2") + " ZE2 " 
 _cQry += " WHERE ZE2.D_E_L_E_T_ = ' ' "
-_cQry += " AND ZE2.ZE2_DTCONT BETWEEN '"+DtoS(MV_PAR02)+"' AND '"+DtoS(MV_PAR03)+"' "
+_cQry += " AND ZE2.ZE2_DTCONT BETWEEN '"+DToS(MV_PAR02)+"' AND '"+DToS(MV_PAR03)+"' "
 
 If ! Empty(MV_PAR01) // Filial/Filiais  
    _cQry +=  " AND ZE2_FILIAL IN " + FormatIn(MV_PAR01,";")
@@ -281,7 +281,7 @@ _cQry += " AND ZE2_PRODUT = '08130000002' "
 _cQry += " ORDER BY ZE2_FILIAL, ZE2_DTCONT "
 
 If Select("TRBZE2") <> 0
-   TRBZE2->(DbCloseArea())
+   TRBZE2->(DBCloseArea())
 EndIf
 
 TCQUERY _cQry NEW ALIAS "TRBZE2"	
@@ -289,24 +289,24 @@ TCSetField('TRBZE2',"ZE2_DTCONT","D",8,0)
 
 _aDadosZE2 := {}
 
-Do While ! TRBZE2->(Eof())
+While ! TRBZE2->(Eof())
    oReport:IncMeter()
 
-   _nI := AsCan(_aDadosZE2,{|x| x[1] == TRBZE2->ZE2_FILIAL })
+   _nI := aScan(_aDadosZE2,{|x| x[1] == TRBZE2->ZE2_FILIAL })
    If _nI == 0
-      Aadd(_aDadosZE2,{TRBZE2->ZE2_FILIAL, TRBZE2->ZE2_DTCONT, TRBZE2->ZE2_PALTOT})
+      aAdd(_aDadosZE2,{TRBZE2->ZE2_FILIAL, TRBZE2->ZE2_DTCONT, TRBZE2->ZE2_PALTOT})
    Else
-      If Dtos(TRBZE2->ZE2_DTCONT) >= Dtos(_aDadosZE2[_nI,2])
+      If DToS(TRBZE2->ZE2_DTCONT) >= DToS(_aDadosZE2[_nI,2])
          _aDadosZE2[_nI,2] := TRBZE2->ZE2_DTCONT
 		 _aDadosZE2[_nI,3] := TRBZE2->ZE2_PALTOT  
       EndIf 
    EndIf
 
-   TRBZE2->(DbSkip())
+   TRBZE2->(DBSkip())
 EndDo 
 
 If Len(_aDadosZE2) == 0
-   Aadd(_aDadosZE2, {"  ", Ctod("  /  /  "), 0}) 
+   aAdd(_aDadosZE2, {"  ", Ctod("  /  /  "), 0}) 
 EndIf 
 
 //=========================================================================//
@@ -319,10 +319,10 @@ If MV_PAR04 = 1 //Com abatimento de notas de devolução
 
 	   SELECT D2.D2_FILIAL WK_FILIAL,
 		  SUM(D2.D2_QUANT-D2.D2_QTDEDEV) WK_TOTNF
-	   FROM %table:SD2% D2
-	      LEFT JOIN %table:SA1% A1  ON (D2.D2_CLIENTE = A1.A1_COD     AND D2_LOJA = A1.A1_LOJA AND A1.%notDel% )
-	      LEFT JOIN %table:SF2% F2  ON (F2.F2_FILIAL = D2.D2_FILIAL   AND F2.F2_DOC = D2.D2_DOC AND F2.F2_SERIE = D2.D2_SERIE AND F2.F2_CLIENTE = D2.D2_CLIENTE AND F2.F2_LOJA = D2.D2_LOJA AND F2.%notDel% )
-		  LEFT JOIN %table:SC5% C5  ON (D2.D2_FILIAL = C5.C5_FILIAL   AND C5.C5_NUM = D2.D2_PEDIDO AND C5.%notDel% )
+	   FROM %Table:SD2% D2
+	      LEFT JOIN %Table:SA1% A1  ON (D2.D2_CLIENTE = A1.A1_COD     AND D2_LOJA = A1.A1_LOJA AND A1.%notDel% )
+	      LEFT JOIN %Table:SF2% F2  ON (F2.F2_FILIAL = D2.D2_FILIAL   AND F2.F2_DOC = D2.D2_DOC AND F2.F2_SERIE = D2.D2_SERIE AND F2.F2_CLIENTE = D2.D2_CLIENTE AND F2.F2_LOJA = D2.D2_LOJA AND F2.%notDel% )
+		  LEFT JOIN %Table:SC5% C5  ON (D2.D2_FILIAL = C5.C5_FILIAL   AND C5.C5_NUM = D2.D2_PEDIDO AND C5.%notDel% )
 	   WHERE D2.D_E_L_E_T_ = ' '
 		  AND D2.D2_COD 	= '08130000002'
 		  %exp:cFiltro%
@@ -341,10 +341,10 @@ Else
 
 	   SELECT D2.D2_FILIAL WK_FILIAL,
 	          SUM(D2.D2_QUANT-D2.D2_QTDEDEV) WK_TOTNF
-	   FROM %table:SD2% D2
-	          LEFT JOIN %table:SA1% A1 ON (D2.D2_CLIENTE = A1.A1_COD AND D2_LOJA = A1.A1_LOJA AND A1.%notDel% )
-	          LEFT JOIN %table:SF2% F2 ON (F2.F2_FILIAL = D2.D2_FILIAL AND F2.F2_DOC = D2.D2_DOC AND F2.F2_SERIE = D2.D2_SERIE AND F2.F2_CLIENTE = D2.D2_CLIENTE AND F2.F2_LOJA = D2.D2_LOJA AND F2.%notDel% )
-		      LEFT JOIN %table:SC5% C5 ON (C5.C5_NUM = D2.D2_PEDIDO AND C5.%notDel% )
+	   FROM %Table:SD2% D2
+	          LEFT JOIN %Table:SA1% A1 ON (D2.D2_CLIENTE = A1.A1_COD AND D2_LOJA = A1.A1_LOJA AND A1.%notDel% )
+	          LEFT JOIN %Table:SF2% F2 ON (F2.F2_FILIAL = D2.D2_FILIAL AND F2.F2_DOC = D2.D2_DOC AND F2.F2_SERIE = D2.D2_SERIE AND F2.F2_CLIENTE = D2.D2_CLIENTE AND F2.F2_LOJA = D2.D2_LOJA AND F2.%notDel% )
+		      LEFT JOIN %Table:SC5% C5 ON (C5.C5_NUM = D2.D2_PEDIDO AND C5.%notDel% )
 	   WHERE D2.D_E_L_E_T_ = ' '
 		      AND D2.D2_COD  = '08130000002'
 	          %exp:cFiltro%
@@ -355,12 +355,12 @@ Else
 
 	_oSection2:EndQuery()  
 
-Endif
+EndIf
 
 _oSection2:Enable()
 _oSection2:Init()
 
-Do While TRBTOT->(!EoF()) 
+While TRBTOT->(!Eof()) 
     
    If oReport:Cancel()
 	  Exit
@@ -368,7 +368,7 @@ Do While TRBTOT->(!EoF())
 
    oReport:IncMeter()
 
-   _nI := AsCan(_aDadosZE2,{|x| x[1] == TRBTOT->WK_FILIAL })
+   _nI := aScan(_aDadosZE2,{|x| x[1] == TRBTOT->WK_FILIAL })
    If _nI == 0
       _oSection2:Cell("WK_TOTFISC"):SetValue(0)    
    Else
@@ -377,7 +377,7 @@ Do While TRBTOT->(!EoF())
 
    _oSection2:PrintLine() 
 	
-   TRBTOT->(dbSkip())
+   TRBTOT->(DBSkip())
 
 EndDo
 

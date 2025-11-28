@@ -2,49 +2,38 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor  |    Data    |                                             Motivo                                           
-------------------------------------------------------------------------------------------------------------------------------- 
-Julio Paz     | 08/06/2017 | Alterações da rotina para gravação do campo hora de emissão. Chamado: 20362.                 
-------------------------------------------------------------------------------------------------------------------------------- 
-Josué Danich  | 11/06/2019 | Ajustes para loboguara - Chamado 29593
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 14/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 27/04/2021 | Aterar Rotina para enviar para RDC: Peso variavel=S ou N, peso maximo e peso minimo.Chamado 36404
--------------------------------------------------------------------------------------------------------------------------------
-Jerry         | 11/08/2023 | Adicionado leitura de Produto do Tipo PP.Chamado 44717
+Julio Paz     |27/04/2021| Chamado 36404. Aterar Rotina para enviar para RDC: Peso variavel=S ou N, peso maximo e peso minimo
+Jerry         |11/08/2023| Chamado 44717. Adicionado leitura de Produto do Tipo PP
+Lucas Borges  |17/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS079
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 03/10/2016
-===============================================================================================================================
 Descrição---------: Rotina de gravação dos dados do produto(Carga Inicial)  Chamado 16681.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
-User Function AOMS079() 
+User Function AOMS079
+
 Local _cQry
 Local _nI 
 Local _nnj	:= 0
 Local _aOrd := SaveOrd({"SX3","ZFI","ZZM","SA2","SB1"})   
-Local _cCodEmpWS := U_ITGETMV( 'IT_EMPWEBSE' , '000001' )
+Local _cCodEmpWS := SuperGetMV('IT_EMPWEBS',.F.,'000001')
 Local _nEmpMax, _nQtdLastro
 Local _cPesoVar := "N", _nPesoMin := 0, _nPesoMax := 0
 
 Begin Sequence
-   If ! u_itmsg("Confirma a gravação dos dados do produto tabela SB1, na tabela ZFI de envio de dados da integração Webservice?","Atenção",,2,2,2)
+   If ! U_ITMsg("Confirma a gravação dos dados do produto tabela SB1, na tabela ZFI de envio de dados da integração Webservice?","Atenção",,2,2,2)
       Break
    EndIf
    
@@ -53,10 +42,10 @@ Begin Sequence
    //================================================================================   
    _cQry := " SELECT SB1.R_E_C_N_O_ AS NRECNO "
    _cQry += " FROM "+RetSqlName("SB1")+" SB1" 
-   _cQry += " WHERE SB1.D_E_L_E_T_ <> '*' AND B1_TIPO IN ('PA','UN','PP') AND B1_MSBLQL = '2' "    // Não deletado, apenas produto acabado e unitizador.
+   _cQry += " WHERE SB1.D_E_L_E_T_ = ' ' AND B1_TIPO IN ('PA','UN','PP') AND B1_MSBLQL = '2' "    // Não deletado, apenas produto acabado e unitizador.
    
    If Select("QRYSB1") > 0
-      QRYSB1->( DbCloseArea())
+      QRYSB1->( DBCloseArea())
    EndIf
            
    _cQry := ChangeQuery(_cQry) 
@@ -70,29 +59,29 @@ Begin Sequence
    // Cria as variáveis de memória com seus respectivos incializadores padrão
    //================================================================================
    _acamps := ZFI->(Dbstruct())
-   For _nnj := 1 to len(_acamps)
-      &("M->"+alltrim(_acamps[_nnj][1])) := CriaVar(alltrim(_acamps[_nnj][1]))
+   For _nnj := 1 To Len(_acamps)
+      &("M->"+AllTrim(_acamps[_nnj][1])) := CriaVar(AllTrim(_acamps[_nnj][1]))
    Next
 
    //================================================================================
    // Grava os dados da tabela SB1 de clientes ativos na tabela ZFI
    //================================================================================
-   SA2->(DbSetOrder(3))
-   QRYSB1->( DbGotop() )
+   SA2->(DBSetOrder(3))
+   QRYSB1->( DBGoTop() )
    
-   Do While ! QRYSB1->(Eof())  
-      SB1->(DbGoTo(QRYSB1->NRECNO))
+   While ! QRYSB1->(Eof())  
+      SB1->(DBGoTo(QRYSB1->NRECNO))
 
-      ZZM->(DbGoTop())      
+      ZZM->(DBGoTop())      
 
-      Do While ! ZZM->(Eof())
-         If ! SA2->(DbSeek(xFilial("SA2")+ZZM->ZZM_CGC))
-            ZZM->(DbSkip())
+      While ! ZZM->(Eof())
+         If ! SA2->(DBSeek(xFilial("SA2")+ZZM->ZZM_CGC))
+            ZZM->(DBSkip())
             Loop
          EndIf
          
-         ZFI->(DbSetOrder(3)) 
-         If ZFI->(DbSeek(xFilial("ZFI")+SB1->B1_COD+SA2->A2_CGC+"N"))
+         ZFI->(DBSetOrder(3)) 
+         If ZFI->(DBSeek(xFilial("ZFI")+SB1->B1_COD+SA2->A2_CGC+"N"))
             ZFI->(RecLock("ZFI",.F.))
          Else
             ZFI->(RecLock("ZFI",.T.))    
@@ -105,7 +94,7 @@ Begin Sequence
          _nEmpMax := 0      
          _nQtdLastro := 0
          
-         If SB5->(DbSeek(xFilial("SB5")+SB1->B1_COD))
+         If SB5->(DBSeek(xFilial("SB5")+SB1->B1_COD))
             _nEmpMax := SB5->B5_EMPMAX  
             _nQtdLastro := 1 
          EndIf
@@ -114,7 +103,7 @@ Begin Sequence
             _cPesoVar := "S"
             _nPesoMin := SB1->B1_I_FTMIN
             _nPesoMax := SB1->B1_I_FTMAX         
-         Else 
+         Else
             _cPesoVar := "N"
          EndIf 
 
@@ -131,36 +120,35 @@ Begin Sequence
          ZFI->ZFI_SEGUM	   := If(SB1->B1_SEGUM <> "CX","1","2")  
          ZFI->ZFI_EMPMAX   := If(_nEmpMax == 0,1,_nEmpMax)
          ZFI->ZFI_QTDEL    := If(_nQtdLastro == 0,1,_nQtdLastro)
-         //ZFI->ZFI_EMPMAX   := _nEmpMax
          ZFI->ZFI_EMB	   := "1" // SB1->B1_SEGUM
          ZFI->ZFI_SUBEMB   := "1" // SB1->B1_UM
          ZFI->ZFI_PESO	   := SB1->B1_PESBRU // If(SB1->B1_PESO == 0,1,SB1->B1_PESO)
          ZFI->ZFI_CODFOR   := SA2->A2_COD
          ZFI->ZFI_LOJA	   := SA2->A2_LOJA
          ZFI->ZFI_NOME	   := SA2->A2_NOME
-         ZFI->ZFI_USUARI   := __CUSERID
+         ZFI->ZFI_USUARI   := __cUserId
          ZFI->ZFI_DATAAL   := Date()
          ZFI->ZFI_SITUAC   := "N"
          ZFI->ZFI_CODEMP   := _cCodEmpWS
          ZFI->ZFI_PESVAR   := _cPesoVar
          ZFI->ZFI_PESMIN   := _nPesoMin // SB1->B1_I_FTMIN
          ZFI->ZFI_PESMAX   := _nPesoMax // SB1->B1_I_FTMAX
-         ZFI->(MsUnlock())
+         ZFI->(MSUnLock())
    
-         ZZM->(DbSkip())
+         ZZM->(DBSkip())
       EndDo                               
 
-      QRYSB1->(DbSkip())
+      QRYSB1->(DBSkip())
    EndDo                
       
 End Sequence
 
 If Select("QRYSB1") > 0
-   QRYSB1->(DbCloseArea())
+   QRYSB1->(DBCloseArea())
 EndIf             
 
 RestOrd(_aOrd)
 
-u_itmsg("Término da carga inicial do cadastro de produtos para a tabela ZFI.","Atenção",,2)
+U_ITMsg("Término da carga inicial do cadastro de produtos para a tabela ZFI.","Atenção",,2)
 
 Return

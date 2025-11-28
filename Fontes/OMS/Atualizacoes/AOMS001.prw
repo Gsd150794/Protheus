@@ -6,7 +6,7 @@
 -------------------------------------------------------------------------------------------------------------------------------
 Alex Wallauer     | 09/10/2017 | Correção do erro de não existir acols - Chamado 21805
 ------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer     | 11/03/2019 | Não validar o preenchimento das filais quando o codigo da operação for = "22". Chamado 28396
+Alex Wallauer     | 11/03/2019 | Não validar o preenchimento das filais quando o codigo da operação For = "22". Chamado 28396
 -------------------------------------------------------------------------------------------------------------------------------
 Lucas Borges      | 14/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
 ===============================================================================================================================
@@ -15,8 +15,8 @@ Lucas Borges      | 14/10/2019 | Removidos os Warning na compilação da release 1
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "FWMVCDEF.CH"
+#Include "TOTVS.ch"
+#Include "FWMVCDEF.CH"
 #Include "TOPCONN.CH"
 
 /*
@@ -48,7 +48,7 @@ oBrowse:DisableDetails()
 
 oBrowse:Activate()
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return .T.
 
@@ -130,10 +130,10 @@ oModel:SetPrimaryKey( {"Z09_FILIAL", "Z09_CODOPE","Z09_INIVIG","Z09_FIMVIG"})
 // Faz relaciomaneto entre os compomentes do model
 _arelacao := {}
 
-aadd(_arelacao, { 'Z09_FILIAL', 'xFilial( "Z09" ) ' })
-aadd(_arelacao, { 'Z09_CODOPE', 'Z09_CODOPE' })
-aadd(_arelacao, { 'Z09_INIVIG', 'Z09_INIVIG' })
-aadd(_arelacao, { 'Z09_FIMVIG', 'Z09_FIMVIG' })
+aAdd(_arelacao, { 'Z09_FILIAL', 'xFilial( "Z09" ) ' })
+aAdd(_arelacao, { 'Z09_CODOPE', 'Z09_CODOPE' })
+aAdd(_arelacao, { 'Z09_INIVIG', 'Z09_INIVIG' })
+aAdd(_arelacao, { 'Z09_FIMVIG', 'Z09_FIMVIG' })
 		
 oModel:SetRelation( 'Z09FIL', _arelacao , Z09->( IndexKey( 4 ) ) )
 
@@ -237,32 +237,32 @@ Static Function MDGrv(oMdl)
 Local oModelCab  := oMdl:GetModel( 'Z09PAI' )
 Local nOperacao  := oMdl:GetOperation()
 Local cOper      := oModelCab:GetValue("Z09_CODOPE")
-Local aArea      := GetArea()
+Local aArea      := FWGetArea()
 
 FwFormCommit(oMdl)
 
 //alteracao
 If nOperacao=MODEL_OPERATION_UPDATE
 	
-	dbselectarea("Z09")
-	Z09->( dbsetorder(2) )
-	Z09->(Dbseek(XFilial("Z09")+oModelCAB:GetValue("Z09_CODOPE")))
+	DBSelectArea("Z09")
+	Z09->( DBSetOrder(2) )
+	Z09->(DBSeek(xFilial("Z09")+oModelCAB:GetValue("Z09_CODOPE")))
 	
-	While Z09->(!EOF()) .And. Z09->Z09_CODOPE == cOper
+	While Z09->(!Eof()) .And. Z09->Z09_CODOPE == cOper
 		
 		RecLock("Z09",.F.)
 		Z09->Z09_DESVIO := oModelCAB:GetValue("Z09_DESVIO")
 		Z09->Z09_INIVIG := oModelCAB:GetValue("Z09_INIVIG")
 		Z09->Z09_FIMVIG := oModelCAB:GetValue("Z09_FIMVIG")
-		Z09->(MsUnLock())
+		Z09->(MSUnLock())
 		
-		Z09->(DbSkip())
+		Z09->(DBSkip())
 		
 	EndDo
 	
 EndIf
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return .T.
 
@@ -279,7 +279,7 @@ Parametros--------: Objeto da visão de dados
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static function ImportGrid(oView)
+Static Function ImportGrid(oView)
 
 Local oModel := FWModelActive()
 Local oModelGrid := oModel:GetModel( 'Z09FIL' )
@@ -289,27 +289,27 @@ Local cTipo := 'PA'
 //consultar banco de produtos
 BeginSql Alias cAliasQry
 	SELECT B1_COD, B1_DESC
-	FROM %table:SB1%
+	FROM %Table:SB1%
 	WHERE %NotDel%
-	AND B1_FILIAL = %xfilial:SB1%
+	AND B1_FILIAL = %xFilial:SB1%
 	AND	B1_TIPO = %Exp:cTipo%
 	AND B1_MSBLQL <> '1'
 	ORDER BY B1_COD
 EndSql
 
-(cAliasQry)->(DbGoTop())
+(cAliasQry)->(DBGoTop())
 
 //preenchimento do grid
-While (cAliasQry)->(!EOF())
+While (cAliasQry)->(!Eof())
 	
 	If !oModelGrid:Seekline({ {"Z09_CODPRO",(cAliasQry)->B1_COD} },.F.)
 		oModelGrid:AddLine()
 		oModelGrid:SetValue( "Z09_CODPRO",(cAliasQry)->B1_COD )
 	EndIf
-	(cAliasQry)->(DbSkip())
+	(cAliasQry)->(DBSkip())
 EndDo
 
-(cAliasQry)->(DbCloseArea())
+(cAliasQry)->(DBCloseArea())
 
 oModelGrid:GoLine(1)
 
@@ -328,7 +328,7 @@ Parametros--------: Objeto da visão de dados
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static function PesqProd(oView)
+Static Function PesqProd(oView)
 
 Local oModel := FWModelActive()
 Local oModelGrid := oModel:GetModel( 'Z09FIL' )
@@ -336,9 +336,9 @@ Local oDlg , oButton1 , oGet1 , oSay1
 Local cProd := Space(15)
 
 DEFINE MSDIALOG oDlg TITLE "Pesquisar produto" FROM 000, 000  TO 100, 400 COLORS 0, 16777215 PIXEL
-@ 017, 014 SAY oSay1 PROMPT "Codigo Produto:" SIZE 041, 007 OF oDlg COLORS 0, 16777215 PIXEL
+@ 017, 014 Say oSay1 PROMPT "Codigo Produto:" SIZE 041, 007 OF oDlg COLORS 0, 16777215 PIXEL
 @ 015, 055 MSGET oGet1 VAR cProd SIZE 097, 010 OF oDlg PICTURE "@!" COLORS 0, 16777215 F3 "Z09B1" PIXEL
-DEFINE SBUTTON oButton1 FROM 030, 115 TYPE 01 OF oDlg ENABLE ACTION {|| oDlg:End()}
+DEFINE SBUTTON oButton1 FROM 030, 115 Type 01 OF oDlg ENABLE ACTION {|| oDlg:End()}
 ACTIVATE MSDIALOG oDlg
 
 //posicionar no grid
@@ -361,15 +361,15 @@ Retorno-----------: Logico
 */
 Static Function AtivaModelo(oModel)
 
-Local aArea		:= GetArea()
+Local aArea		:= FWGetArea()
 Local lRet      := .T.
 
 If !U_ITVLDUSR(8)
-	U_ITMSG('O usuário '+UsrRetName( RetCodUsr() )+' não possui acesso para manutenção dos preços de transferências.',,'Informar ao suporte T.I. para realizar essa manutenção.',,,,.T.)
+	U_ITMsg('O usuário '+UsrRetName( RetCodUsr() )+' não possui acesso para manutenção dos preços de transferências.',,'Informar ao suporte T.I. para realizar essa manutenção.',,,,.T.)
 	lRet := .F.
 EndIf
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return lRet
 
@@ -392,7 +392,7 @@ Static Function MDPosVld(oMdl)
 Local oModelGrid := oMdl:GetModel( 'Z09FIL' )
 Local lRet := .T.
 Local nx := 0
-Local aArea	:= GetArea()
+Local aArea	:= FWGetArea()
 
 //validar preço
 For nx := 1 To oModelGrid:Length()
@@ -400,12 +400,12 @@ For nx := 1 To oModelGrid:Length()
 	If !oModelGrid:IsDeleted()
 		If oModelGrid:GetValue('Z09_PRECO',nx) <= 0
 			lRet := .F.
-			U_ITMSG('Produto '+Alltrim(oModelGrid:GetValue("Z09_CODPRO",nx))+' com preço zerado.',,'Acerte o preço do produto para um valor maior que zero',,,,.T.)
+			U_ITMsg('Produto '+AllTrim(oModelGrid:GetValue("Z09_CODPRO",nx))+' com preço zerado.',,'Acerte o preço do produto para um valor maior que zero',,,,.T.)
 		EndIf
-	Endif
+	EndIf
 Next nx
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return lRet
 
@@ -431,7 +431,7 @@ Local _lRet := .T.
 If dFimData <= dIniData .And. !Empty(dFimData)
 
 	_lRet := .F.
-	U_ITMSG("Data final da vigência deve ser maior que a data inicio da vigência.",,,,,,.T.)
+	U_ITMsg("Data final da vigência deve ser maior que a data inicio da vigência.",,,,,,.T.)
 
 EndIf
 
@@ -453,11 +453,11 @@ Retorno-----------: Logico
 User Function AOMS001H(_cCodop)
 
 Local lRet := .T.
-Local aArea	:= GetArea()
+Local aArea	:= FWGetArea()
 Local cQuery	:= ''
 Local cAlias	:= GetNextAlias()
 
-If (Inclui .or. Altera) 
+If (Inclui .Or. Altera) 
 
 	//valida operação  não pode sobrepor com nenhum registro já existente
 	cQuery += " SELECT Z09.Z09_CODOPE FROM "+ RETSQLNAME('Z09') +" Z09 WHERE "+ RETSQLCOND('Z09') 
@@ -470,14 +470,14 @@ If (Inclui .or. Altera)
 
 	//se achou mesma operação  alerta e bloqueia o cadastro
 	If .not. (cAlias)->( Eof() )
-  	    U_ITMSG("Operação conflitante com registro já existente",,,,,,.T.)
+  	    U_ITMsg("Operação conflitante com registro já existente",,,,,,.T.)
 		lRet := .F.
 	
-	Endif
+	EndIf
 
-Endif
+EndIf
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return lRet
 
@@ -496,14 +496,14 @@ Retorno-----------: Logico
 */
 User Function AOMS001C()
 
-Local aArea	:= GetArea()
+Local aArea	:= FWGetArea()
 Local cQuery	:= ''
 Local cAlias	:= GetNextAlias()
 Local lRet		:= .F.
 
 cQuery += " SELECT Z09.R_E_C_N_O_ AS REGZ09 FROM "+ RETSQLNAME('Z09') +" Z09 WHERE "+ RETSQLCOND('Z09') 
-cQuery += " AND Z09.Z09_CODOPE = '"+ Z09->Z09_CODOPE +"' AND Z09.Z09_INIVIG = '" + DTOS(Z09->Z09_INIVIG) + "'" 
-cQuery += " AND Z09.Z09_FIMVIG = '" + DTOS(Z09->Z09_FIMVIG) + "' AND ROWNUM = 1 ORDER BY 1 "
+cQuery += " AND Z09.Z09_CODOPE = '"+ Z09->Z09_CODOPE +"' AND Z09.Z09_INIVIG = '" + DToS(Z09->Z09_INIVIG) + "'" 
+cQuery += " AND Z09.Z09_FIMVIG = '" + DToS(Z09->Z09_FIMVIG) + "' AND ROWNUM = 1 ORDER BY 1 "
 
 
 IIf( Select(cAlias) > 0 , (cAlias)->( DBCloseArea() ) , Nil )
@@ -516,7 +516,7 @@ lRet := ( (cAlias)->REGZ09 == Z09->( Recno() ) )
 
 (cAlias)->( DBCloseArea() )
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return lRet
 
@@ -535,29 +535,29 @@ Retorno-----------: Logico
 */
 Static Function AOMS001LV(oMdl)
 
-Local _lret := .T.
+Local _lRet := .T.
 Local _oModel	:= FWModelActive()
 Local oModelGrid:= _oModel:GetModel( 'Z09FIL' )
-Local _cFilori := oModelGrid:GetValue("Z09_FILORI")//ALLTRIM(aCols[n][aScan(aHeader,{|x| UPPER(Alltrim(x[2])) == "Z09_FILORI"})])
-Local _cFildes := oModelGrid:GetValue("Z09_FILDES")//ALLTRIM(aCols[n][aScan(aHeader,{|x| UPPER(Alltrim(x[2])) == "Z09_FILDES"})])
+Local _cFilori := oModelGrid:GetValue("Z09_FILORI")//AllTrim(aCols[n][aScan(aHeader,{|x| Upper(AllTrim(x[2])) == "Z09_FILORI"})])
+Local _cFildes := oModelGrid:GetValue("Z09_FILDES")//AllTrim(aCols[n][aScan(aHeader,{|x| Upper(AllTrim(x[2])) == "Z09_FILDES"})])
 
 If Z09->Z09_CODOPE <> "22"
-	If  .NOT.( EMPTY(_cFilori) .AND.  EMPTY(_cFildes)).AND. ;
-	    .NOT.(!EMPTY(_cFilori) .AND. !EMPTY(_cFildes) .AND. ALLTRIM(_cFilori) <> ALLTRIM(_cFildes) ) 
+	If  .NOT.( Empty(_cFilori) .And.  Empty(_cFildes)).AND. ;
+	    .NOT.(!Empty(_cFilori) .And. !Empty(_cFildes) .And. AllTrim(_cFilori) <> AllTrim(_cFildes) ) 
 
-       U_ITMSG("Campos de filial origem / destino devem ser diferentes ou vazios.",," Acertar Linha: "+ALLTRIM(STR(oModelGrid:NLINE)),,,,.T.)
-	   _lret := .F.
+       U_ITMsg("Campos de filial origem / destino devem ser diferentes ou vazios.",," Acertar Linha: "+AllTrim(Str(oModelGrid:NLINE)),,,,.T.)
+	   _lRet := .F.
 	
-	Endif
+	EndIf
 
-ELSEIf  Z09->Z09_CODOPE = "22"
-	If EMPTY(_cFilori) .OR. EMPTY(_cFildes) .OR. ALLTRIM(_cFilori) <> ALLTRIM(_cFildes)
+ElseIf  Z09->Z09_CODOPE = "22"
+	If Empty(_cFilori) .Or. Empty(_cFildes) .Or. AllTrim(_cFilori) <> AllTrim(_cFildes)
 
-       U_ITMSG("Campos de filial origem / destino devem ser preenchidos e iguais.",," Acertar Linha: "+ALLTRIM(STR(oModelGrid:NLINE)),,,,.T.)
-	   _lret := .F.
+       U_ITMsg("Campos de filial origem / destino devem ser preenchidos e iguais.",," Acertar Linha: "+AllTrim(Str(oModelGrid:NLINE)),,,,.T.)
+	   _lRet := .F.
 	
-	Endif
-Endif	
+	EndIf
+EndIf	
     
 
-Return _lret
+Return _lRet

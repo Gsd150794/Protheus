@@ -7,7 +7,7 @@
 ===============================================================================================================================
 */
 
-#Include 'Protheus.Ch'
+#Include "TOTVS.ch"
 #Include 'FWMVCDef.Ch'
 
 /*
@@ -33,7 +33,7 @@ oBrowse:SetAlias('ZC0')
 oBrowse:SetDescription( 'Metas - Vendas Leite Magro' )
 oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -81,8 +81,8 @@ Local _cTitAux := 'Inclusão'
 Local _oDlg    := Nil
 
 If !U_ITVLDUSR(5)
-	u_itmsg(  'Usuário sem acesso à alterar o cadastro de Configuração de Metas! Verifique com a área de TI/ERP' , 'Atenção!' , , 1 )
-	Return()
+	U_ITMsg(  'Usuário sem acesso à alterar o cadastro de Configuração de Metas! Verifique com a área de TI/ERP' , 'Atenção!' , , 1 )
+	Return
 EndIf
 
 If _nOpc == 1
@@ -95,14 +95,14 @@ EndIf
 
 DEFINE MSDIALOG _oDlg TITLE "Cadastro de Metas - "+ _cTitAux FROM 000,000 TO 100,500 PIXEL
 	
-	@020,010 SAY 'Ano/Mes:'                                   OF _oDLg PIXEL
+	@020,010 Say 'Ano/Mes:'                                   OF _oDLg PIXEL
 	@018,040 MSGET _cDtRef PICTURE "@E 9999/99"  SIZE 050,010 OF _oDlg PIXEL
-	@020,120 SAY '% Meta:'                                    OF _oDLg PIXEL
+	@020,120 Say '% Meta:'                                    OF _oDLg PIXEL
 	@018,150 MSGET _nMeta  PICTURE "@E 999.99"   SIZE 050,010 OF _oDlg PIXEL
 	
 ACTIVATE MSDIALOG _oDlg ON INIT ( EnchoiceBar( _oDlg , _bOk , _bCancel ) ) CENTERED
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -129,6 +129,6 @@ EndIf
 ZC0->ZC0_ANOMES := StrTran( _cDtRef , '/' , '' )
 ZC0->ZC0_META   := _nMeta
 
-ZC0->( MsUnLock() )
+ZC0->( MSUnLock() )
 
-Return()
+Return

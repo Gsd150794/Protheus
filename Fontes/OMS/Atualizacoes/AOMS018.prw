@@ -8,16 +8,16 @@ Julio Paz         | 03/11/2016 | Alterações na Query da rotina para aceitar o ti
 -------------------------------------------------------------------------------------------------------------------------------
 Lucas Borges      | 15/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer     | 31/10/2022 | Chamado 41714. Acerto da numeracao do campo DA3_COD com a funcao SOMA1()
+Alex Wallauer     | 31/10/2022 | Chamado 41714. Acerto da numeracao do campo DA3_COD com a funcao Soma1()
 ===============================================================================================================================
 */
 
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#include "protheus.ch"
-#include "topconn.ch"
-#include "rwmake.ch"
+#Include "TOTVS.ch"
+#Include "topconn.ch"
+#Include "rwmake.ch"
 
 /*
 ===============================================================================================================================
@@ -40,93 +40,93 @@ Retorno---------: _cRetorno = Retorna codigo para cadastro de Veiculo
 */
 User Function AOMS018(_pcTipo)
 
-	Local _aArea    := GetArea()
+	Local _aArea    := FWGetArea()
 	Local _cQuery   := ""
-	local _cRetorno := ""
+	Local _cRetorno := ""
 	Local _cCodigo  := ""
 
    
 	_cQuery := " SELECT MAX(DA3_COD) AS CODIGO"
 	_cQuery += " FROM " + RetSqlName("DA3")
-	If Alltrim(_pcTipo) == "1"
-		_cQuery += " WHERE substr(DA3_COD,1,3) = 'CAR' "
-	ElseIf Alltrim(_pcTipo) == "2"
-		_cQuery += " WHERE substr(DA3_COD,1,3) = 'CAM' "
-	ElseIf Alltrim(_pcTipo) == "3"
-		_cQuery += " WHERE substr(DA3_COD,1,3) = 'BIT' "
-	ElseIf Alltrim(_pcTipo) == "4"
-		_cQuery += " WHERE substr(DA3_COD,1,3) = 'UTI' "   
-	ElseIf Alltrim(_pcTipo) == "5"
-		_cQuery += " WHERE substr(DA3_COD,1,3) = 'ROD' "	
+	If AllTrim(_pcTipo) == "1"
+		_cQuery += " WHERE SubStr(DA3_COD,1,3) = 'CAR' "
+	ElseIf AllTrim(_pcTipo) == "2"
+		_cQuery += " WHERE SubStr(DA3_COD,1,3) = 'CAM' "
+	ElseIf AllTrim(_pcTipo) == "3"
+		_cQuery += " WHERE SubStr(DA3_COD,1,3) = 'BIT' "
+	ElseIf AllTrim(_pcTipo) == "4"
+		_cQuery += " WHERE SubStr(DA3_COD,1,3) = 'UTI' "   
+	ElseIf AllTrim(_pcTipo) == "5"
+		_cQuery += " WHERE SubStr(DA3_COD,1,3) = 'ROD' "	
 	EndIf
-	_cQuery += " AND DA3_FILIAL = '"+xfilial("DA3")+"' AND "+  RetSqlName("DA3")+".D_E_L_E_T_ = ' '"
+	_cQuery += " AND DA3_FILIAL = '"+xFilial("DA3")+"' AND "+  RetSqlName("DA3")+".D_E_L_E_T_ = ' '"
 	
 	TcQuery _cQuery New Alias "QRY"
 	
-	dbSelectArea("QRY")
-	dbGotop()
+	DBSelectArea("QRY")
+	DBGoTop()
 	
 	_cCodigo := QRY->CODIGO
 	
-	dbSelectArea("QRY")
-	QRY->(dbCloseArea())
+	DBSelectArea("QRY")
+	QRY->(DBCloseArea())
 	
-	// Se _cCodigo for vazio, entao devera ser gerado um codigo sequencial para retorno.
-	If Alltrim(_cCodigo) == ""
-		If Alltrim(_pcTipo) == "1"
+	// Se _cCodigo For vazio, entao devera ser gerado um codigo sequencial para retorno.
+	If AllTrim(_cCodigo) == ""
+		If AllTrim(_pcTipo) == "1"
 			_cCodigo := "CAR00001"
 			While !MayIUseCode("DA3_COD"+xFilial("DA3")+_cCodigo)  //verifica se esta na memoria, sendo usado
 				_cCodigo := "CAR" + StrZero((Val(Right(_cCodigo,5))+1),5)// busca o proximo numero disponivel 
 			EndDo                                           
-		ElseIf Alltrim(_pcTipo) == "2"
+		ElseIf AllTrim(_pcTipo) == "2"
 			_cCodigo := "CAM00001"
 			While !MayIUseCode("DA3_COD"+xFilial("DA3")+_cCodigo)  //verifica se esta na memoria, sendo usado
 				_cCodigo := "CAM" + StrZero((Val(Right(_cCodigo,5))+1),5)// busca o proximo numero disponivel 
 			EndDo                                           
-		ElseIf Alltrim(_pcTipo) == "3"
+		ElseIf AllTrim(_pcTipo) == "3"
 			_cCodigo := "BIT00001"
 			While !MayIUseCode("DA3_COD"+xFilial("DA3")+_cCodigo)  //verifica se esta na memoria, sendo usado
 				_cCodigo := "BIT" + StrZero((Val(Right(_cCodigo,5))+1),5)// busca o proximo numero disponivel 
 			EndDo                                           
-		ElseIf Alltrim(_pcTipo) == "4"
+		ElseIf AllTrim(_pcTipo) == "4"
 			_cCodigo := "UTI00001"	    
 			While !MayIUseCode("DA3_COD"+xFilial("DA3")+_cCodigo)  //verifica se esta na memoria, sendo usado
 				_cCodigo := "UTI" + StrZero((Val(Right(_cCodigo,5))+1),5)// busca o proximo numero disponivel 
 			EndDo                                           
-		ElseIf Alltrim(_pcTipo) == "5"
+		ElseIf AllTrim(_pcTipo) == "5"
 			_cCodigo := "ROD00001"	    
 			While !MayIUseCode("DA3_COD"+xFilial("DA3")+_cCodigo)  //verifica se esta na memoria, sendo usado
 				_cCodigo := "ROD" + StrZero((Val(Right(_cCodigo,5))+1),5)// busca o proximo numero disponivel 
 			EndDo                                           			
-   	    Endif
-	ELSE
-	    _cCodigo:=LEFT(_cCodigo,3)+SOMA1(Right(_cCodigo,5))
-		DO While !MayIUseCode("DA3_COD"+xFilial("DA3")+_cCodigo)  //verifica se esta na memoria, sendo usado
-		   _cCodigo:=LEFT(_cCodigo,3)+SOMA1(Right(_cCodigo,5))// busca o proximo numero disponivel 
+   	    EndIf
+	Else
+	    _cCodigo:=LEFT(_cCodigo,3)+Soma1(Right(_cCodigo,5))
+		While !MayIUseCode("DA3_COD"+xFilial("DA3")+_cCodigo)  //verifica se esta na memoria, sendo usado
+		   _cCodigo:=LEFT(_cCodigo,3)+Soma1(Right(_cCodigo,5))// busca o proximo numero disponivel 
 		EndDo                                           
-	ENDIF
+	EndIf
 /*		
-	ElseIf Alltrim(_cCodigo) <> "" .and. Alltrim(_pcTipo) == "1"
+	ElseIf AllTrim(_cCodigo) <> "" .And. AllTrim(_pcTipo) == "1"
 		_cCodigo := "CAR" + StrZero((Val(Right(_cCodigo,5))+1),5)
 		While !MayIUseCode("DA3_COD"+xFilial("DA3")+_cCodigo)  //verifica se esta na memoria, sendo usado
 			_cCodigo := "CAR" + StrZero((Val(Right(_cCodigo,5))+1),5)// busca o proximo numero disponivel 
 		EndDo                                           
-	ElseIf Alltrim(_cCodigo) <> "" .and. Alltrim(_pcTipo) == "2"
+	ElseIf AllTrim(_cCodigo) <> "" .And. AllTrim(_pcTipo) == "2"
 		_cCodigo := "CAM" + StrZero((Val(Right(_cCodigo,5))+1),5)
 		While !MayIUseCode("DA3_COD"+xFilial("DA3")+_cCodigo)  //verifica se esta na memoria, sendo usado
 			_cCodigo := "CAM" + StrZero((Val(Right(_cCodigo,5))+1),5)// busca o proximo numero disponivel 
 		EndDo                                           
-	ElseIf Alltrim(_cCodigo) <> "" .and. Alltrim(_pcTipo) == "3"
+	ElseIf AllTrim(_cCodigo) <> "" .And. AllTrim(_pcTipo) == "3"
 		_cCodigo := "BIT" + StrZero((Val(Right(_cCodigo,5))+1),5)
 		While !MayIUseCode("DA3_COD"+xFilial("DA3")+_cCodigo)  //verifica se esta na memoria, sendo usado
 			_cCodigo := "BIT" + StrZero((Val(Right(_cCodigo,5))+1),5)// busca o proximo numero disponivel 
 		EndDo                                           
-	ElseIf Alltrim(_cCodigo) <> "" .and. Alltrim(_pcTipo) == "4"
+	ElseIf AllTrim(_cCodigo) <> "" .And. AllTrim(_pcTipo) == "4"
 		_cCodigo := "UTI" + StrZero((Val(Right(_cCodigo,5))+1),5)
 		While !MayIUseCode("DA3_COD"+xFilial("DA3")+_cCodigo)  //verifica se esta na memoria, sendo usado
 			_cCodigo := "UTI" + StrZero((Val(Right(_cCodigo,5))+1),5)// busca o proximo numero disponivel 
 		EndDo                                           
-    ElseIf Alltrim(_cCodigo) <> "" .and. Alltrim(_pcTipo) == "5"
+    ElseIf AllTrim(_cCodigo) <> "" .And. AllTrim(_pcTipo) == "5"
 		_cCodigo := "ROD" + StrZero((Val(Right(_cCodigo,5))+1),5)
 		While !MayIUseCode("DA3_COD"+xFilial("DA3")+_cCodigo)  //verifica se esta na memoria, sendo usado
 			_cCodigo := "ROD" + StrZero((Val(Right(_cCodigo,5))+1),5)// busca o proximo numero disponivel 
@@ -135,5 +135,5 @@ User Function AOMS018(_pcTipo)
 	
 	_cRetorno := _cCodigo    
 
-	RestArea(_aArea)
+	FWRestArea(_aArea)
 Return(_cRetorno)

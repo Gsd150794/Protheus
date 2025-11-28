@@ -17,7 +17,7 @@
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#INCLUDE "RWMAKE.ch"
+#Include "RWMAKE.ch"
 
 /*
 ===============================================================================================================================
@@ -34,11 +34,11 @@ Retorno-----------: Nenhum
 */
 User Function OS200ES2()
 
-Local aArea      := GetArea()
+Local aArea      := FWGetArea()
 Local cCarga     := DAK->DAK_COD  
 Local _cTpCarga  := DAK->DAK_I_TPFR
 
-_lUsuConfirmou   :=.T.//Variavel PRIVATE usada no rdmake OM200MNU.PRW para saber se o usuario confirmou o estorno - Projeto de unificação de pedidos de TN
+_lUsuConfirmou   :=.T.//Variavel Private usada no rdmake OM200MNU.PRW para saber se o usuario confirmou o estorno - Projeto de unificação de pedidos de TN
 
 //================================================================================
 // Gravar neste ponto os dados da tabela de muro para estorno de carga na
@@ -49,7 +49,7 @@ _lUsuConfirmou   :=.T.//Variavel PRIVATE usada no rdmake OM200MNU.PRW para saber
 // Deleta registros relacionados ao frete.
 //================================================================================      
 DBSelectArea("ZZ2") 	// Posicionando no cabecalho do recibo
-ZZ2->( DBSetORder(2) )	// ZZ2_FILIAL+ZZ2_CARGA
+ZZ2->( DBSetOrder(2) )	// ZZ2_FILIAL+ZZ2_CARGA
 If ZZ2->( DBSeek( xFilial("ZZ2") + cCarga ) )
 
 	//================================================================================
@@ -57,7 +57,7 @@ If ZZ2->( DBSeek( xFilial("ZZ2") + cCarga ) )
 	//================================================================================
 	ZZ2->( RecLock( "ZZ2" , .F. ) )
 	ZZ2->( DBDelete() )
-	ZZ2->( MsUnLock() )
+	ZZ2->( MSUnLock() )
 	
 	//================================================================================
 	// Posiciona Itens do recibo
@@ -73,7 +73,7 @@ If ZZ2->( DBSeek( xFilial("ZZ2") + cCarga ) )
 		
 			ZZ3->( RecLock( "ZZ3" , .F. ) )
 			ZZ3->( DBDelete() )
-			ZZ3->( MsUnlock() )
+			ZZ3->( MSUnLock() )
 			
 		ZZ3->( DBSkip() )
 		EndDo
@@ -83,14 +83,14 @@ If ZZ2->( DBSeek( xFilial("ZZ2") + cCarga ) )
 Else                        
 
 	//================================================================================
-	// Se for Igual a Autonomos o tipo da carga
+	// Se For Igual a Autonomos o tipo da carga
 	//================================================================================
 	If  _cTpCarga == '1'
 		
 		//================================================================================
 		// CASO NAO ENCONTRE UM CARGA PARA SER ESTORNADA
 		//================================================================================
-		xmaghelpfis(	"Atenção!"																		,;
+		xMagHelpFis(	"Atenção!"																		,;
 						"Não foi possível identificar o recibo da carga: "+ cCarga +" NA TABELA ZZ2"	,;
 						"Informar a ocorrência para a Área de TI/ERP."									 )
 		
@@ -98,6 +98,6 @@ Else
    	
 EndIf
 
-RestArea(aArea)
+FWRestArea(aArea)
 
-Return()
+Return

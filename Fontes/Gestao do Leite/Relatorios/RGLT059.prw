@@ -2,15 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 09/09/2022 | Chamado 41230. Incluídos estados tratados pelo método NfeConsultaCadastro
-Lucas Borges  | 04/10/2022 | Chamado 41447. Corrigir caracter indevido inserido por esse teclado lixo
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Lucas Borges  |09/09/2022| Chamado 41230. Incluídos estados tratados pelo método NfeConsultaCadastro
+Lucas Borges  |04/10/2022| Chamado 41447. Corrigir caracter indevido inserido por esse teclado lixo
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -114,7 +114,7 @@ Return(oReport)
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 06/12/2018
-Descrição---------: A funcao estatica ReportDef devera ser criada para todos os relatorios que poderao ser agendados pelo usuario.
+Descrição---------: A funcStaticatica ReportDef devera ser criada para todos os relatorios que poderao ser agendados pelo usuario.
 Parametros--------: ExpO1: Objeto Report do Relatório
 Retorno-----------: Nenhum
 ===============================================================================================================================
@@ -134,9 +134,9 @@ Local _cSituacao	:= "Erro"
 If MV_PAR07 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZLD")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
+	aAdd(_aSelFil,cFilAnt)
 EndIf
 
 //==========================================================================
@@ -155,7 +155,7 @@ oReport:Section(1):Cell("SITUACAO"):SetBlock({||_cSituacao })
 If MV_PAR08 = 1
 	_cFiltro += " AND ZLD_STATUS = 'F'"
 EndIf
-//Normalmente não precisaria desse filtro pois o fonte trataria o agendamento independente da filial, porém, se for informado apenas a empresa, ele irá processar
+//Normalmente não precisaria desse filtro pois o fonte trataria o agendamento independente da filial, porém, se For informado apenas a empresa, ele irá processar
 //e disparar e-mail para todas as filiais que nem usam o leite. Se informar todas as filiais que usam o leite, ele processará todos ao mesmo tempo, ocupando todas as threads.
 //Diante disso, travei para que sempre sejam processadas todas as filiais ao mesmo tempo, bastando agendar uma filial qualquer.
 If !_lSchedule
@@ -201,13 +201,13 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	_nCount++
-	oReport:Section(1):Cell("A2_CGC"):SetBlock( { || Transform((_cAlias)->A2_CGC, IIF(Len(Alltrim((_cAlias)->A2_CGC))>11,"@R! NN.NNN.NNN/NNNN-99","@R 999.999.999-99")) } )
+	oReport:Section(1):Cell("A2_CGC"):SetBlock( { || Transform((_cAlias)->A2_CGC, IIf(Len(AllTrim((_cAlias)->A2_CGC))>11,"@R! NN.NNN.NNN/NNNN-99","@R 999.999.999-99")) } )
 
 	If Mod(_nCount, 100) == 0
 		Sleep(5000)//Aguarda 1 segundos para evitar sobrecarga do TSS
@@ -230,7 +230,7 @@ While !oReport:Cancel() .And. (_cAlias)->(!EOF())
 		oReport:IncMeter()
 	EndIf
 
-	(_cAlias)->(dbSkip())
+	(_cAlias)->(DBSkip())
 
 EndDo
 If !_lFirst
@@ -266,7 +266,7 @@ oWs:cID_ENT := cIdEnt
 oWs:cUF := cUF
 oWs:cCNPJ := ""
 oWs:cCPF := ""
-oWs:cIE := Alltrim(cIE)
+oWs:cIE := AllTrim(cIE)
 oWs:_URL := AllTrim(cURL)+"/NFeSBRA.apw"
 
 While _lRepetir
@@ -283,7 +283,7 @@ While _lRepetir
 		  	_lRepetir:= .F.
 		EndIf
 	Else
-		If _lSchedule .And. _nQtd > 2// Não realizar uma segunda tentativa quando for agendado
+		If _lSchedule .And. _nQtd > 2// Não realizar uma segunda tentativa quando For agendado
 			_lRepetir:= .F.
 		ElseIf !_lSchedule .And. !ApMsgYesNo("Não foi possivel realizar a consulta. Deseja fazer uma nova tentativa?","RGLT05901")
 			_lRepetir:= .F.
@@ -298,10 +298,10 @@ Return
 Programa----------: SchedDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 25/05/2017
-Descrição---------: Definição de Static Function SchedDef para o novo Schedule
+Descrição---------: DefiniçStaticStatic Function SchedDef para o novo Schedule
 					No novo Schedule existe uma forma para a definição dos Perguntes para o botão Parâmetros, além do cadastro 
-					das funções no SXD. Ao definir em sua rotina a static function SchedDef(), no cadastro da rotina no Agenda-
-					mento do Schedule será verificado se existe esta static function e irá executá-la habilitando o botão Parâ-
+					das funções no SXD. Ao definir em sua rotinStaticatic Function SchedDef(), no cadastro da rotina no Agenda-
+					mento do Schedule será verificado se existe estStaticic Function e irá executá-la habilitando o botão Parâ-
 					metros com as informações do retorno da SchedDef(), deixando de verificar assim as informações na SXD. O 
 					retorno da SchedDef deverá ser um array.
 					Válido para Function e User Function, lembrando que uma vez definido a SchedDef, ao chamar a rotina o ambi-

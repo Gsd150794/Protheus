@@ -17,7 +17,7 @@
 // Definicoes de Includes da Rotina.
 //====================================================================================================
 #Include "Rwmake.ch"
-#include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -37,7 +37,7 @@ User Function M521CDEL()
 
 Local lRet		:= .T.
 Local _aInfHlp	:= {}
-Local aArea		:= GetArea()
+Local aArea		:= FWGetArea()
 Local cCarga	:= SF2->F2_CARGA
 Local dDtEmis	:= SF2->F2_EMISSAO     
    
@@ -51,7 +51,7 @@ If dDataBase < dDtEmis
 	//================================================================================
 	_aInfHlp := {}
 	//                  |....:....|....:....|....:....|....:....|	  |....:....|....:....|....:....|....:....|	  |....:....|....:....|....:....|....:....|
-	aAdd( _aInfHlp	, { 'Não é permitido estornar um documento '	, 'em data anterior à data de emissão. A '	, 'emissão do registro é:' + DtoC(dDtEmis)	} )
+	aAdd( _aInfHlp	, { 'Não é permitido estornar um documento '	, 'em data anterior à data de emissão. A '	, 'emissão do registro é:' + DToC(dDtEmis)	} )
 	aAdd( _aInfHlp	, { 'Para excluir o documento atual deve '		, 'ser utilizada a (database) posterior à '	, 'data de emissão.'						} )
 	
 	U_ITCADHLP( _aInfHlp , "M521CD1" )
@@ -63,11 +63,11 @@ EndIf
 //================================================================================
 //| Salvando Integridade do Sistema.                                             |
 //================================================================================
-dbSelectArea("SF2")
+DBSelectArea("SF2")
 _nOrdSF2 := IndexOrd()
 _nRecSF2 := Recno()
 
-dbSelectArea("SD2")
+DBSelectArea("SD2")
 _nOrdSD2 := IndexOrd()
 _nRecSD2 := Recno()
 
@@ -82,19 +82,19 @@ If !Empty(cCarga)
 	If Upper( AllTrim( FunName() ) ) == "MATA521B"
 	
 		DBSelectArea("ZZ2")
-		ZZ2->( DBSetORder(2) ) // ZZ2_FILIAL+ZZ2_CARGA
+		ZZ2->( DBSetOrder(2) ) // ZZ2_FILIAL+ZZ2_CARGA
 		If ZZ2->( DBSeek( xFilial("ZZ2") + cCarga ) ) //Transporte realizado por Autonomo
 		
 			DBSelectArea("SE2")
 			SE2->( DBSetOrder(1) ) //E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA
 			If SE2->( DBSeek( xFilial("SE2") + "AUT" + ZZ2->ZZ2_RECIBO ) )
 				
-				While SE2->( !Eof() ) .and. SE2->( E2_FILIAL + E2_PREFIXO + E2_NUM ) == xFilial("SE2") + "AUT" + ZZ2->ZZ2_RECIBO .And. AllTrim(SE2->E2_ORIGEM) == "GERAZZ3"
+				While SE2->( !Eof() ) .And. SE2->( E2_FILIAL + E2_PREFIXO + E2_NUM ) == xFilial("SE2") + "AUT" + ZZ2->ZZ2_RECIBO .And. AllTrim(SE2->E2_ORIGEM) == "GERAZZ3"
 					
 					//====================================================================================================
 					// Verifica se houveram movimentações no título financeiro
 					//====================================================================================================
-					If SE2->E2_TIPO == "RPA" .and. SE2->E2_SALDO <> SE2->E2_VALOR
+					If SE2->E2_TIPO == "RPA" .And. SE2->E2_SALDO <> SE2->E2_VALOR
 		
 						MessageBox(	'O Título ['+ SE2->( E2_FILIAL+E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO ) +'] possui baixas/movimentações e não pode ser excluído! '	+;
 									'É necessário solicitar o estorno de todos os movimentos do título para prosseguir com o processo!' , 'Atenção!' , 48 )
@@ -129,14 +129,14 @@ If !Empty(cCarga)
 	
 EndIf
 
-dbSelectArea("SD2")
-dbSetOrder(_nOrdSD2)
-dbGoto(_nRecSD2)
+DBSelectArea("SD2")
+DBSetOrder(_nOrdSD2)
+DBGoTo(_nRecSD2)
 
-dbSelectArea("SF2")
-dbSetOrder(_nOrdSF2)
-dbGoto(_nRecSF2)
+DBSelectArea("SF2")
+DBSetOrder(_nOrdSF2)
+DBGoTo(_nRecSF2)
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return( lRet )

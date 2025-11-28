@@ -2,16 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Antonio Neves | 15/03/2024 | Chamado 46603. Inclusão da Coluna de Nota Fiscal de Remessa
-Igor Melgaço  | 05/06/2024 | Chamado 47265. Inclusão do Histórico da baixa.
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Antonio Neves |15/03/2024| Chamado 46603. Inclusão da Coluna de Nota Fiscal de Remessa
+Igor Melgaço  |05/06/2024| Chamado 47265. Inclusão do Histórico da baixa.
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
-#INCLUDE 'TOPCONN.CH'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -47,68 +46,68 @@ MV_PAR11 := CTOD("")
 MV_PAR12 := CTOD("")
 
 _aItalac_F3:={}
-//_bSelectSA1:={|| "SELECT A1_COD, A1_LOJA,A1_NOME FROM "+RETSQLNAME("SA1")+" SA1 WHERE D_E_L_E_T_ <> '*' ORDER BY A1_COD,A1_LOJA "  }
-//AADD(_aItalac_F3,{"MV_PAR06",_bSelectSA1,{|Tab| (Tab)->A1_COD + ' ' + (Tab)->A1_LOJA }, {|Tab| (Tab)->A1_NOME } , ,"Clientes",,,15,.F.        ,       , } )
-_bSelectSA1:={|| "SELECT DISTINCT A1_COD, A1_NOME FROM "+RETSQLNAME("SA1")+" SA1 WHERE D_E_L_E_T_ <> '*' ORDER BY A1_COD "  }
-AADD(_aItalac_F3,{"MV_PAR06",_bSelectSA1,{|Tab| (Tab)->A1_COD }, {|Tab| (Tab)->A1_NOME } , ,"Clientes",,,15,.F.        ,       , } )
+//_bSelectSA1:={|| "SELECT A1_COD, A1_LOJA,A1_NOME FROM "+RETSQLNAME("SA1")+" SA1 WHERE D_E_L_E_T_ = ' ' ORDER BY A1_COD,A1_LOJA "  }
+//aAdd(_aItalac_F3,{"MV_PAR06",_bSelectSA1,{|Tab| (Tab)->A1_COD + ' ' + (Tab)->A1_LOJA }, {|Tab| (Tab)->A1_NOME } , ,"Clientes",,,15,.F.        ,       , } )
+_bSelectSA1:={|| "SELECT DISTINCT A1_COD, A1_NOME FROM "+RETSQLNAME("SA1")+" SA1 WHERE D_E_L_E_T_ = ' ' ORDER BY A1_COD "  }
+aAdd(_aItalac_F3,{"MV_PAR06",_bSelectSA1,{|Tab| (Tab)->A1_COD }, {|Tab| (Tab)->A1_NOME } , ,"Clientes",,,15,.F.        ,       , } )
 
-_bSelectSX5:={|| "SELECT DISTINCT SUBSTR(X5_CHAVE,1,3) X5_CHAVE, X5_DESCRI FROM "+RETSQLNAME("SX5")+" SX5 WHERE D_E_L_E_T_ <> '*' AND X5_TABELA = '05' ORDER BY X5_CHAVE "  }
-AADD(_aItalac_F3,{"MV_PAR07",_bSelectSX5,{|Tab| (Tab)->X5_CHAVE }, {|Tab|(Tab)->X5_DESCRI } , ,"Tipos de Título",3,,,.F.        ,       , } )
+_bSelectSX5:={|| "SELECT DISTINCT SubStr(X5_CHAVE,1,3) X5_CHAVE, X5_DESCRI FROM "+RETSQLNAME("SX5")+" SX5 WHERE D_E_L_E_T_ = ' ' AND X5_TABELA = '05' ORDER BY X5_CHAVE "  }
+aAdd(_aItalac_F3,{"MV_PAR07",_bSelectSX5,{|Tab| (Tab)->X5_CHAVE }, {|Tab|(Tab)->X5_DESCRI } , ,"Tipos de Título",3,,,.F.        ,       , } )
 
-AADD( _aParAux , { 1 , "Filiais"	           , MV_PAR01, ""		, ""	, "LSTFIL"    , "" , 100 , .F. } )
-AADD( _aParAux , { 1 , "Emissão de"	        , MV_PAR02, "@D"	, ""	, ""		  , "" , 050 , .F. } )
-AADD( _aParAux , { 1 , "Emissão ate"	     , MV_PAR03, "@D"	, ""	, ""		  , "" , 050 , .F. } )
-AADD( _aParAux , { 1 , "Vencimento de"	     , MV_PAR04, "@D"	, ""	, ""		  , "" , 050 , .F. } )
-AADD( _aParAux , { 1 , "Vencimento ate"	  , MV_PAR05, "@D"	, ""	, ""		  , "" , 050 , .F. } )
-AADD( _aParAux , { 1 , "Clientes"           , MV_PAR06, "@!"    , ""    , "F3ITLC"    , "" , 100 , .F. } )
-AADD( _aParAux , { 1 , "Tipos"              , MV_PAR07, "@!"    , ""    , "F3ITLC"    , "" , 100 , .F. } )
-AADD( _aParAux , { 3 , "Posição"            , MV_PAR08, {"Todos","Vencidos","Não vencidos"}, 060, "", .T., .T. , .T. } )
-AADD( _aParAux , { 3 , "Tipo Vencimento"    , MV_PAR09, {"Original","Real"}                , 060, "", .T., .T. , .T. } )
-AADD( _aParAux , { 3 , "Tipo Relatorio"     , MV_PAR10, {"Abertos","Baixados"}             , 060, "", .T., .T. , .T. } )
-AADD( _aParAux , { 1 , "Baixa de  "	        , MV_PAR11, "@D"	, ""	, ""		  , "" , 050 , .F. } )
-AADD( _aParAux , { 1 , "Baixa ate"	        , MV_PAR12, "@D"	, ""	, ""		  , "" , 050 , .F. } )
+aAdd( _aParAux , { 1 , "Filiais"	           , MV_PAR01, ""		, ""	, "LSTFIL"    , "" , 100 , .F. } )
+aAdd( _aParAux , { 1 , "Emissão de"	        , MV_PAR02, "@D"	, ""	, ""		  , "" , 050 , .F. } )
+aAdd( _aParAux , { 1 , "Emissão ate"	     , MV_PAR03, "@D"	, ""	, ""		  , "" , 050 , .F. } )
+aAdd( _aParAux , { 1 , "Vencimento de"	     , MV_PAR04, "@D"	, ""	, ""		  , "" , 050 , .F. } )
+aAdd( _aParAux , { 1 , "Vencimento ate"	  , MV_PAR05, "@D"	, ""	, ""		  , "" , 050 , .F. } )
+aAdd( _aParAux , { 1 , "Clientes"           , MV_PAR06, "@!"    , ""    , "F3ITLC"    , "" , 100 , .F. } )
+aAdd( _aParAux , { 1 , "Tipos"              , MV_PAR07, "@!"    , ""    , "F3ITLC"    , "" , 100 , .F. } )
+aAdd( _aParAux , { 3 , "Posição"            , MV_PAR08, {"Todos","Vencidos","Não vencidos"}, 060, "", .T., .T. , .T. } )
+aAdd( _aParAux , { 3 , "Tipo Vencimento"    , MV_PAR09, {"Original","Real"}                , 060, "", .T., .T. , .T. } )
+aAdd( _aParAux , { 3 , "Tipo Relatorio"     , MV_PAR10, {"Abertos","Baixados"}             , 060, "", .T., .T. , .T. } )
+aAdd( _aParAux , { 1 , "Baixa de  "	        , MV_PAR11, "@D"	, ""	, ""		  , "" , 050 , .F. } )
+aAdd( _aParAux , { 1 , "Baixa ate"	        , MV_PAR12, "@D"	, ""	, ""		  , "" , 050 , .F. } )
 
 For nI := 1 To Len( _aParAux )
 	aAdd( _aParRet , _aParAux[nI][03] )
 Next
 
-DO WHILE .T.
+While .T.
 		//aParametros, cTitle                          , @aRet   ,[bOk]  , [ aButtons ] [ lCentered ] [ nPosX ] [ nPosy ] [ oDlgWizard ] [ cLoad ] [ lCanSave ] [ lUserSave ] 
-	IF !ParamBox( _aParAux , "Selecione os filtros" , @_aParRet,  _bOK , /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
-	   EXIT
-	ENDIF
+	If !ParamBox( _aParAux , "Selecione os filtros" , @_aParRet,  _bOK , /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
+	   Exit
+	EndIf
     
-	IF MV_PAR10 = 2//Quando Tipo Relatorio = Baixados não filtrar Vencidos ou Não vencidos
+	If MV_PAR10 = 2//Quando Tipo Relatorio = Baixados não filtrar Vencidos ou Não vencidos
        MV_PAR08:=1
-	ENDIF
+	EndIf
 
-	If !EMPTY(MV_PAR01)
+	If !Empty(MV_PAR01)
 			
 	    _cFilSemAcesso:=""
         _cFilNaoExiste:=""
-		SM0->(dbSetOrder(1))
+		SM0->(DBSetOrder(1))
 		_aFilSelecionados := U_ITLinDel( AllTrim(MV_PAR01) , ";" )
 		For nI := 1 To Len(_aFilSelecionados)
-			If ASCAN( _aAcesso , {|F| F[3] == _aFilSelecionados[nI] } ) = 0
+			If aScan( _aAcesso , {|F| F[3] == _aFilSelecionados[nI] } ) = 0
 			   _cFilSemAcesso+="[ "+_aFilSelecionados[nI]+" ] "
 			EndIf
-               if !SM0->(dbSeek(cEmpAnt + _aFilSelecionados[nI]))
+               If !SM0->(DBSeek(cEmpAnt + _aFilSelecionados[nI]))
 			   _cFilNaoExiste+="[ "+_aFilSelecionados[nI]+" ] "
 			EndIf
 		Next
-		If !EMPTY(_cFilNaoExiste)
-			u_itmsg("A(s) Filiai(s): "+_cFilNaoExiste+" não são válidas." , "Atenção!" ,"Selecione as filiais validas pelo F3.",1 )
-			LOOP	
+		If !Empty(_cFilNaoExiste)
+			U_ITMsg("A(s) Filiai(s): "+_cFilNaoExiste+" não são válidas." , "Atenção!" ,"Selecione as filiais validas pelo F3.",1 )
+			Loop	
 		EndIf
-		If !EMPTY(_cFilSemAcesso)
-			u_itmsg("O usuário não tem acesso a(s) Filiai(s): "+_cFilSemAcesso,"Atenção!","Selecione as filiais com acesso pelo F3.",1 )
-			LOOP
+		If !Empty(_cFilSemAcesso)
+			U_ITMsg("O usuário não tem acesso a(s) Filiai(s): "+_cFilSemAcesso,"Atenção!","Selecione as filiais com acesso pelo F3.",1 )
+			Loop
 		EndIf
-    ENDIF
-	cTimeInicial := TIME()
- 	FWMSGRUN( ,{|oProc|  RFIN025R(oProc) } , "SE1 - Hora Inicial: "+cTimeInicial+", Aguarde...",  )
+    EndIf
+	cTimeInicial := Time()
+ 	FWMsgRun( ,{|oProc|  RFIN025R(oProc) } , "SE1 - Hora Inicial: "+cTimeInicial+", Aguarde...",  )
 
-ENDDO
+EndDo
 
 Return
 
@@ -125,7 +124,7 @@ Retorno-----------: Nenhum
 Static Function RFIN025R(oProc)
 Local _cQuery    := ""
 Local _cFiltro   := ""
-LOCAL _cAlias    := GetNextAlias()
+Local _cAlias    := GetNextAlias()
 Local _aLinha    := {}
 Local _aDados    := {}
 Local _aTit      := {}
@@ -140,50 +139,50 @@ Local _cSerRem    := ""
 oProc:cCaption := ("Filtrando os dados! Aguarde...")
 ProcessMessages()
 
-If !Empty(Alltrim(MV_PAR01))
-	_cFiltro += " AND E1_FILIAL IN " + FormatIn(Alltrim(MV_PAR01),";") 	
+If !Empty(AllTrim(MV_PAR01))
+	_cFiltro += " AND E1_FILIAL IN " + FormatIn(AllTrim(MV_PAR01),";") 	
 EndIf
 
 If !Empty( MV_PAR02)
-	_cFiltro += " AND E1_EMISSAO >= '" + DTOS(MV_PAR02) + "' "
+	_cFiltro += " AND E1_EMISSAO >= '" + DToS(MV_PAR02) + "' "
 EndIf
 If !Empty(MV_PAR03)
-	_cFiltro += " AND E1_EMISSAO <= '" + DTOS(MV_PAR03) + "' "
+	_cFiltro += " AND E1_EMISSAO <= '" + DToS(MV_PAR03) + "' "
 EndIf
 
-IF MV_PAR09 = 1//VENCTO Original
+If MV_PAR09 = 1//VENCTO Original
 
-   If !Empty(Alltrim( DTOS(MV_PAR04)+ DTOS(MV_PAR05)))
-   	   _cFiltro += " AND E1_VENCTO BETWEEN '" + DTOS(MV_PAR04) + "' AND '" + DTOS(MV_PAR05) + "' "
+   If !Empty(AllTrim( DToS(MV_PAR04)+ DToS(MV_PAR05)))
+   	   _cFiltro += " AND E1_VENCTO BETWEEN '" + DToS(MV_PAR04) + "' AND '" + DToS(MV_PAR05) + "' "
    EndIf
    If MV_PAR08 = 2
-   	  _cFiltro += " AND E1_VENCTO <'" + DTOS(dDataBase) + "' "
+   	  _cFiltro += " AND E1_VENCTO <'" + DToS(dDataBase) + "' "
    ElseIf MV_PAR08 = 3
-   	  _cFiltro += " AND E1_VENCTO >='" + DTOS(dDataBase) + "' "
+   	  _cFiltro += " AND E1_VENCTO >='" + DToS(dDataBase) + "' "
    EndIf
 
-ELSEIF MV_PAR09 = 2//VENCTO Real
+ElseIf MV_PAR09 = 2//VENCTO Real
 
-   If !Empty(Alltrim( DTOS(MV_PAR04)+ DTOS(MV_PAR05)))
-   	  _cFiltro += " AND E1_VENCREA BETWEEN '" + DTOS(MV_PAR04) + "' AND '" + DTOS(MV_PAR05) + "' "
+   If !Empty(AllTrim( DToS(MV_PAR04)+ DToS(MV_PAR05)))
+   	  _cFiltro += " AND E1_VENCREA BETWEEN '" + DToS(MV_PAR04) + "' AND '" + DToS(MV_PAR05) + "' "
    EndIf
    If MV_PAR08 = 2
-   	  _cFiltro += " AND E1_VENCREA <'" + DTOS(dDataBase) + "' "
+   	  _cFiltro += " AND E1_VENCREA <'" + DToS(dDataBase) + "' "
    ElseIf MV_PAR08 = 3
-   	  _cFiltro += " AND E1_VENCREA >='" + DTOS(dDataBase) + "' "
+   	  _cFiltro += " AND E1_VENCREA >='" + DToS(dDataBase) + "' "
    EndIf
 
-ENDIF
-
-If !Empty(Alltrim(MV_PAR06))
-    _cFiltro += " AND E1_CLIENTE IN "+FormatIn(ALLTRIM(StrTran(MV_PAR06, " ","")),";")
 EndIf
 
-If !Empty(Alltrim(MV_PAR07))
-    _cFiltro += " AND TRIM(E1_TIPO) IN "+FormatIn(ALLTRIM(MV_PAR07),";")
+If !Empty(AllTrim(MV_PAR06))
+    _cFiltro += " AND E1_CLIENTE IN "+FormatIn(AllTrim(StrTran(MV_PAR06, " ","")),";")
 EndIf
 
-IF MV_PAR10 = 1 // Abertos ******************************************
+If !Empty(AllTrim(MV_PAR07))
+    _cFiltro += " AND TRIM(E1_TIPO) IN "+FormatIn(AllTrim(MV_PAR07),";")
+EndIf
+
+If MV_PAR10 = 1 // Abertos ******************************************
 
    _cQuery := "SELECT "
    _cQuery += "     E1_FILIAL	   , E1_PREFIXO	, E1_NUM		   , "
@@ -219,13 +218,13 @@ IF MV_PAR10 = 1 // Abertos ******************************************
    _cQuery += _cFiltro
    _cQuery += " ORDER BY E1_FILIAL, E1_NUM, E1_CLIENTE, E1_LOJA"
 
-ELSEIF MV_PAR10 = 2 // Baixados
+ElseIf MV_PAR10 = 2 // Baixados
 
    If !Empty( MV_PAR11)
-      _cFiltro += " AND E5_DATA >= '" + DTOS(MV_PAR11) + "' "
+      _cFiltro += " AND E5_DATA >= '" + DToS(MV_PAR11) + "' "
    EndIf
    If !Empty(MV_PAR12)
-      _cFiltro += " AND E5_DATA <= '" + DTOS(MV_PAR12) + "' "
+      _cFiltro += " AND E5_DATA <= '" + DToS(MV_PAR12) + "' "
    EndIf
    _cQuery := " SELECT "
    _cQuery += "     E5_FILIAL  E1_FILIAL , E5_PREFIXO E1_PREFIXO  , E5_NUMERO E1_NUM         , A1_CGC ,"
@@ -234,7 +233,7 @@ ELSEIF MV_PAR10 = 2 // Baixados
    _cQuery += "     E5_CONTA E1_CONTA	  , E1_NATUREZ	            , E5_TIPO E1_TIPO          , A1_EST ,"
    _cQuery += "     E5_CLIFOR E1_CLIENTE , E1_LOJA                , E5_BENEF E1_NOMCLI       , E5_LOJA,"
    _cQuery += "     E5_HISTOR ,"
-   _cQuery += "     E1_EMISSAO		     , E1_VENCTO			      , CASE E1_I_DTPRO WHEN ' ' THEN E1_VENCREA ELSE E1_I_DTPRO END AS E1_VENCREA, "
+   _cQuery += "     E1_EMISSAO		     , E1_VENCTO			      , Case E1_I_DTPRO WHEN ' ' THEN E1_VENCREA Else E1_I_DTPRO END AS E1_VENCREA, "
    _cQuery += "     E1_TIPODES		     , E1_NUMBCO			      , E1_DECRESC	            , E1_I_CART         , ZAR_DESC  ,"
    _cQuery += "     E1_NUMBOR		        , E1_I_CARGA		         , E1_I_DESCO               , E1_I_NUMBC        , E1_EMIS1  ,"
    _cQuery += "     E1_I_ULBCO		     , E1_I_ULCTA		         , E1_I_ULAGE               , E1_IDCNAB         , E1_I_CHDCI,"
@@ -263,9 +262,9 @@ ELSEIF MV_PAR10 = 2 // Baixados
    _cQuery += _cFiltro
    _cQuery += " ORDER BY E1_FILIAL, E1_NUM, E1_CLIENTE, E1_LOJA"
 
-ENDIF
+EndIf
 //E5_CLIFOR CODCLI, E5_LOJA LOJA, E5_BENEF NOME_CLIENTE, A1_CGC, A1_EST UF, E1_VENCTO VENCORI,
-//CASE E1_I_DTPRO WHEN ' ' THEN E1_VENCREA ELSE E1_I_DTPRO END AS VENCREA
+//Case E1_I_DTPRO WHEN ' ' THEN E1_VENCREA Else E1_I_DTPRO END AS VENCREA
 //, E5_DATA DT_BAIXA, E5_VALOR VALOR, E5_BANCO BANCO, E5_AGENCIA AGENCIA, E5_CONTA CONTA
 //FROM SIGH.SE5010 SE5
 //INNER JOIN SIGH.SE1010 SE1 ON E1_FILIAL = E5_FILIAL AND E1_NUM = E5_NUMERO AND E1_PREFIXO = E5_PREFIXO AND E1_CLIENTE = E5_CLIFOR AND E1_LOJA = E5_LOJA AND SE1.D_E_L_E_T_ = ' '
@@ -273,275 +272,275 @@ ENDIF
 //WHERE E5_RECPAG ='R' AND E5_BANCO ' ' AND SE5.D_E_L_E_T_ =' ' AND E5_DATA BETWEEN '20230901' AND '20230930'
 
 MPSysOpenQuery( _cQuery, _cAlias ) 
-(_cAlias)->(dbGoTop())
+(_cAlias)->(DBGoTop())
 
-IF ((_cAlias)->(EOF()) .AND. (_cAlias)->(BOF()))
-   U_ITMSG("Não há dados para essas seleções.",'Atenção!',,3)
-   RETURN .F.
-ENDIF
+If ((_cAlias)->(Eof()) .And. (_cAlias)->(Bof()))
+   U_ITMsg("Não há dados para essas seleções.",'Atenção!',,3)
+   Return .F.
+EndIf
 _aCabXML:={}
 // Alinhamento: 1-Left   ,2-Center,3-Right
 // Formatação.: 1-General,2-Number,3-Monetário,4-DateTime
 //             Titulo das Colunas ,Alinhamento ,Formatação, Totaliza?
 //   (_aCabXML,{Titulo             ,1           ,1         ,.F.       })
-AADD(_aTit,'') 
-IF MV_PAR10 = 1 // Abertos
-   AADD(_aCabXML,{"Prazo"          ,1           ,1         ,.F.})//01
-ELSEIF MV_PAR10 = 2 // Baixados
-   AADD(_aCabXML,{"Pago"           ,1           ,1         ,.F.})//01
-ENDIF
-AADD(_aTit,'Filial')  ; _nPosfil:=LEN(_aTit)
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//02
-AADD(_aTit,'Prefixo')
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,1           ,1         ,.F.})//03
-AADD(_aTit,'Numero')  ; _nPosTit:=LEN(_aTit)
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//04
-AADD(_aTit,'Parcela') 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//05
-AADD(_aTit,'Tipo') 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,1           ,1         ,.F.})//06
-AADD(_aTit,'Codigo Cliente') 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//07
-AADD(_aTit,'Loja') 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//08
-AADD(_aTit,'Nome')  ; _nPosNom:=LEN(_aTit)
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,1           ,1         ,.F.})//09
-AADD(_aTit,'CNPJ')                 ; _nPosCNPJ:=LEN(_aTit)    
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//10
-AADD(_aTit,'UF') 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//11
-AADD(_aTit,'Emissão')              ; _nPosEmi:=LEN(_aTit)
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//12
-AADD(_aTit,'Vencimento')           ; _nPosVen:=LEN(_aTit)
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,4         ,.F.})//13
-AADD(_aTit,'Venc Real')            ; _nPosRea:=LEN(_aTit)
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,4         ,.F.})//14
-IF MV_PAR10 = 1 // Abertos
-   AADD(_aTit,'Dt Prorrogação')    ;_nPosPro:=LEN(_aTit)//15         
-ELSEIF MV_PAR10 = 2 // Baixados
-   AADD(_aTit,'Dt Baixa')          ;_nPosPro:=LEN(_aTit)//15         
-ENDIF
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,4         ,.F.})//16
-AADD(_aTit,'Dt Contab.')            ;_nPosCon:=LEN(_aTit)     
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,4         ,.F.})//17
-AADD(_aTit,'Qtd Dias de Vencto')   ;_nPosQtd  :=LEN(_aTit)
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,2         ,.F.,"@E 999,999,999"})//18
-AADD(_aTit,'Valor')                ;_nPosValor:=LEN(_aTit)
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,3           ,3         ,.F.})//19
-AADD(_aTit,'Saldo')                ;_nPosSaldo:=LEN(_aTit)
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,3           ,3         ,.F.})//20
-AADD(_aTit,'Saldo Desc.Contratual');_nPosDesc :=LEN(_aTit)    
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,3           ,3         ,.F.})//21
-AADD(_aTit,'Carteira') 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,1           ,1         ,.F.})//22
-AADD(_aTit,'Desc Carteira') 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,1           ,1         ,.F.})//23
-AADD(_aTit,'Portador') 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//24
-AADD(_aTit,'Agencia') 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//25
-AADD(_aTit,'Conta') 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//26
-AADD(_aTit,'Nr Bordero') 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//27
-AADD(_aTit,'Nosso Numero') 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//28
-AADD(_aTit,'ID CNAB') 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//29
-AADD(_aTit,'Natureza') 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//30
-AADD(_aTit,'Cod Vendedor') 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//31
-AADD(_aTit,'Nome Vendedor') 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,1           ,1         ,.F.})//32
-AADD(_aTit,'Cod Coordenador') 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//33
-AADD(_aTit,'Nome Coordenador') 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,1           ,1         ,.F.})//34
-AADD(_aTit,'Cod Gerente') 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//35
-AADD(_aTit,'Nome Gerente') 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,1           ,1         ,.F.})//36
-AADD(_aTit,'Cod Grupo de Venda') 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//37
-AADD(_aTit,'Nome Grupo de Venda') 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,1           ,1         ,.F.})//38
-AADD(_aTit,'Chave NF Ori') 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//39
-AADD(_aTit,'Historico'    )
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//38
-AADD(_aTit,'Ocorr. Fretes') 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//40
-AADD(_aTit,'Dt. Canhoto'               );_nPosDCan:=LEN(_aTit) 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//41
-AADD(_aTit,'Dt. Entrega Cliente'       );_nPosDEnt:=LEN(_aTit) 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//42
-AADD(_aTit,'Dt. Prevista Cliente'      );_nPosPCli:=LEN(_aTit) 
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//43
-AADD(_aTit,'Prev.Entr.Cliente Original');_nPosPOri:=LEN(_aTit)
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//44
-AADD(_aTit,'Prev.Entrega Oper.Log.'    );_nPosPOpe:=LEN(_aTit)
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//45
-AADD(_aTit,'Cliente Remessa'    )
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,1           ,1         ,.F.})//46
-AADD(_aTit,'Chave Nota'    )
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//47
-AADD(_aTit,'Nota Remessa'    )
-AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//48
+aAdd(_aTit,'') 
+If MV_PAR10 = 1 // Abertos
+   aAdd(_aCabXML,{"Prazo"          ,1           ,1         ,.F.})//01
+ElseIf MV_PAR10 = 2 // Baixados
+   aAdd(_aCabXML,{"Pago"           ,1           ,1         ,.F.})//01
+EndIf
+aAdd(_aTit,'Filial')  ; _nPosfil:=Len(_aTit)
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//02
+aAdd(_aTit,'Prefixo')
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,1           ,1         ,.F.})//03
+aAdd(_aTit,'Numero')  ; _nPosTit:=Len(_aTit)
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//04
+aAdd(_aTit,'Parcela') 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//05
+aAdd(_aTit,'Tipo') 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,1           ,1         ,.F.})//06
+aAdd(_aTit,'Codigo Cliente') 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//07
+aAdd(_aTit,'Loja') 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//08
+aAdd(_aTit,'Nome')  ; _nPosNom:=Len(_aTit)
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,1           ,1         ,.F.})//09
+aAdd(_aTit,'CNPJ')                 ; _nPosCNPJ:=Len(_aTit)    
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//10
+aAdd(_aTit,'UF') 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//11
+aAdd(_aTit,'Emissão')              ; _nPosEmi:=Len(_aTit)
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//12
+aAdd(_aTit,'Vencimento')           ; _nPosVen:=Len(_aTit)
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,4         ,.F.})//13
+aAdd(_aTit,'Venc Real')            ; _nPosRea:=Len(_aTit)
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,4         ,.F.})//14
+If MV_PAR10 = 1 // Abertos
+   aAdd(_aTit,'Dt Prorrogação')    ;_nPosPro:=Len(_aTit)//15         
+ElseIf MV_PAR10 = 2 // Baixados
+   aAdd(_aTit,'Dt Baixa')          ;_nPosPro:=Len(_aTit)//15         
+EndIf
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,4         ,.F.})//16
+aAdd(_aTit,'Dt Contab.')            ;_nPosCon:=Len(_aTit)     
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,4         ,.F.})//17
+aAdd(_aTit,'Qtd Dias de Vencto')   ;_nPosQtd  :=Len(_aTit)
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,2         ,.F.,"@E 999,999,999"})//18
+aAdd(_aTit,'Valor')                ;_nPosValor:=Len(_aTit)
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,3           ,3         ,.F.})//19
+aAdd(_aTit,'Saldo')                ;_nPosSaldo:=Len(_aTit)
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,3           ,3         ,.F.})//20
+aAdd(_aTit,'Saldo Desc.Contratual');_nPosDesc :=Len(_aTit)    
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,3           ,3         ,.F.})//21
+aAdd(_aTit,'Carteira') 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,1           ,1         ,.F.})//22
+aAdd(_aTit,'Desc Carteira') 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,1           ,1         ,.F.})//23
+aAdd(_aTit,'Portador') 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//24
+aAdd(_aTit,'Agencia') 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//25
+aAdd(_aTit,'Conta') 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//26
+aAdd(_aTit,'Nr Bordero') 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//27
+aAdd(_aTit,'Nosso Numero') 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//28
+aAdd(_aTit,'ID CNAB') 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//29
+aAdd(_aTit,'Natureza') 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//30
+aAdd(_aTit,'Cod Vendedor') 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//31
+aAdd(_aTit,'Nome Vendedor') 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,1           ,1         ,.F.})//32
+aAdd(_aTit,'Cod Coordenador') 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//33
+aAdd(_aTit,'Nome Coordenador') 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,1           ,1         ,.F.})//34
+aAdd(_aTit,'Cod Gerente') 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//35
+aAdd(_aTit,'Nome Gerente') 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,1           ,1         ,.F.})//36
+aAdd(_aTit,'Cod Grupo de Venda') 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//37
+aAdd(_aTit,'Nome Grupo de Venda') 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,1           ,1         ,.F.})//38
+aAdd(_aTit,'Chave NF Ori') 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//39
+aAdd(_aTit,'Historico'    )
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//38
+aAdd(_aTit,'Ocorr. Fretes') 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//40
+aAdd(_aTit,'Dt. Canhoto'               );_nPosDCan:=Len(_aTit) 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//41
+aAdd(_aTit,'Dt. Entrega Cliente'       );_nPosDEnt:=Len(_aTit) 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//42
+aAdd(_aTit,'Dt. Prevista Cliente'      );_nPosPCli:=Len(_aTit) 
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//43
+aAdd(_aTit,'Prev.Entr.Cliente Original');_nPosPOri:=Len(_aTit)
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//44
+aAdd(_aTit,'Prev.Entrega Oper.Log.'    );_nPosPOpe:=Len(_aTit)
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//45
+aAdd(_aTit,'Cliente Remessa'    )
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,1           ,1         ,.F.})//46
+aAdd(_aTit,'Chave Nota'    )
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//47
+aAdd(_aTit,'Nota Remessa'    )
+aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//48
 If MV_PAR10 = 2 // Baixados
-   AADD(_aTit,'Historico de Baixa'    )
-   AADD(_aCabXML,{_aTit[LEN(_aTit)]   ,2           ,1         ,.F.})//49
+   aAdd(_aTit,'Historico de Baixa'    )
+   aAdd(_aCabXML,{_aTit[Len(_aTit)]   ,2           ,1         ,.F.})//49
 EndIf
 
 _aTotais:={0,0,0,0,0,0}
-ZF5->(DbSetOrder(1)) // ZF5_FILIAL+ZF5_DOCOC+ZF5_SEROC
+ZF5->(DBSetOrder(1)) // ZF5_FILIAL+ZF5_DOCOC+ZF5_SEROC
 
-Do While (_cAlias)->(!EOF())
+While (_cAlias)->(!Eof())
 
 	i++
 	oproc:cCaption := ("Lendo registros "+AllTrim(Str(i)) )
     ProcessMessages()
 
-    IF MV_PAR10 = 1 // Abertos
-       IF MV_PAR09 = 1//VENCTO Original
-          _nDias  := dDatabase - STOD((_cAlias)->E1_VENCTO)
-       ELSEIF MV_PAR09 = 2//VENCTO Real
-          _nDias  := dDatabase - STOD((_cAlias)->E1_VENCREA)
-       ENDIF
-    ELSEIF MV_PAR10 = 2 // Baixados
-       _nDias  := STOD((_cAlias)->E1_I_DTPRO) - STOD((_cAlias)->E1_VENCREA)
-    ENDIF
-   IF !EMPTY((_cAlias)->F2_I_PEDID)
-//      _cPedRem := POSICIONE("SC5",1,xFilial("SC5")+(_cAlias)->F2_I_PEDID,"C5_I_PVREM")
-      //_cCliRem := POSICIONE("SC5",1,xFilial("SC5")+_cPedRem,"C5_CLIENTE")
-      _cPedRem := POSICIONE("SC5",1,(_cAlias)->E1_FILIAL+(_cAlias)->F2_I_PEDID,"C5_I_PVREM")
-      _cCliRem := POSICIONE("SC5",1,(_cAlias)->E1_FILIAL+_cPedRem,"C5_CLIENTE")
-      If !EmptY(_cPedRem)
-         _cNotRem := POSICIONE("SF2",20,(_cAlias)->E1_FILIAL+_cPedRem,"F2_DOC")
-         _cSerRem := POSICIONE("SF2",20,(_cAlias)->E1_FILIAL+_cPedRem,"F2_SERIE")
+    If MV_PAR10 = 1 // Abertos
+       If MV_PAR09 = 1//VENCTO Original
+          _nDias  := dDatabase - SToD((_cAlias)->E1_VENCTO)
+       ElseIf MV_PAR09 = 2//VENCTO Real
+          _nDias  := dDatabase - SToD((_cAlias)->E1_VENCREA)
+       EndIf
+    ElseIf MV_PAR10 = 2 // Baixados
+       _nDias  := SToD((_cAlias)->E1_I_DTPRO) - SToD((_cAlias)->E1_VENCREA)
+    EndIf
+   If !Empty((_cAlias)->F2_I_PEDID)
+//      _cPedRem := Posicione("SC5",1,xFilial("SC5")+(_cAlias)->F2_I_PEDID,"C5_I_PVREM")
+      //_cCliRem := Posicione("SC5",1,xFilial("SC5")+_cPedRem,"C5_CLIENTE")
+      _cPedRem := Posicione("SC5",1,(_cAlias)->E1_FILIAL+(_cAlias)->F2_I_PEDID,"C5_I_PVREM")
+      _cCliRem := Posicione("SC5",1,(_cAlias)->E1_FILIAL+_cPedRem,"C5_CLIENTE")
+      If !Empty(_cPedRem)
+         _cNotRem := Posicione("SF2",20,(_cAlias)->E1_FILIAL+_cPedRem,"F2_DOC")
+         _cSerRem := Posicione("SF2",20,(_cAlias)->E1_FILIAL+_cPedRem,"F2_SERIE")
       EndIf
-      SA1->(dbSetOrder(1))
-      IF SA1->(dbSeek(xFilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI))
-         _cCliRem := SC5->C5_CLIENTE+" "+SC5->C5_LOJACLI+"-"+ALLTRIM(SA1->A1_NOME)+" ["+_cPedRem+"]"
-      ENDIF
-   ELSE
+      SA1->(DBSetOrder(1))
+      If SA1->(DBSeek(xFilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI))
+         _cCliRem := SC5->C5_CLIENTE+" "+SC5->C5_LOJACLI+"-"+AllTrim(SA1->A1_NOME)+" ["+_cPedRem+"]"
+      EndIf
+   Else
       _cCliRem := ""
-   ENDIF
+   EndIf
 
-    _cOcorrFrete:=IF(ZF5->(DBSEEK((_cAlias)->E1_FILIAL+(_cAlias)->E1_NUM+(_cAlias)->E1_PREFIXO)),"SIM","NÃO")
+    _cOcorrFrete:=If(ZF5->(DBSeek((_cAlias)->E1_FILIAL+(_cAlias)->E1_NUM+(_cAlias)->E1_PREFIXO)),"SIM","NÃO")
 
-    _cPFOUPJ:=IF(LEN(ALLTRIM((_cAlias)->A1_CGC))=11,Transform((_cAlias)->A1_CGC,"@R 999.999.999-99"),;
+    _cPFOUPJ:=If(Len(AllTrim((_cAlias)->A1_CGC))=11,Transform((_cAlias)->A1_CGC,"@R 999.999.999-99"),;
 	                                                 Transform((_cAlias)->A1_CGC,"@R! NN.NNN.NNN/NNNN-99"))
 	_aLinha := {}
-	AADD(_aLinha,IF(_nDias>0,.F.,.T.))                                              //01
-	AADD(_aLinha,(_cAlias)->E1_FILIAL)                                              //02
-	AADD(_aLinha,(_cAlias)->E1_PREFIXO)                                             //03
-	AADD(_aLinha,(_cAlias)->E1_NUM)                                                 //04
-	AADD(_aLinha,(_cAlias)->E1_PARCELA)                                             //05
-	AADD(_aLinha,(_cAlias)->E1_TIPO)                                                //06
-	AADD(_aLinha,(_cAlias)->E1_CLIENTE)                                             //07
-	AADD(_aLinha,(_cAlias)->E1_LOJA)                                                //08
-	AADD(_aLinha,(_cAlias)->E1_NOMCLI)                                              //09
-	AADD(_aLinha,_cPFOUPJ)                                                          //10
-	AADD(_aLinha,(_cAlias)->A1_EST)                                                 //11
-	AADD(_aLinha,STOD((_cAlias)->E1_EMISSAO))                                       //12
-	AADD(_aLinha,STOD((_cAlias)->E1_VENCTO ))                                       //13
-	AADD(_aLinha,STOD((_cAlias)->E1_VENCREA))                                       //14
-	AADD(_aLinha,STOD((_cAlias)->E1_I_DTPRO))                                       //15
-	AADD(_aLinha,STOD((_cAlias)->E1_EMIS1  ))                                       //16
-	AADD(_aLinha,_nDias)                                                            //17
-	AADD(_aLinha,(_cAlias)->E1_VALOR )                                              //18
-	AADD(_aLinha,(_cAlias)->E1_SALDO )                                              //19
-	AADD(_aLinha,(_cAlias)->E1_DESCFIN)                                             //20
-	AADD(_aLinha,(_cAlias)->E1_I_CART)                                              //21
-	AADD(_aLinha,(_cAlias)->ZAR_DESC)                                               //22
-	AADD(_aLinha,(_cAlias)->E1_PORTADO)                                             //23
-	AADD(_aLinha,(_cAlias)->E1_AGEDEP)                                              //24
-	AADD(_aLinha,(_cAlias)->E1_CONTA)                                               //25
-	AADD(_aLinha,(_cAlias)->E1_NUMBOR)                                              //26
-	AADD(_aLinha,(_cAlias)->E1_NUMBCO)                                              //27
-	AADD(_aLinha,(_cAlias)->E1_IDCNAB)                                              //28
-	AADD(_aLinha,(_cAlias)->E1_NATUREZ)                                             //29
-	AADD(_aLinha,(_cAlias)->A3_COD)                                                 //30
-	AADD(_aLinha,(_cAlias)->A3_NOME)                                                //31
-	AADD(_aLinha,(_cAlias)->A3_SUPER)                                               //32
-	AADD(_aLinha,(_cAlias)->A3_NSUPER)                                              //33
-	AADD(_aLinha,(_cAlias)->A3_GEREN)                                               //34
-	AADD(_aLinha,(_cAlias)->A3_NGEREN)                                              //35
-	AADD(_aLinha,(_cAlias)->A1_GRPVEN)                                              //36
-	AADD(_aLinha,(_cAlias)->A1_NGRPVEN)                                             //37
-	AADD(_aLinha,(_cAlias)->E1_I_CHDCI)                                             //38
-   AADD(_aLinha,(_cAlias)->E1_HIST)                                                //39 
-	AADD(_aLinha,_cOcorrFrete)                                                      //40
-	AADD(_aLinha,STOD((_cAlias)->DT_CANHOTO))                                       //41 
-	AADD(_aLinha,STOD((_cAlias)->DT_ENT_CLI))                                       //42 
-	AADD(_aLinha,STOD((_cAlias)->DT_PRV_CLI))                                       //43 
-	AADD(_aLinha,STOD((_cAlias)->DT_PRV_ORI))                                       //44 
-	AADD(_aLinha,STOD((_cAlias)->DT_PRVOPER))                                       //45 
-   AADD(_aLinha,_cCliRem)                                                          //46 
-   AADD(_aLinha,(_cAlias)->CHAVESF2)                                               //47 
-   AADD(_aLinha,_cNotRem+" - "+_cSerRem)                                           //48
+	aAdd(_aLinha,If(_nDias>0,.F.,.T.))                                              //01
+	aAdd(_aLinha,(_cAlias)->E1_FILIAL)                                              //02
+	aAdd(_aLinha,(_cAlias)->E1_PREFIXO)                                             //03
+	aAdd(_aLinha,(_cAlias)->E1_NUM)                                                 //04
+	aAdd(_aLinha,(_cAlias)->E1_PARCELA)                                             //05
+	aAdd(_aLinha,(_cAlias)->E1_TIPO)                                                //06
+	aAdd(_aLinha,(_cAlias)->E1_CLIENTE)                                             //07
+	aAdd(_aLinha,(_cAlias)->E1_LOJA)                                                //08
+	aAdd(_aLinha,(_cAlias)->E1_NOMCLI)                                              //09
+	aAdd(_aLinha,_cPFOUPJ)                                                          //10
+	aAdd(_aLinha,(_cAlias)->A1_EST)                                                 //11
+	aAdd(_aLinha,SToD((_cAlias)->E1_EMISSAO))                                       //12
+	aAdd(_aLinha,SToD((_cAlias)->E1_VENCTO ))                                       //13
+	aAdd(_aLinha,SToD((_cAlias)->E1_VENCREA))                                       //14
+	aAdd(_aLinha,SToD((_cAlias)->E1_I_DTPRO))                                       //15
+	aAdd(_aLinha,SToD((_cAlias)->E1_EMIS1  ))                                       //16
+	aAdd(_aLinha,_nDias)                                                            //17
+	aAdd(_aLinha,(_cAlias)->E1_VALOR )                                              //18
+	aAdd(_aLinha,(_cAlias)->E1_SALDO )                                              //19
+	aAdd(_aLinha,(_cAlias)->E1_DESCFIN)                                             //20
+	aAdd(_aLinha,(_cAlias)->E1_I_CART)                                              //21
+	aAdd(_aLinha,(_cAlias)->ZAR_DESC)                                               //22
+	aAdd(_aLinha,(_cAlias)->E1_PORTADO)                                             //23
+	aAdd(_aLinha,(_cAlias)->E1_AGEDEP)                                              //24
+	aAdd(_aLinha,(_cAlias)->E1_CONTA)                                               //25
+	aAdd(_aLinha,(_cAlias)->E1_NUMBOR)                                              //26
+	aAdd(_aLinha,(_cAlias)->E1_NUMBCO)                                              //27
+	aAdd(_aLinha,(_cAlias)->E1_IDCNAB)                                              //28
+	aAdd(_aLinha,(_cAlias)->E1_NATUREZ)                                             //29
+	aAdd(_aLinha,(_cAlias)->A3_COD)                                                 //30
+	aAdd(_aLinha,(_cAlias)->A3_NOME)                                                //31
+	aAdd(_aLinha,(_cAlias)->A3_SUPER)                                               //32
+	aAdd(_aLinha,(_cAlias)->A3_NSUPER)                                              //33
+	aAdd(_aLinha,(_cAlias)->A3_GEREN)                                               //34
+	aAdd(_aLinha,(_cAlias)->A3_NGEREN)                                              //35
+	aAdd(_aLinha,(_cAlias)->A1_GRPVEN)                                              //36
+	aAdd(_aLinha,(_cAlias)->A1_NGRPVEN)                                             //37
+	aAdd(_aLinha,(_cAlias)->E1_I_CHDCI)                                             //38
+   aAdd(_aLinha,(_cAlias)->E1_HIST)                                                //39 
+	aAdd(_aLinha,_cOcorrFrete)                                                      //40
+	aAdd(_aLinha,SToD((_cAlias)->DT_CANHOTO))                                       //41 
+	aAdd(_aLinha,SToD((_cAlias)->DT_ENT_CLI))                                       //42 
+	aAdd(_aLinha,SToD((_cAlias)->DT_PRV_CLI))                                       //43 
+	aAdd(_aLinha,SToD((_cAlias)->DT_PRV_ORI))                                       //44 
+	aAdd(_aLinha,SToD((_cAlias)->DT_PRVOPER))                                       //45 
+   aAdd(_aLinha,_cCliRem)                                                          //46 
+   aAdd(_aLinha,(_cAlias)->CHAVESF2)                                               //47 
+   aAdd(_aLinha,_cNotRem+" - "+_cSerRem)                                           //48
    If MV_PAR10 = 2 // Baixados
-      AADD(_aLinha,(_cAlias)->E5_HISTOR)    
+      aAdd(_aLinha,(_cAlias)->E5_HISTOR)    
    EndIf
 
     _aTotais[1]+=(_cAlias)->E1_VALOR// Total de valor
     _aTotais[2]+=(_cAlias)->E1_SALDO// Total de Saldo
-    IF MV_PAR10 = 1 // ABERTOS
-       IF _nDias > 0//VENCIDOS
+    If MV_PAR10 = 1 // ABERTOS
+       If _nDias > 0//VENCIDOS
 	       _aTotais[3]+=(_cAlias)->E1_VALOR// Total de Valor Vencidos
           _aTotais[4]+=(_cAlias)->E1_SALDO// Total de Saldo Vencidos
-	   ELSE
+	   Else
           _aTotais[5]+=(_cAlias)->E1_VALOR// Total de Valor a Vencer  
           _aTotais[6]+=(_cAlias)->E1_SALDO// Total de Saldo a Vencer 
-      ENDIF
-//  ELSEIF MV_PAR10 = 2 // BAIXADOS
-    ENDIF
+      EndIf
+//  ElseIf MV_PAR10 = 2 // BAIXADOS
+    EndIf
 
-    AADD(_aDados,(_aLinha))
+    aAdd(_aDados,(_aLinha))
 	
    _cNotRem := _cSerRem:= ""
 	
-   (_cAlias)->(DbSkip())
+   (_cAlias)->(DBSkip())
 EndDo
 
-If LEN(_aDados) > 0 
+If Len(_aDados) > 0 
 	
    oproc:cCaption := ("Acertos finais...")
 
-   (_cAlias)->(DbCloseArea())
+   (_cAlias)->(DBCloseArea())
 //*************************************************************************************************
    _aColXML:=ACLONE(_aDados)//FORMATO CORRETO PARA GERAR O EXCEL EM INGLES COM PONTO PARA DECIMAIS
 //*************************************************************************************************
 
-   FOR L := 1 TO (LEN(_aColXML))//AJUSTE PARA PARA GERAR O EXCEL CORRETO COM A LEGENDA
-       _aColXML[L,1]:=IF(_aColXML[L,1],"NO PRAZO","ATRASADO")
-       _aColXML[L,_nPosEmi]:=IF(EMPTY(_aColXML[L,_nPosEmi])," ",_aColXML[L,_nPosEmi])
-       _aColXML[L,_nPosVen]:=IF(EMPTY(_aColXML[L,_nPosVen])," ",_aColXML[L,_nPosVen])
-       _aColXML[L,_nPosRea]:=IF(EMPTY(_aColXML[L,_nPosRea])," ",_aColXML[L,_nPosRea])
-       _aColXML[L,_nPosPro]:=IF(EMPTY(_aColXML[L,_nPosPro])," ",_aColXML[L,_nPosPro])
-       _aColXML[L,_nPosCon]:=IF(EMPTY(_aColXML[L,_nPosCon])," ",_aColXML[L,_nPosCon])
+   For L := 1 TO (Len(_aColXML))//AJUSTE PARA PARA GERAR O EXCEL CORRETO COM A LEGENDA
+       _aColXML[L,1]:=If(_aColXML[L,1],"NO PRAZO","ATRASADO")
+       _aColXML[L,_nPosEmi]:=If(Empty(_aColXML[L,_nPosEmi])," ",_aColXML[L,_nPosEmi])
+       _aColXML[L,_nPosVen]:=If(Empty(_aColXML[L,_nPosVen])," ",_aColXML[L,_nPosVen])
+       _aColXML[L,_nPosRea]:=If(Empty(_aColXML[L,_nPosRea])," ",_aColXML[L,_nPosRea])
+       _aColXML[L,_nPosPro]:=If(Empty(_aColXML[L,_nPosPro])," ",_aColXML[L,_nPosPro])
+       _aColXML[L,_nPosCon]:=If(Empty(_aColXML[L,_nPosCon])," ",_aColXML[L,_nPosCon])
 
-       _aColXML[L,_nPosDCan]:=IF(EMPTY(_aColXML[L,_nPosDCan])," ",_aColXML[L,_nPosDCan])
-       _aColXML[L,_nPosDEnt]:=IF(EMPTY(_aColXML[L,_nPosDEnt])," ",_aColXML[L,_nPosDEnt])
-       _aColXML[L,_nPosPCli]:=IF(EMPTY(_aColXML[L,_nPosPCli])," ",_aColXML[L,_nPosPCli])
-       _aColXML[L,_nPosPOri]:=IF(EMPTY(_aColXML[L,_nPosPOri])," ",_aColXML[L,_nPosPOri])
-       _aColXML[L,_nPosPOpe]:=IF(EMPTY(_aColXML[L,_nPosPOpe])," ",_aColXML[L,_nPosPOpe])
-   NEXT   
+       _aColXML[L,_nPosDCan]:=If(Empty(_aColXML[L,_nPosDCan])," ",_aColXML[L,_nPosDCan])
+       _aColXML[L,_nPosDEnt]:=If(Empty(_aColXML[L,_nPosDEnt])," ",_aColXML[L,_nPosDEnt])
+       _aColXML[L,_nPosPCli]:=If(Empty(_aColXML[L,_nPosPCli])," ",_aColXML[L,_nPosPCli])
+       _aColXML[L,_nPosPOri]:=If(Empty(_aColXML[L,_nPosPOri])," ",_aColXML[L,_nPosPOri])
+       _aColXML[L,_nPosPOpe]:=If(Empty(_aColXML[L,_nPosPOpe])," ",_aColXML[L,_nPosPOpe])
+   Next   
 
-   FOR L := 1 TO LEN(_aDados)//AJUSTE PARA MOSTRAR NA TELA DO U_ITListBox() CORRETA
+   For L := 1 TO Len(_aDados)//AJUSTE PARA MOSTRAR NA TELA DO U_ITListBox() CORRETA
        _aDados[L,_nPosValor]:= TRANSFORM(_aDados[L,_nPosValor],_cPictValor)
        _aDados[L,_nPosSaldo]:= TRANSFORM(_aDados[L,_nPosSaldo],_cPictSaldo)
        _aDados[L,_nPosDesc ]:= TRANSFORM(_aDados[L,_nPosDesc ],_cPictDesc )
-   NEXT
+   Next
 
-   IF MV_PAR10 = 1 // Abertos
-      _cTitulo:="Relação de Títulos em Aberto - "+DTOC(DATE())+" - "+TIME()
+   If MV_PAR10 = 1 // Abertos
+      _cTitulo:="Relação de Títulos em Aberto - "+DToC(DATE())+" - "+Time()
       _cMsgTop:= "TOTAIS: Valor A Vencer "+TRANSFORM(_aTotais[5],_cPictValor)+" | Valor Vencidos "+TRANSFORM(_aTotais[3],_cPictValor)+" | Saldo A Vencer "+TRANSFORM(_aTotais[6],_cPictSaldo)+" | Saldo Vencidos "+TRANSFORM(_aTotais[4],_cPictSaldo)+" | Valor Total "+TRANSFORM(_aTotais[1],_cPictValor)+" | Saldo Total "+TRANSFORM(_aTotais[2],_cPictValor)
-   ELSEIF MV_PAR10 = 2 // Baixados
-      _cTitulo:="Relação de Títulos Baixados - "+DTOC(DATE())+" - "+TIME()
+   ElseIf MV_PAR10 = 2 // Baixados
+      _cTitulo:="Relação de Títulos Baixados - "+DToC(DATE())+" - "+Time()
       _cMsgTop:= "TOTAIS: Valor Total "+TRANSFORM(_aTotais[1],_cPictValor)+" | Saldo Total "+TRANSFORM(_aTotais[2],_cPictValor)
-   ENDIF
+   EndIf
 
 
     oOk:= LoadBitmap( GetResources() , "BR_VERDE"    )
@@ -550,9 +549,9 @@ If LEN(_aDados) > 0
     aAdd(_aButtons,{"",{|| AOMS59Pes( oLbxAux ) }, "" , "PESQUISAR"} )
 
 	//                        , _aCols  ,_lMaxSiz,_nTipo,_cMsgTop, _lSelUnc ,_aSizes , _nCampo , bOk , bCancel, _abuttons , _aCab  , bDblClk , _aColXML , bCondMarca,_bLegenda:EVAL(_bLegenda,_aCols,oLbxAux:nAt),_lHasOk,_bHeadClk,_aSX1)
-	U_ITListBox(_cTitulo,_aTit,_aDados  , .T.    , 3    ,_cMsgTop,          ,        ,         ,     ,        , _aButtons ,_aCabXML,         , _aColXML ,           ,{|aCol,Lin|IF(aCol[Lin,1],oOk,oNo)}          )
+	U_ITListBox(_cTitulo,_aTit,_aDados  , .T.    , 3    ,_cMsgTop,          ,        ,         ,     ,        , _aButtons ,_aCabXML,         , _aColXML ,           ,{|aCol,Lin|If(aCol[Lin,1],oOk,oNo)}          )
 Else				
-	U_ITMSG("Não há dados para essa seleção",'Atenção!',,3)
+	U_ITMsg("Não há dados para essa seleção",'Atenção!',,3)
 EndIf
 
 Return
@@ -570,7 +569,7 @@ Retorno-----------: .T.
 Static Function AOMS59Pes( oLbxAux ) 
 
 Local _oDlg			:= Nil
-Local _cGet 		:= SPACE(LEN(SE1->E1_NOMCLI))
+Local _cGet 		:= Space(Len(SE1->E1_NOMCLI))
 Local _nOpca		:= 0
 Local nPos			:= 0
 Local _lAchou		:= .F.
@@ -578,58 +577,58 @@ Local _aPosCol:={_nPosfil,_nPosTit,_nPosNom,_nPosVen}
 Local aOrdem :={"Filial do Titulo","Numero do Titulo","Nome do Cliente","Vencimento Original"}
 Local cOrdem :=aOrdem[2]
 
-IF oLbxAux <> NIL
+If oLbxAux <> NIL
    N:=oLbxAux:nAt
    aCols:=oLbxAux:aArray
-ELSE
-   RETURN .F.
-ENDIF
+Else
+   Return .F.
+EndIf
 
-IF MV_PAR09 = 2//VENCTO Real
+If MV_PAR09 = 2//VENCTO Real
    _aPosCol:={_nPosfil,_nPosTit,_nPosNom,_nPosRea}
    aOrdem :={"Filial do Titulo","Numero do Titulo","Nome do Cliente","Vencimento Real"}
-ENDIF
+EndIf
 
 DEFINE MSDIALOG _oDlg TITLE "PESQUISAR" FROM 178,181 TO 259,697 PIXEL 
 
 @ 004,003 ComboBox cOrdem ITEMS aOrdem SIZE 150,10 PIXEL OF _oDlg
 @ 020,003 MsGet  _cGet			       SIZE 212,009 PIXEL OF _oDlg COLOR CLR_BLACK Picture "@!" 
 
-DEFINE SBUTTON FROM 004,227 TYPE 1 ENABLE ACTION ( _nOpca := 1 , _oDlg:End() ) OF _oDlg
-DEFINE SBUTTON FROM 021,227 TYPE 2 ENABLE ACTION ( _nOpca := 0 , _oDlg:End() ) OF _oDlg
+DEFINE SBUTTON FROM 004,227 Type 1 ENABLE ACTION ( _nOpca := 1 , _oDlg:End() ) OF _oDlg
+DEFINE SBUTTON FROM 021,227 Type 2 ENABLE ACTION ( _nOpca := 0 , _oDlg:End() ) OF _oDlg
 
 ACTIVATE MSDIALOG _oDlg CENTERED
 
 If _nOpca == 1
-   _cGet := ALLTRIM( _cGet)
-   _nOrdem:=ASCAN(aOrdem,cOrdem)
+   _cGet := AllTrim( _cGet)
+   _nOrdem:=aScan(aOrdem,cOrdem)
    If _nOrdem <> 0 
-      IF _nOrdem = 4 // DATAS DE VENCIMENTO
-         _cGet := DTOS(CTOD(_cGet))
-	     ASORT( aCols ,,, { |x,y| DTOS(x[_aPosCol[4]]) < DTOS(y[_aPosCol[4]]) } )
-         nPos := ASCAN(aCols,{|P| DTOS(P[_aPosCol[4]]) == _cGet }) 
-      ELSEIF _nOrdem = 3
-	     ASORT( aCols ,,, { |x,y| x[_aPosCol[3]] < y[_aPosCol[3]] } )
-         nPos := ASCAN(aCols,{|P| _cGet $ P[_aPosCol[3]] }) 
-      ELSE
-	     ASORT( aCols ,,, { |x,y| x[_aPosCol[_nOrdem]] < y[_aPosCol[_nOrdem]] } )
-         nPos := ASCAN(aCols,{|P| ALLTRIM(P[_aPosCol[_nOrdem]]) == _cGet }) 
-      ENDIF
+      If _nOrdem = 4 // DATAS DE VENCIMENTO
+         _cGet := DToS(CTOD(_cGet))
+	     aSort( aCols ,,, { |x,y| DToS(x[_aPosCol[4]]) < DToS(y[_aPosCol[4]]) } )
+         nPos := aScan(aCols,{|P| DToS(P[_aPosCol[4]]) == _cGet }) 
+      ElseIf _nOrdem = 3
+	     aSort( aCols ,,, { |x,y| x[_aPosCol[3]] < y[_aPosCol[3]] } )
+         nPos := aScan(aCols,{|P| _cGet $ P[_aPosCol[3]] }) 
+      Else
+	     aSort( aCols ,,, { |x,y| x[_aPosCol[_nOrdem]] < y[_aPosCol[_nOrdem]] } )
+         nPos := aScan(aCols,{|P| AllTrim(P[_aPosCol[_nOrdem]]) == _cGet }) 
+      EndIf
       If nPos <> 0 
       	  oLbxAux:nAt:= N :=nPos
       	 _lAchou:= .T.
       EndIf	  	
    EndIf	  	
-ELSE
-   RETURN .T.
+Else
+   Return .T.
 EndIf
 
 If _lAchou
    oLbxAux:Refresh()
    oLbxAux:SetFocus()
-   //U_ITMSG(cOrdem+" "+_cGet+" esta na linha: "+ALLTRIM(STR(nPos)),'Atenção!',,2) 
-ELSE
-   U_ITMSG(cOrdem+" não foi encontrado.",'Atenção!',"Tente outro "+cOrdem,3) 
+   //U_ITMsg(cOrdem+" "+_cGet+" esta na linha: "+AllTrim(Str(nPos)),'Atenção!',,2) 
+Else
+   U_ITMsg(cOrdem+" não foi encontrado.",'Atenção!',"Tente outro "+cOrdem,3) 
 EndIf
 
-RETURN .T.
+Return .T.

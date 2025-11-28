@@ -2,18 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 04/10/2024 | Chamado 47735. Incluídas regras para a filial 33
-Lucas Borges  | 23/01/2025 | Chamado 49641. Implementada faixa de início e fim para pagamento do excedente de matéria gorda
-Lucas Borges  | 11/02/2025 | Chamado 49877. Removido tratamento sobre a versão do Mix
+Lucas Borges  |23/01/2025| Chamado 49641. Implementada faixa de início e fim para pagamento do excedente de matéria gorda
+Lucas Borges  |11/02/2025| Chamado 49877. Removido tratamento sobre a versão do Mix
+Lucas Borges  |19/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes e Defines da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -37,12 +34,12 @@ Parametros--------: Nenhum
 Retorno-----------: _cConta = Numero da conta contábil.
 ===============================================================================================================================
 */  
-User Function C_CONTABIL()
+User Function C_CONTABIL As Character
 
-Local _oObj		:= FwModelActivete()
-Local _cConta	:= _oObj:GetValue( 'SA2MASTER', 'A2_CONTA',)
-Local _cCod		:= Substr(_oObj:GetValue( 'SA2MASTER', 'A2_COD',),1,1)
-Local _cLinRot	:= Substr(_oObj:GetValue( 'SA2MASTER', 'A2_L_LI_RO',),1,2)
+Local _oObj		:= FwModelActivete() As Object
+Local _cConta	:= _oObj:GetValue( 'SA2MASTER', 'A2_CONTA',) As Character
+Local _cCod		:= SubStr(_oObj:GetValue( 'SA2MASTER', 'A2_COD',),1,1) As Character
+Local _cLinRot	:= SubStr(_oObj:GetValue( 'SA2MASTER', 'A2_L_LI_RO',),1,2) As Character
 
 Do Case
 	Case _cCod == "P" .And. _cLinRot $  "01/02/03/04/05/06/07/08/09/0A/0B"
@@ -61,7 +58,7 @@ Do Case
 		_cConta := "2101050018"
 EndCase
 
-Return( _cConta )
+Return _cConta
 
 /*
 ===============================================================================================================================
@@ -73,9 +70,9 @@ Parametros--------: Nenhum
 Retorno-----------: _cCusto - Centro de Custo
 ===============================================================================================================================
 */  
-User Function CCusto()
+User Function CCusto As Character
 
-Local _cCusto:= ""
+Local _cCusto:= "" As Character
 
 If cFilAnt == '01'
 	_cCusto:= '13001002'
@@ -124,7 +121,7 @@ ElseIf cFilAnt == '1A'
 ElseIf cFilAnt == '1B'
 	_cCusto:= '28001007'
 ElseIf cFilAnt == '1C'
-	_cCusto:= '28001013'	
+	_cCusto:= '28001013'
 ElseIf cFilAnt == '20'
 	_cCusto:= '43001002'
 ElseIf cFilAnt == '21'
@@ -167,7 +164,8 @@ ElseIf cFilAnt == '98'
 	_cCusto:= 'A8001004'
 EndIf
 
-Return(_cCusto)
+Return _cCusto
+
 /*
 ===============================================================================================================================
 Programa----------: lstCF
@@ -178,74 +176,55 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function lstCF()
+User Function lstCF As Logical
 
-Local _cQuery		:= ''
-Local _nI			:= 0
+Local _cAlias		:= GetNextAlias() As Character
+Local _nI			:= 0 As Numeric
 
-Private nTam		:= 0
-Private nMaxSelect	:= 0
-Private aCat		:= {}
-Private MvRet		:= Alltrim( ReadVar() )
-Private MvPar		:= ""
-Private cTitulo		:= ""
-Private MvParDef	:= ""
+Private nTam		:= 0 As Numeric
+Private nMaxSelect	:= 0 As Numeric
+Private aCat		:= {} As Array
+Private MvRet		:= AllTrim( ReadVar() ) As Variant
+Private MvPar		:= "" As Variant
+Private cTitulo		:= "" As Character
+Private MvParDef	:= "" As Variant
 
 #IFDEF WINDOWS
 	oWnd := GetWndDefault()
-#ENDIF
+#EndIf
 
 //Tratamento para carregar variaveis da lista de opcoes
 nTam		:= 4
 nMaxSelect	:= 19
 cTitulo		:= "CFOP"
 
-_cQuery := " SELECT "
-_cQuery += " DISTINCT X5_CHAVE CHAVE ,X5_DESCRI DESCRI "
-_cQuery += " FROM "+ RetSqlName("SX5") +" X5 "
-_cQuery += " WHERE "
-_cQuery += "     D_E_L_E_T_ = ' ' "
-_cQuery += " AND X5_TABELA  = '13' "
-_cQuery += " ORDER BY X5_CHAVE "
+BeginSql alias _cAlias
+	SELECT DISTINCT X5_CHAVE CHAVE ,X5_DESCRI DESCRI
+	FROM %Table:SX5%
+	WHERE D_E_L_E_T_ = ' '
+	AND X5_TABELA  = '13'
+	ORDER BY X5_CHAVE
+EndSql
 
-If Select("TMPCF") > 0 
-	("TMPCF")->( DBCloseArea() )
-EndIf
-
-DBUseArea( .T. , "TOPCONN" , TCGenQry( ,, _cQuery ) , 'TMPCF' , .F. , .T. )
-
-While TMPCF->( !Eof() )
-                               
-	MvParDef += PadR( TMPCF->CHAVE , 4 )
-	aAdd( aCat , AllTrim( TMPCF->DESCRI ) )
-
-TMPCF->( DBSkip() )
+While (_cAlias)->( !Eof() )
+	MvParDef += PadR((_cAlias)->CHAVE , 4 )
+	aAdd( aCat , AllTrim((_cAlias)->DESCRI ) )
+	(_cAlias)->( DBSkip() )
 EndDo
 
-("TMPCF")->( DBCloseArea() )
+(_cAlias)->(DBCloseArea())
 
-//====================================================================
-//Trativa abaixo para no caso de uma alteracao do campo trazer todos |
-//os dados que foram selecionados anteriormente.                     |
-//====================================================================
+//Trativa abaixo para no caso de uma alteracao do campo trazer todos
+//os dados que foram selecionados anteriormente
 If Len(AllTrim(&MvRet)) == 0
-
 	MvPar	:= PadR( AllTrim( StrTran( &MvRet , ";" , "" ) ) , Len(aCat) )
 	&MvRet	:= PadR( AllTrim( StrTran( &MvRet , ";" , "" ) ) , Len(aCat) )
-	
 Else
-
 	MvPar	:= AllTrim( StrTran( &MvRet , ";" , "/" ) )
-	
 EndIf
 
-//====================================================================
 //Somente altera o conteudo caso o usuario clique no botao ok		 |
-//====================================================================
-
-//====================================================================
 // Executa funcao que monta tela de opcoes                             
-//====================================================================
 If F_Opcoes( @MvPar , cTitulo , aCat , MvParDef , 12 , 49 , .F. , nTam , nMaxSelect )
 
 	//Tratamento para separar retorno com ";"
@@ -264,12 +243,7 @@ If F_Opcoes( @MvPar , cTitulo , aCat , MvParDef , 12 , 49 , .F. , nTam , nMaxSel
 
 EndIf
 
-//===============================================================
-// Grava log de consultas para CFOPs
-//=============================================================== 
-U_ITLOGACS('lstCF')
-
-Return(.T.)
+Return .T.
 
 /*
 ===============================================================================================================================
@@ -281,15 +255,15 @@ Parametros--------: Lógico -> .T. caso não haja nenhum problema com a data digit
 Retorno-----------: Lógico -> .T. caso não haja nenhum problema com a data digitada, .F. caso contrário
 ===============================================================================================================================
 */
-User Function VLDDTFAT(_dData,_nOpca,_aRecnos)
+User Function VLDDTFAT(_dData As Date, _nOpca As Numeric,_aRecnos As Array) As Logical
 
-Local _aArea	:= GetArea()
-Local _aAreaSC7	:= SC7->(GetArea())
-Local _lRet		:= .T.
-Local _nDtLimFt	:= U_ItGetMV("IT_DTLIMFT",180)	// Limite de dias para data de Faturamento
-Local _dLimFt	:= Date() + _nDtLimFt			// Data limite maximo para data de Faturamento
-Local _dLimAnt	:= Date() - _nDtLimFt			// Data limite minimo para data de Faturamento
-Local _nI		:= 0
+Local _aArea	:= FWGetArea() As Array
+Local _aAreaSC7	:= SC7->(FWGetArea()) As Array
+Local _lRet		:= .T. As Logical
+Local _nDtLimFt	:= SuperGetMV("IT_DTLIMFT",.F.,180)	As Numeric// Limite de dias para data de Faturamento
+Local _dLimFt	:= Date() + _nDtLimFt As Date// Data limite maximo para data de Faturamento
+Local _dLimAnt	:= Date() - _nDtLimFt As Date// Data limite minimo para data de Faturamento
+Local _nI		:= 0 As Numeric
 
 Default _dData		:= Date()
 Default _nOpca		:= 1
@@ -299,80 +273,79 @@ If !Empty(_dData)
 	If _nOpca == 1
 		If _lRet
 			If _dData > _dLimFt .Or. _dData < _dLimAnt
-				U_ITMSG("A Data de Faturamento informada não é vaílda. A data digitada foi: " + DtoC(_dData) + ".",;
+				U_ITMsg("A Data de Faturamento informada não é vaílda. A data digitada foi: " + DToC(_dData) + ".",;
                       "Data de Faturamento Informada Invalida!",;
-                      "Favor informar uma data maior ou igual a: " + DtoC(_dLimAnt) + " ou menor ou igual a " + DtoC(_dLimFt) + ".",3) 
+                      "Favor informar uma data maior ou igual a: " + DToC(_dLimAnt) + " ou menor ou igual a " + DToC(_dLimFt) + ".",3) 
 				_lRet := .F.
 			EndIf
 		EndIf
 		
 		If _lRet
-			If (SC7->C7_QUJE >= SC7->C7_QUANT) .AND. SC7->C7_I_DTFAT <> _dData
-				U_ITMSG("Não é possível alterar este Pedido de Compras, pois o mesmo já foi atendido.",;
+			If (SC7->C7_QUJE >= SC7->C7_QUANT) .And. SC7->C7_I_DTFAT <> _dData
+				U_ITMsg("Não é possível alterar este Pedido de Compras, pois o mesmo já foi atendido.",;
                       "Atenção",;
                       "Verifique o status no parâmetro MV_ALTPEDC.",3)
 				_lRet := .F.
-			Endif
+			EndIf
 		EndIf
 		
 		If _lRet
-			If SC7->C7_RESIDUO == "S" .AND. SC7->C7_I_DTFAT <> _dData
-			   U_ITMSG("Este item do Pedido de compras foi encerrado por Eliminação de Residuo e não poderá ser alterado.",;
+			If SC7->C7_RESIDUO == "S" .And. SC7->C7_I_DTFAT <> _dData
+			   U_ITMsg("Este item do Pedido de compras foi encerrado por Eliminação de Residuo e não poderá ser alterado.",;
                       "Atenção",;
                       "",3)
 				_lRet := .F.
-			Endif
+			EndIf
 		EndIf
 		
 		If _lRet
-			If (SC7->C7_QTDACLA + SC7->C7_QUJE) > SC7->C7_QUANT .AND. SC7->C7_I_DTFAT <> _dData
-				U_ITMSG("Pedido não pode ser alterado, pois já esta totalmente/parcialmente entregue ou foi eliminado por residuo.",;
+			If (SC7->C7_QTDACLA + SC7->C7_QUJE) > SC7->C7_QUANT .And. SC7->C7_I_DTFAT <> _dData
+				U_ITMsg("Pedido não pode ser alterado, pois já esta totalmente/parcialmente entregue ou foi eliminado por residuo.",;
                       "Atenção",;
                       "Selecione outro item a ser alterado.",3)
 				_lRet := .F.
 			EndIf
-		Endif
+		EndIf
 	Else
 		For _nI := 1 To Len(_aRecnos)
-			dbSelectArea("SC7")
-			dbGoTo(_aRecnos[_nI])
+			DBSelectArea("SC7")
+			DBGoTo(_aRecnos[_nI])
 			
 			If _lRet
 				If _dData > _dLimFt .Or. _dData < _dLimAnt					
-					U_ITMSG("A Data de Faturamento informada não é vaílda. A data digitada foi: " + DtoC(_dData) +".",;
+					U_ITMsg("A Data de Faturamento informada não é vaílda. A data digitada foi: " + DToC(_dData) +".",;
                          "Data de Faturamento Informada Invalida!",;
-                         "Favor informar uma data maior ou igual a: " + DtoC(_dLimAnt) + " ou menor ou igual a " + DtoC(_dLimFt) + ".",3)		
+                         "Favor informar uma data maior ou igual a: " + DToC(_dLimAnt) + " ou menor ou igual a " + DToC(_dLimFt) + ".",3)		
 					_lRet := .F.
 				EndIf
 			EndIf
 			
 			If _lRet
-				If (SC7->C7_QUJE >= SC7->C7_QUANT) .AND. SC7->C7_I_DTFAT <> _dData
-					U_ITMSG("Não é possível alterar este Pedido de Compras, pois o mesmo já foi atendido.",;
+				If (SC7->C7_QUJE >= SC7->C7_QUANT) .And. SC7->C7_I_DTFAT <> _dData
+					U_ITMsg("Não é possível alterar este Pedido de Compras, pois o mesmo já foi atendido.",;
                           "Atenção",;
                           "Verifique o status no parâmetro MV_ALTPEDC.",3)
 					_lRet := .F.
-				Endif
+				EndIf
 			EndIf
 			
 			If _lRet
-				If SC7->C7_RESIDUO == "S" .AND. SC7->C7_I_DTFAT <> _dData
-				   U_ITMSG("Este item do Pedido de compras foi encerrado por Eliminação de Residuo e não poderá ser alterado.",;
+				If SC7->C7_RESIDUO == "S" .And. SC7->C7_I_DTFAT <> _dData
+				   U_ITMsg("Este item do Pedido de compras foi encerrado por Eliminação de Residuo e não poderá ser alterado.",;
                          "Atenção",;
                          "",3)
-                      
 					_lRet := .F.
-				Endif
+				EndIf
 			EndIf
 			
 			If _lRet
-				If (SC7->C7_QTDACLA + SC7->C7_QUJE) > SC7->C7_QUANT .AND. SC7->C7_I_DTFAT <> _dData
-					U_ITMSG("Pedido não pode ser alterado, pois já esta totalmente/parcialmente entregue ou foi eliminado por residuo.",;
+				If (SC7->C7_QTDACLA + SC7->C7_QUJE) > SC7->C7_QUANT .And. SC7->C7_I_DTFAT <> _dData
+					U_ITMsg("Pedido não pode ser alterado, pois já esta totalmente/parcialmente entregue ou foi eliminado por residuo.",;
                          "Atenção",;
                          "Selecione outro item a ser alterado.",3)
 					_lRet := .F.
 				EndIf
-			Endif
+			EndIf
 		Next _nI
 	EndIf
 EndIf
@@ -382,10 +355,10 @@ EndIf
 //=============================================================== 
 U_ITLOGACS('VLDDTFAT')
 
-RestArea(_aArea)
-RestArea(_aAreaSC7)
+FWRestArea(_aArea)
+FWRestArea(_aAreaSC7)
 
-Return(_lRet)
+Return _lRet
 
 /*
 ===============================================================================================================================
@@ -398,31 +371,22 @@ Parametros--------:  cTipoNF -Tipo de nota ( D - Devolução, B - Beneficiamento, 
 Retorno-----------: String com nome do cliente ou fornecedor
 ===============================================================================================================================
 */
-User Function NomeCliFor(cTipoNF,cTab)
+User Function NomeCliFor(cTipoNF As Character,cTab As Character) As Character
 
-Local cNomeFC := ""
+Local cNomeFC := "" As Character
 
 Do Case  
-
 	Case cTipoNF $ "DB" .And. cTab=="SF2"  
-	
 		cNomeFC := Posicione("SA2",1,xFilial("SA2")+SF2->(F2_CLIENTE+F2_LOJA),"A2_NOME") 
-		
 	Case !cTipoNF $ "DB" .And. cTab=="SF2"  
-	
 		cNomeFC := Posicione("SA1",1,xFilial("SA1")+SF2->(F2_CLIENTE+F2_LOJA),"A1_NOME") 
-		
 	Case cTipoNF $ "DB" .And. cTab=="SF1"  
-	
 		cNomeFC := Posicione("SA1",1,xFilial("SA1")+SF1->(F1_FORNECE+F1_LOJA),"A1_NOME") 
-		
 	Case !cTipoNF $ "DB" .And. cTab=="SF1"  
-	
 		cNomeFC := Posicione("SA2",1,xFilial("SA2")+SF1->(F1_FORNECE+F1_LOJA),"A2_NOME")
-		
 EndCase
 
-Return (cNomeFC)
+Return cNomeFC
 
 /*
 ===============================================================================================================================
@@ -434,9 +398,9 @@ Parametros--------: _cCodErro: String com o código de erro customizado ou padrão
 Retorno-----------: _cRet: String com a descrição do erro
 ===============================================================================================================================
 */
-User Function ColErro(_cCodErro)
+User Function ColErro(_cCodErro As Character) As Character
 
-Local _cRet := ""
+Local _cRet := "" As Character
 
 If _cCodErro == 'MCOM01'
 	_cRet := 'MD-e com 210220-Operação Desconhecida'
@@ -456,8 +420,7 @@ Else
 	_cRet := ColErroErp(_cCodErro)
 EndIf
 
-Return (_cRet)
-
+Return _cRet
 
 /*
 ===============================================================================================================================
@@ -469,20 +432,18 @@ Parametros--------: SA2,SF1 e SD1 deve estar posicionada
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function GrvLT3()
+User Function GrvLT3
 
-Local _aArea	:= GetArea()
-Local _cAlias	:= GetNextAlias()
-Local _lRet		:= .T.
-Local _lSemNota	:= IIf(SA2->A2_L_NFPRO == "S", .T.,.F.)//Produtor que emite a própria NF-e no fechamento
-Local _nQtd		:= 0
+Local _aArea	:= FWGetArea() As Array
+Local _cAlias	:= GetNextAlias() As Character
+Local _lRet		:= .T. As Logical
+Local _lSemNota	:= IIf(SA2->A2_L_NFPRO == "S", .T.,.F.) As Logical//Produtor que emite a própria NF-e no fechamento
+Local _nQtd		:= 0 As Numeric
 
 If SF1->F1_TIPO == "N" .And. !FWIsInCallStack("U_AGLT036")
-	//========================================================================================================
 	//Gravação do Movimento no Leite de Terceiros
-	//========================================================================================================
-	BeginSQL alias _cAlias
-		SELECT D1_COD, SUM(D1_QUANT) D1_QUANT, ROUND(AVG(D1_VUNIT),8) D1_VUNIT, C7_PRECO, C7_L_PMGB, C7_L_PMGB2, C7_L_PMEST,
+	BeginSql alias _cAlias
+		SELECT D1_COD, SUM(D1_QUANT) D1_QUANT, Round(AVG(D1_VUNIT),8) D1_VUNIT, C7_PRECO, C7_L_PMGB, C7_L_PMGB2, C7_L_PMEST,
 			NVL((SELECT ZLY_DFECHA
 					FROM %Table:ZLY% ZLY
 					WHERE ZLY.D_E_L_E_T_ = ' '
@@ -507,7 +468,7 @@ If SF1->F1_TIPO == "N" .And. !FWIsInCallStack("U_AGLT036")
 				AND ZA7.ZA7_FILIAL = SD1.D1_FILIAL
 				AND ZA7.ZA7_CODPRD = SD1.D1_COD)
 		GROUP BY D1_COD, C7_PRECO, C7_L_PMGB, C7_L_PMGB2, C7_L_PMEST, D1_DTDIGIT
-	EndSQL
+	EndSql
 	Count to _nQtd
 	If _nQtd > 1
 		If l103Auto
@@ -521,10 +482,10 @@ If SF1->F1_TIPO == "N" .And. !FWIsInCallStack("U_AGLT036")
 
 		If !Empty((_cAlias)->FECHAMENTO)
 			If l103Auto
-				AutoGRLog("XFUNCOM01"+CRLF+"Período " + IIf(AllTrim((_cAlias)->FECHAMENTO)=="ABORTA","não cadastrado", "fechado") +" na Recepção de Leite de Terceiros."+;
+				AutoGRLog("XFUNCOM01"+CRLF+"Período  "+IIf(AllTrim((_cAlias)->FECHAMENTO)=="ABORTA","não cadastrado", "fechado") +" na Recepção de Leite de Terceiros."+;
 							"Procure o departamento do Leite da Matriz.")
 			Else
-				MsgStop("Período " + IIf(AllTrim((_cAlias)->FECHAMENTO)=="ABORTA","não cadastrado", "fechado") +" na Recepção de Leite de Terceiros."+;
+				MsgStop("Período "+IIf(AllTrim((_cAlias)->FECHAMENTO)=="ABORTA","não cadastrado", "fechado") +" na Recepção de Leite de Terceiros."+;
 						"Procure o departamento do Leite da Matriz.","XFUNCOM01")
 			EndIf
 			_lRet := .F.
@@ -543,7 +504,7 @@ If SF1->F1_TIPO == "N" .And. !FWIsInCallStack("U_AGLT036")
 					ZLX->ZLX_PGFRT	:= 'N'
 					ZLX->ZLX_STATUS	:= '1'
 				EndIf
-				ZLX->ZLX_TIPOLT	:= IIF( Alltrim( SF1->F1_FORNECE ) == 'F00001' , 'F' , 'T' ) //F00001 - CODIGO DA ITALAC PARA TRANSFERÊNCIAS
+				ZLX->ZLX_TIPOLT	:= IIf( AllTrim( SF1->F1_FORNECE ) == 'F00001' , 'F' , 'T' ) //F00001 - CODIGO DA ITALAC PARA TRANSFERÊNCIAS
 				ZLX->ZLX_PRODLT	:= (_cAlias)->D1_COD
 				ZLX->ZLX_FORNEC	:= SF1->F1_FORNECE
 				ZLX->ZLX_LJFORN	:= SF1->F1_LOJA
@@ -559,7 +520,7 @@ If SF1->F1_TIPO == "N" .And. !FWIsInCallStack("U_AGLT036")
 				ZLX->ZLX_DIFPRC	:= (_cAlias)->D1_VUNIT - (_cAlias)->C7_PRECO
 				ZLX->ZLX_VLRNF	:= SF1->F1_VALBRUT
 				ZLX->ZLX_ICMSNF	:= SF1->F1_VALICM
-				ZLX->( MsUnLock() )
+				ZLX->( MSUnLock() )
 						
 				If __lSX8
 					ConfirmSX8()
@@ -591,11 +552,11 @@ If SF1->F1_TIPO == "N" .And. !FWIsInCallStack("U_AGLT036")
 		ZZ4->ZZ4_QTDE	:= SD1->D1_QUANT
 		ZZ4->ZZ4_VALOR	:= SD1->D1_VUNIT
 		ZZ4->ZZ4_STATUS	:= "2"
-		ZZ4->( MsUnLock() )
+		ZZ4->( MSUnLock() )
 	EndIf
 EndIf
 
-RestArea( _aArea )
+FWRestArea(_aArea)
 
 Return
 
@@ -615,14 +576,14 @@ Parametros--------: aCols -> A -> Array com os dados dos itens
 Retorno-----------: _lRet -> indica se permite ou não a gravação do documento de entrada
 ===============================================================================================================================
 */
-User Function ValLT3(aCols,_cDtRef,_nPosPrd,_nPosNOri,_nPosSOri)
+User Function ValLT3(aCols As Array,_cDtRef As Character,_nPosPrd As Numeric,_nPosNOri As Numeric,_nPosSOri As Numeric) As Logical
 
-Local _cAlias	:= GetNextAlias()
-Local _lRet		:= .T.
+Local _cAlias	:= GetNextAlias() As Character
+Local _lRet		:= .T. As Logical
 
 //Para o Leite de terceiros a nota deve possuir um item, logo, só preciso validar o primeiro.
 If Empty( aCols[1][_nPosNOri] ) .And. Empty( aCols[1][_nPosSOri] )
-	BeginSQL alias _cAlias
+	BeginSql alias _cAlias
 		SELECT NVL((SELECT ZLY_DFECHA
 					FROM %Table:ZLY% ZLY
 					WHERE ZLY.D_E_L_E_T_ = ' '
@@ -633,14 +594,14 @@ If Empty( aCols[1][_nPosNOri] ) .And. Empty( aCols[1][_nPosSOri] )
 		WHERE ZA7.D_E_L_E_T_ = ' '
 		AND ZA7.ZA7_CODPRD = %exp:aCols[1][_nPosPrd]%
 		AND ZA7.ZA7_FILIAL = %xFilial:ZA7%
-	EndSQL
-	While (_cAlias)->(!EOF())
+	EndSql
+	While (_cAlias)->(!Eof())
 		If !Empty((_cAlias)->FECHAMENTO)
 			If l103Auto
-				AutoGRLog("XFUNCOM01"+CRLF+"Período " + IIf(AllTrim((_cAlias)->FECHAMENTO)=="ABORTA","não cadastrado", "fechado") +" na Recepção de Leite de Terceiros."+;
+				AutoGRLog("XFUNCOM01"+CRLF+"Período " +IIf(AllTrim((_cAlias)->FECHAMENTO)=="ABORTA","não cadastrado", "fechado") +" na Recepção de Leite de Terceiros."+;
 							"Procure o departamento do Leite da Matriz.")
 			Else
-				MsgStop("Período " + IIf(AllTrim((_cAlias)->FECHAMENTO)=="ABORTA","não cadastrado", "fechado") +" na Recepção de Leite de Terceiros."+;
+				MsgStop("Período " +IIf(AllTrim((_cAlias)->FECHAMENTO)=="ABORTA","não cadastrado", "fechado") +" na Recepção de Leite de Terceiros."+;
 						"Procure o departamento do Leite da Matriz.","XFUNCOM01")
 			EndIf
 			_lRet := .F.
@@ -650,7 +611,7 @@ If Empty( aCols[1][_nPosNOri] ) .And. Empty( aCols[1][_nPosSOri] )
 	(_cAlias)->(DBCloseArea())
 EndIf
 
-Return(_lRet)
+Return _lRet
 
 /*
 ===============================================================================================================================

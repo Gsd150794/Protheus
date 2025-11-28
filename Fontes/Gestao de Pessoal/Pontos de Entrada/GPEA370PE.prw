@@ -2,35 +2,21 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-    Autor    |    Data    |                                             Motivo                                           
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "FWMVCDEF.CH"
-#include "parmtype.ch"
-#INCLUDE "rwmake.ch" 
-#INCLUDE "TOPCONN.CH"   
-#Include 'fileio.ch'
-
-#define CRLF		Chr(13) + Chr(10)
+#Include "TOTVS.ch"
+#Include "FWMVCDEF.CH"
 
 /*
 ===============================================================================================================================
 Programa----------: GPEA370
 Autor-------------: Igor Melgaço
 Data da Criacao---: 14/02/2025
-===============================================================================================================================
 Descrição---------: Ponto de entrada MVC Cadastro de Cargos - Chamado 49377
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: lRet 
 ===============================================================================================================================
 */
@@ -48,7 +34,7 @@ User Function GPEA370()
     Local _cQ3_MEMO3 As Character
     Local _nOperation As Numeric
 
-    _aParam     := PARAMIXB
+    _aParam     := ParamIXB
     _lRet       := .T.
     _cIdPonto   := ""
     _cIdModel   := ""
@@ -68,7 +54,7 @@ User Function GPEA370()
 			
             _nOperation := _oModel:GetOperation()
             
-            If _nOperation == MODEL_OPERATION_UPDATE .OR. _nOperation == MODEL_OPERATION_INSERT
+            If _nOperation == MODEL_OPERATION_UPDATE .Or. _nOperation == MODEL_OPERATION_INSERT
                 _oModelSQ3   := _oModel:GetModel('MODELGPEA370')
 
                 _cQ3_DESCSUM := _oModelSQ3:GetValue("Q3_DESCSUM")

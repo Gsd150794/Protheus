@@ -2,17 +2,14 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  |08/10/2024  | Chamado 48465. Retirada manipulação do SX1
+Lucas Borges  |08/10/2024| Chamado 48465. Retirada manipulação do SX1
+Lucas Borges  |19/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
-#include "topconn.ch"
+#Include "TOTVS.ch"
 #Include "report.ch"
 
 /*
@@ -20,11 +17,8 @@ Lucas Borges  |08/10/2024  | Chamado 48465. Retirada manipulação do SX1
 Programa----------: MCOM016
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 12/04/2021
-===============================================================================================================================
 Descrição---------: Lista Notas Fiscais de Entrada Vinculada com Campo Específico do XML da nota fiscal. Chamado 36143.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -45,28 +39,28 @@ Begin Sequence
    EndIf
    
    If MV_PAR03 == 1
-      If U_ITMSG("Confirma a atualização das tabelas de dados?","Atenção","Os campos 'F1_TPFRETE' e 'DS_TPFRETE' serão atualizados conforme regras estabelecidas." , ,2, 2) 
+      If U_ITMsg("Confirma a atualização das tabelas de dados?","Atenção","Os campos 'F1_TPFRETE' e 'DS_TPFRETE' serão atualizados conforme regras estabelecidas." , ,2, 2) 
          _lGravaDados := .T.
       ElseIf MV_PAR04 == 1 
-         U_ITMSG("Apenas o relatório será emitido.","Atenção", ,2)
+         U_ITMsg("Apenas o relatório será emitido.","Atenção", ,2)
       EndIf
    EndIf
 
    If MV_PAR03 == 2 .And. MV_PAR04 == 2
-      U_ITMSG("Rotina finalizada pelo usuário.","Atenção","O usuário selecionou as opções 'Não gerar relatório e Não atualizar tabelas." ,2)
+      U_ITMsg("Rotina finalizada pelo usuário.","Atenção","O usuário selecionou as opções 'Não gerar relatório e Não atualizar tabelas." ,2)
       Break 
    EndIf 
 
    //======================================================
    // Efetua a Leitura e Montagem dos dados
    //======================================================
-   fwmsgrun( ,{|_oProc| _lRet := U_MCOM016D(_oProc) } , 'Aguarde...' , 'Efetuando Leitura dos dados...' )
+   FWMsgRun( ,{|_oProc| _lRet := U_MCOM016D(_oProc) } , 'Aguarde...' , 'Efetuando Leitura dos dados...' )
 
    If ! _lRet 
       If MV_PAR04 == 1 
-         U_itmsg("Não foram encontrados dados para serem listados.","Atenção",,1)
+         U_ITMsg("Não foram encontrados dados para serem listados.","Atenção",,1)
       Else 
-         U_itmsg("Não foram encontrados dados para atualização das tabelas de dados.","Atenção",,1)
+         U_ITMsg("Não foram encontrados dados para atualização das tabelas de dados.","Atenção",,1)
       EndIf 
 
       Break
@@ -83,29 +77,27 @@ Begin Sequence
 
 End Sequence
 
-U_ItMsg("Processamento finalizado.","Atenção",,2)
+U_ITMsg("Processamento finalizado.","Atenção",,2)
 
 If Select("TRBTOMA") > 0
-	TRBTOMA->(Dbclosearea())
+	TRBTOMA->(DBCloseArea())
 EndIf
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
 Programa----------: MCOM016D
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 12/04/2021
-===============================================================================================================================
 Descrição---------: Rotina de leitura e montagem dos dados.
-===============================================================================================================================
 Parametros--------: _oProc = Objeto da regua de processamento
-===============================================================================================================================
 Retorno-----------: _lRet = .T. = há dados para emissão da listagem.
                             .F. = não há dados para emissão da listagem.
 ===============================================================================================================================
 */
 User Function MCOM016D(_oProc)
+
 Local _cQry, _nTotRegs, _nI 
 Local _lRet := .F.
 Local _cChave 
@@ -121,33 +113,33 @@ Local _nTotGrv
 Begin Sequence
    _aStruct := {}
    If MV_PAR04 == 1
-      Aadd(_aStruct,{"F1_FILIAL" , "C", 2, 0}) 
-      Aadd(_aStruct,{"F1_DOC"    , "C",GetSx3Cache("F1_DOC"    , "X3_TAMANHO"), 0})     
-      Aadd(_aStruct,{"F1_SERIE"  , "C",GetSx3Cache("F1_SERIE"  , "X3_TAMANHO"), 0})  
-      Aadd(_aStruct,{"F1_FORNECE", "C",GetSx3Cache("F1_FORNECE", "X3_TAMANHO"), 0})
-      Aadd(_aStruct,{"F1_LOJA"   , "C",GetSx3Cache("F1_LOJA"   , "X3_TAMANHO"), 0})   
-      Aadd(_aStruct,{"A2_NOME"   , "C",GetSx3Cache("A2_NOME"   , "X3_TAMANHO"), 0}) 
-      Aadd(_aStruct,{"F1_EMISSAO", "D", 8, 0})
-      Aadd(_aStruct,{"F1_DTDIGIT", "D", 8, 0})
-      Aadd(_aStruct,{"F1_EST"    , "C", 2, 0})    
-      Aadd(_aStruct,{"F1_TPFRETE", "C", 1, 0}) //C=CIF;F=FOB;T=Por conta terceiros;R=Por conta remetente;D=Por conta destinatário;S=Sem frete
-      Aadd(_aStruct,{"TOMA"      , "C", 1, 0})
-      Aadd(_aStruct,{"TOMA3"     , "C", 3, 0})
-      Aadd(_aStruct,{"TOMA4"     , "C", 3, 0})
-      Aadd(_aStruct,{"CNPJDES"   , "C",14, 0})
-      Aadd(_aStruct,{"CNPJITALAC", "C",14, 0})
-      Aadd(_aStruct,{"CNPJREM"   , "C",14, 0})
-      Aadd(_aStruct,{"F1_CHVNFE" , "C",GetSx3Cache("F1_CHVNFE" , "X3_TAMANHO") , 0})
-      Aadd(_aStruct,{"CKO_ARQUIV", "C",GetSx3Cache("CKO_ARQUIV", "X3_TAMANHO") , 0})
-      Aadd(_aStruct,{"OBSERVACAO", "M",10, 0})
-      Aadd(_aStruct,{"ARQXML"    , "M",10, 0})
-      Aadd(_aStruct,{"RECSF1"    , "N",10, 0})
-      Aadd(_aStruct,{"RECSDS"    , "N",10, 0})
+      aAdd(_aStruct,{"F1_FILIAL" , "C", 2, 0}) 
+      aAdd(_aStruct,{"F1_DOC"    , "C",GetSx3Cache("F1_DOC"    , "X3_TAMANHO"), 0})     
+      aAdd(_aStruct,{"F1_SERIE"  , "C",GetSx3Cache("F1_SERIE"  , "X3_TAMANHO"), 0})  
+      aAdd(_aStruct,{"F1_FORNECE", "C",GetSx3Cache("F1_FORNECE", "X3_TAMANHO"), 0})
+      aAdd(_aStruct,{"F1_LOJA"   , "C",GetSx3Cache("F1_LOJA"   , "X3_TAMANHO"), 0})   
+      aAdd(_aStruct,{"A2_NOME"   , "C",GetSx3Cache("A2_NOME"   , "X3_TAMANHO"), 0}) 
+      aAdd(_aStruct,{"F1_EMISSAO", "D", 8, 0})
+      aAdd(_aStruct,{"F1_DTDIGIT", "D", 8, 0})
+      aAdd(_aStruct,{"F1_EST"    , "C", 2, 0})    
+      aAdd(_aStruct,{"F1_TPFRETE", "C", 1, 0}) //C=CIF;F=FOB;T=Por conta terceiros;R=Por conta remetente;D=Por conta destinatário;S=Sem frete
+      aAdd(_aStruct,{"TOMA"      , "C", 1, 0})
+      aAdd(_aStruct,{"TOMA3"     , "C", 3, 0})
+      aAdd(_aStruct,{"TOMA4"     , "C", 3, 0})
+      aAdd(_aStruct,{"CNPJDES"   , "C",14, 0})
+      aAdd(_aStruct,{"CNPJITALAC", "C",14, 0})
+      aAdd(_aStruct,{"CNPJREM"   , "C",14, 0})
+      aAdd(_aStruct,{"F1_CHVNFE" , "C",GetSx3Cache("F1_CHVNFE" , "X3_TAMANHO") , 0})
+      aAdd(_aStruct,{"CKO_ARQUIV", "C",GetSx3Cache("CKO_ARQUIV", "X3_TAMANHO") , 0})
+      aAdd(_aStruct,{"OBSERVACAO", "M",10, 0})
+      aAdd(_aStruct,{"ARQXML"    , "M",10, 0})
+      aAdd(_aStruct,{"RECSF1"    , "N",10, 0})
+      aAdd(_aStruct,{"RECSDS"    , "N",10, 0})
    Else
-      Aadd(_aStruct,{"F1_DTDIGIT", "D", 8, 0})
-      Aadd(_aStruct,{"TOMA"      , "C", 1, 0})
-      Aadd(_aStruct,{"RECSF1"    , "N",10, 0})
-      Aadd(_aStruct,{"RECSDS"    , "N",10, 0})
+      aAdd(_aStruct,{"F1_DTDIGIT", "D", 8, 0})
+      aAdd(_aStruct,{"TOMA"      , "C", 1, 0})
+      aAdd(_aStruct,{"RECSF1"    , "N",10, 0})
+      aAdd(_aStruct,{"RECSDS"    , "N",10, 0})
    EndIf 
  
    _oTemp := FWTemporaryTable():New( "TRBTOMA",  _aStruct) 
@@ -162,19 +154,20 @@ Begin Sequence
    _cQry += " WHERE SF1.D_E_L_E_T_ = ' ' AND F1_ESPECIE = 'CTE' "
   
    If ! Empty(MV_PAR01)
-      _cQry += " AND F1_DTDIGIT >= '" + Dtos(MV_PAR01) + "' "
+      _cQry += " AND F1_DTDIGIT >= '" + DToS(MV_PAR01) + "' "
    EndIf
 
    If ! Empty(MV_PAR02)
-      _cQry += " AND F1_DTDIGIT <= '" + Dtos(MV_PAR02) + "' "
+      _cQry += " AND F1_DTDIGIT <= '" + DToS(MV_PAR02) + "' "
    EndIf
 
    If Select("QRYSF1") > 0
-	  QRYSF1->(Dbclosearea())
+	  QRYSF1->(DBCloseArea())
    EndIf
 
-   TCQUERY _cQry NEW ALIAS "QRYSF1"
-
+   _cQry := ChangeQuery(_cQry)
+   MPSysOpenQuery(_cQry,"QRYSF1")
+   DBSelectArea("QRYSF1")
    Count To _nTotRegs
 
    If _nTotRegs == 0
@@ -182,15 +175,15 @@ Begin Sequence
       Break
    EndIf
  
-   CKO->(DbSetOrder(1)) 
-   SDS->(DbSetOrder(2)) //DS_FILIAL+DS_CHAVENF
+   CKO->(DBSetOrder(1)) 
+   SDS->(DBSetOrder(2)) //DS_FILIAL+DS_CHAVENF
 
-   QRYSF1->(DbGoTop())
+   QRYSF1->(DBGoTop())
    
    _nTotGrv := 0
 
    _nI := 1 
-   Do While ! QRYSF1->(Eof())
+   While ! QRYSF1->(Eof())
       _oProc:cCaption := ("Processando os dados ["+ AllTrim(Str(_nI,10)) +"/"+ AllTrim(Str(_nTotRegs,10)) + "]...")
       ProcessMessages()
       
@@ -202,7 +195,7 @@ Begin Sequence
       _nRecSF1 := 0
       _nRecSDS := 0
 
-      SF1->(DbGoTo(QRYSF1->NRRECNO))
+      SF1->(DBGoTo(QRYSF1->NRRECNO))
       _nRecSF1 := QRYSF1->NRRECNO
       
       If SDS->(MsSeek(SF1->F1_FILIAL+SF1->F1_CHVNFE))
@@ -210,9 +203,9 @@ Begin Sequence
       EndIf
       
       If Upper(SubStr(SF1->F1_CHVNFE,1,3)) == "CTE"
-         _cChave := "214" + Alltrim(SubStr(SF1->F1_CHVNFE,4,Len(SF1->F1_CHVNFE)))+".xml"
+         _cChave := "214" + AllTrim(SubStr(SF1->F1_CHVNFE,4,Len(SF1->F1_CHVNFE)))+".xml"
       Else
-         _cChave := "214" + Alltrim(SF1->F1_CHVNFE)+".xml"
+         _cChave := "214" + AllTrim(SF1->F1_CHVNFE)+".xml"
       EndIf
 
       If CKO->(MsSeek(_cChave))
@@ -272,7 +265,7 @@ Begin Sequence
                TRBTOMA->F1_SERIE := SF1->F1_SERIE
                TRBTOMA->F1_FORNECE := SF1->F1_FORNECE
                TRBTOMA->F1_LOJA := SF1->F1_LOJA
-               TRBTOMA->A2_NOME := POSICIONE("SA2",1,xFilial("SA2")+SF1->F1_FORNECE+SF1->F1_LOJA,"A2_NOME")
+               TRBTOMA->A2_NOME := Posicione("SA2",1,xFilial("SA2")+SF1->F1_FORNECE+SF1->F1_LOJA,"A2_NOME")
                TRBTOMA->F1_EMISSAO := SF1->F1_EMISSAO
                TRBTOMA->F1_DTDIGIT := SF1->F1_DTDIGIT
                TRBTOMA->F1_EST := SF1->F1_EST
@@ -289,7 +282,7 @@ Begin Sequence
                TRBTOMA->ARQXML := ""
                TRBTOMA->RECSF1 := _nRecSF1
                TRBTOMA->RECSDS := _nRecSDS
-               TRBTOMA->(MsUnLock())
+               TRBTOMA->(MSUnLock())
                _nTotGrv += 1                            
             Else 
                TRBTOMA->(RecLock("TRBTOMA", .T.))
@@ -297,7 +290,7 @@ Begin Sequence
                TRBTOMA->TOMA   := _cToma
                TRBTOMA->RECSF1 := _nRecSF1
                TRBTOMA->RECSDS := _nRecSDS
-               TRBTOMA->(MsUnLock()) 
+               TRBTOMA->(MSUnLock()) 
 
                _nTotGrv += 1
 
@@ -319,7 +312,7 @@ Begin Sequence
          TRBTOMA->F1_SERIE := SF1->F1_SERIE
          TRBTOMA->F1_FORNECE := SF1->F1_FORNECE
          TRBTOMA->F1_LOJA := F1_LOJA
-         TRBTOMA->A2_NOME := POSICIONE("SA2",1,xFilial("SA2")+SF1->F1_FORNECE+SF1->F1_LOJA,"A2_NOME")
+         TRBTOMA->A2_NOME := Posicione("SA2",1,xFilial("SA2")+SF1->F1_FORNECE+SF1->F1_LOJA,"A2_NOME")
          TRBTOMA->F1_EMISSAO := SF1->F1_EMISSAO
          TRBTOMA->F1_DTDIGIT := SF1->F1_DTDIGIT
          TRBTOMA->F1_EST     := SF1->F1_EST
@@ -336,24 +329,24 @@ Begin Sequence
          TRBTOMA->ARQXML     := ""
          TRBTOMA->RECSF1     := 0
          TRBTOMA->RECSDS     := 0
-         TRBTOMA->(MsUnLock())
+         TRBTOMA->(MSUnLock())
          _nTotGrv += 1
       EndIf 
 
-      QRYSF1->(DbSkip())
+      QRYSF1->(DBSkip())
       
       _oXml := Nil 
       DelClassIntf()
 
    EndDo
    
-   TRBTOMA->(DbGoTop())
+   TRBTOMA->(DBGoTop())
 
    If _lGravaDados
       
       _nI := 1
 
-      Do While ! TRBTOMA->(Eof())   
+      While ! TRBTOMA->(Eof())   
          _oProc:cCaption := ("Gravando tabelas de dados ["+ AllTrim(Str(_nI,10)) +"/"+ AllTrim(Str(_nTotGrv,10)) + "]...")
          ProcessMessages()
 
@@ -362,11 +355,11 @@ Begin Sequence
          _nRecSDS := TRBTOMA->RECSDS 
 
          If _nRecSF1 > 0
-            SF1->(DbGoto(_nRecSF1))
+            SF1->(DBGoTo(_nRecSF1))
          EndIf
 
          If _nRecSDS > 0 
-            SDS->(DbGoTo(_nRecSDS)) 
+            SDS->(DBGoTo(_nRecSDS)) 
          EndIf
           
          If AllTrim(_cToma) == "0" .Or. AllTrim(_cToma) == "1" 
@@ -374,7 +367,7 @@ Begin Sequence
                If SF1->F1_TPFRETE == "F" .And. U_MCOM016P(SF1->F1_FILIAL,SF1->F1_DOC,SF1->F1_SERIE,SF1->F1_FORNECE,SF1->F1_LOJA,"0","SD1")
                   SF1->(RecLock("SF1",.F.))
                   SF1->F1_TPFRETE := "C" 
-                  SF1->(MsUnlock())
+                  SF1->(MSUnLock())
                EndIf
             EndIf 
                 
@@ -382,7 +375,7 @@ Begin Sequence
                If SDS->DS_TPFRETE == "F"  .And. U_MCOM016P(SF1->F1_FILIAL,SF1->F1_DOC,SF1->F1_SERIE,SF1->F1_FORNECE,SF1->F1_LOJA,"0","SDT")
                   SDS->(RecLock("SDS",.F.))
                   SDS->DS_TPFRETE := "C"
-                  SDS->(MsUnlock())
+                  SDS->(MSUnLock())
                EndIf 
             EndIf
           
@@ -391,7 +384,7 @@ Begin Sequence
                If SF1->F1_TPFRETE == "F" .And. U_MCOM016P(SF1->F1_FILIAL,SF1->F1_DOC,SF1->F1_SERIE,SF1->F1_FORNECE,SF1->F1_LOJA,"4","SD1")
                   SF1->(RecLock("SF1",.F.))
                   SF1->F1_TPFRETE := "T" 
-                  SF1->(MsUnlock())
+                  SF1->(MSUnLock())
                EndIf
             EndIf 
                
@@ -399,12 +392,12 @@ Begin Sequence
                If SDS->DS_TPFRETE == "F" .And. U_MCOM016P(SF1->F1_FILIAL,SF1->F1_DOC,SF1->F1_SERIE,SF1->F1_FORNECE,SF1->F1_LOJA,"4","SDT")
                   SDS->(RecLock("SDS",.F.))
                   SDS->DS_TPFRETE := "T"
-                  SDS->(MsUnlock())
+                  SDS->(MSUnLock())
                EndIf  
             EndIf 
          EndIf
   
-         TRBTOMA->(DbSkip())
+         TRBTOMA->(DBSkip())
          _nI += 1
       EndDo
    EndIf 
@@ -412,7 +405,7 @@ Begin Sequence
 End Sequence
 
 If Select("QRYSF1") > 0
-	QRYSF1->(Dbclosearea())
+	QRYSF1->(DBCloseArea())
 EndIf
 
 Return _lRet
@@ -422,15 +415,13 @@ Return _lRet
 Programa--------: MCOM016C
 Autor-----------: Julio de Paula Paz
 Data da Criacao-: 19/03/2021
-===============================================================================================================================
 Descrição-------: Verifica se o CNPJ passado por parâmetro é da Italac.
-===============================================================================================================================
 Parametros------: _cCnpj = Cnpj a ser pesquisado
-===============================================================================================================================
 Retorno---------: _cRet = "SIM" / "NAO"
 ===============================================================================================================================
 */
 User Function MCOM016C(_cCGCDes)
+
 Local _cRet := ""
 Local _cQry
 
@@ -441,11 +432,12 @@ Begin Sequence
    _cQry += " WHERE ZZM.D_E_L_E_T_ = ' ' AND ZZM_CGC = '" + _cCGCDes + "' "
 
    If Select("QRYZZM") > 0
-	  QRYZZM->(Dbclosearea())
+	  QRYZZM->(DBCloseArea())
    EndIf
 
-   TCQUERY _cQry NEW ALIAS "QRYZZM"
-
+   _cQry := ChangeQuery(_cQry)
+   MPSysOpenQuery(_cQry,"QRYZZM")
+   DBSelectArea("QRYZZM")
    If QRYZZM->(Eof()) .Or. QRYZZM->(Bof()) 
       _cRet := "NAO"
       Break 
@@ -460,7 +452,7 @@ Begin Sequence
 End Sequence 
 
 If Select("QRYZZM") > 0
-   QRYZZM->(Dbclosearea())
+   QRYZZM->(DBCloseArea())
 EndIf
 
 Return _cRet 
@@ -470,9 +462,7 @@ Return _cRet
 Programa--------: MCOM016P
 Autor-----------: Julio de Paula Paz
 Data da Criacao-: 20/04/2021
-===============================================================================================================================
 Descrição-------: Verifica se existe produtos do toma na tabela SD1
-===============================================================================================================================
 Parametros------: _cCodFilial  = Filial
                   _cNrNf       = Numero da Nota de entrada
                   _cSerieNf    = Serie da nota de entrada
@@ -480,14 +470,14 @@ Parametros------: _cCodFilial  = Filial
                   _cLojaFor    = Loja do Fornecedor.
                   _cNrToma     = Numero do toma
                   _cTabPesq    = Tabela a ser pesquisada SD1 ou SDT
-===============================================================================================================================
 Retorno---------: _lRet = .T. / .F. 
 ===============================================================================================================================
 */
 User Function MCOM016P(_cCodFilial,_cNrNf,_cSerieNf,_cFornecedor,_cLojaFor,_cNrToma, _cTabPesq)
+
 Local _lRet := .F.             
-Local _cPrdToma0 := U_ItGetMv("IT_PRDTOMA0","10000000005;10000000014;") 
-Local _cPrdToma4 := U_ItGetMv("IT_PRDTOMA4","10000000005;10000000006;10000000014;") 
+Local _cPrdToma0 := SuperGetMV("IT_PRTOMA0",.F.,"10000000005;10000000014;") 
+Local _cPrdToma4 := SuperGetMV("IT_PRTOMA4",.F.,"10000000005;10000000006;10000000014;") 
 Local _cProdutos := ""
 
 Begin Sequence 
@@ -498,28 +488,28 @@ Begin Sequence
    EndIf
 
    If _cTabPesq == "SD1"
-      SD1->(DbSetOrder(1)) // D1_FILIAL+D1_DOC+D1_SERIE+D1_FORNECE+D1_LOJA+D1_COD+D1_ITEM
+      SD1->(DBSetOrder(1)) // D1_FILIAL+D1_DOC+D1_SERIE+D1_FORNECE+D1_LOJA+D1_COD+D1_ITEM
       SD1->(MsSeek(_cCodFilial + _cNrNf + _cSerieNf + _cFornecedor + _cLojaFor))
 
-      Do While ! SD1->(Eof()) .And. SD1->(D1_FILIAL+D1_DOC+D1_SERIE+D1_FORNECE+D1_LOJA) == (_cCodFilial + _cNrNf + _cSerieNf + _cFornecedor + _cLojaFor)
+      While ! SD1->(Eof()) .And. SD1->(D1_FILIAL+D1_DOC+D1_SERIE+D1_FORNECE+D1_LOJA) == (_cCodFilial + _cNrNf + _cSerieNf + _cFornecedor + _cLojaFor)
          If AllTrim(SD1->D1_COD) $ _cProdutos
             _lRet := .T.
             Break 
          EndIf 
 
-         SD1->(DbSkip())
+         SD1->(DBSkip())
       EndDo
    Else 
-      SDT->(DbSetOrder(3)) // DT_FILIAL+DT_FORNEC+DT_LOJA+DT_DOC+DT_SERIE+DT_COD 
+      SDT->(DBSetOrder(3)) // DT_FILIAL+DT_FORNEC+DT_LOJA+DT_DOC+DT_SERIE+DT_COD 
       SDT->(MsSeek(_cCodFilial + _cFornecedor + _cLojaFor + _cNrNf + _cSerieNf ))
 
-      Do While ! SDT->(Eof()) .And. SDT->(DT_FILIAL+DT_FORNEC+DT_LOJA+DT_DOC+DT_SERIE) == (_cCodFilial + _cFornecedor + _cLojaFor + _cNrNf + _cSerieNf )
+      While ! SDT->(Eof()) .And. SDT->(DT_FILIAL+DT_FORNEC+DT_LOJA+DT_DOC+DT_SERIE) == (_cCodFilial + _cFornecedor + _cLojaFor + _cNrNf + _cSerieNf )
          If AllTrim(SDT->DT_COD) $ _cProdutos
             _lRet := .T.
             Break 
          EndIf 
 
-         SDT->(DbSkip())
+         SDT->(DBSkip())
       EndDo
    EndIf
 
@@ -532,11 +522,8 @@ Return _lRet
 Programa----------:  MCOM016R
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 28/06/2021
-===============================================================================================================================
 Descrição---------: Gera o relatório em Excel e na impressora.
-===============================================================================================================================
 Parametros--------: _oProc ==  Objeto da regura de processos.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -579,18 +566,15 @@ Return(_oReport)
 Programa----------:  MCOM016I
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 28/06/2021
-===============================================================================================================================
 Descrição---------: Grava os dados de impressão do relatório.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function MCOM016I(_oReport,_oSect1_A)
 
 Begin Sequence
-   TRBTOMA->(DbGoTop())
+   TRBTOMA->(DBGoTop())
 
    //====================================================================================================
    // Inicializando a impressão
@@ -598,7 +582,7 @@ Begin Sequence
    _oSect1_A:Enable() 		 
 	_oSect1_A:Init()
 
-	Do While ! TRBTOMA->(Eof())
+	While ! TRBTOMA->(Eof())
 
       If _oReport:Cancel()
 		   Exit
@@ -629,11 +613,11 @@ Begin Sequence
       _oSect1_A:Cell("CKO_ARQUIV"):SetValue(TRBTOMA->CKO_ARQUIV)
       _oSect1_A:Cell("OBSERVACAO"):SetValue(TRBTOMA->OBSERVACAO)
       
-      _oSect1_A:Printline()
+      _oSect1_A:PrintLine()
 
-      TRBTOMA->(DbSkip()) 
+      TRBTOMA->(DBSkip()) 
    EndDo   
 
 End Sequence
 
-Return Nil 
+Return 

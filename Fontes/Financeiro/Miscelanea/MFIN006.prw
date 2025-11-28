@@ -10,11 +10,7 @@ Lucas Borges  |13/10/2024| Chamado 48465. Retirada da função de conout
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Ap5mail.ch"
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -51,7 +47,7 @@ If _lCriaAmb
     //================================================================================
     // Mensagem que ficara armazenada no arquivo de log para posterior monitoramento
     //================================================================================
-	FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MFIN00601"/*cMsgId*/, "MFIN00601 - Gerando envio do arquivo HTML de Fluxo de Caixa na data: "+ Dtoc(DATE()) +" - "+ Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+	FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MFIN00601"/*cMsgId*/, "MFIN00601 - Gerando envio do arquivo HTML de Fluxo de Caixa na data: "+ DToC(DATE()) +" - "+ Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
 EndIf
 	
@@ -97,11 +93,11 @@ DBSelectArea(_cAliasEm)
 If _lCriaAmb
     
 	RpcClearEnv() //Limpa o ambiente, liberando a licença e fechando as conexões
-	FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MFIN00602"/*cMsgId*/, "MFIN00602 - Termino de execucao normal do envio do HTML de Fluxo de Caixa na data:" + Dtoc(DATE()) + " - " + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+	FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MFIN00602"/*cMsgId*/, "MFIN00602 - Termino de execucao normal do envio do HTML de Fluxo de Caixa na data:" + DToC(DATE()) + " - " + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -116,7 +112,7 @@ Retorno---------: Nenhum
 */
 Static Function MFIN006H(_cEmailDes)
 
-Local _horario		:= STRTRAN(Time(),":","'")				//Nao se pode gerar um arquivo com o nome que contenha o caracter ":"
+Local _horario		:= StrTran(Time(),":","'")				//Nao se pode gerar um arquivo com o nome que contenha o caracter ":"
 Local _cArqAnexo	:= "\spool\fluxo" + _horario + ".HTM"	//Nome do arquivo anexo a ser enviado ao usuario
 Local _cArqHtml		:= ''
 Local _nHdl			:= 0
@@ -132,7 +128,7 @@ Local _cAlias		:= GetNextAlias()
 Local _cAliSC7		:= ""
 Local _cRecD1		:= ""
 Local _cMsgEmail	:= ""
-Local _cGeracao		:= DtoC( Date() )
+Local _cGeracao		:= DToC( Date() )
 Local _nVenc15		:= 0
 Local _nI			:= 0
 Local _nSldBan		:= 0
@@ -168,7 +164,7 @@ Local _aConfig	  := U_ITCFGEML('')
 // Inicialização do HTML e configuração dos scripts
 //================================================================================
 _cTxtHTM += '<html><head><title>Relatório de Fluxo de Caixa - Italac</title></head>'
-_cTxtHTM += '<style type="text/css"><!--'
+_cTxtHTM += '<style Type="text/css"><!--'
 _cTxtHTM += 'table.bordasimples { border-collapse: collapse; } '
 _cTxtHTM += 'table.bordasimples tr td { border:1px solid #777777; } '
 _cTxtHTM += 'td.grupos	{ font-family:VERDANA; font-size:18px; V-align:middle; background-color: #000099; color:#FFFFFF; } '
@@ -216,11 +212,11 @@ DBSelectArea(_cAliasGer)
 While (_cAliasGer)->( !Eof() )
 	
 	_nValPC		:= 0
-	_nPosAux	:= aScan( _aDadVen , {|x| DtoS( x[1] ) == (_cAliasGer)->VENCIMENTO } )
+	_nPosAux	:= aScan( _aDadVen , {|x| DToS( x[1] ) == (_cAliasGer)->VENCIMENTO } )
 	
 	If _nPosAux > 0
 	
-		While _nPosAux <= Len(_aDadVen) .And. DtoS( _aDadVen[_nPosAux][1] ) == (_cAliasGer)->VENCIMENTO
+		While _nPosAux <= Len(_aDadVen) .And. DToS( _aDadVen[_nPosAux][1] ) == (_cAliasGer)->VENCIMENTO
 			
 			_nValPC += _aDadVen[_nPosAux][2]
 			
@@ -345,9 +341,9 @@ While _nI <= Len( _aDadosAux )
     
     _nCont++
     
-	_dUltDia	:= DtoS( lastday( Stod( _aDadosAux[_nI][01] ) ) )
-	_cMes       := SUBSTR( _aDadosAux[_nI][01] , 5 , 2 )
-	_cAno       := SUBSTR( _aDadosAux[_nI][01] , 3 , 2 )
+	_dUltDia	:= DToS( lastday( SToD( _aDadosAux[_nI][01] ) ) )
+	_cMes       := SubStr( _aDadosAux[_nI][01] , 5 , 2 )
+	_cAno       := SubStr( _aDadosAux[_nI][01] , 3 , 2 )
 	_nTMesRec	:= 0
 	_nTMesPrev	:= 0
 	_nTMesAdt	:= 0
@@ -359,7 +355,7 @@ While _nI <= Len( _aDadosAux )
 		_nTMesPag	:=	0
 	EndIf
 	
-	While _nI <= Len( _aDadosAux ) .and. _aDadosAux[_nI][01] <= _dUltDia
+	While _nI <= Len( _aDadosAux ) .And. _aDadosAux[_nI][01] <= _dUltDia
 		
 		_nTMesRec	+= _aDadosAux[_nI][02]
 		_nTMesPag	+= _aDadosAux[_nI][03] + _aDadosAux[_nI][06]
@@ -371,7 +367,7 @@ While _nI <= Len( _aDadosAux )
 		_nTGerPrev  += _aDadosAux[_nI][05]
 		_nTMesPC	+= _aDadosAux[_nI][06]
 		_nTGerPC	+= _aDadosAux[_nI][06]
-		_dData	    := DtoC( StoD( _aDadosAux[_nI][01] ) )
+		_dData	    := DToC( SToD( _aDadosAux[_nI][01] ) )
 		
 		If _nTSaldDia >= 0
 			_cCorPN := "#000000"
@@ -506,7 +502,7 @@ MFIN006Q( 2 , _cAliasRec )
 DBSelectArea(_cAliasRec)
 (_cAliasRec)->( DBGoTop() )
 
-Do While (_cAliasRec)->( !EOF() )
+While (_cAliasRec)->( !Eof() )
     
 	If (_cAliasRec)->COD_CART = ' '
 	
@@ -563,7 +559,7 @@ MFIN006Q( 2 , _cAliasRec )
 DBSelectArea(_cAliasRec)
 (_cAliasRec)->( DBGoTop() )
 
-Do While (_cAliasRec)->( !EOF() )
+While (_cAliasRec)->( !Eof() )
     
 	If (_cAliasRec)->COD_CART = ' '
 	
@@ -711,12 +707,12 @@ If _lRet
 	// Cria o arquivo HTML na pasta spool da raiz do server.
 	//================================================================================
 	_cArqHtml	:= _cArqAnexo
-	_nHdl		:= fCreate(_cArqHtml)
+	_nHdl		:= FCreate(_cArqHtml)
 	
 	If _nHdl == -1
 		FWLogMsg("ERROR"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MFIN00603"/*cMsgId*/, "MFIN00603 - O arquivo de fluxo de caixa nome "+ _cArqHtml +" nao pode ser criado!"/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 		_lRet := .F.
-	Endif
+	EndIf
 	
 	FWrite( _nHdl , _cTxtHTM , Len(_cTxtHTM) )
 	FClose( _nHdl )
@@ -749,13 +745,13 @@ If _lRet
 		//================================================================================
 		If FERASE(_cArqAnexo) == -1
 		   FWLogMsg("ERROR"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MFIN00605"/*cMsgId*/, "MFIN00605 - Falha na deleção do Arquivo HTML"/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
-		Endif
+		EndIf
 	
 	EndIf
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -780,24 +776,24 @@ Local _cFiltro4 := ""
 Local _nDias	:= GETMV( "IT_QDIASFL" ,, 0 )
 Local _nDiaAux	:= _nDias
 Local _sDtInic  := DToS( Date() )
-Local _dDtVenc	:= StoD('')
+Local _dDtVenc	:= SToD('')
 Local _nI		:= 0
 
 _cFiltro	:= "% "
-_cFiltro	+= " AND E1.E1_VENCREA BETWEEN '"+ DTOS( DATE() ) +"' AND '"+ DTOS( DATE() + _nDias ) +"' "
+_cFiltro	+= " AND E1.E1_VENCREA BETWEEN '"+ DToS( Date() ) +"' AND '"+ DToS( Date() + _nDias ) +"' "
 _cFiltro	+= " %"
 
 _cFiltro2	:= "% "
-_cFiltro2	+= " AND E2.E2_VENCREA BETWEEN '"+ DTOS( DATE() ) +"' AND '"+ DTOS( DATE() + _nDias ) +"' "
+_cFiltro2	+= " AND E2.E2_VENCREA BETWEEN '"+ DToS( Date() ) +"' AND '"+ DToS( Date() + _nDias ) +"' "
 _cFiltro2	+= " %"
 
 _cFiltro3	:= "% "
 _cFiltro3	+= _sDtInic
 _cFiltro3	+= " %"
 
-If DOW( DATE() ) == 1 //DOMINGO
+If DOW( Date() ) == 1 //DOMINGO
 	_nDias := "2"
-ElseIf DOW( DATE() ) == 2 //SEGUNDA
+ElseIf DOW( Date() ) == 2 //SEGUNDA
 	_nDias := "3"
 Else
    	_nDias := "1"
@@ -838,7 +834,7 @@ Case _nOpcao == 1
 	_cQuery +=        " AND E1.E1_SALDO   > 0 "
 	_cQuery +=        " AND E1.E1_TIPO    NOT IN ('RA','NCC') "
 	_cQuery +=        " AND E1.E1_VENCREA <> ' ' "
-	_cQuery +=        " AND E1.E1_VENCREA BETWEEN '"+ DTOS( DATE() ) +"' AND '"+ DTOS( DATE() + _nDiaAux ) +"' "
+	_cQuery +=        " AND E1.E1_VENCREA BETWEEN '"+ DToS( Date() ) +"' AND '"+ DToS( Date() + _nDiaAux ) +"' "
 	
 	_cQuery +=        " GROUP BY E1.E1_VENCREA "
 	
@@ -895,7 +891,7 @@ Case _nOpcao == 1
 	_cQuery +=        " AND E2.E2_SALDO   > 0 "
 	_cQuery +=        " AND E2.E2_TIPO    NOT IN ('PA','NDF') "
 	_cQuery +=        " AND E2.E2_VENCREA <> ' ' "
-	_cQuery +=        " AND E2.E2_VENCREA BETWEEN '"+ DTOS( DATE() ) +"' AND '"+ DTOS( DATE() + _nDiaAux ) +"' "
+	_cQuery +=        " AND E2.E2_VENCREA BETWEEN '"+ DToS( Date() ) +"' AND '"+ DToS( Date() + _nDiaAux ) +"' "
 	
 	_cQuery +=        " GROUP BY E2.E2_VENCREA "
 	
@@ -919,10 +915,10 @@ Case _nOpcao == 2
 	
 		SELECT  E1.E1_I_CART AS COD_CART,
 				NVL((SELECT ZAR.ZAR_DESC FROM %Table:ZAR% ZAR WHERE ZAR.D_E_L_E_T_ = ' ' AND ZAR.ZAR_COD = E1.E1_I_CART),'SEM TIPO') TIPO_CART,
-				SUM((CASE WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') > %Exp:_cFiltro4% AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') <=1825 AND E1.E1_TIPO <> 'NCC' AND E1.E1_I_CART <> ' ') THEN ((E1.E1_SALDO+E1.E1_SDACRES)-E1.E1_SDDECRE) ELSE 0 END)) AS CART_COB, // SUM((CASE WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') > %Exp:_cFiltro4% AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') <=60 AND E1.E1_TIPO <> 'NCC' AND E1.E1_I_CART <> ' ') THEN ((E1.E1_SALDO+E1.E1_SDACRES)-E1.E1_SDDECRE) ELSE 0 END)) AS CART_COB,
-				SUM((CASE WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') > %Exp:_cFiltro4% AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') <=15 AND E1.E1_TIPO <> 'NCC' AND E1.E1_I_CART = ' ') THEN ((E1.E1_SALDO+E1.E1_SDACRES)-E1.E1_SDDECRE) ELSE 0 END)) AS VENC_15,
-				SUM((CASE WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') > %Exp:_cFiltro4% AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') <=1825 AND E1.E1_TIPO <> 'NCC' AND E1.E1_I_CART = ' ') THEN ((E1.E1_SALDO+E1.E1_SDACRES)-E1.E1_SDDECRE) ELSE 0 END)) AS VENC_60, // SUM((CASE WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') > %Exp:_cFiltro4% AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') <=60 AND E1.E1_TIPO <> 'NCC' AND E1.E1_I_CART = ' ') THEN ((E1.E1_SALDO+E1.E1_SDACRES)-E1.E1_SDDECRE) ELSE 0 END)) AS VENC_60, 
-				SUM((CASE WHEN E1.E1_TIPO = 'NCC' THEN E1.E1_SALDO ELSE 0 END)) AS REC_NCC
+				SUM((Case WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') > %Exp:_cFiltro4% AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') <=1825 AND E1.E1_TIPO <> 'NCC' AND E1.E1_I_CART <> ' ') THEN ((E1.E1_SALDO+E1.E1_SDACRES)-E1.E1_SDDECRE) Else 0 END)) AS CART_COB, // SUM((Case WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') > %Exp:_cFiltro4% AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') <=60 AND E1.E1_TIPO <> 'NCC' AND E1.E1_I_CART <> ' ') THEN ((E1.E1_SALDO+E1.E1_SDACRES)-E1.E1_SDDECRE) Else 0 END)) AS CART_COB,
+				SUM((Case WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') > %Exp:_cFiltro4% AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') <=15 AND E1.E1_TIPO <> 'NCC' AND E1.E1_I_CART = ' ') THEN ((E1.E1_SALDO+E1.E1_SDACRES)-E1.E1_SDDECRE) Else 0 END)) AS VENC_15,
+				SUM((Case WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') > %Exp:_cFiltro4% AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') <=1825 AND E1.E1_TIPO <> 'NCC' AND E1.E1_I_CART = ' ') THEN ((E1.E1_SALDO+E1.E1_SDACRES)-E1.E1_SDDECRE) Else 0 END)) AS VENC_60, // SUM((Case WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') > %Exp:_cFiltro4% AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') <=60 AND E1.E1_TIPO <> 'NCC' AND E1.E1_I_CART = ' ') THEN ((E1.E1_SALDO+E1.E1_SDACRES)-E1.E1_SDDECRE) Else 0 END)) AS VENC_60, 
+				SUM((Case WHEN E1.E1_TIPO = 'NCC' THEN E1.E1_SALDO Else 0 END)) AS REC_NCC
 		FROM %Table:SE1% E1
 		WHERE
 			E1.D_E_L_E_T_ = ' '
@@ -942,9 +938,9 @@ Case _nOpcao == 3
 
 	BeginSql alias _cAlias
 	
-    	SELECT	SUM((CASE WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') > TO_DATE(E2.E2_VENCREA,'YYYY/MM/DD') AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E2.E2_VENCREA,'YYYY/MM/DD') <=30 AND E2.E2_TIPO NOT IN ('NDF','PR') ) THEN ((E2.E2_SALDO+E2.E2_SDACRES) - E2.E2_SDDECRE) ELSE 0 END)) AS VENC_PAG,
-				SUM((CASE WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') > TO_DATE(E2.E2_VENCREA,'YYYY/MM/DD') AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E2.E2_VENCREA,'YYYY/MM/DD') <=30 AND E2.E2_TIPO = 'NDF') THEN ((E2.E2_SALDO+E2.E2_SDACRES) - E2.E2_SDDECRE) ELSE 0 END)) AS PAG_NDF,
-				SUM((CASE WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') > TO_DATE(E2.E2_VENCREA,'YYYY/MM/DD') AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E2.E2_VENCREA,'YYYY/MM/DD') <=30 AND E2.E2_TIPO = 'PR') THEN ((E2.E2_SALDO+E2.E2_SDACRES) - E2.E2_SDDECRE) ELSE 0 END)) AS PAG_PREV
+    	SELECT	SUM((Case WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') > TO_DATE(E2.E2_VENCREA,'YYYY/MM/DD') AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E2.E2_VENCREA,'YYYY/MM/DD') <=30 AND E2.E2_TIPO NOT IN ('NDF','PR') ) THEN ((E2.E2_SALDO+E2.E2_SDACRES) - E2.E2_SDDECRE) Else 0 END)) AS VENC_PAG,
+				SUM((Case WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') > TO_DATE(E2.E2_VENCREA,'YYYY/MM/DD') AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E2.E2_VENCREA,'YYYY/MM/DD') <=30 AND E2.E2_TIPO = 'NDF') THEN ((E2.E2_SALDO+E2.E2_SDACRES) - E2.E2_SDDECRE) Else 0 END)) AS PAG_NDF,
+				SUM((Case WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') > TO_DATE(E2.E2_VENCREA,'YYYY/MM/DD') AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E2.E2_VENCREA,'YYYY/MM/DD') <=30 AND E2.E2_TIPO = 'PR') THEN ((E2.E2_SALDO+E2.E2_SDACRES) - E2.E2_SDDECRE) Else 0 END)) AS PAG_PREV
 		FROM %Table:SE2% E2
 		WHERE
 			E2.D_E_L_E_T_ = ' '
@@ -996,9 +992,9 @@ Case _nOpcao == 6
 
 	BeginSql alias _cAlias
 	
-		SELECT	SUM((CASE WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') > TO_DATE(E2.E2_VENCREA,'YYYY/MM/DD') AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E2.E2_VENCREA,'YYYY/MM/DD') >30 AND E2.E2_TIPO NOT IN ('NDF','PR') ) THEN ((E2.E2_SALDO+E2.E2_SDACRES) - E2.E2_SDDECRE) ELSE 0 END)) AS VENC_PAGR,
-				SUM((CASE WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') > TO_DATE(E2.E2_VENCREA,'YYYY/MM/DD') AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E2.E2_VENCREA,'YYYY/MM/DD') >30 AND E2.E2_TIPO = 'NDF') THEN ((E2.E2_SALDO+E2.E2_SDACRES) - E2.E2_SDDECRE) ELSE 0 END)) AS PAG_NDFR,
-				SUM((CASE WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') > TO_DATE(E2.E2_VENCREA,'YYYY/MM/DD') AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E2.E2_VENCREA,'YYYY/MM/DD') >30 AND E2.E2_TIPO = 'PR') THEN ((E2.E2_SALDO+E2.E2_SDACRES) - E2.E2_SDDECRE) ELSE 0 END)) AS PAG_PREVR
+		SELECT	SUM((Case WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') > TO_DATE(E2.E2_VENCREA,'YYYY/MM/DD') AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E2.E2_VENCREA,'YYYY/MM/DD') >30 AND E2.E2_TIPO NOT IN ('NDF','PR') ) THEN ((E2.E2_SALDO+E2.E2_SDACRES) - E2.E2_SDDECRE) Else 0 END)) AS VENC_PAGR,
+				SUM((Case WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') > TO_DATE(E2.E2_VENCREA,'YYYY/MM/DD') AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E2.E2_VENCREA,'YYYY/MM/DD') >30 AND E2.E2_TIPO = 'NDF') THEN ((E2.E2_SALDO+E2.E2_SDACRES) - E2.E2_SDDECRE) Else 0 END)) AS PAG_NDFR,
+				SUM((Case WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') > TO_DATE(E2.E2_VENCREA,'YYYY/MM/DD') AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E2.E2_VENCREA,'YYYY/MM/DD') >30 AND E2.E2_TIPO = 'PR') THEN ((E2.E2_SALDO+E2.E2_SDACRES) - E2.E2_SDDECRE) Else 0 END)) AS PAG_PREVR
 		FROM	%Table:SE2% E2
 		WHERE
 			E2.D_E_L_E_T_ = ' '
@@ -1017,8 +1013,8 @@ Case _nOpcao == 7
 
 	BeginSql alias _cAlias
 
-		SELECT	SUM((CASE WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') > 0  AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') <= %Exp:_cFiltro4% AND E1.E1_TIPO <> 'NCC' AND E1.E1_I_CART = ' ') THEN ((E1.E1_SALDO+E1.E1_SDACRES)-E1.E1_SDDECRE) ELSE 0 END)) AS VREC_D1,
-				SUM((CASE WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') > 0  AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') <= %Exp:_cFiltro4% AND E1.E1_TIPO = 'NCC') THEN ((E1.E1_SALDO+E1.E1_SDACRES)-E1.E1_SDDECRE) ELSE 0 END)) AS NCC_D1
+		SELECT	SUM((Case WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') > 0  AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') <= %Exp:_cFiltro4% AND E1.E1_TIPO <> 'NCC' AND E1.E1_I_CART = ' ') THEN ((E1.E1_SALDO+E1.E1_SDACRES)-E1.E1_SDDECRE) Else 0 END)) AS VREC_D1,
+				SUM((Case WHEN (TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') > 0  AND TO_DATE(%Exp:_cFiltro3%,'YYYY/MM/DD') - TO_DATE(E1.E1_VENCREA,'YYYY/MM/DD') <= %Exp:_cFiltro4% AND E1.E1_TIPO = 'NCC') THEN ((E1.E1_SALDO+E1.E1_SDACRES)-E1.E1_SDDECRE) Else 0 END)) AS NCC_D1
 		FROM	%Table:SE1% E1
 		WHERE
 			E1.D_E_L_E_T_ = ' '
@@ -1037,7 +1033,7 @@ Case _nOpcao == 8
 		_cQuery += "     SUM(SE5.E5_VALOR) AS VALOR
 		_cQuery += " FROM  "+ RetSqlName('SE5') +" SE5
 		_cQuery += " WHERE "+ RetSqlDel('SE5')
-		_cQuery += " AND SE5.E5_DATA    BETWEEN '"+ SubStr( DtoS( Date() ) , 1 , 6 ) +"01' AND '"+ DtoS( DaySub( Date() , 1 ) ) +"' "
+		_cQuery += " AND SE5.E5_DATA    BETWEEN '"+ SubStr( DToS( Date() ) , 1 , 6 ) +"01' AND '"+ DToS( DaySub( Date() , 1 ) ) +"' "
 		_cQuery += " AND SE5.E5_MOTBX   IN ( 'NOR' , 'DEB' ) "
 		_cQuery += " AND SE5.E5_CONTA   <> ' ' "
 		_cQuery += " AND SE5.E5_RECPAG  = 'P' "
@@ -1052,7 +1048,7 @@ Case _nOpcao == 8
 		_cQuery += "    SUM(SE5.E5_VALOR) * -1 AS VALOR
 		_cQuery += " FROM  "+ RetSqlName('SE5') +" SE5
 		_cQuery += " WHERE "+ RetSqlDel('SE5')
-		_cQuery += " AND SE5.E5_DATA    BETWEEN '"+ SubStr( DtoS( Date() ) , 1 , 6 ) +"01' AND '"+ DtoS( DaySub( Date() , 1 ) ) +"' "
+		_cQuery += " AND SE5.E5_DATA    BETWEEN '"+ SubStr( DToS( Date() ) , 1 , 6 ) +"01' AND '"+ DToS( DaySub( Date() , 1 ) ) +"' "
 		_cQuery += " AND SE5.E5_MOTBX   IN ( 'NOR' , 'DEB' ) "
 		_cQuery += " AND SE5.E5_CONTA   <> ' ' "
 		_cQuery += " AND SE5.E5_TIPODOC IN ('ES' ) "
@@ -1100,7 +1096,7 @@ Case _nOpcao == 9
 	(_cAlias)->( DBGoTop() )
 	While (_cAlias)->( !Eof() )
 		
-		_dDtEmis	:= StoD( (_cAlias)->C7_I_DTFAT )
+		_dDtEmis	:= SToD( (_cAlias)->C7_I_DTFAT )
 		_aCond		:= Condicao( (_cAlias)->TOTAL , (_cAlias)->C7_COND , 0 , _dDtEmis )
 		
 		For _nI := 1 To Len( _aCond )
@@ -1140,24 +1136,24 @@ Local _xAcesso	:= U_ITACSUSR( "ZZL_WFFLCX" , "S" )
 // Verifica se o usuário tem permissão para rodar o WF
 //====================================================================================================
 If ValType( _xAcesso ) == 'N' .And. _xAcesso == 0
-	u_itmsg( 'Usuário não está cadastrado na Gestão de Usuários do Configurador Italac!'	, 'Atenção!' , ,1)
-	Return()
+	U_ITMsg( 'Usuário não está cadastrado na Gestão de Usuários do Configurador Italac!'	, 'Atenção!' , ,1)
+	Return
 ElseIf !_xAcesso
-	u_itmsg(  'Usuário sem acesso à rotina de execução manual do WF do Fluxo de Caixa!'	, 'Atenção!',,1)
-	Return()
+	U_ITMsg(  'Usuário sem acesso à rotina de execução manual do WF do Fluxo de Caixa!'	, 'Atenção!',,1)
+	Return
 EndIf
 
 //====================================================================================================
 // Verifica e inicia o processamento do WF
 //====================================================================================================
-If u_itmsg( 'Essa rotina irá processar o relatório do WF de Fluxo de Caixa diário e enviar à todos os destinatários automaticamente! Deseja solicitar o processamento do WF de Fluxo de Caixa diário?' , 'Atenção!',,2,2,2 )
+If U_ITMsg( 'Essa rotina irá processar o relatório do WF de Fluxo de Caixa diário e enviar à todos os destinatários automaticamente! Deseja solicitar o processamento do WF de Fluxo de Caixa diário?' , 'Atenção!',,2,2,2 )
 
 	FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "SCHEDULE"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MFIN00606"/*cMsgId*/, "MFIN00606 - Chamada da execução do JOB. Usuário - "+ RetCodUsr() +" / "+ UsrFullName( RetCodUsr() )/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 	StartJob( "U_MFIN006" , GetEnvServer() , .F. )
 	
-	u_itmsg(	'Foi feita a solicitação para o processamento do WF, o mesmo será processado e enviará automaticamente as mensagens aos destinatários conforme configuração! ' ,"Atenção",;
+	U_ITMsg(	'Foi feita a solicitação para o processamento do WF, o mesmo será processado e enviará automaticamente as mensagens aos destinatários conforme configuração! ' ,"Atenção",;
 				'Aguarde o processamento do WF, no caso de não receber, entre em contato com a área de TI/Sistema.' ,2)
 	
 EndIf
 
-Return()
+Return

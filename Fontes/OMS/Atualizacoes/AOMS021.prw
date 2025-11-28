@@ -1,15 +1,15 @@
-#include "protheus.ch"
-#include "topconn.ch"
-#include "rwmake.ch"
+#Include "TOTVS.ch"
+#Include "topconn.ch"
+#Include "rwmake.ch"
 /*/
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
 ±±ºPrograma  ³ AOMS021  º Autor ³ Frederico O. C. Jr    º Data da Criacao  ³ 12/11/2008                						º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-±±ºDescricao ³ Validar no Pedido de Venda para nao alterar armazem quando produto for PA						            º±±
+±±ºDescricao ³ Validar no Pedido de Venda para nao alterar armazem quando produto For PA						            º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-±±ºUso       ³ Validar nos itens do Pedido de Venda para nao liberar a alteracao do armazem quando o produto for            º±±
+±±ºUso       ³ Validar nos itens do Pedido de Venda para nao liberar a alteracao do armazem quando o produto For            º±±
 ±±º			 ³ Produto Acabado																								º±±
 ±±º			 ³                                                                                          					º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
@@ -32,19 +32,19 @@
 */
 User Function AOMS021()
 
-	Local aArea		:= GetArea()
+	Local aArea		:= FWGetArea()
 	Local lRet		:= .T.
 
-	dbSelectArea("SB1")
-	dbSetOrder(1)
-	dbSeek(xFilial("SB1")+GDFIELDGET("C6_PRODUTO",n))
+	DBSelectArea("SB1")
+	DBSetOrder(1)
+	DBSeek(xFilial("SB1")+GdFieldGet("C6_PRODUTO",n))
 
-	if (SB1->B1_TIPO == 'PA')
+	If (SB1->B1_TIPO == 'PA')
 	
 		lRet := .F.
 
 	EndIf
 	
-	RestArea(aArea)
+	FWRestArea(aArea)
 	
 Return (lRet)

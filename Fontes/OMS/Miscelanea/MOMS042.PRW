@@ -9,8 +9,8 @@
 ===============================================================================================================================
 */
 
-#INCLUDE "Protheus.ch"
-#INCLUDE "RwMake.ch"
+#Include "TOTVS.ch"
+#Include "RwMake.ch"
 
 /*
 ===============================================================================================================================
@@ -30,42 +30,42 @@ User Function MOMS042()
 //Valida se pedido não está  com nota emitida
 If !Empty(SC5->C5_NOTA) 
 
-    u_itmsg("Pedido já foi faturado","Atenção",,1)
+    U_ITMsg("Pedido já foi faturado","Atenção",,1)
     Return
 
-Endif
+EndIf
 
 //Valida se pedido não está  em carga
-DAI->(Dbsetorder(4)) //DAI_FILIAL+DAI_PEDIDO
-If DAI->(Dbseek(SC5->C5_FILIAL+SC5->C5_NUM)) 
+DAI->(DBSetOrder(4)) //DAI_FILIAL+DAI_PEDIDO
+If DAI->(DBSeek(SC5->C5_FILIAL+SC5->C5_NUM)) 
 
-    u_itmsg("Pedido já está em carga","Atenção",,1)
+    U_ITMsg("Pedido já está em carga","Atenção",,1)
     Return
 
-Endif
+EndIf
 
 //Verifica permissão de ajuste de bloqueio logístico
-ZZL->(Dbsetorder(3))
-If !(ZZL->(Dbseek(xFilial("ZZL") + RetCodUsr()))) .OR. ZZL->ZZL_PVLOG != "S"
+ZZL->(DBSetOrder(3))
+If !(ZZL->(DBSeek(xFilial("ZZL") + RetCodUsr()))) .Or. ZZL->ZZL_PVLOG != "S"
 
-   	u_itmsg("Usuário sem permissão para Definir Pedido em Planejamento Logístico","Atenção",,1)    	
+   	U_ITMsg("Usuário sem permissão para Definir Pedido em Planejamento Logístico","Atenção",,1)    	
     Return
 
-Endif
+EndIf
 
-If SC5->C5_I_BLOG == "S" .AND. u_itmsg("Retirar Pedido do Planejamento Logístico " + SC5->C5_NUM + "?","Atenção",,2,2,2)
+If SC5->C5_I_BLOG == "S" .And. U_ITMsg("Retirar Pedido do Planejamento Logístico " + SC5->C5_NUM + "?","Atenção",,2,2,2)
 
     U_MOMS042P("N")
     Return
 
-Endif
+EndIf
 
-If SC5->C5_I_BLOG != "S" .AND. u_itmsg("Definir Pedido em Planejamento Logístico " + SC5->C5_NUM + "?","Atenção",,2,2,2)
+If SC5->C5_I_BLOG != "S" .And. U_ITMsg("Definir Pedido em Planejamento Logístico " + SC5->C5_NUM + "?","Atenção",,2,2,2)
 
     U_MOMS042P("S")
     Return
 
-Endif
+EndIf
 
 Return
 
@@ -90,81 +90,81 @@ Local _corig := SC5->C5_I_BLOG
 BEGIN TRANSACTION
 
 //Ajusta bloqueio no pedido posicionado
-Reclock("SC5",.F.)
+RecLock("SC5",.F.)
 SC5->C5_I_BLOG := _cgrv
-SC5->(Msunlock())
+SC5->(MSUnLock())
 
 //Grava o log do ajuste de bloqueio
 If _corig != _cgrv
 
     MOMS042L(_corig)
 
-Endif
+EndIf
 
 //Marca pedidos vinculados
-If !empty(SC5->C5_I_PEVIN)
+If !Empty(SC5->C5_I_PEVIN)
 
-    SC5->(Dbsetorder(1))
-    If SC5->(Dbseek(xfilial("SC5")+SC5->C5_I_PEVIN))
+    SC5->(DBSetOrder(1))
+    If SC5->(DBSeek(xFilial("SC5")+SC5->C5_I_PEVIN))
 
         _corig := SC5->C5_I_BLOG
 
-        Reclock("SC5",.F.)
+        RecLock("SC5",.F.)
         SC5->C5_I_BLOG := _cgrv
-        SC5->(Msunlock())
+        SC5->(MSUnLock())
 
         //Grava o log do ajuste de bloqueio
         If _corig != _cgrv
 
             MOMS042L(_corig)
 
-        Endif
+        EndIf
 
-    Endif
+    EndIf
 
-    SC5->(Dbgoto(_nposi))
+    SC5->(DBGoTo(_nposi))
 
-Endif
+EndIf
 
 //Marca pedidos com vinculo de operação triangular
-If !empty(SC5->C5_I_PVREM) .AND. SC5->C5_I_PVREM != SC5->C5_NUM
+If !Empty(SC5->C5_I_PVREM) .And. SC5->C5_I_PVREM != SC5->C5_NUM
 
-    SC5->(Dbsetorder(1))
-    If SC5->(Dbseek(xfilial("SC5")+SC5->C5_I_PVREM))
+    SC5->(DBSetOrder(1))
+    If SC5->(DBSeek(xFilial("SC5")+SC5->C5_I_PVREM))
 
         _corig := SC5->C5_I_BLOG
 
-        Reclock("SC5",.F.)
+        RecLock("SC5",.F.)
         SC5->C5_I_BLOG := _cgrv
-        SC5->(Msunlock())
+        SC5->(MSUnLock())
 
         //Grava o log do ajuste de bloqueio
         If _corig != _cgrv
 
             MOMS042L(_corig)
 
-        Endif
+        EndIf
 
-    Endif
+    EndIf
 
-    SC5->(Dbgoto(_nposi))
+    SC5->(DBGoTo(_nposi))
 
-Endif
+EndIf
 
 //Marca pedidos com vinculo de operação triangular
-If !empty(SC5->C5_I_PVFAT) .AND. SC5->C5_I_PVFAT != SC5->C5_NUM
+If !Empty(SC5->C5_I_PVFAT) .And. SC5->C5_I_PVFAT != SC5->C5_NUM
 
-    SC5->(Dbsetorder(1))
-    If SC5->(Dbseek(xfilial("SC5")+SC5->C5_I_PVFAT))
+    SC5->(DBSetOrder(1))
+    If SC5->(DBSeek(xFilial("SC5")+SC5->C5_I_PVFAT))
 
-        Reclock("SC5",.F.)
+        RecLock("SC5",.F.)
         SC5->C5_I_BLOG := _cgrv
-        SC5->(Msunlock())
-    Endif
+        SC5->(MSUnLock())
+    EndIf
 
-    SC5->(Dbgoto(_nposi))
+    SC5->(DBGoTo(_nposi))
 
-Endif
+EndIf
 
 END TRANSACTION
 
@@ -197,13 +197,13 @@ Z07->Z07_CONORG		:= _corig
 Z07->Z07_CONALT		:= SC5->C5_I_BLOG
 Z07->Z07_CODUSU		:= RetCodUsr()
 Z07->Z07_DATA		:= Date()
-Z07->Z07_HORA		:= time()
+Z07->Z07_HORA		:= Time()
 Z07->Z07_IFILIA		:= SC5->C5_FILIAL
 Z07->Z07_INUM		:= SC5->C5_NUM
-IF Z07->(FIELDPOS("Z07_ORIGEM")) <> 0
+If Z07->(FIELDPOS("Z07_ORIGEM")) <> 0
    Z07->Z07_ORIGEM := "MOMS042"
-ENDIF
+EndIf
 											
-Z07->( MsUnLock() )
+Z07->( MSUnLock() )
 
 Return

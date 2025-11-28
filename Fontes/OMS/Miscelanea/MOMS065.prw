@@ -11,11 +11,11 @@
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include "PROTHEUS.CH"
+#Include "TOTVS.ch"
 #Include "TopConn.ch"
-#include "APWEBSRV.CH"
-#INCLUDE "TBICONN.CH"   
-#INCLUDE "RESTFUL.CH"
+#Include "APWEBSRV.CH"
+#Include "TBICONN.CH"   
+#Include "RESTFUL.CH"
 
 /*
 ===============================================================================================================================
@@ -30,7 +30,7 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User function MOMS065(lAuto)
+User Function MOMS065(lAuto)
 Default lAuto := .T.
 
    If lAuto
@@ -42,7 +42,7 @@ Default lAuto := .T.
 
       RESET ENVIRONMENT
    Else
-      FwMsgRun(,{|oproc|  MOMS065B() },'Aguarde processamento...','Lendo dados...')
+      FWMsgRun(,{|oproc|  MOMS065B() },'Aguarde processamento...','Lendo dados...')
    EndIf
 
 Return .T.
@@ -62,7 +62,7 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static function MOMS065B(lAuto)
+Static Function MOMS065B(lAuto)
 Local dDtNcm     := Ctod("")
 Local i          := 0
 Local _oJson
@@ -79,7 +79,7 @@ Local cNcm := ""
 dDtNcm     := U_ItGetMV( 'IT_DTNCM' , CTOD("01/01/2001") )
 _cLinkWS   := U_ItGetMV( 'IT_SISCOM' ,"https://portalunico.siscomex.gov.br/classif/api/publico/nomenclatura/download/json")
 
-Aadd(_aHeadOut,'Content-Type: application/json') 
+aAdd(_aHeadOut,'Content-Type: application/json') 
 
 _cRetHttp   := MOMS065C(AllTrim(HttpGet( _cLinkWS, _cGetParms, _nTimOut, _aHeadOut, @_cJSonRet)),.T.)
 _oJson      := JsonObject():new()
@@ -97,25 +97,25 @@ If ctod(_oJson:GetJsonObject("Data_Ultima_Atualizacao_NCM")) > dDtNcm
    _aNames := _oJson:GetNames()
    _oDados := _oJson:GetJsonObject("Nomenclaturas")
 
-   DbSelectArea("SYD")
+   DBSelectArea("SYD")
 
    If ! ValType(_oDados) == "J"
 
       For i := 1 to Len(_oDados)
 
-         If Len(_oDados[i]:GetJsonObject("Codigo")) = 10 .And. !Empty(Alltrim(_oDados[i]:GetJsonObject("Descricao")))
+         If Len(_oDados[i]:GetJsonObject("Codigo")) = 10 .And. !Empty(AllTrim(_oDados[i]:GetJsonObject("Descricao")))
 
-            cNcm := Alltrim(StrTran(_oDados[i]:GetJsonObject("Codigo"),".",""))
+            cNcm := AllTrim(StrTran(_oDados[i]:GetJsonObject("Codigo"),".",""))
 
-            SYD->(DbSetOrder(1))
-            If SYD->(!DbSeek(xFilial("SYD")+cNcm))
+            SYD->(DBSetOrder(1))
+            If SYD->(!DBSeek(xFilial("SYD")+cNcm))
 
                _cDesc := decodeutf8(_oDados[i]:GetJsonObject("Descricao"),"cp1252")
 
-               If Valtype(_cDesc) == "U"
-                  _cDesc := MOMS065C(UPPER(_oDados[i]:GetJsonObject("Descricao"))) 
+               If ValType(_cDesc) == "U"
+                  _cDesc := MOMS065C(Upper(_oDados[i]:GetJsonObject("Descricao"))) 
                Else
-                  _cDesc := MOMS065C(UPPER(_cDesc))
+                  _cDesc := MOMS065C(Upper(_cDesc))
                EndIf
 
                RecLock("SYD",.T.)
@@ -124,13 +124,13 @@ If ctod(_oJson:GetJsonObject("Data_Ultima_Atualizacao_NCM")) > dDtNcm
                   SYD->YD_I_DTINC  := cTod(_oDados[i]:GetJsonObject("Data_Inicio"))
                   SYD->YD_I_DTFIM  := cTod(_oDados[i]:GetJsonObject("Data_Fim"))
                   SYD->YD_I_ORIGE  := "MOMS065"
-               MsUnlock()
+               MSUnLock()
             Else
                If _oDados[i]:GetJsonObject("Data_Fim") <> "31/12/9999"
                   RecLock("SYD",.F.)
                      SYD->YD_I_DTFIM  := cTod(_oDados[i]:GetJsonObject("Data_Fim"))
                      SYD->YD_I_ORIGE  := "MOMS065"
-                  MsUnlock()
+                  MSUnLock()
                EndIf
             EndIf
          EndIf

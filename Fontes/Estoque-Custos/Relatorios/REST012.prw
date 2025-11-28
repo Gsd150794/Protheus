@@ -7,13 +7,11 @@
 Alex Wallauer |22/03/2018| Chamado 43342. Retirada da função MTR900CUnf(lCusFil,lCusEmp). 
 Lucas Borges  |12/09/2024| Chamado 48465. Removendo warning de compilação.
 Lucas Borges  |13/10/2024| Chamado 48465. Retirada da função de conout
+Jose Gavetti  |25/11/2025| Chamado 52778. Inclusão coluna Filial.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -33,14 +31,14 @@ Local oReport
 oReport:= ReportDef()
 oReport:PrintDialog()
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: ReportDef()
 Autor-------------: Totvs
 Data da Criacao---: 25/07/2006                                 .
-Descrição---------: A funcao estatica ReportDef devera ser criada para todos os
+Descrição---------: A funcStaticatica ReportDef devera ser criada para todos os
                     relatorios que poderao ser agendados pelo usuario. 
 Parametros--------: Nenhum
 Retorno-----------: Nenhum
@@ -70,8 +68,8 @@ Local cTamD2Cust  := TamSX3('D2_CUSTO1')[1]
 Local cTamD1CF    := TamSX3('D1_CF')[1]
 Local cTamCCPVPJOP:= TamSX3(MaiorCampo("D3_CC;D3_PROJPMS;D3_OP;D2_CLIENTE"))[1] 
 Local lVEIC       := Upper(GetMV("MV_VEICULO"))=="S"
-Local nTamData 	  := IIF(__SetCentury(),10,8)
-Local lVer116     := (VAL(GetVersao(.F.)) == 11 .And. GetRpoRelease() >= "R6" .Or. VAL(GetVersao(.F.))  > 11)
+Local nTamData 	  := IIf(__SetCentury(),10,8)
+Local lVer116     := (Val(GetVersao(.F.)) == 11 .And. GetRpoRelease() >= "R6" .Or. Val(GetVersao(.F.))  > 11)
 Local _cTamFator   := TamSX3('B1_CONV')[1]
 Local _cTamTipConv := TamSX3('B1_TIPCONV')[1]
 Local _cPicFator   := PesqPict("SB1","B1_CONV",18)
@@ -113,28 +111,28 @@ oReport:SetTotalInLine(.F.)
 // Verifica as perguntas selecionadas                      
 //===============================================================
 // Variaveis utilizadas para parametros                     
-// mv_par01         // Do produto                           
-// mv_par02         // Ate o produto                        
-// mv_par03         // Do tipo                              
-// mv_par04         // Ate o tipo                           
-// mv_par05         // Da data                              
-// mv_par06         // Ate a data                           
-// mv_par07         // Lista produtos s/movimento           
-// mv_par08         // Qual Local (almoxarifado)            
-// MV_par09         // (d)OCUMENTO/(s)EQUENCIA              
-// mv_par10         // moeda selecionada ( 1 a 5 )          
-// mv_par11         // Seq.de Digitacao /Calculo            
-// mv_par12         // Pagina Inicial                       
-// mv_par13         // Lista Transf Locali (Sim/Nao)        
-// mv_par14         // Do  Grupo                            
-// mv_par15         // Ate o Grupo                          
-// mv_par16         // Seleciona Filial?                    
-// mv_par17         // Qual Custo ? ( Medio / Reposicao )   
+// MV_PAR01         // Do produto                           
+// MV_PAR02         // Ate o produto                        
+// MV_PAR03         // Do tipo                              
+// MV_PAR04         // Ate o tipo                           
+// MV_PAR05         // Da data                              
+// MV_PAR06         // Ate a data                           
+// MV_PAR07         // Lista produtos s/movimento           
+// MV_PAR08         // Qual Local (almoxarifado)            
+// MV_PAR09         // (d)OCUMENTO/(s)EQUENCIA              
+// MV_PAR10         // moeda selecionada ( 1 a 5 )          
+// MV_PAR11         // Seq.de Digitacao /Calculo            
+// MV_PAR12         // Pagina Inicial                       
+// MV_PAR13         // Lista Transf Locali (Sim/Nao)        
+// MV_PAR14         // Do  Grupo                            
+// MV_PAR15         // Ate o Grupo                          
+// MV_PAR16         // Seleciona Filial?                    
+// MV_PAR17         // Qual Custo ? ( Medio / Reposicao )   
 //===============================================================
 Pergunte("MTR900",.F.)
 
-Aadd( aOrdem, " Codigo Produto " ) // " Codigo Produto "
-Aadd( aOrdem, " Tipo do Produto" ) // " Tipo do Produto"
+aAdd( aOrdem, " Codigo Produto " ) // " Codigo Produto "
+aAdd( aOrdem, " Tipo do Produto" ) // " Tipo do Produto"
 
 //===============================================================
 // Definicao da Sessao 1 - Dados do Produto                     
@@ -157,7 +155,7 @@ TRCell():New(oSection1,"TIPOCONV"	,"SB1","Tip.Conv"			         ,_cPicTipconv,_cT
 
 TRCell():New(oSection1,"cTipo"		,"   ","Tipo"						 ,"@!"		 ,2				,/*lPixel*/,/*{|| code-block de impressao }*/)
 TRCell():New(oSection1,"B1_GRUPO"	,"SB1","Grupo"						 ,/*Picture*/,/*Tamanho*/	,/*lPixel*/,/*{|| code-block de impressao }*/)
-TRCell():New(oSection1,"nCusMed"	,"   ",IIf(lCusRep .And. mv_par17==2 ,"Custo de Reposição ","Custo Medio")	,cPicB2Cust	,cTamB2Cust		,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection1,"nCusMed"	,"   ",IIf(lCusRep .And. MV_PAR17==2 ,"Custo de Reposição ","Custo Medio")	,cPicB2Cust	,cTamB2Cust		,/*lPixel*/,/*{|| code-block de impressao }*/)
 TRCell():New(oSection1,"nQtdSal"	,"   ","Qtd. Saldo"					 ,cPicB2Qt	 ,cTamB2Qt		,/*lPixel*/,/*{|| code-block de impressao }*/)
 TRCell():New(oSection1,"nQtd2Un"	,"   ","Qtd.2 UN Sld"				 ,cPicB2Qt	 ,cTamB2Qt		,/*lPixel*/,/*{|| code-block de impressao }*/)  //=======================  QTD SEGUNDA UNID MEDIDA 
 
@@ -183,16 +181,16 @@ If lVeic
 	
 	TRCell():New(oSection2	,"FATOR"		,"SB1","Fat.Conv"		,/*Picture*/	,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
 	TRCell():New(oSection2	,"TIPOCONV"		,"SB1","Tip.Conv"		,/*Picture*/	,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
-Endif	
-If cPaisLoc<>"CHI"
-	TRCell():New(oSection2	,"B1_POSIPI"	,"SB1","POSICAO IPI"		,/*Picture*/	,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
-Endif	
+EndIf	
 
+TRCell():New(oSection2	,"B1_POSIPI"	,"SB1","POSICAO IPI"		,/*Picture*/	,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)	
 If lVer116
 	TRCell():New(oSection2		,'NNR_DESCRI'	,"NNR","ENDERECO"		,/*Picture*/	,/*Tamanho*/,/*lPixel*/,{|| If(lCusFil .Or. lCusEmp , MV_PAR08 , Posicione("NNR",1,xFilial("NNR")+MV_PAR08,"NNR_DESCRI")) })
 Else
 	TRCell():New(oSection2		,"B2_LOCALIZ"	,"SB2","ENDERECO"		,/*Picture*/	,/*Tamanho*/,/*lPixel*/,{|| If(lCusFil .Or. lCusEmp , MV_PAR08 , SB2->B2_LOCALIZ) })
 EndIf
+TRCell():New(oSection2	,"D1_FILIAL"	,"  ","FILIAL"		,/*Picture*/	,/*Tamanho*/,/*lPixel*/,/*{|| code-block de impressao }*/)
+
 //===============================================================
 // Definicao da Sessao 3 - Movimentos                           
 //===============================================================
@@ -230,7 +228,7 @@ TRCell():New(oSection3,"nSALD2UnQtd","   ","SALDO" +CRLF+"QTD 2 UNID"	,cPicB2Qt	
 TRCell():New(oSection3,"cTraco7"	,"   ","|"+CRLF+"|"			,/*Picture*/,1				,/*lPixel*/,{|| "|" })
 TRCell():New(oSection3,"nSALDCus"	,"   ","SALDO" +CRLF+"VALOR TOTAL"	,cPicB2Tot	,cTamB2Tot		,/*lPixel*/,/*{|| code-block de impressao }*/)
 TRCell():New(oSection3,"cTraco8"	,"   ","|"+CRLF+"|"			,/*Picture*/,1		   		,/*lPixel*/,{|| "|" })
-TRCell():New(oSection3,"cCCPVPJOP"	,"   ","CLI,FOR,"+CRLF+"CC , PJ ou OP"  ,"@!"		,cTamCCPVPJOP+2 ,/*lPixel*/,/*{|| code-block de impressao }*/)
+TRCell():New(oSection3,"cCCPVPJOP"	,"   ","CLI,For,"+CRLF+"CC , PJ ou OP"  ,"@!"		,cTamCCPVPJOP+2 ,/*lPixel*/,/*{|| code-block de impressao }*/)
 
 // Definir o formato de valores negativos (para o caso de devolucoes)
 oSection3:Cell("nENTQtd"):SetNegative("PARENTHESES")
@@ -304,7 +302,7 @@ Local cNumSeqTr := ""
 Local cAlias    := ""
 Local cTipoNf   := ""
 // Indica se esta listando relatorio do almox. de processo
-Local lLocProc  := alltrim(mv_par08) == GetMv("MV_LOCPROC")
+Local lLocProc  := AllTrim(MV_PAR08) == GetMv("MV_LOCPROC")
 // Indica se deve imprimir movimento invertido (almox. de processo)
 Local lInverteMov :=.F.
 Local lPriApropri :=.T.
@@ -335,28 +333,28 @@ Local lVEIC    := Upper(GetMV("MV_VEICULO"))=="S"
 
 Local lImpSMov := .F.
 Local lImpS3   := .F.
-LOCAL cProdMNT := GetMv("MV_PRODMNT")
-LOCAL cProdTER := GetMv("MV_PRODTER")
+Local cProdMNT := GetMv("MV_PRODMNT")
+Local cProdTER := GetMv("MV_PRODTER")
 Local aProdsMNT := {}
 
 //=================================================================
 // Variaveis utilizadas para processamento de Filiais           
 //=================================================================
-Local aFilsCalc := MatFilCalc( Iif (!IsBlind(), mv_par16 == 1, .F.))
+Local aFilsCalc := MatFilCalc( IIf (!IsBlind(), MV_PAR16 == 1, .F.))
 Local cFilBack  := cFilAnt
 Local nForFilial:= 0
 
 //=================================================================
 // Variavel utilizada para inicar a pagina do relatorio
 //=================================================================
-Local n_pag     := mv_par12
+Local n_pag     := MV_PAR12
 Local cAliasTop := ""
 Local cCondicao := ""  
 Local cFilUsrSB1:= oSection1:GetAdvplExp("SB1")
 Local cFilUsrSB2:= oSection1:GetAdvplExp("SB2")
 Local lWmsNew		:= SuperGetMv("MV_WMSNEW",.F.,.F.)
-Local lD3Servi	:= IIF(lWmsNew,.F.,GetMV('MV_D3SERVI',.F.,'N')=='N')
-Local _cCodMoeda := GetMv("MV_SIMB"+Ltrim(Str(mv_par10))) 
+Local lD3Servi	:= IIf(lWmsNew,.F.,GetMV('MV_D3SERVI',.F.,'N')=='N')
+Local _cCodMoeda := GetMv("MV_SIMB"+Ltrim(Str(MV_PAR10))) 
 Local _lPE_MTAAVLTES := ExistBlock("MTAAVLTES")
 Local _cEstornD3 := SuperGetMV('MV_D3ESTOR', .F., 'N')
 Local _cCrtlQualit := SuperGetMV('MV_CQ', .F., '98')
@@ -365,13 +363,13 @@ Local _cCrtlQualit := SuperGetMV('MV_CQ', .F., '98')
 	If !(TcSrvType()=="AS/400") .And. !("POSTGRES" $ TCGetDB())
 		cAliasTop := GetNextAlias()
 	Else
-#ENDIF 
+#EndIf 
 	cCondicao := ""
 #IFDEF TOP
 	EndIf
-#ENDIF
+#EndIf
 
-Private bBloco   := { |nV,nX| Trim(nV)+IIf(Valtype(nX)='C',"",Str(nX,1)) }
+Private bBloco   := { |nV,nX| Trim(nV)+IIf(ValType(nX)='C',"",Str(nX,1)) }
 
 //=================================================================
 // MV_CUSREP - Parametro utilizado para habilitar o calculo do   
@@ -392,8 +390,8 @@ cProdTER := cProdTER + Space(15-Len(cProdTER))
 Private lCusFil    := AllTrim(SuperGetMV('MV_CUSFIL' ,.F.,"A")) == "F"
 Private lCusEmp    := AllTrim(SuperGetMv('MV_CUSFIL' ,.F.,"A")) == "E"
 
-lCusFil:=lCusFil .And. mv_par08 == Repl("*",TamSX3("B2_LOCAL")[1])
-lCusEmp:=lCusEmp .And. mv_par08 == Repl("#",TamSX3("B2_LOCAL")[1])
+lCusFil:=lCusFil .And. MV_PAR08 == Repl("*",TamSX3("B2_LOCAL")[1])
+lCusEmp:=lCusEmp .And. MV_PAR08 == Repl("#",TamSX3("B2_LOCAL")[1])
 
 Private lDev := .F. // Flag que indica se nota ‚ devolu‡ao (.T.) ou nao (.F.)
 
@@ -402,9 +400,9 @@ oReport:SetPageNumber(n_pag)
 // Alerta o usuario que o custo de reposicao esta desativado.   
 //=================================================================
 
-If mv_par17==2 .And. !lCusRep
+If MV_PAR17==2 .And. !lCusRep
 	Help(" ",1,"A910CUSRP")
-	mv_par17 := 1
+	MV_PAR17 := 1
 EndIf
 
 //=================================================================
@@ -420,13 +418,13 @@ If !Empty(aFilsCalc)
 
 			oReport:EndPage() //Reinicia Pagina
 			
-			oReport:SetTitle(OemToAnsi("KARDEX FISICO-FINANCEIRO ") + If(mv_par11==3,"(DATA DE MOVIMENTO)",If(mv_par11==1,;
-			                                                              If(lCusRep .And. mv_par17==2,"(SEQUENCIA/REPOSIÇÃO)","(SEQUENCIA)"),IIf(lCusRep .And. mv_par17==2,"(CALCULO/REPOSIÇÃO) " ,"(SEQUENCIA)") ) )+;
+			oReport:SetTitle(OemToAnsi("KARDEX FISICO-FINANCEIRO ") + If(MV_PAR11==3,"(DATA DE MOVIMENTO)",If(MV_PAR11==1,;
+			                                                              If(lCusRep .And. MV_PAR17==2,"(SEQUENCIA/REPOSIÇÃO)","(SEQUENCIA)"),IIf(lCusRep .And. MV_PAR17==2,"(CALCULO/REPOSIÇÃO) " ,"(SEQUENCIA)") ) )+;
 			                                                        " " + IIf(lCusFil .Or. lCusEmp,"",OemToAnsi("L O C A L :")+" "+mv_par08) ) // "KARDEX FISICO-FINANCEIRO "###"(SEQUENCIA)"###"(CALCULO)"###"L O C A L :"
 			If nOrdem == 1				
-			   oReport:SetTitle( oReport:Title()+Alltrim(" (Por "+" Codigo Produto "+" ,em "+AllTrim(_cCodMoeda)+")")+' - ' + aFilsCalc[ nForFilial, 3 ] ) //" (Por "###" ,em "	
+			   oReport:SetTitle( oReport:Title()+AllTrim(" (Por "+" Codigo Produto "+" ,em "+AllTrim(_cCodMoeda)+")")+' - ' + aFilsCalc[ nForFilial, 3 ] ) //" (Por "###" ,em "	
 			Else
-			   oReport:SetTitle( oReport:Title()+Alltrim(" (Por "+" Tipo do Produto"+" ,em "+AllTrim(_cCodMoeda)+")")+' - ' + aFilsCalc[ nForFilial, 3 ] ) //" (Por "###" ,em "
+			   oReport:SetTitle( oReport:Title()+AllTrim(" (Por "+" Tipo do Produto"+" ,em "+AllTrim(_cCodMoeda)+")")+' - ' + aFilsCalc[ nForFilial, 3 ] ) //" (Por "###" ,em "
 			EndIf
 				
 			If lVeic
@@ -436,21 +434,21 @@ If !Empty(aFilsCalc)
 				oSection1:Cell("B1_GRUPO"	):Disable()
 			EndIf
 				
-			If mv_par09 $ "Ss"
+			If MV_PAR09 $ "Ss"
 				oSection3:Cell("cDoc"):SetTitle("SEQUENCIA"+CRLF+"NUMERO") //"SEQUENCIA"
 			EndIf	
 
-			dbSelectArea("SD1")   // Itens de Entrada
+			DBSelectArea("SD1")   // Itens de Entrada
 			nTotRegs += LastRec()
 			
-			dbSelectArea("SD2")   // Itens de Saida
+			DBSelectArea("SD2")   // Itens de Saida
 			nTotRegs += LastRec()
 			
-			dbSelectArea("SD3")   // movimentacoes internas (producao/requisicao/devolucao)
+			DBSelectArea("SD3")   // movimentacoes internas (producao/requisicao/devolucao)
 			nTotRegs += LastRec()
 			
-			dbSelectArea("SB2")  // Saldos em estoque
-			dbSetOrder(1)
+			DBSelectArea("SB2")  // Saldos em estoque
+			DBSetOrder(1)
 			nTotRegs += LastRec()
 			
 			//===========================================================================
@@ -458,7 +456,7 @@ If !Empty(aFilsCalc)
 			//             para verificar se devera considerar TES que nao atualiza    
 			//             saldos em estoque.                                          
 			//===========================================================================
-			lIxbConTes := IF(lIxbConTes == NIL,_lPE_MTAAVLTES,lIxbConTes)
+			lIxbConTes := If(lIxbConTes == NIL,_lPE_MTAAVLTES,lIxbConTes)
 
 			//===========================================================================
 			// Filtragem do relatorio                                                  
@@ -478,13 +476,13 @@ If !Empty(aFilsCalc)
 				   //===========================================================================
 				   // Complemento do SELECT da tabela SD1                                     
 				   //===========================================================================
-				   If lCusRep .And. mv_par17==2
+				   If lCusRep .And. MV_PAR17==2
 					  cSelectD1 := "% D1_CUSRP"
-					  cSelectD1 += Str(mv_par10,1,0) // Coloca a Moeda do Custo
+					  cSelectD1 += Str(MV_PAR10,1,0) // Coloca a Moeda do Custo
 				   Else
 					  cSelectD1 := "% D1_CUSTO"
-					  If mv_par10 > 1
-						 cSelectD1 += Str(mv_par10,1,0) // Coloca a Moeda do Custo
+					  If MV_PAR10 > 1
+						 cSelectD1 += Str(MV_PAR10,1,0) // Coloca a Moeda do Custo
 					  EndIf
 				   EndIf	
 				   cSelectD1 += " CUSTO,"
@@ -504,7 +502,7 @@ If !Empty(aFilsCalc)
 				   cWhereD1 := "%" 
 				   cWhereD1 += "AND" 
 				   If !(lCusFil .Or. lCusEmp)
-					  cWhereD1 += " D1_LOCAL = '" + mv_par08 + "' AND"
+					  cWhereD1 += " D1_LOCAL = '" + MV_PAR08 + "' AND"
 			       EndIf
 				   cWhereD1 += "%" 
 				   //===========================================================================
@@ -528,12 +526,12 @@ If !Empty(aFilsCalc)
 				    //===========================================================================
 				    // Complemento do SELECT da tabela SD2                                     
 				    //===========================================================================
-				    If lCusRep .And. mv_par17==2
+				    If lCusRep .And. MV_PAR17==2
 				       cSelectD2 := "% D2_CUSRP"
-					   cSelectD2 += Str(mv_par10,1,0) // Coloca a Moeda do Custo
+					   cSelectD2 += Str(MV_PAR10,1,0) // Coloca a Moeda do Custo
 				    Else
 				       cSelectD2 := "% D2_CUSTO"
-					   cSelectD2 += Str(mv_par10,1,0) // Coloca a Moeda do Custo
+					   cSelectD2 += Str(MV_PAR10,1,0) // Coloca a Moeda do Custo
 				    EndIf	
 				    cSelectD2 += " CUSTO,"
 			        cSelectD2 += "%"	
@@ -544,7 +542,7 @@ If !Empty(aFilsCalc)
 				cWhereD2 := "%" 
 				cWhereD2 += "AND" 
 				If !(lCusFil .Or. lCusEmp)
-					cWhereD2 += " D2_LOCAL = '" + mv_par08 + "' AND"
+					cWhereD2 += " D2_LOCAL = '" + MV_PAR08 + "' AND"
 				EndIf
 				cWhereD2 += "%"    
 				
@@ -569,12 +567,12 @@ If !Empty(aFilsCalc)
 				//===========================================================================
 				// Complemento do SELECT da tabelas SD3                                    
 				//===========================================================================
-				If lCusRep .And. mv_par17==2
+				If lCusRep .And. MV_PAR17==2
 					cSelectD3 := "% D3_CUSRP"
-					cSelectD3 += Str(mv_par10,1,0) // Coloca a Moeda do Custo
+					cSelectD3 += Str(MV_PAR10,1,0) // Coloca a Moeda do Custo
 				Else
 					cSelectD3 := "% D3_CUSTO"
-					cSelectD3 += Str(mv_par10,1,0) // Coloca a Moeda do Custo
+					cSelectD3 += Str(MV_PAR10,1,0) // Coloca a Moeda do Custo
 				EndIf	
 				cSelectD3 +=	" CUSTO," 
 				cSelectD3 += "%"    
@@ -591,19 +589,19 @@ If !Empty(aFilsCalc)
 					cWhereD3 += " OR  (D3_SERVIC <> '   ' AND D3_TM > '500' AND D3_LOCAL ='"+_cCrtlQualit+"') ) AND"
 				EndIf
 				If !(lCusFil .Or. lCusEmp) .And. !lLocProc
-					cWhereD3 += " D3_LOCAL = '"+mv_par08+"' AND" 
+					cWhereD3 += " D3_LOCAL = '"+MV_PAR08+"' AND" 
 				EndIf
 				If	!lVEIC
-					cWhereD3+= " SB1.B1_COD >= '"+mv_par01+"' AND SB1.B1_COD <= '"+mv_par02+"' AND"
+					cWhereD3+= " SB1.B1_COD >= '"+MV_PAR01+"' AND SB1.B1_COD <= '"+MV_PAR02+"' AND"
 				Else
-					cWhereD3+= " SB1.B1_CODITE >= '"+mv_par01+"' AND SB1.B1_CODITE <= '"+mv_par02+"' AND"
+					cWhereD3+= " SB1.B1_CODITE >= '"+MV_PAR01+"' AND SB1.B1_CODITE <= '"+MV_PAR02+"' AND"
 				EndIf	
 				If lCusEmp
-					cWhereD3 += " SB1.B1_TIPO >= '"+mv_par03+"' AND SB1.B1_TIPO <= '"+mv_par04+"' AND"
+					cWhereD3 += " SB1.B1_TIPO >= '"+MV_PAR03+"' AND SB1.B1_TIPO <= '"+MV_PAR04+"' AND"
 				Else
-					cWhereD3 += " SB1.B1_FILIAL = '"+xFilial("SB1")+"' AND SB1.B1_TIPO >= '"+mv_par03+"' AND SB1.B1_TIPO <= '"+mv_par04+"' AND"
+					cWhereD3 += " SB1.B1_FILIAL = '"+xFilial("SB1")+"' AND SB1.B1_TIPO >= '"+MV_PAR03+"' AND SB1.B1_TIPO <= '"+MV_PAR04+"' AND"
 				EndIf
-				cWhereD3 += " SB1.B1_GRUPO >= '"+mv_par14+"' AND SB1.B1_GRUPO <= '"+mv_par15+"' AND SB1.B1_COD <> '"+cProdimp+"' AND "
+				cWhereD3 += " SB1.B1_GRUPO >= '"+MV_PAR14+"' AND SB1.B1_GRUPO <= '"+MV_PAR15+"' AND SB1.B1_COD <> '"+cProdimp+"' AND "
 				cWhereD3 += " SB1.D_E_L_E_T_=' ' AND"
 				cWhereD3 += "%"	
 				//===========================================================================
@@ -625,30 +623,30 @@ If !Empty(aFilsCalc)
 			    cWhereB1C:= "%" 
 			    cWhereB1D:= "%" 	
 				If	!lVEIC
-					cWhereB1A+= " AND SB1.B1_COD >= '"+mv_par01+"' AND SB1.B1_COD <= '"+mv_par02+"'"
+					cWhereB1A+= " AND SB1.B1_COD >= '"+MV_PAR01+"' AND SB1.B1_COD <= '"+MV_PAR02+"'"
 					cWhereB1B+= " AND SB1.B1_COD = SB1EXS.B1_COD"
 					If lCusEmp
-						cWhereB1C+= " SB1.B1_TIPO >= '"+mv_par03+"' AND SB1.B1_TIPO <= '"+mv_par04+"' AND"
-						cWhereB1D+= " SB1EXS.B1_COD >= '"+mv_par01+"' AND SB1EXS.B1_COD <= '"+mv_par02+"' AND SB1EXS.B1_TIPO >= '"+mv_par03+"' AND SB1EXS.B1_TIPO <= '"+mv_par04+"' AND"
+						cWhereB1C+= " SB1.B1_TIPO >= '"+MV_PAR03+"' AND SB1.B1_TIPO <= '"+MV_PAR04+"' AND"
+						cWhereB1D+= " SB1EXS.B1_COD >= '"+MV_PAR01+"' AND SB1EXS.B1_COD <= '"+MV_PAR02+"' AND SB1EXS.B1_TIPO >= '"+MV_PAR03+"' AND SB1EXS.B1_TIPO <= '"+MV_PAR04+"' AND"
 					Else
-						cWhereB1C+= " SB1.B1_FILIAL = '"+xFilial("SB1")+"' AND SB1.B1_TIPO >= '"+mv_par03+"' AND SB1.B1_TIPO <= '"+mv_par04+"' AND"
-						cWhereB1D+= " SB1EXS.B1_FILIAL = '"+xFilial("SB1")+"' AND SB1EXS.B1_COD >= '"+mv_par01+"' AND SB1EXS.B1_COD <= '"+mv_par02+"' AND SB1EXS.B1_TIPO >= '"+mv_par03+"' AND SB1EXS.B1_TIPO <= '"+mv_par04+"' AND"
+						cWhereB1C+= " SB1.B1_FILIAL = '"+xFilial("SB1")+"' AND SB1.B1_TIPO >= '"+MV_PAR03+"' AND SB1.B1_TIPO <= '"+MV_PAR04+"' AND"
+						cWhereB1D+= " SB1EXS.B1_FILIAL = '"+xFilial("SB1")+"' AND SB1EXS.B1_COD >= '"+MV_PAR01+"' AND SB1EXS.B1_COD <= '"+MV_PAR02+"' AND SB1EXS.B1_TIPO >= '"+MV_PAR03+"' AND SB1EXS.B1_TIPO <= '"+MV_PAR04+"' AND"
 					EndIf	
 				Else
-					cWhereB1A+= " AND SB1.B1_CODITE >= '"+mv_par01+"' AND SB1.B1_CODITE <= '"+mv_par02+"'"
+					cWhereB1A+= " AND SB1.B1_CODITE >= '"+MV_PAR01+"' AND SB1.B1_CODITE <= '"+MV_PAR02+"'"
 					cWhereB1B+= " AND SB1.B1_COD = SB1EXS.B1_COD"
 					If lCusEmp
-						cWhereB1C+= " SB1.B1_TIPO >= '"+mv_par03+"' AND SB1.B1_TIPO <= '"+mv_par04+"' AND"
-						cWhereB1D+= " SB1EXS.B1_CODITE >= '"+mv_par01+"' AND SB1EXS.B1_CODITE <= '"+mv_par02+"' AND SB1EXS.B1_TIPO >= '"+mv_par03+"' AND SB1EXS.B1_TIPO <= '"+mv_par04+"' AND"
+						cWhereB1C+= " SB1.B1_TIPO >= '"+MV_PAR03+"' AND SB1.B1_TIPO <= '"+MV_PAR04+"' AND"
+						cWhereB1D+= " SB1EXS.B1_CODITE >= '"+MV_PAR01+"' AND SB1EXS.B1_CODITE <= '"+MV_PAR02+"' AND SB1EXS.B1_TIPO >= '"+MV_PAR03+"' AND SB1EXS.B1_TIPO <= '"+MV_PAR04+"' AND"
 					Else
-						cWhereB1C+= " SB1.B1_FILIAL = '"+xFilial("SB1")+"' AND SB1.B1_TIPO >= '"+mv_par03+"' AND SB1.B1_TIPO <= '"+mv_par04+"' AND"
-						cWhereB1D+= " SB1EXS.B1_FILIAL = '"+xFilial("SB1")+"' AND SB1EXS.B1_CODITE >= '"+mv_par01+"' AND SB1EXS.B1_CODITE <= '"+mv_par02+"' AND SB1EXS.B1_TIPO >= '"+mv_par03+"' AND SB1EXS.B1_TIPO <= '"+mv_par04+"' AND"
+						cWhereB1C+= " SB1.B1_FILIAL = '"+xFilial("SB1")+"' AND SB1.B1_TIPO >= '"+MV_PAR03+"' AND SB1.B1_TIPO <= '"+MV_PAR04+"' AND"
+						cWhereB1D+= " SB1EXS.B1_FILIAL = '"+xFilial("SB1")+"' AND SB1EXS.B1_CODITE >= '"+MV_PAR01+"' AND SB1EXS.B1_CODITE <= '"+MV_PAR02+"' AND SB1EXS.B1_TIPO >= '"+MV_PAR03+"' AND SB1EXS.B1_TIPO <= '"+MV_PAR04+"' AND"
 					EndIf	
 				EndIf	
 			
-				cWhereB1C += " SB1.B1_GRUPO >= '"+mv_par14+"' AND SB1.B1_GRUPO <= '"+mv_par15+"' AND SB1.B1_COD <> '"+cProdimp+"' AND "
+				cWhereB1C += " SB1.B1_GRUPO >= '"+MV_PAR14+"' AND SB1.B1_GRUPO <= '"+MV_PAR15+"' AND SB1.B1_COD <> '"+cProdimp+"' AND "
 				cWhereB1C += " SB1.D_E_L_E_T_=' '"
-				cWhereB1D += " SB1EXS.B1_GRUPO >= '"+mv_par14+"' AND SB1EXS.B1_GRUPO <= '"+mv_par15+"' AND SB1EXS.B1_COD <> '"+cProdimp+"' AND "
+				cWhereB1D += " SB1EXS.B1_GRUPO >= '"+MV_PAR14+"' AND SB1EXS.B1_GRUPO <= '"+MV_PAR15+"' AND SB1EXS.B1_COD <> '"+cProdimp+"' AND "
 				cWhereB1D += " SB1EXS.D_E_L_E_T_=' '"	
 				
 				cQueryB1A:= Subs(cWhereB1A,2)
@@ -678,11 +676,11 @@ If !Empty(aFilsCalc)
 					cQueryD1 += (" AND F4_FILIAL = '" + xFilial("SF4") + "'")
 				EndIf	
 				cQueryD1 += (" AND SD1.D1_TES = F4_CODIGO AND F4_ESTOQUE = 'S'")
-				cQueryD1 += (" AND D1_DTDIGIT >= '" + DTOS(mv_par05) + "'")
-				cQueryD1 += (" AND D1_DTDIGIT <= '" + DTOS(mv_par06) + "'")
+				cQueryD1 += (" AND D1_DTDIGIT >= '" + DToS(MV_PAR05) + "'")
+				cQueryD1 += (" AND D1_DTDIGIT <= '" + DToS(MV_PAR06) + "'")
 				cQueryD1 +=  " AND D1_ORIGLAN <> 'LF'"
 				If !(lCusFil .Or. lCusEmp)
-					cQueryD1 += " AND D1_LOCAL = '" + mv_par08 + "'"
+					cQueryD1 += " AND D1_LOCAL = '" + MV_PAR08 + "'"
 				EndIf
 				cQueryD1 += " AND SD1.D_E_L_E_T_=' ' AND SF4.D_E_L_E_T_=' '"
 				
@@ -698,10 +696,10 @@ If !Empty(aFilsCalc)
 					cQueryD2 += " AND F4_FILIAL = '"+xFilial("SF4")+"' " 
 				EndIf	
 				cQueryD2 += " AND SD2.D2_TES = F4_CODIGO AND F4_ESTOQUE = 'S'"
-				cQueryD2 += " AND D2_EMISSAO >= '"+DTOS(mv_par05)+"' AND D2_EMISSAO <= '"+DTOS(mv_par06)+"'"
+				cQueryD2 += " AND D2_EMISSAO >= '"+DToS(MV_PAR05)+"' AND D2_EMISSAO <= '"+DToS(MV_PAR06)+"'"
 				cQueryD2 += " AND D2_ORIGLAN <> 'LF'"
 				If !(lCusFil .Or. lCusEmp)
-					cQueryD2 += " AND D2_LOCAL = '"+mv_par08+"'"
+					cQueryD2 += " AND D2_LOCAL = '"+MV_PAR08+"'"
 				EndIf
 				cQueryD2 += " AND SD2.D_E_L_E_T_=' ' AND SF4.D_E_L_E_T_=' '"	
 				
@@ -711,7 +709,7 @@ If !Empty(aFilsCalc)
 				If !lCusEmp
 					cQueryD3 += " AND D3_FILIAL = '"+xFilial("SD3")+"' "
 				EndIf	
-				cQueryD3 += " AND D3_EMISSAO >= '"+DTOS(mv_par05)+"' AND D3_EMISSAO <= '"+DTOS(mv_par06)+"'"
+				cQueryD3 += " AND D3_EMISSAO >= '"+DToS(MV_PAR05)+"' AND D3_EMISSAO <= '"+DToS(MV_PAR06)+"'"
 				If _cEstornD3 == 'N'
 					cQueryD3 += " AND D3_ESTORNO <> 'S'"
 				EndIf
@@ -720,13 +718,13 @@ If !Empty(aFilsCalc)
 					cQueryD3 += " OR  (D3_SERVIC <> '   ' AND D3_TM > '500' AND D3_LOCAL ='"+_cCrtlQualit+"') )"					
 				EndIf					
 				If !(lCusFil .Or. lCusEmp) .And. !lLocProc
-					cQueryD3 += " AND D3_LOCAL = '"+mv_par08+"'"
+					cQueryD3 += " AND D3_LOCAL = '"+MV_PAR08+"'"
 				EndIf
 				cQueryD3 += " AND SD3.D_E_L_E_T_=' '"	
 				
 				cQuerySub:= "SELECT 1 "
 				
-				If mv_par07 == 1
+				If MV_PAR07 == 1
 					cQuery2 := " AND NOT EXISTS (" + cQuerySub + cQueryD1
 					cQuery2 += cQueryB1B
 					cQuery2 += " AND "
@@ -773,9 +771,10 @@ If !Empty(aFilsCalc)
 					If lVEIC
 						cUnion += ", SB1EXS.B1_CODITE CODITE"	// 28
 					EndIf		
-					cUnion += ", 0"						// 29		   
-					cUnion += ", SB1EXS.B1_CONV FATOR "        // 30 // Fator conversao 
-                    cUnion += ", SB1EXS.B1_TIPCONV TIPOCONV "     // 31 // Tipo conversao   
+					cUnion += ", 0"								// 29		   
+					cUnion += ", SB1EXS.B1_CONV FATOR "        	// 30 // Fator conversao 
+                    cUnion += ", SB1EXS.B1_TIPCONV TIPOCONV "   // 31 // Tipo conversao
+					cUnion += ", SB1EXS.B1_FILIAL FILIAL "     	// 32 // Filial   
                     
 					cUnion += " FROM "+RetSqlName("SB1") + " SB1EXS WHERE"
 					cUnion += cQueryB1D
@@ -798,10 +797,10 @@ If !Empty(aFilsCalc)
 					EndIf
 				EndIf
 			
-				If mv_par11 == 1
+				If MV_PAR11 == 1
 //					cOrder += "17,12"+IIf(lVEIC,',29',',28')
 					cOrder += "12"+IIf(lVEIC,',29',',28')
-				ELSEIf mv_par11 == 3
+				ElseIf MV_PAR11 == 3
 					cOrder += "9"+IIf(lVEIC,',29',',28')
 				Else
 					If lCusFil .Or. lCusEmp
@@ -845,14 +844,15 @@ If !Empty(aFilsCalc)
 							 %Exp:cSelectVe%       	//-- 28 CODITE
 							 SD1.R_E_C_N_O_ NRECNO,  //-- 29 RECNO
 						     SB1.B1_CONV FATOR,      //-- 30 // Fator conversao 
-                             SB1.B1_TIPCONV TIPOCONV //-- 31 // Tipo conversao   
+                             SB1.B1_TIPCONV TIPOCONV,//-- 31 // Tipo conversao   
+							 D1_FILIAL               //-- 32 // FILIAL 
 							 					 
-					FROM %table:SB1% SB1,%table:SD1% SD1,%table:SF4% SF4
+					FROM %Table:SB1% SB1,%table:SD1% SD1,%table:SF4% SF4
 					
 					WHERE SB1.B1_COD     =  SD1.D1_COD		AND  	%Exp:cWhereD1C%						
 						  SD1.D1_TES     =  SF4.F4_CODIGO	AND
-						  SF4.F4_ESTOQUE =  'S'				AND 	SD1.D1_DTDIGIT >= %Exp:mv_par05%	AND
-						  SD1.D1_DTDIGIT <= %Exp:mv_par06%	AND		SD1.D1_ORIGLAN <> 'LF'				   
+						  SF4.F4_ESTOQUE =  'S'				AND 	SD1.D1_DTDIGIT >= %Exp:MV_PAR05%	AND
+						  SD1.D1_DTDIGIT <= %Exp:MV_PAR06%	AND		SD1.D1_ORIGLAN <> 'LF'				   
 						  %Exp:cWhereD1%
 						  SD1.%NotDel%						AND 	SF4.%NotDel%                           
 						  %Exp:cWhereB1A%                   AND
@@ -888,17 +888,18 @@ If !Empty(aFilsCalc)
 							' ', 					
 							D2_LOTECTL
 							%Exp:cSelectVe%
-							SD2.R_E_C_N_O_ SD2RECNO, //-- 29 RECNO
-						    SB1.B1_CONV FATOR,      //-- 30 // Fator conversao 
-                            SB1.B1_TIPCONV TIPOCONV //-- 31 // Tipo conversao   
+							SD2.R_E_C_N_O_ SD2RECNO,  //-- 29 RECNO
+						    SB1.B1_CONV FATOR,        //-- 30 // Fator conversao 
+                            SB1.B1_TIPCONV TIPOCONV,  //-- 31 // Tipo conversao 
+							D2_FILIAL                 //-- 32 // FILIAL       
 
 							
-					FROM %table:SB1% SB1,%table:SD2% SD2,%table:SF4% SF4
+					FROM %Table:SB1% SB1,%table:SD2% SD2,%table:SF4% SF4
 					
 					WHERE	SB1.B1_COD     =  SD2.D2_COD		AND	%Exp:cWhereD2C%						
 							SD2.D2_TES     =  SF4.F4_CODIGO		AND
-							SF4.F4_ESTOQUE =  'S'				AND	SD2.D2_EMISSAO >= %Exp:mv_par05%	AND
-							SD2.D2_EMISSAO <= %Exp:mv_par06%	AND	SD2.D2_ORIGLAN <> 'LF'				   
+							SF4.F4_ESTOQUE =  'S'				AND	SD2.D2_EMISSAO >= %Exp:MV_PAR05%	AND
+							SD2.D2_EMISSAO <= %Exp:MV_PAR06%	AND	SD2.D2_ORIGLAN <> 'LF'				   
 							%Exp:cWhereD2%
 							SD2.%NotDel%						AND SF4.%NotDel%						   
 							%Exp:cWhereB1A%                     AND
@@ -935,13 +936,14 @@ If !Empty(aFilsCalc)
 							D3_LOTECTL
 							%Exp:cSelectVe%
 							SD3.R_E_C_N_O_ SD3RECNO, //-- 29 RECNO
-							SB1.B1_CONV FATOR,      //-- 30 // Fator conversao 
-                            SB1.B1_TIPCONV TIPOCONV //-- 31 // Tipo conversao   
+							SB1.B1_CONV FATOR,       //-- 30 // Fator conversao 
+                            SB1.B1_TIPCONV TIPOCONV, //-- 31 // Tipo conversao 
+							D3_FILIAL                //-- 32 // FILIAL      
 			
-					FROM %table:SB1% SB1,%table:SD3% SD3
+					FROM %Table:SB1% SB1,%table:SD3% SD3
 			
 					WHERE	SB1.B1_COD     =  SD3.D3_COD 		AND %Exp:cWhereD3C%						
-							SD3.D3_EMISSAO >= %Exp:mv_par05%	AND	SD3.D3_EMISSAO <= %Exp:mv_par06%	AND
+							SD3.D3_EMISSAO >= %Exp:MV_PAR05%	AND	SD3.D3_EMISSAO <= %Exp:MV_PAR06%	AND
 							%Exp:cWhereD3% 	
 							SD3.%NotDel% 
 							
@@ -964,10 +966,10 @@ If !Empty(aFilsCalc)
 				//===========================================================================
 				// Inicio da impressao do fluxo do relatorio                               
 				//===========================================================================
-				dbSelectArea(cAliasTop)
+				DBSelectArea(cAliasTop)
 				oReport:SetMeter(nTotRegs)
 				
-				TcSetField(cAliasTop,DATA ,"D", TamSx3("D1_DTDIGIT")[1], TamSx3("D1_DTDIGIT")[2] )
+				TCSetField(cAliasTop,DATA ,"D", TamSX3("D1_DTDIGIT")[1], TamSX3("D1_DTDIGIT")[2] )
 
 				While !oReport:Cancel() .And. !(cAliasTop)->(Eof())
 					
@@ -983,11 +985,11 @@ If !Empty(aFilsCalc)
 					//===========================================================================
 					
 					If !Empty(cFilUsrSB1) 
-						DbSelectArea("SB1")
-						SB1->(dbSetOrder(1))
-					    SB1->(dbSeek( xFilial("SB1") + (cAliasTop)->PRODUTO))
+						DBSelectArea("SB1")
+						SB1->(DBSetOrder(1))
+					    SB1->(DBSeek( xFilial("SB1") + (cAliasTop)->PRODUTO))
 					    If !(&(cFilUsrSB1))
-					       (cAliasTop)->(dbSkip())
+					       (cAliasTop)->(DBSkip())
 			    		   Loop
 				    	EndIf   
 					EndIf
@@ -1000,11 +1002,11 @@ If !Empty(aFilsCalc)
 					//===========================================================================
 					     
 					If !Empty(cFilUsrSB2)
-						DbSelectArea("SB2")
-						SB2->(dbSetOrder(1))
-					    SB2->(dbSeek( xFilial("SB2") + (cAliasTop)->PRODUTO))
+						DBSelectArea("SB2")
+						SB2->(DBSetOrder(1))
+					    SB2->(DBSeek( xFilial("SB2") + (cAliasTop)->PRODUTO))
 					    If !(&(cFilUsrSB2))
-					       (cAliasTop)->(dbSkip())
+					       (cAliasTop)->(DBSkip())
 				    	   Loop
 				    	EndIf   
 					EndIf
@@ -1012,29 +1014,29 @@ If !Empty(aFilsCalc)
 					//===========================================================================
 					// Se nao encontrar no arquivo de saldos ,nao lista 
 					//===========================================================================
-					dbSelectArea("SB2")
-					If !dbSeek(xFilial("SB2")+(cAliasTop)->PRODUTO+If(lCusFil .Or. lCusEmp,"",mv_par08))
-						dbSelectArea(cAliasTop)
-						dbSkip()
+					DBSelectArea("SB2")
+					If !DBSeek(xFilial("SB2")+(cAliasTop)->PRODUTO+If(lCusFil .Or. lCusEmp,"",MV_PAR08))
+						DBSelectArea(cAliasTop)
+						DBSkip()
 						Loop
 					EndIf
 					
-					dbSelectArea(cAliasTop)
+					DBSelectArea(cAliasTop)
 					cProdAnt  := (cAliasTop)->PRODUTO
-					cLocalAnt := alltrim(SB2->B2_LOCAL)
+					cLocalAnt := AllTrim(SB2->B2_LOCAL)
 					
 					lFirst:=.F.
 			
 					MR900ImpS1(@aSalAtu,cAliasTop,.T.,lVEIC,lCusFil,lCusEmp,oSection1,oSection2,oReport)
 					
 					oSection3:Init()
-					While !oReport:Cancel() .And. !(cAliasTop)->(Eof()) .And. (cAliasTop)->PRODUTO = cProdAnt .And. If(lCusFil .Or. lCusEmp .Or. lLocProc,.T.,IIf(alltrim((cAliasTop)->ARQ) <> 'SB1',alltrim((cAliasTop)->ARMAZEM)==cLocalAnt,.T.))
+					While !oReport:Cancel() .And. !(cAliasTop)->(Eof()) .And. (cAliasTop)->PRODUTO = cProdAnt .And. If(lCusFil .Or. lCusEmp .Or. lLocProc,.T.,IIf(AllTrim((cAliasTop)->ARQ) <> 'SB1',AllTrim((cAliasTop)->ARMAZEM)==cLocalAnt,.T.))
 						oReport:IncMeter()
 						lContinua := .F.
 						lImpSMov  := .F.
-						If Alltrim((cAliasTop)->ARQ) $ "SD1/SD2"
+						If AllTrim((cAliasTop)->ARQ) $ "SD1/SD2"
 							lFirst:=.T.
-							SF4->(dbSeek(xFilial("SF4")+(cAliasTop)->TES))
+							SF4->(DBSeek(xFilial("SF4")+(cAliasTop)->TES))
 							//===========================================================================
 							// Despreza Notas Fiscais Lancadas Pelo Modulo do Livro Fiscal  
 							//===========================================================================
@@ -1046,20 +1048,20 @@ If !Empty(aFilsCalc)
 								lTesNEst := If(ValType(lTesNEst) # "L",.F.,lTesNEst)
 							EndIf
 							If SF4->F4_ESTOQUE != "S" .And. !lTesNEst
-								dbSkip()
+								DBSkip()
 								Loop
 							EndIf
-						ElseIf Alltrim((cAliasTop)->ARQ) == "SD3"
+						ElseIf AllTrim((cAliasTop)->ARQ) == "SD3"
 							lFirst:=.T.
 							//===========================================================================
 							// Quando movimento ref apropr. indireta, so considera os         
 							// movimentos com destino ao almoxarifado de apropriacao indireta.
 							//===========================================================================
 							lInverteMov:=.F.
-							If alltrim((cAliasTop)->ARMAZEM) != cLocalAnt .Or. lCusFil .Or. lCusEmp
-								If !(Substr((cAliasTop)->CF,3,1) == "3")
+							If AllTrim((cAliasTop)->ARMAZEM) != cLocalAnt .Or. lCusFil .Or. lCusEmp
+								If !(SubStr((cAliasTop)->CF,3,1) == "3")
 									If !(lCusFil .Or. lCusEmp)
-										dbSkip()
+										DBSkip()
 										Loop
 									EndIf
 								ElseIf lPriApropri
@@ -1071,37 +1073,34 @@ If !Empty(aFilsCalc)
 							// Caso seja uma transferencia de localizacao verifica se lista   
 							// o movimento ou nao                                             
 							//===========================================================================
-							If mv_par13 == 2 .And. Substr((cAliasTop)->CF,3,1) == "4"
+							If MV_PAR13 == 2 .And. SubStr((cAliasTop)->CF,3,1) == "4"
 								cNumSeqTr := (cAliasTOP)->(PRODUTO+SEQUENCIA+ARMAZEM)
 								aDadosTran:={(cAliasTOP)->TES,(cAliasTOP)->QUANTIDADE,(cAliasTOP)->CUSTO,(cAliasTOP)->QUANT2UM,(cAliasTOP)->TIPO,;
 								(cAliasTOP)->DATA,(cAliasTOP)->CF,(cAliasTOP)->SEQUENCIA,(cAliasTOP)->DOCUMENTO,(cAliasTOP)->PRODUTO,;
-								(cAliasTOP)->OP,(cAliasTOP)->PROJETO,(cAliasTOP)->CC,alltrim((cAliasTOP)->ARQ)}
-								dbSkip()
+								(cAliasTOP)->OP,(cAliasTOP)->PROJETO,(cAliasTOP)->CC,AllTrim((cAliasTOP)->ARQ)}
+								DBSkip()
 								If (cAliasTOP)->(PRODUTO+SEQUENCIA+ARMAZEM) == cNumSeqTr
-									dbSkip()
+									DBSkip()
 									Loop
 								Else
 									lContinua := .T.
 									If !Localiza(aDadosTran[10])
 										If lFirst
-											oSection3:Cell("dDtMov"):SetValue(STOD(aDadosTran[6]))
+											oSection3:Cell("dDtMov"):SetValue(SToD(aDadosTran[6]))
 											oSection3:Cell("cTES"):SetValue(aDadosTran[1])
-											If ( cPaisLoc=="BRA" )
-												oSection3:Cell("cCF"):Show()
-												If	lInverteMov
-													oSection3:Cell("cCF"):SetValue(Substr(aDadosTran[7],1,3)+"*")
-												Else
-													oSection3:Cell("cCF"):SetValue(aDadosTran[7])
-												EndIf
+											oSection3:Cell("cCF"):Show()
+
+											If	lInverteMov
+												oSection3:Cell("cCF"):SetValue(SubStr(aDadosTran[7],1,3)+"*")
 											Else
-												oSection3:Cell("cCF"):Hide()
-												oSection3:Cell("cCF"):SetValue("   ")
+												oSection3:Cell("cCF"):SetValue(aDadosTran[7])
 											EndIf
-											If mv_par09 $ "Ss"
+											
+											If MV_PAR09 $ "Ss"
 												oSection3:Cell("cDoc"):SetValue(aDadosTran[8])
 											Else
 												oSection3:Cell("cDoc"):SetValue(aDadosTran[9])
-											Endif
+											EndIf
 										EndIf
 										
 										If aDadosTran[1] <= "500"
@@ -1127,7 +1126,7 @@ If !Empty(aFilsCalc)
 											
 											
 											aSalAtu[1] += aDadosTran[2]
-											aSalAtu[mv_par10+1] += aDadosTran[3]
+											aSalAtu[MV_PAR10+1] += aDadosTran[3]
 											aSalAtu[7] += aDadosTran[4]
 										Else
 										
@@ -1153,7 +1152,7 @@ If !Empty(aFilsCalc)
 											
 											
 											aSalAtu[1] -= aDadosTran[2]
-											aSalAtu[mv_par10+1] -= aDadosTran[3]
+											aSalAtu[MV_PAR10+1] -= aDadosTran[3]
 											aSalAtu[7] -= aDadosTran[4]
 										EndIf
 									Else
@@ -1163,29 +1162,24 @@ If !Empty(aFilsCalc)
 							EndIf
 						EndIf
 						If lFirst .And. !lContinua .And. lTransEnd
-							oSection3:Cell("dDtMov"):SetValue(STOD(DATA))
+							oSection3:Cell("dDtMov"):SetValue(SToD(DATA))
 							oSection3:Cell("cTES"):SetValue(TES)
-							If ( cPaisLoc=="BRA" )
-								oSection3:Cell("cCF"):Show()
-								oSection3:Cell("cCF"):SetValue(CF)
-								If	lInverteMov
-									oSection3:Cell("cCF"):SetValue(Substr(CF,1,3)+"*")
-								Else
-									oSection3:Cell("cCF"):SetValue(CF)
-								EndIf
+							oSection3:Cell("cCF"):Show()
+							oSection3:Cell("cCF"):SetValue(CF)
+							If	lInverteMov
+								oSection3:Cell("cCF"):SetValue(SubStr(CF,1,3)+"*")
 							Else
-								oSection3:Cell("cCF"):Hide()
-								oSection3:Cell("cCF"):SetValue("   ")
+								oSection3:Cell("cCF"):SetValue(CF)
 							EndIf
-							If mv_par09 $ "Ss"
+							If MV_PAR09 $ "Ss"
 								oSection3:Cell("cDoc"):SetValue(SEQUENCIA)
 							Else
 								oSection3:Cell("cDoc"):SetValue(DOCUMENTO)
-							Endif
+							EndIf
 						EndIf
 						
 						Do Case
-							Case Alltrim((cAliasTop)->ARQ) == "SD1" .And. !lContinua .And. lTransEnd
+							Case AllTrim((cAliasTop)->ARQ) == "SD1" .And. !lContinua .And. lTransEnd
 								lDev:=MTR900Dev("SD1",cAliasTop)
 								If (cAliasTOP)->TES <= "500" .And. !lDev
 									If (cAliasTOP)->TIPONF != "C"
@@ -1214,7 +1208,7 @@ If !Empty(aFilsCalc)
 									oSection3:Cell("nSAI2UnQtd"):SetValue(0)  //=======================  QTD SEGUNDA UNID MEDIDA 
 									
 									aSalAtu[1] += (cAliasTOP)->QUANTIDADE
-									aSalAtu[mv_par10+1] += (cAliasTOP)->CUSTO
+									aSalAtu[MV_PAR10+1] += (cAliasTOP)->CUSTO
 									aSalAtu[7] += (cAliasTOP)->QUANT2UM
 								Else
 									If (cAliasTOP)->TIPONF != "C"
@@ -1244,7 +1238,7 @@ If !Empty(aFilsCalc)
                                         oSection3:Cell("nSAI2UnQtd"):SetValue((cAliasTOP)->QUANT2UM * -1)  //=======================  QTD SEGUNDA UNID MEDIDA 
 										
 										aSalAtu[1] += (cAliasTOP)->QUANTIDADE
-										aSalAtu[mv_par10+1] += (cAliasTOP)->CUSTO
+										aSalAtu[MV_PAR10+1] += (cAliasTOP)->CUSTO
 										aSalAtu[7] += (cAliasTOP)->QUANT2UM
 									Else
 										oSection3:Cell("nSAIQtd"):SetValue((cAliasTOP)->QUANTIDADE)
@@ -1252,11 +1246,11 @@ If !Empty(aFilsCalc)
 										oSection3:Cell("nSAI2UnQtd"):SetValue((cAliasTOP)->QUANT2UM)  //=======================  QTD SEGUNDA UNID MEDIDA 
 										
 										aSalAtu[1] 			-= (cAliasTOP)->QUANTIDADE
-										aSalAtu[mv_par10+1]	-= (cAliasTOP)->CUSTO
+										aSalAtu[MV_PAR10+1]	-= (cAliasTOP)->CUSTO
 										aSalAtu[7]			-= (cAliasTOP)->QUANT2UM
 									EndIf
 								EndIf
-							Case Alltrim((cAliasTop)->ARQ) = "SD2" .And. !lContinua .And. lTransEnd
+							Case AllTrim((cAliasTop)->ARQ) = "SD2" .And. !lContinua .And. lTransEnd
 								lDev:=MTR900Dev("SD2",cAliasTop)
 								If (cAliasTOP)->TES <= "500" .Or. lDev
 									If lDev
@@ -1269,7 +1263,7 @@ If !Empty(aFilsCalc)
 										oSection3:Cell("nENT2UnQtd"):SetValue((cAliasTOP)->QUANT2UM * -1)  //=======================  QTD SEGUNDA UNID MEDIDA 
 										
 										aSalAtu[1] 			-= (cAliasTOP)->QUANTIDADE
-										aSalAtu[mv_par10+1]	-= (cAliasTOP)->CUSTO
+										aSalAtu[MV_PAR10+1]	-= (cAliasTOP)->CUSTO
 										aSalAtu[7]			-= (cAliasTOP)->QUANT2UM
 									Else
 										oSection3:Cell("nENTQtd"):Show()
@@ -1281,7 +1275,7 @@ If !Empty(aFilsCalc)
 										oSection3:Cell("nENT2UnQtd"):SetValue((cAliasTOP)->QUANT2UM)  //=======================  QTD SEGUNDA UNID MEDIDA 
 										
 										aSalAtu[1]			+= (cAliasTOP)->QUANTIDADE
-										aSalAtu[mv_par10+1]	+= (cAliasTOP)->CUSTO
+										aSalAtu[MV_PAR10+1]	+= (cAliasTOP)->CUSTO
 										aSalAtu[7]			+= (cAliasTOP)->QUANT2UM
 									EndIf
 									
@@ -1323,10 +1317,10 @@ If !Empty(aFilsCalc)
 									oSection3:Cell("nSAI2UnQtd"):SetValue((cAliasTOP)->QUANT2UM)   //=======================  QTD SEGUNDA UNID MEDIDA 
 									
 									aSalAtu[1]			-= (cAliasTOP)->QUANTIDADE
-									aSalAtu[mv_par10+1]	-= (cAliasTOP)->CUSTO
+									aSalAtu[MV_PAR10+1]	-= (cAliasTOP)->CUSTO
 									aSalAtu[7]			-= (cAliasTOP)->QUANT2UM
 								EndIf
-							Case Alltrim((cAliasTop)->ARQ) == "SD3" .And. !lContinua  .And. lTransEnd
+							Case AllTrim((cAliasTop)->ARQ) == "SD3" .And. !lContinua  .And. lTransEnd
 								lDev := .F.
 								If	lInverteMov
 									If (cAliasTOP)->TES > "500"
@@ -1351,7 +1345,7 @@ If !Empty(aFilsCalc)
 										oSection3:Cell("nSAI2UnQtd"):SetValue(0)  //=======================  QTD SEGUNDA UNID MEDIDA 
 										
 										aSalAtu[1]			+= (cAliasTOP)->QUANTIDADE
-										aSalAtu[mv_par10+1]	+= (cAliasTOP)->CUSTO
+										aSalAtu[MV_PAR10+1]	+= (cAliasTOP)->CUSTO
 										aSalAtu[7]			+= (cAliasTOP)->QUANT2UM
 									Else
 
@@ -1376,7 +1370,7 @@ If !Empty(aFilsCalc)
 										oSection3:Cell("nSAI2UnQtd"):SetValue((cAliasTOP)->QUANT2UM)    //=======================  QTD SEGUNDA UNID MEDIDA 										
 										
 										aSalAtu[1]			-= (cAliasTOP)->QUANTIDADE
-										aSalAtu[mv_par10+1]	-= (cAliasTOP)->CUSTO
+										aSalAtu[MV_PAR10+1]	-= (cAliasTOP)->CUSTO
 										aSalAtu[7]			-= (cAliasTOP)->QUANT2UM
 									EndIf
 									If lCusFil .Or. lCusEmp
@@ -1405,7 +1399,7 @@ If !Empty(aFilsCalc)
 										oSection3:Cell("nSAI2UnQtd"):SetValue(0)  //=======================  QTD SEGUNDA UNID MEDIDA 
 										
 										aSalAtu[1]			+= (cAliasTOP)->QUANTIDADE
-										aSalAtu[mv_par10+1]	+= (cAliasTOP)->CUSTO
+										aSalAtu[MV_PAR10+1]	+= (cAliasTOP)->CUSTO
 										aSalAtu[7]			+= (cAliasTOP)->QUANT2UM
 									Else
 
@@ -1430,7 +1424,7 @@ If !Empty(aFilsCalc)
 										oSection3:Cell("nSAI2UnQtd"):SetValue((cAliasTOP)->QUANT2UM)    
 										
 										aSalAtu[1]			-= (cAliasTOP)->QUANTIDADE
-										aSalAtu[mv_par10+1]	-= (cAliasTOP)->CUSTO
+										aSalAtu[MV_PAR10+1]	-= (cAliasTOP)->CUSTO
 										aSalAtu[7]			-= (cAliasTOP)->QUANT2UM
 									EndIf
 									If lCusFil .Or. lCusEmp
@@ -1440,11 +1434,11 @@ If !Empty(aFilsCalc)
 						EndCase
 						If lFirst  .And. lTransEnd
 							oSection3:Cell("nSALDQtd"):SetValue(aSalAtu[1])
-							oSection3:Cell("nSALDCus"):SetValue(aSalAtu[mv_par10+1])
+							oSection3:Cell("nSALDCus"):SetValue(aSalAtu[MV_PAR10+1])
 							oSection3:Cell("nSALD2UnQtd"):SetValue(aSalAtu[7])
 						EndIf
 						Do Case
-							Case Alltrim((cAliasTop)->ARQ) == "SD3" .And. !lContinua  .And. lTransEnd
+							Case AllTrim((cAliasTop)->ARQ) == "SD3" .And. !lContinua  .And. lTransEnd
 								If Empty((cAliasTOP)->OP) .And. Empty((cAliasTOP)->PROJETO)
 									oSection3:Cell("cCCPVPJOP"):SetValue('CC'+(cAliasTOP)->CC)
 								ElseIf !Empty((cAliasTOP)->PROJETO)
@@ -1452,17 +1446,17 @@ If !Empty(aFilsCalc)
 								ElseIf !Empty((cAliasTOP)->OP)
 									oSection3:Cell("cCCPVPJOP"):SetValue('OP'+(cAliasTOP)->OP)
 								EndIf
-							Case Alltrim((cAliasTop)->ARQ) == "SD1" .And. !lContinua .And. lTransEnd
+							Case AllTrim((cAliasTop)->ARQ) == "SD1" .And. !lContinua .And. lTransEnd
 								cTipoNf := 'F-'
-								SD1->(dbGoTo((cAliasTop)->NRECNO))
-								SD2->(dbSetOrder(3))
-								If SD2->(dbSeek(xFilial("SD2")+SD1->D1_NFORI+SD1->D1_SERIORI+SD1->D1_FORNECE+SD1->D1_LOJA))
+								SD1->(DBGoTo((cAliasTop)->NRECNO))
+								SD2->(DBSetOrder(3))
+								If SD2->(DBSeek(xFilial("SD2")+SD1->D1_NFORI+SD1->D1_SERIORI+SD1->D1_FORNECE+SD1->D1_LOJA))
 									If SD2->D2_TIPO <> 'B'
 										cTipoNf := 'C-'
 									EndIf									
 								EndIf
 								oSection3:Cell("cCCPVPJOP"):SetValue(cTipoNf+(cAliasTOP)->FORNECEDOR)
-							Case Alltrim((cAliasTop)->ARQ) == "SD2" .And. !lContinua .And. lTransEnd
+							Case AllTrim((cAliasTop)->ARQ) == "SD2" .And. !lContinua .And. lTransEnd
 								//===========================================================================
 								// N - QNC: 002117                                                       
 								// Corrigida a ultima coluna do relatorio onde apresentava nas notas     
@@ -1487,12 +1481,12 @@ If !Empty(aFilsCalc)
 						
 						If lFirst .And. lTransEnd
 							oSection3:PrintLine()
-						Endif
+						EndIf
 						lTransEnd := .T.
 						
 						If !lInverteMov .Or. (lInverteMov .And. lPriApropri)
 							If !lContinua //Acerto para utilizar o Array aDadosTranf[]
-								dbSkip()
+								DBSkip()
 							EndIf
 						EndIf
 					EndDo
@@ -1524,14 +1518,14 @@ If !Empty(aFilsCalc)
 					oSection2:Finish()
 					If !lImpSMov
 						oSection3:Finish()
-					Endif
+					EndIf
 				EndDo
-				dbSelectArea(cAliasTop)
+				DBSelectArea(cAliasTop)
 				Else				
-			#ENDIF
-				dbSelectArea("SD1")
-				If mv_par11 == 1
-					dbSetOrder(5)
+			#EndIf
+				DBSelectArea("SD1")
+				If MV_PAR11 == 1
+					DBSetOrder(5)
 				Else
 					If lCusFil .Or. lCusEmp
 						cIndice:="D1_FILIAL+D1_COD+D1_SEQCALC+D1_NUMSEQ"
@@ -1542,13 +1536,13 @@ If !Empty(aFilsCalc)
 					nInd := RetIndex("SD1")
 					#IFNDEF TOP
 			  		   dbSetIndex(cTrbSD1+OrdBagExt())
-					#ENDIF
-					dbSetOrder(nInd+1)
+					#EndIf
+					DBSetOrder(nInd+1)
 				EndIf
 				
-				dbSelectArea("SD2")
-				If mv_par11 == 1
-					dbSetOrder(1)
+				DBSelectArea("SD2")
+				If MV_PAR11 == 1
+					DBSetOrder(1)
 				Else
 					If lCusFil .Or. lCusEmp
 						cIndice:="D2_FILIAL+D2_COD+D2_SEQCALC+D2_NUMSEQ"
@@ -1559,14 +1553,14 @@ If !Empty(aFilsCalc)
 					nInd := RetIndex("SD2")
 					#IFNDEF TOP
 					  dbSetIndex(cTrbSD2+OrdBagExt())
-					#ENDIF
-					dbSetOrder(nInd+1)
+					#EndIf
+					DBSetOrder(nInd+1)
 				EndIf
 				
-				dbSelectArea("SD3")
+				DBSelectArea("SD3")
 			
-				If mv_par11 == 1
-					dbSetOrder(3)
+				If MV_PAR11 == 1
+					DBSetOrder(3)
 				Else
 					If lCusFil .Or. lCusEmp
 						cIndice:="D3_FILIAL+D3_COD+D3_SEQCALC+D3_NUMSEQ"
@@ -1579,19 +1573,19 @@ If !Empty(aFilsCalc)
 					nInd := RetIndex("SD3")
 					#IFNDEF TOP
 			     	  dbSetIndex(cTrbSD3+OrdBagExt())
-			 		#ENDIF
-				    dbSetOrder(nInd+1)
+			 		#EndIf
+				    DBSetOrder(nInd+1)
 				EndIf
 				
-				dbSelectArea("SB1")
+				DBSelectArea("SB1")
 				If ! lVEIC
 					If nOrdem == 1
-						dbSetOrder(1)
-						dbseek(cFilial+mv_par01)
+						DBSetOrder(1)
+						DBSeek(cFilial+MV_PAR01)
 						cOrder := IndexKey()
 					ElseIf nOrdem == 2
-						dbSetOrder(2)
-						dbseek(cFilial+mv_par03)
+						DBSetOrder(2)
+						DBSeek(cFilial+MV_PAR03)
 						cOrder := IndexKey()
 					EndIf  
 				Else
@@ -1607,18 +1601,18 @@ If !Empty(aFilsCalc)
 				MakeAdvplExpr(oReport:uParam)
 			
 				cCondicao := 'B1_FILIAL == "'+xFilial("SB1")+'".And.' 
-				cCondicao += 'B1_TIPO >= "'+mv_par03+'".And.B1_TIPO <="'+mv_par04+'".And.'
+				cCondicao += 'B1_TIPO >= "'+MV_PAR03+'".And.B1_TIPO <="'+MV_PAR04+'".And.'
 				If ! lVEIC
-					cCondicao += 'B1_COD >= "'+mv_par01+'".And.B1_COD <="'+mv_par02+'".And.'
+					cCondicao += 'B1_COD >= "'+MV_PAR01+'".And.B1_COD <="'+MV_PAR02+'".And.'
 				Else
-					cCondicao += 'B1_CODITE >= "'+mv_par01+'".And.B1_CODITE <="'+mv_par02+'".And.'
-				Endif	
-				cCondicao += 'B1_GRUPO >= "'+mv_par14+'".And.B1_GRUPO <="'+mv_par15+'".And.'	
-				cCondicao += 'B1_COD <> "'+Substr(cProdImp,1,Len(B1_COD))+'"'
+					cCondicao += 'B1_CODITE >= "'+MV_PAR01+'".And.B1_CODITE <="'+MV_PAR02+'".And.'
+				EndIf	
+				cCondicao += 'B1_GRUPO >= "'+MV_PAR14+'".And.B1_GRUPO <="'+MV_PAR15+'".And.'	
+				cCondicao += 'B1_COD <> "'+SubStr(cProdImp,1,Len(B1_COD))+'"'
 			
 				oReport:Section(1):SetFilter(cCondicao,cOrder)
 				
-				dbSelectArea("SB1")
+				DBSelectArea("SB1")
 				oReport:SetMeter(nTotRegs)
 				
 				While !oReport:Cancel() .And. SB1->(!Eof())
@@ -1629,39 +1623,39 @@ If !Empty(aFilsCalc)
 					
 					oReport:IncMeter()
 					
-					dbSelectArea("SB2")
+					DBSelectArea("SB2")
 					//===========================================================================
 					// Se nao encontrar no arquivo de saldos ,nao lista 
 					//===========================================================================
-					If !dbSeek(xFilial("SB2")+SB1->B1_COD+IF(lCusFil .Or. lCusEmp,"",mv_par08))
-						dbSelectArea("SB1")
-						dbSkip()
+					If !DBSeek(xFilial("SB2")+SB1->B1_COD+If(lCusFil .Or. lCusEmp,"",MV_PAR08))
+						DBSelectArea("SB1")
+						DBSkip()
 						Loop
 					EndIf
 					
 					cProdAnt  := SB1->B1_COD
-					cLocalAnt := alltrim(B2_LOCAL)
+					cLocalAnt := AllTrim(B2_LOCAL)
 					
-					dbSelectArea("SD1")
-					dbSeek(cFilial+SB1->B1_COD+If(lCusFil .Or. lCusEmp,"",SB2->B2_LOCAL))
-					dbSelectArea("SD2")
-					dbSeek(cFilial+SB1->B1_COD+If(lCusFil .Or. lCusEmp,"",SB2->B2_LOCAL))
-					dbSelectArea("SD3")
-					dbSeek(cFilial+SB1->B1_COD+If(lCusFil .Or. lCusEmp.Or.lLocProc,"",SB2->B2_LOCAL))
+					DBSelectArea("SD1")
+					DBSeek(cFilial+SB1->B1_COD+If(lCusFil .Or. lCusEmp,"",SB2->B2_LOCAL))
+					DBSelectArea("SD2")
+					DBSeek(cFilial+SB1->B1_COD+If(lCusFil .Or. lCusEmp,"",SB2->B2_LOCAL))
+					DBSelectArea("SD3")
+					DBSeek(cFilial+SB1->B1_COD+If(lCusFil .Or. lCusEmp.Or.lLocProc,"",SB2->B2_LOCAL))
 					
 					oSection3:Init()
 					While .T.
 						lImpSMov := .F.
 						lImpS3   := .F.
-						dbSelectArea("SD1")
-						If !Eof() .and. D1_FILIAL == xFilial("SD1") .and. D1_COD = cProdAnt .and. If(lCusFil .Or. lCusEmp,.T.,alltrim(D1_LOCAL) = cLocalAnt)
+						DBSelectArea("SD1")
+						If !Eof() .And. D1_FILIAL == xFilial("SD1") .And. D1_COD = cProdAnt .And. If(lCusFil .Or. lCusEmp,.T.,AllTrim(D1_LOCAL) = cLocalAnt)
 							
 							//===========================================================================
 							// Despreza Notas Fiscais Lancadas Pelo Modulo do Livro Fiscal  
 							//===========================================================================
-							dbSelectArea("SF4")
-							dbSeek(xFilial("SF4")+SD1->D1_TES)
-							dbSelectArea("SD1")
+							DBSelectArea("SF4")
+							DBSeek(xFilial("SF4")+SD1->D1_TES)
+							DBSelectArea("SD1")
 							//===========================================================================
 							// Executa ponto de entrada para verificar se considera TES que 
 							// NAO ATUALIZA saldos em estoque.                              
@@ -1672,25 +1666,25 @@ If !Empty(aFilsCalc)
 							EndIf
 							
 							If D1_ORIGLAN $ "LF" .Or. (SF4->F4_ESTOQUE != "S" .And. !lTesNEst)
-								dbSkip()
+								DBSkip()
 								Loop
 							Else
-								If D1_DTDIGIT < mv_par05 .or. D1_DTDIGIT > mv_par06
-									dbSkip()
-									loop
+								If D1_DTDIGIT < MV_PAR05 .Or. D1_DTDIGIT > MV_PAR06
+									DBSkip()
+									Loop
 								Else
-									cSeqIni := IIf(mv_par11==1,D1_NUMSEQ,D1_SEQCALC+D1_NUMSEQ)
+									cSeqIni := IIf(MV_PAR11==1,D1_NUMSEQ,D1_SEQCALC+D1_NUMSEQ)
 									cAlias := Alias()
-								Endif
+								EndIf
 							EndIf
 						EndIf
 						
-						dbSelectArea("SD2")
-						If !Eof() .and. D2_FILIAL == xFilial("SD2") .and. D2_COD = cProdAnt .and. If(lCusFil .Or. lCusEmp,.T.,alltrim(D2_LOCAL) = cLocalAnt)
+						DBSelectArea("SD2")
+						If !Eof() .And. D2_FILIAL == xFilial("SD2") .And. D2_COD = cProdAnt .And. If(lCusFil .Or. lCusEmp,.T.,AllTrim(D2_LOCAL) = cLocalAnt)
 							
-							dbSelectArea("SF4")
-							dbSeek(cFilial+SD2->D2_TES)
-							dbSelectArea("SD2")
+							DBSelectArea("SF4")
+							DBSeek(cFilial+SD2->D2_TES)
+							DBSelectArea("SD2")
 							
 							//===========================================================================
 							// Despreza Notas Fiscais Lancadas Pelo Modulo do Livro Fiscal  
@@ -1704,18 +1698,18 @@ If !Empty(aFilsCalc)
 							EndIf
 							
 							If D2_ORIGLAN == "LF" .Or. (SF4->F4_ESTOQUE != "S" .And. !lTesNEst)
-								dbSkip()
+								DBSkip()
 								Loop
 							Else
-								If D2_EMISSAO < mv_par05 .or. D2_EMISSAO > mv_par06
-									dbSkip()
+								If D2_EMISSAO < MV_PAR05 .Or. D2_EMISSAO > MV_PAR06
+									DBSkip()
 									Loop
 								Else
-									If mv_par11 == 1
+									If MV_PAR11 == 1
 										If D2_NUMSEQ < cSeqIni
 											cSeqIni := D2_NUMSEQ
 											cAlias  := Alias()
-										Endif
+										EndIf
 									Else
 										If D2_SEQCALC+D2_NUMSEQ < cSeqIni
 											cSeqIni := D2_SEQCALC+D2_NUMSEQ
@@ -1726,17 +1720,17 @@ If !Empty(aFilsCalc)
 							EndIf
 						EndIf
 						
-						dbSelectArea("SD3")
-						If !Eof() .and. D3_FILIAL == xFilial("SD3") .and. D3_COD = cProdAnt .and. If(lCusFil .Or. lCusEmp.Or.lLocProc,.T.,alltrim(D3_LOCAL) = cLocalAnt)
+						DBSelectArea("SD3")
+						If !Eof() .And. D3_FILIAL == xFilial("SD3") .And. D3_COD = cProdAnt .And. If(lCusFil .Or. lCusEmp.Or.lLocProc,.T.,AllTrim(D3_LOCAL) = cLocalAnt)
 							//===========================================================================
 							// Quando movimento ref apropr. indireta, so considera os         
 							// movimentos com destino ao almoxarifado de apropriacao indireta.
 							//===========================================================================
 							lInverteMov:=.F.
-							If alltrim(D3_LOCAL) != cLocalAnt .Or. lCusFil .Or. lCusEmp
-								If !(Substr(D3_CF,3,1) == "3")
+							If AllTrim(D3_LOCAL) != cLocalAnt .Or. lCusFil .Or. lCusEmp
+								If !(SubStr(D3_CF,3,1) == "3")
 									If !(lCusFil .Or. lCusEmp)
-										dbSkip()
+										DBSkip()
 										Loop
 									EndIf
 								ElseIf lPriApropri
@@ -1744,13 +1738,13 @@ If !Empty(aFilsCalc)
 								EndIf
 							EndIf
 							
-							If D3_EMISSAO < mv_par05 .or. D3_EMISSAO > mv_par06
-								dbSkip()
+							If D3_EMISSAO < MV_PAR05 .Or. D3_EMISSAO > MV_PAR06
+								DBSkip()
 								Loop
 							EndIf
 							// VALIDACAO TRATAMENTO SE CONSIDERA OS ESTORNO E SE CONSIDERA MOVIMENTOS WMS
 							If !D3Valido()
-								dbSkip()
+								DBSkip()
 								Loop
 							EndIf
 							
@@ -1758,18 +1752,18 @@ If !Empty(aFilsCalc)
 							// Caso seja uma transferencia de localizacao verifica se lista   
 							// o movimento ou nao                                             
 							//===========================================================================
-							If mv_par13 == 2 .And. Substr(D3_CF,3,1) == "4"
+							If MV_PAR13 == 2 .And. SubStr(D3_CF,3,1) == "4"
 								cNumSeqTr := SD3->D3_COD+SD3->D3_NUMSEQ+SD3->D3_LOCAL
 								nRegTr    := Recno()
-								dbSkip()
+								DBSkip()
 								If SD3->D3_COD+SD3->D3_NUMSEQ+SD3->D3_LOCAL == cNumSeqTr
-									dbSkip()
+									DBSkip()
 									Loop
 								Else
-									dbGoto(nRegTr)
+									DBGoTo(nRegTr)
 								EndIf
 							EndIf
-							If mv_par11 == 1
+							If MV_PAR11 == 1
 								If D3_NUMSEQ < cSeqIni
 									cSeqIni := D3_NUMSEQ
 									cAlias  := Alias()
@@ -1783,11 +1777,11 @@ If !Empty(aFilsCalc)
 						EndIf
 						
 						If !Empty(cAlias)
-							dbSelectArea(cAlias)
+							DBSelectArea(cAlias)
 							cCampo1 := Subs(cAlias,2,2)+IIf(cAlias=="SD1","_DTDIGIT","_EMISSAO")
 							cCampo2 := Subs(cAlias,2,2)+"_TES"
 							cCampo3 := Subs(cAlias,2,2)+"_CF"
-							cCampo4 := Subs(cAlias,2,2)+IIf(mv_par09 $ "Ss","_NUMSEQ","_DOC" )
+							cCampo4 := Subs(cAlias,2,2)+IIf(MV_PAR09 $ "Ss","_NUMSEQ","_DOC" )
 							
 							If lFirst
 								MR900ImpS1(@aSalAtu,,.F.,lVEIC,lCusFil,lCusEmp,oSection1,oSection2,oReport)
@@ -1802,13 +1796,8 @@ If !Empty(aFilsCalc)
 								oSection3:Cell("cTES"):SetValue(&cCampo2)
 							EndIf
 							
-							If ( cPaisLoc=="BRA" )
-								oSection3:Cell("cCF"):Show()
-								oSection3:Cell("cCF"):SetValue(&cCampo3)
-							Else
-								oSection3:Cell("cCF"):Hide()
-								oSection3:Cell("cCF"):SetValue("   ")
-							EndIf
+							oSection3:Cell("cCF"):Show()
+							oSection3:Cell("cCF"):SetValue(&cCampo3)
 							oSection3:Cell("cDoc"):SetValue(&cCampo4)
 							
 							Do Case
@@ -1816,7 +1805,7 @@ If !Empty(aFilsCalc)
 									lDev:=MTR900Dev("SD1")
 									If D1_TES <= "500" .And. !lDev
 										If SF1->F1_TIPO != "C"
-											oSection3:Cell("nCusMov"):SetValue((&(Eval(bBloco,"D1_CUSTO",iif(mv_par10==1," ",mv_par10))) / D1_QUANT))
+											oSection3:Cell("nCusMov"):SetValue((&(Eval(bBloco,"D1_CUSTO",IIf(MV_PAR10==1," ",MV_PAR10))) / D1_QUANT))
 											oSection3:Cell("nCusMov"):Show()
 										Else
 											oSection3:Cell("nCusMov"):SetValue(0)
@@ -1828,7 +1817,7 @@ If !Empty(aFilsCalc)
 										oSection3:Cell("nENT2UnQtd"):Show()  //=======================  QTD SEGUNDA UNID MEDIDA 										
 										
 										oSection3:Cell("nENTQtd"):SetValue(D1_QUANT)
-										oSection3:Cell("nENTCus"):SetValue(&(Eval(bBloco,"D1_CUSTO",iif(mv_par10==1," ",mv_par10))))
+										oSection3:Cell("nENTCus"):SetValue(&(Eval(bBloco,"D1_CUSTO",IIf(MV_PAR10==1," ",MV_PAR10))))
 										oSection3:Cell("nENT2UnQtd"):SetValue(D1_QTSEGUM)  //=======================  QTD SEGUNDA UNID MEDIDA 
 										
 										oSection3:Cell("nSAIQtd"):Hide()
@@ -1841,11 +1830,11 @@ If !Empty(aFilsCalc)
 
 										
 										aSalAtu[1] 			+= D1_QUANT
-										aSalAtu[mv_par10+1]	+= &(Eval(bBloco,"D1_CUSTO",iif(mv_par10==1," ",mv_par10)))
+										aSalAtu[MV_PAR10+1]	+= &(Eval(bBloco,"D1_CUSTO",IIf(MV_PAR10==1," ",MV_PAR10)))
 										aSalAtu[7]			+= D1_QTSEGUM
 									Else
 										If SF1->F1_TIPO != "C"
-											oSection3:Cell("nCusMov"):SetValue((&(Eval(bBloco,"D1_CUSTO",iif(mv_par10==1," ",mv_par10))) / D1_QUANT))
+											oSection3:Cell("nCusMov"):SetValue((&(Eval(bBloco,"D1_CUSTO",IIf(MV_PAR10==1," ",MV_PAR10))) / D1_QUANT))
 											oSection3:Cell("nCusMov"):Show()
 										Else
 											oSection3:Cell("nCusMov"):SetValue(0)
@@ -1866,19 +1855,19 @@ If !Empty(aFilsCalc)
 										
 										If lDev
 											oSection3:Cell("nSAIQtd"):SetValue(D1_QUANT * -1)
-											oSection3:Cell("nSAICus"):SetValue(&(Eval(bBloco,"D1_CUSTO",iif(mv_par10==1," ",mv_par10))) * -1)
+											oSection3:Cell("nSAICus"):SetValue(&(Eval(bBloco,"D1_CUSTO",IIf(MV_PAR10==1," ",MV_PAR10))) * -1)
 											oSection3:Cell("nSAI2UnQtd"):SetValue(D1_QTSEGUM * -1)  //=======================  QTD SEGUNDA UNID MEDIDA 
 
 											aSalAtu[1]			+= D1_QUANT
-											aSalAtu[mv_par10+1]	+= &(Eval(bBloco,"D1_CUSTO",iif(mv_par10==1," ",mv_par10)))
+											aSalAtu[MV_PAR10+1]	+= &(Eval(bBloco,"D1_CUSTO",IIf(MV_PAR10==1," ",MV_PAR10)))
 											aSalAtu[7]			+= D1_QTSEGUM
 										Else
 											oSection3:Cell("nSAIQtd"):SetValue(D1_QUANT)
-											oSection3:Cell("nSAICus"):SetValue(&(Eval(bBloco,"D1_CUSTO",iif(mv_par10==1," ",mv_par10))))
+											oSection3:Cell("nSAICus"):SetValue(&(Eval(bBloco,"D1_CUSTO",IIf(MV_PAR10==1," ",MV_PAR10))))
 											oSection3:Cell("nSAI2UnQtd"):SetValue(D1_QTSEGUM)  //=======================  QTD SEGUNDA UNID MEDIDA 
 			
 											aSalAtu[1]			-= D1_QUANT
-											aSalAtu[mv_par10+1]	-= &(Eval(bBloco,"D1_CUSTO",iif(mv_par10==1," ",mv_par10)))
+											aSalAtu[MV_PAR10+1]	-= &(Eval(bBloco,"D1_CUSTO",IIf(MV_PAR10==1," ",MV_PAR10)))
 											aSalAtu[7]			-= D1_QTSEGUM
 										EndIf
 									EndIf
@@ -1900,23 +1889,23 @@ If !Empty(aFilsCalc)
 										
 										If lDev
 											oSection3:Cell("nENTQtd"):SetValue(D2_QUANT  * -1)
-											oSection3:Cell("nENTCus"):SetValue(&(Eval(bBloco,"D2_CUSTO",mv_par10)) * -1)
+											oSection3:Cell("nENTCus"):SetValue(&(Eval(bBloco,"D2_CUSTO",MV_PAR10)) * -1)
 											oSection3:Cell("nENT2UnQtd"):SetValue(D2_QTSEGUM  * -1)  //=======================  QTD SEGUNDA UNID MEDIDA    
 											
 											aSalAtu[1]			-= D2_QUANT
-											aSalAtu[mv_par10+1]	-= &(Eval(bBloco,"D2_CUSTO",mv_par10))
+											aSalAtu[MV_PAR10+1]	-= &(Eval(bBloco,"D2_CUSTO",MV_PAR10))
 											aSalAtu[7]			-= D2_QTSEGUM
 										Else
 											oSection3:Cell("nENTQtd"):SetValue(D2_QUANT)
-											oSection3:Cell("nENTCus"):SetValue(&(Eval(bBloco,"D2_CUSTO",mv_par10)))
+											oSection3:Cell("nENTCus"):SetValue(&(Eval(bBloco,"D2_CUSTO",MV_PAR10)))
 											oSection3:Cell("nENT2UnQtd"):SetValue(D2_QTSEGUM)  //=======================  QTD SEGUNDA UNID MEDIDA  
 											
 											aSalAtu[1]			+= D2_QUANT
-											aSalAtu[mv_par10+1]	+= &(Eval(bBloco,"D2_CUSTO",mv_par10))
+											aSalAtu[MV_PAR10+1]	+= &(Eval(bBloco,"D2_CUSTO",MV_PAR10))
 											aSalAtu[7]			+= D2_QTSEGUM
 										EndIf
 										If SF2->F2_TIPO != "C"
-											oSection3:Cell("nCusMov"):SetValue((&(Eval(bBloco,"D2_CUSTO",mv_par10)) / D2_QUANT))
+											oSection3:Cell("nCusMov"):SetValue((&(Eval(bBloco,"D2_CUSTO",MV_PAR10)) / D2_QUANT))
 											oSection3:Cell("nCusMov"):Show()
 										Else
 											oSection3:Cell("nCusMov"):SetValue(0)
@@ -1936,7 +1925,7 @@ If !Empty(aFilsCalc)
 										oSection3:Cell("nSAI2UnQtd"):Show()       //=======================  QTD SEGUNDA UNID MEDIDA 
 										
 										If SF2->F2_TIPO != "C"
-											oSection3:Cell("nCusMov"):SetValue((&(Eval(bBloco,"D2_CUSTO",mv_par10)) / D2_QUANT))
+											oSection3:Cell("nCusMov"):SetValue((&(Eval(bBloco,"D2_CUSTO",MV_PAR10)) / D2_QUANT))
 											oSection3:Cell("nCusMov"):Show()
 										Else
 											oSection3:Cell("nCusMov"):SetValue(0)
@@ -1944,14 +1933,14 @@ If !Empty(aFilsCalc)
 										EndIf
 										
 										oSection3:Cell("nSAIQtd"):SetValue(D2_QUANT)
-										oSection3:Cell("nSAICus"):SetValue(&(Eval(bBloco,"D2_CUSTO",mv_par10)))
+										oSection3:Cell("nSAICus"):SetValue(&(Eval(bBloco,"D2_CUSTO",MV_PAR10)))
 										oSection3:Cell("nSAI2UnQtd"):SetValue(D2_QTSEGUM)      //=======================  QTD SEGUNDA UNID MEDIDA 
 			
 										aSalAtu[1]			-= D2_QUANT
-										aSalAtu[mv_par10+1]	-= &(Eval(bBloco,"D2_CUSTO",mv_par10))
+										aSalAtu[MV_PAR10+1]	-= &(Eval(bBloco,"D2_CUSTO",MV_PAR10))
 										aSalAtu[7]			-= D2_QTSEGUM
 									EndIf
-								Otherwise
+								OtherWise
 									lDev := .F.
 									If	lInverteMov
 										If D3_TM > "500"
@@ -1962,8 +1951,8 @@ If !Empty(aFilsCalc)
 											oSection3:Cell("nENT2UnQtd"):Show()  //=======================  QTD SEGUNDA UNID MEDIDA 
 											
 											oSection3:Cell("nENTQtd"):SetValue(D3_QUANT)
-											oSection3:Cell("nENTCus"):SetValue(&(Eval(bBloco,"D3_CUSTO",mv_par10)))
-											oSection3:Cell("nCusMov"):SetValue((&(Eval(bBloco,"D3_CUSTO",mv_par10)) / D3_QUANT))
+											oSection3:Cell("nENTCus"):SetValue(&(Eval(bBloco,"D3_CUSTO",MV_PAR10)))
+											oSection3:Cell("nCusMov"):SetValue((&(Eval(bBloco,"D3_CUSTO",MV_PAR10)) / D3_QUANT))
 											oSection3:Cell("nENT2UnQtd"):SetValue(D3_QTSEGUM)  //=======================  QTD SEGUNDA UNID MEDIDA 
 											
 											oSection3:Cell("nSAIQtd"):Hide()
@@ -1975,7 +1964,7 @@ If !Empty(aFilsCalc)
 											oSection3:Cell("nSAI2UnQtd"):SetValue(0)  //=======================  QTD SEGUNDA UNID MEDIDA 
 											
 											aSalAtu[1]			+= D3_QUANT
-											aSalAtu[mv_par10+1]	+= &(Eval(bBloco,"D3_CUSTO",mv_par10))
+											aSalAtu[MV_PAR10+1]	+= &(Eval(bBloco,"D3_CUSTO",MV_PAR10))
 											aSalAtu[7]			+= D3_QTSEGUM
 										Else
 											oSection3:Cell("nENTQtd"):Hide()
@@ -1991,13 +1980,13 @@ If !Empty(aFilsCalc)
 											oSection3:Cell("nSAICus"):Show()
 											oSection3:Cell("nSAI2UnQtd"):Show()       //=======================  QTD SEGUNDA UNID MEDIDA 											
 											
-											oSection3:Cell("nCusMov"):SetValue((&(Eval(bBloco,"D3_CUSTO",mv_par10)) / D3_QUANT))
+											oSection3:Cell("nCusMov"):SetValue((&(Eval(bBloco,"D3_CUSTO",MV_PAR10)) / D3_QUANT))
 											oSection3:Cell("nSAIQtd"):SetValue(D3_QUANT)
-											oSection3:Cell("nSAICus"):SetValue(&(Eval(bBloco,"D3_CUSTO",mv_par10)))
+											oSection3:Cell("nSAICus"):SetValue(&(Eval(bBloco,"D3_CUSTO",MV_PAR10)))
 											oSection3:Cell("nSAI2UnQtd"):SetValue(D3_QTSEGUM)      //=======================  QTD SEGUNDA UNID MEDIDA 
 											
 											aSalAtu[1]			-= D3_QUANT
-											aSalAtu[mv_par10+1]	-= &(Eval(bBloco,"D3_CUSTO",mv_par10))
+											aSalAtu[MV_PAR10+1]	-= &(Eval(bBloco,"D3_CUSTO",MV_PAR10))
 											aSalAtu[7]			-= D3_QTSEGUM
 										EndIf
 										If lCusFil .Or. lCusEmp
@@ -2011,8 +2000,8 @@ If !Empty(aFilsCalc)
 											oSection3:Cell("nENT2UnQtd"):Show()                    //=======================  QTD SEGUNDA UNID MEDIDA 											
 											
 											oSection3:Cell("nENTQtd"):SetValue(D3_QUANT)
-											oSection3:Cell("nENTCus"):SetValue(&(Eval(bBloco,"D3_CUSTO",mv_par10)))
-											oSection3:Cell("nCusMov"):SetValue((&(Eval(bBloco,"D3_CUSTO",mv_par10)) / D3_QUANT))
+											oSection3:Cell("nENTCus"):SetValue(&(Eval(bBloco,"D3_CUSTO",MV_PAR10)))
+											oSection3:Cell("nCusMov"):SetValue((&(Eval(bBloco,"D3_CUSTO",MV_PAR10)) / D3_QUANT))
 											oSection3:Cell("nENT2UnQtd"):SetValue(D3_QTSEGUM)      //=======================  QTD SEGUNDA UNID MEDIDA 
 
 											
@@ -2026,7 +2015,7 @@ If !Empty(aFilsCalc)
 
 											
 											aSalAtu[1]			+= D3_QUANT
-											aSalAtu[mv_par10+1]	+= &(Eval(bBloco,"D3_CUSTO",mv_par10))
+											aSalAtu[MV_PAR10+1]	+= &(Eval(bBloco,"D3_CUSTO",MV_PAR10))
 											aSalAtu[7]			+= D3_QTSEGUM
 										Else
 											oSection3:Cell("nENTQtd"):Hide()
@@ -2042,13 +2031,13 @@ If !Empty(aFilsCalc)
 											oSection3:Cell("nSAICus"):Show()
 											oSection3:Cell("nSAI2UnQtd"):Show()  //=======================  QTD SEGUNDA UNID MEDIDA 
 											
-											oSection3:Cell("nCusMov"):SetValue((&(Eval(bBloco,"D3_CUSTO",mv_par10)) / D3_QUANT))
+											oSection3:Cell("nCusMov"):SetValue((&(Eval(bBloco,"D3_CUSTO",MV_PAR10)) / D3_QUANT))
 											oSection3:Cell("nSAIQtd"):SetValue(D3_QUANT)
-											oSection3:Cell("nSAICus"):SetValue(&(Eval(bBloco,"D3_CUSTO",mv_par10)))
+											oSection3:Cell("nSAICus"):SetValue(&(Eval(bBloco,"D3_CUSTO",MV_PAR10)))
 											oSection3:Cell("nSAI2UnQtd"):SetValue(D3_QTSEGUM)  //=======================  QTD SEGUNDA UNID MEDIDA 
 											
 											aSalAtu[1]			-= D3_QUANT
-											aSalAtu[mv_par10+1]	-= &(Eval(bBloco,"D3_CUSTO",mv_par10))
+											aSalAtu[MV_PAR10+1]	-= &(Eval(bBloco,"D3_CUSTO",MV_PAR10))
 											aSalAtu[7]			-= D3_QTSEGUM
 										EndIf
 										If lCusFil .Or. lCusEmp
@@ -2058,7 +2047,7 @@ If !Empty(aFilsCalc)
 							EndCase
 							
 							oSection3:Cell("nSALDQtd"):SetValue(aSalAtu[1])
-							oSection3:Cell("nSALDCus"):SetValue(aSalAtu[mv_par10+1])
+							oSection3:Cell("nSALDCus"):SetValue(aSalAtu[MV_PAR10+1])
 							oSection3:Cell("nSALD2UnQtd"):SetValue(aSalAtu[7])
 							
 							Do Case
@@ -2073,14 +2062,14 @@ If !Empty(aFilsCalc)
 								Case cAlias = "SD1"  && compras    (SD1)
 									cTipoNf := 'F-'
 									aAreaSD2:=SD2->(GetArea())
-									SD2->(dbSetOrder(3))
-									If SD2->(dbSeek(xFilial("SD2")+SD1->D1_NFORI+SD1->D1_SERIORI+SD1->D1_FORNECE+SD1->D1_LOJA))
+									SD2->(DBSetOrder(3))
+									If SD2->(DBSeek(xFilial("SD2")+SD1->D1_NFORI+SD1->D1_SERIORI+SD1->D1_FORNECE+SD1->D1_LOJA))
 										If !(SD2->D2_TIPO $ 'B|D')
 											cTipoNf := 'C-'
 										EndIf									
 									EndIf
-									RestArea(aAreaSD2)
-									dbSelectArea('SD1')
+									FWRestArea(aAreaSD2)
+									DBSelectArea('SD1')
 									oSection3:Cell("cCCPVPJOP"):SetValue(cTipoNf+D1_FORNECE)
 								Case cAlias = "SD2"  && vendas     (SD2)
 									If D2_TIPO $ "B|D"
@@ -2095,10 +2084,10 @@ If !Empty(aFilsCalc)
 							
 							If !lImpSMov
 								oSection3:PrintLine()
-							Endif
+							EndIf
 							
 							If !lInverteMov .Or. (lInverteMov .And. lPriApropri)
-								dbSkip()
+								DBSkip()
 							EndIf
 						Else
 							If !lFirst
@@ -2108,7 +2097,7 @@ If !Empty(aFilsCalc)
 								//===========================================================================
 								// Verifica se deve ou nao listar os produtos s/movimento 
 								//===========================================================================
-								If mv_par07 == 1
+								If MV_PAR07 == 1
 									MR900ImpS1(@aSalAtu,,.F.,lVEIC,lCusFil,lCusEmp,oSection1,oSection2,oReport)
 									
 									If !MTR900IsMNT()
@@ -2142,42 +2131,42 @@ If !Empty(aFilsCalc)
 						oSection3:Finish()
 					EndIf
 					
-					dbSelectArea("SB1")
-					dbSkip()
+					DBSelectArea("SB1")
+					DBSkip()
 				EndDo
 				
-				dbSelectArea("SD1")
+				DBSelectArea("SD1")
 				If !Empty(cTrbSD1) .And. File(cTrbSD1 + OrdBagExt())
 					RetIndex("SD1")
 					Ferase(cTrbSD1+OrdBagExt())
 				EndIf
-				dbSetOrder(1)
-				dbSelectArea("SD2")
+				DBSetOrder(1)
+				DBSelectArea("SD2")
 				If !Empty(cTrbSD2) .And. File(cTrbSD2 + OrdBagExt())
 					RetIndex("SD2")
 					Ferase(cTrbSD2+OrdBagExt())
 				EndIf
-				dbSetOrder(1)
-				dbSelectArea("SD3")
+				DBSetOrder(1)
+				DBSelectArea("SD3")
 				If !Empty(cTrbSD3) .And. File(cTrbSD2 + OrdBagExt())
 					RetIndex("SD3")
 					Ferase(cTrbSD3+OrdBagExt())
 				EndIf
-				dbSetOrder(1)	
+				DBSetOrder(1)	
 	        #IFDEF TOP
 		    	EndIf
-			#ENDIF
+			#EndIf
 
 		EndIf
         
         #IFDEF TOP
 			If !(TcSrvType()=="AS/400") .And. !("POSTGRES" $ TCGetDB())
 		    	If Select(cAliasTop)>0
-		    		dbSelectArea(cAliasTop)
-		       		dbCloseArea() 
-		       	Endif 
+		    		DBSelectArea(cAliasTop)
+		       		DBCloseArea() 
+		       	EndIf 
 			EndIf
-		#ENDIF
+		#EndIf
 	Next nForFilial
 	
 EndIf
@@ -2185,7 +2174,7 @@ EndIf
 // Restaura Filial Corrente
 cFilAnt := cFilBack
 
-Return NIL
+Return
 
 /*
 ===============================================================================================================================
@@ -2209,7 +2198,7 @@ Retorno-----------: Nenhum
 */
 Static Function MR900ImpS1(aSalAtu,cAliasTop,lQuery,lVEIC,lCusFil,lCusEmp,oSection1,oSection2,oReport)
 
-Local aArea     := GetArea()
+Local aArea     := FWGetArea()
 Local nCusMed   := 0
 Local i         := 0
 Local nIndice   := 0
@@ -2227,70 +2216,70 @@ default lCusEmp  := .F.
 // Calcula o Saldo Inicial do Produto             
 //============================================================================
 If lCusFil
-	aArea:=GetArea()
+	aArea:=FWGetArea()
 	aSalAtu  := { 0,0,0,0,0,0,0 }
-	dbSelectArea("SB2")
-	dbSetOrder(1)
-	dbSeek(cSeek:=xFilial("SB2") + If(lQuery,(cAliasTOP)->PRODUTO,SB1->B1_COD))
+	DBSelectArea("SB2")
+	DBSetOrder(1)
+	DBSeek(cSeek:=xFilial("SB2") + If(lQuery,(cAliasTOP)->PRODUTO,SB1->B1_COD))
 	While !Eof() .And. B2_FILIAL+B2_COD == cSeek
-		aSalAlmox := CalcEst(If(lQuery,(cAliasTOP)->PRODUTO,SB1->B1_COD),SB2->B2_LOCAL,mv_par05,,, ( lCusRep .And. mv_par17==2 ) )
+		aSalAlmox := CalcEst(If(lQuery,(cAliasTOP)->PRODUTO,SB1->B1_COD),SB2->B2_LOCAL,MV_PAR05,,, ( lCusRep .And. MV_PAR17==2 ) )
 		For i:=1 to Len(aSalAtu)
 			aSalAtu[i] += aSalAlmox[i]
 		Next i
-		dbSkip()
+		DBSkip()
 	End
-	RestArea(aArea)
+	FWRestArea(aArea)
 ElseIf lCusEmp
-	aArea:=GetArea()
+	aArea:=FWGetArea()
 	aSalAtu  := { 0,0,0,0,0,0,0 }
-	dbSelectArea("SB2")
-	dbSetOrder(1)
+	DBSelectArea("SB2")
+	DBSetOrder(1)
 	INDREGUA("SB2",cTrbSB2,"B2_COD+B2_LOCAL",,,"Selecionando Registros")	//"Selecionando Registros"
 	nIndice := RetIndex("SB2") 
 	#IFNDEF TOP
 	   dbSetIndex(cTrbSB2+OrdBagExt())
-	#ENDIF
-	dbSetOrder(nIndice+1)
-	dbSeek(cSeek:=If(lQuery,(cAliasTOP)->PRODUTO,SB1->B1_COD))
+	#EndIf
+	DBSetOrder(nIndice+1)
+	DBSeek(cSeek:=If(lQuery,(cAliasTOP)->PRODUTO,SB1->B1_COD))
 	While !Eof() .And. SB2->B2_COD == cSeek
 		If !Empty(xFilial("SB2"))
 			cFilAnt:=SB2->B2_FILIAL
 		EndIf	
-		aSalAlmox := CalcEst(If(lQuery,(cAliasTOP)->PRODUTO,SB1->B1_COD),SB2->B2_LOCAL,mv_par05,,,( lCusRep .And. mv_par17==2 ) )
+		aSalAlmox := CalcEst(If(lQuery,(cAliasTOP)->PRODUTO,SB1->B1_COD),SB2->B2_LOCAL,MV_PAR05,,,( lCusRep .And. MV_PAR17==2 ) )
 		For i:=1 to Len(aSalAtu)
 			aSalAtu[i] += aSalAlmox[i]
 		Next i
-		dbSkip()
+		DBSkip()
 	End
-	dbSelectArea("SB2")
+	DBSelectArea("SB2")
 	If !Empty(cTrbSB2) .And. File(cTrbSB2 + OrdBagExt())
 		RetIndex("SB2")
 		Ferase(cTrbSB2+OrdBagExt())
 	EndIf
 	cFilAnt := cFilBkp
-	RestArea(aArea)
+	FWRestArea(aArea)
 Else
-	aSalAtu := CalcEst(If(lQuery,(cAliasTOP)->PRODUTO,SB1->B1_COD),mv_par08,mv_par05,,, ( lCusRep .And. mv_par17==2 ) )
+	aSalAtu := CalcEst(If(lQuery,(cAliasTOP)->PRODUTO,SB1->B1_COD),MV_PAR08,MV_PAR05,,, ( lCusRep .And. MV_PAR17==2 ) )
 EndIf
 
 //============================================================================
 // Calcula o Custo de Reposicao do Produto        
 //============================================================================
-If lCusRep .And. mv_par17==2
+If lCusRep .And. MV_PAR17==2
 	aSalAtu := {aSalAtu[1],aSalAtu[18],aSalAtu[19],aSalAtu[20],aSalAtu[21],aSalAtu[22],aSalAtu[07]}
 EndIf
 
 //============================================================================
 // Calcula o Custo Medio do Produto               
 //============================================================================
-SB2->(dbSetOrder(1))
-SB2->(dbSeek(xFilial("SB2") + If(lQuery,(cAliasTOP)->PRODUTO,SB1->B1_COD)))
+SB2->(DBSetOrder(1))
+SB2->(DBSeek(xFilial("SB2") + If(lQuery,(cAliasTOP)->PRODUTO,SB1->B1_COD)))
 If aSalAtu[1] > 0
-	nCusmed := aSalAtu[mv_par10+1]/aSalAtu[1]
-ElseIf aSalAtu[1] == 0 .and. aSalAtu[mv_par10+1] == 0
+	nCusmed := aSalAtu[MV_PAR10+1]/aSalAtu[1]
+ElseIf aSalAtu[1] == 0 .And. aSalAtu[MV_PAR10+1] == 0
 	nCusMed := 0
 Else
-	nCusmed := &(Eval(bBloco,"SB2->B2_CM",mv_par10))
+	nCusmed := &(Eval(bBloco,"SB2->B2_CM",MV_PAR10))
 EndIf
 
 oSection1:Init()
@@ -2298,7 +2287,7 @@ oSection2:Init()
 
 oSection1:Cell("nCusMed"):SetValue(nCusMed)
 oSection1:Cell("nQtdSal"):SetValue(aSalAtu[1])
-oSection1:Cell("nVlrSal"):SetValue(aSalAtu[mv_par10+1])			
+oSection1:Cell("nVlrSal"):SetValue(aSalAtu[MV_PAR10+1])			
 
 oSection1:Cell("nQtd2Un"):SetValue(aSalAtu[7])                 // QUANTIDADE NA 2 UNIDADE DE MEDIDA 
 oSection1:Cell("FATOR"):SetValue((cAliasTop)->FATOR)       // FATOR DE CONVERSAO 
@@ -2311,12 +2300,12 @@ oSection1:Cell("TIPOCONV"):SetValue((cAliasTop)->TIPOCONV) // TIPO DE CONVERSAO
 		If lVEIC
 			oSection2:Cell("cProduto"	):SetValue((cAliasTop)->PRODUTO)			
 			oSection2:Cell("cTipo"		):SetValue((cAliasTop)->TIPO	)
-		Endif
+		EndIf
 		
-		dbSelectArea("SB2")
-		dbSeek(xFilial("SB2")+(cAliasTop)->PRODUTO+If(lCusFil .Or. lCusEmp,"",mv_par08))
+		DBSelectArea("SB2")
+		DBSeek(xFilial("SB2")+(cAliasTop)->PRODUTO+If(lCusFil .Or. lCusEmp,"",MV_PAR08))
  	Else
-#ENDIF
+#EndIf
 	oSection1:Cell("cProduto"	):SetValue(SB1->B1_COD)			
 	oSection1:Cell("cTipo"		):SetValue(SB1->B1_TIPO)
 	If lVEIC
@@ -2325,13 +2314,13 @@ oSection1:Cell("TIPOCONV"):SetValue((cAliasTop)->TIPOCONV) // TIPO DE CONVERSAO
 	EndIf
 #IFDEF TOP
 	EndIf
-#ENDIF	
+#EndIf	
 oSection1:PrintLine()
 oSection2:PrintLine()
 
-RestArea(aArea)
+FWRestArea(aArea)
 
-RETURN
+Return
 
 /*
 ===============================================================================================================================
@@ -2356,34 +2345,34 @@ Local lIntegrMNT := .F.
 If FindFunction("NGProdMNT")
 	aProdsMNT := aClone(NGProdMNT("M"))
 	If Len(aProdsMNT) > 0
-		aArea	 := GetArea()
+		aArea	 := FWGetArea()
 		aAreaSB1 := SB1->(GetArea())
 		
-		SB1->(dbSelectArea( "SB1" ))
-		SB1->(dbSetOrder(1))
+		SB1->(DBSelectArea( "SB1" ))
+		SB1->(DBSetOrder(1))
 		For nX := 1 To Len(aProdsMNT)
-			If SB1->(dbSeek( xFilial("SB1") + aProdsMNT[nX] ))
+			If SB1->(DBSeek( xFilial("SB1") + aProdsMNT[nX] ))
 				lIntegrMNT := .T.
 				Exit
 			EndIf 
 		Next nX
 		
-		RestArea(aAreaSB1)
-		RestArea(aArea)
+		FWRestArea(aAreaSB1)
+		FWRestArea(aArea)
 	EndIf
-Else //Se a funcao nao existir, processa com o parametro aceitando 1 (UM) Produto
+Else //Se a funcao nao existir, Processa com o parametro aceitando 1 (UM) Produto
 	cProdMNT := GetMv("MV_PRODMNT")
 	cProdMNT := cProdMNT + Space(15-Len(cProdMNT))
 	If !Empty(cProdMNT)
-		aArea	 := GetArea()
+		aArea	 := FWGetArea()
 		aAreaSB1 := SB1->(GetArea())
-		SB1->(dbSelectArea( "SB1" ))
-		SB1->(dbSetOrder(1))
-		If SB1->(dbSeek( xFilial('SB1') + cProdMNT ))
+		SB1->(DBSelectArea( "SB1" ))
+		SB1->(DBSetOrder(1))
+		If SB1->(DBSeek( xFilial('SB1') + cProdMNT ))
 			lIntegrMNT := .T.
 		EndIf 
-		RestArea(aAreaSB1)
-		RestArea(aArea)
+		FWRestArea(aAreaSB1)
+		FWRestArea(aArea)
 	EndIf
 EndIf
 Return( lIntegrMNT )
@@ -2409,21 +2398,21 @@ Local cSeek:= If(!Empty(cAliasTop),(cAliasTop)->DOCUMENTO+(cAliasTop)->SERIE+(cA
 lListaDev := If(ValType(lListaDev)#"L",GetMV("MV_LISTDEV"),lListaDev)
 
 If lListaDev .And. cAlias == "SD1"
-	dbSelectArea("SF1")
+	DBSelectArea("SF1")
 	If Empty(cSeek)
 		cSeek:=SD1->D1_DOC+SD1->D1_SERIE+SD1->D1_FORNECE+SD1->D1_LOJA
 	EndIf
-	If dbSeek(xFilial("SF1") + cSeek) .And. SF1->F1_TIPO == "D"
+	If DBSeek(xFilial("SF1") + cSeek) .And. SF1->F1_TIPO == "D"
 		lRet:=.T.
 	EndIf
 ElseIf lListaDev .And. cAlias == "SD2"
-	dbSelectArea("SF2")
+	DBSelectArea("SF2")
 	If Empty(cSeek)
 		cSeek:=+SD2->D2_DOC+SD2->D2_SERIE+SD2->D2_CLIENTE+SD2->D2_LOJA
 	EndIf
-	If dbSeek(xFilial("SF2") + cSeek) .And. SF2->F2_TIPO == "D"
+	If DBSeek(xFilial("SF2") + cSeek) .And. SF2->F2_TIPO == "D"
 		lRet:=.T.
 	EndIf
 EndIf
-dbSelectArea(If(Empty(cAliasTop),cAlias,cAliasTop))
+DBSelectArea(If(Empty(cAliasTop),cAlias,cAliasTop))
 Return lRet

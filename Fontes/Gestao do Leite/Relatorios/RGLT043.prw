@@ -2,37 +2,29 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 04/08/2020 | Proteção para impressão direto do Mix e ajuste para produtores sem movimento. Chamado 33750
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 24/12/2021 | Tratamento para uso do Configurador de Tributos para o Reinf (R-2055). Chamado 38549 e 38663
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 25/05/2022 | Modifiado tratamento do Incentivo à Produção. Chamado 40238
+Lucas Borges  |04/08/2020| Chamado 33750. Proteção para impressão direto do Mix e ajuste para produtores sem movimento.
+Lucas Borges  |24/12/2021| Chamado 38549 e 38663. Tratamento para uso do Configurador de Tributos para o Reinf (R-2055).
+Lucas Borges  |25/05/2022| Chamado 40238. Modifiado tratamento do Incentivo à Produção.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT043
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 31/05/2010
-===============================================================================================================================
 Descrição---------: Relatório que imprime dados dos produtores, volume, valores com ordenação por preço pago.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function RGLT043
 
-Local _aArea := GetArea()
+Local _aArea := FWGetArea()
 Local oReport
 If AllTrim(FunName()) == 'AGLT008' 
 	MV_PAR01:= ZLE->ZLE_COD
@@ -41,7 +33,7 @@ Pergunte("RGLT043",.F.)
 //Inferface de Impressão
 oReport := ReportDef()
 oReport:PrintDialog()
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -50,11 +42,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Erich Buttner
 Data da Criacao---: 27/03/2013
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -100,11 +89,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 26/06/2020
-===============================================================================================================================
 Descrição---------: Processa a impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -123,10 +109,10 @@ Local _nCountRec	:= 0
 If MV_PAR02 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZLD")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -205,8 +191,8 @@ oReport:SetMeter(0)
 BeginSql alias _cAlias
 SELECT *
   FROM (SELECT ZL2_FILIAL, A2_COD, A2_LOJA, A2_NOME, ZL2_COD, ZL2_DESCRI, ZL3_COD, ZL3_DESCRI, VOLUME,
-               ROUND(TOT_MIX / CASE WHEN VOLUME=0 THEN 1 ELSE VOLUME END, 4) CUS_EMP, ROUND(TOT_CRED / CASE WHEN VOLUME=0 THEN 1 ELSE VOLUME END, 4) PRC_BRUTO,
-               ROUND((TOT_CRED / CASE WHEN VOLUME=0 THEN 1 ELSE VOLUME END) + (TOT_IMP / CASE WHEN VOLUME=0 THEN 1 ELSE VOLUME END) - TOT_DEB, 4) PRC_LIQ
+               Round(TOT_MIX / Case WHEN VOLUME=0 THEN 1 Else VOLUME END, 4) CUS_EMP, Round(TOT_CRED / Case WHEN VOLUME=0 THEN 1 Else VOLUME END, 4) PRC_BRUTO,
+               Round((TOT_CRED / Case WHEN VOLUME=0 THEN 1 Else VOLUME END) + (TOT_IMP / Case WHEN VOLUME=0 THEN 1 Else VOLUME END) - TOT_DEB, 4) PRC_LIQ
           FROM (SELECT ZL2_FILIAL, A2_COD, A2_LOJA, A2_NOME, ZL2_COD, ZL2_DESCRI, ZL3_COD, ZL3_DESCRI,
                        NVL((SELECT SUM(ZLD.ZLD_QTDBOM)
                              FROM ZLD010 ZLD
@@ -230,7 +216,7 @@ SELECT *
                            AND ZLF1.ZLF_TP_MIX = 'L'
                            AND ZLF1.ZLF_ENTMIX = 'S'
                            AND ZLF1.ZLF_DEBCRE = 'C'),0) TOT_CRED,
-                       NVL((SELECT SUM(CASE WHEN ZL8.ZL8_DEBCRE = 'C' THEN ZLF2.ZLF_TOTAL ELSE ZLF2.ZLF_TOTAL * -1 END)
+                       NVL((SELECT SUM(Case WHEN ZL8.ZL8_DEBCRE = 'C' THEN ZLF2.ZLF_TOTAL Else ZLF2.ZLF_TOTAL * -1 END)
                           FROM %Table:ZLF% ZLF2, %Table:ZL8% ZL8
                          WHERE ZLF2.D_E_L_E_T_ = ' '
                            AND ZL8.D_E_L_E_T_ = ' '
@@ -244,7 +230,7 @@ SELECT *
                            AND ZLF2.ZLF_CODZLE = ZLE_COD
                            AND ZL8.ZL8_PERTEN = 'P'
                            AND ZL8.ZL8_GRUPO = '000007'),0) TOT_IMP,
-                       NVL((SELECT SUM(CASE WHEN ZL8.ZL8_DEBCRE = 'C' THEN ZLF2.ZLF_TOTAL ELSE ZLF2.ZLF_TOTAL * -1 END)
+                       NVL((SELECT SUM(Case WHEN ZL8.ZL8_DEBCRE = 'C' THEN ZLF2.ZLF_TOTAL Else ZLF2.ZLF_TOTAL * -1 END)
                           FROM %Table:ZLF% ZLF2, %Table:ZL8% ZL8
                          WHERE ZLF2.D_E_L_E_T_ = ' '
                            AND ZL8.D_E_L_E_T_ = ' '
@@ -324,18 +310,18 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->ZL2_FILIAL
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

@@ -2,18 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 16/08/2022 | Corrigida query para não considerar pre-notas. Chamado 41037
-Lucas Borges  | 24/01/2023 | Retirada referencia à SX5. Chamado 42685
-Lucas Borges  | 22/01/2025 | Chamado 49641. Implementada faixa de início e fim para pagamento do excedente de matéria gorda
+Lucas Borges  |24/01/2023| Chamado 42685. Retirada referencia à SX5.
+Lucas Borges  |22/01/2025| Chamado 49641. Implementada faixa de início e fim para pagamento do excedente de matéria gorda
+Lucas Borges  |01/10/2025| Chamado 52143. Incluido filtro para fornecedore Centro Leite
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -25,9 +22,9 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function RGLT017()
+User Function RGLT017
 
-Local oReport as Object
+Local oReport := Nil As Object
 
 Pergunte("RGLT017",.F.)
 //Inferface de Impressão
@@ -46,11 +43,11 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function ReportDef()
+Static Function ReportDef() As Object
 
-Local oReport 	as Object
-Local oSection	as Object
-Local _aOrdem	:= {"Filial+Produto"} as Array
+Local oReport 	:= Nil As Object
+Local oSection	:= Nil As Object
+Local _aOrdem	:= {"Filial+Produto"} As Array
 
 //Criacao do componente de impressao
 //TReport():New
@@ -102,26 +99,26 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function ReportPrint(oReport,_aOrdem)
+Static Function ReportPrint(oReport As Object,_aOrdem As Array)
 
-Local _cFiltro	:= "%" as String
-Local _cAlias	:= "" as String
-Local _aSelFil	:= {} as Array
-Local _nOrdem	:= oReport:Section(1):GetOrder()  as Number
-Local _lPlanilha:= oReport:nDevice == 4 as Logical
-Local _cFilial	:= "" as String
-Local _cProduto := "" as String
-Local _cPedido	:= "" as String
-Local _cBreak01	:= "" as String
+Local _cFiltro	:= "%" As Character
+Local _cAlias	:= "" As Character
+Local _aSelFil	:= {} As Array
+Local _nOrdem	:= oReport:Section(1):GetOrder()  As Numeric
+Local _lPlanilha:= oReport:nDevice == 4 As Logical
+Local _cFilial	:= "" As Character
+Local _cProduto := "" As Character
+Local _cPedido	:= "" As Character
+Local _cBreak01	:= "" As Character
 
 //Chama função que permitirá a seleção das filiais
 If MV_PAR09 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZZX")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -188,6 +185,13 @@ ElseIf MV_PAR03 == 2
 ElseIf MV_PAR03 == 3 
  _cFiltro += " AND ZLX.ZLX_TIPOLT = 'P' "
 EndIf
+
+//Centro Leite
+If MV_PAR10 == 1
+	_cFiltro += " AND A2_L_CENTR = '1' "
+ElseIf MV_PAR10 == 2
+	_cFiltro += " AND A2_L_CENTR = '2' "
+EndIf
 _cFiltro += " %"
 
 //==========================================================================
@@ -203,15 +207,15 @@ BeginSql alias _cAlias
 SELECT ZZX_FILIAL, ZZX_CODPRD, X5_DESCRI PRODUTO, ZLX_TIPOLT, A2_COD, A2_LOJA, A2_NREDUZ, ZLX_NRONF, C7_NUM, C7_EMISSAO,
        C7_L_PMEST, C7_L_EXEST, C7_QUANT, ZLX_VOLREC, C7_PRECO, ZLX_PRCNF, ZAP_GORD,
        C7_QUANT - SUM(ZLX_VOLREC) OVER (PARTITION BY C7_NUM ORDER BY ZLX_NRONF) VOL_DIF, C7_PRECO - ZLX_PRCNF PRC_DIF,
-	   CASE WHEN ROW_NUMBER() OVER (PARTITION BY C7_NUM ORDER BY ZLX_NRONF DESC) = 1 
+	   Case WHEN ROW_NUMBER() OVER (PARTITION BY C7_NUM ORDER BY ZLX_NRONF DESC) = 1 
          THEN C7_QUANT - SUM(ZLX_VOLREC) OVER (PARTITION BY C7_NUM ORDER BY ZLX_NRONF)
-         ELSE 0 END AS DIF,
-       NVL(ROUND(CASE
-                   WHEN NVL(ROUND(ZAP_GORD, 2), 0) > C7_L_PMGB AND NVL(ROUND(ZAP_GORD, 2), 0) <= C7_L_PMGB2 
+         Else 0 END AS DIF,
+       NVL(Round(Case
+                   WHEN NVL(Round(ZAP_GORD, 2), 0) > C7_L_PMGB AND NVL(Round(ZAP_GORD, 2), 0) <= C7_L_PMGB2 
 				   THEN C7_L_EXEMG
-                   WHEN NVL(ROUND(ZAP_GORD, 2), 0) > C7_L_PMGB2 THEN
+                   WHEN NVL(Round(ZAP_GORD, 2), 0) > C7_L_PMGB2 THEN
                     C7_L_EXEM2
-                   ELSE 0 END, 2), 0) C7_L_EXEMG
+                   Else 0 END, 2), 0) C7_L_EXEMG
 	  FROM %Table:ZLX% ZLX, %Table:SA2% SA2, %Table:ZZX% ZZX, %Table:SD1% SD1, %Table:SF1% SF1, %Table:SC7% SC7, %Table:SX5% SX5,
        (SELECT ZAP.ZAP_FILIAL, ZAP.ZAP_CODIGO, AVG(ZAP.ZAP_GORD) ZAP_GORD
           FROM %Table:ZAP% ZAP
@@ -271,7 +275,7 @@ oReport:Section(1):Init()
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(0)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	If (_cAlias)->(ZZX_FILIAL+ZZX_CODPRD+C7_NUM) <> _cBreak01
 		oReport:Section(1):Cell("QUANT" ):SetBlock({||(_cAlias)->C7_QUANT})
 		_cBreak01 := (_cAlias)->(ZZX_FILIAL+ZZX_CODPRD+C7_NUM)
@@ -283,10 +287,10 @@ While !oReport:Cancel() .And. (_cAlias)->(!EOF())
 	_cFilial := (_cAlias)->ZZX_FILIAL
 	_cPedido := (_cAlias)->C7_NUM
 	_cProduto := (_cAlias)->ZZX_CODPRD+' - '+(_cAlias)->PRODUTO
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

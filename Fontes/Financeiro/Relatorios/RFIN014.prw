@@ -9,18 +9,17 @@ Darcio		  |20/06/2016| Chamado 15934. Foi criado relatório para apresentar todos
 Lucas Borges  |08/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
-#include "report.ch"
-#include "protheus.ch"
+
+#Include "report.ch"
+#Include "TOTVS.ch"
+
 /*
 ===============================================================================================================================
 Programa----------: RFIN014
 Autor-------------: Darcio Ribeiro Sporl
 Data da Criacao---: 20/06/2016
-===============================================================================================================================
 Descrição---------: Relatório de Fechamento de Fluxo
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -34,7 +33,7 @@ Private oBrkEntr_1	:= Nil
 Private _aOrd		:= {  }
 Private _cPerg		:= "RFIN014"
 
-pergunte( _cPerg , .T. )
+Pergunte( _cPerg , .T. )
 
 DEFINE REPORT oReport	NAME		_cPerg ;
 						TITLE		"Relatório de Fechamento de Fluxo" ;
@@ -55,7 +54,7 @@ oReport:nLineHeight	:= 45 // Define a altura da linha.
 //====================================================================================================
 // Secao dados do Investimento
 //====================================================================================================
-DEFINE SECTION oSecEntr_1 OF oReport TITLE "Entrada_ordem_1" TABLES "SF2" ORDERS _aOrd
+DEFINE Section oSecEntr_1 OF oReport TITLE "Entrada_ordem_1" TABLES "SF2" ORDERS _aOrd
 DEFINE CELL NAME "E1_FILIAL" 	OF oSecEntr_1 ALIAS "SF2"  TITLE "Filial"				SIZE 20
 DEFINE CELL NAME "E1_PREFIXO"	OF oSecEntr_1 ALIAS "SF2"  TITLE "Prefixo"				SIZE 20
 DEFINE CELL NAME "E1_NUM"	  	OF oSecEntr_1 ALIAS "SF2"  TITLE "Número"				SIZE 20
@@ -73,18 +72,15 @@ DEFINE CELL NAME "CUSERLGA"		OF oSecEntr_1 ALIAS "SE1"  TITLE "Usr Alterou"			SI
 oSecEntr_1:Disable()
 oReport:PrintDialog()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: RFIN014PR
 Autor-------------: Darcio Ribeiro Sporl
 Data da Criacao---: 20/06/2012
-===============================================================================================================================
 Descrição---------: Executa relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -93,7 +89,7 @@ Local 	_cFiltro  	:= "% "
 
 oSecEntr_1:Enable()
 
-oReport:SetTitle( "Fechamento de Fluxo  - Período de " + DtoC(mv_par05) + " até "  + DtoC(mv_par06) )
+oReport:SetTitle( "Fechamento de Fluxo  - Período de " + DToC(MV_PAR05) + " até "  + DToC(MV_PAR06) )
 //==============
 // Filtra Filial
 //==============
@@ -105,18 +101,18 @@ EndIf
 //===============
 // Filtra Emissão
 //===============
-If DtoS( MV_PAR03 ) == DtoS( MV_PAR04 )
-	_cFiltro += " AND E1_EMISSAO = '" + DtoS( MV_PAR03 ) + "' "
+If DToS( MV_PAR03 ) == DToS( MV_PAR04 )
+	_cFiltro += " AND E1_EMISSAO = '" + DToS( MV_PAR03 ) + "' "
 Else
-	_cFiltro += " AND E1_EMISSAO BETWEEN '" + DtoS( MV_PAR03 ) + "' AND '" + DtoS( MV_PAR04 ) + "' "
+	_cFiltro += " AND E1_EMISSAO BETWEEN '" + DToS( MV_PAR03 ) + "' AND '" + DToS( MV_PAR04 ) + "' "
 EndIf
 //===================================
 // Filtra Data de Fechamento do Fluxo
 //===================================
-If DtoS( MV_PAR05 ) == DtoS( MV_PAR06 )
-	_cFiltro += " AND E1_I_FCFLU = '" + DtoS( MV_PAR05 ) + "' "
+If DToS( MV_PAR05 ) == DToS( MV_PAR06 )
+	_cFiltro += " AND E1_I_FCFLU = '" + DToS( MV_PAR05 ) + "' "
 Else
-	_cFiltro += " AND E1_I_FCFLU BETWEEN '" + DtoS( MV_PAR05 ) + "' AND '" + DtoS( MV_PAR06 ) + "' "
+	_cFiltro += " AND E1_I_FCFLU BETWEEN '" + DToS( MV_PAR05 ) + "' AND '" + DToS( MV_PAR06 ) + "' "
 EndIf
 //===============
 // Filtra Cliente
@@ -141,7 +137,7 @@ BEGIN REPORT QUERY oSecEntr_1
 	BeginSql alias "QRY1"
 
 		SELECT E1_FILIAL, E1_PREFIXO, E1_NUM, E1_PARCELA, E1_CLIENTE, E1_LOJA, E1_NOMCLI, E1_VALOR, E1_EMISSAO, E1_VENCTO, E1_VENCREA, E1_I_FCFLU, E1_I_VCFLU, E1_USERLGA
-		FROM %table:SE1% SE1
+		FROM %Table:SE1% SE1
 		WHERE %exp:_cFiltro%
 		  AND E1_I_VCFLU <> E1_VENCREA
 		  AND SE1.%notDel%
@@ -153,18 +149,15 @@ END REPORT QUERY oSecEntr_1
 		
 oSecEntr_1:Print(.T.)
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: RFIN014NO
 Autor-------------: Darcio Ribeiro Sporl
 Data da Criacao---: 21/06/2016
-===============================================================================================================================
 Descrição---------: Função criada descriptografar o código do usuário de alteração, e retornar o nome do mesmo
-===============================================================================================================================
 Parametros--------: _cUsrLga	-> Recebe o código do usuário criptografado
-===============================================================================================================================
 Retorno-----------: _cRet		-> Retorna o nome do usuário
 ===============================================================================================================================
 */

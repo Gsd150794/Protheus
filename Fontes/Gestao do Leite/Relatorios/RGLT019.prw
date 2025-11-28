@@ -2,15 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 18/06/2021 | Chamado 36884. Inclusão do Nome do atravessador PF do produtor PJ
-Lucas Borges  | 17/04/2023 | Chamado 43587. Imprimir o Informativo de qualidade independente da quantidade de análise
-Lucas Borges  | 05/05/2025 | Chamado 50600. Criada exceção para o evento 000229, prefixo GLA devido indefinição da diretoria
+Lucas Borges  |17/04/2023| Chamado 43587. Imprimir o Informativo de qualidade independente da quantidade de análise
+Lucas Borges  |05/05/2025| Chamado 50600. Criada exceção para o evento 000229, prefixo GLA devido indefinição da diretoria
+Lucas Borges  |01/10/2025| Chamado 52141. Incluido filtro para fornecedore Pessoa Física/Jurídica
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -24,40 +24,40 @@ Retorno-----------: Nenhum
 */
 User Function RGLT019()
 
-Static cpMix	:= ""
-Static cpSetor	:= ""
-Static cpPrdIni	:= ""
-Static cpPrdFim	:= ""
-Static cpLjIni	:= ""
-Static cpLjFim	:= ""
-Static cpLinIni	:= ""
-Static cpLinFim	:= ""
-Static dpDtIni	:= StoD("")
-Static dpDtFim	:= StoD("")
+Static cpMix	:= "" As Character
+Static cpSetor	:= "" As Character
+Static cpPrdIni	:= "" As Character
+Static cpPrdFim	:= "" As Character
+Static cpLjIni	:= "" As Character
+Static cpLjFim	:= "" As Character
+Static cpLinIni	:= "" As Character
+Static cpLinFim	:= "" As Character
+Static dpDtIni	:= SToD("") As Date
+Static dpDtFim	:= SToD("") As Date
 
-Private cPerg	:= "RGLT019"
+Private cPerg	:= "RGLT019" As Character
 
 If !Pergunte( cPerg , .T. )
-	Return()
+	Return
 EndIf
 
 //================================================================================
 // Obtem parametros
 //================================================================================
-cpMix		:= mv_par01
-cpSetor		:= mv_par02
-cpPrdIni	:= mv_par03
-cpLjIni		:= mv_par04
-cpPrdFim	:= mv_par05
-cpLjFim		:= mv_par06
-cpLinIni	:= mv_par07
-cpLinFim	:= mv_par08
-dpDtIni		:= POSICIONE("ZLE",1,XFILIAL("ZLE")+cpMix,"ZLE_DTINI")
-dpDtFim		:= POSICIONE("ZLE",1,XFILIAL("ZLE")+cpMix,"ZLE_DTFIM")
+cpMix		:= MV_PAR01
+cpSetor		:= MV_PAR02
+cpPrdIni	:= MV_PAR03
+cpLjIni		:= MV_PAR04
+cpPrdFim	:= MV_PAR05
+cpLjFim		:= MV_PAR06
+cpLinIni	:= MV_PAR07
+cpLinFim	:= MV_PAR08
+dpDtIni		:= Posicione("ZLE",1,xFilial("ZLE")+cpMix,"ZLE_DTINI")
+dpDtFim		:= Posicione("ZLE",1,xFilial("ZLE")+cpMix,"ZLE_DTFIM")
 
 Processa({|| RGLT019RUN() })
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -71,59 +71,59 @@ Retorno-----------: Nenhum
 */
 Static Function RGLT019RUN()
 
-Local nCount		:= 0
-Local nPos4			:= 1800
-Local nTab01		:= 100
-Local nTab02		:= 800
-Local nTab03		:= 1200
-Local nTab04		:= 1600
-Local nTab05		:= 2000
-Local nTab11		:= 100
-Local nTab12		:= 400
-Local nTab13		:= 700
-Local nTab14		:= 1000
-Local nTab15		:= 1300
-Local nTab16		:= 1700
-Local nTotCre		:= 0
-Local nTotDeb		:= 0
-Local nTotVol		:= 0
-Local nUltDia		:= 0
-Local nTotQual		:= 0
-Local dQual1
-Local dQual2
-Local dQual3
-Local nOk			:= 0
-Local aMensagem		:= {}
-Local lmostra		:= .T.
-Local nVolProd		:= 0
-Local _cAliasZLF	:= GetNextAlias()
-Local _cAliasPRD	:= ""
-Local nReg			:= 0
-Local nTotPend		:= 0                                                          
-Local cCodLinRota	:= ""      
-Local _cMesAno		:= ""  
-Local _cDescEven	:= ""
-Local _nTotal		:= 0
-Local _nVlrPag		:= 0
-Local _cCampo		:= ""
-Local _cFiltro		:= ""
-Local _nX			:= 0
-Local _aClass 		:= RetSX3Box(GetSX3Cache("A2_L_CLASS","X3_CBOX"),,,1)
-Local _cBonif		:= ""
-Local _nInfQual		:= 0
-Local _cMenAux		:= ""
-Private nL			:= 0
-Private nPos1		:= 100
-Private nPos2		:= 350
-Private nPos3		:= 1500
-Private oFontTitulo	:= TFont():New("Arial",09,10,.T.,.T.,5,.T.,5,.T.,.F.)
-Private oFontRotulo	:= TFont():New("Arial",09,09,.T.,.T.,5,.T.,5,.T.,.F.)
-Private oFontNormal	:= TFont():New("Arial",09,08,.T.,.T.,5,.T.,5,.T.,.F.)
-Private cRaizServer	:= If(issrvunix(), "/", "\")
-Private _nBase		:= 0 //varivável declarada como private para poder ser lida por macroexecução (ZL8_FORMUL)
+Local nCount		:= 0 As Numeric
+Local nPos4			:= 1800 As Numeric
+Local nTab01		:= 100 As Numeric
+Local nTab02		:= 800 As Numeric
+Local nTab03		:= 1200 As Numeric
+Local nTab04		:= 1600 As Numeric
+Local nTab05		:= 2000 As Numeric
+Local nTab11		:= 100 As Numeric
+Local nTab12		:= 400 As Numeric
+Local nTab13		:= 700 As Numeric
+Local nTab14		:= 1000 As Numeric
+Local nTab15		:= 1300 As Numeric
+Local nTab16		:= 1700 As Numeric
+Local nTotCre		:= 0 As Numeric
+Local nTotDeb		:= 0 As Numeric
+Local nTotVol		:= 0 As Numeric
+Local nUltDia		:= 0 As Numeric
+Local nTotQual		:= 0 As Numeric
+Local dQual1		:= SToD("") As Date
+Local dQual2		:= SToD("") As Date
+Local dQual3		:= SToD("") As Date
+Local nOk			:= 0 As Numeric
+Local aMensagem		:= {} As Array
+Local lmostra		:= .T. As Logical
+Local nVolProd		:= 0 As Numeric
+Local _cAliasZLF	:= GetNextAlias() As Character
+Local _cAliasPRD	:= "" As Character
+Local nReg			:= 0 As Numeric
+Local nTotPend		:= 0 As Numeric                                               
+Local cCodLinRota	:= "" As Character
+Local _cMesAno		:= "" As Character
+Local _cDescEven	:= "" As Character
+Local _nTotal		:= 0 As Numeric
+Local _nVlrPag		:= 0 As Numeric
+Local _cCampo		:= "" As Character
+Local _cFiltro		:= "% %" As Character
+Local _nX			:= 0 As Numeric
+Local _aClass 		:= RetSX3Box(GetSX3Cache("A2_L_CLASS","X3_CBOX"),,,1) As Array
+Local _cBonif		:= "" As Character
+Local _nInfQual		:= 0 As Numeric
+Local _cMenAux		:= "" As Character
+Private nL			:= 0 As Numeric
+Private nPos1		:= 100 As Numeric
+Private nPos2		:= 350 As Numeric
+Private nPos3		:= 1500 As Numeric
+Private oFontTitulo	:= TFont():New("Arial",09,10,.T.,.T.,5,.T.,5,.T.,.F.) As Object
+Private oFontRotulo	:= TFont():New("Arial",09,09,.T.,.T.,5,.T.,5,.T.,.F.) As Object
+Private oFontNormal	:= TFont():New("Arial",09,08,.T.,.T.,5,.T.,5,.T.,.F.) As Object
+Private cRaizServer	:= If(issrvunix(), "/", "\") As Character
+Private _nBase		:= 0 As Array//varivável declarada como Private para poder ser lida por macroexecução (ZL8_FORMUL)
 
 OpenSm0(cEmpAnt, .F.)// Cadatro de Filial
-SM0->(DbSeek(cEmpAnt + cFilAnt))
+SM0->(DBSeek(cEmpAnt + cFilAnt))
 // Objeto de impressao grafica
 oPrint:= TMSPrinter():New( "Relatorio de Grafico" )
 oPrint:SetPortrait() 
@@ -135,15 +135,26 @@ If cFilAnt == "10"
 ElseIf cFilAnt == "11"
 	_cBonif:= "000080"
 EndIf
+
+If MV_PAR11 == 1 //Pessoa Física
+	_cFiltro := "% AND A2_TIPO  = 'F' %"
+ElseIf MV_PAR11 == 2 //Pessoa Jurídica
+	_cFiltro := "% AND A2_TIPO  = 'J' %"
+EndIf
+
 // Obtem dados de impressao
 BeginSql alias _cAliasZLF
 	SELECT ZLF_SETOR,ZLF_RETIRO,ZLF_RETILJ,ZLF_LINROT
-	FROM %table:ZLF% ZLF
-	WHERE D_E_L_E_T_ = ' '
+	FROM %Table:ZLF% ZLF, %Table:SA2% SA2
+	WHERE ZLF.D_E_L_E_T_ = ' '
+	AND SA2.D_E_L_E_T_ = ' '
 	AND ZLF_FILIAL = %xFilial:ZLF%
 	AND ZLF_CODZLE = %exp:cpMix%
 	AND ZLF_SETOR = %exp:cpSetor%
+	AND ZLF_RETIRO = A2_COD
+	AND ZLF_RETILJ = A2_LOJA
 	AND ZLF_RETIRO != ' '
+	%exp:_cFiltro%
 	AND ZLF_LINROT BETWEEN %exp:cpLinIni% AND %exp:cpLinFim%
 	AND ZLF_RETIRO BETWEEN %exp:cpPrdIni% AND %exp:cpPrdFim%
 	AND ZLF_RETILJ BETWEEN %exp:cpLjIni% AND %exp:cpLjFim%
@@ -154,12 +165,12 @@ Count to nQtdReg
 
 ProcRegua(nQtdReg)
 
-(_cAliasZLF)->(DbGoTop())
-While !(_cAliasZLF)->(EOf())
+(_cAliasZLF)->(DBGoTop())
+While !(_cAliasZLF)->(Eof())
 	nCount++                   
 
 	cCodLinRota:=(_cAliasZLF)->ZLF_LINROT
-	incproc((_cAliasZLF)->ZLF_RETIRO)
+	IncProc((_cAliasZLF)->ZLF_RETIRO)
 
     oPrint:StartPage()
     
@@ -170,12 +181,12 @@ While !(_cAliasZLF)->(EOf())
 	//===================================================================
 		
 	// Posiciona no Produtor
-	DbSelectArea("SA2")
-	SA2->(DbSetOrder(1))
-	SA2->(DbSeek(xFilial("SA2")+(_cAliasZLF)->(ZLF_RETIRO+ZLF_RETILJ)))
-	DbSelectArea("ZL3")
-	ZL3->(DbSetOrder(1))
-	ZL3->(DbSeek(xFilial("ZL3")+(_cAliasZLF)->ZLF_LINROT))
+	DBSelectArea("SA2")
+	SA2->(DBSetOrder(1))
+	SA2->(DBSeek(xFilial("SA2")+(_cAliasZLF)->(ZLF_RETIRO+ZLF_RETILJ)))
+	DBSelectArea("ZL3")
+	ZL3->(DBSetOrder(1))
+	ZL3->(DBSeek(xFilial("ZL3")+(_cAliasZLF)->ZLF_LINROT))
 		
 	nL += 50
 	oPrint:Say(nL,nPos1,"PRODUTOR:",oFontRotulo) 
@@ -209,19 +220,19 @@ While !(_cAliasZLF)->(EOf())
 	oPrint:Say(nL,nPos1,"FRETISTA:",oFontRotulo)
 		
 
-	SA2->(DbSeek(xFilial("SA2")+ZL3->(ZL3_FRETIS+ZL3_FRETLJ)))
+	SA2->(DBSeek(xFilial("SA2")+ZL3->(ZL3_FRETIS+ZL3_FRETLJ)))
 		
 	oPrint:Say(nL,nPos2, ZL3->ZL3_FRETIS +'/'+ ZL3->ZL3_FRETLJ +" - "+ SA2->A2_NOME , oFontNormal ) //Ajuste para considerar a Loja no posicionamento e exibição [Chamado-6851]
 	oPrint:Say(nL,nPos3,"",oFontRotulo)
 	oPrint:Say(nL,nPos4,"",oFontNormal)
 		
-	SA2->(DbSeek(xFilial("SA2")+(_cAliasZLF)->(ZLF_RETIRO+ZLF_RETILJ)))
-	SA2->(DbSeek(xFilial("SA2")+SA2->(A2_L_TANQ + A2_L_TANLJ)))
+	SA2->(DBSeek(xFilial("SA2")+(_cAliasZLF)->(ZLF_RETIRO+ZLF_RETILJ)))
+	SA2->(DBSeek(xFilial("SA2")+SA2->(A2_L_TANQ + A2_L_TANLJ)))
 	nL += 50
 	oPrint:Say(nL,nPos1,"RESP.TANQUE:",oFontRotulo) 
 	oPrint:Say(nL,nPos2,SA2->A2_COD +'/'+ SA2->A2_LOJA +" - "+ SA2->A2_NOME , oFontNormal ) //Ajuste para considerar a Loja no posicionamento e exibição [Chamado-6851]
 		
-	SA2->(DbSeek(xFilial("SA2")+(_cAliasZLF)->(ZLF_RETIRO+ZLF_RETILJ)))
+	SA2->(DBSeek(xFilial("SA2")+(_cAliasZLF)->(ZLF_RETIRO+ZLF_RETILJ)))
 	oPrint:Say(nL,nPos3,"CLASS.TANQUE:",oFontRotulo)
 	oPrint:Say(nL,nPos4,_aClass[aScan(_aClass,{|x| x[2] == SA2->A2_L_CLASS})][3],oFontNormal) 
 
@@ -238,11 +249,11 @@ While !(_cAliasZLF)->(EOf())
 	//===================================================================
 	// Início dos eventos do Produtor na ZLF
 	//===================================================================
-	If mv_par09 != 2 //Default ou por produtor
+	If MV_PAR09 != 2 //Default ou por produtor
 		nL += 50
 		oPrint:Say(nL,900,"DEMONSTRATIVO DE PAGAMENTO DE LEITE",oFontRotulo)
 		nL += 50
-		oPrint:Say(nL,900,"PERIODO DE "+dtoc(dpDtIni)+" A "+dtoc(dpDtFim),oFontRotulo)
+		oPrint:Say(nL,900,"PERIODO DE "+DToC(dpDtIni)+" A "+DToC(dpDtFim),oFontRotulo)
 		nL += 50
 		oPrint:FillRect({nL,2300,nL+1,100},TBrush():New("",0)) 
 		nL += 10
@@ -260,7 +271,7 @@ While !(_cAliasZLF)->(EOf())
 		_cCampo := "% "
 		_cFiltro:= "% "
 		If cpMix == "000118" .And. cFilAnt $ "10/11"
-			_cCampo += " SUM (CASE WHEN ZLF_EVENTO = '000002' THEN ZLF_TOTAL "
+			_cCampo += " SUM (Case WHEN ZLF_EVENTO = '000002' THEN ZLF_TOTAL "
 			_cCampo += " + NVL((SELECT SUM(ZLF_TOTAL)
 			_cCampo += " FROM "+RetSqlName("ZLF")+" B "
 			_cCampo += " WHERE B.D_E_L_E_T_ = ' '"
@@ -272,9 +283,9 @@ While !(_cAliasZLF)->(EOf())
 			_cCampo += " AND B.ZLF_LINROT = ZLF.ZLF_LINROT"
 			_cCampo += " AND B.ZLF_TP_MIX = 'L'"
 			_cCampo += " AND B.ZLF_EVENTO = '"+_cBonif+"'),0)"
-			_cCampo += " ELSE ZLF_TOTAL"
+			_cCampo += " Else ZLF_TOTAL"
 			_cCampo += " END) AS TOTAL, "
-			_cCampo += " SUM (CASE WHEN ZLF_EVENTO = '000002' THEN ZLF_VLRPAG "
+			_cCampo += " SUM (Case WHEN ZLF_EVENTO = '000002' THEN ZLF_VLRPAG "
 			_cCampo += " + NVL((SELECT SUM(ZLF_VLRPAG)
 			_cCampo += " FROM "+RetSqlName("ZLF")+" B "
 			_cCampo += " WHERE B.D_E_L_E_T_ = ' '"
@@ -286,7 +297,7 @@ While !(_cAliasZLF)->(EOf())
 			_cCampo += " AND B.ZLF_LINROT = ZLF.ZLF_LINROT"
 			_cCampo += " AND B.ZLF_TP_MIX = 'L'"
 			_cCampo += " AND B.ZLF_EVENTO = '"+_cBonif+"'),0)"
-			_cCampo += " ELSE ZLF_VLRPAG"
+			_cCampo += " Else ZLF_VLRPAG"
 			_cCampo += " END) AS VLRPAG, "
 		Else
 			_cCampo += " SUM(ZLF_TOTAL) AS TOTAL,SUM(ZLF_VLRPAG) AS VLRPAG,"
@@ -328,7 +339,7 @@ While !(_cAliasZLF)->(EOf())
 		_cAliasPRD:= GetNextAlias()
 		BeginSql alias _cAliasPRD 
 			SELECT  ZLF_SETOR, ZLF_EVENTO EVENTO,ZLF_DEBCRE DEBCRE,MAX(ZLF_QTDBOM) QTDBOM, %exp:_cCampo% MAX(ZLF_SEEKCO) SEEKCOMPL
-			FROM %table:ZLF% ZLF
+			FROM %Table:ZLF% ZLF
 			WHERE D_E_L_E_T_ = ' '
 			AND ZLF_FILIAL = %xFilial:ZLF%
 			AND ZLF_CODZLE = %exp:cpMix%
@@ -342,20 +353,20 @@ While !(_cAliasZLF)->(EOf())
 			ORDER BY ZLF_SETOR, ZLF_DEBCRE,ZLF_EVENTO
 		EndSql
 
-		DbSelectArea("ZL8")
-		ZL8->( DbSetOrder(1) )
-		DbSelectArea("ZL2")
-		ZL2->( DbSetOrder(1) )
+		DBSelectArea("ZL8")
+		ZL8->( DBSetOrder(1) )
+		DBSelectArea("ZL2")
+		ZL2->( DBSetOrder(1) )
 		
-		While !(_cAliasPRD)->(EOf())
+		While !(_cAliasPRD)->(Eof())
 			_nInfQual:= 0
 			_nTotal := (_cAliasPRD)->TOTAL
 			_nVlrPag := (_cAliasPRD)->VLRPAG
 			If cpMix $ ("000118/000119") .And. cFilAnt $ "10/11"
 				_nBase	:= (_cAliasPRD)->ADTO_TOTAL
 			EndIf
-			ZL8->(DbSeek(xFilial("ZL8")+(_cAliasPRD)->EVENTO) )
-			ZL2->(DbSeek(xFilial("ZL2")+(_cAliasPRD)->ZLF_SETOR) )
+			ZL8->(DBSeek(xFilial("ZL8")+(_cAliasPRD)->EVENTO) )
+			ZL2->(DBSeek(xFilial("ZL2")+(_cAliasPRD)->ZLF_SETOR) )
 
 			If cpMix == "000118" .And. cFilAnt $ "10/11" .And. (_cAliasPRD)->EVENTO == "000002"
 				_nTotal += (_cAliasPRD)->ADTO_TOTAL
@@ -367,15 +378,15 @@ While !(_cAliasZLF)->(EOf())
 			EndIf
 			
 			If ZL8->ZL8_RECIBO == "S"
-				lmostra:=.t.
+				lmostra:=.T.
 			Else
-				lmostra:=.f.
+				lmostra:=.F.
 			EndIf       
 			    
 			If lmostra  
 			
 				_cMesAno  := ""  
-				_cDescEven:= POSICIONE("ZL8",1,XFILIAL("ZL8")+(_cAliasPRD)->EVENTO,"ZL8_DESCRI")
+				_cDescEven:= Posicione("ZL8",1,xFilial("ZL8")+(_cAliasPRD)->EVENTO,"ZL8_DESCRI")
 			          			    				
 				//=============================================================
 				// Verifica se o evento gerado eh de complemento de pagamento. 
@@ -403,12 +414,12 @@ While !(_cAliasZLF)->(EOf())
 			EndIf
 			(_cAliasPRD)->(DBSkip())
 		EndDo
-		(_cAliasPRD)->(dbcloseArea())
+		(_cAliasPRD)->(DBCloseArea())
 		oPrint:FillRect({nL,2300,nL+1,100},TBrush():New("",0)) 
 
 		nL += 10
 		oPrint:Say(nL,nTab01,"TOTAL",oFontRotulo)
-		nVolProd:=U_VolLeite(xfilial("ZLF"),dpDtIni,dpDtFim,cpSetor,(_cAliasZLF)->ZLF_LINROT,(_cAliasZLF)->ZLF_RETIRO,(_cAliasZLF)->ZLF_RETILJ)
+		nVolProd:=U_VolLeite(xFilial("ZLF"),dpDtIni,dpDtFim,cpSetor,(_cAliasZLF)->ZLF_LINROT,(_cAliasZLF)->ZLF_RETIRO,(_cAliasZLF)->ZLF_RETILJ)
 		oPrint:Say(nL,nTab02,transform(nVolProd,"@E 999,999,999.99"),oFontRotulo)
 		If !(cpMix $ "000118/000119" .And. cFilAnt $ "10/11")
 			oPrint:Say(nL,nTab03,transform((nTotCre/nVolProd),"@E 999,999,999.9999"),oFontRotulo)
@@ -443,7 +454,7 @@ While !(_cAliasZLF)->(EOf())
 	nL += 50
 	oPrint:Say(nL,nPos1,"Volume",oFontRotulo)
 	For _nX:=1 To 15
-		nAux:=RGLT019O((_cAliasZLF)->ZLF_RETIRO,(_cAliasZLF)->ZLF_RETILJ,Substr(DToS(dpDtIni),1,6)+StrZero(_nX,2),(_cAliasZLF)->ZLF_LINROT)
+		nAux:=RGLT019O((_cAliasZLF)->ZLF_RETIRO,(_cAliasZLF)->ZLF_RETILJ,SubStr(DToS(dpDtIni),1,6)+StrZero(_nX,2),(_cAliasZLF)->ZLF_LINROT)
 		oPrint:Say(nL,200+(_nX*120),Transform(nAux,"@E 999,999,999"),oFontNormal)
 		nTotVol+=nAux
 	Next _nX
@@ -452,15 +463,15 @@ While !(_cAliasZLF)->(EOf())
 
     // Segunda  Quinzena
 	oPrint:Say(nL,nPos1,"Dia",oFontRotulo)	
-	nUltDia:=val(substr(dtos(dpDtFim),7,2)) // ultimo dia do mes
+	nUltDia:=Val(SubStr(DToS(dpDtFim),7,2)) // ultimo dia do mes
 	For _nX:=16 To nUltDia
-		oPrint:Say(nL,200+((_nX-15)*120),Space(11-Len(AllTrim(str(_nX))))+AllTrim(str(_nX)),oFontRotulo)
+		oPrint:Say(nL,200+((_nX-15)*120),Space(11-Len(AllTrim(Str(_nX))))+AllTrim(Str(_nX)),oFontRotulo)
 	Next _nX
 	nL += 50
 	oPrint:Say(nL,nPos1,"Volume",oFontRotulo)
 	For _nX:=16 To nUltDia
 		//oPrint:Say(nL,200+(n*120),transform(99999,"@E 999,999,999"),oFontNormal)
-		nAux:=RGLT019O((_cAliasZLF)->ZLF_RETIRO,(_cAliasZLF)->ZLF_RETILJ,Substr(DToS(dpDtIni),1,6)+StrZero(_nX,2),(_cAliasZLF)->ZLF_LINROT)
+		nAux:=RGLT019O((_cAliasZLF)->ZLF_RETIRO,(_cAliasZLF)->ZLF_RETILJ,SubStr(DToS(dpDtIni),1,6)+StrZero(_nX,2),(_cAliasZLF)->ZLF_LINROT)
 		oPrint:Say(nL,200+((_nX-15)*120),Transform(nAux,"@E 999,999,999"),oFontNormal)
 		nTotVol+=nAux
 	Next _nX
@@ -508,23 +519,23 @@ While !(_cAliasZLF)->(EOf())
 	oPrint:Say(nL,nTab11,"Análise",oFontRotulo)		
 	oPrint:Say(nL,nTab12,"Referencia",oFontRotulo)		
 	If !Empty(dQual1)
-		oPrint:Say(nL,nTab13,dtoc(dQual1),oFontRotulo)		
+		oPrint:Say(nL,nTab13,DToC(dQual1),oFontRotulo)		
 	EndIf
 	If !Empty(dQual2)
-		oPrint:Say(nL,nTab14,dtoc(dQual2),oFontRotulo)		
+		oPrint:Say(nL,nTab14,DToC(dQual2),oFontRotulo)		
 	EndIf
 	If !Empty(dQual3)
-		oPrint:Say(nL,nTab15,dtoc(dQual3),oFontRotulo)		
+		oPrint:Say(nL,nTab15,DToC(dQual3),oFontRotulo)		
 	EndIf
 	oPrint:Say(nL,nTab16,"Media Arit/Geom.",oFontRotulo)
 	nL += 50
 	oPrint:FillRect({nL,2300,nL+1,100},TBrush():New("",0)) 
 	nL += 10
 		
-	DbSelectArea("ZL9")
-	ZL9->(DbSetOrder(1))
-	ZL9->(DbSeek(xFilial("ZL9")))
-	While !ZL9->(EOf()) .and. xFilial("ZL9")==ZL9->ZL9_FILIAL
+	DBSelectArea("ZL9")
+	ZL9->(DBSetOrder(1))
+	ZL9->(DBSeek(xFilial("ZL9")))
+	While !ZL9->(Eof()) .And. xFilial("ZL9")==ZL9->ZL9_FILIAL
 		If ZL9->ZL9_TIPO = "Q"   
 			oPrint:Say(nL,nTab11,ZL9->ZL9_DESCRI,oFontRotulo)		
 			oPrint:Say(nL,nTab12,ZL9->ZL9_REFERE,oFontRotulo)		
@@ -590,7 +601,7 @@ While !(_cAliasZLF)->(EOf())
 			nL += 50
 			nTotQual:=0
 		EndIf
-		ZL9->(DbSkip())
+		ZL9->(DBSkip())
 	EndDo
 
 	oPrint:FillRect({nL,2300,nL+1,100},TBrush():New("",0)) 
@@ -606,7 +617,7 @@ While !(_cAliasZLF)->(EOf())
 	_cAliasSE2 := GetNextAlias()
 	BeginSql alias _cAliasSE2
 		SELECT ZL8_COD, ZL8_DESCRI, SUM(E2_SALDO + E2_SDACRES) AS SALDO
-		FROM %table:SE2% SE2, %table:ZL8% ZL8
+		FROM %Table:SE2% SE2, %Table:ZL8% ZL8
 		WHERE SE2.D_E_L_E_T_ = ' ' 
 		AND ZL8.D_E_L_E_T_ = ' '
 		AND E2_PREFIXO = ZL8_PREFIX 
@@ -620,7 +631,7 @@ While !(_cAliasZLF)->(EOf())
 	EndSql
         
 	Count to nReg
-	(_cAliasSE2)->(DbGoTop())
+	(_cAliasSE2)->(DBGoTop())
 	If nReg > 0
 		oPrint:FillRect({nL,2300,nL+1,100},TBrush():New("",0)) 
 		nL += 10
@@ -631,7 +642,7 @@ While !(_cAliasZLF)->(EOf())
 		nL += 10
     EndIf               
 	                             
-	While (_cAliasSE2)->(!EOF())
+	While (_cAliasSE2)->(!Eof())
 		oPrint:Say(nL,nPos1,(_cAliasSE2)->ZL8_COD,oFontRotulo)
 		oPrint:Say(nL,nPos2,(_cAliasSE2)->ZL8_DESCRI,oFontRotulo)
 		oPrint:Say(nL,nPos3,transform((_cAliasSE2)->SALDO,"@E 999,999.99"),oFontRotulo) 
@@ -639,9 +650,9 @@ While !(_cAliasZLF)->(EOf())
 		
 		nTotPend+=(_cAliasSE2)->SALDO
 		
-		(_cAliasSE2)->(DbSkip())
+		(_cAliasSE2)->(DBSkip())
 	EndDo
-	(_cAliasSE2)->(DbCloseArea())
+	(_cAliasSE2)->(DBCloseArea())
 
 	If nReg > 0
 		oPrint:Say(nL,nPos1,"Valor Total Pendente ------>",oFontRotulo)
@@ -663,7 +674,7 @@ While !(_cAliasZLF)->(EOf())
 	oPrint:FillRect({nL,2300,nL+1,100},TBrush():New("",0)) 
 	nL += 10
 
-	aMensagem := u_showMemo(POSICIONE("ZLP",2,xFilial("ZLP")+cpMix+"1"+cpSetor,"ZLP_MENSAG"),120)
+	aMensagem := u_showMemo(Posicione("ZLP",2,xFilial("ZLP")+cpMix+"1"+cpSetor,"ZLP_MENSAG"),120)
 	For _nX:=1 To Len(aMensagem)
 		If _nX <= 7 // Max. de Linhas
 			oPrint:Say(nL,nPos1,aMensagem[_nX],oFontNormal)
@@ -713,7 +724,7 @@ While !(_cAliasZLF)->(EOf())
 			oPrint:Say(nL,nPos1,"a.	Uso do “antibiótico vaca-seca” para controle de Mastite no período seco ",oFontRotulo); nL += 50
 			oPrint:Say(nL,nPos1,"b.	Não ultrapassar o tempo de 10 meses de Lactação ",oFontRotulo); nL += 100
 			oPrint:Say(nL,nPos1,"6.	CUIDADOS NO PRÉ - PARTO: ",oFontTitulo); nL += 50
-			oPrint:Say(nL,nPos1,"a.	O local do pré - parto tem que ser o mais adequado (evitar locais com acúmulo de “barro”) ",oFontRotulo); nL += 50
+			oPrint:Say(nL,nPos1,"a.	O Local do pré - parto tem que ser o mais adequado (evitar locais com acúmulo de “barro”) ",oFontRotulo); nL += 50
 			oPrint:Say(nL,nPos1,"b.	Se o animal já começou a soltar leite antes da parição, o mesmo deve passar pela ordenha para realização do Pós Dipping ",oFontRotulo); nL += 100
 		ElseIf _nInfQual == 2
 			oPrint:Say(nL,nPos1,"LOGO, SEGUE ABAIXO ALGUMAS INSTRUÇÕES DE COMO MELHORAR A TAXA DE CBT: ",oFontRotulo); nL += 100
@@ -804,10 +815,10 @@ While !(_cAliasZLF)->(EOf())
 	//===================================================================
 	// Fim do Informativo de Qualidade
 	//===================================================================
-	(_cAliasZLF)->(DbSkip())
+	(_cAliasZLF)->(DBSkip())
 	
 EndDo
-(_cAliasZLF)->(DbCloseArea())
+(_cAliasZLF)->(DBCloseArea())
 	
 oPrint:Preview()
 
@@ -825,16 +836,16 @@ Parametros--------: cpCodPrd - código do produtor
 Retorno-----------: aret - array com datas das últimas análises
 ===============================================================================================================================
 */
-Static function RGLT019N(cpCodPrd,dpData,cLojaProd)
+Static Function RGLT019N(cpCodPrd As Character,dpData As Date,cLojaProd As Character) As Array
 
-Local aArea		:= GetArea()
-Local _cAlias	:= GetNextAlias()
-Local aRet		:={}
-Local nQtd		:=0
-Local _nAno		:= Val( SubStr( DtoS( dpData ) , 1 , 4 ) )
-Local _nMes		:= Val( SubStr( DtoS( dpData ) , 5 , 2 ) )
-Local _sDtInic	:= ""
-Local _sDtFinal	:= DtoS(dpData)
+Local aArea		:= FWGetArea() As Array
+Local _cAlias	:= GetNextAlias() As Character
+Local aRet		:={} As Array
+Local nQtd		:=0 As Numeric
+Local _nAno		:= Val( SubStr( DToS( dpData ) , 1 , 4 ) ) As Numeric
+Local _nMes		:= Val( SubStr( DToS( dpData ) , 5 , 2 ) ) As Numeric
+Local _sDtInic	:= "" As Character
+Local _sDtFinal	:= DToS(dpData) As Character
 
 //===================================================================
 // Define os ultimos tres meses a serem considerados para obter      
@@ -845,13 +856,13 @@ If _nMes - 2 == 0
 ElseIf _nMes - 2 == -1 
 	_sDtInic:= AllTrim(Str(_nAno - 1)) + '1101'
 Else   
-	_sDtInic:= AllTrim(Str(_nAno)) + AllTrim(Strzero(_nMes - 2,2)) + '01' //HEDER - 05/04/12 - Corrigido para considerar dois digitos no mes
+	_sDtInic:= AllTrim(Str(_nAno)) + AllTrim(StrZero(_nMes - 2,2)) + '01' //HEDER - 05/04/12 - Corrigido para considerar dois digitos no mes
 EndIf
 
 // Obtem Data das analise
 BeginSql alias _cAlias 
 	SELECT ZLB_DATA
-	FROM %table:ZLB%
+	FROM %Table:ZLB%
 	WHERE D_E_L_E_T_ = ' '
 	AND ZLB_FILIAL = %xFilial:ZLB%
 	AND ZLB_RETIRO = %exp:cpCodPrd%
@@ -861,15 +872,15 @@ BeginSql alias _cAlias
 	ORDER BY ZLB_DATA DESC
 EndSql
 
-While !(_cALias)->(EOf()) .And. nQtd<=2
+While !(_cAlias)->(Eof()) .And. nQtd<=2
 	nQtd++
-	aAdd(aRet,SToD((_cALias)->ZLB_DATA))
-	(_cALias)->(DbSkip())
+	aAdd(aRet,SToD((_cAlias)->ZLB_DATA))
+	(_cAlias)->(DBSkip())
 EndDo          
 
-(_cAlias)->(DbCloseArea())
+(_cAlias)->(DBCloseArea())
 
-RestArea(aArea)	
+FWRestArea(aArea)
 Return aRet
 
 /*
@@ -885,11 +896,11 @@ Parametros--------: cpCodPrd - código do produtor
 Retorno-----------: nret - valor da análise
 ===============================================================================================================================
 */
-Static Function RGLT019V(cpCodPrd,cpLj,dpData,cpTipoFx)
+Static Function RGLT019V(cpCodPrd As Character,cpLj As Character,dpData As Date,cpTipoFx As Character) As Numeric
 
-Local _cAlias	:= GetNextAlias()
-Local _aArea	:= GetArea()
-Local _nRet		:=0
+Local _cAlias	:= GetNextAlias() As Character
+Local _aArea	:= FWGetArea() As Array
+Local _nRet		:=0 As Numeric
 
 If Empty(dpData)
 	Return 0
@@ -909,9 +920,9 @@ EndSql
 
 _nRet := (_cAlias)->ZLB_VLRFX
 
-(_cAlias)->(DbCloseArea())
+(_cAlias)->(DBCloseArea())
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return _nRet
 
@@ -928,16 +939,16 @@ Parametros--------: cpCodPrd - código do produtor
 Retorno-----------: nret - volume coletado
 ===============================================================================================================================
 */
-Static Function RGLT019O(cpCodPrd,cpLj,cpDia,cLinRota)
+Static Function RGLT019O(cpCodPrd As Character,cpLj As Character,cpDia As Character,cLinRota As Character) As Numeric
 
-Local _cAlias	:= GetNextAlias()
-Local _aArea	:= GetArea()
-Local _nRet		:=0
+Local _cAlias	:= GetNextAlias() As Character
+Local _aArea	:= FWGetArea() As Array
+Local _nRet		:=0 As  Numeric
 
 // Obtem Volume do dia 
 BeginSql alias _cAlias
 	SELECT SUM(ZLD_QTDBOM) VOLUME
-	FROM %table:ZLD% ZLD
+	FROM %Table:ZLD% ZLD
 	WHERE D_E_L_E_T_ = ' '
 	AND ZLD_FILIAL = %xFilial:ZLD%
 	AND ZLD_RETIRO = %exp:cpCodPrd%
@@ -948,9 +959,9 @@ EndSql
 
 _nRet:=(_cAlias)->VOLUME
 
-(_cAlias)->(DbCloseArea())
+(_cAlias)->(DBCloseArea())
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return _nRet
 
@@ -964,11 +975,11 @@ Parametros--------: _cSeekComp - código do complemento
 Retorno-----------: _cMesAno - data do complemento
 ===============================================================================================================================
 */
-Static Function RGLT019D(_cSeekComp)      
+Static Function RGLT019D(_cSeekComp As Character) As Character
 
-Local _cAlias := GetNextAlias()
-Local _cMesAno:= "" 
-Local _cFiltro:= "%" 
+Local _cAlias := GetNextAlias() As Character
+Local _cMesAno:= "" As Character
+Local _cFiltro:= "%" As Character
 
 //===============================================================
 // Complemento de pagamento gerado para ser pago no proximo Mix. 
@@ -979,8 +990,8 @@ If 'MGLT026' $ _cSeekComp
 	_cFiltro += "%"
      
 	BeginSql alias _cAlias
-		SELECT SUBSTR(ZLE.ZLE_DTINI,1,6) anoMes
-		FROM %table:ZZD% ZZD, %table:ZLE% ZLE 		      
+		SELECT SubStr(ZLE.ZLE_DTINI,1,6) anoMes
+		FROM %Table:ZZD% ZZD, %Table:ZLE% ZLE 		      
 		WHERE ZZD.D_E_L_E_T_ = ' '
 		AND ZLE.D_E_L_E_T_ = ' '
 		AND ZLE.ZLE_COD = ZZD.ZZD_MIXORI
@@ -998,8 +1009,8 @@ ElseIf 'MGLT027' $ _cSeekComp
 	_cFiltro += "%"
 	
 	BeginSql alias _cAlias 
-		SELECT SUBSTR(ZLE.ZLE_DTINI,1,6) anoMes
-		FROM %table:ZZE% ZZE, %table:ZLE% ZLE
+		SELECT SubStr(ZLE.ZLE_DTINI,1,6) anoMes
+		FROM %Table:ZZE% ZZE, %Table:ZLE% ZLE
 		WHERE ZZE.D_E_L_E_T_ = ' '
 		AND ZLE.D_E_L_E_T_ = ' '
 		AND ZLE.ZLE_COD = ZZE.ZZE_MIXORI
@@ -1008,7 +1019,7 @@ ElseIf 'MGLT027' $ _cSeekComp
 	_cMesAno:= SubStr((_cAlias)->anoMes,5,2) + '/' + SubStr((_cAlias)->anoMes,1,4) 
 
 EndIf     
-(_cAlias)->(dbCloseArea())   
+(_cAlias)->(DBCloseArea())   
 
 Return _cMesAno
 
@@ -1031,7 +1042,7 @@ nL := 50
 oPrint:FillRect({nL,2300,nL+1,100},TBrush():New("",0))
 oPrint:SayBitmap(nL+20,100,cRaizServer + "system/lgrl01.bmp",250,100)
 nL += 10
-oPrint:Say(nL,2000,"Emissão:"+dtoc(DDataBase),oFontNormal)
+oPrint:Say(nL,2000,"Emissão:"+DToC(DDataBase),oFontNormal)
 nL += 50
 
 If MV_PAR09 != 2 //Default ou por produtor
@@ -1052,10 +1063,10 @@ nL += 10
 //===================================================================
 // Início dos dados da Empresa
 //===================================================================
-oPrint:Say(nL,nPos1,alltrim(SM0->M0_NOME)+"-"+alltrim(SM0->M0_FILIAL)+"-"+SM0->M0_NOMECOM,oFontRotulo)
+oPrint:Say(nL,nPos1,AllTrim(SM0->M0_NOME)+"-"+AllTrim(SM0->M0_FILIAL)+"-"+SM0->M0_NOMECOM,oFontRotulo)
 oPrint:Say(nL,nPos3,"CNPJ:"+SM0->M0_CGC,oFontRotulo)
 nL += 50
-oPrint:Say(nL,nPos1,ALLTRIM(SM0->M0_ENDENT)+"-"+ALLTRIM(SM0->M0_CIDENT)+"-"+ALLTRIM(SM0->M0_ESTENT),oFontRotulo)
+oPrint:Say(nL,nPos1,AllTrim(SM0->M0_ENDENT)+"-"+AllTrim(SM0->M0_CIDENT)+"-"+AllTrim(SM0->M0_ESTENT),oFontRotulo)
 nL += 50
 oPrint:FillRect({nL,2300,nL+1,100},TBrush():New("",0))
 nL += 10
@@ -1075,24 +1086,24 @@ Parametros------: _cTexto -> Texto a ser formatado de forma justificada
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-Static Function impTexto(_cTexto)
+Static Function impTexto(_cTexto As Character)
 
-Local _aTexto   := Separa(_cTexto," ",.F.)//Quebro o texto em palavras
-Local _nNumCarac:= 131 //Numero maximo de caracteres por linha
+Local _aTexto   := Separa(_cTexto," ",.F.) As Array//Quebro o texto em palavras
+Local _nNumCarac:= 131 As Numeric//Numero maximo de caracteres por linha
 
-Local _cLinImpr := "" //Texto de impressao inicial do array
-Local _nPosInic := 1 //Posicao inicial do array que comecou uma linha     
-Local _nNumEspac:= 0 //Numero de espacos vazios necessario para justificar o texto
-Local _nNumPalav:= 0 
+Local _cLinImpr := "" As Character//Texto de impressao inicial do array
+Local _nPosInic := 1 As Numeric//Posicao inicial do array que comecou uma linha     
+Local _nNumEspac:= 0 As Numeric//Numero de espacos vazios necessario para justificar o texto
+Local _nNumPalav:= 0 As Numeric
 
-Local _lEntrou  := .F.    
-Local _nVlrDiv  := 0
-Local _nEspacame:= 0      
+Local _lEntrou  := .F. As Logical
+Local _nVlrDiv  := 0 As Numeric
+Local _nEspacame:= 0 As Numeric
 
-Local _nEspcAdic:= 0                
-Local _nVlrEspac:= 0
-Local _nK		:= 0
-Local _nX		:= 0
+Local _nEspcAdic:= 0 As Numeric     
+Local _nVlrEspac:= 0 As Numeric
+Local _nK		:= 0 As Numeric
+Local _nX		:= 0 As Numeric
 
 //Para que todo inicio de nova linha seja impresa como um paragrafo
 _aTexto[1]:= "       "  + _aTexto[1]                           
@@ -1114,7 +1125,7 @@ For _nX:=1 to Len(_aTexto)
 			_nNumEspac:= _nNumCarac - Len(_cLinImpr) 	
 			_cLinImpr := ""					 					 					                  					
 					
-			//Se numero de caracteres for possivel de se distribuir os espacos em branco entre os numero de palavras
+			//Se numero de caracteres For possivel de se distribuir os espacos em branco entre os numero de palavras
 			If _nNumEspac < _nNumPalav - 2												
 				For _nK:=_nPosInic to _nX-1  
 					If Len(_cLinImpr) == 0
@@ -1160,7 +1171,7 @@ For _nX:=1 to Len(_aTexto)
 		  	EndIf    	                 	                	                	                
 
 		    _nPosInic:= _nX
-            //Para que a palavra que nao foi impressa neste loop seja impressa na proxima execucao
+            //Para que a palavra que nao foi impressa neste Loop seja impressa na proxima execucao
             _nX:= _nX-1
             _lEntrou:= .T.     
 		EndIf 	

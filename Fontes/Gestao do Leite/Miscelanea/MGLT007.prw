@@ -2,29 +2,22 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 14/09/2023 | Retirada duas colunas que foram excluídas do layout. Chamado 45039
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 19/12/2023 | Modificada regra para Mix fechados com atraso. Chamado 45856
+Lucas Borges  |14/09/2023| Chamado 45039. Retirada duas colunas que foram excluídas do layout
+Lucas Borges  |19/12/2023| Chamado 45856. Modificada regra para Mix fechados com atraso
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MGLT007
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 04/04/2023
-===============================================================================================================================
 Descrição---------: Mapa de Recebimento de Leite Eletrônico - Chamado 43433
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -56,11 +49,8 @@ Return
 Programa----------: MGLT007P
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 04/04/2023
-===============================================================================================================================
 Descrição---------: Realiza o processamento da rotina.
-===============================================================================================================================
 Parametros--------: _oSelf
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -93,7 +83,7 @@ _oExcel:AddColumn("Produtores","Table1","CD_PRODUTOR_IE"	,1,1,.F.,)
 _oExcel:AddColumn("Produtores","Table1","CD_PRODUTOR_CPF"	,1,1,.F.,)
 _oExcel:AddColumn("Produtores","Table1","NM_PRODUTOR"		,1,1,.F.,)
 
-BeginSQL alias _cAlias
+BeginSql alias _cAlias
 	SELECT A2_INSCR, A2_CGC, A2_NOME 
 	FROM %Table:SA2% 
 	WHERE D_E_L_E_T_ = ' '
@@ -106,18 +96,18 @@ BeginSQL alias _cAlias
 	AND F1_FORMUL = 'S'
 	AND F1_DTDIGIT BETWEEN %exp:MV_PAR01% AND %exp:MV_PAR02%)
 	ORDER BY A2_INSCR
-EndSQL
+EndSql
 
 _oSelf:SetRegua2(2)
 _oSelf:IncRegua2("")
 //Criando as Linhas
-While (_cAlias)->(!EOF())
+While (_cAlias)->(!Eof())
 	_oExcel:AddRow("Produtores","Table1",{(_cAlias)->A2_INSCR,;
                                           (_cAlias)->A2_CGC,;
                                           (_cAlias)->A2_NOME })
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
-(_cAlias)->(DbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 _oSelf:IncRegua1("Gerando Recebimento-Leite...")
 //Criando Aba 1
@@ -131,10 +121,10 @@ _oExcel:AddColumn("Recebimento-Leite","Table2","QT_LITROS"		,3,2,)
 _oExcel:AddColumn("Recebimento-Leite","Table2","CD_PLACA"		,1,1,)
 
 _cAlias := GetNextAlias()
-BeginSQL alias _cAlias
+BeginSql alias _cAlias
 	SELECT A2_INSCR, ZLD_DTCOLE, ZLD_QTDBOM, ZL1_PLACA,
-		ROUND(F1_VALBRUT / VOL_TOT * ZLD_QTDBOM, 2) VR_BRUTO,
-		ROUND(F1_VALMERC / VOL_TOT * ZLD_QTDBOM, 2) VR_LIQUIDO
+		Round(F1_VALBRUT / VOL_TOT * ZLD_QTDBOM, 2) VR_BRUTO,
+		Round(F1_VALMERC / VOL_TOT * ZLD_QTDBOM, 2) VR_LIQUIDO
 	FROM (SELECT A2_INSCR, ZLD_DTCOLE, SUM(ZLD_QTDBOM) ZLD_QTDBOM, ZL1_PLACA,
 				(SELECT SUM(F1_VALMERC)
 					FROM %Table:SF1% F
@@ -170,7 +160,7 @@ BeginSQL alias _cAlias
 					AND F1_DTDIGIT BETWEEN %exp:MV_PAR01% AND %exp:MV_PAR02%
 					AND ZLD_DTCOLE BETWEEN ZLE_DTINI AND ZLE_DTFIM) VOL_TOT
 			FROM (SELECT F1_FILIAL, F1_DTDIGIT, A2_COD, A2_LOJA, A2_INSCR,
-						CASE WHEN ZLD_DTCOLE < %exp:MV_PAR01% THEN %exp:MV_PAR01% ELSE ZLD_DTCOLE END ZLD_DTCOLE,
+						Case WHEN ZLD_DTCOLE < %exp:MV_PAR01% THEN %exp:MV_PAR01% Else ZLD_DTCOLE END ZLD_DTCOLE,
 						SUM(ZLD_QTDBOM) ZLD_QTDBOM, ZL1_PLACA
 					FROM %Table:ZLD% ZLD, %Table:SA2% SA2, %Table:ZL1% ZL1, %Table:ZLE% ZLE, %Table:SF1% SF1
 					WHERE ZLD.D_E_L_E_T_ = ' '
@@ -196,19 +186,19 @@ BeginSQL alias _cAlias
 					GROUP BY F1_FILIAL, F1_DTDIGIT, A2_INSCR, A2_COD, A2_LOJA, ZLE_DTINI, ZLE_DTFIM, ZLD_DTCOLE, ZL1_PLACA, F1_L_SETOR, F1_L_LINHA) A
 			GROUP BY A2_INSCR, ZLD_DTCOLE, ZL1_PLACA, F1_FILIAL, A2_COD, A2_LOJA, F1_DTDIGIT)
 	ORDER BY A2_INSCR, ZLD_DTCOLE
-EndSQL
+EndSql
 
 _oSelf:SetRegua2(2)
 _oSelf:IncRegua2("")
 //Criando as Linhas
-While (_cAlias)->(!EOF())
+While (_cAlias)->(!Eof())
 	_oExcel:AddRow("Recebimento-Leite","Table2",{(_cAlias)->A2_INSCR,;
-                                          StoD((_cAlias)->ZLD_DTCOLE),;
+                                          SToD((_cAlias)->ZLD_DTCOLE),;
                                           (_cAlias)->ZLD_QTDBOM,;
 										  (_cAlias)->ZL1_PLACA})
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
-(_cAlias)->(DbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 
 _oSelf:IncRegua1("Gerando Notas Fiscais - Globais...")
@@ -233,9 +223,9 @@ _oExcel:AddColumn("Notas Fiscais - Globais","Table3","VR_INCENTIVO"			,3,2,)
 _oExcel:AddColumn("Notas Fiscais - Globais","Table3","VR_ICMS"				,3,2,)
 
 _cAlias := GetNextAlias()
-BeginSQL alias _cAlias
+BeginSql alias _cAlias
 	SELECT A2_INSCR, F1_EMISSAO, F1_DOC, F1_SERIE, F1_CHVNFE, 'L' RESPONSABILIDADE, F1_VALBRUT, F1_VALMERC, 
-	(SELECT NVL(SUM(CASE WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL ELSE ZLF_TOTAL * -1 END), 0) FROM %Table:ZLF%
+	(SELECT NVL(SUM(Case WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL Else ZLF_TOTAL * -1 END), 0) FROM %Table:ZLF%
 		WHERE D_E_L_E_T_ = ' '
 		AND ZLF_FILIAL = F1_FILIAL
 		AND ZLF_CODZLE = ZLE_COD
@@ -275,14 +265,14 @@ BeginSQL alias _cAlias
 	AND A2_TIPO = 'F'
 	GROUP BY F1_FILIAL, A2_INSCR, A2_COD, A2_LOJA, F1_EMISSAO, F1_DOC, F1_SERIE, F1_CHVNFE, F1_VALBRUT, F1_VALMERC, F1_L_SETOR, F1_L_LINHA, F1_DESCONT, F1_VALICM, ZLE_COD, ZLE_DTINI, ZLE_DTFIM, F1_BASEICM
 	ORDER BY  A2_INSCR, F1_EMISSAO
-EndSQL
+EndSql
 
 _oSelf:SetRegua2(2)
 _oSelf:IncRegua2("")
 //Criando as Linhas
-While (_cAlias)->(!EOF())
+While (_cAlias)->(!Eof())
 	_oExcel:AddRow("Notas Fiscais - Globais","Table3",{(_cAlias)->A2_INSCR,;//CD_PRODUTOR_IE
-                                          StoD((_cAlias)->F1_EMISSAO),;//DT_NF
+                                          SToD((_cAlias)->F1_EMISSAO),;//DT_NF
                                           (_cAlias)->F1_DOC,;//NR_NF
 										  (_cAlias)->F1_SERIE,;//CD_SERIE
 										  (_cAlias)->F1_CHVNFE,;//CD_CHAVE
@@ -295,9 +285,9 @@ While (_cAlias)->(!EOF())
 										  (_cAlias)->F1_DESCONT,;//VR_DEDUCOES
 										  (_cAlias)->D1_VLINCMG,;//VR_INCENTIVO
 										  (_cAlias)->F1_VALICM})//VR_ICMS
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
-(_cAlias)->(DbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 //Ativando o arquivo e gerando o xml
 _oExcel:Activate()

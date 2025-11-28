@@ -1,31 +1,19 @@
 /*
 ===============================================================================================================================
-                  ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                            
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Alex Wallauer    | 24/10/2017 | Ajustes da inicialização das vairiaveis STATIC - Chamado 22158
--------------------------------------------------------------------------------------------------------------------------------
- Josué Danich     | 30/11/2018 | Retirada de itputsx6 - Chamado 27175 
--------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges     | 11/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
- Alex Wallauer    | 05/11/2021 | Alterado em vez de usar o Codigo do Cliente + Loja usar o CNPJ - Chamado 38203
- -------------------------------------------------------------------------------------------------------------------------------
- Igor Melgaço     | 14/03/2022 | Ajustes para nova conexão sftp "edis.chep.com" - Chamado 39463
---------------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges      | 23/07/2025 | Chamado 51340. Ajustar função para validação de ambiente de teste
+Igor Melgaço  |14/03/2022| Chamado 39463. Ajustes para nova conexão sftp "edis.chep.com"
+Lucas Borges  |23/07/2025| Chamado 51340. Ajustar função para validação de ambiente de teste
+Lucas Borges  |14/09/2025| Chamado 51799. Implementada função para validar ambiente de teste totvs.framework.environment.Type.get()
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 #Include "Fileio.ch"   
 #Include "TBICONN.CH"
 #Include "TBICODE.CH"
-#Define CRLF	Chr(13)+Chr(10)
 
 Static cPathOk	:= ""
 Static cPathNo	:= ""
@@ -36,11 +24,8 @@ Static lViaJob	:= GetRemoteType() == -1
 Programa----------: MOMS022
 Autor-------------: Frederico O. C. Jr
 Data da Criacao---: 24/06/2009
-===============================================================================================================================
 Descrição---------: EDI com CHEP - Controle de localizacao dos Pallet's CHEP
-===============================================================================================================================
 Parametros--------: aParam
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -53,36 +38,30 @@ Private aLogErro	:= {}
 
 Default aParam		:= {"01","01"}
 
-//===========================================================================
-//| Verifica a chamada da Rotina para as tratativas do JOB                  |
-//===========================================================================
-IF lViaJob .OR. SELECT("SX3") = 0
+// Verifica a chamada da Rotina para as tratativas do JOB
+If lViaJob .Or. SELECT("SX3") = 0
    lViaJob:=.T.
-	IF Empty(aParam)
+	If Empty(aParam)
 		u_itconout( "Falha na inicialização dos parâmetros de processamento." )
 		u_itconout( "==============================================================================================================="	)
-		Return()
-	EndIF
-	//===========================================================================
-	//| Prepara o ambiente pra processamento do JOB                             |
-	//===========================================================================
+		Return
+	EndIf
+	// Prepara o ambiente pra processamento do JOB
 	u_itconout( "==================================================[ MOMS022 ]=================================================="	)
-	u_itconout( "[MOMS022]["+ DTOC(Date()) +" - "+ Time() +"]: Preparando o ambiente para o processamento..."						)
+	u_itconout( "[MOMS022]["+ DToC(Date()) +" - "+ Time() +"]: Preparando o ambiente para o processamento..."						)
 	u_itconout( "Empresa: "+ aParam[01]																					)
 	u_itconout( "Filial: "+ aParam[02]																					)
     _lAbriunoRdm:=.F.
-	IF SELECT("SX3") = 0
+	If Select("SX3") = 0
 	   _lAbriunoRdm:=.T.
 	   PREPARE ENVIRONMENT EMPRESA aParam[01] FILIAL aParam[02] TABLES "SB1","SB2","SC5","SC6","SD1","SD2","SD3","SF4"
 	   Sleep( 5000 )
-	ENDIF
+	EndIf
 	u_itconout( "Ambiente inicializado com sucesso!"																	)
 	u_itconout( "==============================================================================================================="	)
 	
 	
-	//===========================================================================
-	//| Inicializa a parametrização das Perguntas                               |
-	//===========================================================================
+	// Inicializa a parametrização das Perguntas
 	nDiasAux := GetMV( "IT_CHEPDIA" ,, 1 )					//Dias anteriores para a busca das NF - Somente via Schedule
 	
 	MV_PAR01 := Space( TamSX3("A1_COD")[01] )				//Cód. do Cliente Inicial
@@ -92,86 +71,72 @@ IF lViaJob .OR. SELECT("SX3") = 0
 	MV_PAR05 := DaySub( Date() , nDiasAux )					//Data De para busca das NF
 	MV_PAR06 := DaySub( Date() , nDiasAux )					//Data Até para busca das NF
 	MV_PAR07 := GetMV( "IT_CHEPABA" ,, 1 )					//Considera Abatimento ? 1=Sim;2=Não
-	MV_PAR08 := ""//Diretorio esta na STATIC
+	MV_PAR08 := ""//Diretorio esta na Static
 	MV_PAR09 := Space( TamSX3("A1_COD")[01] )				//Cód. do Cliente Inicial
 	MV_PAR10 := Space( TamSX3("A1_LOJA")[01] )				//Cód. da Loja Inicial
 	MV_PAR11 := Space( TamSX3("A1_COD")[01] )		//Cód. do Cliente Final
 	MV_PAR12 := Space( TamSX3("A1_LOJA")[01] )	//Cód. da Loja Final
 	
-	//===========================================================================
-	//| Grava no Log do Console                                                 |
-	//===========================================================================
+	// Grava no Log do Console
 	u_itconout( "Definição de Parâmetros:" )
 	u_itconout( "MV_PAR01: "+ MV_PAR01 )
 	u_itconout( "MV_PAR02: "+ MV_PAR02 )
 	u_itconout( "MV_PAR03: "+ MV_PAR03 )
 	u_itconout( "MV_PAR04: "+ MV_PAR04 )
-	u_itconout( "MV_PAR05: "+ DtoC( MV_PAR05 ) )
-	u_itconout( "MV_PAR06: "+ DtoC( MV_PAR06 ) )
+	u_itconout( "MV_PAR05: "+ DToC( MV_PAR05 ) )
+	u_itconout( "MV_PAR06: "+ DToC( MV_PAR06 ) )
 	u_itconout( "MV_PAR07: "+ cValToChar( MV_PAR07 ) )
 	u_itconout( "Dias Ant: "+ cValToChar( nDiasAux ) )
 	u_itconout( "==============================================================================================================="	)
 	u_itconout( "Iniciando o processamento..." )
 	
-	//===========================================================================
-	//| Chama a rotina de processamento                                         |
-	//===========================================================================
-    cPathOk:=AllTrim( GetMV( "IT_CHPENV" ,, "\data\italac\moms022\enviado\" ) )
+	// Chama a rotina de processamento
+	cPathOk:=AllTrim( GetMV( "IT_CHPENV" ,, "\data\italac\moms022\enviado\" ) )
     cPathNo:=AllTrim( GetMV( "IT_CHPNEV" ,, "\data\italac\moms022\nao_enviado\" ) )
 	MOMS022PRC()
 	
-	IF !Empty( aLogErro )
+	If !Empty( aLogErro )
 		MOMS022Mail()
-	EndIF
+	EndIf
 	
-	//===========================================================================
-	//| Finaliza o ambiente e encerra a rotina                                  |
-	//===========================================================================
-	IF _lAbriunoRdm
+	// Finaliza o ambiente e encerra a rotina
+	If _lAbriunoRdm
 	   RESET ENVIRONMENT
-	ENDIF
+	EndIf
 	
-	u_itconout( "Fim da Rotina - Data: "+ DtoC(Date()) +" / Hora: "+ Time()												)
+	u_itconout( "Fim da Rotina - Data: "+ DToC(Date()) +" / Hora: "+ Time()												)
 	u_itconout( "==============================================================================================================="	)
 	
 Else
-
-	//===========================================================================
-	//| Verifica o cadastro das perguntas                                       |
-	//===========================================================================
+	// Verifica o cadastro das perguntas
     cPathOk:=AllTrim( GetMV( "IT_CHPENV" ,, "\data\italac\moms022\enviado\" ) )
     cPathNo:=AllTrim( GetMV( "IT_CHPNEV" ,, "\data\italac\moms022\nao_enviado\" ) )
 	
-	//===========================================================================
-	//| Confirmação das Perguntas e processamento.                              |
-	//===========================================================================
-	DO WHILE Pergunte(cPerg,.T.)
+	// Confirmação das Perguntas e processamento.
+	While Pergunte(cPerg,.T.)
          
-        IF  (!EMPTY(MV_PAR01+MV_PAR02) .OR. !EMPTY(MV_PAR03+MV_PAR04)) .AND. (!EMPTY(MV_PAR09+MV_PAR10) .OR. !EMPTY(MV_PAR11+MV_PAR12))
-            u_itmsg("Informe somente o filtro inicial e final do Cliente / Loja ou somente do Fornecedor / Loja, ou deixe todos os campos em branco do Fornecedor / Loja e do Cliente / Loja para trazer todos.","Atenção",,1)
-            LOOP
-        ENDIF  
+        If  (!Empty(MV_PAR01+MV_PAR02) .Or. !Empty(MV_PAR03+MV_PAR04)) .And. (!Empty(MV_PAR09+MV_PAR10) .Or. !Empty(MV_PAR11+MV_PAR12))
+            U_ITMsg("Informe somente o filtro inicial e final do Cliente / Loja ou somente do Fornecedor / Loja, ou deixe todos os campos em branco do Fornecedor / Loja e do Cliente / Loja para trazer todos.","Atenção",,1)
+            Loop
+        EndIf  
 	
 	
 		Processa( {|| MOMS022PRC() } , "Montando relação de notas:" , "Iniciando a rotina..." )
 	    
-	ENDDO
+	EndDo
 	
 
-EndIF
+EndIf
    	
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MOMS022PRC
 Autor-------------: Alexandre Villar
 Data da Criacao---: 15/05/2014
-===============================================================================================================================
 Descrição---------: Controle do processamento de geração e transmissão dos arquivos
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
  */
@@ -193,9 +158,7 @@ Private nQtMov		:= 0
 Private cArqTxt 	:= 	""
 
 U_ITLOGACS()
-//===========================================================================
-//| Monta a consulta das notas                                              |
-//===========================================================================
+// Monta a consulta das notas
 cQry := " SELECT "
 cQry += " 	SD2.D2_SERIE	, "
 cQry += " 	SD2.D2_DOC		, "
@@ -206,9 +169,7 @@ cQry += " 	SD2.D2_TIPO  	, "
 cQry += " 	SB1.B1_I_CPCHE	, "
 cQry += " 	SD2.D2_QUANT	  "
 
-//===========================================================================
-//| Verifica o abatimento de devoluções                                     |
-//===========================================================================
+// Verifica o abatimento de devoluções
 If MV_PAR07 == 1
 
 cQry += " - (	SELECT COALESCE( SUM(SD1.D1_QUANT) , 0 ) FROM "+ RetSQLName("SD1") +" SD1 "
@@ -220,7 +181,7 @@ cQry += "		AND SD1.D1_SERIORI	= SD2.D2_SERIE "
 cQry += "		AND SD1.D1_FORNECE  = SD2.D2_CLIENTE "
 cQry += "		AND SD1.D1_LOJA     = SD2.D2_LOJA ) AS D2_QUANT "
 
-EndIF
+EndIf
 
 cQry += " FROM "+ RetSQLName("SD2") +" SD2 "
 
@@ -233,16 +194,16 @@ cQry += " AND	SB1.D_E_L_E_T_	= ' ' "
 cQry += " AND	SD2.D2_FILIAL	= '"+ xFilial("SD2") +"' "
 cQry += " AND	SD2.D2_COD		= '"+ AllTrim(cCodProd) +"' "
 
-IF !EMPTY(MV_PAR01+MV_PAR02) .OR. !EMPTY(MV_PAR03+MV_PAR04)
+If !Empty(MV_PAR01+MV_PAR02) .Or. !Empty(MV_PAR03+MV_PAR04)
    cQry += " AND (D2_CLIENTE BETWEEN '" + MV_PAR01 + "' AND '" + MV_PAR03 + "')"
    cQry += " AND (D2_LOJA BETWEEN '" + MV_PAR02 + "' AND '" + MV_PAR04 + "')"
 
-ELSEIF !EMPTY(MV_PAR09+MV_PAR10) .OR. !EMPTY(MV_PAR11+MV_PAR12)
+ElseIf !Empty(MV_PAR09+MV_PAR10) .Or. !Empty(MV_PAR11+MV_PAR12)
    cQry += " AND (D2_CLIENTE BETWEEN '" + MV_PAR09 + "' AND '" + MV_PAR11 + "')"
    cQry += " AND (D2_LOJA BETWEEN '" + MV_PAR10 + "' AND '" + MV_PAR12 + "')"
 
-ENDIF
-cQry += " AND	SD2.D2_EMISSAO	BETWEEN '"+ DtoS( MV_PAR05 )	+"' AND '"+ DtoS( MV_PAR06 )	+"' "
+EndIf
+cQry += " AND	SD2.D2_EMISSAO	BETWEEN '"+ DToS( MV_PAR05 )	+"' AND '"+ DToS( MV_PAR06 )	+"' "
 
 If MV_PAR07 == 1
 
@@ -255,16 +216,14 @@ cQry += " 							AND SD1.D1_SERIORI	= SD2.D2_SERIE "
 cQry += " 							AND SD1.D1_FORNECE  = SD2.D2_CLIENTE "
 cQry += " 							AND SD1.D1_LOJA     = SD2.D2_LOJA ) > 0 "
 
-EndIF
+EndIf
     
-//===========================================================================
-//| Verifica e inicializa a tabela temporária                               |
-//===========================================================================
-IF Select(cAlias) > 0
+// Verifica e inicializa a tabela temporária
+If Select(cAlias) > 0
 	(cAlias)->( DBCloseArea() )
-EndIF
+EndIf
 
-IF lViaJob
+If lViaJob
 	
 	u_itconout( "Preparando a tabela temporária..." )
 	
@@ -286,29 +245,29 @@ Else
 	
 	ProcRegua( nTotReg )
 	
-EndIF
+EndIf
 
-IF nTotReg > 0
+If nTotReg > 0
 
 	While (cAlias)->(!Eof())
 		
-		IF !lViaJob
+		If !lViaJob
 			nAtuReg++
 			IncProc( "["+ StrZero( nAtuReg , 9 ) +"] de ["+ StrZero( nTotReg , 9 ) +"]" )
-		EndIF
+		EndIf
 
-        IF (cAlias)->D2_TIPO # "D"
+        If (cAlias)->D2_TIPO # "D"
            _cAliasBusca:="SA1"
            _cCampoBusca:="A1_NREDUZ"
-           _CCHEP:=ALLTRIM(POSICIONE(_cAliasBusca,1,XFILIAL(_cAliasBusca)+(cAlias)->D2_CLIENTE+(cAlias)->D2_LOJA,"A1_I_CCHEP"))
+           _CCHEP:=AllTrim(Posicione(_cAliasBusca,1,xFilial(_cAliasBusca)+(cAlias)->D2_CLIENTE+(cAlias)->D2_LOJA,"A1_I_CCHEP"))
            _cNome:=""
-        ELSE
+        Else
            _cAliasBusca:="SA2"
            _cCampoBusca:="A2_NREDUZ"
-           _CCHEP:=SPACE(10)
+           _CCHEP:=Space(10)
            _cNome:=" [D]"
-        ENDIF
-        _cNome:=ALLTRIM(POSICIONE(_cAliasBusca,1,XFILIAL(_cAliasBusca)+(cAlias)->D2_CLIENTE+(cAlias)->D2_LOJA,_cCampoBusca))+_cNome
+        EndIf
+        _cNome:=AllTrim(Posicione(_cAliasBusca,1,xFilial(_cAliasBusca)+(cAlias)->D2_CLIENTE+(cAlias)->D2_LOJA,_cCampoBusca))+_cNome
 		
 		aAdd( aNotas , {	lViaJob					,;//01
 							(cAlias)->D2_DOC		,;//02
@@ -323,37 +282,35 @@ IF nTotReg > 0
 	
 		cChave += (cAlias)->D2_DOC
 		
-		aAdd( aNotMark ,	(cAlias)->D2_SERIE	+ " - " + DtoC( StoD( (cAlias)->D2_EMISSAO ) )		+ " - " +;
+		aAdd( aNotMark ,	(cAlias)->D2_SERIE	+ " - " + DToC( SToD( (cAlias)->D2_EMISSAO ) )		+ " - " +;
 							(cAlias)->D2_CLIENTE+ " - " + (cAlias)->D2_LOJA							+ " - " +;
 							_cNome            	+ " - " + AllTrim( Transform( (cAlias)->D2_QUANT	, "@E 9,999" ) ) )
 		
-	(cAlias)->(DbSkip())
+	(cAlias)->(DBSkip())
 	EndDo
 	
-	(cAlias)->(DbCloseArea())
+	(cAlias)->(DBCloseArea())
 	
-	IF lViaJob
+	If lViaJob
 	
 		u_itconout( "Total de Registros selecionados: "+ StrZero( nTotReg , 9 ) )
 		MOMS022G()
 		
 	Else
 		
-		If MOMS022S() .AND. MOMS022T()
+		If MOMS022S() .And. MOMS022T()
 		
 			Processa({|| MOMS022G() },"Processando...")
 			
 		EndIf
 	
-	EndIF
+	EndIf
 
 Else
 
-	//===========================================================================
-	//| Caso o processamento atual não encontre movimentação verifica se existem|
-	//| arquivos pendentes de envio para transmitir via FTP                     |
-	//===========================================================================
-	IF lViaJob
+	// Caso o processamento atual não encontre movimentação verifica se existem
+	// arquivos pendentes de envio para transmitir via FTP
+	If lViaJob
 		
 		u_itconout( "Não foram encontrados dados para gerar novos arquivos!" )
 		u_itconout( "Verificando para enviar arquivos pendentes..." )
@@ -364,29 +321,26 @@ Else
 		
 	Else
 		
-		IF u_itmsg( "Não foram encontrados dados para a geração de novos arquivos! Deseja verificar o envio de arquivos pendentes ?" , "Atenção!" , ,3,2,2 ) 
+		If U_ITMsg( "Não foram encontrados dados para a geração de novos arquivos! Deseja verificar o envio de arquivos pendentes ?" , "Atenção!" , ,3,2,2 ) 
 			
 			Processa( {|| MOMS022FTP() } , "Verificando arquivos para enviar..." )
 			
-		EndIF
+		EndIf
 	
-	EndIF
+	EndIf
 	
-EndIF
+EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MOMS022T
 Autor-------------: Rafael Ramos Lavinas
 Data da Criacao---: 24/07/2009
-===============================================================================================================================
 Descrição---------: Tela para apresentacao das notas fiscais baseadas nas perguntas "MOMS002"
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
-Retorno-----------: .t. ou .f.
+Retorno-----------: .T. ou .F.
 ===============================================================================================================================
 */
 Static Function MOMS022T()
@@ -410,16 +364,14 @@ DEFINE MSDIALOG _oDlg TITLE "[ Geração - EDI CHEP ]" FROM 000,000 TO 270,600 PIX
 	
 	olbNotas:SetArray( aNFImp )
 	
-	//===========================================================================
-	//| Carrega o Array para exibir a lista na tela                             |
-	//===========================================================================
+	// Carrega o Array para exibir a lista na tela
 	For nI := 1 To Len( aNotas )
 	
-		IF ( aNotas[nI][01] )
+		If ( aNotas[nI][01] )
 		
 			aAdd( aNFImp , {	aNotas[nI][02]								,;
 								aNotas[nI][03]								,;
-								DtoC( StoD( aNotas[nI][04] ) )				,;
+								DToC( SToD( aNotas[nI][04] ) )				,;
 								aNotas[nI][5] +"/"+ aNotas[nI][06]			,;
 								AllTrim( aNotas[nI][07] )					,;
 								cCodOrig						 			,;
@@ -429,17 +381,15 @@ DEFINE MSDIALOG _oDlg TITLE "[ Geração - EDI CHEP ]" FROM 000,000 TO 270,600 PIX
 			nQtPalet += aNotas[nI][10]
 			nQtMov++
 		
-		EndIF
+		EndIf
 		
 	Next nI
 	
-	IF Empty( aNFImp )
+	If Empty( aNFImp )
 		aNFImp := { { "" , "" , "" , "" , "" , "" , "" , "" } }
-	EndIF
+	EndIf
 	
-	//===========================================================================
-	//| Carrega o Objeto do ListBox com os dados do Array                       |
-	//===========================================================================
+	// Carrega o Objeto do ListBox com os dados do Array
 	olbNotas:bLine := {|| {	aNFImp[olbNotas:nAT,01]	,;
 							aNFImp[olbNotas:nAT,02]	,;
 							aNFImp[olbNotas:nAT,03]	,;
@@ -458,11 +408,8 @@ Return( lRet )
 Programa----------: MOMS022G
 Autor-------------: Frederico O. C. Jr
 Data da Criacao---: 25/06/2009
-===============================================================================================================================
 Descrição---------: Função de processamento da geração do arquivo TXT
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -476,7 +423,7 @@ Local nTotReg		:= 0
 Local nQuanti		:= 0
 Local cLin			:= ""
 Local cEmpChep		:= GetMv("IT_EMPCHEP")
-Local cDataAux		:= DTOS(dDataBase) 
+Local cDataAux		:= DToS(dDataBase) 
 Local cSeqNum		:= GetMv("IT_SEQCHEP")
 Local cCodRem		:= GetMv("IT_CODCHEP")    
 Local cCodDest		:= ""
@@ -491,77 +438,71 @@ Local _cPthFil		:= cPathNo + cFilAnt +'\'
 
 Private cNome		:= ""
 
-cSeqNum	:= SOMA1( StrZero( Val( cSeqNum ) , 10 ) )
+cSeqNum	:= Soma1( StrZero( Val( cSeqNum ) , 10 ) )
 cCodRem	:= StrZero( Val( cCodRem ) , 10 )
 cData	:= SubStr( cDataAux , 7 , 2 ) +"_"+ SubStr( cDataAux , 5 , 2 ) +"_"+ SubStr( cDataAux , 1 , 4 )
 cNome	:= "BR"+ StrZero( Val( cCodEmp ) , 10 ) +"_"+ cSeqNum +"_"+ cData
 
-IF !lViaJob .AND. !EMPTY(MV_PAR08)
+If !lViaJob .And. !Empty(MV_PAR08)
     cPathOk:=AllTrim(MV_PAR08)
-ENDIF    
-//===========================================================================
-//| Verifica a criação dos Diretórios                                       |
-//===========================================================================
-IF !ExistDIR( cPathOk )
+EndIf    
+// Verifica a criação dos Diretórios
+If !ExistDIR( cPathOk )
 
-	IF MAKEDIR( cPathOk ) <> 0
+	If MAKEDIR( cPathOk ) <> 0
 		
-		IF lViaJob
+		If lViaJob
 			u_itconout( "Não foi possível utilizar o diretório: "+ cEOL + cPathOk )
 			aAdd( aLogErro , "Não foi possível utilizar o diretório: "+ cPathOk )
 		Else
-			U_ITMSG( "Não foi possível utilizar o diretório: "+ cEOL + cPathOk , "Atenção!" , ,1 )
-		EndIF
+			U_ITMsg( "Não foi possível utilizar o diretório: "+ cEOL + cPathOk , "Atenção!" , ,1 )
+		EndIf
 		
-		Return()
+		Return
 		
-	EndIF
+	EndIf
 	
-EndIF
+EndIf
 
-IF !ExistDIR( _cPthFil )
+If !ExistDIR( _cPthFil )
 
-	IF MAKEDIR( _cPthFil ) <> 0
+	If MAKEDIR( _cPthFil ) <> 0
 	
-		IF lViaJob
+		If lViaJob
 			u_itconout( "Não foi possível utilizar o diretório: "+ cEOL + _cPthFil )
 			aAdd( aLogErro , "Não foi possível utilizar o diretório: "+ _cPthFil )
 		Else
-			U_ITMSG( "Não foi possível utilizar o diretório: "+ cEOL + _cPthFil , "Atenção!" , ,1 )
-		EndIF
+			U_ITMsg( "Não foi possível utilizar o diretório: "+ cEOL + _cPthFil , "Atenção!" , ,1 )
+		EndIf
 		
-		Return()
+		Return
 		
-	EndIF
+	EndIf
 	
-EndIF
+EndIf
 
-//===========================================================================
-//| Verifica a criação do arquivo                                           |
-//===========================================================================
+// Verifica a criação do arquivo
 cArqTxt := _cPthFil + cNome + ".txt"
-nHdl	:= FCREATE( cArqTxt , FC_NORMAL ,, .T. )
+nHdl	:= FCreate( cArqTxt , FC_NORMAL ,, .T. )
 
 If nHdl == -1
 	
-	IF lViaJob
+	If lViaJob
 		u_itconout( "Falha ao criar o arquivo ["+ cArqTxt +"]. Verifique com a área de TI/ERP." )
 		aAdd( aLogErro , "Falha ao criar o arquivo: "+ cArqTxt )
 	Else
-		U_ITMSG( "Falha ao criar o arquivo ["+ cArqTxt +"]. Verifique com a área de TI/ERP." , "Atenção!" , ,1 )
-	EndIF
+		U_ITMsg( "Falha ao criar o arquivo ["+ cArqTxt +"]. Verifique com a área de TI/ERP." , "Atenção!" , ,1 )
+	EndIf
 	
 Else
 	
 	nTotReg := Len(aNotas)
 	
-	IF !lViaJob
+	If !lViaJob
 		ProcRegua( nTotReg + 2 )
-	EndIF
+	EndIf
 	
-	//===========================================================================
-	//| Monta o cabeçalho do arquivo                                            |
-	//===========================================================================
+	// Monta o cabeçalho do arquivo
 	cLin := "*****+"							// | 001 - 006 | Início da Linha
 	cLin += "FROM+CHEP-"						// | 007 - 016 | Campo FROM
 	cLin += "BR"								// | 017 - 018 | Campo Código do País
@@ -585,29 +526,26 @@ Else
 	
 	FWrite( nHdl , cLin , Len(cLin) )
 	
-	//===========================================================================
-	//| Monta os Itens do arquivo                                               |
-	//===========================================================================
-    SA1->( DBSetOrder(1) )
+	// Monta os Itens do arquivo
+	SA1->( DBSetOrder(1) )
     SA2->( DBSetOrder(1) )
 	For nI := 1 To nTotReg
 	
-		IF aNotas[nI][01]
+		If aNotas[nI][01]
 		
 			DBSelectArea("SD2")
 			SD2->( DBSetOrder(3) )
-			IF SD2->( DBSeek( xFilial("SD2") + aNotas[nI][02] + aNotas[nI][03] ) )
+			If SD2->( DBSeek( xFilial("SD2") + aNotas[nI][02] + aNotas[nI][03] ) )
 			
 				nQuanti		:= SD2->D2_QUANT
 			
 			Else
 				u_itconout( "Não conseguiu posicionar na SD2: ["+ xFilial("SD2") + aNotas[nI][02] + aNotas[nI][03] +"]" )
 				Loop
-			EndIF
+			EndIf
 
-        IF SD2->D2_TIPO # "D"
-			IF SA1->( DBSeek( xFilial("SA1") + aNotas[nI][05] + aNotas[nI][06] ) )
-//				cCodDest	:= SA1->A1_COD + SA1->A1_LOJA //24/01/14 - Talita Teixeira -  Alterado para em vez de usar o codigo Chep usar o Codigo do Cliente + Loja. Chamado: 5293
+        If SD2->D2_TIPO # "D"
+			If SA1->( DBSeek( xFilial("SA1") + aNotas[nI][05] + aNotas[nI][06] ) )
 				cCodDest	:= SA1->A1_CGC //05/11/14 - ALEX WALLAUER- Alterado em vez de usar o Codigo do Cliente + Loja usar o CNPJ. Chamado: 38203
 				cNomeCli	:= SA1->A1_NOME
 				cEndCli		:= SA1->A1_END
@@ -617,10 +555,9 @@ Else
 			Else
 				u_itconout( "Não conseguiu posicionar na SA1: ["+ xFilial("SA1") + aNotas[nI][05] + aNotas[nI][06] +"]" )
 				Loop
-			EndIF
-	   ELSE
-			IF SA2->( DBSeek( xFilial("SA2") + aNotas[nI][05] + aNotas[nI][06] ) )
-// 		        cCodDest	:= SA2->A2_COD + SA2->A2_LOJA //24/01/14 - Talita Teixeira -  Alterado para em vez de usar o codigo Chep usar o Codigo do Cliente + Loja. Chamado: 5293
+			EndIf
+	   Else
+			If SA2->( DBSeek( xFilial("SA2") + aNotas[nI][05] + aNotas[nI][06] ) )
 				cCodDest	:= SA2->A2_CGC //05/11/14 - ALEX WALLAUER- Alterado em vez de usar o Codigo do Cliente + Loja usar o CNPJ. Chamado: 38203
 				cNomeCli	:= SA2->A2_NOME
 				cEndCli		:= SA2->A2_END
@@ -630,23 +567,21 @@ Else
 			Else
 				u_itconout( "Não conseguiu posicionar na SA2: ["+ xFilial("SA2") + aNotas[nI][05] + aNotas[nI][06] +"]" )
 				Loop
-			EndIF
-	   ENDIF		
+			EndIf
+	   EndIf		
 			
 			DBSelectArea("SB1")
 			SB1->( DBSetOrder(1) )
-			IF SB1->( DBSeek( xFilial("SB1") + SD2->D2_COD ) )
+			If SB1->( DBSeek( xFilial("SB1") + SD2->D2_COD ) )
 			
 				cCodEquip	:= SB1->B1_I_CPCHE
 				
 			Else
 				u_itconout( "Não conseguiu posicionar na SB1: ["+ xFilial("SB1") + SD2->D2_COD +"]" )
 				Loop
-			EndIF
+			EndIf
 			
-			//===========================================================================
-			//| Atualiza o contador e imprime a linha do arquivo                        |
-			//===========================================================================
+			// Atualiza o contador e imprime a linha do arquivo
 			nRegImp++
 			
 			cLin := "LI="									// | 001 - 003 | Início da Linha
@@ -659,17 +594,17 @@ Else
 			cLin += "~"										// | 016 - 016 | Separador CHEP
 			cLin += "SA"									// | 017 - 018 | Tipo de Código do Remetente
 			cLin += "~"										// | 019 - 019 | Separador CHEP
-			cLin += PADR( cCodRem , 10 )					// | 020 - 029 | Código do Remetente
+			cLin += PadR( cCodRem , 10 )					// | 020 - 029 | Código do Remetente
 			cLin += "~"										// | 030 - 030 | Separador CHEP
 			cLin += "IN"									// | 031 - 032 | Tipo de Código do Destinatário
 			cLin += "~"										// | 033 - 033 | Separador CHEP
-			cLin += PADR( cCodDest , 14 )					// | 034 - 043 | Código do Destinatário
+			cLin += PadR( cCodDest , 14 )					// | 034 - 043 | Código do Destinatário
 			cLin += "~"										// | 044 - 044 | Separador CHEP
 			cLin += "90"									// | 045 - 046 | Código do Tipo de Equipamento
 			cLin += "~"										// | 047 - 047 | Separador CHEP
-			cLin += PADR( AllTrim( cCodEquip ) , 04 )		// | 048 - 051 | Código de Identificação do Equipamento
+			cLin += PadR( AllTrim( cCodEquip ) , 04 )		// | 048 - 051 | Código de Identificação do Equipamento
 			cLin += "~"										// | 052 - 052 | Separador CHEP
-			cLin += PADR( aNotas[nI][04] , 08 )				// | 053 - 060 | Data de Emissão
+			cLin += PadR( aNotas[nI][04] , 08 )				// | 053 - 060 | Data de Emissão
 			cLin += "~"										// | 061 - 061 | Separador CHEP
 			cLin += "~"										// | 062 - 062 | Separador CHEP
 			cLin += StrZero( nQuanti , 5 )					// | 063 - 067 | Quantidade
@@ -685,15 +620,15 @@ Else
 			cLin += "~"										// | 087 - 087 | Separador CHEP
 			cLin += "~"										// | 088 - 088 | Separador CHEP
 			cLin += "~"										// | 089 - 089 | Separador CHEP
-			cLin += PADR( cNomeCli , 40 )					// | 090 - 129 | Nome do Cliente
+			cLin += PadR( cNomeCli , 40 )					// | 090 - 129 | Nome do Cliente
 			cLin += "~"										// | 130 - 130 | Separador CHEP
-			cLin += PADR( cEndCli , 60 )					// | 131 - 190 | Endereço do Cliente
+			cLin += PadR( cEndCli , 60 )					// | 131 - 190 | Endereço do Cliente
 			cLin += "~"										// | 191 - 191 | Separador CHEP
-			cLin += PADR( cCidCli , 40 )					// | 192 - 231 | Cidade do Cliente
+			cLin += PadR( cCidCli , 40 )					// | 192 - 231 | Cidade do Cliente
 			cLin += "~"										// | 232 - 232 | Separador CHEP
-			cLin += PADR( cCepCli , 08 )					// | 233 - 240 | Cep do Cliente
+			cLin += PadR( cCepCli , 08 )					// | 233 - 240 | Cep do Cliente
 			cLin += "~"										// | 241 - 241 | Separador CHEP
-			cLin += PADR( cEstCli , 02 )					// | 242 - 243 | UF do Cliente
+			cLin += PadR( cEstCli , 02 )					// | 242 - 243 | UF do Cliente
 			cLin += "~"										// | 244 - 244 | Separador CHEP
 			cLin += "BR"									// | 245 - 246 | Código do País do Cliente
 			cLin += "~"										// | 247 - 247 | Separador CHEP
@@ -703,79 +638,63 @@ Else
 			
 			FWrite(nHdl,cLin,Len(cLin))
 		
-		EndIF
+		EndIf
 		
-		IF !lViaJob
+		If !lViaJob
 			IncProc( "["+ StrZero( nI , 9 ) +"] de ["+ StrZero( nTotReg , 9 ) +"]")
-		EndIF
+		EndIf
 	
 	Next nI
 	
-	IF !lViaJob
+	If !lViaJob
 		IncProc( "["+ StrZero( nI , 9 ) +"] de ["+ StrZero( nTotReg , 9 ) +"]")
-	EndIF
+	EndIf
 	
-	IF nRegImp > 0
+	If nRegImp > 0
 	
-		//===========================================================================
-		//| Monta o Rodapé do arquivo                                               |
-		//===========================================================================
+		// Monta o Rodapé do arquivo
 		cLin := "*****+"							// | 001 - 006 | Início da Linha
 		cLin += "NORC+"								// | 007 - 011 | Identificador do número de registro
 		cLin += StrZero( nQtMov , 09 )				// | 012 - 020 | Quantidade de Notas
 		cLin += "+"									// | 021 - 021 | Separador CHEP
 		cLin += "SQTY+"				 				// | 022 - 026 | Tipo de Totalizador
 		cLin += StrZero( nQtPalet , 05 )			// | 027 - 031 | Quantidade de Palets
-		cLin += "+EOF"								// | 032 - 035 | Fim da Linha
+		cLin += "+Eof"								// | 032 - 035 | Fim da Linha
 		
 		FWrite( nHdl , cLin , Len(cLin) )
-		
-		//===========================================================================
-		//| Fecha o arquivo                                                         |
-		//===========================================================================
 		FClose( nHdl )
 		
-		//===========================================================================
-		//| Atualiza o Sequencial do CHEP no parâmetro de Controle                  |
-		//===========================================================================
-		putmv( "IT_SEQCHEP" , cSeqNum )
+		//Atualiza o Sequencial do CHEP no parâmetro de Controle
+		PutMV( "IT_SEQCHEP" , cSeqNum )
 		
-		//===========================================================================
-		//| Chama rotina de processamento do envio dos arquivos para o FTP.         |
-		//===========================================================================
+		// Chama rotina de processamento do envio dos arquivos para o FTP
 		MOMS022FTP()
 		
 	Else
-	    
-		//===========================================================================
-		//| Fecha e apaga o arquivo se o mesmo for gerado vazio                     |
-		//===========================================================================
+		// Fecha e apaga o arquivo se o mesmo For gerado vazio                     |
 		FClose( nHdl )
 		FErase( cArqTxt )
 		
-		IF lViaJob
+		If lViaJob
 			u_itconout( "Não foram impressos registros no arquivo e o mesmo foi excluído!" )
 			aAdd( aLogErro , "Não foram encontrados registros de movimentação para enviar." )
 		Else
-			U_ITMSG( "Não foram impressos registros no arquivo e o mesmo foi excluído!" , "Atenção!" , ,1 )
-		EndIF
+			U_ITMsg( "Não foram impressos registros no arquivo e o mesmo foi excluído!" , "Atenção!" , ,1 )
+		EndIf
 	
-	EndIF
+	EndIf
 
-EndIF
+EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MOMS022S
 Autor-------------: Frederico O. C. Jr
 Data da Criacao---: 12/06/2009
-===============================================================================================================================
 Descrição---------: Programa para selecao das notas a serem geradas no EDI do Carrefour
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: .T.
 ===============================================================================================================================
 */
@@ -792,44 +711,35 @@ Private cTitulo		:= "Seleção de Notas - EDI CHEP"
 
 #IFDEF WINDOWS
 	oWnd := GetWndDefault()
-#ENDIF
+#EndIf
 
-//===========================================================================
-//| Chama a função padrão do sistema para exibição das opções               |
-//===========================================================================
+// Chama a função padrão do sistema para exibição das opções
 f_Opcoes( @cRet , cTitulo , aNotMark , cChave , 12 , 49 , .F. , nTam , nMaxSelect )
 
-//===========================================================================
-//| Tratamento do retorno para remover os "*" dos não selecionados          |
-//===========================================================================
+// Tratamento do retorno para remover os "*" dos não selecionados
 cRet	:= AllTrim( StrTran( cRet , "*" , "" ) )
 nTotSel	:= Int( Len( cRet ) / 9 )
 
-//===========================================================================
-//| Processa a marcação dos dados do ListBox                                |
-//===========================================================================
+// Processa a marcação dos dados do ListBox
 For nI := 1 To nTotSel
 	
 	nPos := aScan( aNotas , {|x| AllTrim( x[02] ) == SubStr( cRet , 1 + ( 9 * ( nI - 1 ) ) , 9 ) } )
 	
-	IF nPos <> 0
+	If nPos <> 0
 		aNotas[nPos][01] := .T.
-	EndIF
+	EndIf
 
 Next nI
 
-Return !EMPTY(cRet)
+Return !Empty(cRet)
 
 /*
 ===============================================================================================================================
 Programa----------: MOMS022FTP
 Autor-------------: Talita Teixeira
 Data da Criacao---: 18/03/2013
-===============================================================================================================================
 Descrição---------: Funcao responsavel por enviar o arquivo para o ftp
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -848,21 +758,21 @@ Local nI		:= 0
 Local nArqFlh	:= 0
 Local _nAux		:= 0
 Local _lRename	:= .T.
-Local lSftp     := U_ITGETMV("IT_SFTPCHE",.T.) //Tranferencia para Sftp
+Local lSftp     := SuperGetMV("IT_SFTPCHE",.T.,.T.) //Tranferencia para Sftp
 
 If lSftp
-	cServer := GetMV( "IT_CHEPFTP" ,, "edis.chep.com" )//"ftpedi.chep.com"
+	cServer := SuperGetMV("IT_CHEPFTP",.T., "edis.chep.com")//"ftpedi.chep.com"
 EndIf
 
-IF Empty( aArqDir )
+If Empty( aArqDir )
 	
-	IF lViaJob
+	If lViaJob
 		u_itconout( "Não foram encontrados arquivos para enviar no diretório ["+ _cPthFil +"]." )
 	Else
-		U_ITMSG( "Não foram encontrados arquivos para enviar no diretório ["+ _cPthFil +"]." , "Atenção!" , ,1 )
-	EndIF
+		U_ITMsg( "Não foram encontrados arquivos para enviar no diretório ["+ _cPthFil +"]." , "Atenção!" , ,1 )
+	EndIf
 	
-	Return()
+	Return
 	
 Else
 	
@@ -870,45 +780,45 @@ Else
 	
 		If File( _cPthFil + aArqDir[nI][01] )
 			aAdd( aArqEnv , aArqDir[nI][01] )
-		EndIF
+		EndIf
 	
 	Next nI
 
-EndIF
+EndIf
 
 If Empty( aArqEnv )
 	
-	IF lViaJob
+	If lViaJob
 		u_itconout( "Os arquivos selecionados não existem ou foram excluídos do diretório ["+ _cPthFil +"]." )
 		aAdd( aLogErro , "Os arquivos selecionados não existem ou foram excluídos do diretório: "+ _cPthFil )
 	Else
-		U_ITMSG( "Os arquivos selecionados não existem ou foram excluídos do diretório ["+ _cPthFil +"]." , "Atenção!" , ,1)
-	EndIF
+		U_ITMsg( "Os arquivos selecionados não existem ou foram excluídos do diretório ["+ _cPthFil +"]." , "Atenção!" , ,1)
+	EndIf
 	
-	Return()
+	Return
 	
 Else
 	
 	If lSftp
 		_cPasta:="/incoming/"
-	else
+	Else
 		_cPasta:="\incoming"
 	EndIf
 
-	IF lViaJob
+	If lViaJob
 		aRetEnv := ITENVFTP( cServer , nPorta , cUser , cPass , _cPthFil , aArqEnv , .T. , _cPasta , lViaJob,lSftp )
 	Else
 		LjMsgRun( "Enviando arquivos ao servidor..." , "Aguarde!" , {|| aRetEnv := ITENVFTP( cServer , nPorta , cUser , cPass , _cPthFil , aArqEnv , .T. , _cPasta,,lSftp ) } )
-	EndIF
+	EndIf
 
 	If Empty( aRetEnv )
 		
-		IF lViaJob
+		If lViaJob
 			u_itconout( "Falhou ao enviar os arquivos para o FTP e os mesmos serão mantidos no diretório ["+ _cPthFil +"]" )
 			aAdd( aLogErro , "Falhou ao enviar os arquivos para o FTP e os mesmos serão mantidos no diretório: "+ _cPthFil )
 		Else
-			U_ITMSG( "Os arquivos não foram enviados e serão mantidos no diretório ["+ _cPthFil +"]" , "Atenção!" , ,1 )
-		EndIF
+			U_ITMsg( "Os arquivos não foram enviados e serão mantidos no diretório ["+ _cPthFil +"]" , "Atenção!" , ,1 )
+		EndIf
 		
 	Else
 		
@@ -931,22 +841,22 @@ Else
 				
 				If _lRename
 				
-					IF lViaJob
+					If lViaJob
 						u_itconout( "Falhou ao copiar os arquivos para o diretório 'Enviados' e os mesmos serão mantidos no diretório ["+ _cPthFil +"]" )
 						aAdd( aLogErro , "Falhou ao copiar os arquivos para o diretório 'Enviados' e os mesmos serão mantidos no diretório: "+ _cPthFil )
 					Else
-						U_ITMSG( "Falhou ao copiar os arquivos para o diretório 'Enviados' e os mesmos serão mantidos no diretório ["+ _cPthFil +"]" , "Atenção!" , ,1 )
-					EndIF
+						U_ITMsg( "Falhou ao copiar os arquivos para o diretório 'Enviados' e os mesmos serão mantidos no diretório ["+ _cPthFil +"]" , "Atenção!" , ,1 )
+					EndIf
 					
 				EndIf
 				
-			EndIF
+			EndIf
 			
 		Next nI
 		
 		For nI := 1 To Len( aArqEnv )
 		
-			IF aScan( aRetEnv , aArqEnv[01] ) > 0
+			If aScan( aRetEnv , aArqEnv[01] ) > 0
 			
 				aAdd( aLogEnv , { aArqEnv[nI] , "Enviado"		} )
 				
@@ -955,51 +865,48 @@ Else
 				aAdd( aLogEnv , { aArqEnv[nI] , "Não enviado"	} )
 				nArqFlh++
 				
-			EndIF
+			EndIf
 			
 		Next nI
 		
-	EndIF
+	EndIf
 
-EndIF
+EndIf
 
-IF nArqFlh > 0
+If nArqFlh > 0
 
-	IF lViaJob
+	If lViaJob
 		u_itconout( "Falhou ao enviar alguns arquivos para o FTP e os mesmos serão mantidos no diretório ["+ _cPthFil +"]." )
 		aAdd( aLogErro , "Falhou ao enviar alguns arquivos para o FTP e os mesmos serão mantidos no diretório: "+ _cPthFil )
 	Else
 		MessageBox( "Não foram enviados todos os arquivos para o servidor FTP. Verifique os diretórios dos arquivos [\data\italac\moms022\]." , "Atenção!" , 0 )
 		U_ITListBox( "Arquivos enviados para o FTP:" , { "Arquivo" , "Status" } , aLogEnv , .F. )
-	EndIF
+	EndIf
 
-ElseIF !Empty( aRetEnv )
+ElseIf !Empty( aRetEnv )
 
-	IF lViaJob
+	If lViaJob
 	
 		u_itconout( "Todos os arquivos foram enviados para o servidor FTP. Verifique o diretório ["+ cPathOk +"]." )
 		
 	Else
 	
-		U_ITMSG( "Todos os arquivos foram enviados para o servidor FTP. Verifique o diretório ["+ cPathOk +"]." , "Concluído!" , ,2 )
+		U_ITMsg( "Todos os arquivos foram enviados para o servidor FTP. Verifique o diretório ["+ cPathOk +"]." , "Concluído!" , ,2 )
 		U_ITListBox( "Arquivos enviados para o FTP:" , { "Arquivo" , "Status" } , aLogEnv , .F. )
 		
-	EndIF
+	EndIf
 	
-EndIF
+EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MOMS022Mail
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/05/2014
-===============================================================================================================================
 Descrição---------: Processa o envio de e-mail caso tenha ocorrido alguma inconsistência durante o processamento
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1023,7 +930,7 @@ cMsgAux	+= 'Relatório de processamento do envio de Arquivos "EDI Chep" para o se
 cMsgAux += '-------------------------------------------------------------------------------------------------------<br>'
 cMsgAux += ' Ambiente.........: '+ GetEnvServer() +'<br>'
 cMsgAux += ' Empresa/Filial...: '+ cEmpAnt +"/"+ cFilAnt + '<br>'
-cMsgAux += ' Data Proc........: '+ DtoC( Date() ) +'<br>'
+cMsgAux += ' Data Proc........: '+ DToC( Date() ) +'<br>'
 cMsgAux += ' Hora.............: '+ Time() +'<br>'
 cMsgAux += '-------------------------------------------------------------------------------------------------------<br>'
 
@@ -1043,19 +950,17 @@ U_ITENVMAIL( aConfig[01] , cMailDes ,,, "EDI Chep - Workflow - Processamento age
 
 u_itconout( "Envio de e-mail: "+ cLog )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: SchedDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 25/05/2017
-===============================================================================================================================
-Descrição---------: Definição de Static Function SchedDef para o novo Schedule
-===============================================================================================================================
+Descrição---------: DefiniçStaticStatic Function SchedDef para o novo Schedule
 Uso---------------: No novo Schedule existe uma forma para a definição dos Perguntes para o botão Parâmetros, além do cadastro 
-					das funções no SXD. Ao definir em sua rotina a static function SchedDef(), no cadastro da rotina no Agenda-
-					mento do Schedule será verificado se existe esta static function e irá executá-la habilitando o botão Parâ-
+					das funções no SXD. Ao definir em sua rotinStaticatic Function SchedDef(), no cadastro da rotina no Agenda-
+					mento do Schedule será verificado se existe estStaticic Function e irá executá-la habilitando o botão Parâ-
 					metros com as informações do retorno da SchedDef(), deixando de verificar assim as informações na SXD. O 
 					retorno da SchedDef deverá ser um array.
 					Válido para Function e User Function, lembrando que uma vez definido a SchedDef, ao chamar a rotina o ambi-
@@ -1063,13 +968,11 @@ Uso---------------: No novo Schedule existe uma forma para a definição dos Pergu
 					Uma vez definido a Static Function SchedDef(), a rotina deixa de ser uma execução como processo especial, 
 					ou seja, não se deve cadastrá-la no Agendamento passando parâmetros de linha. Ex: Funcao("A","B") ou 
 					U_Funcao("A","B").
-===============================================================================================================================
 Parametros--------: aReturn[1] - Tipo: "P" - para Processo, "R" -  para Relatórios
 					aReturn[2] - Nome do Pergunte, caso nao use passar ParamDef
 					aReturn[3] - Alias  (para Relatório)
 					aReturn[4] - Array de ordem  (para Relatório)
 					aReturn[5] - Título (para Relatório)
-===============================================================================================================================
 Retorno-----------: aParam
 ===============================================================================================================================
 */
@@ -1112,68 +1015,68 @@ Default lSFTP := .T.
 
 
 If !lSFTP
-	IF Empty(cServer) .Or. Empty(cUser) .Or. Empty(cPass)
+	If Empty(cServer) .Or. Empty(cUser) .Or. Empty(cPass)
 		
-		IF lViaJob
+		If lViaJob
 			U_ITCONOUT( "Falha ao identificar os dados para Login no Servidor de FTP." )
 		Else
-			u_itmsg("Falha ao identificar os dados para Login no Servidor de FTP","Alerta",,1)
-		EndIF
+			U_ITMsg("Falha ao identificar os dados para Login no Servidor de FTP","Alerta",,1)
+		EndIf
 		
 		Return( aRetOk )
 		
-	EndIF
+	EndIf
 
-	IF Empty(cPath) .Or. Empty(aArqEnv)
+	If Empty(cPath) .Or. Empty(aArqEnv)
 		
-		IF lViaJob
+		If lViaJob
 			U_ITCONOUT( "Falha ao identificar o diretório de origem e os arquivos a enviar." )
 		Else
-			u_itmsg("Falha ao identificar o diretório de origem e os arquivos a enviar.","Alerta",,1)
-		EndIF
+			U_ITMsg("Falha ao identificar o diretório de origem e os arquivos a enviar.","Alerta",,1)
+		EndIf
 		
 		Return( aRetOk )
 		
-	EndIF
+	EndIf
 
-	If SuperGetMV("IT_AMBTEST",.F.,.T.)
+	If !totvs.framework.environment.Type.get() == '1' //1-Produção, 2-Homologação,3-Desenvolvimento
 		
-		IF lViaJob
+		If lViaJob
 			U_ITCONOUT( "Rotina foi executada em Ambiente de Testes: ["+ GetEnvServer() +"]" )
 			U_ITCONOUT( "Não será processada a integração com o FTP!" )
 		Else
 		
-			u_itmsg("A Rotina foi executada em Ambiente de Testes:   "+ GetEnvServer() +  Chr(13) + Chr(10) + Chr(13) + Chr(10)	+;
+			U_ITMsg("A Rotina foi executada em Ambiente de Testes:   "+ GetEnvServer() +  Chr(13) + Chr(10) + Chr(13) + Chr(10)	+;
 					"Não será processada a integração com o FTP!"				 			, "Atenção!" ,,3)
 					
-		EndIF
+		EndIf
 		
 		Return( aRetOk )
 
-	EndIF
+	EndIf
 
 	If FTPConnect( cServer , nPorta , cUser , cPass )
 
-		IF lChgDir .And. !Empty( cDirFtp )
+		If lChgDir .And. !Empty( cDirFtp )
 		
-			IF !FTPDirChange( cDirFtp )
+			If !FTPDirChange( cDirFtp )
 			
-				IF lViaJob
+				If lViaJob
 					U_ITCONOUT( "Não foi possível acessar o diretório no FTP: "+ cDirFtp +CRLF+ "Informe a área de TI/ERP." )
 				Else
 
-					u_itmsg("Não foi possível acessar o diretório no FTP: "+ cDirFtp +CRLF+ "Informe a área de TI/ERP." +  Chr(13) + Chr(10) + Chr(13) + Chr(10)	+;
+					U_ITMsg("Não foi possível acessar o diretório no FTP: "+ cDirFtp +CRLF+ "Informe a área de TI/ERP." +  Chr(13) + Chr(10) + Chr(13) + Chr(10)	+;
 							"Informe a área de TI/ERP"				 			, "Atenção!" ,,3)
 		
-				EndIF
+				EndIf
 				
 				lEnvia := .F.
 				
-			EndIF
+			EndIf
 			
-		EndIF
+		EndIf
 		
-		IF lEnvia
+		If lEnvia
 		
 			FTPSetPasv( .T. )
 			
@@ -1187,22 +1090,22 @@ If !lSFTP
 				
 					aAdd( aLogErro , 'Falha no UpLoad do arquivo: '+ aArqEnv[nI] )
 					
-				EndIF
+				EndIf
 				
 			Next nI
 		
-		EndIF
+		EndIf
 		
 		FTPDISCONNECT()
-	ELSE
+	Else
 		Conout("Falha ao transferir : "+cError)
 
-		IF lViaJob
-		U_ITCONOUT( "Não foi possivel onectar no FTP: FTPConnect( Sever: "+cServer+" , Porta: "+ALLTRIM(str(nPorta))+" , User: "+cUser+" , Senha: "+cPass+" )" )
+		If lViaJob
+		U_ITCONOUT( "Não foi possivel onectar no FTP: FTPConnect( Sever: "+cServer+" , Porta: "+AllTrim(Str(nPorta))+" , User: "+cUser+" , Senha: "+cPass+" )" )
 		Else
-		U_ITMSG("Não foi possivel onectar no FTP: FTPConnect( Sever: "+cServer+" , Porta: "+ALLTRIM(str(nPorta))+" , User "+cUser+" , Senha: "+cPass+" )","Atenção!",;
+		U_ITMsg("Não foi possivel onectar no FTP: FTPConnect( Sever: "+cServer+" , Porta: "+AllTrim(Str(nPorta))+" , User "+cUser+" , Senha: "+cPass+" )","Atenção!",;
 				"Entre em contato com a Area de TI",1)
-		EndIF
+		EndIf
 		Return( aRetOk )
 		
 	EndIf
@@ -1216,13 +1119,13 @@ Else
 		EndIf
 	Next
 
-	IF Len( aLogErro ) > 0 .And. !lViaJob
+	If Len( aLogErro ) > 0 .And. !lViaJob
 		ITListBox( "Falhas de UpLoad" , { "Não Enviados" } , aLogErro , .F. )
 	ElseIf Len( aLogErro ) > 0 .And. lViaJob
 		For i := 1 to Len(aLogErro)
 			U_ITCONOUT( aLogErro[i])
 		Next
-	EndIF
+	EndIf
 EndIf
 
 Return( aRetOk )

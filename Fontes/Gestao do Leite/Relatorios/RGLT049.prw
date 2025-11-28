@@ -2,15 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 26/03/2019 | Chamado 11132. Ajuste para imprimir empréstimos do Leite de Terceiros
-Lucas Borges  | 25/06/2019 | Chamado 28346. Revisão de fontes
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Lucas Borges  |26/03/2019| Chamado 11132. Ajuste para imprimir empréstimos do Leite de Terceiros
+Lucas Borges  |25/06/2019| Chamado 28346. Revisão de fontes
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
 ===============================================================================================================================
 */
 
-#include "protheus.ch"      
+#Include "TOTVS.ch"      
 
 /*
 ===============================================================================================================================
@@ -105,7 +105,7 @@ _cOrder += _cAux +"_COD %"
 
 BeginSql alias _cAlias
 	SELECT A2_COD, A2_LOJA, A2_NOME, A2_CGC, %exp:_cCampo%
-	FROM %table:SA2% SA2, %exp:_cTabela%
+	FROM %Table:SA2% SA2, %exp:_cTabela%
 	WHERE SA2.D_E_L_E_T_ = ' '
 	      %exp:_cFiltro%
 	ORDER BY %exp:_cOrder%
@@ -181,7 +181,7 @@ If (_cAlias)->(!Eof()) .And. !Empty((_cAlias)->STATUS) .And. (_cAlias)->STATUS <
 			nlinha+=nSaltoLinha
 			_cMsg:= "Provenientes de: " + _cTipoReci + " CONCEDIDO AO "
 			If _cAux == "ZLM"
-				_cMsg+= IIf(Substr((_cAlias)->A2_COD,1,1) == "P","PRODUTOR","FRETISTA") + " DA FOLHA DE LEITE RELATIVA A "
+				_cMsg+= IIf(SubStr((_cAlias)->A2_COD,1,1) == "P","PRODUTOR","FRETISTA") + " DA FOLHA DE LEITE RELATIVA A "
 			Else
 				_cMsg+= "AO FORNECEDOR REFERENTE AO SUPRIMENTO RELATIVO A " 
 			EndIf
@@ -202,12 +202,12 @@ If (_cAlias)->(!Eof()) .And. !Empty((_cAlias)->STATUS) .And. (_cAlias)->STATUS <
 			nlinha+=nSaltoLinha
 			oPrint:Say (nlinha,nColFinal / 2,(_cAlias)->A2_COD + '/' + (_cAlias)->A2_LOJA + ' - '  + AllTrim((_cAlias)->A2_NOME),oFont12b,nColFinal,,,2)
 			nlinha+=nSaltoLinha
-			oPrint:Say (nlinha,nColFinal / 2,IIF(Len(AllTrim((_cAlias)->A2_CGC)) == 11,Transform(AllTrim((_cAlias)->A2_CGC),"@R 999.999.999-99"),Transform(AllTrim((_cAlias)->A2_CGC),"@R! NN.NNN.NNN/NNNN-99")),oFont12b,nColFinal,,,2)
+			oPrint:Say (nlinha,nColFinal / 2,IIf(Len(AllTrim((_cAlias)->A2_CGC)) == 11,Transform(AllTrim((_cAlias)->A2_CGC),"@R 999.999.999-99"),Transform(AllTrim((_cAlias)->A2_CGC),"@R! NN.NNN.NNN/NNNN-99")),oFont12b,nColFinal,,,2)
 			oPrint:Box(nLinInBox,nColInic,nLinFiBox,nColFinal) //Box do relatorio
 	    Next _nX
 
 		  oPrint:EndPage()	// Finaliza a Pagina.
-		  (_cAlias)->(dbSkip())
+		  (_cAlias)->(DBSkip())
 	  EndDo		        
 
 	  oPrint:Preview()	// Visualiza antes de Imprimir.

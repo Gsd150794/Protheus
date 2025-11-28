@@ -2,21 +2,16 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Igor Melgaço  | 31/05/2024 | Chamado 47277. Ajuste para gravação de campo na SE1. 
-Igor Melgaço  | 03/06/2024 | Chamado 47277. Ajuste para execução da rotina somente se E1_SALDO > 0. 
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
-===============================================================================================================================
-Analista       - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
-===============================================================================================================================
-Antonio Ramos  - Igor Melgaço  - 21/01/25 -          - 49269   - Ajustes para validação data de Vecto.
+Igor Melgaço  |03/06/2024| Chamado 47277. Ajuste para execução da rotina somente se E1_SALDO > 0. 
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Igor Melgaço  |21/01/2025| Chamado 49269. Ajustes para validação data de Vecto.
 ===============================================================================================================================
 */
 
 #Include	"Protheus.Ch"
 #Include	"FWMVCDef.Ch"
-#Include	"topconn.Ch"
 
 #Define		TITULO	"Análise de Pagamentos previstos"
 
@@ -43,9 +38,9 @@ SET DATE FORMAT TO "DD/MM/YYYY"
 //Grava Log de execução da rotina
 //U_ITLOGACS( "MFIN014" )
 
-fwmsgrun( ,{|oproc| MFIN014INI(oproc) } , "Processando..." , "Iniciando o processamento..." )
+FWMsgRun( ,{|oproc| MFIN014INI(oproc) } , "Processando..." , "Iniciando o processamento..." )
 	
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -63,8 +58,8 @@ Local _aParAux	    := {}
 Local _aParRet	    := {}
 Local _aCpos		 := MFIN014CPS()
 Local _nreg		    := 0
-Local _adados		 := {}
-Local _ni			 := 0
+Local _aDados		 := {}
+Local _nI			 := 0
 Local _carq		    := ""
 Local _lInverte    := .F.
 Local _aSizeAut    := MsAdvSize(.T.)
@@ -94,9 +89,9 @@ Begin Sequence
 	   aAdd( _aParRet , _aParAux[nI][03] )
    Next nI
 
-   IF !ParamBox( _aParAux , "Análise de pagamentos previstos" , @_aParRet )
-	  u_itmsg( "Operação cancelada pelo usuário!" , "Atenção!",,1 )
-	  Break // Return()
+   If !ParamBox( _aParAux , "Análise de pagamentos previstos" , @_aParRet )
+	  U_ITMsg( "Operação cancelada pelo usuário!" , "Atenção!",,1 )
+	  Break // Return
    EndIf
 
    //=================================================================================
@@ -120,7 +115,7 @@ Begin Sequence
       _carq := AllTrim(MV_PAR01)
 
       If FT_FUSE(_carq) == -1
-         U_ITMSG("1-Falha ao abrir o arquivo: "+_carq,;
+         U_ITMsg("1-Falha ao abrir o arquivo: "+_carq,;
                  "Erro Abertura de Arquivo",;
 	             "Verfifique se o arquivo não está sendo utilizado por outro aplicativo, ou se o arquivo foi salvo corretamente no formato CSV e possui ponto-e-virgula (;) como separador de colunas.",1)
 	     _lRet := .F. //Return .F.
@@ -134,7 +129,7 @@ Begin Sequence
       _cDados := StrTran(_cDados," ","") 
    
       If !("CNPJ_FORNECEDOR;CODIGO_CLIENTE;NOME_CLIENTE;NUMERO_DOCUMENTO;PARCELA;VALOR_DOCUMENTO;NOVO_VENCIMENTO" $ SubStr(_cDados,1,100))  // 92
-	     U_ITMSG("Layout de arquivo inválido, contido no arquivo: "+_carq,;
+	     U_ITMsg("Layout de arquivo inválido, contido no arquivo: "+_carq,;
                  "Layout de Arquivo",;
 		         "O layout do arquivo a ser processado, obrigatoriamente precisa seguir o padrão de colunas: "+CRLF+;
 		         "CNPJ_FORNECEDOR; CODIGO_CLIENTE; NOME_CLIENTE; NUMERO_DOCUMENTO; PARCELA; VALOR_DOCUMENTO; NOVO_VENCIMENTO;",1)
@@ -145,7 +140,7 @@ Begin Sequence
       //Fecha arquivo e prepara parâmetro com arquivo convertido
       FT_FUSE()
    Else
-      U_ITMSG("O arquivo informado: "+Alltrim(MV_PAR01)+" não tem extenção [ .CSV ] ",;
+      U_ITMsg("O arquivo informado: "+AllTrim(MV_PAR01)+" não tem extenção [ .CSV ] ",;
               "Arquivo inválido",;
 	          "Favor informar um arquivo no formato [ .CSV ].",1)
       _lRet := .F. // Return .F.
@@ -155,7 +150,7 @@ Begin Sequence
    ChkFile("SA1")
 
    If FT_FUSE(MV_PAR01) == -1
-      U_ITMSG("1-Falha ao abrir o arquivo: "+_carq,;
+      U_ITMsg("1-Falha ao abrir o arquivo: "+_carq,;
               "Erro Abertura de Arquivo",;
 	          "Verfifique se o arquivo não está sendo utilizado por outro aplicativo, ou se o arquivo foi salvo corretamente no formato CSV e possui ponto-e-virgula (;) como separador de colunas.",1)
       _lRet := .F. // Return .F.
@@ -172,7 +167,7 @@ Begin Sequence
 	
    If _nReg == 0 //O arquivo informado nao possui nenhuma linha de dados
 		
-      U_ItMsg("O arquivo informado para relizar a importação não possui dados.",;
+      U_ITMsg("O arquivo informado para relizar a importação não possui dados.",;
 	          "Arquivo inválido","Favor verificar se o arquivo informado esta correto.",1)
       _lRet := .F. // Return .F.
       Break
@@ -182,11 +177,11 @@ Begin Sequence
    //=========================================
    // Faz a leitura dos dados
    //=========================================
-   _adados := MFIN014L4(_nreg,oproc2) //Faz leitura dos dados 
+   _aDados := MFIN014L4(_nreg,oproc2) //Faz leitura dos dados 
 	
-   If Empty(_adados) // Len(_adados) <= 0
-      U_ItMsg("Não foram encontrados registros válidos no arquivo!" ,"Atenção!",,1 )
-      Break //Return()	
+   If Empty(_aDados) // Len(_aDados) <= 0
+      U_ITMsg("Não foram encontrados registros válidos no arquivo!" ,"Atenção!",,1 )
+      Break //Return	
    EndIf
 
    If Len(_aDadosRej) > 0
@@ -198,9 +193,9 @@ Begin Sequence
    //=========================================
    //ordena titulos no browse
    //=========================================
-   _adados := asort( _adados,,, { |x,y| x[06]+x[03]+x[04]+x[01]+x[02] < y[06]+y[03]+y[04]+y[01]+y[02] } )
+   _aDados := aSort( _aDados,,, { |x,y| x[06]+x[03]+x[04]+x[01]+x[02] < y[06]+y[03]+y[04]+y[01]+y[02] } )
 
-   ProcRegua(len(_adados))
+   ProcRegua(Len(_aDados))
    
    //================================================================================
    // Verifica se ja existe um arquivo com mesmo nome, se sim deleta.
@@ -219,56 +214,56 @@ Begin Sequence
 
    _otemp:Create()
    
-   _ni := 0
+   _nI := 0
 
    //==============================================
    // Grava os dados lidos na tabela temporária
    //==============================================
 
-   While _ni < len(_adados)
+   While _nI < Len(_aDados)
 	
-	   _ni++
-	   IncProc( "Analisando... ["+ StrZero( _ni , 6 ) +"] de ["+ StrZero( _ni , 6 ) +"]" )
+	   _nI++
+	   IncProc( "Analisando... ["+ StrZero( _nI , 6 ) +"] de ["+ StrZero( _nI , 6 ) +"]" )
 	
 	   //=========================================================================================
 	   //localiza título
-	   // se não achar e for parcela 001 procura com parcela em branco
+	   // se não achar e For parcela 001 procura com parcela em branco
 	   // se não achar não mostra na tela
 	   //==========================================================================================
-	   Dbselectarea("SE1")
-	   SE1->(Dbsetorder(2))
+	   DBSelectArea("SE1")
+	   SE1->(DBSetOrder(2))
 	
-	   If .not. SE1->(dBSEEK(_adados[_ni][06]+_adados[_ni][03]+_adados[_ni][04]+"1  "+_adados[_ni][01]+_adados[_ni][02]))
-		   If .not. (_adados[_ni][02] == "001" .or. _adados[_ni][02] == "01")
-			   _ni++
-			   loop
-		   Elseif .not. 	SE1->(dBSEEK(_adados[_ni][06]+_adados[_ni][03]+_adados[_ni][04]+"1  "+_adados[_ni][01]))
-			   _ni++
-			   loop
-		   Endif
-	   Endif
+	   If .not. SE1->(DBSeek(_aDados[_nI][06]+_aDados[_nI][03]+_aDados[_nI][04]+"1  "+_aDados[_nI][01]+_aDados[_nI][02]))
+		   If .not. (_aDados[_nI][02] == "001" .Or. _aDados[_nI][02] == "01")
+			   _nI++
+			   Loop
+		   ElseIf .not. 	SE1->(DBSeek(_aDados[_nI][06]+_aDados[_nI][03]+_aDados[_nI][04]+"1  "+_aDados[_nI][01]))
+			   _nI++
+			   Loop
+		   EndIf
+	   EndIf
 	
 	   (cAliasAux)->( RecLock( cAliasAux , .T. ) )
 
-		   (cAliasAux)->FILIAL		:= _adados[_ni][06]
-		   (cAliasAux)->CLIENTE	   := _adados[_ni][03]
-		   (cAliasAux)->LOJA		   := _adados[_ni][04]
-		   (cAliasAux)->NOME 		:= Posicione("SA1",1,xfilial("SA1")+_adados[_ni][03]+_adados[_ni][04],"A1_NOME")
-		   (cAliasAux)->REDE		   := Capital( AllTrim( Posicione("ACY",1, xFilial("ACY")+posicione("SA1",1,xfilial("SA1")+_adados[_ni][03]+_adados[_ni][04],"A1_GRPVEN"),"ACY_DESCRI")))
-		   (cAliasAux)->CGC		   := MFIN014CGC( _adados[_ni][07] )
-		   (cAliasAux)->TITU		   := _adados[_ni][01]
-		   (cAliasAux)->PARCELA	   := _adados[_ni][02]
-		   (cAliasAux)->CONDI		:= Posicione("SA1",1,xfilial("SA1")+_adados[_ni][03]+_adados[_ni][04],"A1_COND")
-		   (cAliasAux)->DCONDI		:= Posicione("SE4",1,xfilial("SE4")+(cAliasAux)->CONDI,"E4_DESCRI")
+		   (cAliasAux)->FILIAL		:= _aDados[_nI][06]
+		   (cAliasAux)->CLIENTE	   := _aDados[_nI][03]
+		   (cAliasAux)->LOJA		   := _aDados[_nI][04]
+		   (cAliasAux)->NOME 		:= Posicione("SA1",1,xFilial("SA1")+_aDados[_nI][03]+_aDados[_nI][04],"A1_NOME")
+		   (cAliasAux)->REDE		   := Capital( AllTrim( Posicione("ACY",1, xFilial("ACY")+Posicione("SA1",1,xFilial("SA1")+_aDados[_nI][03]+_aDados[_nI][04],"A1_GRPVEN"),"ACY_DESCRI")))
+		   (cAliasAux)->CGC		   := MFIN014CGC( _aDados[_nI][07] )
+		   (cAliasAux)->TITU		   := _aDados[_nI][01]
+		   (cAliasAux)->PARCELA	   := _aDados[_nI][02]
+		   (cAliasAux)->CONDI		:= Posicione("SA1",1,xFilial("SA1")+_aDados[_nI][03]+_aDados[_nI][04],"A1_COND")
+		   (cAliasAux)->DCONDI		:= Posicione("SE4",1,xFilial("SE4")+(cAliasAux)->CONDI,"E4_DESCRI")
 		   (cAliasAux)->VALOR		:= SE1->E1_VALOR
 		   (cAliasAux)->VENCTO		:= SE1->E1_VENCTO
 		   (cAliasAux)->VENCREA	   := SE1->E1_VENCREA
-		   (cAliasAux)->VENCNVO	   := _adados[_ni][05]
+		   (cAliasAux)->VENCNVO	   := _aDados[_nI][05]
 		   (cAliasAux)->REGSE1		:= SE1->( Recno() )
 		   (cAliasAux)->SITUACAO   := "NÃO PROCESSADO"
          (cAliasAux)->OBSERVACAO := ""
          (cAliasAux)->NOMEFIL    := AllTrim(FWFilialName(cEmpAnt,(cAliasAux)->FILIAL,1))
-         (cAliasAux)->HISTORICO  := _adados[_ni][08]
+         (cAliasAux)->HISTORICO  := _aDados[_nI][08]
 	   (cAliasAux)->( MSUnLock() )
 
    EndDo
@@ -278,35 +273,35 @@ Begin Sequence
    //==============================================
    // Substituir FWMarkBrowse() por MSSELECT.
    //==============================================
-   Aadd( _aCamposTela , {"MARCA"		   ,    , "Marca"		   , "@!" } )
-   Aadd( _aCamposTela , {"FILIAL"		, "" , "Filial"		, "@!" } )
-   Aadd( _aCamposTela , {"NOMEFIL"		, "" , "Nome Fil."   , "@!" } )
-   Aadd( _aCamposTela , {"CLIENTE"		, "" , "Cliente"	   , "@!" } )
-   Aadd( _aCamposTela , {"LOJA"		   , "" , "Loja"		   , "@!" } )
-   Aadd( _aCamposTela , {"NOME"		   , "" , "Nome"		   , "@!" } )
-   Aadd( _aCamposTela , {"REDE"		   , "" , "Rede"	      , "@!" } )
-   Aadd( _aCamposTela , {"CGC"			, "" , "CNPJ"		   , "@R! NN.NNN.NNN/NNNN-99" } )
-   Aadd( _aCamposTela , {"TITU"		   , "" , "Nr.Tilulo"	, "@!" } )
-   Aadd( _aCamposTela , {"PARCELA"		, "" , "Parcela"	   , "@!" } )
-   Aadd( _aCamposTela , {"CONDI"		   , "" , "Cond.Pgto" 	, "@!" } )
-   Aadd( _aCamposTela , {"DCONDI"		, "" , "Dias Cond."	, "@!" } )
-   Aadd( _aCamposTela , {"VALOR"		   , "" , "Valor"		   , "@E 99,999,999,999,999.99" } )
-   Aadd( _aCamposTela , {"VENCTO"		, "" , "Vencimento"	, "@D" } )
-   Aadd( _aCamposTela , {"VENCREA"		, "" , "Vencto.Real" , "@D" } )
-   Aadd( _aCamposTela , {"VENCNVO"		, "" , "Novo Vencto" , "@D" } )
-   Aadd( _aCamposTela , {"SITUACAO"	   , "" , "Situação"	   , "@!" } )
-   Aadd( _aCamposTela , {"OBSERVACAO"	, "" , "Observação"	, "@!" } )
-   Aadd( _aCamposTela , {"HISTORICO"	, "" , "Historico"	, "@!" } )
+   aAdd( _aCamposTela , {"MARCA"		   ,    , "Marca"		   , "@!" } )
+   aAdd( _aCamposTela , {"FILIAL"		, "" , "Filial"		, "@!" } )
+   aAdd( _aCamposTela , {"NOMEFIL"		, "" , "Nome Fil."   , "@!" } )
+   aAdd( _aCamposTela , {"CLIENTE"		, "" , "Cliente"	   , "@!" } )
+   aAdd( _aCamposTela , {"LOJA"		   , "" , "Loja"		   , "@!" } )
+   aAdd( _aCamposTela , {"NOME"		   , "" , "Nome"		   , "@!" } )
+   aAdd( _aCamposTela , {"REDE"		   , "" , "Rede"	      , "@!" } )
+   aAdd( _aCamposTela , {"CGC"			, "" , "CNPJ"		   , "@R! NN.NNN.NNN/NNNN-99" } )
+   aAdd( _aCamposTela , {"TITU"		   , "" , "Nr.Tilulo"	, "@!" } )
+   aAdd( _aCamposTela , {"PARCELA"		, "" , "Parcela"	   , "@!" } )
+   aAdd( _aCamposTela , {"CONDI"		   , "" , "Cond.Pgto" 	, "@!" } )
+   aAdd( _aCamposTela , {"DCONDI"		, "" , "Dias Cond."	, "@!" } )
+   aAdd( _aCamposTela , {"VALOR"		   , "" , "Valor"		   , "@E 99,999,999,999,999.99" } )
+   aAdd( _aCamposTela , {"VENCTO"		, "" , "Vencimento"	, "@D" } )
+   aAdd( _aCamposTela , {"VENCREA"		, "" , "Vencto.Real" , "@D" } )
+   aAdd( _aCamposTela , {"VENCNVO"		, "" , "Novo Vencto" , "@D" } )
+   aAdd( _aCamposTela , {"SITUACAO"	   , "" , "Situação"	   , "@!" } )
+   aAdd( _aCamposTela , {"OBSERVACAO"	, "" , "Observação"	, "@!" } )
+   aAdd( _aCamposTela , {"HISTORICO"	, "" , "Historico"	, "@!" } )
    
    _bOk     := {|| _lRet := .T., _oDlgTit:End()}
    _bCancel := {|| _lRet := .F., _oDlgTit:End()}
 
-   Aadd(_aButtons,{"",{|| U_MFIN014M("T") }                         ,"Marc/Des"      ,"Marca/Desmarca Todos"    })
-   Aadd(_aButtons,{"",{|| U_MFIN014T() }                            ,"Pesquisar"     ,"Pesquisar"               })
-   Aadd(_aButtons,{"",{|| U_MFIN014R((cAliasAux)->REGSE1 )}         ,"Consultar"     ,"Consultar Título"        })
-   Aadd(_aButtons,{"",{|| fwmsgrun( ,{|oproc| U_MFIN014B(oproc) })} ,"Atualiza Tit." ,"Atualiza Data do Titulo" })
+   aAdd(_aButtons,{"",{|| U_MFIN014M("T") }                         ,"Marc/Des"      ,"Marca/Desmarca Todos"    })
+   aAdd(_aButtons,{"",{|| U_MFIN014T() }                            ,"Pesquisar"     ,"Pesquisar"               })
+   aAdd(_aButtons,{"",{|| U_MFIN014R((cAliasAux)->REGSE1 )}         ,"Consultar"     ,"Consultar Título"        })
+   aAdd(_aButtons,{"",{|| FWMsgRun( ,{|oproc| U_MFIN014B(oproc) })} ,"Atualiza Tit." ,"Atualiza Data do Titulo" })
 
-   (cAliasAux)->(DbGoTop())
+   (cAliasAux)->(DBGoTop())
 
    _cTitulo := TITULO + " - " + "Atualização de Vencimentos "
 
@@ -314,8 +309,8 @@ Begin Sequence
    // Configurações iniciais
    //======================================================
    _aObjects := {} 
-   AAdd( _aObjects, { 315,  50, .T., .T. } )
-   AAdd( _aObjects, { 100, 100, .T., .T. } )
+   aAdd( _aObjects, { 315,  50, .T., .T. } )
+   aAdd( _aObjects, { 100, 100, .T., .T. } )
 
    _aInfo := { _aSizeAut[ 1 ], _aSizeAut[ 2 ], _aSizeAut[ 3 ], _aSizeAut[ 4 ], 3, 3 } 
 
@@ -333,7 +328,7 @@ Begin Sequence
       
    Activate MsDialog _oDlgTit On Init (EnchoiceBar(_oDlgTit,_bOk,_bCancel,,_aButtons), _oMarkTitulo:oBrowse:Align:=CONTROL_ALIGN_ALLCLIENT , _oMarkTitulo:oBrowse:Refresh() )
 
-   U_ItMsg( "Rotina de atualização de vencimentos de títulos finalizada!","Atenção",,2)
+   U_ITMsg( "Rotina de atualização de vencimentos de títulos finalizada!","Atenção",,2)
 
 End Sequence 
 
@@ -380,7 +375,7 @@ DBSelectArea("SE1")
 SE1->( DBGoTo(nRegSE1) )
 AxVisual( "SE1" , nRegSE1 , 2 )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -397,25 +392,25 @@ Static Function MFIN014CPS()
 Local _aCpos := {}
 
 aAdd( _aCpos , { "MARCA"		, "C" , 2							   , 0 } )
-AAdd( _aCpos , { "FILIAL"		, "C" , TamSX3("A1_FILIAL")[01]	, 0 } )
-AAdd( _aCpos , { "NOMEFIL"		, "C" , 20                  		, 0 } )
-AAdd( _aCpos , { "CLIENTE"		, "C" , TamSX3("A1_COD")[01]		, 0 } )
-AAdd( _aCpos , { "LOJA"			, "C" , TamSX3("A1_LOJA")[01]		, 0 } )
-AAdd( _aCpos , { "NOME"			, "C" , TamSX3("A1_NOME")[01]		, 0 } )
-AAdd( _aCpos , { "REDE"			, "C" , TamSX3("ACY_DESCRI")[01]	, 0 } )
-AAdd( _aCpos , { "CGC"			, "C" , 20 , 0 } )
-AAdd( _aCpos , { "TITU"		   , "C" , 9  , 0 } )
-AAdd( _aCpos , { "PARCELA"		, "C" , 3  , 0 } )
-AAdd( _aCpos , { "CONDI"		, "C" , 5  , 0 } )
-AAdd( _aCpos , { "DCONDI"		, "C" , 20 , 0 } )
-AAdd( _aCpos , { "VALOR"		, "N" , 18 , 2 } )
-AAdd( _aCpos , { "VENCTO"		, "D" , 8  , 0 } )
-AAdd( _aCpos , { "VENCREA"		, "D" , 8  , 0 } )
-AAdd( _aCpos , { "VENCNVO"		, "D" , 8  , 0 } )
-AAdd( _aCpos , { "REGSE1"		, "N" , 18 , 0 } )
-AAdd( _aCpos , { "SITUACAO"	, "C" , 20 , 0 } )
-AAdd( _aCpos , { "OBSERVACAO"	, "C" , 150, 0 } )
-AAdd( _aCpos , { "HISTORICO"	, "C" , 50 , 0 } )
+aAdd( _aCpos , { "FILIAL"		, "C" , TamSX3("A1_FILIAL")[01]	, 0 } )
+aAdd( _aCpos , { "NOMEFIL"		, "C" , 20                  		, 0 } )
+aAdd( _aCpos , { "CLIENTE"		, "C" , TamSX3("A1_COD")[01]		, 0 } )
+aAdd( _aCpos , { "LOJA"			, "C" , TamSX3("A1_LOJA")[01]		, 0 } )
+aAdd( _aCpos , { "NOME"			, "C" , TamSX3("A1_NOME")[01]		, 0 } )
+aAdd( _aCpos , { "REDE"			, "C" , TamSX3("ACY_DESCRI")[01]	, 0 } )
+aAdd( _aCpos , { "CGC"			, "C" , 20 , 0 } )
+aAdd( _aCpos , { "TITU"		   , "C" , 9  , 0 } )
+aAdd( _aCpos , { "PARCELA"		, "C" , 3  , 0 } )
+aAdd( _aCpos , { "CONDI"		, "C" , 5  , 0 } )
+aAdd( _aCpos , { "DCONDI"		, "C" , 20 , 0 } )
+aAdd( _aCpos , { "VALOR"		, "N" , 18 , 2 } )
+aAdd( _aCpos , { "VENCTO"		, "D" , 8  , 0 } )
+aAdd( _aCpos , { "VENCREA"		, "D" , 8  , 0 } )
+aAdd( _aCpos , { "VENCNVO"		, "D" , 8  , 0 } )
+aAdd( _aCpos , { "REGSE1"		, "N" , 18 , 0 } )
+aAdd( _aCpos , { "SITUACAO"	, "C" , 20 , 0 } )
+aAdd( _aCpos , { "OBSERVACAO"	, "C" , 150, 0 } )
+aAdd( _aCpos , { "HISTORICO"	, "C" , 50 , 0 } )
 
 Return( _aCpos )
 
@@ -441,7 +436,7 @@ Local _cCodOcorr := ""  As Character
 Local _cDescOcorr := ""  As Character
 Local _lContinua := .F.  As Logical
 Local _lSaldo := .F.  As Logical
-LOcal _lVenc := .F. As Logical
+Local _lVenc := .F. As Logical
 Local _cObs := "" As Character
 
 Begin Transaction
@@ -454,7 +449,7 @@ ProcRegua(_nTotReg)
 //| Verifica a quantidade de Registros no Browse                            |
 //===========================================================================
 
-(cAliasAux)->(DbGoTop())
+(cAliasAux)->(DBGoTop())
 
 While !(cAliasAux)->(Eof()) 
 	
@@ -464,10 +459,10 @@ While !(cAliasAux)->(Eof())
    _cCodOcorr := ""
    _cDescOcorr := ""
 
-   IF valtype(oproc) = "O"
+   If ValType(oproc) = "O"
       oproc:cCaption := ("Processando... ["+ StrZero(_nRegAtu,6) +"] de ["+ StrZero(_nTotReg,6) +"]")
       ProcessMessages()
-   ENDIF
+   EndIf
 	
 	If !Empty((cAliasAux)->MARCA) 
 		
@@ -478,7 +473,7 @@ While !(cAliasAux)->(Eof())
 		DBSelectArea("SE1")
 		SE1->( DBSetOrder(2) ) // E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO
 		
-		If  SE1->(dBSEEK((cAliasAux)->FILIAL+(cAliasAux)->CLIENTE+(cAliasAux)->LOJA+"1  "+(cAliasAux)->TITU	+ALLTRIM((cAliasAux)->PARCELA)))	 
+		If  SE1->(DBSeek((cAliasAux)->FILIAL+(cAliasAux)->CLIENTE+(cAliasAux)->LOJA+"1  "+(cAliasAux)->TITU	+AllTrim((cAliasAux)->PARCELA)))	 
          If SE1->E1_SALDO > 0 
             _lContinua := .T.
              _lSaldo   := .T.
@@ -486,7 +481,7 @@ While !(cAliasAux)->(Eof())
             _lContinua := .F.
              _lSaldo   := .F.
          EndIf
-		Elseif ((cAliasAux)->PARCELA = '001' .or. (cAliasAux)->PARCELA = '01') .and. SE1->(dBSEEK((cAliasAux)->FILIAL+(cAliasAux)->CLIENTE+(cAliasAux)->LOJA+"1  "+(cAliasAux)->TITU )) .AND. SE1->E1_SALDO > 0 
+		ElseIf ((cAliasAux)->PARCELA = '001' .Or. (cAliasAux)->PARCELA = '01') .And. SE1->(DBSeek((cAliasAux)->FILIAL+(cAliasAux)->CLIENTE+(cAliasAux)->LOJA+"1  "+(cAliasAux)->TITU )) .And. SE1->E1_SALDO > 0 
          If SE1->E1_SALDO > 0 
             _lContinua := .T.
              _lSaldo   := .T.
@@ -511,10 +506,10 @@ While !(cAliasAux)->(Eof())
 
       If _lContinua 
 
-         If !Empty(Alltrim((cAliasAux)->HISTORICO))
+         If !Empty(AllTrim((cAliasAux)->HISTORICO))
             _cHistor := (cAliasAux)->HISTORICO 
          Else
-            _cHistor := "VENC.REAL ALT.DE " + Dtoc(_dVencAtu) + " P/" + Dtoc(_dNovoVencto) + "."  
+            _cHistor := "VENC.REAL ALT.DE " + DToC(_dVencAtu) + " P/" + DToC(_dNovoVencto) + "."  
          EndIf
 
 			SE1->( RecLock( "SE1" , .F. ) )
@@ -522,14 +517,14 @@ While !(cAliasAux)->(Eof())
 			SE1->E1_I_VCPOR	:= _dNovoVencto 
 			SE1->E1_I_VCFLU	:= _dNovoVencto 
 			SE1->E1_HIST      := _cHistor
-         If !Empty(Alltrim((cAliasAux)->HISTORICO))
+         If !Empty(AllTrim((cAliasAux)->HISTORICO))
             SE1->E1_I_DTPRO   := _dNovoVencto
             SE1->E1_I_PRORR   := 'S'
             SE1->E1_I_CART    := '17'
          EndIf
-			SE1->( MsUnLock() )
+			SE1->( MSUnLock() )
 
-         If !Empty(Alltrim((cAliasAux)->HISTORICO))
+         If !Empty(AllTrim((cAliasAux)->HISTORICO))
             If SE1->E1_PORTADO $ "001|341"
                _cCodOcorr := "06"
                _cDescOcorr := "ALTERACAO DE VENCIMENTO"
@@ -538,9 +533,9 @@ While !(cAliasAux)->(Eof())
                _cDescOcorr := "ALTERACAO DE OUTROS DADOS"
             EndIf
 
-            If !Empty(Alltrim(_cCodOcorr))
+            If !Empty(AllTrim(_cCodOcorr))
                //ADICAO DA INCLUSÃO DA INSTRUCAO BANCARIA
-               FI2->(Reclock("FI2",.T.))
+               FI2->(RecLock("FI2",.T.))
 
                FI2->FI2_FILIAL := (cAliasAux)->FILIAL
                FI2->FI2_OCORR  := _cCodOcorr
@@ -555,12 +550,12 @@ While !(cAliasAux)->(Eof())
                FI2->FI2_NUMBOR := SE1->E1_NUMBOR
                FI2->FI2_CARTEI := "1"
                FI2->FI2_DTOCOR := dDataBase
-               FI2->FI2_VALANT := DTOC(_dVencAtu)
-               FI2->FI2_VALNOV := DTOC(_dNovoVencto)
+               FI2->FI2_VALANT := DToC(_dVencAtu)
+               FI2->FI2_VALNOV := DToC(_dNovoVencto)
                FI2->FI2_CAMPO  := "E1_VENCREA"
                FI2->FI2_TIPCPO := "D"
 
-               FI2->(MsUnlock())
+               FI2->(MSUnLock())
 
             EndIf
          EndIf
@@ -568,27 +563,27 @@ While !(cAliasAux)->(Eof())
 			(cAliasAux)->( RecLock( cAliasAux , .F. ) )
 			(cAliasAux)->VENCREA    := _dNovoVencto 
 			(cAliasAux)->SITUACAO   := "PROCESSADO"
-         (cAliasAux)->OBSERVACAO := "CAMPO VENCIMENTO REAL ALTERADO DE " + Dtoc(_dVencAtu) + " PARA " + Dtoc(_dNovoVencto) + "." 
+         (cAliasAux)->OBSERVACAO := "CAMPO VENCIMENTO REAL ALTERADO DE " + DToC(_dVencAtu) + " PARA " + DToC(_dNovoVencto) + "." 
 			(cAliasAux)->( MSUnLock() )
 			_oMarkTitulo:oBrowse:Refresh()
 		
 			//===========================================================================
 			//| Grava o Item processado no Lote                                         |
 			//===========================================================================
-			U_ITGrLote( "Z03" , _cNumLote , { { SE1->E1_FILIAL + SE1->E1_NUM + SE1->E1_PARCELA , StoD( cDtIni ) , Date() , "1" } } , "1" )
+			U_ITGrLote( "Z03" , _cNumLote , { { SE1->E1_FILIAL + SE1->E1_NUM + SE1->E1_PARCELA , SToD( cDtIni ) , Date() , "1" } } , "1" )
 		
 		Else
          If _lVenc
             _cObs := "VENCIMENTO MENOR QUE A DATA DE EMISSAO DO TITULO: " + (cAliasAux)->TITU +", FILIAL: " + (cAliasAux)->FILIAL + ", CLIENTE: " + (cAliasAux)->CLIENTE + ", LOJA: " + (cAliasAux)->LOJA + ;
-                                      ", XXXXXXXXXX: '1  ', PARA AS PARCELAS: " + ALLTRIM((cAliasAux)->PARCELA) + ", OU '001', OU '01'."    
+                                      ", XXXXXXXXXX: '1  ', PARA AS PARCELAS: " + AllTrim((cAliasAux)->PARCELA) + ", OU '001', OU '01'."    
 
          ElseIf _lSaldo
             _cObs := "NAO FOI LOCALIZADO O TITULO: " + (cAliasAux)->TITU +", FILIAL: " + (cAliasAux)->FILIAL + ", CLIENTE: " + (cAliasAux)->CLIENTE + ", LOJA: " + (cAliasAux)->LOJA + ;
-                                      ", XXXXXXXXXX: '1  ', PARA AS PARCELAS: " + ALLTRIM((cAliasAux)->PARCELA) + ", OU '001', OU '01'."    
+                                      ", XXXXXXXXXX: '1  ', PARA AS PARCELAS: " + AllTrim((cAliasAux)->PARCELA) + ", OU '001', OU '01'."    
 
          Else
             _cObs := "NAO HÁ SALDO PARA O TITULO: " + (cAliasAux)->TITU +", FILIAL: " + (cAliasAux)->FILIAL + ", CLIENTE: " + (cAliasAux)->CLIENTE + ", LOJA: " + (cAliasAux)->LOJA + ;
-                                      ", XXXXXXXXXX: '1  ', PARA AS PARCELAS: " + ALLTRIM((cAliasAux)->PARCELA) + ", OU '001', OU '01'."    
+                                      ", XXXXXXXXXX: '1  ', PARA AS PARCELAS: " + AllTrim((cAliasAux)->PARCELA) + ", OU '001', OU '01'."    
          EndIf
 
 		   (cAliasAux)->( RecLock( cAliasAux , .F. ) )
@@ -597,13 +592,13 @@ While !(cAliasAux)->(Eof())
 		   (cAliasAux)->( MSUnLock() )
 		   _oMarkTitulo:oBrowse:Refresh()
 			
-		   U_ITGrLote( "Z03" , _cNumLote , { { SE1->E1_FILIAL + SE1->E1_NUM + SE1->E1_PARCELA , StoD( cDtIni ) , Date() , "1" } } , "2" )
+		   U_ITGrLote( "Z03" , _cNumLote , { { SE1->E1_FILIAL + SE1->E1_NUM + SE1->E1_PARCELA , SToD( cDtIni ) , Date() , "1" } } , "2" )
 			
-		Endif			
+		EndIf			
 		
 	EndIf
 	
-	(cAliasAux)->( DbSkip() )
+	(cAliasAux)->( DBSkip() )
 	
 EndDo
  
@@ -617,22 +612,22 @@ End Transaction
 //| Verifica o Status geral do processamento.                               |
 //===========================================================================
 If _nRegSel > 0
-	u_itmsg( "Registros processados com sucesso!" , "Concluído!" ,,2)
+	U_ITMsg( "Registros processados com sucesso!" , "Concluído!" ,,2)
 Else
 
 	//===========================================================================
 	//| Exclui o Lote que não teve registros processados.                       |
 	//===========================================================================
 	DBSelectArea("Z00")
-	IF Z00->( DBSeek( xFilial("Z00") + _cNumLote ) )
+	If Z00->( DBSeek( xFilial("Z00") + _cNumLote ) )
 		
 		Z00->( RecLock( "Z00" , .F. ) )
 		Z00->( DBDelete() )
-		Z00->( MsUnlock() )
+		Z00->( MSUnLock() )
 		
-	EndIF
+	EndIf
 	
-	u_itmsg( "O processamento foi concluído porém nenhum registro foi selecionado para o atualização!" , "Concluído!",,3 )
+	U_ITMsg( "O processamento foi concluído porém nenhum registro foi selecionado para o atualização!" , "Concluído!",,3 )
 
 EndIf
 
@@ -641,7 +636,7 @@ _oMarkTitulo:oBrowse:Refresh()
 //oMarkBRW:Refresh()
 //oMarkBRW:GoTop()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -658,13 +653,13 @@ Static Function MFIN014CGC( _cCGCAux )
 Local _cRet	:= ""
 Local _cAux	:= AllTrim( _cCGCAux )
 
-IF Len( _cAux	 ) > 11
+If Len( _cAux	 ) > 11
 	_cAux	 := PadL( _cAux	 , 14 , "0" )
 	_cRet := Transform( _cAux	 , "@R! NN.NNN.NNN/NNNN-99" )
 Else
 	_cAux	 := PadL( _cAux	 , 11 , "0" )
 	_cRet := Transform( _cAux	 , "@R 999.999.999-99" )
-EndIF
+EndIf
 
 Return( _cRet )
 
@@ -682,52 +677,52 @@ Retorno-----------: _dret - data de vencimento ajustada
 
 Static Function MFIN014AV( _dvenc, _ccond )
 
-Local _ctipo 	:= posicione("SE4",1,xfilial("SE4")+_ccond,"E4_TIPO")
-Local _cdet	:= posicione("SE4",1,xfilial("SE4")+_ccond,"E4_COND")
+Local _ctipo 	:= Posicione("SE4",1,xFilial("SE4")+_ccond,"E4_TIPO")
+Local _cdet	:= Posicione("SE4",1,xFilial("SE4")+_ccond,"E4_COND")
 Local _adias	:= {}
-Local _ni 		:= 0
+Local _nI 		:= 0
 Local _lsai	:= .F.
 
 If Subs(MV_PAR02,1,1) == "2"
-   If _ctipo == "4" .or. _ctipo == "6" //tipos de condição de pagamento que tem dia determinado da semana
+   If _ctipo == "4" .Or. _ctipo == "6" //tipos de condição de pagamento que tem dia determinado da semana
 
       _adias := StrTokArr(_cdet,",")
       
-      Do while !( dow(_dvenc) == val(_adias[3]) )
+      While !( dow(_dvenc) == Val(_adias[3]) )
          _dvenc++
-      Enddo
+      EndDo
       
       _dvenc := datavalida(_dvenc)
 
-   Elseif _ctipo == "3"  //tipo de condição que determina dias fixos do mes para pagamento
+   ElseIf _ctipo == "3"  //tipo de condição que determina dias fixos do mes para pagamento
       _adias := StrTokArr(_cdet,",")
       _lsai := .F.
       
-      Do while len(_adias) > 2 .and. !_lsai
-         _ni := 3 
-         Do while _ni <= len(_adias)
-            if strzero(day(_dvenc),2) == strzero(val(_adias[_ni]),2)
+      While Len(_adias) > 2 .And. !_lsai
+         _nI := 3 
+         While _nI <= Len(_adias)
+            If StrZero(day(_dvenc),2) == StrZero(Val(_adias[_nI]),2)
                _lsai := .T.
-               _ni := len(_adias) + 1
+               _nI := Len(_adias) + 1
             Else
-               _ni++
-            Endif
-         Enddo
+               _nI++
+            EndIf
+         EndDo
          
          If !_lsai
             _dvenc++
          Else
             _dvenc := datavalida(_dvenc)
-         Endif
-      Enddo			 
+         EndIf
+      EndDo			 
    Else
       _dvenc := datavalida(_dvenc)
-   Endif
+   EndIf
 Else
    _dvenc := datavalida(_dvenc)
-Endif
+EndIf
 
-Return dtoc(_dvenc)
+Return DToC(_dvenc)
 
 /*
 ===============================================================================================================================
@@ -737,45 +732,45 @@ Data da Criacao---: 09/03/2016
 Descrição---------: Faz a leitura de dados no layout unico.
 Parametros--------: _nreg - número de linhas do arquivo
 					oproc2 - objeto da barra de processamento
-Retorno-----------: _adados - array com dados carregados do arquivo
+Retorno-----------: _aDados - array com dados carregados do arquivo
 ===============================================================================================================================
 */
 
-Static function MFIN014L4(_nreg,oProc2)
+Static Function MFIN014L4(_nreg,oProc2)
 Local _cHistor := ""
 Local _nCont 	:= 0
 Local _cDados	:= ""
 Local _alinha	:= {}
-Local _adados 	:= {}
+Local _aDados 	:= {}
 Local _cNumDoc , _nNumDoc
 Local _aSM0 := {}
 Local _aRecnoSM0  := SM0->(Recno())
 
 Default oProc2 := nil
 
-SM0->(DbGoTop())
+SM0->(DBGoTop())
 
-Do While ! SM0->(Eof())
-   Aadd(_aSM0,{SM0->M0_CODFIL,SM0->M0_CGC,SM0->M0_NOMECOM})
+While ! SM0->(Eof())
+   aAdd(_aSM0,{SM0->M0_CODFIL,SM0->M0_CGC,SM0->M0_NOMECOM})
   
-   SM0->(DbSkip())
+   SM0->(DBSkip())
 EndDo
 
-SM0->(DbGoTo(_aRecnoSM0))
+SM0->(DBGoTo(_aRecnoSM0))
 
 FT_FGOTOP() //POSICIONA NO TOPO DO ARQUIVO
 FT_FSKIP()
 
-While !FT_FEOF()  //FACA ENQUANTO NAO FOR FIM DE ARQUIVO
+While !FT_FEOF()  //FACA ENQUANTO NAO For FIM DE ARQUIVO
 	
 	_nCont++ 
 
-	IF valtype(oProc2) = "O"
+	If ValType(oProc2) = "O"
 
-      	  oProc2:cCaption := ("Processando arquivo... Lendo linha " + strzero(_nCont,5) + " de " + strzero(_nreg,5) + ".")
+      	  oProc2:cCaption := ("Processando arquivo... Lendo linha " + StrZero(_nCont,5) + " de " + StrZero(_nreg,5) + ".")
    		  ProcessMessages()
  
-    ENDIF
+    EndIf
 			
 	_cDados := FT_FREADLN()
 
@@ -783,18 +778,18 @@ While !FT_FEOF()  //FACA ENQUANTO NAO FOR FIM DE ARQUIVO
 
 	If Empty(_alinha)
 	   FT_FSKIP()
-	   LOOP
+	   Loop
 	EndIf
 
     // Numero de colunas a serem lidas do arquivo texto.
     //        1              2            3             4               5               6        7
     //"CNPJ_FORNECEDOR;CODIGO_CLIENTE;NOME_CLIENTE;NUMERO_DOCUMENTO;PARCELA;VALOR_DOCUMENTO;NOVO_VENCIMENTO"
-    _alinha[1] := strtran(_alinha[1],".","")
-    _alinha[1] := strtran(_alinha[1],"/","")
-    _alinha[1] := strtran(_alinha[1],"-","")
+    _alinha[1] := StrTran(_alinha[1],".","")
+    _alinha[1] := StrTran(_alinha[1],"/","")
+    _alinha[1] := StrTran(_alinha[1],"-","")
 
-	_alinha[6] := strtran(_alinha[6],".","")
-	_alinha[6] := strtran(_alinha[6],",",".")
+	_alinha[6] := StrTran(_alinha[6],".","")
+	_alinha[6] := StrTran(_alinha[6],",",".")
 	
 	_cCodCli := _alinha[2]
 	
@@ -809,45 +804,45 @@ While !FT_FEOF()  //FACA ENQUANTO NAO FOR FIM DE ARQUIVO
 	   _cNumDoc := StrZero(_nNumDoc,9)
 	EndIf
 	
-	If ascan( _aSM0, { |x| x[2] = (alltrim(_alinha[1]))}) > 0	
+	If aScan( _aSM0, { |x| x[2] = (AllTrim(_alinha[1]))}) > 0	
 		//Identifica filial
-		_cfilial := _aSM0[ascan( _aSM0, { |x| x[2] = (alltrim(_alinha[1]))})][1]
+		_cfilial := _aSM0[aScan( _aSM0, { |x| x[2] = (AllTrim(_alinha[1]))})][1]
 		
 		_cfilial := U_ITKEY(_cfilial,"E1_FILIAL")  
 		
 		//Usa número do título para identificar o cliente e loja
-		DBselectarea("SE1")
-		SE1->( Dbsetorder(1) ) // E1_FILIAL+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO
+		DBSelectArea("SE1")
+		SE1->( DBSetOrder(1) ) // E1_FILIAL+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO
 		
-		If SE1->( Dbseek( _cfilial + U_ITKEY('1',"E1_PREFIXO") + U_ITKEY(_cNumDoc,"E1_NUM") + U_ITKEY(_alinha[5],"E1_PARCELA") + U_ITKEY('NF',"E1_TIPO")) ) .AND. SE1->E1_CLIENTE == _cCodCli
+		If SE1->( DBSeek( _cfilial + U_ITKEY('1',"E1_PREFIXO") + U_ITKEY(_cNumDoc,"E1_NUM") + U_ITKEY(_alinha[5],"E1_PARCELA") + U_ITKEY('NF',"E1_TIPO")) ) .And. SE1->E1_CLIENTE == _cCodCli
 			If Len(_alinha) >= 8
             _cHistor := _alinha[8]
          Else
             _cHistor := ""
          EndIf
 
-			aadd(_adados, {SE1->E1_NUM    ,;            											                    //01 - num titulo  // U_ITKEY(_cNumDoc,"E1_NUM") 
+			aAdd(_aDados, {SE1->E1_NUM    ,;            											                    //01 - num titulo  // U_ITKEY(_cNumDoc,"E1_NUM") 
 					       SE1->E1_PARCELA,;																			        //02 - parcela  // '01',;	
 					       SE1->E1_CLIENTE,;																			        //03 - codigo do cliente
 					       SE1->E1_LOJA,;																				        //04 - loja do cliente
 					       Ctod(_alinha[7]),;	    													            	     //05 - data de pagamento prevista  //Ctod(_alinha[6])
 					       _cfilial,;                                                                 		  //06 - filial Italac 
-					       POSICIONE("SA1",1,xfilial("SA1") + SE1->E1_CLIENTE + SE1->E1_LOJA,"A1_CGC"),;	  //07 - CNPJ cliente	
+					       Posicione("SA1",1,xFilial("SA1") + SE1->E1_CLIENTE + SE1->E1_LOJA,"A1_CGC"),;	  //07 - CNPJ cliente	
                       _cHistor})
 	    Else
 	                     //{ "Filial", "Prefixo"               , "Titulo"                      , "Parcela"            ,    "Tipo"   ,           "Cliente"}
-	       Aadd(_aDadosRej,{alltrim(_alinha[1]), U_ITKEY('1',"E1_PREFIXO"), U_ITKEY(_cNumDoc,"E1_NUM"), U_ITKEY(_alinha[5],"E1_PARCELA"), U_ITKEY('NF',"E1_TIPO"), _cCodCli})
-	    Endif
+	       aAdd(_aDadosRej,{AllTrim(_alinha[1]), U_ITKEY('1',"E1_PREFIXO"), U_ITKEY(_cNumDoc,"E1_NUM"), U_ITKEY(_alinha[5],"E1_PARCELA"), U_ITKEY('NF',"E1_TIPO"), _cCodCli})
+	    EndIf
 	Else
                      //{ "Filial", "Prefixo"               , "Titulo"                      , "Parcela"            ,    "Tipo"   ,           "Cliente"}
-       Aadd(_aDadosRej,{alltrim(_alinha[1]), U_ITKEY('1',"E1_PREFIXO"), U_ITKEY(_cNumDoc,"E1_NUM"), U_ITKEY(_alinha[5],"E1_PARCELA"), U_ITKEY('NF',"E1_TIPO"), _cCodCli})	
-	Endif
+       aAdd(_aDadosRej,{AllTrim(_alinha[1]), U_ITKEY('1',"E1_PREFIXO"), U_ITKEY(_cNumDoc,"E1_NUM"), U_ITKEY(_alinha[5],"E1_PARCELA"), U_ITKEY('NF',"E1_TIPO"), _cCodCli})	
+	EndIf
 								                     
 	FT_FSKIP()
 	
-Enddo
+EndDo
 	
-Return _adados
+Return _aDados
 
 /*
 ===============================================================================================================================
@@ -874,25 +869,25 @@ Begin Sequence
    If _cTipoMarca == "P"
       (cAliasAux)->(RecLock(cAliasAux,.F.))
       (cAliasAux)->MARCA := _cSimboloMarca 
-      (cAliasAux)->(MsUnlock())
+      (cAliasAux)->(MSUnLock())
    Else
-      (cAliasAux)->(DbGoTop())
-      Do While ! (cAliasAux)->(Eof())
+      (cAliasAux)->(DBGoTop())
+      While ! (cAliasAux)->(Eof())
          (cAliasAux)->(RecLock(cAliasAux,.F.))
          (cAliasAux)->MARCA := _cSimboloMarca 
-         (cAliasAux)->(MsUnlock()) 
+         (cAliasAux)->(MSUnLock()) 
          
-         (cAliasAux)->(DbSkip())
+         (cAliasAux)->(DBSkip())
       EndDo
    
    EndIf
            
 End Sequence
 
-(cAliasAux)->(DbGoTo(_nRegAtu)) 
+(cAliasAux)->(DBGoTo(_nRegAtu)) 
 _oMarkTitulo:oBrowse:Refresh()
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -941,16 +936,16 @@ Begin Sequence
 
    If _lRet
       If _cItem == _aItens[1]
-         (cAliasAux)->(DbSetOrder(1))
-         If !(cAliasAux)->(DbSeek(_cFilPesq + _cNrTitulo))
-            U_ITMSG("Não foi possível localizar a Filial + Titulo informados!","Atenção", ,1) 
-            (cAliasAux)->(DbGoto(_nRegAtu))
+         (cAliasAux)->(DBSetOrder(1))
+         If !(cAliasAux)->(DBSeek(_cFilPesq + _cNrTitulo))
+            U_ITMsg("Não foi possível localizar a Filial + Titulo informados!","Atenção", ,1) 
+            (cAliasAux)->(DBGoTo(_nRegAtu))
          EndIf
       Else
-         (cAliasAux)->(DbSetOrder(2))
-         If !(cAliasAux)->(DbSeek(_cFilPesq + Dtos(_dDtVencto)))
-            U_ITMSG("Não foi possível localizar a Filial + Dt.Vencimento informados!","Atenção", ,1) 
-            (cAliasAux)->(DbGoto(_nRegAtu))
+         (cAliasAux)->(DBSetOrder(2))
+         If !(cAliasAux)->(DBSeek(_cFilPesq + DToS(_dDtVencto)))
+            U_ITMsg("Não foi possível localizar a Filial + Dt.Vencimento informados!","Atenção", ,1) 
+            (cAliasAux)->(DBGoTo(_nRegAtu))
          EndIf
       EndIf   
       
@@ -959,4 +954,4 @@ Begin Sequence
 
 End Sequence
 
-Return Nil
+Return

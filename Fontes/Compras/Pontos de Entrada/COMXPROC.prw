@@ -4,14 +4,14 @@
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  |11/02/2025| Chamado 49877. Removido tratamento sobre a versão do Mix
 Lucas Borges  |23/05/2025| Chamado 50754. Incluído tratamento para CT-e Simplificado
 Lucas Borges  |03/06/2025| Chamado 50847. Incluída validação para não permitir gerar documento de fornecedor que emite a própria
 			  |			 | nota sem informar o código do Mix.
+Lucas Borges  |21/11/2025| Chamado 53084. Realizado posicionamento na SA2 que não está mais posicionado
 ===============================================================================================================================
 */
 
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -28,6 +28,7 @@ User Function COMXPROC()
 Local _lRet		:= .T. As Logical
 Local _cAlias	:= GetNextAlias() As Character
 Local _aArea 	:= FWGetArea() As Character
+Local _aAreaSA2 := SA2->(FWGetArea()) As Character
 Local _nI		:= 0 As Numeric
 Local _aChaveCTe:= {} As Array
 Local _aChaveOri:= {} As Array
@@ -47,20 +48,22 @@ Local _bLine	:= Nil As CodeBlock
 // Verificar campo de Status pois o PE é chamado duas vezes
 //====================================================================================================
 If SDS->DS_STATUS <> 'P'
+	SA2->(DBSetOrder(1))
+	SA2->(DBSeek(FWxFilial("SA2")+SDS->(DS_FORNEC+DS_LOJA)))
 	//CT-e de Anulação nã deve ser importado. Manter até a TOTVS tratar a situação.
-	If SDS->DS_TIPO == 'T' .AND. SDS->DS_TPCTE == 'A'
+	If SDS->DS_TIPO == 'T' .And. SDS->DS_TPCTE == 'A'
 		_lRet := .F.
 		MsgStop("O CT-e Filial: "+ SDS->DS_FILIAL +", Documento "+ SDS->DS_DOC +", Série "+ SDS->DS_SERIE+ ", Fornecedor " +SDS->DS_FORNEC+"-"+SDS->DS_LOJA+", chave " +SDS->DS_CHAVENF +;
 				" é do tipo Anulação de Valor e não irá gerar pré-nota.","COMXPROC10")
 	EndIf
 	//Evita geração de documentos quando já existe um com mesma chave.
 	If _lRet
-		BeginSQL Alias _cAlias
+		BeginSql Alias _cAlias
 			SELECT SF1.F1_FILIAL, SF1.F1_DOC, SF1.F1_SERIE
 			FROM  %Table:SF1% SF1
 			WHERE SF1.D_E_L_E_T_ = ' '
 			AND SF1.F1_CHVNFE	= %exp:SDS->DS_CHAVENF%
-		EndSQL
+		EndSql
 		
 		If (_cAlias)->( !Eof() )
 			_lRet := .F.
@@ -74,7 +77,7 @@ If SDS->DS_STATUS <> 'P'
 	//Valida se não é um documento de entrada, formulário prório do fornecedor
 	If _lRet .And. !SDS->DS_TIPO == 'T'
 		_cAlias := GetNextAlias()
-		BeginSQL Alias _cAlias
+		BeginSql Alias _cAlias
 			SELECT COUNT(1) QTD FROM  %Table:SDT%
 				WHERE D_E_L_E_T_ = ' '
 				AND DT_FILIAL = %exp:SDS->DS_FILIAL%	
@@ -84,7 +87,7 @@ If SDS->DS_STATUS <> 'P'
 				AND DT_LOJA = %exp:SDS->DS_LOJA%
 				AND DT_CODCFOP <> ' ' 
 				AND DT_CODCFOP < '5000'
-		EndSQL
+		EndSql
 		If (_cAlias)->QTD > 0
 			_lRet := .F.
 			FWAlertWarning("A chave: "+ SDS->DS_CHAVENF +" é referente a um documento de entrada formulário próprio! "+ CRLF +;
@@ -94,25 +97,25 @@ If SDS->DS_STATUS <> 'P'
 	EndIf
 
 	If _lRet .And. SubStr(SDS->DS_FORNEC,1,1)=='P' .And. SM0->M0_ESTENT == 'RS'
-		DbSelectArea("SDT")
-		SDT->(dbSetOrder(3))
-		SDT->(dbSeek(SDS->(DS_FILIAL+DS_FORNEC+DS_LOJA+DS_DOC+DS_SERIE)))
+		DBSelectArea("SDT")
+		SDT->(DBSetOrder(3))
+		SDT->(DBSeek(SDS->(DS_FILIAL+DS_FORNEC+DS_LOJA+DS_DOC+DS_SERIE)))
 		If AllTrim(SDT->DT_COD) $ '08000000030/08000000065/08000000004/08000000062' .And. !SDT->DT_CODCFOP $ '5601/6601'
-			DbSelectArea("ZZ4")
-			ZZ4->(dbSetorder(1))
+			DBSelectArea("ZZ4")
+			ZZ4->(DBSetOrder(1))
 			If Empty(SDS->DS_L_MIX)
 				_lRet := .F.
 				FWAlertWarning("Código o Mix não informado. Informação obrigatório para NF-e de Produtor.","COMXPROC02")
-			ElseIf ZZ4->(dbSeek(SDS->(DS_FILIAL+DS_L_MIX)+SDS->(DS_FORNEC+DS_LOJA+DS_SERIE+DS_DOC)))
+			ElseIf ZZ4->(DBSeek(SDS->(DS_FILIAL+DS_L_MIX)+SDS->(DS_FORNEC+DS_LOJA+DS_SERIE+DS_DOC)))
 				_lRet := .F.
 				FWAlertWarning("NF-e de produtor já associada ao Mix "+ZZ4->ZZ4_CODMIX+". Verifique informação na rotina de Contra Nota.","COMXPROC03")
-			ElseIf ZZ4->(dbSeek(SDS->(DS_FILIAL+DS_L_MIX)+SDS->(DS_FORNEC+DS_LOJA)))
+			ElseIf ZZ4->(DBSeek(SDS->(DS_FILIAL+DS_L_MIX)+SDS->(DS_FORNEC+DS_LOJA)))
 				_lRet := .F.
 				FWAlertWarning("Foi encontrada uma NF-e para o Mix informado: "+ZZ4->ZZ4_CODMIX+". Doc: " + ZZ4->ZZ4_NUMCNF + " Série: "+ZZ4->ZZ4_SERIE+". Verifique informação na rotina de Contra Nota.","COMXPROC12")
 			Else
-				DbSelectArea("ZLE")
-				ZLE->(dbSetorder(1))
-				ZLE->(dbSeek(xFilial("ZLE")+SDS->DS_L_MIX))
+				DBSelectArea("ZLE")
+				ZLE->(DBSetOrder(1))
+				ZLE->(DBSeek(xFilial("ZLE")+SDS->DS_L_MIX))
 				
 				If U_VolLeite(xFilial("SDS"),ZLE->ZLE_DTINI,ZLE->ZLE_DTFIM,,,SDS->DS_FORNEC,SDS->DS_LOJA,,) <= 0
 					_lRet := .F.
@@ -181,31 +184,31 @@ If SDS->DS_STATUS <> 'P'
 				
 				If !Empty( _aChaveCTe )
 
-					DbSelectArea("SDT")
-					SDT->(dbSetOrder(3))
-					SDT->(dbSeek(SDS->(DS_FILIAL+DS_FORNEC+DS_LOJA+DS_DOC+DS_SERIE)))
-					While !SDT->(EOF()) .And. SDT->(DT_FILIAL+DT_FORNEC+DT_LOJA+DT_DOC+DT_SERIE) == SDS->(DS_FILIAL+DS_FORNEC+DS_LOJA+DS_DOC+DS_SERIE) 
+					DBSelectArea("SDT")
+					SDT->(DBSetOrder(3))
+					SDT->(DBSeek(SDS->(DS_FILIAL+DS_FORNEC+DS_LOJA+DS_DOC+DS_SERIE)))
+					While !SDT->(Eof()) .And. SDT->(DT_FILIAL+DT_FORNEC+DT_LOJA+DT_DOC+DT_SERIE) == SDS->(DS_FILIAL+DS_FORNEC+DS_LOJA+DS_DOC+DS_SERIE) 
 						IIf (!Empty(SDT->DT_CHVNFO),aAdd(_aChaveOri,SDT->DT_CHVNFO),)
 						_cPrdFrete:= AllTrim(SDT->DT_COD)
-						SDT->(dbSkip())
-					Enddo
+						SDT->(DBSkip())
+					EndDo
 				
 					For _nI := 1 To Len( _aChaveCTe )
 						If ValType(XmlChildEx(_aChaveCTe[_nI],"_CHAVE")) == "O"
-							_cChaveNF := Padr( AllTrim( _aChaveCTe[_nI]:_chave:Text ) , TamSX3("F1_CHVNFE")[1] )
+							_cChaveNF := PadR( AllTrim( _aChaveCTe[_nI]:_chave:Text ) , TamSX3("F1_CHVNFE")[1] )
 						ElseIf ValType(XmlChildEx(_aChaveCTe[_nI],"_CHCTE")) == "O"
-							_cChaveNF := Padr( AllTrim( _aChaveCTe[_nI]:_chCTE:Text ) , TamSX3("F1_CHVNFE")[1] )
-						EndIF
+							_cChaveNF := PadR( AllTrim( _aChaveCTe[_nI]:_chCTE:Text ) , TamSX3("F1_CHVNFE")[1] )
+						EndIf
 						
 						If aScan(_aChaveOri,_cChaveNF) == 0
 
-							If Substr(_cChaveNF,21,2)=='55'
+							If SubStr(_cChaveNF,21,2)=='55'
 								_cArquiv:= '109'+_cChaveNF+'.xml'
 							Else
 								_cArquiv:= '214'+_cChaveNF+'.xml'
 							EndIf
 							
-							If CKO->(dbSeek(_cArquiv))
+							If CKO->(DBSeek(_cArquiv))
 								If CKO->CKO_FLAG == '2'
 									_lRet := .F.
 									FWAlertWarning("Chave referenciada consta na lista de Erros. Reprocesse o documento referenciado."+;
@@ -222,7 +225,7 @@ If SDS->DS_STATUS <> 'P'
 									EndIf
 									_lRet := .F.
 								ElseIf CKO->CKO_FLAG == '1' .And. !AllTrim(CKO->CKO_FILPRO)==cFilAnt
-									BeginSQL Alias _cAlias
+									BeginSql Alias _cAlias
 										SELECT COUNT(1) QTDREG
 										  FROM %Table:SF1% SF1
 										 WHERE SF1.D_E_L_E_T_ = ' '
@@ -252,7 +255,7 @@ If SDS->DS_STATUS <> 'P'
 	
 	If _lRet .And. AllTrim(SDS->DS_ESPECI) == 'SPED'
 		_cAlias := GetNextAlias()
-		BeginSQL alias _cAlias
+		BeginSql alias _cAlias
 			SELECT COUNT(1) QTD FROM %Table:SDT% SDT
 			WHERE SDT.D_E_L_E_T_ = ' '
 			AND DT_FILIAL = %exp:SDS->DS_FILIAL%
@@ -266,7 +269,7 @@ If SDS->DS_STATUS <> 'P'
 				WHERE ZA7.D_E_L_E_T_ = ' '
 				AND ZA7.ZA7_FILIAL = DT_FILIAL
 				AND ZA7.ZA7_CODPRD = DT_COD)
-		EndSQL
+		EndSql
 		If (_cAlias)->QTD > 0
 			_lRet := .F.
 			FWAlertWarning("O documento "+SDS->DS_DOC+"/"+SDS->DS_SERIE+", Fornecedor "+SDS->DS_FORNEC+"/"+SDS->DS_LOJA+", Filial "+SDS->DS_FILIAL+" se trata de uma bonificação/amostra grátis e não permite vincular um pedido de compra. O documento será ignorado.","COMXPROC13")
@@ -276,7 +279,7 @@ If SDS->DS_STATUS <> 'P'
 
 	If _lRet .And. AllTrim(SDS->DS_ESPECI) == 'SPED'
 		_cAlias := GetNextAlias()
-		BeginSQL alias _cAlias
+		BeginSql alias _cAlias
 			SELECT B1_COD, B1_DESC, B1_POSIPI, DT_I_POSIP
 			FROM %Table:SB1% SB1, %Table:SDT% SDT
 			WHERE SB1.D_E_L_E_T_ = ' '
@@ -288,7 +291,7 @@ If SDS->DS_STATUS <> 'P'
 			AND DT_SERIE = %exp:SDS->DS_SERIE%
 			AND DT_FORNEC = %exp:SDS->DS_FORNEC%
 			AND DT_LOJA = %exp:SDS->DS_LOJA%
-		EndSQL
+		EndSql
 		While _lRet .And. (_cAlias)->( !Eof() )
 			aAdd( _aItens , { (_cAlias)->B1_POSIPI, (_cAlias)->DT_I_POSIP, (_cAlias)->B1_COD, (_cAlias)->B1_DESC } )
 			(_cAlias)->(DBSkip())
@@ -334,6 +337,7 @@ If SDS->DS_STATUS <> 'P'
 	EndIf
 EndIf
 
+FWRestArea(_aAreaSA2)
 FWRestArea(_aArea)
 
 _oXML := Nil

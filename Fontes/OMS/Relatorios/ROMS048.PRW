@@ -14,7 +14,7 @@ Lucas Borges  	  | 17/10/2019 | Removidos os Warning na compilação da release 12
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -29,10 +29,10 @@ Parametros------: Nenhum
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-USER Function ROMS048()
+User Function ROMS048()
 
 Local oReport 
-PRIVATE _cPerg:="ROMS48"
+Private _cPerg:="ROMS48"
 
 oReport := ReportDef()
 oReport:PrintDialog()
@@ -45,7 +45,7 @@ Programa--------: ReportDef
 Autor-----------: Eduardo Riera
 Data da Criacao-: 10/05/2006
 ===============================================================================================================================
-Descricao-------: A funcao estatica ReportDef devera ser criada para todos os  
+Descricao-------: A funcao eStatica ReportDef devera ser criada para todos os  
 ===============================================================================================================================
 Parametros------: Nenhum
 ===============================================================================================================================
@@ -77,9 +77,9 @@ Pergunte(oReport:uParam,.F.)
 // Section(1)                                                               
 oCarga:= TRSection():New(oReport,"Carga",{"DAK","DA3","DA4"},/*{"Pedido","Item"}*/,/*Campos do SX3*/,/*Campos do SIX*/) 
 oCarga:SetTotalInLine(.F.)
-TRCell():New(oCarga , "DAK_COD"    , "DAK" , "Carga"    , PesqPict("DAK","DAK_COD")   	, TamSx3("DAK_COD")[1]+1   	, /*lPixel*/ , /*{|| code-block de impressao }*/) //"Carga"
-TRCell():New(oCarga , "DAK_SEQCAR" , "DAK" , "Seq."     , PesqPict("DAK","DAK_SEQCAR")	, TamSx3("DAK_COD")[1]     	, /*lPixel*/ , /*{|| code-block de impressao }*/) //"Seq."
-TRCell():New(oCarga , "DAK_CAMINH" , "DAK" , /*Titulo*/ , PesqPict("DAK","DAK_CAMINH")	, TamSx3("DAK_CAMINH")[1]+3	, /*lPixel*/ , /*{|| code-block de impressao }*/)
+TRCell():New(oCarga , "DAK_COD"    , "DAK" , "Carga"    , PesqPict("DAK","DAK_COD")   	, TamSX3("DAK_COD")[1]+1   	, /*lPixel*/ , /*{|| code-block de impressao }*/) //"Carga"
+TRCell():New(oCarga , "DAK_SEQCAR" , "DAK" , "Seq."     , PesqPict("DAK","DAK_SEQCAR")	, TamSX3("DAK_COD")[1]     	, /*lPixel*/ , /*{|| code-block de impressao }*/) //"Seq."
+TRCell():New(oCarga , "DAK_CAMINH" , "DAK" , /*Titulo*/ , PesqPict("DAK","DAK_CAMINH")	, TamSX3("DAK_CAMINH")[1]+3	, /*lPixel*/ , /*{|| code-block de impressao }*/)
 TRCell():New(oCarga , "DA3_DESC"   , "DA3" , /*Titulo*/ , /*Picture*/					, /*Tamanho*/				, /*lPixel*/ , /*{|| code-block de impressao }*/)
 TRCell():New(oCarga , "DAK_MOTORI" , "DAK" , /*Titulo*/ , /*Picture*/					, /*Tamanho*/ 				, /*lPixel*/ , /*{|| code-block de impressao }*/)
 TRCell():New(oCarga , "DA4_NOME"   , "DA4" , ""         , /*Picture*/					, /*Tamanho*/ 				, /*lPixel*/ , /*{|| code-block de impressao }*/)
@@ -87,9 +87,9 @@ TRCell():New(oCarga , "DAK_PESO"   , "DAK" , /*Titulo*/ , /*Picture*/					, /*Ta
 TRCell():New(oCarga , "DAK_CAPVOL" , "DAK" , /*Titulo*/ , /*Picture*/					, /*Tamanho*/ 				, /*lPixel*/ , /*{|| code-block de impressao }*/)
 TRCell():New(oCarga , "DAK_PTOENT" , "DAK" , /*Titulo*/ , /*Picture*/					, /*Tamanho*/	 			, /*lPixel*/ , /*{|| code-block de impressao }*/)
 TRCell():New(oCarga , "DAK_VALOR"  , "DAK" , /*Titulo*/ , /*Picture*/					, /*Tamanho*/ 				, /*lPixel*/ , /*{|| code-block de impressao }*/)
-TRCell():New(oCarga , "DAK_I_PREC" , "DAI" , /*Titulo*/ , /*Picture*/                   , /*Tamanho*/               , /*lPixel*/ , {|| IF((cAliasDAK)->DAK_I_PREC="1","Sim","Não") })
-TRCell():New(oCarga , "DAK_DATA"   , "DAK" , /*Titulo*/ , /*Picture*/					, TamSx3("DAK_DATA")[1]+6	, /*lPixel*/ , /*{|| code-block de impressao }*/)
-TRCell():New(oCarga , "DAK_HORA"   , "DAK" , /*Titulo*/ , /*Picture*/					, TamSx3("DAK_HORA")[1]+4	, /*lPixel*/ , /*{|| code-block de impressao }*/)
+TRCell():New(oCarga , "DAK_I_PREC" , "DAI" , /*Titulo*/ , /*Picture*/                   , /*Tamanho*/               , /*lPixel*/ , {|| If((cAliasDAK)->DAK_I_PREC="1","Sim","Não") })
+TRCell():New(oCarga , "DAK_DATA"   , "DAK" , /*Titulo*/ , /*Picture*/					, TamSX3("DAK_DATA")[1]+6	, /*lPixel*/ , /*{|| code-block de impressao }*/)
+TRCell():New(oCarga , "DAK_HORA"   , "DAK" , /*Titulo*/ , /*Picture*/					, TamSX3("DAK_HORA")[1]+4	, /*lPixel*/ , /*{|| code-block de impressao }*/)
 
 //PEDIDO
 //Section(1):Section(1)
@@ -123,7 +123,7 @@ Programa--------: ReportPrint
 Autor-----------: Eduardo Riera
 Data da Criacao-: 10/05/2006
 ===============================================================================================================================
-Descricao-------: A funcao estatica ReportDef devera ser criada para todos os
+Descricao-------: A funcao eStatica ReportDef devera ser criada para todos os
 ===============================================================================================================================
 Parametros------: ExpO1: Objeto Report do Relatorio
 ===============================================================================================================================
@@ -148,25 +148,25 @@ MakeSqlExpr(oReport:uParam)
 		Case MV_PAR11 == 1 ////SINTETICO
 				cQrySelect := "%"+cQrySelect+"%"
 				oReport:Section(1):BeginQuery()
-				BeginSQL Alias cAliasDAK
+				BeginSql Alias cAliasDAK
 					SELECT DAK_FILIAL,DAK_COD,DAK_SEQCAR,DAK_CAMINH,DAK_MOTORI,DAK_DATA,DAK_PESO,DAK_CAPVOL,
 							DAK_PTOENT,DAK_VALOR,DAK_HORA,DAK_PESO,DAK_I_PREC
-					FROM %table:DAK% DAK 
+					FROM %Table:DAK% DAK 
 					WHERE DAK_FILIAL = %xFilial:DAK% AND 
-							DAK_COD    >= %exp:mv_par01% AND 
-							DAK_COD    <= %exp:mv_par02% AND 
-							DAK_SEQCAR >= %exp:mv_par03% AND 
-							DAK_SEQCAR <= %exp:mv_par04% AND 
-							DAK_CAMINH >= %exp:mv_par05% AND 
-							DAK_CAMINH <= %exp:mv_par06% AND 
-							DAK_MOTORI >= %exp:mv_par07% AND 
-							DAK_MOTORI <= %exp:mv_par08% AND 
-							DAK_DATA   >= %exp:Dtos(mv_par09)% AND 
-							DAK_DATA   <= %exp:Dtos(mv_par10)% AND 
+							DAK_COD    >= %exp:MV_PAR01% AND 
+							DAK_COD    <= %exp:MV_PAR02% AND 
+							DAK_SEQCAR >= %exp:MV_PAR03% AND 
+							DAK_SEQCAR <= %exp:MV_PAR04% AND 
+							DAK_CAMINH >= %exp:MV_PAR05% AND 
+							DAK_CAMINH <= %exp:MV_PAR06% AND 
+							DAK_MOTORI >= %exp:MV_PAR07% AND 
+							DAK_MOTORI <= %exp:MV_PAR08% AND 
+							DAK_DATA   >= %exp:DToS(MV_PAR09)% AND 
+							DAK_DATA   <= %exp:DToS(MV_PAR10)% AND 
 							DAK_FEZNF  = '2' AND 
 							DAK.%NotDel%
 					ORDER BY DAK_FILIAL,DAK_COD,DAK_SEQCAR
-				EndSQL
+				EndSql
 				oReport:Section(1):EndQuery()
 
 		Case MV_PAR11 == 2	// ANALITICO
@@ -177,23 +177,23 @@ MakeSqlExpr(oReport:uParam)
 				cQrySelect := "%"+cQrySelect+"%"
 
 				oReport:Section(1):BeginQuery()
-				BeginSQL Alias cAliasDAK
+				BeginSql Alias cAliasDAK
 					SELECT DAK_FILIAL,DAK_COD,DAK_SEQCAR,DAK_CAMINH,DAK_MOTORI,DAK_DATA,DAK_PESO,DAK_CAPVOL,
 							DAK_PTOENT,DAK_VALOR,DAK_HORA,DAK_I_PREC,DAI_FILIAL,DAI_COD,DAI_SEQCAR,DAI_SEQUEN,DAI_PEDIDO,
 							DAI_CLIENT,DAI_LOJA,DAI_PESO,DAI_CAPVOL,DAI_NFISCA,DAI_SERIE
 							%exp:cQrySelect%
-					FROM %table:DAK% DAK ,%table:DAI% DAI
+					FROM %Table:DAK% DAK ,%table:DAI% DAI
 					WHERE DAK_FILIAL = %xFilial:DAK% AND 
-							DAK_COD    >= %exp:mv_par01% AND 
-							DAK_COD    <= %exp:mv_par02% AND 
-							DAK_SEQCAR >= %exp:mv_par03% AND 
-							DAK_SEQCAR <= %exp:mv_par04% AND 
-							DAK_CAMINH >= %exp:mv_par05% AND 
-							DAK_CAMINH <= %exp:mv_par06% AND 
-							DAK_MOTORI >= %exp:mv_par07% AND 
-							DAK_MOTORI <= %exp:mv_par08% AND 
-							DAK_DATA   >= %exp:Dtos(mv_par09)% AND 
-							DAK_DATA   <= %exp:Dtos(mv_par10)% AND 
+							DAK_COD    >= %exp:MV_PAR01% AND 
+							DAK_COD    <= %exp:MV_PAR02% AND 
+							DAK_SEQCAR >= %exp:MV_PAR03% AND 
+							DAK_SEQCAR <= %exp:MV_PAR04% AND 
+							DAK_CAMINH >= %exp:MV_PAR05% AND 
+							DAK_CAMINH <= %exp:MV_PAR06% AND 
+							DAK_MOTORI >= %exp:MV_PAR07% AND 
+							DAK_MOTORI <= %exp:MV_PAR08% AND 
+							DAK_DATA   >= %exp:DToS(MV_PAR09)% AND 
+							DAK_DATA   <= %exp:DToS(MV_PAR10)% AND 
 							DAK.%NotDel% AND 
 							DAI_FILIAL = %exp:xFilial("DAI")% AND 
 							DAI_COD    = DAK.DAK_COD AND 
@@ -201,31 +201,31 @@ MakeSqlExpr(oReport:uParam)
 							DAI_NFISCA = ' ' AND  
 							DAI.%NotDel%
 					ORDER BY DAK_FILIAL,DAK_COD,DAK_SEQCAR,DAI_SEQUEN
-				EndSQL
+				EndSql
 				oReport:Section(1):EndQuery()
 			    oReport:Section(1):Section(1):SetParentQuery()
 			    
 			Else	//PRODUTO
 				cQrySelect := ""
-				cFilWhere := Iif(nTipoOper == 1, xFilial("SC9"),"%"+OsFilQry("SC9","DAI.DAI_FILPV")+"%" )
+				cFilWhere := IIf(nTipoOper == 1, xFilial("SC9"),"%"+OsFilQry("SC9","DAI.DAI_FILPV")+"%" )
 
 				oReport:Section(1):BeginQuery()
-				BeginSQL Alias cAliasDAK
+				BeginSql Alias cAliasDAK
 					SELECT DAK_FILIAL,DAK_COD,DAK_SEQCAR,DAK_CAMINH,DAK_MOTORI,DAK_DATA,DAK_PESO,DAK_CAPVOL,DAK_PTOENT,DAK_VALOR,DAK_HORA,DAK_I_PREC,
 							DAI_FILIAL,DAI_COD,DAI_SEQCAR,DAI_SEQUEN,DAI_PEDIDO,DAI_CLIENT,DAI_LOJA,DAI_PESO,DAI_CAPVOL,DAI_NFISCA,DAI_SERIE,
 							C9_FILIAL,C9_CLIENTE,C9_LOJA,C9_PEDIDO,C9_ITEM,C9_PRODUTO,C9_QTDLIB,C9_QTDLIB2,C9_PRCVEN,C9_CARGA,C9_SEQCAR,C9_NFISCAL,C9_SERIENF,C9_LOTECTL,C9_NUMLOTE,B1_UM,B1_SEGUM
-					FROM %table:DAK% DAK ,%table:DAI% DAI ,%table:SC9% SC9 ,%table:SB1% SB1
+					FROM %Table:DAK% DAK ,%table:DAI% DAI ,%table:SC9% SC9 ,%table:SB1% SB1
 					WHERE DAK_FILIAL = %xFilial:DAK% AND 
-							DAK_COD    >= %exp:mv_par01% AND 
-							DAK_COD    <= %exp:mv_par02% AND 
-							DAK_SEQCAR >= %exp:mv_par03% AND 
-							DAK_SEQCAR <= %exp:mv_par04% AND 
-							DAK_CAMINH >= %exp:mv_par05% AND 
-							DAK_CAMINH <= %exp:mv_par06% AND 
-							DAK_MOTORI >= %exp:mv_par07% AND 
-							DAK_MOTORI <= %exp:mv_par08% AND 
-							DAK_DATA   >= %exp:Dtos(mv_par09)% AND 
-							DAK_DATA   <= %exp:Dtos(mv_par10)% AND 
+							DAK_COD    >= %exp:MV_PAR01% AND 
+							DAK_COD    <= %exp:MV_PAR02% AND 
+							DAK_SEQCAR >= %exp:MV_PAR03% AND 
+							DAK_SEQCAR <= %exp:MV_PAR04% AND 
+							DAK_CAMINH >= %exp:MV_PAR05% AND 
+							DAK_CAMINH <= %exp:MV_PAR06% AND 
+							DAK_MOTORI >= %exp:MV_PAR07% AND 
+							DAK_MOTORI <= %exp:MV_PAR08% AND 
+							DAK_DATA   >= %exp:DToS(MV_PAR09)% AND 
+							DAK_DATA   <= %exp:DToS(MV_PAR10)% AND 
 							DAK.%NotDel% AND 
 							DAI_FILIAL = %exp:xFilial("DAI")% AND 
 							DAI_COD    = DAK_COD AND 
@@ -243,7 +243,7 @@ MakeSqlExpr(oReport:uParam)
 							C9_SEQCAR  = DAI_SEQCAR AND 
 							SC9.%NotDel%
 					ORDER BY DAK_FILIAL,DAK_COD,DAK_SEQCAR,DAI_SEQUEN,C9_PEDIDO,C9_ITEM
-				EndSQL
+				EndSql
 				oReport:Section(1):EndQuery()
   			    oReport:Section(1):Section(1):SetParentQuery()
  			    oReport:Section(1):Section(1):Section(1):SetParentQuery()
@@ -253,14 +253,14 @@ MakeSqlExpr(oReport:uParam)
 	EndCase
 
 
-//Desliga e liga as section com base nas opcoes
-IF MV_PAR11 == 1 //SINTETICO
+//Desliga e liga as Section com base nas opcoes
+If MV_PAR11 == 1 //SINTETICO
 
    oReport:Section(1):Enable()
    oReport:Section(1):Section(1):Disable()
    oReport:Section(1):Section(1):Section(1):Disable()
 
-ELSEIF MV_PAR11 == 2 //ANALITICO
+ElseIf MV_PAR11 == 2 //ANALITICO
 
    oReport:Section(1):Section(1):SetParentFilter({|x| (cAliasDAI)->DAI_FILIAL+(cAliasDAI)->DAI_COD+(cAliasDAI)->DAI_SEQCAR == x})
    oReport:Section(1):Section(1):bParentParam := {||  (cAliasDAK)->DAK_FILIAL+(cAliasDAK)->DAK_COD+(cAliasDAK)->DAK_SEQCAR}
@@ -268,15 +268,15 @@ ELSEIF MV_PAR11 == 2 //ANALITICO
    oReport:Section(1):Section(1):Enable()//Por Pedido
    oReport:Section(1):Section(1):Section(1):Disable()
 
-   IF MV_PAR13 == 2 //Por Produto
+   If MV_PAR13 == 2 //Por Produto
 
 	  oReport:Section(1):Section(1):Section(1):SetParentFilter({|x|(cAliasSC9)->C9_FILIAL +(cAliasSC9)->C9_CLIENTE+(cAliasSC9)->C9_LOJA+ (cAliasSC9)->C9_PEDIDO == x})
 	  oReport:Section(1):Section(1):Section(1):bParentParam := {|| (cAliasDAI)->DAI_FILIAL+(cAliasDAI)->DAI_CLIENT+(cAliasDAI)->DAI_LOJA+(cAliasDAI)->DAI_PEDIDO}
 
       oReport:Section(1):Section(1):Section(1):Enable()
 
-   ENDIF
-ENDIF
+   EndIf
+EndIf
 
 oReport:Section(1):Section(1):Cell("A1_NREDUZ" ):SetBlock({|| cNReduz})
 
@@ -318,18 +318,18 @@ Retorno---------: Nenhum
 ===============================================================================================================================
 */
 Static Function BuscaNome(cChave,cNReduz)
-DbSelectArea("SC5")
-DbSetOrder(1)
-If DbSeek(cChave)
+DBSelectArea("SC5")
+DBSetOrder(1)
+If DBSeek(cChave)
 	If !SC5->C5_TIPO $ "BD"
-		DbSelectArea("SA1")
-		DbSetOrder(1)
-		DbSeek(xFilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI)
+		DBSelectArea("SA1")
+		DBSetOrder(1)
+		DBSeek(xFilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI)
 		cNReduz := SA1->A1_NREDUZ
 	Else
-		DbSelectArea("SA2")
-		DbSetOrder(1)
-		DbSeek(xFilial("SA2")+SC5->C5_CLIENTE+SC5->C5_LOJACLI)
+		DBSelectArea("SA2")
+		DBSetOrder(1)
+		DBSeek(xFilial("SA2")+SC5->C5_CLIENTE+SC5->C5_LOJACLI)
 		cNReduz := SA2->A2_NREDUZ
 	EndIf
 EndIf

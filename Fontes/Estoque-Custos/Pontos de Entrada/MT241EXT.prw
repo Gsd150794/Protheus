@@ -2,30 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 06/11/2019 | Chamado 28346. Revisão de fonte para novo appserver
--------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 22/08/2024 | Chamado 47670. Validar estorno considerando apenas os campos:ZZL_TIPMES,ZZL_ARMAES,ZZL_TIPRES. 
-------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 19/09/2024 | Chamado 48569. Incluir a rotina de Desconto Tetra Pak nas exceções para validação de acesso
+Alex Wallauer |06/11/2019| Chamado 28346. Revisão de fonte para novo appserver
+Julio Paz     |22/08/2024| Chamado 47670. Validar estorno considerando apenas os campos:ZZL_TIPMES,ZZL_ARMAES,ZZL_TIPRES. 
+Lucas Borges  |19/09/2024| Chamado 48569. Incluir a rotina de Desconto Tetra Pak nas exceções para validação de acesso
 ===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
+
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MT241EXT
 Autor-------------: Tiago Correa Castro
 Data da Criacao---: 24/12/2008
-===============================================================================================================================
 Descrição---------: Ponto de entrada para validar estorno dos movimentos internos modelo 2
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: _lRet == Define se o movimento pode ser estornado
 ===============================================================================================================================
 */
@@ -49,10 +42,10 @@ If FUNNAME() == "MATA241" .And. cTM $ AllTrim(SuperGetMV("LT_ENTTM",.F., ""))
             "Favor realizar estorno do movimento via rotina que gerou o mesmo!!","MT241EXT01")
    _lRet := .F.
 ElseIf !FWIsInCallStack("DESCTETRAE") .And. !FWIsInCallStack("DESCTETRAE")
-   ZZL->(DbSetOrder(3))
-   If ZZL->(DbSeek(xFilial("ZZL")+RetCodUsr()))
+   ZZL->(DBSetOrder(3))
+   If ZZL->(DBSeek(xFilial("ZZL")+RetCodUsr()))
       If !(cTm $ AllTrim(ZZL->ZZL_TIPMES))
-         FWAlertWarning("Usuário sem permissão para utilizar este tipo de movimento. Não será possível realizar o estorno. Tipos de Movimentos permitidos ao usuário: '"+(ALLTRIM(ZZL->ZZL_TIPMOV)+";"+ALLTRIM(ZZL->ZZL_TIPMES))+"'. "+;
+         FWAlertWarning("Usuário sem permissão para utilizar este tipo de movimento. Não será possível realizar o estorno. Tipos de Movimentos permitidos ao usuário: '"+(AllTrim(ZZL->ZZL_TIPMOV)+";"+AllTrim(ZZL->ZZL_TIPMES))+"'. "+;
                      "Entre em contato com o suporte do TI.","MT241EXT02")
          _lRet := .F.
       ElseIf ZZL->ZZL_AUMMUL <> 'S'
@@ -70,7 +63,7 @@ ElseIf !FWIsInCallStack("DESCTETRAE") .And. !FWIsInCallStack("DESCTETRAE")
             SB1->(DBSeek(xFilial("SB1")+aCols[_nI,_nPosCod]))
             If !(SB1->B1_TIPO $ AllTrim(ZZL->ZZL_TIPRES))
                FWAlertWarning("Usuário sem permissão para utilizar este Tipo de Produto ["+SB1->B1_TIPO+"]. Não será possível realizar o estorno. Tipos "+;
-                              "permitidos ao usuário: '"+(AllTrim(ZZL->ZZL_TIPROD)+";"+Alltrim(ZZL->ZZL_TIPRES))+"'. Entre em contato com o suporte do TI.","MT241EXT05")
+                              "permitidos ao usuário: '"+(AllTrim(ZZL->ZZL_TIPROD)+";"+AllTrim(ZZL->ZZL_TIPRES))+"'. Entre em contato com o suporte do TI.","MT241EXT05")
                _lRet := .F.
                Exit
             EndIf

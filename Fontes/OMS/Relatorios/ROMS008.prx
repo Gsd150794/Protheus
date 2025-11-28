@@ -8,7 +8,7 @@ Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
 
-#include "report.ch"
+#Include "report.ch"
 
 /*
 ===============================================================================================================================
@@ -20,15 +20,15 @@ Parametros------: Nenhum
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-User function ROMS008()
-private oReport
+User Function ROMS008()
+Private oReport
 Private oZAI
 Private cPerg := "ROMS008"
 Private QRY1
 Private aOrd := {"Dt. Emissao","Dt. Vencimento","Dt. Cancelamento","Cliente","Numero"}
-private cCliente := " "
+Private cCliente := " "
 
-pergunte(cPerg,.F.)
+Pergunte(cPerg,.F.)
 
 DEFINE REPORT oReport NAME "ROMS008" TITLE "Relação de Títulos Cancelados" PARAMETER cPerg ACTION {|oReport| PrintReport(oReport)}
 
@@ -38,11 +38,11 @@ oReport:SetTotalInLine(.F.)
 
 //Define secao
 
-DEFINE SECTION oZAI OF oReport TITLE "Dados" TABLES "ZAI"  ORDERS aOrd
+DEFINE Section oZAI OF oReport TITLE "Dados" TABLES "ZAI"  ORDERS aOrd
 DEFINE CELL NAME "A1_NOME"  	OF oZAI ALIAS "SA1"
 DEFINE CELL NAME "A1_LOJA"  	OF oZAI ALIAS "SA1"
 
-DEFINE SECTION oZAIDet OF oZAI TITLE "Dados" TABLES "ZAI"  ORDERS aOrd
+DEFINE Section oZAIDet OF oZAI TITLE "Dados" TABLES "ZAI"  ORDERS aOrd
 DEFINE CELL NAME "ZAI_FILIAL"	OF oZAIDet ALIAS "ZAI"
 DEFINE CELL NAME "ZAI_PREFIX"	OF oZAIDet ALIAS "ZAI"
 DEFINE CELL NAME "ZAI_NUM"	    OF oZAIDet ALIAS "ZAI"
@@ -66,68 +66,68 @@ Return
 
 Static Function PrintReport(oReport)
 Local cFiltro := "%"
-local cOrdem := "%"
+Local cOrdem := "%"
 Private nOrdem := oZAI:GetOrder() //Busca ordem selecionada pelo usuario
 
 //Define o filtro de acordo com os parametros digitados
 //Filtra Filial da ZAI
-if !empty(alltrim(mv_par01))	
-	if !empty(xFilial("ZAI"))
-		cFiltro += " AND ZAI.ZAI_FILIAL IN " + FormatIn(mv_par01,";")
-	endif	                         
-endif
+If !Empty(AllTrim(MV_PAR01))	
+	If !Empty(xFilial("ZAI"))
+		cFiltro += " AND ZAI.ZAI_FILIAL IN " + FormatIn(MV_PAR01,";")
+	EndIf	                         
+EndIf
 //Filtra Prefixo
-if !empty(mv_par02) .and. !empty(mv_par03)
-	cFiltro += " AND ZAI.ZAI_PREFIX BETWEEN '" + mv_par02 + "' AND '" + mv_par03 + "'"
-endif
+If !Empty(MV_PAR02) .And. !Empty(MV_PAR03)
+	cFiltro += " AND ZAI.ZAI_PREFIX BETWEEN '" + MV_PAR02 + "' AND '" + MV_PAR03 + "'"
+EndIf
 //Filtra Numero
-if !empty(mv_par04) .and. !empty(mv_par05)
-	cFiltro += " AND ZAI.ZAI_NUM BETWEEN '" + mv_par04 + "' AND '" + mv_par05 + "'"
-endif
+If !Empty(MV_PAR04) .And. !Empty(MV_PAR05)
+	cFiltro += " AND ZAI.ZAI_NUM BETWEEN '" + MV_PAR04 + "' AND '" + MV_PAR05 + "'"
+EndIf
 //Filtra Emissao da ZAI
-if !empty(mv_par06) .and. !empty(mv_par07)
-	cFiltro += " AND ZAI.ZAI_EMISSA BETWEEN '" + dtos(mv_par06) + "' AND '" + dtos(mv_par07) + "'"
-endif
+If !Empty(MV_PAR06) .And. !Empty(MV_PAR07)
+	cFiltro += " AND ZAI.ZAI_EMISSA BETWEEN '" + DToS(MV_PAR06) + "' AND '" + DToS(MV_PAR07) + "'"
+EndIf
 
 //Filtra Vencimento Real
-if !empty(mv_par08) .and. !empty(mv_par09)
-	cFiltro += " AND ZAI.ZAI_VENCRE BETWEEN '" + dtos(mv_par08) + "' AND '" + dtos(mv_par09) + "'"
-endif
+If !Empty(MV_PAR08) .And. !Empty(MV_PAR09)
+	cFiltro += " AND ZAI.ZAI_VENCRE BETWEEN '" + DToS(MV_PAR08) + "' AND '" + DToS(MV_PAR09) + "'"
+EndIf
 
 //Filtra Cliente
-if !empty(mv_par10) .and. !empty(mv_par12)
-	cFiltro += " AND ZAI.ZAI_CLIENT BETWEEN '" + mv_par10 + "' AND '" + mv_par12 + "'"
-endif
+If !Empty(MV_PAR10) .And. !Empty(MV_PAR12)
+	cFiltro += " AND ZAI.ZAI_CLIENT BETWEEN '" + MV_PAR10 + "' AND '" + MV_PAR12 + "'"
+EndIf
 
 //Filtra Loja Cliente
-if !empty(mv_par11) .and. !empty(mv_par13)
-	cFiltro += " AND ZAI.ZAI_LOJA BETWEEN '" + mv_par11 + "' AND '" + mv_par13 + "'"
-endif
+If !Empty(MV_PAR11) .And. !Empty(MV_PAR13)
+	cFiltro += " AND ZAI.ZAI_LOJA BETWEEN '" + MV_PAR11 + "' AND '" + MV_PAR13 + "'"
+EndIf
 
 //Filtra Rede Cliente
-if !empty(mv_par14)
-	cFiltro += " AND SA1.A1_GRPVEN IN " + FormatIn(mv_par14,";")
-endif
+If !Empty(MV_PAR14)
+	cFiltro += " AND SA1.A1_GRPVEN IN " + FormatIn(MV_PAR14,";")
+EndIf
 
 //Filtra usuario que exclui
-if !empty(mv_par15)
-	cFiltro += " AND ZAI.ZAI_CDUSU = '" + mv_par15 + "' "
-endif
+If !Empty(MV_PAR15)
+	cFiltro += " AND ZAI.ZAI_CDUSU = '" + MV_PAR15 + "' "
+EndIf
 cFiltro += "%"                                           
 
 //Verifica qual ordem usuario definiu
-do case
-	case nOrdem == 1 //Dt. Emissao
+Do Case
+	Case nOrdem == 1 //Dt. Emissao
 		cOrdem += " ZAI.ZAI_EMISSA,ZAI_PREFIX,ZAI_NUM,ZAI_PARCEL "
-	case nOrdem == 2 //Dt. Vencimento
+	Case nOrdem == 2 //Dt. Vencimento
 		cOrdem += " ZAI.ZAI_VENCTO,ZAI_PREFIX,ZAI_NUM,ZAI_PARCEL "
-	case nOrdem == 3 //Dt. Cancelamento
+	Case nOrdem == 3 //Dt. Cancelamento
 		cOrdem += " ZAI.ZAI_DTCANC,ZAI_PREFIX,ZAI_NUM,ZAI_PARCEL "
-	case nOrdem == 4 //Cliente
+	Case nOrdem == 4 //Cliente
 		cOrdem += " ZAI.ZAI_CLIENT,ZAI.ZAI_LOJA,ZAI_PREFIX,ZAI_NUM,ZAI_PARCEL "		
-	case nOrdem == 5 //Prefixo+Numero
+	Case nOrdem == 5 //Prefixo+Numero
 		cOrdem += " ZAI_PREFIX,ZAI_NUM,ZAI_PARCEL "			
-endcase
+EndCase
 cOrdem += "%"
 
 
@@ -139,8 +139,8 @@ BEGIN REPORT QUERY oZAI
 			ZAI_FILIAL,ZAI_PREFIX,ZAI_NUM,ZAI_PARCEL,ZAI_TIPO,ZAI_CLIENT,ZAI_LOJA,SA1.A1_NOME,
 			ZAI_VENCTO,ZAI_EMISSA,ZAI_CDUSU,ZAI_DTCANC,ZAI.ZAI_VENCRE
 		FROM 
-			%table:ZAI% ZAI
-			JOIN %table:SA1% SA1 ON ZAI_CLIENT = SA1.A1_COD AND ZAI_LOJA = SA1.A1_LOJA
+			%Table:ZAI% ZAI
+			JOIN %Table:SA1% SA1 ON ZAI_CLIENT = SA1.A1_COD AND ZAI_LOJA = SA1.A1_LOJA
 		WHERE 
 			ZAI.%notDel%  
 			AND SA1.%notDel%
@@ -156,4 +156,4 @@ oZAIDet:SetParentFilter({|cParam| QRY1->ZAI_CLIENT+QRY1->ZAI_LOJA == cParam },{|
 
 
 oReport:Section(1):Print(.T.)
-return
+Return

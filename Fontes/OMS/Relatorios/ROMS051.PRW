@@ -10,9 +10,9 @@ Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para cont
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 #Include "report.ch"
-#INCLUDE 'TOPCONN.CH'
+#Include 'TOPCONN.CH'
 
 /*
 ===============================================================================================================================
@@ -51,10 +51,10 @@ End Sequence
 // Fecha e exclui as tabelas temporárias
 //================================================================================                    
 If Select("TRBCTE") > 0  
-   TRBCTE->(DbCloseArea())
+   TRBCTE->(DBCloseArea())
 EndIf
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -199,24 +199,24 @@ Begin Sequence
    EndIf
    If MV_PAR05 = 1//Saida
       _oReport:SetTitle( _oReport:Title()+" - Saida")
-   ELSE
+   Else
       _oReport:SetTitle( _oReport:Title()+" - Entrada")
-   ENDIF
+   EndIf
    
-   fwmsgrun( ,{|oproc|  _lRet := ROMS051E(oproc) } , 'Aguarde!' , 'Lendo dados do relatório...' )
+   FWMsgRun( ,{|oproc|  _lRet := ROMS051E(oproc) } , 'Aguarde!' , 'Lendo dados do relatório...' )
    If ! _lRet // ROMS051E()
       Break
    EndIf
 
-   DbSelectArea("TRBCTE")
-   TRBCTE->(dbGoTop())
+   DBSelectArea("TRBCTE")
+   TRBCTE->(DBGoTop())
 	
    _oReport:SetMeter(TRBCTE->(LastRec()))	
 
    //====================================================================================================
    // Inicia processo de impressão.
    //====================================================================================================		
-   Do While !TRBCTE->(Eof())
+   While !TRBCTE->(Eof())
 		
       If _oReport:Cancel()
 		 Exit
@@ -244,7 +244,7 @@ Begin Sequence
          _oSect2_A:init()
       EndIf
 	  				
-      Do While TRBCTE->(!Eof()) // &(_cCondicao)
+      While TRBCTE->(!Eof()) // &(_cCondicao)
 
          _cTpAverb := ""
          If TRBCTE->A2_I_TPAVE == "T"
@@ -284,7 +284,7 @@ Begin Sequence
             _oSect2_S:Cell("A2_I_TPAVE"):SetValue(_cTpAverb)                  // Tipo de Averbação de Carga 
             
             _oSect2_S:SetTotalText(" ")
-            _oSect2_S:Printline()
+            _oSect2_S:PrintLine()
          Else // Relatório Analítico    
             _oSect2_A:Cell("F1_FILIAL"):SetValue(TRBCTE->F1_FILIAL)          // Filial
             _oSect2_A:Cell("F1_DTDIGIT"):SetValue(TRBCTE->F1_DTDIGIT)      // DT Digitação
@@ -318,10 +318,10 @@ Begin Sequence
             _oSect2_A:Cell("A2_I_TPAVE"):SetValue(_cTpAverb)                  // Tipo de Averbação de Carga 
 
             _oSect2_A:SetTotalText(" ")
-            _oSect2_A:Printline()
+            _oSect2_A:PrintLine()
          EndIf
 
-         TRBCTE->(dbSkip())
+         TRBCTE->(DBSkip())
       EndDo		
  	  //====================================================================================================
       // Finaliza segunda seção.
@@ -345,7 +345,7 @@ Begin Sequence
 	     _oSect1_A:Finish()
 	  EndIf
       
-   Enddo     
+   EndDo     
 
 End Sequence
 
@@ -384,38 +384,38 @@ Begin Sequence
    //================================================================================
    // Cria as estruturas das tabelas temporárias
    //================================================================================
-   Aadd(_aStructCTE,{"F1_FILIAL" ,"C", 2,0})                                             // Filial
-   Aadd(_aStructCTE,{"F1_DTDIGIT","D", 8,0})                                             // DT Digitação
-   Aadd(_aStructCTE,{"F1_EMISSAO","D", 8 , 0})                                           // DT Emissao
-   Aadd(_aStructCTE,{"F1_DOC"    ,"C", TAMSX3("F1_DOC")[1]  , 0})                        // Documento
-   Aadd(_aStructCTE,{"F1_SERIE"  ,"C", TAMSX3("F1_SERIE")[1], 0})                        // Serie
-   Aadd(_aStructCTE,{"D1_CF"     ,"C", 40, 0})                                           // Cod. Fiscal    
-   Aadd(_aStructCTE,{"A2_CGC"    ,"C", TAMSX3("A2_CGC")[1]  , 0})                        // -> F1_FORNECE + F1_LOJA // CNPJ do Transportado
-   Aadd(_aStructCTE,{"A2_NOME"   ,"C", TAMSX3("A2_NOME")[1] , 0})                        // Transportador
-   Aadd(_aStructCTE,{"M0_CGC"    ,"C", TAMSX3("A2_CGC")[1]  , 0})                        //  cnpj da filial = F1_FILIAL // CNPJ Estabelecimento que deu saída à mercadoria
-   Aadd(_aStructCTE,{"F1_VALBRUT","N", TAMSX3("F1_VALBRUT")[1],TAMSX3("F1_VALBRUT")[2]}) // Vlr.Total
-   Aadd(_aStructCTE,{"FT_CSTPIS" ,"C", 40 , 0})                                          // Sit.Trib.PIS
-   Aadd(_aStructCTE,{"FT_CSTCOF" ,"C", 40 , 0})                                          // Sit.Trib.COFINS
-   Aadd(_aStructCTE,{"F1_CHVNFE" ,"C", TAMSX3("F1_CHVNFE")[1] , 0})                      // Chave 
-   Aadd(_aStructCTE,{"F1_ESPECIE","C", TAMSX3("F1_ESPECIE")[1] , 0})                     // Chave 
-   Aadd(_aStructCTE,{"F1_PBRUTO", "N", TAMSX3("F1_PBRUTO")[1] , 0})                     // Peso Bruto 
+   aAdd(_aStructCTE,{"F1_FILIAL" ,"C", 2,0})                                             // Filial
+   aAdd(_aStructCTE,{"F1_DTDIGIT","D", 8,0})                                             // DT Digitação
+   aAdd(_aStructCTE,{"F1_EMISSAO","D", 8 , 0})                                           // DT Emissao
+   aAdd(_aStructCTE,{"F1_DOC"    ,"C", TamSX3("F1_DOC")[1]  , 0})                        // Documento
+   aAdd(_aStructCTE,{"F1_SERIE"  ,"C", TamSX3("F1_SERIE")[1], 0})                        // Serie
+   aAdd(_aStructCTE,{"D1_CF"     ,"C", 40, 0})                                           // Cod. Fiscal    
+   aAdd(_aStructCTE,{"A2_CGC"    ,"C", TamSX3("A2_CGC")[1]  , 0})                        // -> F1_FORNECE + F1_LOJA // CNPJ do Transportado
+   aAdd(_aStructCTE,{"A2_NOME"   ,"C", TamSX3("A2_NOME")[1] , 0})                        // Transportador
+   aAdd(_aStructCTE,{"M0_CGC"    ,"C", TamSX3("A2_CGC")[1]  , 0})                        //  cnpj da filial = F1_FILIAL // CNPJ Estabelecimento que deu saída à mercadoria
+   aAdd(_aStructCTE,{"F1_VALBRUT","N", TamSX3("F1_VALBRUT")[1],TamSX3("F1_VALBRUT")[2]}) // Vlr.Total
+   aAdd(_aStructCTE,{"FT_CSTPIS" ,"C", 40 , 0})                                          // Sit.Trib.PIS
+   aAdd(_aStructCTE,{"FT_CSTCOF" ,"C", 40 , 0})                                          // Sit.Trib.COFINS
+   aAdd(_aStructCTE,{"F1_CHVNFE" ,"C", TamSX3("F1_CHVNFE")[1] , 0})                      // Chave 
+   aAdd(_aStructCTE,{"F1_ESPECIE","C", TamSX3("F1_ESPECIE")[1] , 0})                     // Chave 
+   aAdd(_aStructCTE,{"F1_PBRUTO", "N", TamSX3("F1_PBRUTO")[1] , 0})                     // Peso Bruto 
 
    //===================================================================================================
    // Amarrado com a respectiva Nota Fiscal Transportada, que devera conter os seguintes dados:
    //===================================================================================================
-   Aadd(_aStructCTE,{"F2_DOC"    ,"C", TAMSX3("F2_DOC")[1],0})                           // Documento
-   Aadd(_aStructCTE,{"F2_SERIE"  ,"C", TAMSX3("F2_SERIE")[1],0})                         // serie
-   Aadd(_aStructCTE,{"F2_VALBRUT","N", TAMSX3("F2_VALBRUT")[1],TAMSX3("F2_VALBRUT")[2]}) // Vlr.Total da Nota
-   Aadd(_aStructCTE,{"F2_EMISSAO","D", 8,0})                                             // DT Emissão
-   Aadd(_aStructCTE,{"D2_CF"     ,"C", 40,0})                                            // Cod. Fiscal
-   Aadd(_aStructCTE,{"F2_CLIENTE","C", 18,0})                                            // F2_LOJA  // CNPJ/CPF Cliente // TAMSX3("F2_CLIENTE")[1]
-   Aadd(_aStructCTE,{"B1_DESC"   ,"C", 150,0})                                           // D2_COD (B1_DESC)   // Descrição Produto
-   Aadd(_aStructCTE,{"B1_POSIPI" ,"C", 50,0})                                            // D2_COD (B1_POSIPI)  // NCM
-   Aadd(_aStructCTE,{"FT2_CSTPIS","C", 40,0})                                            // Sit.Trib.PIS
-   Aadd(_aStructCTE,{"FT2_CSTCOF","C", 40,0})                                            // Sit.Trib.COFINS
-   Aadd(_aStructCTE,{"F2_VALMERC","N", TAMSX3("F2_VALMERC")[1],TAMSX3("F2_VALMERC")[2]}) // Vlr.Total Mercadoria
-   Aadd(_aStructCTE,{"F2_CHVNFE" ,"C", TAMSX3("F2_CHVNFE")[1],0})                        // Chave Nfe
-   Aadd(_aStructCTE,{"A2_I_TPAVE","C", 1,0})                                             // A2_I_TPAVE   // Tipo de Averbação de Carga 
+   aAdd(_aStructCTE,{"F2_DOC"    ,"C", TamSX3("F2_DOC")[1],0})                           // Documento
+   aAdd(_aStructCTE,{"F2_SERIE"  ,"C", TamSX3("F2_SERIE")[1],0})                         // serie
+   aAdd(_aStructCTE,{"F2_VALBRUT","N", TamSX3("F2_VALBRUT")[1],TamSX3("F2_VALBRUT")[2]}) // Vlr.Total da Nota
+   aAdd(_aStructCTE,{"F2_EMISSAO","D", 8,0})                                             // DT Emissão
+   aAdd(_aStructCTE,{"D2_CF"     ,"C", 40,0})                                            // Cod. Fiscal
+   aAdd(_aStructCTE,{"F2_CLIENTE","C", 18,0})                                            // F2_LOJA  // CNPJ/CPF Cliente // TamSX3("F2_CLIENTE")[1]
+   aAdd(_aStructCTE,{"B1_DESC"   ,"C", 150,0})                                           // D2_COD (B1_DESC)   // Descrição Produto
+   aAdd(_aStructCTE,{"B1_POSIPI" ,"C", 50,0})                                            // D2_COD (B1_POSIPI)  // NCM
+   aAdd(_aStructCTE,{"FT2_CSTPIS","C", 40,0})                                            // Sit.Trib.PIS
+   aAdd(_aStructCTE,{"FT2_CSTCOF","C", 40,0})                                            // Sit.Trib.COFINS
+   aAdd(_aStructCTE,{"F2_VALMERC","N", TamSX3("F2_VALMERC")[1],TamSX3("F2_VALMERC")[2]}) // Vlr.Total Mercadoria
+   aAdd(_aStructCTE,{"F2_CHVNFE" ,"C", TamSX3("F2_CHVNFE")[1],0})                        // Chave Nfe
+   aAdd(_aStructCTE,{"A2_I_TPAVE","C", 1,0})                                             // A2_I_TPAVE   // Tipo de Averbação de Carga 
     
    //================================================================================
    // Verifica se ja existe um arquivo com mesmo nome, se sim fecha.
@@ -441,9 +441,9 @@ Begin Sequence
    //====================================================================================================	
    _cQry := " SELECT DISTINCT CKO.R_E_C_N_O_ RECNOCKO, SF1.R_E_C_N_O_ RECNOSF1 "
    _cQry += " FROM " + RetSqlName("CKO") + " CKO, " + RetSqlName("SF1") +" SF1 "
-   _cQry += " WHERE CKO.D_E_L_E_T_ <> '*' AND SF1.D_E_L_E_T_ <> '*' "
+   _cQry += " WHERE CKO.D_E_L_E_T_ = ' ' AND SF1.D_E_L_E_T_ = ' ' "
    _cQry += " AND F1_ESPECIE = 'CTE' AND F1_STATUS = 'A' "
-   _cQry += " AND SUBSTR(CKO_ARQUIV,4,44) = F1_CHVNFE "
+   _cQry += " AND SubStr(CKO_ARQUIV,4,44) = F1_CHVNFE "
    _cQry += " AND CKO_CODEDI = '214' "
 
    If !Empty(MV_PAR01) // De Filial  
@@ -451,11 +451,11 @@ Begin Sequence
    EndIf
 
    If ! Empty(MV_PAR02) // De Emissao  
-      _cQry += " AND F1_DTDIGIT >= '"+Dtos(MV_PAR02)+"' "
+      _cQry += " AND F1_DTDIGIT >= '"+DToS(MV_PAR02)+"' "
    EndIf
    
    If !Empty(MV_PAR03) // Até Emissao 
-      _cQry += " AND F1_DTDIGIT <= '"+Dtos(MV_PAR03)+"' "
+      _cQry += " AND F1_DTDIGIT <= '"+DToS(MV_PAR03)+"' "
    EndIf
 
    If !Empty(MV_PAR06) // De Transportadora 
@@ -475,34 +475,34 @@ Begin Sequence
    EndIf
       
    If Select("TRBSF1") <> 0
-	  TRBSF1->(DbCloseArea())
+	  TRBSF1->(DBCloseArea())
    EndIf
 	
    TCQUERY _cQry NEW ALIAS "TRBSF1"	
    
    If TRBSF1->(Eof()) .Or. TRBSF1->(Bof())
-      U_ITMSG("Não existem dados que satisfaçam as condições de filtros para a emissão do relatório.","Atenção", ,1) 
+      U_ITMsg("Não existem dados que satisfaçam as condições de filtros para a emissão do relatório.","Atenção", ,1) 
       _lRet := .F.
       Break
    EndIf
    
-   DbSelectArea("TRBSF1")
+   DBSelectArea("TRBSF1")
       
    COUNT TO _nTotRegs
       
-   TRBSF1->(DbGoTop())
+   TRBSF1->(DBGoTop())
     
-   Do While ! TRBSF1->(Eof())
+   While ! TRBSF1->(Eof())
       
-       oproc:cCaption := ("3/3 Carregando dados de CTE, " + strzero(_nni,6) + " de " + strzero(_ntotregs,6) + "...")
+       oproc:cCaption := ("3/3 Carregando dados de CTE, " + StrZero(_nni,6) + " de " + StrZero(_ntotregs,6) + "...")
        ProcessMessages()
        _nni++
       
       //================================================
       // Posiciona nos registros da tabela CKO e SF1.
       //================================================
-      CKO->(DbGoTo(TRBSF1->RECNOCKO))
-      SF1->(DbGoTo(TRBSF1->RECNOSF1)) 
+      CKO->(DBGoTo(TRBSF1->RECNOCKO))
+      SF1->(DBGoTo(TRBSF1->RECNOSF1)) 
       
       //=====================================================
       // Grava os dados da tabela temporária do relatorio.
@@ -558,7 +558,7 @@ Begin Sequence
          TRBCTE->F1_PBRUTO  := _cF1_PBRUTO
          TRBCTE->A2_I_TPAVE := _cA2_TPAVE       // Tipo de Averbação de Carga 
       Else
-         For _nI := 1 To len(_aDadosXML)
+         For _nI := 1 To Len(_aDadosXML)
              TRBCTE->(DBAPPEND()) 
              TRBCTE->F1_FILIAL  := _cF1_FILIAL      // Filial
              TRBCTE->F1_DTDIGIT := _dF1_DTDIGIT     // DT Digitação
@@ -595,13 +595,13 @@ Begin Sequence
          Next
       EndIf      
   
-      TRBSF1->(DbSkip()) 
+      TRBSF1->(DBSkip()) 
    EndDo
    
 End Sequence
 
 If Select("TRBSF1") <> 0
-   TRBSF1->(DbCloseArea())
+   TRBSF1->(DBCloseArea())
 EndIf
 
 Return _lRet
@@ -639,45 +639,45 @@ Default _cTIPONF := "ENTRADA"
 Begin Sequence
    If _cTIPONF == "ENTRADA"
       _aRet := {}
-      SF4->(DbSetOrder(1)) // F4_FILIAL+F4_CODIGO
-      SD1->(DbSetOrder(1)) // D1_FILIAL+D1_DOC+D1_SERIE+D1_FORNECE+D1_LOJA+D1_COD+D1_ITEM
-      SD1->(DbSeek(_cCodFilial + _cNrNf + _cSerieNf + _cFornece + _cLoja))
-      Do While ! SD1->(Eof()) .And. SD1->(D1_FILIAL+SD1->D1_DOC+SD1->D1_SERIE+SD1->D1_FORNECE+SD1->D1_LOJA) == _cCodFilial + _cNrNf + _cSerieNf + _cFornece + _cLoja
+      SF4->(DBSetOrder(1)) // F4_FILIAL+F4_CODIGO
+      SD1->(DBSetOrder(1)) // D1_FILIAL+D1_DOC+D1_SERIE+D1_FORNECE+D1_LOJA+D1_COD+D1_ITEM
+      SD1->(DBSeek(_cCodFilial + _cNrNf + _cSerieNf + _cFornece + _cLoja))
+      While ! SD1->(Eof()) .And. SD1->(D1_FILIAL+SD1->D1_DOC+SD1->D1_SERIE+SD1->D1_FORNECE+SD1->D1_LOJA) == _cCodFilial + _cNrNf + _cSerieNf + _cFornece + _cLoja
          //_aRet += If(!Empty(_aRet),"/","") + AllTrim(SD1->D1_CF)
          _cCodFisc := AllTrim(SD1->D1_CF)
          _cDescPrd := AllTrim(Posicione("SB1",1,xFilial("SB1")+SD1->D1_COD,"B1_DESC"))
          _cNcm     := AllTrim(Posicione("SB1",1,xFilial("SB1")+SD1->D1_COD,"B1_POSIPI"))
          _cCSTPIS    := ""
          _cCSTCOFINS := ""
-         If SF4->(DbSeek(SD1->D1_FILIAL+SD1->D1_TES))
+         If SF4->(DBSeek(SD1->D1_FILIAL+SD1->D1_TES))
             _cCSTPIS    := SF4->F4_CSTPIS // AllTrim(Posicione("SF4",1,SD1->D1_FILIAL+SD1->D1_TES,"F4_CSTPIS"))
             _cCSTCOFINS := SF4->F4_CSTCOF // AllTrim(Posicione("SF4",1,SD1->D1_FILIAL+SD1->D1_TES,"F4_CSTCOF"))
          EndIf
                  //      1             2         3        4      5         6             7
-         Aadd(_aRet,{SD1->D1_ITEM, _cCodFisc, _cDescPrd, _cNcm,_cCSTPIS,_cCSTCOFINS,SD1->(Recno())})
+         aAdd(_aRet,{SD1->D1_ITEM, _cCodFisc, _cDescPrd, _cNcm,_cCSTPIS,_cCSTCOFINS,SD1->(Recno())})
       
-         SD1->(DbSkip())
+         SD1->(DBSkip())
       EndDo
    Else // "SAIDA" 
       _aRet := {}
       
-      SF4->(DbSetOrder(1)) // F4_FILIAL+F4_CODIGO 
-      SD2->(DbSetOrder(3)) // D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA+D2_COD+D2_ITEM 
-      SD2->(DbSeek(_cCodFilial + _cNrNf + _cSerieNf + _cFornece + _cLoja))
-      Do While ! SD2->(Eof()) .And. SD2->(D2_FILIAL+SD2->D2_DOC+SD2->D2_SERIE+SD2->D2_CLIENTE+SD2->D2_LOJA) == _cCodFilial + _cNrNf + _cSerieNf + _cFornece + _cLoja
+      SF4->(DBSetOrder(1)) // F4_FILIAL+F4_CODIGO 
+      SD2->(DBSetOrder(3)) // D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA+D2_COD+D2_ITEM 
+      SD2->(DBSeek(_cCodFilial + _cNrNf + _cSerieNf + _cFornece + _cLoja))
+      While ! SD2->(Eof()) .And. SD2->(D2_FILIAL+SD2->D2_DOC+SD2->D2_SERIE+SD2->D2_CLIENTE+SD2->D2_LOJA) == _cCodFilial + _cNrNf + _cSerieNf + _cFornece + _cLoja
          _cCodFisc := AllTrim(SD2->D2_CF)
          _cDescPrd := AllTrim(Posicione("SB1",1,xFilial("SB1")+SD2->D2_COD,"B1_DESC"))
          _cNcm     := AllTrim(Posicione("SB1",1,xFilial("SB1")+SD2->D2_COD,"B1_POSIPI"))
          _cCSTPIS    := ""
          _cCSTCOFINS := ""
-         If SF4->(DbSeek(SD2->D2_FILIAL+SD2->D2_TES))
+         If SF4->(DBSeek(SD2->D2_FILIAL+SD2->D2_TES))
             _cCSTPIS    := SF4->F4_CSTPIS // AllTrim(Posicione("SF4",1,SD2->D2_FILIAL+SD2->D2_TES,"F4_CSTPIS"))
             _cCSTCOFINS := SF4->F4_CSTCOF // AllTrim(Posicione("SF4",1,SD2->D2_FILIAL+SD2->D2_TES,"F4_CSTCOF"))
          EndIf
                     //   1           2           3        4        5        6               7   
-         Aadd(_aRet,{SD2->D2_ITEM, _cCodFisc, _cDescPrd, _cNcm, _cCSTPIS,_cCSTCOFINS, SD2->(Recno())})
+         aAdd(_aRet,{SD2->D2_ITEM, _cCodFisc, _cDescPrd, _cNcm, _cCSTPIS,_cCSTCOFINS, SD2->(Recno())})
          
-         SD2->(DbSkip())
+         SD2->(DBSkip())
       EndDo
       
    EndIf
@@ -708,8 +708,8 @@ Local _lGravaCKO   := .T.
 Local _cXmlCKO     := ""
 Local _nI, _nJ
 Local _cError := "", _cWarning := "" 
-Local _nTamFil := TAMSX3("F2_FILIAL")[1]
-Local _nTamChave := TAMSX3("F2_CHVNFE")[1]
+Local _nTamFil := TamSX3("F2_FILIAL")[1]
+Local _nTamChave := TamSX3("F2_CHVNFE")[1]
 Local _cD2_CF      := ""   // Cod. Fiscal 
 Local _cB1_DESC    := ""   // D2_COD (B1_DESC)   // Descrição Produto
 Local _cB1_POSIPI  := ""   // D2_COD (B1_POSIPI)  // NCM
@@ -732,7 +732,7 @@ Begin Sequence
    _oXml := XmlParser(_cXmlCKO, "_", @_cError, @_cWarning ) 
       
    If (_oXml == NIL )
-	  //u_itconout("Falha ao gerar Objeto XML : "+SUBSTR(_cError,1,10000)+" / "+SUBSTR(_cWarning,1,10000))	
+	  //u_itconout("Falha ao gerar Objeto XML : "+SubStr(_cError,1,10000)+" / "+SubStr(_cWarning,1,10000))	
 	  _lGravaCKO := .F.
    EndIf       
       
@@ -756,7 +756,7 @@ Begin Sequence
 	     Break
 	  EndIf   
            
-      If _lgravacko .and. ValType(XmlChildEx(_oXml:_CTEPROC:_CTE:_INFCTE:_INFCTENORM,"_INFDOC")) <> "O" .And. ValType(XmlChildEx(_oXml:_CTEPROC:_CTE:_INFCTE:_INFCTENORM,"_INFDOC")) <> "A"
+      If _lgravacko .And. ValType(XmlChildEx(_oXml:_CTEPROC:_CTE:_INFCTE:_INFCTENORM,"_INFDOC")) <> "O" .And. ValType(XmlChildEx(_oXml:_CTEPROC:_CTE:_INFCTE:_INFCTENORM,"_INFDOC")) <> "A"
          //u_itconout("O CTE: "+_cNrCTE+"-"+_cSerieCTE+" não pertence a uma nota fiscal de saida.")	
    	     Break                                             
       EndIf
@@ -775,7 +775,7 @@ Begin Sequence
          _nQtdNFE := Len(_cInfoNFE)
       EndIf
       
-      SF1->(DbsETOrder(8) )      //F1_FILIAL+F1_CHVNFE
+      SF1->(DBSetOrder(8) )      //F1_FILIAL+F1_CHVNFE
       SF2->(DbOrderNickName("IT_CHVNF2") )// K - 20 - F2_CHVNFE
       
       For _nI := 1 To _nQtdNFE
@@ -810,8 +810,8 @@ Begin Sequence
            
           If _lgravacko
 
-             If (MV_PAR05 = 1 .AND. SF2->(DbSeek(PadR(_cChaveNFE,_nTamChave," "))) ) .OR.;//Saida
-                (MV_PAR05 = 2 .AND. SF1->(DbSeek(PadR(CKO->CKO_FILPRO,_nTamFil," ") + PadR(_cChaveNFE,_nTamChave," "))) )//Entrada
+             If (MV_PAR05 = 1 .And. SF2->(DBSeek(PadR(_cChaveNFE,_nTamChave," "))) ) .OR.;//Saida
+                (MV_PAR05 = 2 .And. SF1->(DBSeek(PadR(CKO->CKO_FILPRO,_nTamFil," ") + PadR(_cChaveNFE,_nTamChave," "))) )//Entrada
 
                 If MV_PAR05 = 1//Saida
                    _cF2_DOC     := SF2->F2_DOC      // Documento
@@ -821,7 +821,7 @@ Begin Sequence
                    _nF2_VALMERC := SF2->F2_VALMERC  // Vlr.Total Mercadoria
                    _cF2_CHVNFE  := SF2->F2_CHVNFE   // Chave Nfe
                    _cF2_CLIENTE := Posicione("SA1",1,xFilial("SA1")+SF2->(F2_CLIENTE+F2_LOJA),"A1_CGC") // CNPJ/CPF Cliente    //Posicione("SA2",1,xFilial("SA2")+SF2->(F2_CLIENTE+F2_LOJA),"A2_CGC") // CNPJ/CPF Cliente
-                ELSEIf MV_PAR05 = 2//Entrada
+                ElseIf MV_PAR05 = 2//Entrada
                    _cF2_DOC     := SF1->F1_DOC      // Documento
                    _cF2_SERIE   := SF1->F1_SERIE    // serie
                    _nF2_VALBRUT := SF1->F1_VALBRUT  // Vlr.Total da Nota
@@ -829,7 +829,7 @@ Begin Sequence
                    _nF2_VALMERC := SF1->F1_VALMERC  // Vlr.Total Mercadoria
                    _cF2_CHVNFE  := SF1->F1_CHVNFE   // Chave Nfe
                    _cF2_CLIENTE := Posicione("SA2",1,xFilial("SA2")+SF1->F1_FORNECE+SF1->F1_LOJA,"A2_CGC") // CNPJ/CPF Cliente    //Posicione("SA2",1,xFilial("SA2")+SF2->(F2_CLIENTE+F2_LOJA),"A2_CGC") // CNPJ/CPF Cliente
-                ENDIF
+                EndIf
                 
                 If MV_PAR04 == 1 // Relatório Sintético 
                    _cD2_CF      := ""   // Cod. Fiscal 
@@ -840,7 +840,7 @@ Begin Sequence
                    _cD2_CF      := ""
                    _cB1_DESC    := ""
                    
-                   Aadd(_aRet,{_cChaveCTE,;    // Chave CTE                               // 1
+                   aAdd(_aRet,{_cChaveCTE,;    // Chave CTE                               // 1
                                _cNrCTE,;       // Numero CTE                              // 2
                                _cSerieCTE,;    // Serie CTE                               // 3 
                                _cEmissaoCTE,;  // Emissão CT                              // 4
@@ -864,9 +864,9 @@ Begin Sequence
 
                 If MV_PAR05 = 1//Saida
                    _aDadosTrib  := ROMS051F(SF2->F2_FILIAL,SF2->F2_DOC,SF2->F2_SERIE,SF2->F2_CLIENTE,SF2->F2_LOJA,"SAIDA")    
-                ELSEIf MV_PAR05 = 2//Entrada
+                ElseIf MV_PAR05 = 2//Entrada
                    _aDadosTrib  := ROMS051F(SF1->F1_FILIAL,SF1->F1_DOC,SF1->F1_SERIE,SF1->F1_FORNECE,SF1->F1_LOJA,"ENTRADA")    
-                ENDIF
+                EndIf
                    //-----------------------------------------------------------------------------------------------------------------//
                    For _nJ := 1 To Len(_aDadosTrib)
                        _cD2_CF     := _aDadosTrib[_nJ,2] // AllTrim(SD2->D2_CF)
@@ -875,7 +875,7 @@ Begin Sequence
                        _cF4_CSTPIS := _aDadosTrib[_nJ,5]
                        _cF4_CSTCOF := _aDadosTrib[_nJ,6]
                       
-                       Aadd(_aRet,{_cChaveCTE,;   // Chave CTE                               // 1
+                       aAdd(_aRet,{_cChaveCTE,;   // Chave CTE                               // 1
                                   _cNrCTE,;       // Numero CTE                              // 2
                                   _cSerieCTE,;    // Serie CTE                               // 3 
                                   _cEmissaoCTE,;  // Emissão CT                              // 4

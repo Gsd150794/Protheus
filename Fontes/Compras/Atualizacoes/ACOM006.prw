@@ -10,7 +10,7 @@ Lucas Borges  |09/05/2025| Chamado 50617. Corrigir chamada estática no nome das 
 ===============================================================================================================================
 */
 
-#include "protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -26,30 +26,30 @@ Retorno-----------: _cRet     = Código que deverá ser gravado no campo A2_LOJA.
 */
 User Function ACOM006( _pcCNPJ , cCodigo , cClass )
 
-Local _aArea := GetArea()
+Local _aArea := FWGetArea()
 Local _cQuery := ""
 
 Local _cRetorno := ""
 
 If cClass $ 'P/Z'
 
-	If Len(Alltrim(_pcCNPJ)) > 10
+	If Len(AllTrim(_pcCNPJ)) > 10
 
 		_cQuery := " SELECT MAX(A2_LOJA) AS LOJA "
 		_cQuery += " FROM " + RetSqlName("SA2")
 		_cQuery += " WHERE D_E_L_E_T_ = ' '"
-		_cQuery += " AND   A2_COD = '" + Alltrim(cCodigo) +"' "
+		_cQuery += " AND   A2_COD = '" + AllTrim(cCodigo) +"' "
 		_cQuery := ChangeQuery(_cQuery)
 		MPSysOpenQuery(_cQuery,"QRY")
 		
-		QRY->(dbGotop())
+		QRY->(DBGoTop())
 		_cRetorno := StrZero(Val(QRY->LOJA)+1,4)
-		QRY->(dbCloseArea())
-	EndIF    
+		QRY->(DBCloseArea())
+	EndIf    
 
 Else
 
-	If Len(Alltrim(_pcCNPJ)) > 11  
+	If Len(AllTrim(_pcCNPJ)) > 11  
 		
 		_cRetorno := SubStr(_pcCNPJ,9,4) 
 		
@@ -58,13 +58,13 @@ Else
 		_cQuery := " SELECT MAX(A2_LOJA) AS LOJA "
 		_cQuery += " FROM " + RetSqlName("SA2")
 		_cQuery += " WHERE D_E_L_E_T_ = ' '"
-		_cQuery += " AND   A2_COD = '" + Alltrim(cCodigo) +"' "
+		_cQuery += " AND   A2_COD = '" + AllTrim(cCodigo) +"' "
 		_cQuery := ChangeQuery(_cQuery)
 		MPSysOpenQuery(_cQuery,"QRY")
 		
-		QRY->(dbGotop())
+		QRY->(DBGoTop())
 		_cRetorno := StrZero(Val(QRY->LOJA)+1,4)
-		QRY->(dbCloseArea())
+		QRY->(DBCloseArea())
 
 	EndIf
 
@@ -72,15 +72,13 @@ EndIf
  
 If !MayIUseCode( "A2_COD"+ xFilial("SA2") + cCodigo + _cRetorno )  //verifica se esta na memoria, sendo usado
 	MSGSTOP("Código "+ cCodigo + " loja " + _cRetorno + " já está sendo utilizado. Contacte o administrador do sistema." )
-	Return .f.
+	Return .F.
 EndIf                
 
-//======================================================================
 // Grava log de acesso a rotina Cadastro de Fornecedores. 
 // Geração do código da loja do fornecedor.
-//====================================================================== 
 U_ITLOGACS('ACOM006')
 
-RestArea(_aArea)  
+FWRestArea(_aArea)  
 
 Return(_cRetorno)

@@ -35,7 +35,7 @@ Jerry    - Igor Melgaço  - 03/02/25 - 20/03/25 - 39201   - Ajustes para execução
 // Definicoes de Includes da Rotina.
 //====================================================================================================
  
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 //====================================================================================================
 // Definicoes de Variáveis Estáticas.
@@ -58,13 +58,13 @@ Retorno-----------: Nenhum
 User Function A410EXC()
 
 Local _lRet			:= .T.
-Local _aArea	    := GetArea()
+Local _aArea	    := FWGetArea()
 Local _aSC6         := SC6->(GetArea())
-Local _cCodArmaz	:=	aScan( aHeader , {|x| UPPER( Alltrim( x[2] ) ) == "C6_LOCAL"	} )
-Local _cCodPro		:=	aScan( aHeader , {|x| UPPER( Alltrim( x[2] ) ) == "C6_PRODUTO"	} )
+Local _cCodArmaz	:=	aScan( aHeader , {|x| Upper( AllTrim( x[2] ) ) == "C6_LOCAL"	} )
+Local _cCodPro		:=	aScan( aHeader , {|x| Upper( AllTrim( x[2] ) ) == "C6_PRODUTO"	} )
 Local _cmens		:= ""
 Local _aRet			:= {}
-Local _Ni 			:= 1
+Local _nI 			:= 1
 Local nLinha        := 10
 Local _nCol			:= 15
 Local _cAssunto, _cBody, _cEmail, _cNomeCli
@@ -76,19 +76,19 @@ Local _cTpOper      := U_ITGetMv("IT_TPOPER", "01,42,08,12,15,24,25,26")
 Private _aItemPedV := {}   
 
 _lRet := U_RetMT410ACE()//Verifica se o PE MT410ACE.PRW devolveu .F.
-IF TYPE("lMsErroAuto") = "L" .AND. !_lRet .AND. !lMsErroAuto//Só altera o conteudo do lMsErroAuto se ele tiver Falso e o retorno for falso
-   lMsErroAuto:=!_lRet//Só Joga verdadeiro de for o caso
-ENDIF
-IF !_lRet
-   RETURN _lRet 
-ENDIF
+If Type("lMsErroAuto") = "L" .And. !_lRet .And. !lMsErroAuto//Só altera o conteudo do lMsErroAuto se ele tiver Falso e o retorno For falso
+   lMsErroAuto:=!_lRet//Só Joga verdadeiro de For o caso
+EndIf
+If !_lRet
+   Return _lRet 
+EndIf
 
 //================================================================================
-// Configura ambiente quando uma exclusão for da rotina de MSExecAuto( {|x,y,z| Mata410(x,y,z) }
+// Configura ambiente quando uma exclusão For da rotina de MSExecAuto( {|x,y,z| Mata410(x,y,z) }
 // pedidos de vendas. A mensagem de erro é retornada na variavel _cAOMS074Vld.
 // Para exibir mensagens, utilizar neste ponto de entrada a função U_MT_ITMSG().
 //================================================================================
-PRIVATE _lMsgEmTela := .T.
+Private _lMsgEmTela := .T.
 
 If Type("_cAOMS074") <> "U"
    _lMsgEmTela := .F.
@@ -99,34 +99,34 @@ EndIf
 //========================================================================================
 If _lRet
 
-	_cusr := alltrim(RetCodUsr())
+	_cusr := AllTrim(RetCodUsr())
 	
-	For _ni := 1 to len(acols)
+	For _nI := 1 to Len(acols)
 
-		If !aCols[_ni][Len(aHeader)+1] //Não verifica linhas deletadas
+		If !aCols[_nI][Len(aHeader)+1] //Não verifica linhas deletadas
 	
 			//============================================
 			//Valida armazémxprodutoxfilialxusuário
 			//============================================
-			_aRet:= U_ACFG004E(_cusr, alltrim(xFilial("SC6")), alltrim(acols[_Ni][_cCodArmaz]),alltrim(acols[_Ni][_ccodPro]),.F.)
+			_aRet:= U_ACFG004E(_cusr, AllTrim(xFilial("SC6")), AllTrim(acols[_nI][_cCodArmaz]),AllTrim(acols[_nI][_ccodPro]),.F.)
 		
 			//se ainda está valido verifica se não teve erro
 			If _lRet
 		
 		  	   _lRet:= _aRet[1]
 		
-			Endif
+			EndIf
 		
 			// adiciona armazens com problema se ainda não estiver na mensagem
-			if empty(_cmens)
+			If Empty(_cmens)
 		
 				_cmens += _aRet[2]
 			
-			elseif !(_aRet[2]$_cmens) .and. !(Empty(_aRet[2])) 
+			ElseIf !(_aRet[2]$_cmens) .And. !(Empty(_aRet[2])) 
 		
 				_cmens += ", " + _aRet[2]
 			
-			Endif
+			EndIf
 
 	
 		EndIf
@@ -141,35 +141,35 @@ If _lRet
 		U_MT_ITMSG( 'Usuário sem acesso ao(s) armazém(éns) abaixo nessa filial: ' +  _cmens, "Atenção", ;
 					'Caso necessário solicite a manutenção à um usuário com acesso ou, se necessário, solicite o acesso à área de Custos.' ,1 )
 	
-	Endif
+	EndIf
 
-Endif
+EndIf
 
 //Solicita motivo de corte por exclusão
 //Não é chamado pela exclusão múltipla que tem tela própria de motivo de corte
 //Não é chamado pelo desmembramento que não pé considerado corte
 //Não chama no corte da tela de central de pvs que tem a própria chamada de motivo
 //Não chama da transferência
-//Não chama se o pedido de vendas não for "N" ou não tiver produto PA em venda
+//Não chama se o pedido de vendas não For "N" ou não tiver produto PA em venda
 _lvcorte := .F.
 
-If SC5->C5_TIPO == "N" .AND. ALLTRIM(SC5->C5_I_OPER) $ _cTpOper
+If SC5->C5_TIPO == "N" .And. AllTrim(SC5->C5_I_OPER) $ _cTpOper
    _lvcorte := .T.
 
-	//SC6->(Dbsetorder(1))
-	//If SC6->(Dbseek(SC5->C5_FILIAL+SC5->C5_NUM))
-	//	Do while SC5->C5_NUM == SC6->C6_NUM .AND. SC5->C5_FILIAL == SC6->C6_FILIAL	
-	//		If alltrim(posicione("SB1",1,xfilial("SB1")+SC6->C6_PRODUTO,"B1_TIPO")) == "PA" .and. posicione("ZAY",1,xfilial("ZAY")+SC6->C6_CF,"ZAY_TPOPER") == "V" 
+	//SC6->(DBSetOrder(1))
+	//If SC6->(DBSeek(SC5->C5_FILIAL+SC5->C5_NUM))
+	//	While SC5->C5_NUM == SC6->C6_NUM .And. SC5->C5_FILIAL == SC6->C6_FILIAL	
+	//		If AllTrim(Posicione("SB1",1,xFilial("SB1")+SC6->C6_PRODUTO,"B1_TIPO")) == "PA" .And. Posicione("ZAY",1,xFilial("ZAY")+SC6->C6_CF,"ZAY_TPOPER") == "V" 
 	//			_lvcorte := .T.
-	//		Endif	
-	//		SC6->(Dbskip())
-	//	Enddo
-	//Endif
+	//		EndIf	
+	//		SC6->(DBSkip())
+	//	EndDo
+	//EndIf
 	
-Endif
+EndIf
 
 
-If _lret .and. _lvcorte .and. !ISINCALLSTACK("U_AOMS108")           .AND.;
+If _lRet .And. _lvcorte .And. !ISINCALLSTACK("U_AOMS108")           .AND.;
                               !ISINCALLSTACK("U_AOMS099")           .AND.;
 							  !ISINCALLSTACK("U_AOMS109")           .AND.;
 							  !ISINCALLSTACK("U_AOMS032")           .AND.;
@@ -178,7 +178,7 @@ If _lret .and. _lvcorte .and. !ISINCALLSTACK("U_AOMS108")           .AND.;
 							  !ISINCALLSTACK("U_IT_OPERTRIANGULAR") .AND.;
 							  !ISINCALLSTACK("U_INCPEDVEND")
 
-	_lret := .F. //Deixa em false para bloquear se o usuário fechar a dialog no X
+	_lRet := .F. //Deixa em false para bloquear se o usuário fechar a dialog no X
 
 	_cQuery := " SELECT "
 	_cQuery += " DISTINCT X5_CHAVE CHAVE,X5_DESCRI DESCRI "
@@ -205,39 +205,39 @@ If _lret .and. _lvcorte .and. !ISINCALLSTACK("U_AOMS108")           .AND.;
 
 	("TMPCF")->( DBCloseArea() )
 
-	public _cmotivs := _AMOTIVS[1]
+	Public _cmotivs := _AMOTIVS[1]
 
 	DEFINE MSDIALOG _oDlg2 TITLE ("Corte por exclusão de PV (A410EXC)") From 0,0 To 325, 650 OF oMainWnd PIXEL
                                                                        
 	@ 01,_nCol Say OemToAnsi("Selecione o motivo para corte:")
 	nLinha+=12
 
-	_omotiv := TComboBox():New(nLinha,_nCol,{|u|if(PCount()>0,_cmotivs:=u,_cmotivs)}, _amotivs,250,20,_oDlg2,,;
+	_omotiv := TComboBox():New(nLinha,_nCol,{|u|If(PCount()>0,_cmotivs:=u,_cmotivs)}, _amotivs,250,20,_oDlg2,,;
 							,,,,.T.,,,,,,,,,'') //40
 
 	nLinha+=38
 
-	@ nLinha,_nCol    Button "OK" SIZE 41,15 ACTION ( _lret := .T.,_oDlg2:End()) Pixel 
+	@ nLinha,_nCol    Button "OK" SIZE 41,15 ACTION ( _lRet := .T.,_oDlg2:End()) Pixel 
 	@ nLinha,_nCol+57 Button "Cancela"     SIZE 41,15 ACTION ( _oDlg2:End() ) Pixel 
 
 	ACTIVATE MSDIALOG _oDlg2 
 	
-	If !_lret
+	If !_lRet
 	
 		U_MT_ITMSG("Não foi selecionado motivo de corte, pedido não será excluido!","Atenção",,1)
 		
-	Endif
-Elseif _lret .and. _lvcorte .and. ISINCALLSTACK("U_AOMS032")
+	EndIf
+ElseIf _lRet .And. _lvcorte .And. ISINCALLSTACK("U_AOMS032")
 
 	_cmotivs := "96"  //Exclusão por transferência
-Elseif _lret .and. _lvcorte .and. ISINCALLSTACK("U_MOMS072")
+ElseIf _lRet .And. _lvcorte .And. ISINCALLSTACK("U_MOMS072")
 
 	_cmotivs := "18"  //A mais de 60 dias na carteira
-Elseif _lret .AND. !ISINCALLSTACK("U_MOMS066") .AND. !ISINCALLSTACK("U_AOMS108")
+ElseIf _lRet .And. !ISINCALLSTACK("U_MOMS066") .And. !ISINCALLSTACK("U_AOMS108")
 
 	_cmotivs := "95"  //Exclusão de pedido não venda
 
-Endif
+EndIf
 
 //==============================================
 // Obtem a descrição do motivo.
@@ -248,10 +248,10 @@ If Type("_cmotivs") <> "U"
 EndIf 
 
 //Grava log de exclusão e corte do pedido de vendas
-If _lret .AND. !ISINCALLSTACK("U_IT_OPERTRIANGULAR")//Não grava nada quando for exclusao do pedido triangular 05
+If _lRet .And. !ISINCALLSTACK("U_IT_OPERTRIANGULAR")//Não grava nada quando For exclusao do pedido triangular 05
         If ISINCALLSTACK("U_AOMS032")
 		   _aDadaux := {}
-		   _nPosMTRAN := Ascan(_aCabecPV,{|x| x[1] == 'C5_I_MTRAN'})
+		   _nPosMTRAN := aScan(_aCabecPV,{|x| x[1] == 'C5_I_MTRAN'})
 		   
 		   aAdd( _aDadAux , { 'C5_FILIAL'	, SC5->C5_FILIAL	, _cFilTran	} )
            If _nPosMTRAN > 0 
@@ -264,18 +264,18 @@ If _lret .AND. !ISINCALLSTACK("U_IT_OPERTRIANGULAR")//Não grava nada quando for 
 		   aAdd( _aDadAux , { 'C5_NUM'		, SC5->C5_NUM		, ''		} )
 		   aAdd( _aDadAux , { 'C5_CLIENTE'	, SC5->C5_CLIENTE	, ''		} )
 		   aAdd( _aDadAux , { 'C5_LOJACLI'	, SC5->C5_LOJACLI	, ''		} )
-		   aAdd( _aDadAux , { 'C5_EMISSAO'	, SC5->C5_EMISSAO	, StoD('')	} )
-		   aAdd( _aDadAux , { 'C5_I_DTENT'	, SC5->C5_I_DTENT	, StoD('')	} )
+		   aAdd( _aDadAux , { 'C5_EMISSAO'	, SC5->C5_EMISSAO	, SToD('')	} )
+		   aAdd( _aDadAux , { 'C5_I_DTENT'	, SC5->C5_I_DTENT	, SToD('')	} )
 		EndIf 
 		
 		If !ISINCALLSTACK("U_AOMS032") 
-		   U_ITGrvLog( _aDadAux , "SC5" , 1 , SC5->( C5_FILIAL + C5_NUM ) , "E" , RetCodUsr() , date() , time() )
+		   U_ITGrvLog( _aDadAux , "SC5" , 1 , SC5->( C5_FILIAL + C5_NUM ) , "E" , RetCodUsr() , Date() , Time() )
 		Else // Rotina chamada na exclusão de pedidos que deram origem a transferência de pedidos.
-		   U_ITGrvLog( _aDadAux , "SC5" , 1 , SC5->( C5_FILIAL + C5_NUM ) , "T" , RetCodUsr() , date() , time() )
+		   U_ITGrvLog( _aDadAux , "SC5" , 1 , SC5->( C5_FILIAL + C5_NUM ) , "T" , RetCodUsr() , Date() , Time() )
 		   U_GrvMonitor(SC5->C5_FILIAL,SC5->C5_NUM,_cmotivs,"Exclusao","S",SC5->C5_I_DTENT,SC5->C5_I_DTENT,SC5->C5_I_DTENT)     
 		EndIf  
 
-Endif 
+EndIf 
 
 //======================================================================
 // Verifica se o Pedido de Vendas Excluido possui origem do portal.
@@ -284,8 +284,8 @@ Endif
 If _lRet .And. !ISINCALLSTACK("U_AOMS032")
      
 
-   //SZW->(DbSetOrder(12)) // ZW_NUMPED // Ordem C
-   If ALLTRIM(SC5->C5_I_OPER) $ _cTpOper //SZW->(DbSeek(SC5->C5_NUM))
+   //SZW->(DBSetOrder(12)) // ZW_NUMPED // Ordem C
+   If AllTrim(SC5->C5_I_OPER) $ _cTpOper //SZW->(DBSeek(SC5->C5_NUM))
       //========================================================================
 	  // Carrega dados do Pedido de Vendas para Envio do E-Mail.
 	  //========================================================================
@@ -294,16 +294,16 @@ If _lRet .And. !ISINCALLSTACK("U_AOMS032")
 	  //======================================================================== 
       // Grava dados para Enviar E-Mail
 	  //========================================================================
-        _cEmail:= Posicione("SA3",1,xfilial("SA3")+SC5->C5_VEND1,"A3_EMAIL") 
+        _cEmail:= Posicione("SA3",1,xFilial("SA3")+SC5->C5_VEND1,"A3_EMAIL") 
 		_cZPG_EMAIL:=""
-        IF !EMPTY(SC5->C5_ASSCOD)
-           _cZPG_EMAIL:=ALLTRIM(POSICIONE("ZPG",1,xFilial("ZPG")+SC5->C5_ASSCOD,"ZPG_EMAIL"))
-        ENDIF
-        IF !EMPTY(_cZPG_EMAIL)
+        If !Empty(SC5->C5_ASSCOD)
+           _cZPG_EMAIL:=AllTrim(Posicione("ZPG",1,xFilial("ZPG")+SC5->C5_ASSCOD,"ZPG_EMAIL"))
+        EndIf
+        If !Empty(_cZPG_EMAIL)
            _cEmail+=";"+Lower(_cZPG_EMAIL)
-        ENDIF
+        EndIf
 
-	  _cNomeCli := Posicione("SA1",1,xfilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI,"A1_NOME")
+	  _cNomeCli := Posicione("SA1",1,xFilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI,"A1_NOME")
 
       //If SC5->C5_I_ AGEND == "A" // A=AGENDADA;I=IMEDIATA;M=AGENDADA C/MULTA;P=AGUARD. AGENDA;R=REAGENDAR;N=REAGENDAR C/MULTA
       //   _cTipoAgen := "AGENDADA"
@@ -321,7 +321,7 @@ If _lRet .And. !ISINCALLSTACK("U_AOMS032")
       _cTipoAgen:=U_TipoEntrega(SC5->C5_I_AGEND)
 
 	  _aFilial := FwLoadSM0()  // Posição 07 = Nome filial  // Posição 02 = codigo filial
-      _nI := Ascan(_aFilial,{|x| x[02] == SC5->C5_FILIAL})
+      _nI := aScan(_aFilial,{|x| x[02] == SC5->C5_FILIAL})
 	  _cNomeFil := AllTrim(_aFilial[_nI,07])
 
       _cAssunto := "Pedido de Vendas Numero: " + AllTrim(SC5->C5_NUM) +" - "+ AllTrim(_cNomeCli)  + ", foi excluido do sistema Protheus. "
@@ -348,8 +348,8 @@ If _lRet .And. !ISINCALLSTACK("U_AOMS032")
       _cBody    += '<td align="center">'+ SC5->C5_CLIENTE +'</td>'
       _cBody    += '<td align="center">'+ SC5->C5_LOJACLI  +'</td>'
 	  _cBody    += '<td align="center">'+ SC5->C5_NUM    +'</td>'
-      _cBody    += '<td align="center">'+ Dtoc(SC5->C5_EMISSAO) +'</td>'
-      _cBody    += '<td align="center">'+ Dtoc(SC5->C5_I_DTENT) +'</td>'
+      _cBody    += '<td align="center">'+ DToC(SC5->C5_EMISSAO) +'</td>'
+      _cBody    += '<td align="center">'+ DToC(SC5->C5_I_DTENT) +'</td>'
       _cBody    += '<td align="center">'+ _cTipoAgen +'</td>'
       _cBody    += '<td align="center">'+ SC5->C5_I_IDPED +'</td>'
 	  _cBody    += '<td>'+ _cDescMotiv+'</td>'
@@ -396,12 +396,12 @@ If _lRet .And. !ISINCALLSTACK("U_AOMS032")
    EndIf
 EndIf 
 
-Restarea(_aarea)
-SC6->(Restarea(_aSC6))
+FWRestArea(_aarea)
+SC6->(FWRestArea(_aSC6))
 
-IF TYPE("lMsErroAuto") = "L" .AND. !_lRet .AND. !lMsErroAuto//Só altera o conteudo do lMsErroAuto se ele tiver Falso e o retorno for falso
-   lMsErroAuto:=!_lRet//Só Joga verdadeiro de for o caso
-ENDIF
+If Type("lMsErroAuto") = "L" .And. !_lRet .And. !lMsErroAuto//Só altera o conteudo do lMsErroAuto se ele tiver Falso e o retorno For falso
+   lMsErroAuto:=!_lRet//Só Joga verdadeiro de For o caso
+EndIf
 
 Return( _lRet )
           
@@ -444,7 +444,7 @@ Begin Sequence
 
 End Sequence
 
-Return Nil			   
+Return			   
 
 /*
 ===============================================================================================================================
@@ -469,11 +469,11 @@ Local _nPrcTab
 Begin Sequence 
    _aItemPedV := {}
 
-   DA1->(DbSetOrder(1)) // DA1_FILIAL+DA1_CODTAB+DA1_CODPRO+DA1_INDLOT+DA1_ITEM
+   DA1->(DBSetOrder(1)) // DA1_FILIAL+DA1_CODTAB+DA1_CODPRO+DA1_INDLOT+DA1_ITEM
 
-   SC6->(DbSetOrder(1)) // C6_FILIAL+C6_NUM+C6_ITEM+C6_PRODUTO 
+   SC6->(DBSetOrder(1)) // C6_FILIAL+C6_NUM+C6_ITEM+C6_PRODUTO 
    SC6->(MsSeek(SC5->C5_FILIAL+SC5->C5_NUM))
-   Do While ! SC6->(Eof()) .And. SC6->C6_FILIAL + SC6->C6_NUM == SC5->C5_FILIAL + SC5->C5_NUM
+   While ! SC6->(Eof()) .And. SC6->C6_FILIAL + SC6->C6_NUM == SC5->C5_FILIAL + SC5->C5_NUM
       _nPerCont := 0
 	  _nPrcNet  := 0
       _nPrcTab  := 0
@@ -504,7 +504,7 @@ Begin Sequence
          _nPrcNet := SC6->C6_PRCVEN
 	  EndIf
 
-      Aadd(_aItemPedV,{SC6->C6_PRODUTO,; // Código           // 1
+      aAdd(_aItemPedV,{SC6->C6_PRODUTO,; // Código           // 1
                        SC6->C6_DESCRI,;  // Descrição        // 2
                        SC6->C6_PRCVEN,;  // Preço Venda      // 3
                        _nPerCont,;       // % Contrato(2)    // 4
@@ -515,14 +515,14 @@ Begin Sequence
                        SC6->C6_VALOR,;   // Total            // 9
                        SC6->C6_PEDCLI})  // Pedido Cliente   // 10
 
-      SC6->(DbSkip())
+      SC6->(DBSkip())
    EndDo
 
 End Sequence
 
-SC6->(DbGoTo(_nRegAtu))
+SC6->(DBGoTo(_nRegAtu))
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -555,4 +555,4 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil 
+Return 

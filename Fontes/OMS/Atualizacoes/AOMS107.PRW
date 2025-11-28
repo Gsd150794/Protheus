@@ -13,7 +13,7 @@ Lucas Borges  |08/10/2024| Chamado 48465. Retirada manipulação do SX1
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 #Include "FWMVCDEF.ch"
 
 #DEFINE _ENTER CHR(13) + CHR(10)
@@ -93,61 +93,61 @@ oStruCAB := FWFormStruct( 1 , 'ZGQ')
 //================================================================================
 // Criação dos gatilhos 
 //================================================================================
-_aGatAux := FwStruTrigger( 'ZGQ_TABPRE'	, 'ZGQ_DESCTB'	, 'IIF(EMPTY(ALLTRIM(M->ZGQ_TABPRE)),"   ",POSICIONE("DA0",1,XFILIAL("DA0")+M->ZGQ_TABPRE,"DA0_DESCRI"))'			, .F. )
+_aGatAux := FwStruTrigger( 'ZGQ_TABPRE'	, 'ZGQ_DESCTB'	, 'IIf(Empty(AllTrim(M->ZGQ_TABPRE)),"   ",Posicione("DA0",1,xFilial("DA0")+M->ZGQ_TABPRE,"DA0_DESCRI"))'			, .F. )
 oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZGQ_FILEMB'	, 'ZGQ_FILDES'	, 'IIF(EMPTY(ALLTRIM(M->ZGQ_FILEMB)),"   ",POSICIONE("ZZM",1,XFILIAL("ZZM")+M->ZGQ_FILEMB,"ZZM_DESCRI"))'			, .F. )
+_aGatAux := FwStruTrigger( 'ZGQ_FILEMB'	, 'ZGQ_FILDES'	, 'IIf(Empty(AllTrim(M->ZGQ_FILEMB)),"   ",Posicione("ZZM",1,xFilial("ZZM")+M->ZGQ_FILEMB,"ZZM_DESCRI"))'			, .F. )
 oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZGQ_GEREN'	, 'ZGQ_GERNOM'	, 'IIF(EMPTY(ALLTRIM(M->ZGQ_GEREN)),"   ",POSICIONE("SA3",1,XFILIAL("SA3")+M->ZGQ_GEREN,"A3_NOME"))'			, .F. )
+_aGatAux := FwStruTrigger( 'ZGQ_GEREN'	, 'ZGQ_GERNOM'	, 'IIf(Empty(AllTrim(M->ZGQ_GEREN)),"   ",Posicione("SA3",1,xFilial("SA3")+M->ZGQ_GEREN,"A3_NOME"))'			, .F. )
 oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZGQ_COORDE'	, 'ZGQ_COONOM'	, 'IIF(EMPTY(ALLTRIM(M->ZGQ_COORDE)),"   ",POSICIONE("SA3",1,XFILIAL("SA3")+M->ZGQ_COORDE,"A3_NOME"))'			, .F. )
+_aGatAux := FwStruTrigger( 'ZGQ_COORDE'	, 'ZGQ_COONOM'	, 'IIf(Empty(AllTrim(M->ZGQ_COORDE)),"   ",Posicione("SA3",1,xFilial("SA3")+M->ZGQ_COORDE,"A3_NOME"))'			, .F. )
 oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZGQ_COORDE'	, 'ZGQ_GEREN'	, 'IIF(EMPTY(ALLTRIM(M->ZGQ_COORDE)),"   ",POSICIONE("SA3",1,XFILIAL("SA3")+M->ZGQ_COORDE,"A3_GEREN"))'			, .F. )
+_aGatAux := FwStruTrigger( 'ZGQ_COORDE'	, 'ZGQ_GEREN'	, 'IIf(Empty(AllTrim(M->ZGQ_COORDE)),"   ",Posicione("SA3",1,xFilial("SA3")+M->ZGQ_COORDE,"A3_GEREN"))'			, .F. )
 oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZGQ_SUPERV'	, 'ZGQ_GEREN'	, 'IIF(EMPTY(ALLTRIM(M->ZGQ_SUPERV)),"   ",POSICIONE("SA3",1,XFILIAL("SA3")+M->ZGQ_SUPERV,"A3_GEREN"))'			, .F. )
+_aGatAux := FwStruTrigger( 'ZGQ_SUPERV'	, 'ZGQ_GEREN'	, 'IIf(Empty(AllTrim(M->ZGQ_SUPERV)),"   ",Posicione("SA3",1,xFilial("SA3")+M->ZGQ_SUPERV,"A3_GEREN"))'			, .F. )
 oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZGQ_SUPERV'	, 'ZGQ_COORDE'	, 'IIF(EMPTY(ALLTRIM(M->ZGQ_SUPERV)),"   ",POSICIONE("SA3",1,XFILIAL("SA3")+M->ZGQ_SUPERV,"A3_SUPER"))'			, .F. )
+_aGatAux := FwStruTrigger( 'ZGQ_SUPERV'	, 'ZGQ_COORDE'	, 'IIf(Empty(AllTrim(M->ZGQ_SUPERV)),"   ",Posicione("SA3",1,xFilial("SA3")+M->ZGQ_SUPERV,"A3_SUPER"))'			, .F. )
 oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZGQ_SUPERV'	, 'ZGQ_SUPNOM'	, 'IIF(EMPTY(ALLTRIM(M->ZGQ_SUPERV)),"   ",POSICIONE("SA3",1,XFILIAL("SA3")+M->ZGQ_SUPERV,"A3_NOME"))'			, .F. )
+_aGatAux := FwStruTrigger( 'ZGQ_SUPERV'	, 'ZGQ_SUPNOM'	, 'IIf(Empty(AllTrim(M->ZGQ_SUPERV)),"   ",Posicione("SA3",1,xFilial("SA3")+M->ZGQ_SUPERV,"A3_NOME"))'			, .F. )
 oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZGQ_VENDED'	, 'ZGQ_VENNOM'	, 'IIF(EMPTY(ALLTRIM(M->ZGQ_VENDED)),"   ",POSICIONE("SA3",1,XFILIAL("SA3")+M->ZGQ_VENDED,"A3_NOME"))'			, .F. )
+_aGatAux := FwStruTrigger( 'ZGQ_VENDED'	, 'ZGQ_VENNOM'	, 'IIf(Empty(AllTrim(M->ZGQ_VENDED)),"   ",Posicione("SA3",1,xFilial("SA3")+M->ZGQ_VENDED,"A3_NOME"))'			, .F. )
 oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZGQ_VENDED'	, 'ZGQ_GEREN'	, 'IIF(EMPTY(ALLTRIM(M->ZGQ_VENDED)),"   ",POSICIONE("SA3",1,XFILIAL("SA3")+M->ZGQ_VENDED,"A3_GEREN"))'			, .F. )
+_aGatAux := FwStruTrigger( 'ZGQ_VENDED'	, 'ZGQ_GEREN'	, 'IIf(Empty(AllTrim(M->ZGQ_VENDED)),"   ",Posicione("SA3",1,xFilial("SA3")+M->ZGQ_VENDED,"A3_GEREN"))'			, .F. )
 oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZGQ_VENDED'	, 'ZGQ_COORDE'	, 'IIF(EMPTY(ALLTRIM(M->ZGQ_VENDED)),"   ",POSICIONE("SA3",1,XFILIAL("SA3")+M->ZGQ_VENDED,"A3_SUPER"))'			, .F. )
+_aGatAux := FwStruTrigger( 'ZGQ_VENDED'	, 'ZGQ_COORDE'	, 'IIf(Empty(AllTrim(M->ZGQ_VENDED)),"   ",Posicione("SA3",1,xFilial("SA3")+M->ZGQ_VENDED,"A3_SUPER"))'			, .F. )
 oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZGQ_VENDED'	, 'ZGQ_SUPERV'	, 'IIF(EMPTY(ALLTRIM(M->ZGQ_VENDED)),"   ",POSICIONE("SA3",1,XFILIAL("SA3")+M->ZGQ_VENDED,"A3_I_SUPE"))'			, .F. )
+_aGatAux := FwStruTrigger( 'ZGQ_VENDED'	, 'ZGQ_SUPERV'	, 'IIf(Empty(AllTrim(M->ZGQ_VENDED)),"   ",Posicione("SA3",1,xFilial("SA3")+M->ZGQ_VENDED,"A3_I_SUPE"))'			, .F. )
 oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZGQ_CLIENT'	, 'ZGQ_CLINOM'	, 'IIF(EMPTY(ALLTRIM(M->ZGQ_CLIENT+M->ZGQ_LOJA)),"  ",POSICIONE("SA1",1,XFILIAL("SA1")+M->ZGQ_CLIENT+M->ZGQ_LOJA,"A1_NOME"))'			, .F. )
+_aGatAux := FwStruTrigger( 'ZGQ_CLIENT'	, 'ZGQ_CLINOM'	, 'IIf(Empty(AllTrim(M->ZGQ_CLIENT+M->ZGQ_LOJA)),"  ",Posicione("SA1",1,xFilial("SA1")+M->ZGQ_CLIENT+M->ZGQ_LOJA,"A1_NOME"))'			, .F. )
 oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZGQ_LOJA'	, 'ZGQ_CLINOM'	, 'IIF(EMPTY(ALLTRIM(M->ZGQ_CLIENT+M->ZGQ_LOJA)),"  ",POSICIONE("SA1",1,XFILIAL("SA1")+M->ZGQ_CLIENT+M->ZGQ_LOJA,"A1_NOME"))'			, .F. )
+_aGatAux := FwStruTrigger( 'ZGQ_LOJA'	, 'ZGQ_CLINOM'	, 'IIf(Empty(AllTrim(M->ZGQ_CLIENT+M->ZGQ_LOJA)),"  ",Posicione("SA1",1,xFilial("SA1")+M->ZGQ_CLIENT+M->ZGQ_LOJA,"A1_NOME"))'			, .F. )
 oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZGQ_CLIENT'	, 'ZGQ_REDE'	, 'IIF(EMPTY(ALLTRIM(M->ZGQ_CLIENT+M->ZGQ_LOJA)),"  ",POSICIONE("SA1",1,XFILIAL("SA1")+M->ZGQ_CLIENT+M->ZGQ_LOJA,"A1_GRPVEN"))'			, .F. )
+_aGatAux := FwStruTrigger( 'ZGQ_CLIENT'	, 'ZGQ_REDE'	, 'IIf(Empty(AllTrim(M->ZGQ_CLIENT+M->ZGQ_LOJA)),"  ",Posicione("SA1",1,xFilial("SA1")+M->ZGQ_CLIENT+M->ZGQ_LOJA,"A1_GRPVEN"))'			, .F. )
 oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZGQ_LOJA'	, 'ZGQ_REDE'	, 'IIF(EMPTY(ALLTRIM(M->ZGQ_CLIENT+M->ZGQ_LOJA)),"  ",POSICIONE("SA1",1,XFILIAL("SA1")+M->ZGQ_CLIENT+M->ZGQ_LOJA,"A1_GRPVEN"))'			, .F. )
+_aGatAux := FwStruTrigger( 'ZGQ_LOJA'	, 'ZGQ_REDE'	, 'IIf(Empty(AllTrim(M->ZGQ_CLIENT+M->ZGQ_LOJA)),"  ",Posicione("SA1",1,xFilial("SA1")+M->ZGQ_CLIENT+M->ZGQ_LOJA,"A1_GRPVEN"))'			, .F. )
 oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZGQ_CLIENT'	, 'ZGQ_VENDED'	, 'IIF(EMPTY(ALLTRIM(M->ZGQ_CLIENT+M->ZGQ_LOJA)),"  ",POSICIONE("SA1",1,XFILIAL("SA1")+M->ZGQ_CLIENT+M->ZGQ_LOJA,"A1_VEND"))'			, .F. )
+_aGatAux := FwStruTrigger( 'ZGQ_CLIENT'	, 'ZGQ_VENDED'	, 'IIf(Empty(AllTrim(M->ZGQ_CLIENT+M->ZGQ_LOJA)),"  ",Posicione("SA1",1,xFilial("SA1")+M->ZGQ_CLIENT+M->ZGQ_LOJA,"A1_VEND"))'			, .F. )
 oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZGQ_LOJA'	, 'ZGQ_VENDED'	, 'IIF(EMPTY(ALLTRIM(M->ZGQ_CLIENT+M->ZGQ_LOJA)),"  ",POSICIONE("SA1",1,XFILIAL("SA1")+M->ZGQ_CLIENT+M->ZGQ_LOJA,"A1_VEND"))'			, .F. )
+_aGatAux := FwStruTrigger( 'ZGQ_LOJA'	, 'ZGQ_VENDED'	, 'IIf(Empty(AllTrim(M->ZGQ_CLIENT+M->ZGQ_LOJA)),"  ",Posicione("SA1",1,xFilial("SA1")+M->ZGQ_CLIENT+M->ZGQ_LOJA,"A1_VEND"))'			, .F. )
 oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZGQ_REDE'	, 'ZGQ_REDNOM'	, 'IIF(EMPTY(ALLTRIM(M->ZGQ_REDE)),"    ",POSICIONE("ACY",1,XFILIAL("ACY")+M->ZGQ_REDE,"ACY_DESCRI"))'			, .F. )
+_aGatAux := FwStruTrigger( 'ZGQ_REDE'	, 'ZGQ_REDNOM'	, 'IIf(Empty(AllTrim(M->ZGQ_REDE)),"    ",Posicione("ACY",1,xFilial("ACY")+M->ZGQ_REDE,"ACY_DESCRI"))'			, .F. )
 oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 //================================================================================
@@ -260,7 +260,7 @@ Retorno-----------: Nenhum
 
 User Function AOMS107M()
 
-Local _aParam		:= PARAMIXB
+Local _aParam		:= ParamIXB
 Local _xRet			:= .T.
 Local _oObj			:= ''
 Local _oModel		:= Nil
@@ -284,7 +284,7 @@ If _aParam <> NIL
 		_oModel 		:= FWModelActive()
 		_oModelMAS 	:= _oModel:GetModel('ZGQMASTER')
 					
-	Endif
+	EndIf
 		
 	//Gravação de log
 	If _cIdPonto == 'MODELPOS'
@@ -293,13 +293,13 @@ If _aParam <> NIL
 		_oModelMAS 	:= _oModel:GetModel('ZGQMASTER')
 		
 		//Inclusão
-		if _nOper == 3
-		   Reclock("ZGR",.T.)
-		   ZGR->ZGR_FILIAL := xfilial("ZGR")
+		If _nOper == 3
+		   RecLock("ZGR",.T.)
+		   ZGR->ZGR_FILIAL := xFilial("ZGR")
 		   ZGR->ZGR_ITEM   := _oModelMAS:GetValue("ZGQ_ITEM")
-		   ZGR->ZGR_DATA   := date()
-		   ZGR->ZGR_HORA   := time()
-		   ZGR->ZGR_USER := cusername
+		   ZGR->ZGR_DATA   := Date()
+		   ZGR->ZGR_HORA   := Time()
+		   ZGR->ZGR_USER := cUserName
 		   ZGR->ZGR_OPLOG  := _oModelMAS:GetValue("ZGQ_OPLOG")
 		   ZGR->ZGR_REDE   := _oModelMAS:GetValue("ZGQ_REDE")
 		   ZGR->ZGR_CLIENT := _oModelMAS:GetValue("ZGQ_CLIENT")
@@ -313,25 +313,25 @@ If _aParam <> NIL
 		   ZGR->ZGR_SUPERV := _oModelMAS:GetValue("ZGQ_SUPERV")
 		   ZGR->ZGR_RECNO  := ZGQ->(Recno())
 						
-		   ZGR->(Msunlock())	
-		Endif
+		   ZGR->(MSUnLock())	
+		EndIf
 		
 		//Alteração
-		if _nOper == 4
+		If _nOper == 4
 		   
 		   _nposi := ZGQ->(Recno())
-		   ZGQ->(Dbsetorder(3)) //ZGQ_CLIENT+ZGQ_LOJA+ZGQ_ITEM
+		   ZGQ->(DBSetOrder(3)) //ZGQ_CLIENT+ZGQ_LOJA+ZGQ_ITEM
 				
-		    ZGR->(Reclock("ZGR",.T.))
-		   ZGR->ZGR_FILIAL := xfilial("ZGR")
+		    ZGR->(RecLock("ZGR",.T.))
+		   ZGR->ZGR_FILIAL := xFilial("ZGR")
 		   ZGR->ZGR_ITEM   := _oModelMAS:GetValue("ZGQ_ITEM")
-		   ZGR->ZGR_DATA   := date()
-		   ZGR->ZGR_HORA   := time()
-		   ZGR->ZGR_USER := cusername
-		   ZGR->ZGR_FILIAL := xfilial("ZGR")
+		   ZGR->ZGR_DATA   := Date()
+		   ZGR->ZGR_HORA   := Time()
+		   ZGR->ZGR_USER := cUserName
+		   ZGR->ZGR_FILIAL := xFilial("ZGR")
 		   ZGR->ZGR_ITEM   := _oModelMAS:GetValue("ZGQ_ITEM")
-		   ZGR->ZGR_DATA   := date()
-		   ZGR->ZGR_HORA   := time()
+		   ZGR->ZGR_DATA   := Date()
+		   ZGR->ZGR_HORA   := Time()
 		   ZGR->ZGR_OPLOG  := _oModelMAS:GetValue("ZGQ_OPLOG")
 		   ZGR->ZGR_REDE   := _oModelMAS:GetValue("ZGQ_REDE")
 		   ZGR->ZGR_CLIENT := _oModelMAS:GetValue("ZGQ_CLIENT")
@@ -344,7 +344,7 @@ If _aParam <> NIL
 		   ZGR->ZGR_COORDE := _oModelMAS:GetValue("ZGQ_COORDE")
 		   ZGR->ZGR_SUPERV := _oModelMAS:GetValue("ZGQ_SUPERV")
 	
-		   If ZGQ->(Dbseek(_oModelMAS:GetValue("ZGQ_FILEMB")+_oModelMAS:GetValue("ZGQ_ITEM")))
+		   If ZGQ->(DBSeek(_oModelMAS:GetValue("ZGQ_FILEMB")+_oModelMAS:GetValue("ZGQ_ITEM")))
 
 			  ZGR->ZGR_OREDE  := ZGQ->ZGQ_REDE
 			  ZGR->ZGR_OCLIEN := ZGQ->ZGQ_CLIENT
@@ -358,32 +358,32 @@ If _aParam <> NIL
 		      ZGR->ZGR_OCOORD := ZGQ->ZGQ_COORDE
 			  ZGR->ZGR_OSUPER := ZGQ->ZGQ_SUPERV
 											
-	       Endif
+	       EndIf
 					
 		   ZGR->ZGR_RECNO  := ZGQ->(Recno())
 					
 		   //mantém posicionamento original do ZGQ
-		   ZGQ->(Dbgoto(_nposi))
+		   ZGQ->(DBGoTo(_nposi))
 									
-		   ZGR->(Msunlock())	
-		Endif
+		   ZGR->(MSUnLock())	
+		EndIf
 		
 		//Exclusão
-		if _nOper == 5
+		If _nOper == 5
 		
            _nposi := ZGQ->(Recno())
-		   ZGQ->(Dbsetorder(3)) //ZGQ_CLIENT+ZGQ_LOJA+ZGQ_ITEM
+		   ZGQ->(DBSetOrder(3)) //ZGQ_CLIENT+ZGQ_LOJA+ZGQ_ITEM
 				
-		    ZGR->(Reclock("ZGR",.T.))
-		   ZGR->ZGR_FILIAL := xfilial("ZGR")
+		    ZGR->(RecLock("ZGR",.T.))
+		   ZGR->ZGR_FILIAL := xFilial("ZGR")
 		   ZGR->ZGR_ITEM   := _oModelMAS:GetValue("ZGQ_ITEM")
 		   ZGR->ZGR_TABPRE := _oModelMAS:GetValue("ZGQ_TABPRE")
 		   ZGR->ZGR_CLIENT := _oModelMAS:GetValue("ZGQ_CLIENT")
 		   ZGR->ZGR_LOJA   := _oModelMAS:GetValue("ZGQ_LOJA")
 		   ZGR->ZGR_REDE   := _oModelMAS:GetValue("ZGQ_REDE")
-		   ZGR->ZGR_DATA   := date()
-		   ZGR->ZGR_HORA   := time()
-		   ZGR->ZGR_USER := cusername
+		   ZGR->ZGR_DATA   := Date()
+		   ZGR->ZGR_HORA   := Time()
+		   ZGR->ZGR_USER := cUserName
 		   ZGR->ZGR_OPLOG  := _oModelMAS:GetValue("ZGQ_OPLOG")
 		   ZGR->ZGR_REDE   := _oModelMAS:GetValue("ZGQ_REDE")
 		   ZGR->ZGR_CLIENT := _oModelMAS:GetValue("ZGQ_CLIENT")
@@ -399,7 +399,7 @@ If _aParam <> NIL
 
 		   //Se já existe linha no ZGQ grava valores antigos
 		   
-		   If ZGQ->(Dbseek(_oModelMAS:GetValue("ZGQ_FILEMB")+_oModelMAS:GetValue("ZGQ_ITEM")))
+		   If ZGQ->(DBSeek(_oModelMAS:GetValue("ZGQ_FILEMB")+_oModelMAS:GetValue("ZGQ_ITEM")))
 
 			  ZGR->ZGR_OREDE  := ZGQ->ZGQ_REDE
 			  ZGR->ZGR_OCLIEN := ZGQ->ZGQ_CLIENT
@@ -413,22 +413,22 @@ If _aParam <> NIL
 			  ZGR->ZGR_OCOORD := ZGQ->ZGQ_COORDE
 			  ZGR->ZGR_OSUPER := ZGQ->ZGQ_SUPERV
 												
-	       Endif
+	       EndIf
 				
 		   ZGR->ZGR_RECNO  := ZGQ->(Recno())
 					
 		   //mantém posicionamento original do ZGQ
-		   ZGQ->(Dbgoto(_nposi))
+		   ZGQ->(DBGoTo(_nposi))
 									
-		   ZGR->(Msunlock())
+		   ZGR->(MSUnLock())
 			
-		Endif
+		EndIf
 	
-	Endif
+	EndIf
 		
 	End Sequence
 	
-Endif
+EndIf
 	
 Return( _xRet )
 
@@ -449,7 +449,7 @@ Retorno-----------: lRet - indica se campo foi validado
 
 User Function AOMS107V(_ccampo)  
 
-Local _lret := .T.
+Local _lRet := .T.
 Local _cQuery := ""
 Local _oModel 		:= FWModelActive()
 Local _oModelMAS 	:= _oModel:GetModel('ZGQMASTER')
@@ -457,26 +457,26 @@ Local _oModelMAS 	:= _oModel:GetModel('ZGQMASTER')
 _cQuery := " SELECT COUNT(ZGQ_TABPRE) CONT"
 _cQuery += " FROM "+ RetSqlName("ZGQ") + " WHERE "  
 
-_cQuery += " D_E_L_E_T_ = ' ' AND ZGQ_FILEMB = '" + ALLTRIM(_oModelMAS:GetValue("ZGQ_FILEMB")) + "'"
+_cQuery += " D_E_L_E_T_ = ' ' AND ZGQ_FILEMB = '" + AllTrim(_oModelMAS:GetValue("ZGQ_FILEMB")) + "'"
 		
-If select("ZGQT") > 0
+If Select("ZGQT") > 0
 		
-	Dbselectarea("ZGQT")
-	ZGQT->(Dbclosearea())
+	DBSelectArea("ZGQT")
+	ZGQT->(DBCloseArea())
 			
-Endif
+EndIf
 		
 DBUseArea( .T. , "TOPCONN" , TCGenQry(,,_cQuery) , "ZGQT" , .T. , .F. )
 	
-If !(ZGQT->(EOF())) .AND. ZGQT->CONT > 0
+If !(ZGQT->(Eof())) .And. ZGQT->CONT > 0
 
 	Help( ,, 'Atenção!',, "Já existe cadastro para essa filial de embarque!" ,1, 0,, ,,, , {"Utilize a função de alteração"} )
 
-	_lret := .F.
+	_lRet := .F.
 	
-Endif
+EndIf
 
-Return _lret
+Return _lRet
 
 /*
 ===============================================================================================================================
@@ -509,8 +509,8 @@ _cQuery += "     ZGR_TABPRE,ZGR_FILEMB,ZGR_FILFAT,ZGR_VENDED,ZGR_GEREN,ZGR_COORD
 _cQuery += " FROM "+ RetSqlName("ZGR") +" ZGR "
 _cQuery += " WHERE "
 _cQuery += " ZGR.D_E_L_E_T_	= ' ' "
-_cQuery += " AND	ZGR.ZGR_DATA	>= '"+ DTOS(MV_PAR01) +"' "
-_cQuery += " AND	ZGR.ZGR_DATA	<= '"+ DTOS(MV_PAR02) +"' "
+_cQuery += " AND	ZGR.ZGR_DATA	>= '"+ DToS(MV_PAR01) +"' "
+_cQuery += " AND	ZGR.ZGR_DATA	<= '"+ DToS(MV_PAR02) +"' "
 
 _cQuery += " ORDER BY ZGR_TABPRE,ZGR_ITEM,ZGR_DATA,ZGR_HORA"
 
@@ -523,48 +523,48 @@ DBUseArea( .T. , "TOPCONN" , TcGenQry(,,_cQuery) , cAlias , .T. , .F. )
 DBSelectArea(cAlias)
 (cAlias)->( DBGoTop() )
 
-Do while  (cAlias)->(!Eof()) 
+While  (cAlias)->(!Eof()) 
 
-	aadd(_alista,{  sTOd((cAlias)->ZGR_DATA),;
-					ALLTRIM((cAlias)->ZGR_HORA),;
-					ALLTRIM((cAlias)->ZGR_USER),;
-					ALLTRIM((cAlias)->ZGR_FILEMB),;
-					ALLTRIM((cAlias)->ZGR_ITEM),;
+	aAdd(_alista,{  SToD((cAlias)->ZGR_DATA),;
+					AllTrim((cAlias)->ZGR_HORA),;
+					AllTrim((cAlias)->ZGR_USER),;
+					AllTrim((cAlias)->ZGR_FILEMB),;
+					AllTrim((cAlias)->ZGR_ITEM),;
 					(cAlias)->ZGR_OCLIEN + "/" + (cAlias)->ZGR_OLOJA,;
 					(cAlias)->ZGR_CLIENT + "/" + (cAlias)->ZGR_LOJA,;
 					(cAlias)->ZGR_OREDE,;
 					(cAlias)->ZGR_REDE,;
-					ALLTRIM((cAlias)->ZGR_OTABPR),;
-					ALLTRIM((cAlias)->ZGR_TABPRE),;
-					ALLTRIM((cAlias)->ZGR_OOPLOG),;
-					ALLTRIM((cAlias)->ZGR_OPLOG),;
-					ALLTRIM((cAlias)->ZGR_OFILFA),;
-					ALLTRIM((cAlias)->ZGR_FILFAT),;
-					ALLTRIM((cAlias)->ZGR_OVENDE),;
-					ALLTRIM((cAlias)->ZGR_VENDED),;
-					ALLTRIM((cAlias)->ZGR_OGEREN),;
-					ALLTRIM((cAlias)->ZGR_GEREN ),;
-					ALLTRIM((cAlias)->ZGR_OCOORDE),;
-					ALLTRIM((cAlias)->ZGR_COORDE ),;
-					ALLTRIM((cAlias)->ZGR_OSUPER),;
-					ALLTRIM((cAlias)->ZGR_SUPERV ),;
-					If(!EMPTY((cAlias)->ZGR_STATUS),"DELETADO","ATIVO") })
+					AllTrim((cAlias)->ZGR_OTABPR),;
+					AllTrim((cAlias)->ZGR_TABPRE),;
+					AllTrim((cAlias)->ZGR_OOPLOG),;
+					AllTrim((cAlias)->ZGR_OPLOG),;
+					AllTrim((cAlias)->ZGR_OFILFA),;
+					AllTrim((cAlias)->ZGR_FILFAT),;
+					AllTrim((cAlias)->ZGR_OVENDE),;
+					AllTrim((cAlias)->ZGR_VENDED),;
+					AllTrim((cAlias)->ZGR_OGEREN),;
+					AllTrim((cAlias)->ZGR_GEREN ),;
+					AllTrim((cAlias)->ZGR_OCOORDE),;
+					AllTrim((cAlias)->ZGR_COORDE ),;
+					AllTrim((cAlias)->ZGR_OSUPER),;
+					AllTrim((cAlias)->ZGR_SUPERV ),;
+					If(!Empty((cAlias)->ZGR_STATUS),"DELETADO","ATIVO") })
 
-	(cAlias)->( Dbskip() )
+	(cAlias)->( DBSkip() )
 	
-Enddo
+EndDo
 
-If len(_alista) > 0
+If Len(_alista) > 0
 
-   U_ITListBox( "Histórico de Alterações - Data de " + dtoc(MV_PAR01) + " até " + dtoc(MV_PAR02) + "." ,;
+   U_ITListBox( "Histórico de Alterações - Data de " + DToC(MV_PAR01) + " até " + DToC(MV_PAR02) + "." ,;
   				{'Data','Hora','Usuário','Filial emb','Item','Cliente ori','Cliente alt', 'Rede ori', 'Rede alt','Tab ori','Tab alt','Op log ori','Op log alt','Fil fat ori','Fil fat alt','Vend ori','Vend alt','Ger ori','Ger alt','Coor ori','Coor alt','Sup ori','Sup alt','Situação'} ,;
   				 _alista , .F. , 1 )
 
 Else
 
-	u_itmsg("Não foram localizados históricos com os parâmetros indicados","Atenção",,1)
+	U_ITMsg("Não foram localizados históricos com os parâmetros indicados","Atenção",,1)
 	
-Endif
+EndIf
 
 If Select(cAlias) > 0
    (cAlias)->( DBCloseArea() )
@@ -592,15 +592,15 @@ Default _nrec := 0
 
 If _nrec > 0
 
-	ZGQ->(Dbgoto(_nrec))
+	ZGQ->(DBGoTo(_nrec))
 	
 	If !ZGQ->(Eof())
 	
 		_cret := "Filial embarque: " + ZGQ->ZGQ_FILEMB + " /  Item: " + ZGQ->ZGQ_ITEM
 		
-	Endif
+	EndIf
 	
-Endif
+EndIf
 
 Return _cret
 
@@ -667,11 +667,11 @@ Private _oDadosPesq, _cDadosPesq := Space(60)
 
 Begin Sequence
 
-   AADD(aRotina,{"Pesquisar"	,"AxPesqui",0,1})
-   AADD(aRotina,{"Visualizar"	,"AxVisual",0,2})
-   AADD(aRotina,{"Incluir"		,"AxInclui",0,3})
-   AADD(aRotina,{"Alterar"		,"AxAltera",0,4})
-   AADD(aRotina,{"Excluir"		,"AxExclui",0,5})
+   aAdd(aRotina,{"Pesquisar"	,"AxPesqui",0,1})
+   aAdd(aRotina,{"Visualizar"	,"AxVisual",0,2})
+   aAdd(aRotina,{"Incluir"		,"AxInclui",0,3})
+   aAdd(aRotina,{"Alterar"		,"AxAltera",0,4})
+   aAdd(aRotina,{"Excluir"		,"AxExclui",0,5})
    Inclui := .F.
    Altera := .T.
 
@@ -682,9 +682,9 @@ Begin Sequence
 	  TRBSA3->( DBCloseArea() )
    EndIf
 
-   Aadd( _aEstru , { "A3_COD"  , 'C' , 06 , 0 } )
-   Aadd( _aEstru , { "A3_NOME" , 'C' , 60 , 0 } )
-   Aadd( _aEstru , { "A3_RECNO", 'N' , 10 , 0 } )
+   aAdd( _aEstru , { "A3_COD"  , 'C' , 06 , 0 } )
+   aAdd( _aEstru , { "A3_NOME" , 'C' , 60 , 0 } )
+   aAdd( _aEstru , { "A3_RECNO", 'N' , 10 , 0 } )
       
    _otemp := FWTemporaryTable():New( "TRBSA3", _aEstru )
 
@@ -758,12 +758,12 @@ Begin Sequence
    DBUseArea( .T. , "TOPCONN" , TCGenQry(,,_cQry) , "QRYSA3" , .F. , .T. )
 		
    QRYSA3->( DBGoTop() )
-   Do While QRYSA3->(!Eof())
+   While QRYSA3->(!Eof())
       TRBSA3->(DbAppend())	
       TRBSA3->A3_COD   := QRYSA3->A3_COD 
       TRBSA3->A3_NOME  := QRYSA3->A3_NOME 
 	  TRBSA3->A3_RECNO := QRYSA3->RECNO
-	  TRBSA3->(MsUnLock())
+	  TRBSA3->(MSUnLock())
 
 	  QRYSA3->( DBSkip() )
    EndDo
@@ -774,7 +774,7 @@ Begin Sequence
    // Monta o AHeader para o MSGETDB.
    //======================================================
    // aAdd(aHeader,{trim(x3_titulo),x3_campo,x3_picture,x3_tamanho,x3_decimal,x3_valid,x3_usado,x3_tipo, x3_f3,x3_context,	x3_cbox,x3_relacao,x3_when,X3_TRIGGER,	X3_PICTVAR,.F.,.F.})
-   Aadd(aHeader,{"Codigo"                              ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Codigo"                              ,;   // 1  = X3_TITULO                   
                  "A3_COD"                              ,;   // 2  = X3_CAMPO
                  ""                                    ,;   // 3  = X3_PICTURE                    
                  6                                     ,;   // 4  = X3_TAMANHO            
@@ -785,7 +785,7 @@ Begin Sequence
                                                      "",;   // 9  = X3_CONTEXT
                  ""})                                       // 10 = X3_CBOX
 
-   Aadd(aHeader,{"Nome"                                ,;   // 1  = X3_TITULO                   
+   aAdd(aHeader,{"Nome"                                ,;   // 1  = X3_TITULO                   
                  "A3_NOME"                             ,;   // 2  = X3_CAMPO
                  ""                                    ,;   // 3  = X3_PICTURE                    
                  60                                     ,;  // 4  = X3_TAMANHO            
@@ -796,7 +796,7 @@ Begin Sequence
                                                      "",;   // 9  = X3_CONTEXT
                  ""})                                       // 10 = X3_CBOX
 
-    TRBSA3->(DbGoTop())
+    TRBSA3->(DBGoTop())
 
 	DEFINE MSDIALOG _oDlgSA3 TITLE _cTitulo FROM 00,00 To 400, 620 PIXEL                                    
         @ 05, 05  BUTTON _OButtonApr PROMPT "&Ok"	        SIZE 50, 012 OF _oDlgSA3 ACTION (_nOpc := 1 , _oDlgSA3:End()) PIXEL
@@ -811,7 +811,7 @@ Begin Sequence
        _oGetDB:oBrowse:bAdd := {||.F.} // não inclui novos itens MsGetDb()
        _oGetDB:Enable( ) 
 
-       TRBSA3->(DbGoTop())
+       TRBSA3->(DBGoTop())
        _oGetDB:ForceRefresh ( )
 
     ACTIVATE MSDIALOG _oDlgSA3 CENTERED
@@ -820,7 +820,7 @@ Begin Sequence
 	   If TRBSA3->(Eof()) .Or. TRBSA3->(Bof())
           _cMvcRet := Space(6)
 	   Else 
-          SA3->(DbGoTo(TRBSA3->A3_RECNO))
+          SA3->(DBGoTo(TRBSA3->A3_RECNO))
 	      _cMvcRet := SA3->A3_COD 
 	   EndIf 
 	Else 
@@ -854,14 +854,14 @@ Local _nRegAtu := TRBSA3->(Recno())
 Begin Sequence
 
    If AllTrim(_cOrdPesq)  == AllTrim(_aOrdPesq[1])
-      TRBSA3->(DbSetOrder(1)) 
+      TRBSA3->(DBSetOrder(1)) 
    Else
-	  TRBSA3->(DbSetOrder(2)) 
+	  TRBSA3->(DBSetOrder(2)) 
    EndIf    
    
    If ! Empty(_cDadosPesq)
       If ! TRBSA3->(MsSeek(AllTrim(_cDadosPesq)))
-         TRBSA3->(DbGoTo(_nRegAtu))
+         TRBSA3->(DBGoTo(_nRegAtu))
       EndIf 
    EndIf
    
@@ -869,7 +869,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -903,7 +903,7 @@ Begin Sequence
 
    If Empty(_cCodVend) .And. Empty(_cCodSup) .And. Empty(_cCodCoord) .And. Empty(_cCodGer ) .And. Empty(_cRede) .And. Empty(_cCliente) .And. Empty(_cLoja)
       Help( ,, 'Atenção!',, "Os campos Gerente, Coordenador, Supervisor, Vendedor, Rede, Cliente e Loja estão vazios!" ,1, 0,, ,,, , {"Preencha pelo menos um dos campos."} )
-	  _lret := .F.
+	  _lRet := .F.
    EndIf 
 
 End Sequence

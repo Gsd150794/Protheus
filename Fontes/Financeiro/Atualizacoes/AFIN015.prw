@@ -2,35 +2,25 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Julio Paz    | 07/05/2018 | Padronização dos cabeçalhos dos fontes e funções do módulo financeiro. Chamado 24726.
--------------------------------------------------------------------------------------------------------------------------------
- Josué Danich | 26/06/2019 | Revisão para loboguara - Chamado 28886 
--------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges | 09/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+Julio Paz     |07/05/2018| Chamado 24726. Padronização dos cabeçalhos dos fontes e funções do módulo financeiro.
+Josué Danich  |26/06/2019| Chamado 28886. Revisão para loboguara
+Lucas Borges  |09/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "Protheus.ch"
-#INCLUDE "RwMake.ch"
-#INCLUDE "TopConn.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: AFIN015
 Autor-------------: Wodson Reis Silva
 Data da Criacao---: 28/07/2009
-===============================================================================================================================
 Descrição---------: Consulta F3 personalizada.
                     Lista os Descontos Contratuais que poderao ser utilizados de acordo com o produto + rede ou produto + 
                     cliente escolhido.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -69,15 +59,15 @@ Local nSvRecBrw  := 0
 //=============================================================================
 // Posiciona no cadastro de clientes para pegar a rede. 
 //=============================================================================
-If !Empty(ALLTRIM(GdFieldGet("ZAE_CLI",n)))
-	dbSelectArea("SA1")
-	dbSetOrder(1)
-	dbSeek(xFILIAL("SA1")+GdFieldGet("ZAE_CLI",n)+GdFieldGet("ZAE_LOJA",n))
+If !Empty(AllTrim(GdFieldGet("ZAE_CLI",n)))
+	DBSelectArea("SA1")
+	DBSetOrder(1)
+	DBSeek(xFilial("SA1")+GdFieldGet("ZAE_CLI",n)+GdFieldGet("ZAE_LOJA",n))
 	cRede := SA1->A1_GRPVEN
 EndIf
 
-dbSelectArea("ZAZ")
-dbSetOrder(1)
+DBSelectArea("ZAZ")
+DBSetOrder(1)
 
 cAliasZAZ:=	GetNextAlias()
 
@@ -91,25 +81,25 @@ cQuery += " AND ZB0.ZB0_FILIAL  = ZAZ.ZAZ_FILIAL
 cQuery += " AND ZAZ.D_E_L_E_T_  = ' ' AND ZB0.D_E_L_E_T_  = ' '"
 cQuery += " AND ZAZ.ZAZ_COD = ZB0.ZB0_COD"
 cQuery += " AND ZAZ.ZAZ_MSBLQL  <> '1'"
-cQuery += " AND ZAZ.ZAZ_DTINI <= '" + DTOS(dDataBase) + "'"
-cQuery += " AND ZAZ.ZAZ_DTFIM >= '" + DTOS(dDataBase) + "'"
+cQuery += " AND ZAZ.ZAZ_DTINI <= '" + DToS(dDataBase) + "'"
+cQuery += " AND ZAZ.ZAZ_DTFIM >= '" + DToS(dDataBase) + "'"
 cQuery += " AND ZB0.ZB0_SB1COD  = '" + GdFieldGet("ZAE_PROD",n) + "'"
 
 //=========================================================================================
 // Primeiramente verifica se a Rede foi informada, caso tenha sido, filtra pela mesma, 
 // caso contrario, filtra pela Rede informada no cadastro do cliente.                  
 //=========================================================================================
-If !Empty(ALLTRIM(GdFieldGet("ZAE_GRPVEN",n)))
+If !Empty(AllTrim(GdFieldGet("ZAE_GRPVEN",n)))
 	cQuery += " AND ZAZ.ZAZ_GRPVEN  = '" + GdFieldGet("ZAE_GRPVEN",n) + "'"
 Else
 	//=============================================================================
 	// Se a rede no cadastro do cliente esta preenchida. 
 	//=============================================================================
-	If !Empty(ALLTRIM(cRede))
+	If !Empty(AllTrim(cRede))
 		//======================================================================================
 		// Se a loja foi preenchida, entao faz o filtro pelo codigo de cliente/loja ou rede. 
 		//======================================================================================
-		If !Empty(ALLTRIM(GdFieldGet("ZAE_LOJA",n)))
+		If !Empty(AllTrim(GdFieldGet("ZAE_LOJA",n)))
             cQuery += " AND ((ZAZ.ZAZ_CLIENT = '" + GdFieldGet("ZAE_CLI",n) + "' AND ZAZ.ZAZ_LOJA = '" + GdFieldGet("ZAE_LOJA",n) + "') OR  ZAZ.ZAZ_GRPVEN  = '" + cRede + "')"
 		Else
 			//============================================================================================
@@ -122,7 +112,7 @@ Else
 		// Se a rede no cadasto do cliente nao foi preenchida, entao faz o filtro pelo codigo de cliente. 
 		// Se a loja foi preenchida, entao faz o filtro pelo codigo de cliente e loja.                    
 		//=================================================================================================
-		If !Empty(ALLTRIM(GdFieldGet("ZAE_LOJA",n)))
+		If !Empty(AllTrim(GdFieldGet("ZAE_LOJA",n)))
 			cQuery += " AND ZAZ.ZAZ_CLIENT  = '" + GdFieldGet("ZAE_CLI",n) + "'"
 			cQuery += " AND ZAZ.ZAZ_LOJA    = '" + GdFieldGet("ZAE_LOJA",n) + "'"
 		Else
@@ -140,13 +130,13 @@ dbUseArea(.T.,"TOPCONN",TcGenQry(,,cQuery),cAliasZAZ,.T.,.T.)
 //=============================================================================
 // Monta arquivo de trabalho para armazenar os registros da ZAZ.          
 //=============================================================================
-AAdd(aStruct,{"TRB_COD"   ,"C",TamSX3("ZAZ_COD")[1]   ,0})
-AAdd(aStruct,{"TRB_GRPVEN","C",TamSX3("ZAZ_GRPVEN")[1],0})
-AAdd(aStruct,{"TRB_CLIENT","C",TamSX3("ZAZ_CLIENT")[1],0})
-AAdd(aStruct,{"TRB_LOJA"  ,"C",TamSX3("ZAZ_LOJA")[1]  ,0})
-AAdd(aStruct,{"TRB_NOME"  ,"C",TamSX3("ZAZ_NOME")[1]  ,0})
-AAdd(aStruct,{"TRB_DTINI" ,"D",8                      ,0})
-AAdd(aStruct,{"TRB_RECNO" ,"N",14                     ,0})
+aAdd(aStruct,{"TRB_COD"   ,"C",TamSX3("ZAZ_COD")[1]   ,0})
+aAdd(aStruct,{"TRB_GRPVEN","C",TamSX3("ZAZ_GRPVEN")[1],0})
+aAdd(aStruct,{"TRB_CLIENT","C",TamSX3("ZAZ_CLIENT")[1],0})
+aAdd(aStruct,{"TRB_LOJA"  ,"C",TamSX3("ZAZ_LOJA")[1]  ,0})
+aAdd(aStruct,{"TRB_NOME"  ,"C",TamSX3("ZAZ_NOME")[1]  ,0})
+aAdd(aStruct,{"TRB_DTINI" ,"D",8                      ,0})
+aAdd(aStruct,{"TRB_RECNO" ,"N",14                     ,0})
 
 //================================================================================
 // Verifica se ja existe um arquivo com mesmo nome, se sim deleta.
@@ -166,28 +156,28 @@ _otemp:AddIndex( "03",{"TRB_DTINI"} )
 
 _otemp:Create()
 
-dbSelectArea("TRB")
-dbSetOrder(1)
+DBSelectArea("TRB")
+DBSetOrder(1)
 
-dbSelectArea(cAliasZAZ)
+DBSelectArea(cAliasZAZ)
 While !Eof()
 	
-	Reclock("TRB",.T.)
+	RecLock("TRB",.T.)
 	Replace TRB->TRB_COD    With (cAliasZAZ)->ZAZ_COD
     Replace TRB->TRB_GRPVEN With (cAliasZAZ)->ZAZ_GRPVEN
     Replace TRB->TRB_CLIENT With (cAliasZAZ)->ZAZ_CLIENT
     Replace TRB->TRB_LOJA   With (cAliasZAZ)->ZAZ_LOJA
 	Replace TRB->TRB_NOME   With (cAliasZAZ)->ZAZ_NOME
-    Replace TRB->TRB_DTINI  With STOD((cAliasZAZ)->ZAZ_DTINI)
+    Replace TRB->TRB_DTINI  With SToD((cAliasZAZ)->ZAZ_DTINI)
 	Replace TRB->TRB_RECNO  With (cAliasZAZ)->R_E_C_N_O_    
-	TRB->(MsUnLock())
+	TRB->(MSUnLock())
 	
-	dbSelectArea(cAliasZAZ)
-	dbSkip()
+	DBSelectArea(cAliasZAZ)
+	DBSkip()
 EndDo
 
-dbSelectArea("TRB")
-TRB->(dbGoTop())
+DBSelectArea("TRB")
+TRB->(DBGoTop())
 
 aAdd(aBrowse1,{"TRB_COD"})
 aAdd(aBrowse1,{"TRB_GRPVEN"})
@@ -267,9 +257,9 @@ For i:=1 To Len(aBrowse3)
 Next i
 
 @ 003, 003 COMBOBOX oOrdem VAR cOrd ITEMS aOrdem ON CHANGE ;
-(If(oOrdem:nAt==1,(dbSetOrder(1),oBrowse2:Hide()),;
-If(oOrdem:nAt==2,(dbSetOrder(2),oBrowse2:Show()),(dbSetOrder(3),oBrowse3:Show()))),;
-dbGoTop(),;
+(If(oOrdem:nAt==1,(DBSetOrder(1),oBrowse2:Hide()),;
+If(oOrdem:nAt==2,(DBSetOrder(2),oBrowse2:Show()),(DBSetOrder(3),oBrowse3:Show()))),;
+DBGoTop(),;
 oBrowse1:Refresh(),;
 oBrowse2:Refresh(),;
 oBrowse3:Refresh(),;
@@ -277,11 +267,11 @@ cSeek:=Space(40),;
 oSeek:Refresh()) SIZE 213, 42 OF oDlg PIXEL                   
                                                        
 @ 017,003 MSGET oSeek VAR cSeek SIZE 213, 10 OF oDlg PIXEL
-@ 003,220 BUTTON "&Pesquisar" SIZE 037,010 PIXEL OF oDlg ACTION ( ((dbSeek(AllTrim(cSeek)),oBrowse1:Refresh(),oBrowse2:Refresh(),oBrowse3:Refresh()),) )
+@ 003,220 BUTTON "&Pesquisar" SIZE 037,010 PIXEL OF oDlg ACTION ( ((DBSeek(AllTrim(cSeek)),oBrowse1:Refresh(),oBrowse2:Refresh(),oBrowse3:Refresh()),) )
 
-DEFINE SBUTTON oBtn1 FROM 185,003 TYPE 1 ENABLE OF oDlg ACTION (lExport := .T., nSvRecBrw := Recno(), oDlg:End())
+DEFINE SBUTTON oBtn1 FROM 185,003 Type 1 ENABLE OF oDlg ACTION (lExport := .T., nSvRecBrw := Recno(), oDlg:End())
 oBtn1:lAutDisable := .F.
-DEFINE SBUTTON oBtn2 FROM 185,033 TYPE 2 ENABLE OF oDlg ACTION oDlg:End()
+DEFINE SBUTTON oBtn2 FROM 185,033 Type 2 ENABLE OF oDlg ACTION oDlg:End()
 
 ACTIVATE MSDIALOG oDlg CENTERED
 
@@ -289,23 +279,23 @@ ACTIVATE MSDIALOG oDlg CENTERED
 // Posiciona no registro escolhido pelo usuario. 
 //=========================================================
 If lExport
-	ZAZ->(dbGoto(TRB->TRB_RECNO))
+	ZAZ->(DBGoTo(TRB->TRB_RECNO))
 EndIf
 
 //========================================
 // Deleta os arquivos temporarios. 
 //========================================
-dbSelectArea("TRB")
-dbCloseArea()
+DBSelectArea("TRB")
+DBCloseArea()
 
-dbSelectArea(cAliasZAZ)
-dbCloseArea()
+DBSelectArea(cAliasZAZ)
+DBCloseArea()
 
 //=====================================
 // Restaura a area do sistema. 
 //=====================================
-RestArea(aAreaZAE)
-dbSelectArea("ZAZ")
-dbSetOrder(1)
+FWRestArea(aAreaZAE)
+DBSelectArea("ZAZ")
+DBSetOrder(1)
 
 Return(lExport)

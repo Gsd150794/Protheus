@@ -13,9 +13,9 @@ Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 #Include "report.ch"
-#INCLUDE 'TOPCONN.CH'
+#Include 'TOPCONN.CH'
 
 /*
 ===============================================================================================================================
@@ -31,7 +31,7 @@ User Function ROMS061()
 
 Local _cPerg := "ROMS061"
 
-DO WHILE .T.
+While .T.
 
 	//==================================================================
 	// Exibe tela de parâmetros inicias.
@@ -42,13 +42,13 @@ DO WHILE .T.
 
     _lRet:=.T.
 	Processa( {|| _lRet := U_ROMS061A() }, "Aguarde...", "Emitindo o Relatório...",.F.)
-	IF !_lRet
-	   EXIT
-	ENDIF
+	If !_lRet
+	   Exit
+	EndIf
 
-ENDDO
+EndDo
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -118,12 +118,12 @@ Begin Sequence
 		EndIf
 
 		If ! Empty(MV_PAR03)  // "De Vigência"
-			_cQry += " AND DA0_DATDE >= '" + Dtos(MV_PAR03) + "' "   // Início Vigência",
+			_cQry += " AND DA0_DATDE >= '" + DToS(MV_PAR03) + "' "   // Início Vigência",
 
 		EndIf
 
 		If ! Empty(MV_PAR04)  // "Até Vigência"
-			_cQry += " AND DA0_DATATE <= '" + Dtos(MV_PAR04) + "' "
+			_cQry += " AND DA0_DATATE <= '" + DToS(MV_PAR04) + "' "
 		EndIf
 
 		If ! Empty(MV_PAR05)  // "Ativa" //  DA0_ATIVO, 1, 'SIM', 2, 'NAO'
@@ -144,7 +144,7 @@ Begin Sequence
 		_cQry += " B1_DESC "
 
 		If Select("QRYDA1") > 0
-			QRYDAK->(DbCloseArea())
+			QRYDAK->(DBCloseArea())
 		EndIf
 
 		_cQry := ChangeQuery(_cQry)
@@ -170,23 +170,23 @@ Begin Sequence
 		Count To _nTotRegs
 
 		If _nTotRegs == 0
-           U_ItMsg("Não há dados para esses filtros.","Atenção","Tente novamente com outros filtros.",1)
+           U_ITMsg("Não há dados para esses filtros.","Atenção","Tente novamente com outros filtros.",1)
 		   _lRet:=.T.
 		   Break
 		EndIf
 
 		ProcRegua(_nTotRegs)
 
-		QRYDA1->(DbGoTop())
+		QRYDA1->(DBGoTop())
 
 		_aDados := {}
 		_nI := 0
 
-		Do While ! QRYDA1->(Eof())
+		While ! QRYDA1->(Eof())
 			_nI += 1
-			IncProc("Lendo dados Tabela de Preços: " + AllTrim(QRYDA1->DA1_CODTAB) + " - Item: " + StrZero(_nI,6) + "/" + Strzero(_nTotRegs,6))
+			IncProc("Lendo dados Tabela de Preços: " + AllTrim(QRYDA1->DA1_CODTAB) + " - Item: " + StrZero(_nI,6) + "/" + StrZero(_nTotRegs,6))
 
-			Aadd(_aDados,{QRYDA1->DA1_CODTAB,;  // Cod.Tab. Preço
+			aAdd(_aDados,{QRYDA1->DA1_CODTAB,;  // Cod.Tab. Preço
 			QRYDA1->DA0_DESCRI,;  // Tabela Preço",
 			QRYDA1->DA1_CODPRO,;  // Cod.Produto",
 			QRYDA1->B1_DESC,;     // Produto",
@@ -201,9 +201,9 @@ Begin Sequence
 			QRYDA1->DA1_I_PRF3,;  // Pr Faixa 3,
 			QRYDA1->DA1_I_PMF3,;  // Pr min Fx 3
 			QRYDA1->DA1_PRCMAX,;  // PR Max,
-			Iif(QRYDA1->DA1_ATIVO == "2","Nao","Sim") })  // Ativo?
+			IIf(QRYDA1->DA1_ATIVO == "2","Nao","Sim") })  // Ativo?
 
-			QRYDA1->(DbSkip())
+			QRYDA1->(DBSkip())
 		EndDo
  
 		_aTitulos := {"Cod.Tab. Preço",;
@@ -223,21 +223,21 @@ Begin Sequence
 			          "PR Max",;
 			          "Bloqueio Produto"}
    
-   IF LEN(_aDados) > 0
+   If Len(_aDados) > 0
 	
 	  _lRet:=U_ITListBox( 'Relatorio de Tabelas de Preços' ,  _aTitulos , _aDados , .T. ,1)
    
-   ELSE
+   Else
 
-      U_ItMsg("Não há dados para esses filtros.","Atenção","Tente novamente com outros filtros.",1)
+      U_ITMsg("Não há dados para esses filtros.","Atenção","Tente novamente com outros filtros.",1)
 	  _lRet:=.T.
    
-   ENDIF
+   EndIf
 
 End Sequence
 
 If Select("QRYDA1") > 0
-	QRYDA1->(DbCloseArea())
+	QRYDA1->(DBCloseArea())
 EndIf
 
 Return _lRet

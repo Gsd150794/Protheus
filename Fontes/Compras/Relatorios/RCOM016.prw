@@ -9,46 +9,46 @@ Alex Wallauer |08/02/2023| Chamado 42719. Acrescentada a opcao NF no campo C7_I_
 Lucas Borges  |08/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
-#Include 'Protheus.ch'
-#INCLUDE 'TOPCONN.CH'
+
+#Include "TOTVS.ch"
+#Include 'TOPCONN.CH'
+
 /*
 ===============================================================================================================================
 Programa----------: RCOM016
 Autor-------------: Alex Wallauer
 Data da Criacao---: 14/08/2019
-===============================================================================================================================
 Descrição---------: Relacao de Pedidos Por Forncecedor - CHAMADO: 30238
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function RCOM016()
+
 Local oReport:= NIL
 Local _cPerg := "RCOM016"
 Private _aItalac_F3:= {}
 //Private aOrd	:= {"Fornecedor"} 
 //Private aSelFil := {}
 Private _aDadosF:= {}
-_nTamChv:=LEN(SA2->A2_COD+SA2->A2_LOJA)
+_nTamChv:=Len(SA2->A2_COD+SA2->A2_LOJA)
 
-//FWMSGRUN(,{ |_oProc| _aDadosF:=RCOM016F(_oProc) },"Pré-Processando...","Aguarde...")
+//FWMsgRun(,{ |_oProc| _aDadosF:=RCOM016F(_oProc) },"Pré-Processando...","Aguarde...")
 
 _cSelectSB1:="SELECT B1_COD , B1_TIPO, B1_DESC FROM "+RETSQLNAME("SB1")+" SB1 WHERE D_E_L_E_T_ = ' ' ORDER BY B1_COD "
-_bCondTab:={|| IF(EMPTY(MV_PAR06),.T.,B1_TIPO $ MV_PAR06) }
+_bCondTab:={|| If(Empty(MV_PAR06),.T.,B1_TIPO $ MV_PAR06) }
 
 //Italac_F3:={}         1           2         3                        4                            5            6             7         8               9         10             11        12
 //AD(_aItalac_F3,{"1CPO_CAMPO1",_cTabela,_nCpoChave              , _nCpoDesc                   ,_bCondTab , _cTitAux      , _nTamChv , _aDados  , _nMaxSel , _lFilAtual,_cMVRET,_bValida})
-AADD(_aItalac_F3,{"MV_PAR03",_cSelectSB1,{|Tab|(Tab)->B1_COD},{|Tab|(Tab)->B1_TIPO+" "+(Tab)->B1_DESC},_bCondTab,"Produtos",         ,          ,20        ,.F.        ,       , } )//Tipo: [PP,PI,MP,PA]
-//AADD(_aItalac_F3,{"MV_PAR03","SB1", SB1->(FIELDPOS("B1_COD"))  , SB1->(FIELDPOS("B1_DESC"))  ,_bCondTab ,"Produtos"     ,          ,          ,20        ,.F.        ,       , } )//Tipo: [PP,PI,MP,PA]
-AADD(_aItalac_F3,{"MV_PAR04","SY1",                              ,                             ,          ,"Compradores"  ,          ,          ,20                              } )
-AADD(_aItalac_F3,{"MV_PAR05",     ,                              ,                             ,          ,"Fornecedores" , _nTamChv ,_aDadosF  ,20                              } )
-//AADD(_aItalac_F3,{"MV_PAR05",_cSelSA2,{|Tab|(Tab)->A2_COD+(Tab)->A2_LOJA},{|Tab| (Tab)->A2_NREDUZ},     ,"Fornecedores" ,          ,          ,20        ,.F.        ,       , } )
-//AADD(_aItalac_F3,{"MV_PAR05","SA2",{||SA2->A2_COD+SA2->A2_LOJA },SA2->(FIELDPOS("A2_NREDUZ")),          ,"Fornecedores" ,          ,          ,20} )
+aAdd(_aItalac_F3,{"MV_PAR03",_cSelectSB1,{|Tab|(Tab)->B1_COD},{|Tab|(Tab)->B1_TIPO+" "+(Tab)->B1_DESC},_bCondTab,"Produtos",         ,          ,20        ,.F.        ,       , } )//Tipo: [PP,PI,MP,PA]
+//aAdd(_aItalac_F3,{"MV_PAR03","SB1", SB1->(FIELDPOS("B1_COD"))  , SB1->(FIELDPOS("B1_DESC"))  ,_bCondTab ,"Produtos"     ,          ,          ,20        ,.F.        ,       , } )//Tipo: [PP,PI,MP,PA]
+aAdd(_aItalac_F3,{"MV_PAR04","SY1",                              ,                             ,          ,"Compradores"  ,          ,          ,20                              } )
+aAdd(_aItalac_F3,{"MV_PAR05",     ,                              ,                             ,          ,"Fornecedores" , _nTamChv ,_aDadosF  ,20                              } )
+//aAdd(_aItalac_F3,{"MV_PAR05",_cSelSA2,{|Tab|(Tab)->A2_COD+(Tab)->A2_LOJA},{|Tab| (Tab)->A2_NREDUZ},     ,"Fornecedores" ,          ,          ,20        ,.F.        ,       , } )
+//aAdd(_aItalac_F3,{"MV_PAR05","SA2",{||SA2->A2_COD+SA2->A2_LOJA },SA2->(FIELDPOS("A2_NREDUZ")),          ,"Fornecedores" ,          ,          ,20} )
 
 If !Pergunte(_cPerg,.T.)
-   RETURN
+   Return
 EndIf
 
 oReport := RCOM016D()
@@ -63,15 +63,13 @@ Return
 Programa----------: RCOM016D
 Autor-------------: Alex Wallauer
 Data da Criacao---: 14/08/2019
-===============================================================================================================================
 Descrição---------: Função que faz a montagem do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function RCOM016D()
+
 Local oReport	:= Nil
 Local oSection1	:= Nil
 Local oSection2	:= Nil
@@ -108,7 +106,7 @@ oReport:SetTotalInLine(.F.)
 	TRCell():New(oSection2,"QTDE_PC"	,"TRBDAD","Quantidade PC"   ,"@E 999,999,999",16)
 	TRCell():New(oSection2,"C7_TOTAL"	,"TRBDAD","Total"		    ,"@E 999,999,999.999",16)
 
-	IF MV_PAR12 == 1
+	If MV_PAR12 == 1
 		oSection3 := TRSection():New(oReport, "Analitico - Item", {""}, NIL, .F., .T.)
 		TRCell():New(oSection3,"C7_FORNECE" ,"","Cod."     		,"@!",10)
 		TRCell():New(oSection3,"C7_LOJA"    ,"","Loja"     		,"@!",05)
@@ -131,7 +129,7 @@ oReport:SetTotalInLine(.F.)
 		TRCell():New(oSection3,"C7_I_URGEN"	,"","Urgente"			,"@!",04)
 		TRCell():New(oSection3,"C7_I_CMPDI"	,"","Compra Direta"	,"@!",04)
 		TRCell():New(oSection3,"C7_ENCER"	,"","Encerrado"		,"@!",04)
-	ENDIF
+	EndIf
 
 Return(oReport)
 
@@ -140,15 +138,13 @@ Return(oReport)
 Programa----------: RCOM016R
 Autor-------------: Alex Wallauer
 Data da Criacao---: 14/08/2019
-===============================================================================================================================
 Descrição---------: Função que imprime o relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function RCOM016R(oReport)
+
 	Local oSection1 := oReport:Section(1)
 	Local oSection2 := oReport:Section(2)
 	Local oSection3 := Nil
@@ -156,18 +152,18 @@ Static Function RCOM016R(oReport)
 	Local cQry2		:= ""
 	Local _cAlias	:= Nil
 
-	IF MV_PAR12 == 1
+	If MV_PAR12 == 1
 		_cAlias	:= GetNextAlias()
 		oSection3 := oReport:Section(3)
 		cQry2	:= RCO16QRY(.T.)
 		DBUseArea( .T. , "TOPCONN" , TCGenQry(,, cQry2 ) , _cAlias , .F. , .T. )
-	ENDIF
+	EndIf
 	//=================================================================
 	//Se o alias estiver aberto, irei fechar, isso ajuda a evitar erros
 	//=================================================================
 	If Select("TRBPED") <> 0
-		DbSelectArea("TRBPED")
-		DbCloseArea()
+		DBSelectArea("TRBPED")
+		DBCloseArea()
 	EndIf
 
 	//=================
@@ -175,17 +171,17 @@ Static Function RCOM016R(oReport)
 	//=================
 	TCQUERY cQry1 NEW ALIAS "TRBPED"
 		
-	dbSelectArea("TRBPED")
+	DBSelectArea("TRBPED")
 	_nConta:=0
 	aTotais:={}
 	aPCs   :={}
-	TRBPED->(dbGoTop())
+	TRBPED->(DBGoTop())
 	Count to _nConta
 	oReport:SetMeter(_nConta)
 	oSection1:Init()
 	//IMPRIMO A PRIMEIRA SEçãO
-	TRBPED->(dbGoTop())
-	DO While !TRBPED->(Eof())
+	TRBPED->(DBGoTop())
+	While !TRBPED->(Eof())
         cAplic:=""
 		If TRBPED->C7_I_APLIC == "C"
 			cAplic := "Consumo"
@@ -202,40 +198,40 @@ Static Function RCOM016R(oReport)
 		oSection1:Cell("C7_LOJA")   :SetValue(TRBPED->C7_LOJA)
 		oSection1:Cell("A2_NREDUZ")	:SetValue(TRBPED->A2_NREDUZ)
 		oSection1:Cell("C7_NUM")	:SetValue(TRBPED->C7_NUM)
-		oSection1:Cell("C7_EMISSAO"):SetValue(StoD(TRBPED->C7_EMISSAO))
+		oSection1:Cell("C7_EMISSAO"):SetValue(SToD(TRBPED->C7_EMISSAO))
 		oSection1:Cell("C7_TOTAL")  :SetValue(TRBPED->C7_TOTAL)
 		oSection1:Cell("C7_COMPRA") :SetValue(TRBPED->C7_COMPRA)
 		oSection1:Cell("Y1_NOME")	:SetValue(TRBPED->Y1_NOME)
 		oSection1:Cell("C7_I_APLIC"):SetValue(cAplic)
-		oSection1:Cell("C7_I_URGEN"):SetValue(IF(TRBPED->C7_I_URGEN="S","SIM",IF(TRBPED->C7_I_URGEN="F","NF","NÃO")))
-		oSection1:Cell("C7_I_USOD") :SetValue(IF(TRBPED->C7_I_USOD ="S","Sim","Nao"))
-		oSection1:Cell("C7_I_CMPDI"):SetValue(IF(TRBPED->C7_I_CMPDI="S","Sim","Nao"))
-		oSection1:Cell("C7_ENCER")  :SetValue(IF(TRBPED->C7_ENCER  =" ","Nao","Sim"))
+		oSection1:Cell("C7_I_URGEN"):SetValue(If(TRBPED->C7_I_URGEN="S","SIM",If(TRBPED->C7_I_URGEN="F","NF","NÃO")))
+		oSection1:Cell("C7_I_USOD") :SetValue(If(TRBPED->C7_I_USOD ="S","Sim","Nao"))
+		oSection1:Cell("C7_I_CMPDI"):SetValue(If(TRBPED->C7_I_CMPDI="S","Sim","Nao"))
+		oSection1:Cell("C7_ENCER")  :SetValue(If(TRBPED->C7_ENCER  =" ","Nao","Sim"))
 		
-		oSection1:Printline()
+		oSection1:PrintLine()
 		
-		IF (nPos:=ASCAN(aTotais,{|F| F[1] == TRBPED->C7_FORNECE+TRBPED->C7_LOJA} )) = 0
-		   AADD(aTotais,{TRBPED->C7_FORNECE+TRBPED->C7_LOJA,;//1
+		If (nPos:=aScan(aTotais,{|F| F[1] == TRBPED->C7_FORNECE+TRBPED->C7_LOJA} )) = 0
+		   aAdd(aTotais,{TRBPED->C7_FORNECE+TRBPED->C7_LOJA,;//1
 		                 TRBPED->C7_FORNECE,;                //2
 		                 TRBPED->C7_LOJA,;                   //3 
 		                 TRBPED->A2_NREDUZ,;                 //4
 		                 0,0})                               //5,6
-		   nPos:=LEN(aTotais)
-		ENDIF           
-		IF ASCAN(aPCs,TRBPED->C7_NUM) = 0// PARA NÃO CONTAR O PC MAIS DE MA VEZ
+		   nPos:=Len(aTotais)
+		EndIf           
+		If aScan(aPCs,TRBPED->C7_NUM) = 0// PARA NÃO CONTAR O PC MAIS DE MA VEZ
 		   aTotais[nPos,5]++
-		   AADD(aPCs,TRBPED->C7_NUM)
-		ENDIF   
+		   aAdd(aPCs,TRBPED->C7_NUM)
+		EndIf   
 	    aTotais[nPos,6]+=TRBPED->C7_TOTAL
   
-		TRBPED->(dbSkip())
+		TRBPED->(DBSkip())
 	End
 
     aTotais2:={0,0,0}
-	oReport:SetMeter(LEN(aTotais))
+	oReport:SetMeter(Len(aTotais))
 	//inicializo a segunda seção
 	oSection2:init()
-	FOR P := 1 TO LEN(aTotais)
+	For P := 1 TO Len(aTotais)
 
 		oReport:IncMeter()
 
@@ -244,27 +240,27 @@ Static Function RCOM016R(oReport)
 		oSection2:Cell("A2_NREDUZ")	:SetValue(aTotais[P,4])
 		oSection2:Cell("QTDE_PC")	:SetValue(aTotais[P,5])
 		oSection2:Cell("C7_TOTAL")	:SetValue(aTotais[P,6])
-		oSection2:Printline()
+		oSection2:PrintLine()
 
 		aTotais2[1]++
 		aTotais2[2]+=aTotais[P,5]
 		aTotais2[3]+=aTotais[P,6]
 	
-    NEXT
+    Next
 
 	oSection2:Cell("C7_FORNECE"):SetValue("TOTAIS")
 	oSection2:Cell("C7_LOJA")   :SetValue("")
-	oSection2:Cell("A2_NREDUZ")	:SetValue(ALLTRIM(STR(aTotais2[1]))+" Fornecedores" )
+	oSection2:Cell("A2_NREDUZ")	:SetValue(AllTrim(Str(aTotais2[1]))+" Fornecedores" )
 	oSection2:Cell("QTDE_PC")	:SetValue(aTotais2[2])
 	oSection2:Cell("C7_TOTAL")	:SetValue(aTotais2[3])
-	oSection2:Printline()
+	oSection2:PrintLine()
 
-	IF MV_PAR12 == 1
-		(_cAlias)->(dbGoTop())
+	If MV_PAR12 == 1
+		(_cAlias)->(DBGoTop())
 		Count to _nConta
 		oReport:SetMeter(_nConta)
 		oSection3:init()
-		WHILE (_cAlias)->(!EOF())
+		While (_cAlias)->(!Eof())
 
 			cAplic:=""
 			If TRBPED->C7_I_APLIC == "C"
@@ -282,7 +278,7 @@ Static Function RCOM016R(oReport)
 			oSection3:Cell("C7_LOJA")   :SetValue((_cAlias)->C7_LOJA)
 			oSection3:Cell("A2_NREDUZ")	:SetValue((_cAlias)->A2_NREDUZ)
 			oSection3:Cell("C7_NUM")	:SetValue((_cAlias)->C7_NUM)
-			oSection3:Cell("C7_EMISSAO"):SetValue(StoD((_cAlias)->C7_EMISSAO))
+			oSection3:Cell("C7_EMISSAO"):SetValue(SToD((_cAlias)->C7_EMISSAO))
 
 			oSection3:Cell("C7_PRODUTO")	:SetValue((_cAlias)->C7_PRODUTO)
 			oSection3:Cell("C7_DESCRI")	:SetValue((_cAlias)->C7_DESCRI)
@@ -295,21 +291,21 @@ Static Function RCOM016R(oReport)
 			oSection3:Cell("C7_COMPRA") :SetValue((_cAlias)->C7_COMPRA)
 			oSection3:Cell("Y1_NOME")	:SetValue((_cAlias)->Y1_NOME)
 			oSection3:Cell("C7_I_APLIC"):SetValue(cAplic)
-			oSection3:Cell("C7_I_URGEN"):SetValue(IF((_cAlias)->C7_I_URGEN="S","Sim","Nao"))
-			oSection3:Cell("C7_I_USOD") :SetValue(IF((_cAlias)->C7_I_USOD ="S","Sim","Nao"))
-			oSection3:Cell("C7_I_CMPDI"):SetValue(IF((_cAlias)->C7_I_CMPDI="S","Sim","Nao"))
-			oSection3:Cell("C7_ENCER")  :SetValue(IF((_cAlias)->C7_ENCER  =" ","Nao","Sim"))
-			oSection3:Printline()
-			(_cAlias)->(dbSkip())
-		ENDDO
+			oSection3:Cell("C7_I_URGEN"):SetValue(If((_cAlias)->C7_I_URGEN="S","Sim","Nao"))
+			oSection3:Cell("C7_I_USOD") :SetValue(If((_cAlias)->C7_I_USOD ="S","Sim","Nao"))
+			oSection3:Cell("C7_I_CMPDI"):SetValue(If((_cAlias)->C7_I_CMPDI="S","Sim","Nao"))
+			oSection3:Cell("C7_ENCER")  :SetValue(If((_cAlias)->C7_ENCER  =" ","Nao","Sim"))
+			oSection3:PrintLine()
+			(_cAlias)->(DBSkip())
+		EndDo
 
-	ENDIF
+	EndIf
     
 	oSection1:Finish()
 	oSection2:Finish()
-    IF MV_PAR12 == 1
+    If MV_PAR12 == 1
 	   oSection3:Finish()
-	ENDIF
+	EndIf
 
 Return
 
@@ -318,43 +314,37 @@ Return
 Programa----------: RCOM016F
 Autor-------------: Alex Wallauer
 Data da Criacao---: 01/09/2019
-===============================================================================================================================
 Descrição---------: Carga dos dos dados do forncedor
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function RCOM016F(_oProc)
-//LOCAL _cTabela:="SA2"
 
 lRet := ConPad1(,,,"NNR",,,.F.)
 
-RETURN lRet
+Return lRet
 
 /*
 ===============================================================================================================================
 Programa----------: RCO16QRY
 Autor-------------: Jonathan Torioni
 Data da Criacao---: 10/09/2020
-===============================================================================================================================
 Descrição---------: Retorna query
-===============================================================================================================================
 Parametros--------: lItem - Identifica se a query é para o Analitico - Itens (Section3)
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function RCO16QRY(lItem)
-	Local _cQuery := ""
-	DEFAULT lItem := .F.
 
-	IF !lItem
+	Local _cQuery := ""
+	Default lItem := .F.
+
+	If !lItem
 		_cQuery := "SELECT  SUM(C7_TOTAL) C7_TOTAL,"
-	ELSE
+	Else
 		_cQuery := "SELECT C7_TOTAL,"
-	ENDIF
+	EndIf
 	_cQuery += "        C7_NUM    , C7_EMISSAO, C7_COMPRA ,"
 	_cQuery += "        C7_I_APLIC, C7_ENCER  ,"
 	_cQuery += "        C7_I_URGEN, "
@@ -363,7 +353,7 @@ Static Function RCO16QRY(lItem)
 	_cQuery += "        C7_FORNECE, "
 	_cQuery += "        C7_LOJA   , "
 	_cQuery += "        A2_NREDUZ , "
-	IF lItem
+	If lItem
 		_cQuery += "	C7_PRODUTO, "
 		_cQuery += "	C7_ITEM, 	"
 		_cQuery += "	C7_QUANT, 	"
@@ -371,40 +361,40 @@ Static Function RCO16QRY(lItem)
 		_cQuery += "	C7_DESCRI, 	"
 		_cQuery += "	C7_OBS, 	"
 
-	ENDIF
+	EndIf
 	_cQuery += "        Y1_NOME     "
 	_cQuery += " FROM " + RetSqlName("SC7") + " SC7 "
 	_cQuery += "      JOIN " + RetSqlName("SA2") + " SA2 ON A2_FILIAL = '" + xFilial("SA2") + "' AND A2_COD = C7_FORNECE AND A2_LOJA = C7_LOJA AND SA2.D_E_L_E_T_ = ' ' "
 	_cQuery += " LEFT JOIN " + RetSqlName("SY1") + " SY1 ON Y1_FILIAL = '" + xFilial("SY1") + "' AND Y1_COD = C7_COMPRA  AND SY1.D_E_L_E_T_ = ' ' "
-	IF !EMPTY(MV_PAR06)
+	If !Empty(MV_PAR06)
 	   _cQuery += "   JOIN " + RetSqlName("SB1") + " SB1 ON B1_FILIAL = '" + xFilial("SB1") + "' AND B1_COD = C7_PRODUTO AND SB1.D_E_L_E_T_ = ' ' "
-	ENDIF
+	EndIf
 	_cQuery += " WHERE C7_FILIAL = '" + xFilial("SC7") + "' "
 
 	//Filtra DATA EMISSAO
-    IF !EMPTY(MV_PAR02)
-       _cQuery += "  AND C7_EMISSAO BETWEEN '" + DTOS(MV_PAR01) + "' AND '" + DTOS(MV_PAR02) + "'"
-    ELSEIF !EMPTY(MV_PAR01) 
-       _cQuery += "  AND C7_EMISSAO >= '" + DTOS(MV_PAR01) + "'"
-    ENDIF
+    If !Empty(MV_PAR02)
+       _cQuery += "  AND C7_EMISSAO BETWEEN '" + DToS(MV_PAR01) + "' AND '" + DToS(MV_PAR02) + "'"
+    ElseIf !Empty(MV_PAR01) 
+       _cQuery += "  AND C7_EMISSAO >= '" + DToS(MV_PAR01) + "'"
+    EndIf
 
 	//Filtra produto
 	If !Empty(MV_PAR03)
-	    _cQuery += " AND C7_PRODUTO IN "+FormatIn(ALLTRIM(MV_PAR03),";")
+	    _cQuery += " AND C7_PRODUTO IN "+FormatIn(AllTrim(MV_PAR03),";")
 	EndIf
 
 	//Filtra comprador
 	If !Empty(MV_PAR04)
-	    _cQuery += " AND C7_COMPRA IN "+FormatIn(ALLTRIM(MV_PAR04),";")
+	    _cQuery += " AND C7_COMPRA IN "+FormatIn(AllTrim(MV_PAR04),";")
 	EndIf
 
 	//Filtra Fonecedor
 	If !Empty(MV_PAR05)
-	    _cQuery += " AND C7_FORNECE||C7_LOJA  IN "+FormatIn(ALLTRIM(MV_PAR05),";")
+	    _cQuery += " AND C7_FORNECE||C7_LOJA  IN "+FormatIn(AllTrim(MV_PAR05),";")
 	EndIf
 
 	If !Empty(MV_PAR06)
-	    _cQuery += " AND B1_TIPO IN "+FormatIn(ALLTRIM(MV_PAR06),";")
+	    _cQuery += " AND B1_TIPO IN "+FormatIn(AllTrim(MV_PAR06),";")
 	EndIf
 
 	//Filtra URGENTE
@@ -450,7 +440,7 @@ Static Function RCO16QRY(lItem)
 	
 	_cQuery += "  AND SC7.D_E_L_E_T_ = ' ' "
 
-	IF !lItem
+	If !lItem
 		_cQuery += "GROUP BY 
 		_cQuery += "        C7_NUM    , C7_EMISSAO, C7_COMPRA ,"
 		_cQuery += "        C7_I_APLIC, C7_ENCER  ,"
@@ -461,15 +451,15 @@ Static Function RCO16QRY(lItem)
 		_cQuery += "        C7_LOJA   , "
 		_cQuery += "        A2_NREDUZ , "
 		_cQuery += "        Y1_NOME     "
-	ENDIF
+	EndIf
 
-	IF lItem
+	If lItem
 		_cQuery += " ORDER BY "
 		_cQuery += " A2_NREDUZ, "
 		_cQuery += " C7_NUM, "
 		_cQuery += " C7_ITEM "
-	ELSE
+	Else
 		_cQuery += "ORDER BY A2_NREDUZ  "
-	ENDIF
+	EndIf
 
-RETURN _cQuery
+Return _cQuery

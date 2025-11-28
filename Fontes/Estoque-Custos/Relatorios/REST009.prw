@@ -2,32 +2,24 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 02/05/2017 | Chamado 19813. Inclusão da função de Log ITLOGACS().
--------------------------------------------------------------------------------------------------------------------------------
-Igor Melgaço  | 02/05/2017 | Chamado 33589. Inclusão dos campos Endereço, bairro, municipio, uf e CEP na impressão.
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 12/09/2024 | Chamado 48465. Removendo warning de compilação.
+Julio Paz     |02/05/2017| Chamado 19813. Inclusão da função de Log ITLOGACS().
+Igor Melgaço  |02/05/2017| Chamado 33589. Inclusão dos campos Endereço, bairro, municipio, uf e CEP na impressão.
+Lucas Borges  |12/09/2024| Chamado 48465. Removendo warning de compilação.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE 'Protheus.ch'
-#INCLUDE 'TOPCONN.CH'
+#Include "TOTVS.ch"
+#Include 'TOPCONN.CH'
 
 /*
 ===============================================================================================================================
 Programa----------: REST009
 Autor-------------: Darcio R Sporl
 Data da Criacao---: 23/08/2016
-===============================================================================================================================
 Descrição---------: Relatório Pallets Chep para clientes não cadastrados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -37,7 +29,7 @@ Private _cPerg	:= "REST009"
 Private aOrd	:= {} 
 
 If !Pergunte(_cPerg,.T.)
-     return
+     Return
 EndIf
 
 oReport := RptDef(_cPerg)
@@ -55,11 +47,8 @@ Return
 Programa----------: RptDef
 Autor-------------: Darcio R Sporl
 Data da Criacao---: 23/08/2016
-===============================================================================================================================
 Descrição---------: Função que faz a montagem do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -103,11 +92,8 @@ Return(oReport)
 Programa----------: RptDef
 Autor-------------: Darcio R Sporl
 Data da Criacao---: 23/08/2016
-===============================================================================================================================
 Descrição---------: Função que imprime o relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -126,7 +112,7 @@ cQry1 += "WHERE F2_FILIAL IN " + FormatIn( MV_PAR01 , ";" )
 cQry1 += "  AND F2_CLIENTE BETWEEN '" + MV_PAR04 + "' AND '" + MV_PAR06 + "' "
 cQry1 += "  AND F2_LOJA BETWEEN '" + MV_PAR05 + "' AND '" + MV_PAR07 + "' "
 cQry1 += "  AND F2_DOC BETWEEN '" + MV_PAR08 + "' AND '" + MV_PAR09 + "' "
-cQry1 += "  AND F2_EMISSAO BETWEEN '" + DtoS(MV_PAR02) + "' AND '" + DtoS(MV_PAR03) + "' "
+cQry1 += "  AND F2_EMISSAO BETWEEN '" + DToS(MV_PAR02) + "' AND '" + DToS(MV_PAR03) + "' "
 cQry1 += "  AND F2_I_CTRA BETWEEN '" + MV_PAR10 + "' AND '" + MV_PAR12 + "' "
 cQry1 += "  AND F2_I_LTRA BETWEEN '" + MV_PAR11 + "' AND '" + MV_PAR13 + "' "
 If MV_PAR14 == 1
@@ -140,13 +126,13 @@ cQry1 += "  AND SF2.D_E_L_E_T_ = ' ' "
 cQry1 += "ORDER BY F2_FILIAL, F2_EMISSAO, F2_DOC, F2_SERIE "
 
 If Select("TRBPAL") <> 0
-	DbSelectArea("TRBPAL")
-	DbCloseArea()
+	DBSelectArea("TRBPAL")
+	DBCloseArea()
 EndIf
 
 TCQUERY cQry1 NEW ALIAS "TRBPAL"
 		
-TRBPAL->(dbGoTop())
+TRBPAL->(DBGoTop())
 		
 oReport:SetMeter(TRBPAL->(LastRec()))
 
@@ -162,7 +148,7 @@ While !TRBPAL->(Eof())
 	
 	IncProc("Imprimindo Documento " + AllTrim(TRBPAL->F2_DOC) + " - " + AllTrim(TRBPAL->F2_SERIE))
 
-	oSection1:Cell("DATADOC")	:SetValue(StoD(TRBPAL->F2_EMISSAO))
+	oSection1:Cell("DATADOC")	:SetValue(SToD(TRBPAL->F2_EMISSAO))
 	oSection1:Cell("TRANSP")	:SetValue(TRBPAL->F2_I_CTRA + "/" + TRBPAL->F2_I_LTRA + " - " + AllTrim(TRBPAL->F2_I_NTRAN))
 	oSection1:Cell("MOTORI")	:SetValue(TRBPAL->F2_I_MOTOR + " - " + AllTrim(TRBPAL->F2_I_NMOT))
 	oSection1:Cell("OCARGA")	:SetValue(TRBPAL->F2_CARGA)
@@ -174,14 +160,14 @@ While !TRBPAL->(Eof())
     oSection1:Cell("EST")	    :SetValue(TRBPAL->A1_EST)
     oSection1:Cell("CEP")	    :SetValue(TRBPAL->A1_CEP)
 	oSection1:Cell("QTDPAL")	:SetValue(TRBPAL->D2_QUANT)
-	oSection1:Cell("DATADEV")	:SetValue(StoD(TRBPAL->D1_EMISSAO))
+	oSection1:Cell("DATADEV")	:SetValue(SToD(TRBPAL->D1_EMISSAO))
 	oSection1:Cell("QTDDEV")	:SetValue(TRBPAL->D1_QUANT)
 	oSection1:Cell("CDCHEP")	:SetValue(TRBPAL->A1_I_CCHEP)
 	oSection1:Cell("CCHEP")		:SetValue(TRBPAL->A1_I_CHEP)
 	
-	oSection1:Printline()
+	oSection1:PrintLine()
 
-	TRBPAL->(dbSkip())
+	TRBPAL->(DBSkip())
 End
 	
 oSection1:Finish()

@@ -15,7 +15,7 @@ Lucas Borges  | 16/10/2019 | Removidos os Warning na compilação da release 12.1.
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
-#INCLUDE "Protheus.ch"
+#Include "TOTVS.ch"
 #Include "FwMVCDef.ch"
 
 /*
@@ -39,12 +39,12 @@ Local _xAcesso	:= U_ITACSUSR( 'ZZL_ADMPFU' , 'S' )
 If ValType( _xAcesso ) == 'N' .And. _xAcesso == 0
 
 	Aviso( 'Atenção!' , 'Usuário não está cadastrado na Gestão de Usuários do Configurador Italac!'					, {'Fechar'} )
-	Return()
+	Return
 
 ElseIf !_xAcesso
 	
 	Aviso( 'Atenção!' , 'Usuário sem acesso às rotinas de cadastro da tabela de preços de venda à funcionários!'	, {'Fechar'} )
-	Return()
+	Return
 	
 EndIf
 
@@ -58,7 +58,7 @@ _oBrowse:SetMenuDef( 'AOMS069' )
 _oBrowse:SetDescription( "Tabela de preços de produtos - vendas para funcionários" )
 _oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -189,7 +189,7 @@ Static Function AOMS069INC()
 Local _lRet		:= .T.
 Local _aInfHlp	:= {}
 Local _aFilDup	:= {}
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _oModel	:= FWModelActive()
 Local _nOper	:= _oModel:GetOperation()
 Local _nI		:= 0
@@ -230,7 +230,7 @@ If _nOper == MODEL_OPERATION_INSERT
 	
 EndIf
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return( _lRet )
 
@@ -291,7 +291,7 @@ If !Inclui .And. _oModDet:IsInserted()
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -381,4 +381,4 @@ If _lExec
 	
 EndIf
 
-Return()
+Return

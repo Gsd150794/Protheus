@@ -2,27 +2,21 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor            |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Lucas B. Ferreira| 25/07/2019 | Revisão de fontes. Chamado 28346
+ Lucas Borges |25/07/2019| Chamado 28346. Revisão de fontes.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT003
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 24/05/2019
-===============================================================================================================================
 Descrição---------: Imprime notificação de Crioscopia. Chamado 29304
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -42,37 +36,34 @@ Private m_pag		:= 01
 Private wnrel		:= "RGLT003" // Coloque aqui o nome do arquivo usado para impressao em disco
 Private _cPerg		:= "RGLT003"
 
-Pergunte(_cPerg,.f.)
+Pergunte(_cPerg,.F.)
 
 // Monta a interface padrao com o usuario...                           ³
 wnrel := SetPrint("",NomeProg,_cPerg,@_cTitulo,cDesc1,cDesc2,cDesc3,.T.,aOrd,.T.,cTamanho,,.T.)
 
 If nLastKey == 27
 	Return
-Endif
+EndIf
 
 SetDefault(aReturn,"")
 
 If nLastKey == 27
    Return
-Endif
+EndIf
 
 nTipo := If(aReturn[4]==1,15,18)
 
 RptStatus({|| RGLT003P() },_cTitulo)
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT003P
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 24/05/2019
-===============================================================================================================================
 Descrição---------: Processa relatírio
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -104,7 +95,7 @@ Local _cFiltro		:= "%"
 Local _nX			:= 0
 
 OpenSm0(cEmpAnt, .F.)
-SM0->(DbSeek(cEmpAnt + cFilAnt))
+SM0->(DBSeek(cEmpAnt + cFilAnt))
 // Objeto de impressao grafica
 oPrint:= TMSPrinter():New( "Relatorio de Grafico" )
 oPrint:SetPortrait() 
@@ -128,7 +119,7 @@ BeginSql alias _cAlias
 	  SA2.A2_INSCR, SA2.A2_MUN, SA2.A2_L_SIGSI, ZLB.ZLB_DATA, ZLA.ZLA_VALOR, ZLA.ZLA_FXINI, ZLA.ZLA_FXFIM, ZLB.ZLB_VLRFX, 
 	  ZL3.ZL3_FRETIS, ZL3.ZL3_FRETLJ, SA2TRAN.A2_NOME NOME_TRAN, SA2.A2_L_TANQ, SA2.A2_L_TANLJ, SA2TQ.A2_NOME NOME_TANQUE, SA2.A2_L_CLASS,
 	  ZLA.ZLA_DCRANA, ZLB.ZLB_VOLCRI AGUA, ZLD_QTDBOM-ZLB.ZLB_VOLCRI LEITE
-  FROM %table:ZLB% ZLB, %table:ZLD% ZLD, %table:ZLA% ZLA, %table:SA2% SA2, %table:ZL3% ZL3, %table:SA2% SA2TRAN, %table:SA2% SA2TQ
+  FROM %Table:ZLB% ZLB, %Table:ZLD% ZLD, %Table:ZLA% ZLA, %Table:SA2% SA2, %Table:ZL3% ZL3, %Table:SA2% SA2TRAN, %Table:SA2% SA2TQ
   WHERE ZLB.D_E_L_E_T_ = ' '
   AND ZLD.D_E_L_E_T_ = ' '
   AND ZLA.D_E_L_E_T_ = ' '
@@ -166,11 +157,11 @@ Count to nQtdReg
 
 ProcRegua(nQtdReg)
 
-(_cAlias)->(DbGoTop())
-While !(_cAlias)->(EOf())
+(_cAlias)->(DBGoTop())
+While !(_cAlias)->(Eof())
 	nCount++                   
 
-	incproc((_cAlias)->A2_COD)
+	IncProc((_cAlias)->A2_COD)
 	For _nX:= 1 To 2
 	    oPrint:StartPage()
 	    
@@ -181,7 +172,7 @@ While !(_cAlias)->(EOf())
 		oPrint:FillRect({nL,2300,nL+1,100},TBrush():New("",0)) 
 	   	oPrint:SayBitmap(nL+20,100,cRaizServer + "system/lgrl01.bmp",250,100)
 		nL += 10
-		oPrint:Say(nL,2000,"Emissão:"+dtoc(DDataBase),oFontNormal) 
+		oPrint:Say(nL,2000,"Emissão:"+DToC(DDataBase),oFontNormal) 
 		nL += 50
 	
 		oPrint:Say(nL,1000,"Carta de Não Conformidade",oFontTitulo)
@@ -199,10 +190,10 @@ While !(_cAlias)->(EOf())
 		//===================================================================
 		// Início dos dados da Empresa
 		//===================================================================
-		oPrint:Say(nL,nPos1,alltrim(SM0->M0_NOME)+"-"+alltrim(SM0->M0_FILIAL)+"-"+SM0->M0_NOMECOM,oFontRotulo) 
+		oPrint:Say(nL,nPos1,AllTrim(SM0->M0_NOME)+"-"+AllTrim(SM0->M0_FILIAL)+"-"+SM0->M0_NOMECOM,oFontRotulo) 
 		oPrint:Say(nL,nPos3,"CNPJ:"+SM0->M0_CGC,oFontRotulo) 
 		nL += 50
-		oPrint:Say(nL,nPos1,ALLTRIM(SM0->M0_ENDENT)+"-"+ALLTRIM(SM0->M0_CIDENT)+"-"+ALLTRIM(SM0->M0_ESTENT),oFontRotulo) 
+		oPrint:Say(nL,nPos1,AllTrim(SM0->M0_ENDENT)+"-"+AllTrim(SM0->M0_CIDENT)+"-"+AllTrim(SM0->M0_ESTENT),oFontRotulo) 
 		nL += 50
 		oPrint:FillRect({nL,2300,nL+1,100},TBrush():New("",0)) 
 		nL += 10
@@ -327,10 +318,10 @@ While !(_cAlias)->(EOf())
 		
 		oPrint:EndPage()
 	Next _nX
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 	
 EndDo
-(_cAlias)->(DbCloseArea())
+(_cAlias)->(DBCloseArea())
 	
 oPrint:Preview()
 

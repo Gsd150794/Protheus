@@ -2,39 +2,26 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor            |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Alex Wallauer    | 29/09/2021 | Gravacao do campo E1_I_DTPRO no titulo da DCT. Chamado 37873
- Alex Wallauer    | 08/10/2021 | Gravacao do campo E1_VENCREA com M->E1_I_DTPRO+1. Chamado 37884
- Alex Wallauer    | 06/04/2022 | Retirda da confirmação da alteração do titulo DCT. Chamado 39648
- Julio Paz        | 17/11/2022 | Correções nas validações campo data de prorrogação quando não estiver preenchido.Chamado 41853
- Julio Paz        | 12/12/2022 | Fazer Preenchimento da data de Prorrogação(E1_I_DTPRO) seja sempre dia util. Chamado 42100
- Julio Paz        | 06/01/2023 | Alterar rotina p/permitir remover o conteúdo do campo Dt.Prorrogação(E1_I_DTPRO).Chamado 42444
+Igor Melgaço  |23/01/2025| Chamado 49056. Ajustes para gravação de historico de alterações de campo da SE1
+Igor Melgaço  |10/04/2025| Chamado 47833. Ajustes para correção de vencto.
+Igor Melgaço  |30/05/2025| Chamado 50527. Ajustes para mudança de regra de vencto.
 ===============================================================================================================================
-
-=========================================================================================================================================================
-Analista         - Programador       - Inicio     - Envio      - Chamado - Motivo da Alteração
----------------------------------------------------------------------------------------------------------------------------------------------------------
-Antonio Ramos    -  Igor Melgaço     - 18/12/2024 - 23/01/2025 - 49056   - Ajustes para gravação de historico de alterações de campo da SE1
-Antonio Ramos    -  Igor Melgaço     - 10/04/2025 - 10/04/2025 - 47833   - Ajustes para correção de vencto.
-Antonio Ramos    -  Igor Melgaço     - 16/05/2025 - 30/05/2025 - 50527   - Ajustes para mudança de regra de vencto.
-=========================================================================================================================================================
 */
+
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: FA040ALT
 Autor-------------: Lucas Borges Ferreira 
 Data da Criacao---: 07/02/2012	
-===============================================================================================================================
 Descrição---------: O ponto de entrada FA040ALT sera executado na validacao da alteracao dos dados do contas a receber
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: .T.
 ===============================================================================================================================
 */
-
 User Function FA040ALT() As Logical
 
 Local uRet As Logical
@@ -65,7 +52,7 @@ If SE1->E1_I_DTPRO <> M->E1_I_DTPRO .And. !Empty(M->E1_I_DTPRO)
          M->E1_VENCREA := DataValida(M->E1_I_DTPRO+1,.T.)
       Else
          M->E1_VENCREA := M->E1_I_DTPRO
-      Endif
+      EndIf
    Else
       M->E1_I_DTPRO := DataValida(M->E1_I_DTPRO,.T.)
       M->E1_VENCREA := DataValida(M->E1_I_DTPRO+1,.T.)
@@ -73,50 +60,50 @@ If SE1->E1_I_DTPRO <> M->E1_I_DTPRO .And. !Empty(M->E1_I_DTPRO)
 EndIf
 
 If	SE1->E1_VENCTO <> M->E1_VENCTO 
-	M->E1_I_ALTVE := DATE()
+	M->E1_I_ALTVE := Date()
 EndIf              
 
 If uRet
    _cChave :=SE1->E1_FILIAL+SE1->E1_CLIENTE+SE1->E1_LOJA+"DCT"+SE1->E1_NUM+SE1->E1_PARCELA
-   SE1->(DBSETORDER(2))//E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO
-   IF SE1->(DBSEEK(_cChave))
+   SE1->(DBSetOrder(2))//E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO
+   If SE1->(DBSeek(_cChave))
       bBloco:={||  U_ITMsgLog("FILIAL: "+SE1->E1_FILIAL+CHR(13)+CHR(10)+;
                           "- PREFIXO: "+SE1->E1_PREFIXO+CHR(13)+CHR(10)+;
                            "- NUMERO: "+SE1->E1_NUM+CHR(13)+CHR(10)+;
    					   "- PARCELA: "+SE1->E1_PARCELA+CHR(13)+CHR(10)+;
    					   "- CLIENTE: "+SE1->E1_CLIENTE+CHR(13)+CHR(10)+;
    					   "- LOJA: "+SE1->E1_LOJA+CHR(13)+CHR(10)+;
-   					"- VENCIMENTO: "+DTOC(SE1->E1_VENCTO), "DADOS DA DCT") }
-      //IF U_ITMSG("Foi localizado uma DCT que foi gerada para este titulo. Deseja alterar a data de prorrogação deste DCT?",;
+   					"- VENCIMENTO: "+DToC(SE1->E1_VENCTO), "DADOS DA DCT") }
+      //If U_ITMsg("Foi localizado uma DCT que foi gerada para este titulo. Deseja alterar a data de prorrogação deste DCT?",;
       //           'ALTERACAO DATA DA PRORROGACAO',"Clique em Ver Detalhes para ver dados da DCT",1,2,2,,,,bBloco)
          SE1->(RecLock("SE1",.F.))
    	   SE1->E1_I_DTPRO  := M->E1_I_DTPRO
-   	   SE1->(MsUnLock())
-      //ENDIF
-   ENDIF
+   	   SE1->(MSUnLock())
+      //EndIf
+   EndIf
 
-   SE1->(DBSETORDER(1))
+   SE1->(DBSetOrder(1))
 
-   RestArea(_aArea)
+   FWRestArea(_aArea)
 
    For _nI := 1 to Len(_a1Struct)
       If	SE1->&(_a1Struct[_nI,1]) <> M->&(_a1Struct[_nI,1]) 
          
-         If Alltrim(_a1Struct[_nI,2]) == "N"
+         If AllTrim(_a1Struct[_nI,2]) == "N"
 
             _cPict := PesqPict( "SE1",_a1Struct[_nI,1])
             _cOrig := Transform(SE1->&(_a1Struct[_nI,1]),_cPict) 
             _cAlt  := Transform(M->&(_a1Struct[_nI,1]),_cPict) 
 
-         ElseIf Alltrim(_a1Struct[_nI,2]) == "D"
+         ElseIf AllTrim(_a1Struct[_nI,2]) == "D"
 
-            _cOrig := DTOC(SE1->&(_a1Struct[_nI,1]))
-            _cAlt  := DTOC(M->&(_a1Struct[_nI,1]))
+            _cOrig := DToC(SE1->&(_a1Struct[_nI,1]))
+            _cAlt  := DToC(M->&(_a1Struct[_nI,1]))
 
-         ElseIf Alltrim(_a1Struct[_nI,2]) == "L"
+         ElseIf AllTrim(_a1Struct[_nI,2]) == "L"
 
-            _cOrig := Iif(SE1->&(_a1Struct[_nI,1]),".T.",".F.")
-            _cAlt  := Iif(M->&(_a1Struct[_nI,1]),".T.",".F.")
+            _cOrig := IIf(SE1->&(_a1Struct[_nI,1]),".T.",".F.")
+            _cAlt  := IIf(M->&(_a1Struct[_nI,1]),".T.",".F.")
 
          Else
 
@@ -132,18 +119,13 @@ EndIf
 
 Return uRet
 
-
-
 /*
 ===============================================================================================================================
 Programa----------: FA040L
 Autor-------------: Igor Melgaço
 Data da Criacao---: 02/01/2025
-===============================================================================================================================
 Descrição---------: Grava log de ajuste de flag de planejamento logístico
-===============================================================================================================================
 Parametros--------: _cAlias,_nOrdem,_cCampo,_cOrig,_cAlt,_cChave,_cFilial,_cID,_cOrigem
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -164,11 +146,11 @@ Z07->Z07_DATA		:= Date()
 Z07->Z07_HORA		:= Time()
 Z07->Z07_IFILIA	:= _cFilial
 Z07->Z07_INUM		:= _cID
-IF Z07->(FIELDPOS("Z07_ORIGEM")) <> 0
+If Z07->(FIELDPOS("Z07_ORIGEM")) <> 0
    Z07->Z07_ORIGEM := _cOrigem
-ENDIF
+EndIf
 											
-Z07->( MsUnLock() )
+Z07->( MSUnLock() )
 
 Return
 

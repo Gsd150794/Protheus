@@ -2,19 +2,16 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 21/02/2022 | Criada a rotina de agendamento de entrega do leite de terceiros - Chamado 38650
-Lucas Borges  | 22/07/2022 | Tratamento para Extrato Seco Total (EST). Chamado 40778
-Lucas Borges  | 23/01/2025 | Chamado 49641. Implementada faixa de início e fim para pagamento do excedente de matéria gorda
+Alex Wallauer |21/02/2022| Chamado 38650. Criada a rotina de agendamento de entrega do leite de terceiros
+Lucas Borges  |22/07/2022| Chamado 40778. Tratamento para Extrato Seco Total (EST).
+Lucas Borges  |23/01/2025| Chamado 49641. Implementada faixa de início e fim para pagamento do excedente de matéria gorda
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
-#INCLUDE "RWMAKE.CH"
+#Include "TOTVS.ch"
+#Include "RWMAKE.CH"
 
 /*
 ===============================================================================================================================
@@ -121,7 +118,7 @@ DEFINE DIALOG _oDlg FROM 0,0 TO 395,500 PIXEL
 	TGroup():New( 120 , 002 , 175 , 250 , 'Configuração do Leite: '		, _oDlg ,, CLR_GRAY , .T. )
 
 	TSay():New( 008 , 008 , {|| SC7->C7_NUM																													} , _oDlg ,, _oFont ,,,, .T. ,,, 030 , 10 )
-	TSay():New( 008 , 050 , {|| DtoC( SC7->C7_EMISSAO )																										} , _oDlg ,, _oFont ,,,, .T. ,,, 050 , 10 )
+	TSay():New( 008 , 050 , {|| DToC( SC7->C7_EMISSAO )																										} , _oDlg ,, _oFont ,,,, .T. ,,, 050 , 10 )
 	TSay():New( 026 , 005 , {|| SC7->C7_FORNECE +'/'+ SC7->C7_LOJA +' - '+ AllTrim(Posicione('SA2',1,xFilial('SA2')+SC7->(C7_FORNECE+C7_LOJA),'A2_NOME') )	} , _oDlg ,, _oFont ,,,, .T. ,,, 200 , 10 )
 	TSay():New( 044 , 005 , {|| AllTrim( SC7->C7_PRODUTO ) +' - '+ AllTrim( Posicione('SB1',1,xFilial('SB1')+SC7->C7_PRODUTO,'B1_DESC') )					} , _oDlg ,, _oFont ,,,, .T. ,,, 200 , 10 )
 
@@ -221,7 +218,7 @@ If _nOpc == 1
 		EndIf
 
     SC7->(DbCommit())
-    SC7->( MsUnLock() )
+    SC7->( MSUnLock() )
 
 EndIf
 
@@ -238,22 +235,22 @@ Retorno---------: Nenhum
 ===============================================================================================================================
 */
 User Function AGLT0192(_lBrowse)
-LOCAL _cC7_I_MEAGE:= "" , D
+Local _cC7_I_MEAGE:= "" , D
 Local nPosPrf  
 Local nPosQt   
 Local nPosMELT 
 DEFAULT _lBrowse := .T.
 
-PRIVATE _aLinhas  := {}
-PRIVATE _cPict    := "@E 999,999,999.99"
+Private _aLinhas  := {}
+Private _cPict    := "@E 999,999,999.99"
 
-IF _lBrowse
+If _lBrowse
 
    ZA7->( DBSetOrder(2) )
    If !ZA7->( DBSeek( xFilial('ZA7') + SC7->C7_PRODUTO ) )
-       U_ITMSG("O produto do pedido selecionado não está relacionado à recepção do leite de terceiros! Verifique o pedido selecionado.",'Atenção!',,3)
-   	   RETURN .F.
-   ENDIF
+       U_ITMsg("O produto do pedido selecionado não está relacionado à recepção do leite de terceiros! Verifique o pedido selecionado.",'Atenção!',,3)
+   	   Return .F.
+   EndIf
 
    cA120Num      := SC7->C7_NUM
    M->C7_EMISSAO := SC7->C7_EMISSAO
@@ -261,89 +258,89 @@ IF _lBrowse
    M->C7_QUANT   := SC7->C7_QUANT  
    M->C7_I_MEAGE := SC7->C7_I_MEAGE
 
-   IF EMPTY(M->C7_DATPRF) .OR. EMPTY(M->C7_EMISSAO)
-      U_ITMSG("Data de emissão ou data de entrega do item não preenchida",'Atenção!',"Preencha as 2 datas pra acessar essa opção",3) // ALERT
-      RETURN .F.
-   ENDIF
+   If Empty(M->C7_DATPRF) .Or. Empty(M->C7_EMISSAO)
+      U_ITMsg("Data de emissão ou data de entrega do item não preenchida",'Atenção!',"Preencha as 2 datas pra acessar essa opção",3) // ALERT
+      Return .F.
+   EndIf
 
-ELSE
+Else
 
    nPosProd    := aScan(aHeader,{|x| AllTrim(x[2]) == "C7_PRODUTO"})
    
    ZA7->( DBSetOrder(2) )
    If !ZA7->( DBSeek( xFilial('ZA7') + aCols[n][nPosProd ]  ) )
-   	  U_ITMSG("O produto do pedido selecionado não está relacionado à recepção do leite de terceiros! Verifique o pedido selecionado.",'Atenção!',,3)
-   	  RETURN .F.
-   ENDIF
+   	  U_ITMsg("O produto do pedido selecionado não está relacionado à recepção do leite de terceiros! Verifique o pedido selecionado.",'Atenção!',,3)
+   	  Return .F.
+   EndIf
 
    nPosPrf     := aScan(aHeader,{|x| AllTrim(x[2]) == "C7_DATPRF"})
    nPosQt      := aScan(aHeader,{|x| AllTrim(x[2]) == "C7_QUANT"})
    nPosMELT    := aScan(aHeader,{|x| AllTrim(x[2]) == "C7_I_MEAGE"})
 
    M->C7_EMISSAO     := dA120Emis
-   IF N > 0
+   If N > 0
       M->C7_DATPRF   := aCols[n][nPosPrf ] 
       M->C7_QUANT    := aCols[n][nPosQt  ] 
       M->C7_I_MEAGE  := aCols[n][nPosMELT] 
-   ENDIF   
+   EndIf   
 
-   IF n = 0 .OR. EMPTY(M->C7_DATPRF) .OR. EMPTY(M->C7_EMISSAO)
-      U_ITMSG("Data de emissão ou data de entrega do item não preenchida",'Atenção!',"Preencha as 2 datas pra acessar essa opção",3) // ALERT
-      RETURN .F.
-   ENDIF
+   If n = 0 .Or. Empty(M->C7_DATPRF) .Or. Empty(M->C7_EMISSAO)
+      U_ITMsg("Data de emissão ou data de entrega do item não preenchida",'Atenção!',"Preencha as 2 datas pra acessar essa opção",3) // ALERT
+      Return .F.
+   EndIf
 
-ENDIF
+EndIf
 _lCria:=.F.
 _lRecalcula:=.F.
 nDias:=(M->C7_DATPRF - M->C7_EMISSAO)+1
 
-IF EMPTY(M->C7_I_MEAGE)
+If Empty(M->C7_I_MEAGE)
    _lCria:=.T.
-ELSE
-   _cC7_I_MEAGE:=STRTRAN(ALLTRIM(M->C7_I_MEAGE),CHR(13)+CHR(10),"")
+Else
+   _cC7_I_MEAGE:=StrTran(AllTrim(M->C7_I_MEAGE),CHR(13)+CHR(10),"")
    _aLinAux:=StrToArray(_cC7_I_MEAGE,";")
 
-  IF DTOC(M->C7_EMISSAO) <> _aLinAux[1]  .OR.;
-     (LEN(_aLinAux) <= 2 .AND.  M->C7_DATPRF > M->C7_EMISSAO)  .OR.;
-     (LEN(_aLinAux) >  2 .AND.  DTOC(M->C7_DATPRF) <> _aLinAux[LEN(_aLinAux)-1])
+  If DToC(M->C7_EMISSAO) <> _aLinAux[1]  .OR.;
+     (Len(_aLinAux) <= 2 .And.  M->C7_DATPRF > M->C7_EMISSAO)  .OR.;
+     (Len(_aLinAux) >  2 .And.  DToC(M->C7_DATPRF) <> _aLinAux[Len(_aLinAux)-1])
 
-      IF nDias < (LEN(_aLinAux)/2) .AND. U_ITMSG("Data de entrega do item foi alterada",'Atenção!',"Deseja recalcular as datas para menos?",2,2,3,,"RECALCULAR","CONTINUAR") 
+      If nDias < (Len(_aLinAux)/2) .And. U_ITMsg("Data de entrega do item foi alterada",'Atenção!',"Deseja recalcular as datas para menos?",2,2,3,,"RECALCULAR","CONTINUAR") 
          _lRecalcula:=.T.
-	  ENDIF
-   ENDIF
-ENDIF
+	  EndIf
+   EndIf
+EndIf
 
-IF _lCria
+If _lCria
    nSoma:=0
-   FOR D := 1 TO nDias
-       _cC7_I_MEAGE +=DtoC(M->C7_EMISSAO+nSoma)+";0,00;"+CHR(13)+CHR(10)//+  STR(M->C7_QUANT/nDias,15,8)+";"
-       AADD(_aLinhas,{DtoC(M->C7_EMISSAO+nSoma)," 0,00"})//TRANSFORM(M->C7_QUANT/nDias,_cPict) })
+   For D := 1 TO nDias
+       _cC7_I_MEAGE +=DToC(M->C7_EMISSAO+nSoma)+";0,00;"+CHR(13)+CHR(10)//+  Str(M->C7_QUANT/nDias,15,8)+";"
+       aAdd(_aLinhas,{DToC(M->C7_EMISSAO+nSoma)," 0,00"})//TRANSFORM(M->C7_QUANT/nDias,_cPict) })
 	   nSoma++
-   NEXT
-ELSE
+   Next
+Else
 
-   IF _lRecalcula
+   If _lRecalcula
       nTotDias:=(nDias*2)//*2 PQ cada dia tem 2 linhas no _aLinAux
-   ELSE
-      nTotDias:=LEN(_aLinAux)
-   ENDIF
-   FOR D := 1 TO nTotDias
-       AADD(_aLinhas,{_aLinAux[D] , _aLinAux[D+1] })
+   Else
+      nTotDias:=Len(_aLinAux)
+   EndIf
+   For D := 1 TO nTotDias
+       aAdd(_aLinhas,{_aLinAux[D] , _aLinAux[D+1] })
 	   D++
-   NEXT
-   nTotDias:=(LEN(_aLinAux)/2)// dividido por 2 PQ cada dia tem 2 linhas no _aLinAux
-   IF nDias >  nTotDias
+   Next
+   nTotDias:=(Len(_aLinAux)/2)// dividido por 2 PQ cada dia tem 2 linhas no _aLinAux
+   If nDias >  nTotDias
       nSoma:= (nTotDias+1)
-      FOR D:= (nTotDias+1) TO nDias
-          _cC7_I_MEAGE +=DtoC(M->C7_EMISSAO+nSoma)+";0,00;"+CHR(13)+CHR(10)//+  STR(M->C7_QUANT/nDias,15,8)+";"
-          AADD(_aLinhas,{DtoC(M->C7_EMISSAO+nSoma)," 0,00"})//TRANSFORM(M->C7_QUANT/nDias,_cPict) })
+      For D:= (nTotDias+1) TO nDias
+          _cC7_I_MEAGE +=DToC(M->C7_EMISSAO+nSoma)+";0,00;"+CHR(13)+CHR(10)//+  Str(M->C7_QUANT/nDias,15,8)+";"
+          aAdd(_aLinhas,{DToC(M->C7_EMISSAO+nSoma)," 0,00"})//TRANSFORM(M->C7_QUANT/nDias,_cPict) })
 	      nSoma++
-      NEXT   
-   ENDIF
-ENDIF
+      Next   
+   EndIf
+EndIf
 
 _cTitAux :="Programação de Entrega do Pedido: "+cA120Num
-_cMsgTop :="Data de "+DtoC(M->C7_EMISSAO)+" ate "+DTOC(M->C7_DATPRF)+" / "+ALLTRIM(STR(nDias)) + " dia(s) / Quantidade do Produto: "+TRANSFORM(M->C7_QUANT,_cPict)
+_cMsgTop :="Data de "+DToC(M->C7_EMISSAO)+" ate "+DToC(M->C7_DATPRF)+" / "+AllTrim(Str(nDias)) + " dia(s) / Quantidade do Produto: "+TRANSFORM(M->C7_QUANT,_cPict)
 bDblClk  :={|| AGLT0192(@oLbxAux)}
 _aCab    :={"Data","Rateio da Quantidade"}
 _nPosColRepo:=2
@@ -351,25 +348,25 @@ _nPosColRepo:=2
 //      ITListBox(_cTitAux, _aHeader , _aCols    , _lMaxSiz ,  nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel, _abuttons, _aCab ,bDblClk , _aColXML , bCondMarca,_bLegenda)
 lRet:=U_ITLISTBOX(_cTitAux, _aCab    , _aLinhas  , .F.      , 1      , _cMsgTop ,          ,         ,         ,     ,        ,          ,       ,bDblClk ,          ,           ,         )
 
-IF lRet
+If lRet
    _cC7_I_MEAGE:=""
-   FOR D := 1 TO LEN(_aLinhas)
+   For D := 1 TO Len(_aLinhas)
        _cC7_I_MEAGE+=_aLinhas[D,1]+";"+_aLinhas[D,2]+";"+CHR(13)+CHR(10)
-   NEXT
-   _cC7_I_MEAGE:=LEFT(_cC7_I_MEAGE,LEN(_cC7_I_MEAGE)-2)
-ENDIF
+   Next
+   _cC7_I_MEAGE:=LEFT(_cC7_I_MEAGE,Len(_cC7_I_MEAGE)-2)
+EndIf
 
-IF _lBrowse
+If _lBrowse
    SC7->(RecLock( 'SC7' , .F. ))
    SC7->C7_I_MEAGE	:= _cC7_I_MEAGE
    SC7->(DBCOMMIT())
-   SC7->(MSUNLOCK())
-ELSE
+   SC7->(MSUnLock())
+Else
    aCols[n][nPosMELT] := _cC7_I_MEAGE
-ENDIF
+EndIf
 
 
-RETURN .T.
+Return .T.
 
 /*
 ===============================================================================================================================
@@ -387,47 +384,47 @@ Local _nLinPos  := oLbxAux:nAt
 Local _bOK, D
 
 If oLbxAux:nColPos == _nPosColRepo	
-   _bOK:={|| IF(_nQtde >= 0 .AND. _nQtde <= M->C7_QUANT,.T.,(U_ITMSG("Quantidade INVALIDA",'Atenção!',"Digite um valor maior que zero e menor qde que o item posicionado: "+TRANSFORM(M->C7_QUANT,_cPict),3),.F.) ) }
-   _nQtde :=STRTRAN(_aLinhas[_nLinPos,_nPosColRepo],".","") //Tira o ponto dos milhar
-   _nQtde :=VAL(STRTRAN(_nQtde,",",".") )//Tira a virgula e poe o ponto para o val() não comer a decimal
+   _bOK:={|| If(_nQtde >= 0 .And. _nQtde <= M->C7_QUANT,.T.,(U_ITMsg("Quantidade INVALIDA",'Atenção!',"Digite um valor maior que zero e menor qde que o item posicionado: "+TRANSFORM(M->C7_QUANT,_cPict),3),.F.) ) }
+   _nQtde :=StrTran(_aLinhas[_nLinPos,_nPosColRepo],".","") //Tira o ponto dos milhar
+   _nQtde :=Val(StrTran(_nQtde,",",".") )//Tira a virgula e poe o ponto para o Val() não comer a decimal
    lOK:=.F.
 
-   DO WHILE .T.
+   While .T.
       _nLin:=11
 	  @ 00,00 To 150,280 Dialog oDlgDes Title "Quantidade de Leite"
 	  
-	  @ _nLin  ,10 SAY   "Qtde Produto:" Pixel of oDlgDes
+	  @ _nLin  ,10 Say   "Qtde Produto:" Pixel of oDlgDes
 	  @ _nLin-1,50 MSGET M->C7_QUANT Picture _cPict  Pixel Of oDlgDes WHEN .F.
 	   _nLin+=20
-	  @ _nLin  ,10 SAY   "Quantidade:" Pixel of oDlgDes
+	  @ _nLin  ,10 Say   "Quantidade:" Pixel of oDlgDes
 	  @ _nLin-1,50 MSGET _nQtde Picture _cPict  Pixel Of oDlgDes
 	   _nLin+=20
-	  @ _nLin,50 BMPBUTTON Type 1 ACTION (IF(EVAL(_bOK),(lOK:=.T.,Close(oDlgDes)),))
-	  @ _nLin,82 BMPBUTTON TYPE 2 ACTION Close(oDlgDes)
+	  @ _nLin,50 BMPBUTTON Type 1 ACTION (If(EVAL(_bOK),(lOK:=.T.,Close(oDlgDes)),))
+	  @ _nLin,82 BMPBUTTON Type 2 ACTION Close(oDlgDes)
 	  Activate Dialog oDlgDes Center
   
-      IF lOK
+      If lOK
 	     _cQtdeSalva:=oLbxAux:aArray[ _nLinPos , _nPosColRepo ]
          oLbxAux:aArray[ _nLinPos , _nPosColRepo ] := TRANSFORM(_nQtde,_cPict)
          _nQtdeSoma:=0
-         FOR D := 1 TO LEN(oLbxAux:aArray)
-             _nQtdeAux :=STRTRAN(oLbxAux:aArray[D,_nPosColRepo],".","") //Tira o ponto dos milhar
-             _nQtdeAux :=VAL(STRTRAN(_nQtdeAux,",",".") )//Tira a virgula e poe o ponto para o val() não comer a decimal
+         For D := 1 TO Len(oLbxAux:aArray)
+             _nQtdeAux :=StrTran(oLbxAux:aArray[D,_nPosColRepo],".","") //Tira o ponto dos milhar
+             _nQtdeAux :=Val(StrTran(_nQtdeAux,",",".") )//Tira a virgula e poe o ponto para o Val() não comer a decimal
 		     _nQtdeSoma+=_nQtdeAux
-         NEXT
-		 IF _nQtdeSoma > M->C7_QUANT
-            U_ITMSG("Somatoria das quantidades mais a digitada é maior que a quantidade do item posicionado: "+TRANSFORM(_nQtdeSomaT,_cPict),'Atenção!',"Digitar quantidade para somatoria menor ou igual a "+TRANSFORM(M->C7_QUANT,_cPict),3) // ALERT
+         Next
+		 If _nQtdeSoma > M->C7_QUANT
+            U_ITMsg("Somatoria das quantidades mais a digitada é maior que a quantidade do item posicionado: "+TRANSFORM(_nQtdeSomaT,_cPict),'Atenção!',"Digitar quantidade para somatoria menor ou igual a "+TRANSFORM(M->C7_QUANT,_cPict),3) // ALERT
             oLbxAux:aArray[ _nLinPos , _nPosColRepo ] := _cQtdeSalva//VOLTA O ANTERIOR
-		    LOOP
-		 ENDIF
+		    Loop
+		 EndIf
          //_aLinhas[_nLinPos,_nPosColRepo]:=TRANSFORM(_nQtde,_cPict)  
-      ENDIF
-      EXIT
-   ENDDO
-ENDIF
+      EndIf
+      Exit
+   EndDo
+EndIf
 
 //oLbxAux:Setarray(_aLinhas)
 oLbxAux:Refresh()
-PROCESSMESSAGES()
+ProcessMessages()
 
-Return()
+Return

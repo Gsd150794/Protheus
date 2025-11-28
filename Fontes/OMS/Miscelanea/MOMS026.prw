@@ -10,7 +10,7 @@ Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para cont
 ===============================================================================================================================
 */
 
-#Include "Protheus.Ch"
+#Include "TOTVS.ch"
 #Include "FWMVCDef.Ch"
 
 #Define		TITULO	"Análise de Clientes Bloqueados"
@@ -51,7 +51,7 @@ Else
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -96,16 +96,16 @@ For nI := 1 To Len( _aParAux )
 	aAdd( _aParRet , _aParAux[nI][03] )
 Next nI
 
-IF !ParamBox( _aParAux , "Parametrização do Relatório:" , @_aParRet )
+If !ParamBox( _aParAux , "Parametrização do Relatório:" , @_aParRet )
 
-	u_itmsg(  "Operação cancelada pelo usuário!" , "Atenção!" , , 1 )
-	Return()
+	U_ITMsg(  "Operação cancelada pelo usuário!" , "Atenção!" , , 1 )
+	Return
 	
 EndIf
 
-cDtIni	:= DtoS( MV_PAR01 )
-cTpPes	:= IIF( MV_PAR03 == 1 , "J" , IIF( MV_PAR03 == 2 , "F" , "" ) )
-_credes := alltrim(MV_PAR02)
+cDtIni	:= DToS( MV_PAR01 )
+cTpPes	:= IIf( MV_PAR03 == 1 , "J" , IIf( MV_PAR03 == 2 , "F" , "" ) )
+_credes := AllTrim(MV_PAR02)
 
 _cQuery := " SELECT "
 _cQuery += "     SA1.A1_COD				AS CLIENTE,"
@@ -130,18 +130,18 @@ _cQuery += IIf(!Empty(cTpPes) , " AND SA1.A1_PESSOA = '"+ cTpPes +"' ","")						
 If MV_PAR04 == 2 //Para opção com rede filtra redes e não traz os sem rede
 
 	_cQuery += " AND ( SA1.A1_GRPVEN <> '999999' AND SA1.A1_GRPVEN > '000000' ) " 						//Filtro de sem redes
-	_cQuery += IIf( !Empty( _credes ) , " AND SA1.A1_GRPVEN NOT IN "+ FORMATIN( _credes , ";" ) , "" ) 	//Filtro de rede de cliente
+	_cQuery += IIf( !Empty( _credes ) , " AND SA1.A1_GRPVEN NOT IN "+ FormatIn( _credes , ";" ) , "" ) 	//Filtro de rede de cliente
 	
-Elseif MV_PAR04 == 1 //Para opção sem rede filtra todos que tenham alguma rede válida
+ElseIf MV_PAR04 == 1 //Para opção sem rede filtra todos que tenham alguma rede válida
 
 	_cQuery += " AND ( SA1.A1_GRPVEN = '999999' OR SA1.A1_GRPVEN < '000000' ) " 						//filtro de clientes com rede
-	_cQuery += IIf( !Empty( _credes ) , " AND SA1.A1_GRPVEN NOT IN "+ FORMATIN( _credes , ";" ) , "" )	//Filtro de rede de cliente
+	_cQuery += IIf( !Empty( _credes ) , " AND SA1.A1_GRPVEN NOT IN "+ FormatIn( _credes , ";" ) , "" )	//Filtro de rede de cliente
 	
-Elseif MV_PAR04 == 3 //Para opção todos só faz o filtro de redes
+ElseIf MV_PAR04 == 3 //Para opção todos só faz o filtro de redes
 
-	_cQuery += IIf( !Empty( _credes ) , " AND SA1.A1_GRPVEN NOT IN "+ FORMATIN( _credes , ";" ) , "" ) 	//Filtro de rede de cliente
+	_cQuery += IIf( !Empty( _credes ) , " AND SA1.A1_GRPVEN NOT IN "+ FormatIn( _credes , ";" ) , "" ) 	//Filtro de rede de cliente
 	
-Endif
+EndIf
 
 _cQuery += " GROUP BY SA1.A1_COD, SA1.A1_LOJA, SA1.A1_NOME, SA1.A1_GRPVEN, SA1.A1_CGC, SA1.A1_I_DTCAD, SA1.A1_PESSOA, SA1.R_E_C_N_O_, SA1.A1_I_DTREA "
 
@@ -162,14 +162,14 @@ COUNT TO _nTotReg
 If _nTotReg <= 0
 
 	(_cAliasQry)->( DBCloseArea() )
-	u_itmsg(  "Não foram encontrados Clientes Inativos no período de acordo com os parâmetros informados!" ,"Atenção!" ,,1 )
-	Return()
+	U_ITMsg(  "Não foram encontrados Clientes Inativos no período de acordo com os parâmetros informados!" ,"Atenção!" ,,1 )
+	Return
 	
 EndIf
 
-If select(cAliasAux) > 0
-	(cAliasAux)->(Dbclosearea())
-Endif
+If Select(cAliasAux) > 0
+	(cAliasAux)->(DBCloseArea())
+EndIf
 
 _otemp := FWTemporaryTable():New( cAliasAux, _aCpos )
 
@@ -200,21 +200,21 @@ While (_cAliasQry)->( !Eof() )
 								Capital( AllTrim( (_cAliasQry)->NOME ) )	,;
 								Capital( AllTrim( Posicione( "ACY" , 1 , xFilial("ACY") + (_cAliasQry)->REDE , "ACY_DESCRI" ) ) )	,;
 								MOMS026CGC( (_cAliasQry)->CGC )				,;
-								StoD( (_cAliasQry)->DAT_CAD )				,;
-								StoD( (_cAliasQry)->ULT_FAT )				,;
-								StoD( (_cAliasQry)->DT_REAV )				,;	// Data da Reavaliação
+								SToD( (_cAliasQry)->DAT_CAD )				,;
+								SToD( (_cAliasQry)->ULT_FAT )				,;
+								SToD( (_cAliasQry)->DT_REAV )				,;	// Data da Reavaliação
 								(_cAliasQry)->REGSA1						})
 			
-			If StoD( (_cAliasQry)->DAT_CAD ) < MV_PAR01
+			If SToD( (_cAliasQry)->DAT_CAD ) < MV_PAR01
 				_lDtCad	:= .T.
 			EndIf
 			
-			If StoD( (_cAliasQry)->ULT_FAT ) > MV_PAR01
+			If SToD( (_cAliasQry)->ULT_FAT ) > MV_PAR01
 				_lInc	:= .F.
 			EndIf
 			// Faz validação da data de reavaliação
 			If !Empty( (_cAliasQry)->DT_REAV )
-				If StoD( (_cAliasQry)->DT_REAV ) > MV_PAR01
+				If SToD( (_cAliasQry)->DT_REAV ) > MV_PAR01
 					_lDtRea := .T.
 				EndIf
 			EndIf
@@ -251,12 +251,12 @@ While (_cAliasQry)->( !Eof() )
 
 		// Faz validação da data de reavaliação
 		If !Empty( (_cAliasQry)->DT_REAV )
-			If StoD( (_cAliasQry)->DT_REAV ) > MV_PAR01
+			If SToD( (_cAliasQry)->DT_REAV ) > MV_PAR01
 				_lDtRea := .T.
 			EndIf
 		EndIf
 
-		If StoD( (_cAliasQry)->ULT_FAT ) < MV_PAR01 .AND. StoD( (_cAliasQry)->DAT_CAD ) < MV_PAR01 .And. ! _lDtRea // _DtRea
+		If SToD( (_cAliasQry)->ULT_FAT ) < MV_PAR01 .And. SToD( (_cAliasQry)->DAT_CAD ) < MV_PAR01 .And. ! _lDtRea // _DtRea
 			
 			(cAliasAux)->( RecLock( cAliasAux , .T. ) )
 			
@@ -265,9 +265,9 @@ While (_cAliasQry)->( !Eof() )
 			(cAliasAux)->NOME 		:= Capital( AllTrim( (_cAliasQry)->NOME ) )
 			(cAliasAux)->REDE		:= Capital( AllTrim( Posicione( "ACY" , 1 , xFilial("ACY") + (_cAliasQry)->REDE , "ACY_DESCRI" ) ) )
 			(cAliasAux)->CGC		:= MOMS026CGC( (_cAliasQry)->CGC )
-			(cAliasAux)->DAT_CAD	:= StoD( (_cAliasQry)->DAT_CAD )
-			(cAliasAux)->ULT_FAT	:= StoD( (_cAliasQry)->ULT_FAT )
-			(cAliasAux)->DT_REAV	:= StoD( (_cAliasQry)->DT_REAV )	// Data da Reavaliação
+			(cAliasAux)->DAT_CAD	:= SToD( (_cAliasQry)->DAT_CAD )
+			(cAliasAux)->ULT_FAT	:= SToD( (_cAliasQry)->ULT_FAT )
+			(cAliasAux)->DT_REAV	:= SToD( (_cAliasQry)->DT_REAV )	// Data da Reavaliação
 			(cAliasAux)->REGSA1		:= (_cAliasQry)->REGSA1
 			
 			(cAliasAux)->( MSUnLock() )
@@ -287,14 +287,14 @@ aAdd( _aFields , { "Loja"				, {|| (cAliasAux)->LOJA }			, "C" , "@!" , 0 , TamS
 aAdd( _aFields , { "Nome"				, {|| (cAliasAux)->NOME }			, "C" , "@!" , 0 , TamSX3("A1_NOME")[01]-20	, 0 } )
 aAdd( _aFields , { "Rede"				, {|| (cAliasAux)->REDE }			, "C" , "@!" , 0 , TamSX3("ACY_DESCRI")[01]	, 0 } )
 aAdd( _aFields , { "CPF/CNPJ"			, {|| (cAliasAux)->CGC }  			, "C" , "@!" , 0 , TamSX3("A1_CGC")[01]		, 0 } )
-aAdd( _aFields , { "Dt. Cadastro"		, {|| DtoC((cAliasAux)->DAT_CAD) }	, "C" , "@!" , 0 , 10						, 0 } )
-aAdd( _aFields , { "Ult. Compra"		, {|| DtoC((cAliasAux)->ULT_FAT) }	, "C" , "@!" , 0 , 10						, 0 } )
-aAdd( _aFields , { "Dt. Reavaliação"	, {|| DtoC((cAliasAux)->DT_REAV) }	, "C" , "@!" , 0 , 10						, 0 } )	// Data da Reavaliação
+aAdd( _aFields , { "Dt. Cadastro"		, {|| DToC((cAliasAux)->DAT_CAD) }	, "C" , "@!" , 0 , 10						, 0 } )
+aAdd( _aFields , { "Ult. Compra"		, {|| DToC((cAliasAux)->ULT_FAT) }	, "C" , "@!" , 0 , 10						, 0 } )
+aAdd( _aFields , { "Dt. Reavaliação"	, {|| DToC((cAliasAux)->DT_REAV) }	, "C" , "@!" , 0 , 10						, 0 } )	// Data da Reavaliação
 
 oMarkBRW := FWMarkBrowse():New()		   												// Inicializa o Browse
 
 oMarkBRW:SetAlias( cAliasAux )			   												// Define Alias que será a Base do Browse
-oMarkBRW:SetDescription( "Clientes Inativos a partir de: "+ DtoC( StoD( cDtIni ) ) +" (Clientes sem faturamento após a data)" )	// Define o titulo do browse de marcacao
+oMarkBRW:SetDescription( "Clientes Inativos a partir de: "+ DToC( SToD( cDtIni ) ) +" (Clientes sem faturamento após a data)" )	// Define o titulo do browse de marcacao
 oMarkBRW:SetFieldMark( "MARCA" )														// Define o campo que sera utilizado para a marcação
 oMarkBRW:SetMenuDef( 'MOMS026' )														// Força a utilização do menu da rotina atual
 oMarkBRW:SetAllMark( {|| oMarkBRW:AllMark() , MOMS026MRK(.T.) } )						// Ação do Clique no Header da Coluna de Marcação
@@ -307,7 +307,7 @@ oMarkBRW:Activate()																		// Ativacao da classe
 
 (cAliasAux)->( DBCloseArea() )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -345,7 +345,7 @@ DBSelectArea("SA1")
 SA1->( DBGoTo(nRegSA1) )
 AxVisual( "SA1" , nRegSA1 , 2 )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -362,15 +362,15 @@ Static Function MOMS026CPS( _nTotReg )
 Local _aCpos := {}
 
 aAdd( _aCpos , { "MARCA"		, "C" , 1							, 0 } )
-AAdd( _aCpos , { "CLIENTE"		, "C" , TamSX3("A1_COD")[01]		, 0 } )
-AAdd( _aCpos , { "LOJA"			, "C" , TamSX3("A1_LOJA")[01]		, 0 } )
-AAdd( _aCpos , { "NOME"			, "C" , TamSX3("A1_NOME")[01]		, 0 } )
-AAdd( _aCpos , { "REDE"			, "C" , TamSX3("ACY_DESCRI")[01]	, 0 } )
-AAdd( _aCpos , { "CGC"			, "C" , 18							, 0 } )
-AAdd( _aCpos , { "DAT_CAD"		, "D" , 8							, 0 } )
-AAdd( _aCpos , { "ULT_FAT"		, "D" , 8							, 0 } )
-AAdd( _aCpos , { "DT_REAV"		, "D" , 8							, 0 } )	// Data da Reavaliação
-AAdd( _aCpos , { "REGSA1"		, "N" , 9							, 0 } )
+aAdd( _aCpos , { "CLIENTE"		, "C" , TamSX3("A1_COD")[01]		, 0 } )
+aAdd( _aCpos , { "LOJA"			, "C" , TamSX3("A1_LOJA")[01]		, 0 } )
+aAdd( _aCpos , { "NOME"			, "C" , TamSX3("A1_NOME")[01]		, 0 } )
+aAdd( _aCpos , { "REDE"			, "C" , TamSX3("ACY_DESCRI")[01]	, 0 } )
+aAdd( _aCpos , { "CGC"			, "C" , 18							, 0 } )
+aAdd( _aCpos , { "DAT_CAD"		, "D" , 8							, 0 } )
+aAdd( _aCpos , { "ULT_FAT"		, "D" , 8							, 0 } )
+aAdd( _aCpos , { "DT_REAV"		, "D" , 8							, 0 } )	// Data da Reavaliação
+aAdd( _aCpos , { "REGSA1"		, "N" , 9							, 0 } )
 
 Return( _aCpos )
 
@@ -394,8 +394,8 @@ Local _cMsgBlq	:= ""
 Local _nValCbLq := U_ITGETMV( 'IT_VALCBLQ',20.00 ) // Valor de limite de crédito de bloqueio.
 
 _cMsgBlq := "Bloqueio Automático: "+ CRLF
-_cMsgBlq += "Cliente inativo entre "+ DtoC( StoD( cDtIni ) ) +" e "+ DtoC( Date() ) +"]"+ CRLF
-_cMsgBlq += "Usuário: "+ Capital( AllTrim( UsrFullName(_cCodUsr) ) ) +" / "+ DtoC( Date() ) +" "+ Time()
+_cMsgBlq += "Cliente inativo entre "+ DToC( SToD( cDtIni ) ) +" e "+ DToC( Date() ) +"]"+ CRLF
+_cMsgBlq += "Usuário: "+ Capital( AllTrim( UsrFullName(_cCodUsr) ) ) +" / "+ DToC( Date() ) +" "+ Time()
 
 ProcRegua( _nTotReg )
 
@@ -416,19 +416,19 @@ If _nTotReg > 0
         SA1->A1_MSBLQL	:= "1"
         SA1->A1_I_ACRED	:= _cMsgBlq
         SA1->A1_LC      := _nValCbLq // Valor de limite de crédito de bloqueio.
-		SA1->( MsUnLock() )
+		SA1->( MSUnLock() )
 	
 		//===========================================================================
 		//| Grava o Item processado no Lote                                         |
 		//===========================================================================
-		U_ITGrLote( "Z03" , _cNumLote , { { SA1->A1_FILIAL + SA1->A1_COD + SA1->A1_LOJA , StoD( cDtIni ) , Date() , "1" } } , "1" )
+		U_ITGrLote( "Z03" , _cNumLote , { { SA1->A1_FILIAL + SA1->A1_COD + SA1->A1_LOJA , SToD( cDtIni ) , Date() , "1" } } , "1" )
 		
 		If SA1->A1_PESSOA == 'J'
 			
 			_cQuery := " UPDATE "+ RetSqlName('SA1') +" SA1 "
 			_cQuery += " SET SA1.A1_MSBLQL = '1', " 
 			_cQuery += "     SA1.A1_LC = " + AllTrim(Str(_nValCbLq,16,2)) + " "
-			_cQuery += " WHERE SA1.D_E_L_E_T_ = ' ' AND SA1.A1_PESSOA = 'J' AND SUBSTR( SA1.A1_CGC , 1 , 8 ) = '"+ SubStr( SA1->A1_CGC , 1 , 8 ) +"' "
+			_cQuery += " WHERE SA1.D_E_L_E_T_ = ' ' AND SA1.A1_PESSOA = 'J' AND SubStr( SA1.A1_CGC , 1 , 8 ) = '"+ SubStr( SA1->A1_CGC , 1 , 8 ) +"' "
 			
 			If TCSqlExec( _cQuery ) < 0
 			    //								|....:....|....:....|....:....|....:....|
@@ -445,7 +445,7 @@ If _nTotReg > 0
 	
 	U_ITFnLote( "Z00" , _cNumLote )
 	
-	u_itmsg(  '['+ cValToChar( Len( _aRegMrk ) ) +'] clientes processados com sucesso!' , 'Concluído!' ,,2 )
+	U_ITMsg(  '['+ cValToChar( Len( _aRegMrk ) ) +'] clientes processados com sucesso!' , 'Concluído!' ,,2 )
 	
 Else
 	
@@ -453,15 +453,15 @@ Else
 	//| Exclui o Lote que não teve registros processados.                       |
 	//===========================================================================
 	DBSelectArea("Z00")
-	IF Z00->( DBSeek( xFilial("Z00") + _cNumLote ) )
+	If Z00->( DBSeek( xFilial("Z00") + _cNumLote ) )
 		
 		Z00->( RecLock( "Z00" , .F. ) )
 		Z00->( DBDelete() )
-		Z00->( MsUnlock() )
+		Z00->( MSUnLock() )
 		
-	EndIF
+	EndIf
 	
-	u_itmsg(  'Não foram selecionados registros para processar!' , 'Atenção!' ,,1 )
+	U_ITMsg(  'Não foram selecionados registros para processar!' , 'Atenção!' ,,1 )
 	
 EndIf
 
@@ -469,7 +469,7 @@ End Transaction
 
 CloseBrowse()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -486,7 +486,7 @@ Static Function MOMS026CGC( cCGCAux )
 Local cRet	:= ""
 Local cAux	:= AllTrim( cCGCAux )
 
-IF Len( cAux ) > 11
+If Len( cAux ) > 11
 
 	cAux := PadL( cAux , 14 , "0" )
 	cRet := Transform( cAux , "@R! NN.NNN.NNN/NNNN-99" )
@@ -496,7 +496,7 @@ Else
 	cAux := PadL( cAux , 11 , "0" )
 	cRet := Transform( cAux , "@R 999.999.999-99" )
 	
-EndIF
+EndIf
 
 Return( cRet )
 
@@ -547,7 +547,7 @@ EndDo
 (_cAlias)->( DBCloseArea() )
 
 //Se tiver documentos válidos cria a consulta
-If len(_aDados) > 0
+If Len(_aDados) > 0
 
 	If U_ITListBox( _cTitAux , { '__' , 'Código', 'Descrição' } , @_aDados , .F. , 2 , 'Selecione as redes para não listar: ' )
 		
@@ -559,7 +559,7 @@ If len(_aDados) > 0
 	
 			EndIf
 			
-			If len(_cret) > 70
+			If Len(_cret) > 70
 		
 				alert("Máximo de redes a selecionar ultrapassado, selecione 10 ou menos redes")
 			
@@ -567,20 +567,20 @@ If len(_aDados) > 0
 				
 				_nI := Len( _aDados ) + 1
 				
-			Endif		
+			EndIf		
 	
 		Next _nI
 	
 		&( ReadVar() ) := SubStr( _cRet , 1 , Len(_cRet) - 1 )
 		
-	Endif
+	EndIf
 
 //se não tiver redes cadastradas alerta e sai
 Else
 	
-	u_itmsg("Não há redes cadastradas!","Atenção",,1)
+	U_ITMsg("Não há redes cadastradas!","Atenção",,1)
 	
-Endif
+EndIf
 
 Return( .T. )
 
@@ -639,4 +639,4 @@ Else
 	
 EndIf
 
-Return()
+Return

@@ -1,4 +1,4 @@
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -32,7 +32,7 @@ If M->C5_TIPO $ 'D/B'
 	
 	DBSelectArea('SA2')
 	SA2->( DBSetOrder(1) )
-	IF SA2->( DBSeek( xFilial('SA2') + M->C5_CLIENTE + M->C5_LOJACLI ) )
+	If SA2->( DBSeek( xFilial('SA2') + M->C5_CLIENTE + M->C5_LOJACLI ) )
 	
 		M->C5_I_NOME	:= SA2->A2_NOME
 		M->C5_I_FANTA	:= SA2->A2_NREDUZ
@@ -51,7 +51,7 @@ Else
 
 	DBSelectArea('SA1')
 	SA1->( DBSetOrder(1) )
-	IF SA1->( DBSeek( xFilial('SA1') + M->C5_CLIENTE + M->C5_LOJACLI ) )
+	If SA1->( DBSeek( xFilial('SA1') + M->C5_CLIENTE + M->C5_LOJACLI ) )
 	
 		M->C5_I_NOME	:= SA1->A1_NOME
 		M->C5_I_FANTA	:= SA1->A1_NREDUZ

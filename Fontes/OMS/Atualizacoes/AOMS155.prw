@@ -1,18 +1,18 @@
 /*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-       Autor      |    Data    |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-
-===============================================================================================================================
+=========================================================================================================================================================
+                          ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
+=========================================================================================================================================================
+Analista         - Programador       - Inicio     - Envio    - Chamado - Motivo da Alteração
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+Vanderlei/Jerry  - Alex Wallauer     - 02/09/2025 -          - 50463   - Novo campos de detalhes para mostrar do Z40.
+=========================================================================================================================================================
 */
 
-#INCLUDE "FWMBROWSE.CH"
-#INCLUDE "FWMVCDEF.CH"
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "TOPCONN.CH"
-#INCLUDE "RWMAKE.CH"
+#Include "FWMBROWSE.CH"
+#Include "FWMVCDEF.CH"
+#Include "TOTVS.ch"
+#Include "TOPCONN.CH"
+#Include "RWMAKE.CH"
 
 /*
 ===============================================================================================================================
@@ -20,7 +20,7 @@ Programa----------: AOMS155
 Autor-------------: Igor Melgaço
 Data da Criacao---: 08/05/2025
 ===============================================================================================================================
-Descrição---------: Premissa Vs Coordenador. Chamado: 50568 
+Descrição---------: Cadastro de Premissas Vs Coordenadores. Chamado: 50568 
 ===============================================================================================================================
 Parametros--------: 
 ===============================================================================================================================
@@ -36,7 +36,7 @@ _oBrowse:SetMenuDef( 'AOMS155' )
 _oBrowse:SetDescription("Premissa Vs Coordenador")
 _oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -76,8 +76,8 @@ Retorno-----------: _oModel - Objeto do modelo de dados do MVC
 ===============================================================================================================================
 */ 
 Static Function ModelDef()
-Local _oStZ40CAB := FWFormStruct(1,"Z40",{ |x| ALLTRIM(x) $ 'Z40_COD, Z40_DESC, Z40_PERIOD' } )
-Local _oStZ40DET := FWFormStruct(1,"Z40",{ |x| ALLTRIM(x) $ 'Z40_COORD,Z40_NOME,Z40_ALVO, Z40_ATING' } )
+Local _oStZ40CAB := FWFormStruct(1,"Z40",{ |x| AllTrim(x) $ 'Z40_COD, Z40_DESC, Z40_PERIOD' } )
+Local _oStZ40DET := FWFormStruct(1,"Z40",{ |x| !AllTrim(x) $ 'Z40_COD, Z40_DESC, Z40_PERIOD' } )
 Local _oModel
 
 _oModel := MPFormModel():New("AOMS155M",/*bPreValidacao*/ ,/*_bPosValidacao*/ ,/*bCommit*/,/*bCancel*/) 
@@ -118,8 +118,8 @@ Retorno-----------: _oView - Objeto de exibição do MVC
 */ 
 Static Function ViewDef()
 Local _oModel := FWLoadModel("AOMS155")
-Local _oStZ40CAB := FWFormStruct(2,"Z40",{ |x| ALLTRIM(x) $ 'Z40_COD, Z40_DESC, Z40_PERIOD' } )
-Local _oStZ40DET := FWFormStruct(2,"Z40",{ |x| ALLTRIM(x) $ 'Z40_COORD,Z40_NOME,Z40_ALVO, Z40_ATING' } )
+Local _oStZ40CAB := FWFormStruct(2,"Z40",{ |x| AllTrim(x) $ 'Z40_COD, Z40_DESC, Z40_PERIOD' } )
+Local _oStZ40DET := FWFormStruct(2,"Z40",{ |x| !AllTrim(x) $ 'Z40_COD, Z40_DESC, Z40_PERIOD' } )
 Local _oView := Nil
  
 _oView := FWFormView():New()
@@ -161,12 +161,12 @@ User Function AOMS155I()
    Local _oModel := FWModelActive()
    Local _cPeriodo := _oModel:GetValue("Z40MASTER","Z40_PERIOD") 
 
-   If Len(ALLTRIM(_cPeriodo)) < 6
-      U_ITMSG("Contuedo inválido preenchido!","Atenção","Preencha com Ano e Mês (AAAA/MM) no Campo.",3 , , , .T.) 
+   If Len(AllTrim(_cPeriodo)) < 6
+      U_ITMsg("Contuedo inválido preenchido!","Atenção","Preencha com Ano e Mês (AAAA/MM) no Campo.",3 , , , .T.) 
       lRet := .F.
    ElseIf Subs(_cPeriodo,5,2) > "12"
       lRet := .F.
-      U_ITMSG("Mês digitado inválido!","Atenção","",3 , , , .T.)
+      U_ITMsg("Mês digitado inválido!","Atenção","",3 , , , .T.)
    Else
       lRet := .T.
    EndIf
@@ -191,7 +191,7 @@ Retorno-----------: _cCod
 User Function AOMS155J()
 
    If INCLUI
-     _cCod := Space(len(Z40->Z40_COD))
+     _cCod := Space(Len(Z40->Z40_COD))
    Else
       _cCod := Z40->Z40_COD
    EndIf
@@ -215,7 +215,7 @@ Retorno-----------: _cCod
 User Function AOMS155L()
 
    If INCLUI  
-     _cCod := Space(len(Z40->Z40_PERIOD))
+     _cCod := Space(Len(Z40->Z40_PERIOD))
    Else
       _cCod := Z40->Z40_PERIOD
    EndIf

@@ -2,31 +2,26 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                              Motivo                                                          
----------------------------------------------------------------------------------------------------------------------------------------
- Igor Melgaço     | 22/02/2023 | Chamado 43036. Inclusão de campos "Invetariado em" e "Usuario"
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
+Igor Melgaço  |22/02/2023| Chamado 43036. Inclusão de campos "Invetariado em" e "Usuario"
 ================================================================================================================================
-
 */
-//==============================================================================================================================
-// Definicoes de Includes da Rotina.
-//==============================================================================================================================
-#INCLUDE "MATR285.CH"
-#INCLUDE "PROTHEUS.CH"
+
+#Include "MATR285.CH"
+#Include "TOTVS.ch"
+
 /*
-=================================================================================================================================
+===============================================================================================================================
 Programa----------: REST017
 Autor-------------: Alex Wallauer
 Data da Criacao---: 02/01/2020
-==================================================================================================================================
 Descrição---------: Relatorio de Conferencia / copia do MATR285.PRX da TOVS - CHAMADO: 31087
-==================================================================================================================================
 Parametros--------: Nenhum
-==================================================================================================================================
+===============================================================================================================================
 */
-*====================================================*
-USER Function REST017()
-*====================================================*
+User Function REST017()
+
 Local oReport
 
 oReport:= ReportDef()
@@ -40,7 +35,7 @@ Return
 ±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
 ±±³Programa  ³ReportDef ³ Autor ³Marcos V. Ferreira     ³ Data ³20/06/06  ³±±
 ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Descri‡…o ³A funcao estatica ReportDef devera ser criada para todos os ³±±
+±±³Descri‡…o ³Staticao estatica ReportDef devera ser criada para todos os ³±±
 ±±³          ³relatorios que poderao ser agendados pelo usuario.          ³±±
 ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
 ±±³Parametros³Nenhum                                                      ³±±
@@ -63,7 +58,7 @@ Local cAliasSB1 := GetNextAlias()
 Local cAliasSB2 := cAliasSB1
 Local cAliasSB7 := cAliasSB1
 Local oSection1
-LOCAL cPerg     :="REST017"//"MTR285"
+Local cPerg     :="REST017"//"MTR285"
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³Criacao do componente de impressao                                      ³
 //³                                                                        ³
@@ -167,7 +162,7 @@ Return(oReport)
 ±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
 ±±³Programa  ³ReportPrint ³ Autor ³Marcos V. Ferreira   ³ Data ³20/06/06  ³±±
 ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Descri‡…o ³A funcao estatica ReportPrint devera ser criada para todos  ³±±
+±±³Descri‡…o ³Staticao estatica ReportPrint devera ser criada para todos  ³±±
 ±±³          ³os relatorios que poderao ser agendados pelo usuario.       ³±±
 ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
 ±±³Retorno   ³Nenhum                                                      ³±±
@@ -183,7 +178,7 @@ Static Function ReportPrint(oReport,aOrdem,cAliasSB1,cAliasSB2,cAliasSB7)
 
 Local oSection1 := oReport:Section(1)
 Local nOrdem    := oSection1:GetOrder()
-local oSaldoWMS := Nil
+Local oSaldoWMS := Nil
 Local cSeek     := ''
 Local cCompara  := ''
 Local cLocaliz  := ''
@@ -285,14 +280,14 @@ If !(MV_PAR13 == 1)
 	oSection1:Cell('B7_NUMSERI'	):Disable()
 EndIf
 
-dbSelectArea('SB2')
-dbSetOrder(1)
+DBSelectArea('SB2')
+DBSetOrder(1)
 
-dbSelectArea('SB7')
-dbSetOrder(1)
+DBSelectArea('SB7')
+DBSetOrder(1)
 
-dbSelectArea('SB1')
-dbSetOrder(1)
+DBSelectArea('SB1')
+DBSetOrder(1)
 
 nTotRegs += SB2->(LastRec())
 nTotRegs += SB7->(LastRec())
@@ -363,26 +358,26 @@ oSection1:BeginQuery()
 				SB7.B7_FILIAL, SB7.B7_COD, SB7.B7_LOCAL, SB7.B7_LOCALIZ, SB7.B7_DATA,
 				SB7.B7_NUMSERI, SB7.B7_LOTECTL, SB7.B7_NUMLOTE, SB7.B7_DOC, SB7.B7_ESCOLHA, SB1.B1_SEGUM , SB7.B7_QTSEGUM , SB2.B2_QTSEGUM ,
 				SUM(SB7.B7_QUANT) B7_QUANT, CB1.CB1_NOME
-		FROM %table:SB7% SB7
-		INNER JOIN %table:SB1% SB1 ON SB1.B1_FILIAL = %xFilial:SB1%
+		FROM %Table:SB7% SB7
+		INNER JOIN %Table:SB1% SB1 ON SB1.B1_FILIAL = %xFilial:SB1%
 										AND SB1.B1_COD = SB7.B7_COD
 										AND SB1.B1_TIPO BETWEEN %Exp:MV_PAR04% AND %Exp:MV_PAR05%
 										AND SB1.B1_GRUPO BETWEEN %Exp:MV_PAR08%	AND %Exp:MV_PAR09%
 										AND SB1.%NotDel%
-		INNER JOIN %table:SB2% SB2 ON SB2.B2_FILIAL = %xFilial:SB2%
+		INNER JOIN %Table:SB2% SB2 ON SB2.B2_FILIAL = %xFilial:SB2%
 										AND SB2.B2_COD = SB1.B1_COD
 										AND	SB2.B2_LOCAL = SB7.B7_LOCAL
 										AND SB2.%NotDel%
-		LEFT JOIN %table:CBB% CBB ON CBB.CBB_FILIAL = %xFilial:SB7%
+		LEFT JOIN %Table:CBB% CBB ON CBB.CBB_FILIAL = %xFilial:SB7%
 										AND CBB.CBB_CODINV = SB7.B7_DOC
 										AND CBB.%NotDel%
-		LEFT JOIN %table:CB1% CB1 ON CB1.CB1_FILIAL = %xFilial:CBB%
+		LEFT JOIN %Table:CB1% CB1 ON CB1.CB1_FILIAL = %xFilial:CBB%
 										AND CB1.CB1_CODOPE = CBB.CBB_USU
 										AND CB1.%NotDel%
 		WHERE
 			SB7.B7_FILIAL =  %xFilial:SB7%
 			AND SB7.B7_LOCAL BETWEEN %Exp:MV_PAR06%	AND %Exp:MV_PAR07%
-			AND SB7.B7_DATA = %Exp:Dtos(MV_PAR03)%
+			AND SB7.B7_DATA = %Exp:DToS(MV_PAR03)%
 			AND SB7.%NotDel%
 			AND %Exp:cWhere%
 		GROUP BY SB1.B1_FILIAL, SB1.B1_COD, SB1.B1_TIPO,
@@ -399,10 +394,10 @@ oSection1:EndQuery()
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Abertura do Arquivo de Trabalho                        ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-dbSelectArea(cAliasSB1)
+DBSelectArea(cAliasSB1)
 oReport:SetMeter(nTotRegs)
 
-SB7->(dbSetOrder(1))
+SB7->(DBSetOrder(1))
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Processamento do Relatorio                             ³
@@ -417,8 +412,8 @@ While !oReport:Cancel() .And. !(cAliasSB7)->(Eof())
 		nTotal   := 0
 		nSB7Cnt  := 0
 		lImprime := .T.
-		cSeek    := xFilial('SB7')+DTOS(MV_PAR03)+(cAliasSB7)->B7_COD+(cAliasSB7)->B7_LOCAL+(cAliasSB7)->B7_LOCALIZ+(cAliasSB7)->B7_NUMSERI+(cAliasSB7)->B7_LOTECTL+(cAliasSB7)->B7_NUMLOTE
-		cCompara := "B7_FILIAL+DTOS(B7_DATA)+B7_COD+B7_LOCAL+B7_LOCALIZ+B7_NUMSERI+B7_LOTECTL+B7_NUMLOTE"
+		cSeek    := xFilial('SB7')+DToS(MV_PAR03)+(cAliasSB7)->B7_COD+(cAliasSB7)->B7_LOCAL+(cAliasSB7)->B7_LOCALIZ+(cAliasSB7)->B7_NUMSERI+(cAliasSB7)->B7_LOTECTL+(cAliasSB7)->B7_NUMLOTE
+		cCompara := "B7_FILIAL+DToS(B7_DATA)+B7_COD+B7_LOCAL+B7_LOCALIZ+B7_NUMSERI+B7_LOTECTL+B7_NUMLOTE"
 		cProduto := (cAliasSB7)->B7_COD
 		cLocal   := (cAliasSB7)->B7_LOCAL
 		cLocaliz := (cAliasSB7)->B7_LOCALIZ
@@ -429,7 +424,7 @@ While !oReport:Cancel() .And. !(cAliasSB7)->(Eof())
 		cGrupo   := (cAliasSB1)->B1_GRUPO
 		lFirst   := .T.
 
-		SB7->(dbSeek(cSeek))
+		SB7->(DBSeek(cSeek))
 		While !SB7->(Eof()) .And. SB7->&(cCompara) == cSeek
 			If lContagem
 				If SB7->B7_ESCOLHA == "S"
@@ -442,7 +437,7 @@ While !oReport:Cancel() .And. !(cAliasSB7)->(Eof())
 				nSB7Cnt++
 			EndIf
 
-			SB7->(dbSkip())
+			SB7->(DBSkip())
 
 		EndDo
 
@@ -451,7 +446,7 @@ While !oReport:Cancel() .And. !(cAliasSB7)->(Eof())
 			//³Verifica a Quantidade Disponivel/Custo Medio                            ³
 			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 			If (Localiza(cProduto,.T.) .And. !Empty(cLocaliz+cNumSeri)) .Or. (Rastro(cProduto) .And. !Empty(cLotectl+cNumLote))
-				If IntDl(cProduto) .and. lWmsNew
+				If IntDl(cProduto) .And. lWmsNew
 					oSaldoWMS 	:= WMSDTCEstoqueEndereco():New()
 					aSalQtd   := oSaldoWMS:SldPrdData(cProduto,cLocal,MV_PAR03+1,cLoteCtl,cNumLote,cLocaliz,cNumSeri)
 				Else
@@ -497,7 +492,7 @@ While !oReport:Cancel() .And. !(cAliasSB7)->(Eof())
 		EndIf
 	Else
 		lFirst := .F.
-	EndIF
+	EndIf
 
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Impressao do Inventario                                      ³
@@ -505,20 +500,20 @@ While !oReport:Cancel() .And. !(cAliasSB7)->(Eof())
 	If nSB7Cnt > 0 .AND.(lImprime .Or. MV_PAR14 == 3)
 
 
-       IF MV_PAR16 = 1
-		  nSaldo := iif(lFirst,aSaldo[1],0)
+       If MV_PAR16 = 1
+		  nSaldo := IIf(lFirst,aSaldo[1],0)
  		  oSection1:Cell('DIFQUANT'	):SetValue((cAliasSB7)->B7_QUANT - nSaldo )
-       ELSE
-		  nSaldo := iif(lFirst,aSaldo[7],0)
+       Else
+		  nSaldo := IIf(lFirst,aSaldo[7],0)
  		  oSection1:Cell('DIFQUANT'	):SetValue((cAliasSB7)->B7_QTSEGUM - nSaldo )
- 	   ENDIF  
+ 	   EndIf  
 	   oSection1:Cell('QUANTDATA'	):SetValue(nSaldo)
-	   oSection1:Cell('DIFVALOR'	):SetValue(((cAliasSB7)->B7_QUANT - iif(lFirst,aSaldo[1],0))*aCM[MV_PAR10])
+	   oSection1:Cell('DIFVALOR'	):SetValue(((cAliasSB7)->B7_QUANT - IIf(lFirst,aSaldo[1],0))*aCM[MV_PAR10])
 
-            IF MV_PAR16 = 2
+            If MV_PAR16 = 2
 				oSection1:Cell('B1_UM'    	):SetValue( (cAliasSB7)->B1_SEGUM )
 			    oSection1:Cell('B7_QUANT'	):SetValue( (cAliasSB7)->B7_QTSEGUM )
-            ENDIF
+            EndIf
 
 		// Sem quebra de seção, imprime todas as celulas
 		If MV_PAR15 == 1
@@ -547,7 +542,7 @@ While !oReport:Cancel() .And. !(cAliasSB7)->(Eof())
 				oSection1:Cell('B7_LOCALIZ'	):Hide()
 				oSection1:Cell('B7_NUMSERI'	):Hide()
 				oSection1:Cell('QUANTDATA'	):Hide()
-			EndIF
+			EndIf
 
 			oSection1:Cell('DIFVALOR'	):Show()
 
@@ -557,7 +552,7 @@ While !oReport:Cancel() .And. !(cAliasSB7)->(Eof())
 
 	EndIf
 
-	(cAliasSB7)->(dbSkip())
+	(cAliasSB7)->(DBSkip())
 
 EndDo
 

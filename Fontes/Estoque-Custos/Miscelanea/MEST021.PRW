@@ -2,7 +2,7 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        | Data     |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
 Lucas Borges  |08/10/2024| Chamado 48465. Retirada manipulação do SX1
 Lucas Borges  |21/03/2025| Chamado 50221. Rotina refeita e ncluído valor no movimento interno
@@ -10,10 +10,7 @@ Lucas Borges  |03/04/2025| Chamado 50336. Corrigida a forma de gravação do Custo
 ===============================================================================================================================
 */
 
-//===========================================================================
-//| Definições de Includes                                                  |
-//===========================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -84,7 +81,7 @@ If _dMvUlMes < _dDtIni
 	_cUpdate	+= " WHERE SD3.D_E_L_E_T_ = ' ' "
 	_cUpdate	+= "   AND D3_GRUPO IN ('MOD','GGF','DEP')
 	_cUpdate	+= "   AND D3_FILIAL = '" + xFilial("SD3") + "' "
-	_cUpdate	+= "   AND D3_EMISSAO BETWEEN '"+DTOS(_dDtIni)+"' AND '"+DTOS(_dDtFim)+"' "
+	_cUpdate	+= "   AND D3_EMISSAO BETWEEN '"+DToS(_dDtIni)+"' AND '"+DToS(_dDtFim)+"' "
 	If TCSqlExec( _cUpdate ) < 0
 		FWAlertError("Erro na exclusão dos movimentos. Favor acionar a TI. Erro: "+AllTrim(TCSQLError()),"MEST001001")
 	Else
@@ -175,7 +172,7 @@ If _dMvUlMes < _dDtIni
 		_oBulk := FwBulk():New(RetSQLName("SD3"))
 		_oBulk:SetFields(_aStruct)
 
-		While (_cAlias)->(!EOF()) .And. _lRet
+		While (_cAlias)->(!Eof()) .And. _lRet
 			_nI++
 			_oSelf:IncRegua1("Processando...["+ StrZero(_nI,6) +"] de ["+ StrZero(_nQtdReg,6) +"]" )
 			_cProd := PadR(AllTrim('MOD'+(_cAlias)->PBZ_CUSTO),_nTamPrd)
@@ -202,11 +199,11 @@ If _dMvUlMes < _dDtIni
 							(_cAlias)->B1_TIPO;//D3_TIPO
 							})
 			If _cProdOld <> _cProd 
-				If SB2->(DbSeek((_cAlias)->(D3_FILIAL)+_cProd+"00"))
-					SB2->(Reclock("SB2",.F.))
+				If SB2->(DBSeek((_cAlias)->(D3_FILIAL)+_cProd+"00"))
+					SB2->(RecLock("SB2",.F.))
 					SB2->B2_CM1 := Round((_cAlias)->CT2_VALOR / (_cAlias)->QTD,_nRound)
 					SB2->B2_CM3 := Round((_cAlias)->CT2_VALOR / (_cAlias)->QTD,_nRound)
-					SB2->(Msunlock())
+					SB2->(MSUnLock())
 				Else
 					FWAlertError("Erro ao posicionar no produto na SB2. Chave: "+(_cAlias)->(D3_FILIAL)+'MOD'+(_cAlias)->PBZ_CUSTO+"00","MEST02106")
 				EndIf

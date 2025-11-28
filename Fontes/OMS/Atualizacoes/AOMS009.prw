@@ -1,5 +1,5 @@
-#include "protheus.ch"
-#include "rwmake.ch"
+#Include "TOTVS.ch"
+#Include "rwmake.ch"
 /*/
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -37,7 +37,7 @@
 
 User Function AOMS009()
 
-	Local aArea		:= GetArea()
+	Local aArea		:= FWGetArea()
 	Local cEstado	:= M->A1_EST
 	Local cRegiao	:= ""
 	
@@ -53,5 +53,5 @@ User Function AOMS009()
 		cRegiao := "NE" // REGIAO NORDESTE
 	EndIf
 
-	RestArea(aArea)		
-return cRegiao
+	FWRestArea(aArea)		
+Return cRegiao

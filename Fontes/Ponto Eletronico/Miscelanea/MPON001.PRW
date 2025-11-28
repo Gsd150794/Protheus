@@ -10,7 +10,7 @@ Lucas Borges  |08/07/2025| Chamado 50617. Revisões diversas visando padronizar o
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 
 /*
@@ -27,7 +27,7 @@ User Function MPON001
 
 Local _aParRet := {} As Array
 Local _aParAux := {} As Array
-Local _bOK     := {|| IF(MV_PAR02 >= MV_PAR01,.T.,(U_ITMSG("Periodo INVALIDO",'Atenção!',"Tente novamente com outro periodo",3),.F.) ) } As Block
+Local _bOK     := {|| If(MV_PAR02 >= MV_PAR01,.T.,(U_ITMsg("Periodo INVALIDO",'Atenção!',"Tente novamente com outro periodo",3),.F.) ) } As Block
 Local nI       := 0 As Numeric
 
 
@@ -47,7 +47,7 @@ For nI := 1 To Len( _aParAux )
 	aAdd( _aParRet , _aParAux[nI][03] )
 Next nI
 
-Do While .T.
+While .T.
    _lLoop:=.F.
    //            aParametros,cTitle                  ,aRet     ,bOk ,aButtons,lCentered,nPosX,nPosY,oDlgWizard,cLoad,lCanSave,lUserSave
    If !ParamBox( _aParAux , "Leitura das Catracas do Refeitorio" ,@_aParRet,_bOK,        ,         ,     ,     ,          ,     ,.T.     ,.T. )//Intervalo de Datas e Filial
@@ -56,7 +56,7 @@ Do While .T.
 
    FWMsgRun(,{|oproc|  MPON001Proc(oproc) },'Aguarde processamento...','Lendo dados...')
 
-   If _lLoop//Se A função MPON001Proc() devolver .F. ou usuario abortar ou processsar normalmente dá o loop para aparecer a tela novamente senão sai fora 
+   If _lLoop//Se A função MPON001Proc() devolver .F. ou usuario abortar ou processsar normalmente dá o Loop para aparecer a tela novamente senão sai fora 
       Loop
    EndIf
    Exit//Botão cancela 
@@ -86,7 +86,7 @@ DEFAULT oProc := NIL
 oproc:cCaption := ("Lendo dados...")
 ProcessMessages()
 
-BeginSQL alias _cAlias
+BeginSql alias _cAlias
    SELECT ACES.DIREACES, ACES.CODICOLE, ACES.HORAACES,
          TO_CHAR(ACES.DATAACES,'DD/MM/YYYY') DATAACES,
          ACES.ICARD, LAB.NUMEPIS, LAB.TIPOCOLA, LAB.NUMECPF, SRA.RA_PIS
@@ -102,7 +102,7 @@ BeginSQL alias _cAlias
             CRA.DATAFINA = TO_DATE('19001231', 'YYYYMMDD')) AND
             SRA.RA_SITFOLH <> 'D'
    ORDER BY LAB.NUMEPIS , CRA.IDCOLAB
-EndSQL
+EndSql
 
 Count To _ntot
 
@@ -110,7 +110,7 @@ _aHorarios:={}
 
 (_cAlias)->(DBGoTop())
 
-Do While !(_cAlias)->(Eof())
+While !(_cAlias)->(Eof())
 	
    oproc:cCaption := ("Lendo dados " + cValToChar(_npos) + " de " + cValToChar(_ntot))
    ProcessMessages()
@@ -122,7 +122,7 @@ Do While !(_cAlias)->(Eof())
 
    aAdd(_aHorarios,{((_cAlias)->DIREACES  = "S")           ,;//1
                         (_cAlias)->DIREACES                ,;//2
-                        ALLTRIM(STR((_cAlias)->CODICOLE,3)),;//3
+                        AllTrim(Str((_cAlias)->CODICOLE,3)),;//3
                         _cHoras                            ,;//4
                         (_cAlias)->DATAACES                ,;//5
                         StrZero((_cAlias)->ICARD,12)       ,;//6
@@ -138,7 +138,7 @@ If Len(_aHorarios) = 0
    Return .T.
 EndIf
 
-Do While .T.
+While .T.
 
    _lLoop:=.F.
    _lRet:=.F.
@@ -197,7 +197,7 @@ If _oFile:Exists()
 	EndIf
 EndIf
 
-IF !_oFile:Create()
+If !_oFile:Create()
    FWAlertError("Nao foi possível gerar o arquivo "+_cDir+AllTrim(MV_PAR04)+". Verifique os parametros e Tente novamente","MPON00103")
    _lLoop:=.T.
    Return .F.

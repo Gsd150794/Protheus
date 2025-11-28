@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
 Lucas Borges  | 09/07/2021 | Incluído novo produto na regra do MIX. Chamado 37089
--------------------------------------------------------------------------------------------------------------------------------
 Lucas Borges  | 13/03/2023 | Incluído novo produto na regra do MIX. Chamado 43290
--------------------------------------------------------------------------------------------------------------------------------
 Lucas Borges  | 04/04/2024 |Incluída validação para não permitir vincular mix fechado. Chamado 46841
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MCOM008
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/08/2017
-===============================================================================================================================
 Descrição---------: Rotina para informar código do MIX que está relacionado à NF-e emitida pelo Produtor Rural
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -37,7 +29,7 @@ DBSelectArea("ZLE")
 
 	DEFINE MSDIALOG oDlgKey TITLE "Amarração NF-e X Mix" FROM 0,0 TO 150,305 PIXEL OF GetWndDefault()
 			
-	@ 12,008 SAY "Informe o MIX do Leite que deve ser vinculado às NF-e" +CRLF+;
+	@ 12,008 Say "Informe o MIX do Leite que deve ser vinculado às NF-e" +CRLF+;
 				 "selecioandas. Informar Vazio apagará o Mix associado." PIXEL OF oDlgKey
 	@ 39,050 MSGET _cMix SIZE 045,10 PIXEL OF oDlgKey F3 "ZLE_01" Valid (Empty(_cMix).Or.ExistCpo('ZLE',_cMix,1))
 	@ 58,015 BUTTON oBtnCon PROMPT "&Confirma" SIZE 38,11 PIXEL ACTION (MCOM008P(_cMix), oDlgKey:End())
@@ -45,11 +37,11 @@ DBSelectArea("ZLE")
 
 	ACTIVATE DIALOG oDlgKey CENTERED
 	
-Return()
+Return
 
 Static Function MCOM008P(_cMix)
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cQuery 	:= ""
 Local _lRet 	:= .T.
 
@@ -84,6 +76,6 @@ Else
 	EndIf
 EndIf
 ZLE->(DBCloseArea())
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return _lRet

@@ -4,15 +4,15 @@
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  |17/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25
 Lucas Borges  |09/10/2024| Chamado 48465. Retirada da função de conout
 Lucas Borges  |21/05/2025| Chamado 50617. Corrigir chamada estática no nome das tabelas do sistema
+Lucas Borges  |17/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "RPTDEF.CH"
-#INCLUDE "FONT.CH"
+#Include "TOTVS.ch"
+#Include "RPTDEF.CH"
+#Include "FONT.CH"
 
 #define	MB_OK				0
 #define MB_ICONASTERISK		64
@@ -28,10 +28,11 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function ACOM017()
+
 Local cAlias		:= "ZY1"
-Local aCores 		:=	{	{'ZY1_DTFAT - Date() >= 15 .AND. ZY1_ENCMON <> "S"'									, 'BR_VERDE'	},;
-							{'ZY1_DTFAT - Date() >= 10 .And. ZY1_DTFAT - Date() <= 14 .AND. ZY1_ENCMON <> "S"'	, 'BR_AMARELO'	},;
-							{'ZY1_DTFAT - Date() <= 9 .AND. ZY1_ENCMON <> "S"' 									, 'BR_VERMELHO'	},;
+Local aCores 		:=	{	{'ZY1_DTFAT - Date() >= 15 .And. ZY1_ENCMON <> "S"'									, 'BR_VERDE'	},;
+							{'ZY1_DTFAT - Date() >= 10 .And. ZY1_DTFAT - Date() <= 14 .And. ZY1_ENCMON <> "S"'	, 'BR_AMARELO'	},;
+							{'ZY1_DTFAT - Date() <= 9 .And. ZY1_ENCMON <> "S"' 									, 'BR_VERMELHO'	},;
 							{'ZY1_ENCMON == "S"', 'BR_BRANCO'	} }
 
 Private _cFiltro	:= ""
@@ -57,8 +58,8 @@ If MV_PAR01 == 2
 EndIf
 
 cCadastro	:= "Monitoramento Pedido de Compras"
-dbSelectArea(cAlias)
-(cAlias)->(dbSetOrder(1))
+DBSelectArea(cAlias)
+(cAlias)->(DBSetOrder(1))
 mBrowse( 6, 1,22,75,cAlias,,,,,,aCores,,,,,,,,_cFiltro)
 
 Return
@@ -108,7 +109,7 @@ Local _cGetFR := Space(9)
 
 Local _oSayNE
 Local _oGetNE
-Local _dGetNE := StoD("")
+Local _dGetNE := SToD("")
 
 Local _oSayNF
 Local _oGetNF
@@ -144,7 +145,7 @@ Local _nOpca	:= 0
 
 Private _oSayEE
 Private _oGetEE
-Private _dGetEE := StoD("")
+Private _dGetEE := SToD("")
 
 Private _cGetPC := ZY1->ZY1_NUMPC
 
@@ -161,12 +162,12 @@ Private _oMSNewGeZY1
 Private _oDlg
 
 //popula aheader
-Aadd(_aHeader,   {"Sequencia"    ,"ZY1_SEQUEN"," ",4,0," "," ","C"," "," "})
-Aadd(_aHeader,   {"Dt Monitoram" ,"ZY1_DTMONI"," ",8,0," "," ","D"," "," "})
-Aadd(_aHeader,   {"Hr Monitoram" ,"ZY1_HRMONI"," ",5,0," "," ","C"," "," "})
-Aadd(_aHeader,   {"Comentario"   ,"ZY1_COMENT"," ",200,0," "," ","C"," "," "})
-Aadd(_aHeader,   {"Cod Usuario"  ,"ZY1_CODUSR"," ",6,0," "," ","C"," "," "})
-Aadd(_aHeader,   {"Nome Usuario" ,"ZY1_NOMUSR"," ",40,0," "," ","C"," "," "})
+aAdd(_aHeader,   {"Sequencia"    ,"ZY1_SEQUEN"," ",4,0," "," ","C"," "," "})
+aAdd(_aHeader,   {"Dt Monitoram" ,"ZY1_DTMONI"," ",8,0," "," ","D"," "," "})
+aAdd(_aHeader,   {"Hr Monitoram" ,"ZY1_HRMONI"," ",5,0," "," ","C"," "," "})
+aAdd(_aHeader,   {"Comentario"   ,"ZY1_COMENT"," ",200,0," "," ","C"," "," "})
+aAdd(_aHeader,   {"Cod Usuario"  ,"ZY1_CODUSR"," ",6,0," "," ","C"," "," "})
+aAdd(_aHeader,   {"Nome Usuario" ,"ZY1_NOMUSR"," ",40,0," "," ","C"," "," "})
 
 U_ACOM017V(_cGetPC,@_cGetSC,@_cGetNF,@_dGetNE,@_cGetFR,@_nGetVL,@_cGetFO,@_cGetOR,@_cGetSP,@_dGetEE)
 
@@ -179,69 +180,69 @@ _cQryZY1 := ChangeQuery(_cQryZY1)
 
 MPSysOpenQuery(_cQryZY1,"TRBZY1")
 
-dbSelectArea("TRBZY1")
-TRBZY1->(dbGoTop())
+DBSelectArea("TRBZY1")
+TRBZY1->(DBGoTop())
 
 If !TRBZY1->(Eof())
 
    A017GrvaCols()
 
 Else
-	For _nX := 1 to Len(_aFields)
+	For _nX := 1 To Len(_aFields)
 		If _aFields[_nX] == "ZY1_SEQUEN"
-			Aadd(_aFieldFill, "0001")
+			aAdd(_aFieldFill, "0001")
 		Else
-			Aadd(_aFieldFill, CriaVar(_aFields[_nX]))
+			aAdd(_aFieldFill, CriaVar(_aFields[_nX]))
 		EndIf
 	Next _nX
-	Aadd(_aFieldFill, .F.)
-	Aadd(_aCols, _aFieldFill)
+	aAdd(_aFieldFill, .F.)
+	aAdd(_aCols, _aFieldFill)
 EndIf
 
-TRBZY1->(dbCloseArea())
+TRBZY1->(DBCloseArea())
 
 _aSize    := MsAdvSize()
 _aObjects := {}
 
-AAdd( _aObjects, { 100, 100, .T., .T. } )
-AAdd( _aObjects, { 100, 100, .T., .T. } )
-AAdd( _aObjects, { 100, 015, .T., .F. } )
+aAdd( _aObjects, { 100, 100, .T., .T. } )
+aAdd( _aObjects, { 100, 100, .T., .T. } )
+aAdd( _aObjects, { 100, 015, .T., .F. } )
 
 _aInfo   := { _aSize[ 1 ],_aSize[ 2 ],_aSize[ 3 ],_aSize[ 4 ],03,03 }
 _aPosObj := MsObjSize( _aInfo, _aObjects )
 _aPosGet := MsObjGetPos(_aSize[3]-_aSize[1],315,{{003,157,189,236,268}})
 
-DEFINE MSDIALOG _oDlg TITLE "Monitoramento Pedido de Compras" FROM _aSize[7],0 to _aSize[6],_aSize[5] of oMainWnd PIXEL
+DEFINE MSDIALOG _oDlg TITLE "Monitoramento Pedido de Compras" FROM _aSize[7],0 To _aSize[6],_aSize[5] of oMainWnd PIXEL
 
-	@ 035, 002 SAY _oSayPC PROMPT "Número PC:" SIZE 031, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
+	@ 035, 002 Say _oSayPC PROMPT "Número PC:" SIZE 031, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
 	@ 047, 002 MSGET _oGetPC VAR _cGetPC SIZE 039, 010 OF _oDlg COLORS 0, 16777215 F3 "SC7" READONLY PIXEL
 
-	@ 035, 066 SAY _oSaySC PROMPT "Número Solicitação:" SIZE 050, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 035, 066 Say _oSaySC PROMPT "Número Solicitação:" SIZE 050, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 047, 066 MSGET _oGetSC VAR _cGetSC SIZE 039, 010 OF _oDlg COLORS 0, 16777215 READONLY PIXEL
 
-	@ 035, 122 SAY _oSayNF PROMPT "Número NF / Vencimento:" SIZE 080, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 035, 122 Say _oSayNF PROMPT "Número NF / Vencimento:" SIZE 080, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 047, 122 MSGET _oGetNF VAR _cGetNF SIZE 213, 010 OF _oDlg COLORS 0, 16777215 READONLY PIXEL
 
-	@ 035, 394 SAY _oSayNE PROMPT "Dt. Necessidade: " SIZE 055, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 035, 394 Say _oSayNE PROMPT "Dt. Necessidade: " SIZE 055, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 047, 394 MSGET _oGetNE VAR _dGetNE SIZE 040, 010 OF _oDlg COLORS 0, 16777215 PICTURE READONLY PIXEL
 
 	
-	@ 035, 450 SAY _oSayEE PROMPT "Dt. Faturamento: " SIZE 055, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 035, 450 Say _oSayEE PROMPT "Dt. Faturamento: " SIZE 055, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 047, 450 MSGET _oGetEE VAR _dGetEE SIZE 040, 010 OF _oDlg COLORS 0, 16777215 PICTURE READONLY PIXEL
 
-	@ 035, 500 SAY _oSayFR PROMPT "Tp Frete:" SIZE 025, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 035, 500 Say _oSayFR PROMPT "Tp Frete:" SIZE 025, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 047, 500 MSGET _oGetFR VAR _cGetFR SIZE 030, 010 OF _oDlg COLORS 0, 16777215 READONLY PIXEL
 
-	@ 035, 590 SAY _oSayVL PROMPT "Valor: " SIZE 017, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 035, 590 Say _oSayVL PROMPT "Valor: " SIZE 017, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 047, 590 MSGET _oGetVL VAR _nGetVL SIZE 060, 010 OF _oDlg COLORS 0, 16777215 PICTURE PesqPict("SC7","C7_TOTAL") READONLY PIXEL
 
-	@ 063, 002 SAY _oSayFO PROMPT "Fornecedor:" SIZE 031, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 063, 002 Say _oSayFO PROMPT "Fornecedor:" SIZE 031, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 075, 002 MSGET _oGetFO VAR _cGetFO SIZE 213, 010 OF _oDlg COLORS 0, 16777215 READONLY PIXEL
 
-	@ 063, 222 SAY _oSaySP PROMPT "Obs Pedido de Compras: " SIZE 040, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 063, 222 Say _oSaySP PROMPT "Obs Pedido de Compras: " SIZE 040, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 075, 222 MSGET _oGetSP VAR _cGetSP SIZE 336, 010 OF _oDlg COLORS 0, 16777215 READONLY PIXEL
 
-	@ 091, 002 SAY _oSayOR PROMPT "Origem: " SIZE 020, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 091, 002 Say _oSayOR PROMPT "Origem: " SIZE 020, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 103, 002 MSGET _oGetOR VAR _cGetOR SIZE 118, 010 OF _oDlg COLORS 0, 16777215 READONLY PIXEL
 
 	_oMSNewGeZY1 := MsNewGetDados():New( _aPosGet[1,1] + 115, _aPosGet[1,1] - 5, _aPosGet[1,2] - 15, _aPosGet[1,4] + _aPosGet[1,2] - _aPosObj[2,1] - 10, 0, "AllwaysTrue", "AllwaysTrue", "+ZY1_SEQUEN", _aAlterFields,, 999, "AllwaysTrue", "", "AllwaysTrue", _oDlg, _aHeader, _aCols)
@@ -261,6 +262,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function ACOM017I()
+
 Local _oSayFO
 Local _oGetFO
 Local _cGetFO := Space(60)
@@ -271,7 +273,7 @@ Local _cGetFR := Space(9)
 
 Local _oSayNE
 Local _oGetNE
-Local _dGetNE := StoD("")
+Local _dGetNE := SToD("")
 
 Local _oSayNF
 Local _oGetNF
@@ -307,7 +309,7 @@ Local _nOpca	:= 0
 
 Private _oSayEE
 Private _oGetEE
-Private _dGetEE := StoD("")
+Private _dGetEE := SToD("")
 
 Private _cGetPC := Space(TamSX3("ZY1_NUMPC")[1])
 
@@ -324,65 +326,65 @@ Private _oMSNewGeZY1
 Private _oDlg
 
 //popula aheader
-Aadd(_aHeader,   {"Sequencia"    ,"ZY1_SEQUEN"," ",4,0," "," ","C"," "," "})
-Aadd(_aHeader,   {"Dt Monitoram" ,"ZY1_DTMONI"," ",8,0," "," ","D"," "," "})
-Aadd(_aHeader,   {"Hr Monitoram" ,"ZY1_HRMONI"," ",5,0," "," ","C"," "," "})
-Aadd(_aHeader,   {"Comentario"   ,"ZY1_COMENT"," ",200,0," "," ","C"," "," "})
-Aadd(_aHeader,   {"Cod Usuario"  ,"ZY1_CODUSR"," ",6,0," "," ","C"," "," "})
-Aadd(_aHeader,   {"Nome Usuario" ,"ZY1_NOMUSR"," ",40,0," "," ","C"," "," "})
+aAdd(_aHeader,   {"Sequencia"    ,"ZY1_SEQUEN"," ",4,0," "," ","C"," "," "})
+aAdd(_aHeader,   {"Dt Monitoram" ,"ZY1_DTMONI"," ",8,0," "," ","D"," "," "})
+aAdd(_aHeader,   {"Hr Monitoram" ,"ZY1_HRMONI"," ",5,0," "," ","C"," "," "})
+aAdd(_aHeader,   {"Comentario"   ,"ZY1_COMENT"," ",200,0," "," ","C"," "," "})
+aAdd(_aHeader,   {"Cod Usuario"  ,"ZY1_CODUSR"," ",6,0," "," ","C"," "," "})
+aAdd(_aHeader,   {"Nome Usuario" ,"ZY1_NOMUSR"," ",40,0," "," ","C"," "," "})
 
 // Define field values
-For _nX := 1 to Len(_aFields)
+For _nX := 1 To Len(_aFields)
 	If _aFields[_nX] == "ZY1_SEQUEN"
-		Aadd(_aFieldFill, "0001")
+		aAdd(_aFieldFill, "0001")
 	Else
-		Aadd(_aFieldFill, CriaVar(_aFields[_nX]))
+		aAdd(_aFieldFill, CriaVar(_aFields[_nX]))
 	EndIf
 Next _nX
-Aadd(_aFieldFill, .F.)
-Aadd(_aCols, _aFieldFill)
+aAdd(_aFieldFill, .F.)
+aAdd(_aCols, _aFieldFill)
 
 _aSize    := MsAdvSize()
 _aObjects := {}
 
-AAdd( _aObjects, { 100, 100, .T., .T. } )
-AAdd( _aObjects, { 100, 100, .T., .T. } )
-AAdd( _aObjects, { 100, 015, .T., .F. } )
+aAdd( _aObjects, { 100, 100, .T., .T. } )
+aAdd( _aObjects, { 100, 100, .T., .T. } )
+aAdd( _aObjects, { 100, 015, .T., .F. } )
 
 _aInfo   := { _aSize[ 1 ],_aSize[ 2 ],_aSize[ 3 ],_aSize[ 4 ],03,03 }
 _aPosObj := MsObjSize( _aInfo, _aObjects )
 _aPosGet := MsObjGetPos(_aSize[3]-_aSize[1],315,{{003,157,189,236,268}})
 
-DEFINE MSDIALOG _oDlg TITLE "Monitoramento Pedido de Compras" FROM _aSize[7],0 to _aSize[6],_aSize[5] of oMainWnd PIXEL
+DEFINE MSDIALOG _oDlg TITLE "Monitoramento Pedido de Compras" FROM _aSize[7],0 To _aSize[6],_aSize[5] of oMainWnd PIXEL
 
-	@ 035, 002 SAY _oSayPC PROMPT "Número PC:" SIZE 031, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
+	@ 035, 002 Say _oSayPC PROMPT "Número PC:" SIZE 031, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
 	@ 047, 002 MSGET _oGetPC VAR _cGetPC SIZE 039, 010 OF _oDlg COLORS 0, 16777215 F3 "SC7" VALID U_ACOM017V(_cGetPC,@_cGetSC,@_cGetNF,@_dGetNE,@_cGetFR,@_nGetVL,@_cGetFO,@_cGetOR,@_cGetSP,@_dGetEE) PIXEL
 
-	@ 035, 066 SAY _oSaySC PROMPT "Número Solicitação:" SIZE 050, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 035, 066 Say _oSaySC PROMPT "Número Solicitação:" SIZE 050, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 047, 066 MSGET _oGetSC VAR _cGetSC SIZE 039, 010 OF _oDlg COLORS 0, 16777215 READONLY PIXEL
 
-	@ 035, 122 SAY _oSayNF PROMPT "Número NF / Vencimento:" SIZE 080, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 035, 122 Say _oSayNF PROMPT "Número NF / Vencimento:" SIZE 080, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 047, 122 MSGET _oGetNF VAR _cGetNF SIZE 213, 010 OF _oDlg COLORS 0, 16777215 READONLY PIXEL
 
-	@ 035, 394 SAY _oSayNE PROMPT "Dt. Necessidade: " SIZE 055, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 035, 394 Say _oSayNE PROMPT "Dt. Necessidade: " SIZE 055, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 047, 394 MSGET _oGetNE VAR _dGetNE SIZE 040, 010 OF _oDlg COLORS 0, 16777215 PICTURE READONLY PIXEL
 	
-	@ 035, 450 SAY _oSayEE PROMPT "Dt. Faturamento: " SIZE 055, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 035, 450 Say _oSayEE PROMPT "Dt. Faturamento: " SIZE 055, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 047, 450 MSGET _oGetEE VAR _dGetEE SIZE 040, 010 OF _oDlg COLORS 0, 16777215 PICTURE READONLY PIXEL
 
-	@ 035, 500 SAY _oSayFR PROMPT "Tp Frete:" SIZE 025, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 035, 500 Say _oSayFR PROMPT "Tp Frete:" SIZE 025, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 047, 500 MSGET _oGetFR VAR _cGetFR SIZE 030, 010 OF _oDlg COLORS 0, 16777215 READONLY PIXEL
 
-	@ 035, 590 SAY _oSayVL PROMPT "Valor: " SIZE 017, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 035, 590 Say _oSayVL PROMPT "Valor: " SIZE 017, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 047, 590 MSGET _oGetVL VAR _nGetVL SIZE 060, 010 OF _oDlg COLORS 0, 16777215 PICTURE PesqPict("SC7","C7_TOTAL") READONLY PIXEL
 
-	@ 063, 002 SAY _oSayFO PROMPT "Fornecedor:" SIZE 031, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 063, 002 Say _oSayFO PROMPT "Fornecedor:" SIZE 031, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 075, 002 MSGET _oGetFO VAR _cGetFO SIZE 213, 010 OF _oDlg COLORS 0, 16777215 READONLY PIXEL
 
-	@ 063, 222 SAY _oSaySP PROMPT "Obs Pedido de Compras: " SIZE 040, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 063, 222 Say _oSaySP PROMPT "Obs Pedido de Compras: " SIZE 040, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 075, 222 MSGET _oGetSP VAR _cGetSP SIZE 336, 010 OF _oDlg COLORS 0, 16777215 READONLY PIXEL
 
-	@ 091, 002 SAY _oSayOR PROMPT "Origem: " SIZE 020, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 091, 002 Say _oSayOR PROMPT "Origem: " SIZE 020, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 103, 002 MSGET _oGetOR VAR _cGetOR SIZE 118, 010 OF _oDlg COLORS 0, 16777215 READONLY PIXEL
 
 	_oMSNewGeZY1 := MsNewGetDados():New( _aPosGet[1,1] + 115, _aPosGet[1,1] - 5, _aPosGet[1,2] - 15, _aPosGet[1,4] + _aPosGet[1,2] - _aPosObj[2,1] - 10, GD_INSERT+GD_UPDATE, "U_A017LOK()", "U_A017TOK()", "+ZY1_SEQUEN", _aAlterFields,, 999, "AllwaysTrue", "", "AllwaysTrue", _oDlg, _aHeader, _aCols)
@@ -404,7 +406,7 @@ If _nOpca == 1
 					Replace ZY1->ZY1_NOMUSR	With _oMSNewGeZY1:aCols[_nX, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_NOMUSR"})]
 					Replace ZY1->ZY1_DTNECE With _dGetNE
 					Replace ZY1->ZY1_DTFAT With _dGetEE
-				MsUnLock()
+				MSUnLock()
 			EndIf
 		Next
 	End Transaction
@@ -423,6 +425,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function ACOM017A()
+
 Local _oSayFO
 Local _oGetFO
 Local _cGetFO := Space(60)
@@ -433,7 +436,7 @@ Local _cGetFR := Space(9)
 
 Local _oSayNE
 Local _oGetNE
-Local _dGetNE := StoD("")
+Local _dGetNE := SToD("")
 
 Local _oSayNF
 Local _oGetNF
@@ -469,7 +472,7 @@ Local _nOpca	:= 0
 
 Private _oSayEE
 Private _oGetEE
-Private _dGetEE := StoD("")
+Private _dGetEE := SToD("")
 
 Private _cGetPC := ZY1->ZY1_NUMPC
 
@@ -486,17 +489,17 @@ Private _oMSNewGeZY1
 Private _oDlg
 
 If ZY1->ZY1_ENCMON == "S"
-	u_itmsg('Foi encerrado o monitoramento deste pedido, sendo assim este não pode ser alterado.',"Atenção",,1)
+	U_ITMsg('Foi encerrado o monitoramento deste pedido, sendo assim este não pode ser alterado.',"Atenção",,1)
 	Return
 EndIf
 
 //popula aheader
-Aadd(_aHeader,   {"Sequencia"    ,"ZY1_SEQUEN"," ",4,0," "," ","C"," "," "})
-Aadd(_aHeader,   {"Dt Monitoram" ,"ZY1_DTMONI"," ",8,0," "," ","D"," "," "})
-Aadd(_aHeader,   {"Hr Monitoram" ,"ZY1_HRMONI"," ",5,0," "," ","C"," "," "})
-Aadd(_aHeader,   {"Comentario"   ,"ZY1_COMENT"," ",200,0," "," ","C"," "," "})
-Aadd(_aHeader,   {"Cod Usuario"  ,"ZY1_CODUSR"," ",6,0," "," ","C"," "," "})
-Aadd(_aHeader,   {"Nome Usuario" ,"ZY1_NOMUSR"," ",40,0," "," ","C"," "," "})
+aAdd(_aHeader,   {"Sequencia"    ,"ZY1_SEQUEN"," ",4,0," "," ","C"," "," "})
+aAdd(_aHeader,   {"Dt Monitoram" ,"ZY1_DTMONI"," ",8,0," "," ","D"," "," "})
+aAdd(_aHeader,   {"Hr Monitoram" ,"ZY1_HRMONI"," ",5,0," "," ","C"," "," "})
+aAdd(_aHeader,   {"Comentario"   ,"ZY1_COMENT"," ",200,0," "," ","C"," "," "})
+aAdd(_aHeader,   {"Cod Usuario"  ,"ZY1_CODUSR"," ",6,0," "," ","C"," "," "})
+aAdd(_aHeader,   {"Nome Usuario" ,"ZY1_NOMUSR"," ",40,0," "," ","C"," "," "})
 
 U_ACOM017V(_cGetPC,@_cGetSC,@_cGetNF,@_dGetNE,@_cGetFR,@_nGetVL,@_cGetFO,@_cGetOR,@_cGetSP,@_dGetEE)
 
@@ -509,8 +512,8 @@ _cQryZY1 := ChangeQuery(_cQryZY1)
 
 MPSysOpenQuery(_cQryZY1,"TRBZY1")
 
-dbSelectArea("TRBZY1")
-TRBZY1->(dbGoTop())
+DBSelectArea("TRBZY1")
+TRBZY1->(DBGoTop())
 
 If !TRBZY1->(Eof())
 
@@ -518,61 +521,61 @@ If !TRBZY1->(Eof())
 
 Else
 	// Define field values
-	For _nX := 1 to Len(_aFields)
+	For _nX := 1 To Len(_aFields)
 		If _aFields[_nX] == "ZY1_SEQUEN"
-			Aadd(_aFieldFill, "0001")
+			aAdd(_aFieldFill, "0001")
 		Else
-			Aadd(_aFieldFill, CriaVar(_aFields[_nX]))
+			aAdd(_aFieldFill, CriaVar(_aFields[_nX]))
 		EndIf
 	Next _nX
-	Aadd(_aFieldFill, .F.)
-	Aadd(_aCols, _aFieldFill)
+	aAdd(_aFieldFill, .F.)
+	aAdd(_aCols, _aFieldFill)
 EndIf
 
-TRBZY1->(dbCloseArea())
+TRBZY1->(DBCloseArea())
 
 _aSize    := MsAdvSize()
 _aObjects := {}
 
-AAdd( _aObjects, { 100, 100, .T., .T. } )
-AAdd( _aObjects, { 100, 100, .T., .T. } )
-AAdd( _aObjects, { 100, 015, .T., .F. } )
+aAdd( _aObjects, { 100, 100, .T., .T. } )
+aAdd( _aObjects, { 100, 100, .T., .T. } )
+aAdd( _aObjects, { 100, 015, .T., .F. } )
 
 _aInfo   := { _aSize[ 1 ],_aSize[ 2 ],_aSize[ 3 ],_aSize[ 4 ],03,03 }
 _aPosObj := MsObjSize( _aInfo, _aObjects )
 _aPosGet := MsObjGetPos(_aSize[3]-_aSize[1],315,{{003,157,189,236,268}})
 _dGetOri := _dGetEE
 
-DEFINE MSDIALOG _oDlg TITLE "Monitoramento Pedido de Compras" FROM _aSize[7],0 to _aSize[6],_aSize[5] of oMainWnd PIXEL
+DEFINE MSDIALOG _oDlg TITLE "Monitoramento Pedido de Compras" FROM _aSize[7],0 To _aSize[6],_aSize[5] of oMainWnd PIXEL
 
-	@ 035, 002 SAY _oSayPC PROMPT "Número PC:" SIZE 031, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
+	@ 035, 002 Say _oSayPC PROMPT "Número PC:" SIZE 031, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
 	@ 047, 002 MSGET _oGetPC VAR _cGetPC SIZE 039, 010 OF _oDlg COLORS 0, 16777215 F3 "SC7" READONLY PIXEL
 
-	@ 035, 066 SAY _oSaySC PROMPT "Número Solicitação:" SIZE 050, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 035, 066 Say _oSaySC PROMPT "Número Solicitação:" SIZE 050, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 047, 066 MSGET _oGetSC VAR _cGetSC SIZE 039, 010 OF _oDlg COLORS 0, 16777215 READONLY PIXEL
 
-	@ 035, 122 SAY _oSayNF PROMPT "Número NF / Vencimento:" SIZE 080, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 035, 122 Say _oSayNF PROMPT "Número NF / Vencimento:" SIZE 080, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 047, 122 MSGET _oGetNF VAR _cGetNF SIZE 213, 010 OF _oDlg COLORS 0, 16777215 READONLY PIXEL
 
-	@ 035, 394 SAY _oSayNE PROMPT "Dt. Necessidade: " SIZE 055, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 035, 394 Say _oSayNE PROMPT "Dt. Necessidade: " SIZE 055, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 047, 394 MSGET _oGetNE VAR _dGetNE SIZE 040, 010 OF _oDlg COLORS 0, 16777215 PICTURE READONLY PIXEL
 	
-	@ 035, 450 SAY _oSayEE PROMPT "Dt. Faturamento: " SIZE 055, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 035, 450 Say _oSayEE PROMPT "Dt. Faturamento: " SIZE 055, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 047, 450 MSGET _oGetEE VAR _dGetEE SIZE 040, 010 OF _oDlg COLORS 0, 16777215 PIXEL
 
-	@ 035, 500 SAY _oSayFR PROMPT "Tp Frete:" SIZE 025, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 035, 500 Say _oSayFR PROMPT "Tp Frete:" SIZE 025, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 047, 500 MSGET _oGetFR VAR _cGetFR SIZE 030, 010 OF _oDlg COLORS 0, 16777215 READONLY PIXEL
 
-	@ 035, 590 SAY _oSayVL PROMPT "Valor: " SIZE 017, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 035, 590 Say _oSayVL PROMPT "Valor: " SIZE 017, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 047, 590 MSGET _oGetVL VAR _nGetVL SIZE 060, 010 OF _oDlg COLORS 0, 16777215 PICTURE PesqPict("SC7","C7_TOTAL") READONLY PIXEL
 
-	@ 063, 002 SAY _oSayFO PROMPT "Fornecedor:" SIZE 031, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 063, 002 Say _oSayFO PROMPT "Fornecedor:" SIZE 031, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 075, 002 MSGET _oGetFO VAR _cGetFO SIZE 213, 010 OF _oDlg COLORS 0, 16777215 READONLY PIXEL
 
-	@ 063, 222 SAY _oSaySP PROMPT "Obs Pedido de Compras: " SIZE 040, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 063, 222 Say _oSaySP PROMPT "Obs Pedido de Compras: " SIZE 040, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 075, 222 MSGET _oGetSP VAR _cGetSP SIZE 336, 010 OF _oDlg COLORS 0, 16777215 READONLY PIXEL
 
-	@ 091, 002 SAY _oSayOR PROMPT "Origem: " SIZE 020, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 091, 002 Say _oSayOR PROMPT "Origem: " SIZE 020, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 103, 002 MSGET _oGetOR VAR _cGetOR SIZE 118, 010 OF _oDlg COLORS 0, 16777215 READONLY PIXEL
 
 	_oMSNewGeZY1 := MsNewGetDados():New( _aPosGet[1,1] + 115, _aPosGet[1,1] - 5, _aPosGet[1,2] - 15, _aPosGet[1,4] + _aPosGet[1,2] - _aPosObj[2,1] - 10, GD_INSERT+GD_UPDATE, "U_A017LOK()", "AllwaysTrue", /*"+ZY1_SEQUEN"*/, _aAlterFields,, 999, "AllwaysTrue", "", "AllwaysTrue", _oDlg, _aHeader, _aCols)
@@ -588,34 +591,34 @@ If _nOpca == 1
 			U_A017DTFT(_dGetEE,_cGetPC)
 			
 			//Se só tem uma linha no acols com descrição em branco preenche descrição para registrar mudança de data
-			If len(_oMSNewGeZY1:aCols) == 1 .and. empty(_oMSNewGeZY1:aCols[1, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_COMENT"})])
+			If Len(_oMSNewGeZY1:aCols) == 1 .And. Empty(_oMSNewGeZY1:aCols[1, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_COMENT"})])
 			
-				_oMSNewGeZY1:aCols[1, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_COMENT"})] := "Data de faturamento alterada de " + dtoc(_dGetOri) + " para " + dtoc(_dGetEE)
+				_oMSNewGeZY1:aCols[1, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_COMENT"})] := "Data de faturamento alterada de " + DToC(_dGetOri) + " para " + DToC(_dGetEE)
 			
 			Else
 			   
-				aadd(_oMSNewGeZY1:aCols,{	"",;//STRZERO(nMaxGravado,4),;
-										date()			,;
-										time()			,;
-										"Data de faturamento alterada de " + dtoc(_dGetOri) + " para " + dtoc(_dGetEE)				,;
-										__CUSERID 		,;
-										USRFULLNAME(__CUSERID),;
+				aAdd(_oMSNewGeZY1:aCols,{	"",;//StrZero(nMaxGravado,4),;
+										Date()			,;
+										Time()			,;
+										"Data de faturamento alterada de " + DToC(_dGetOri) + " para " + DToC(_dGetEE)				,;
+										__cUserId 		,;
+										USRFULLNAME(__cUserId),;
 										.F. })
 															
 		
-			Endif
+			EndIf
 			
-		Endif
+		EndIf
 	
-		dbSelectArea("ZY1")
-		ZY1->(dbSetOrder(1))
+		DBSelectArea("ZY1")
+		ZY1->(DBSetOrder(1))
 
 		For _nX := 1 To Len(_oMSNewGeZY1:aCols)
 
 			If !_oMSNewGeZY1:aCols[_nX, Len(_oMSNewGeZY1:aHeader) + 1]
 			
 				_cSequen:=_oMSNewGeZY1:aCols[_nX, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_SEQUEN"})]
-				If !EMPTY(_cSequen) .AND. ZY1->(dbSeek(xFilial("ZY1") + _cGetPC + _cSequen ))
+				If !Empty(_cSequen) .And. ZY1->(DBSeek(xFilial("ZY1") + _cGetPC + _cSequen ))
 					RecLock("ZY1", .F.)
 						Replace ZY1->ZY1_FILIAL	With xFilial("ZY1")
 						Replace ZY1->ZY1_NUMPC	With _cGetPC
@@ -625,13 +628,13 @@ If _nOpca == 1
 						Replace ZY1->ZY1_COMENT	With _oMSNewGeZY1:aCols[_nX, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_COMENT"})]
 						Replace ZY1->ZY1_CODUSR	With _oMSNewGeZY1:aCols[_nX, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_CODUSR"})]
 						Replace ZY1->ZY1_NOMUSR	With _oMSNewGeZY1:aCols[_nX, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_NOMUSR"})]
-					MsUnLock()
+					MSUnLock()
 				Else
   				    nMaxGravado++
 					RecLock("ZY1", .T.)
 						Replace ZY1->ZY1_FILIAL	With xFilial("ZY1")
 						Replace ZY1->ZY1_NUMPC	With _cGetPC
-						Replace ZY1->ZY1_SEQUEN	With STRZERO(nMaxGravado,4)
+						Replace ZY1->ZY1_SEQUEN	With StrZero(nMaxGravado,4)
 						Replace ZY1->ZY1_DTMONI	With _oMSNewGeZY1:aCols[_nX, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_DTMONI"})]
 						Replace ZY1->ZY1_HRMONI	With _oMSNewGeZY1:aCols[_nX, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_HRMONI"})]
 						Replace ZY1->ZY1_COMENT	With _oMSNewGeZY1:aCols[_nX, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_COMENT"})]
@@ -639,17 +642,17 @@ If _nOpca == 1
 						Replace ZY1->ZY1_NOMUSR	With _oMSNewGeZY1:aCols[_nX, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_NOMUSR"})]
 						Replace ZY1->ZY1_DTNECE With _dGetNE
 						Replace ZY1->ZY1_DTFAT With _dGetEE
-					MsUnLock()
+					MSUnLock()
 				EndIf
 			EndIf
 		Next
 	End Transaction
 
-    if _dGetEE = _dGetOri 
-	   U_ITMSG("Gravação completada com sucesso", "Atenção",,2)
-  	ELSE
-       U_ITMSG("Data de Faturamento alterada de " + dtoc(_dGetOri) + " para " + DTOC(_dGetEE) +" e Gravação completada com sucesso.","Atenção",,2)
-	ENDIF
+    If _dGetEE = _dGetOri 
+	   U_ITMsg("Gravação completada com sucesso", "Atenção",,2)
+  	Else
+       U_ITMsg("Data de Faturamento alterada de " + DToC(_dGetOri) + " para " + DToC(_dGetEE) +" e Gravação completada com sucesso.","Atenção",,2)
+	EndIf
 EndIf
 
 Return
@@ -676,18 +679,19 @@ Retorno-----------: _lRet - .T. Contina processo cabeçalho / .F. Não continua pr
 ===============================================================================================================================
 */
 User Function ACOM017V(_cGetPC,_cGetSC,_cGetNF,_dGetNE,_cGetFR,_nGetVL,_cGetFO,_cGetOR,_cGetSP,_dGetEE,_lCriaAmb,_cFilial)
-Local _aArea	:= GetArea()
+
+Local _aArea	:= FWGetArea()
 Local _lRet		:= .T.
 Local _cQrySC7	:= ""
 Local _cQrySC1	:= ""
 Local _cQrySE2	:= ""
 
 Local _nTotPed	:= 0
-Local _dDtNece	:= StoD("")
+Local _dDtNece	:= SToD("")
 Local _cTpFret	:= ""
 Local _cFornec	:= ""
 Local _cLoja	:= ""
-Local _dDtFat 	:= StoD("")
+Local _dDtFat 	:= SToD("")
 Local _cNome	:= ""
 Local _cNumSC	:= ""
 Local _cNumNF	:= ""
@@ -699,8 +703,8 @@ Local _nI		:= 0
 Default _cGetPC		:= ""
 Default _cGetSC		:= ""
 Default _cGetNF		:= ""
-Default _dGetEE		:= StoD("")
-Default _dGetNE		:= StoD("")
+Default _dGetEE		:= SToD("")
+Default _dGetNE		:= SToD("")
 Default _cGetFR		:= ""
 Default _nGetVL		:= 0
 Default _cGetFO		:= ""
@@ -710,7 +714,7 @@ Default _lCriaAmb	:= .F.
 Default _cFilial	:= "01"
 
 If Empty(_cGetPC)
-	U_ITMSG("Um pedido de compras deve ser selecionado.","Atenção!",,1)
+	U_ITMsg("Um pedido de compras deve ser selecionado.","Atenção!",,1)
 	_lRet := .F.
 Else
 
@@ -728,7 +732,7 @@ Else
 	
 	MPSysOpenQuery(_cQrySC7,"TRBSC7")
 	
-	TRBSC7->(dbGoTop())
+	TRBSC7->(DBGoTop())
 	
 	While !TRBSC7->(Eof())
 		_nI++
@@ -736,17 +740,17 @@ Else
 			
 		//Grava maior data de faturamento e necessidade
 		
-		If StoD(TRBSC7->C7_I_DTFAT) > _dDtFat
+		If SToD(TRBSC7->C7_I_DTFAT) > _dDtFat
 		
-			_dDtFat	:= StoD(TRBSC7->C7_I_DTFAT)
+			_dDtFat	:= SToD(TRBSC7->C7_I_DTFAT)
 			
-		Endif
+		EndIf
 		
-		If StoD(TRBSC7->C7_DATPRF) > _dDtNece
+		If SToD(TRBSC7->C7_DATPRF) > _dDtNece
 		
-			_dDtNece	:= StoD(TRBSC7->C7_DATPRF)
+			_dDtNece	:= SToD(TRBSC7->C7_DATPRF)
 			
-		Endif
+		EndIf
 		
 		_cTpFret	:= TRBSC7->C7_TPFRETE
 		_cFornec	:= TRBSC7->C7_FORNECE
@@ -772,7 +776,7 @@ Else
 		
 		MPSysOpenQuery(_cQrySD1,"TRBSD1")
 			
-		TRBSD1->(dbGoTop())
+		TRBSD1->(DBGoTop())
 			
 		While !TRBSD1->(Eof())
 	
@@ -791,33 +795,33 @@ Else
 			
 			MPSysOpenQuery(_cQrySE2,"TRBSE2")
 
-			TRBSE2->(dbGoTop())
+			TRBSE2->(DBGoTop())
 
 			While !TRBSE2->(Eof())
 
-				If !(TRBSD1->D1_DOC + " - " + DtoC(StoD(TRBSE2->E2_VENCREA)) + " | " $ _cNumNF) 
-					If !(TRBSD1->D1_DOC + " - " + TRBSE2->E2_PARCELA + " - " + DtoC(StoD(TRBSE2->E2_VENCREA)) + " | " $ _cNumNF)
+				If !(TRBSD1->D1_DOC + " - " + DToC(SToD(TRBSE2->E2_VENCREA)) + " | " $ _cNumNF) 
+					If !(TRBSD1->D1_DOC + " - " + TRBSE2->E2_PARCELA + " - " + DToC(SToD(TRBSE2->E2_VENCREA)) + " | " $ _cNumNF)
 						If Empty(TRBSE2->E2_PARCELA)
-							_cNumNF	+= TRBSD1->D1_DOC + " - " + DtoC(StoD(TRBSE2->E2_VENCREA)) + " | "
+							_cNumNF	+= TRBSD1->D1_DOC + " - " + DToC(SToD(TRBSE2->E2_VENCREA)) + " | "
 						Else
-							_cNumNF	+= TRBSD1->D1_DOC + " - " + TRBSE2->E2_PARCELA + " - " + DtoC(StoD(TRBSE2->E2_VENCREA)) + " | "
+							_cNumNF	+= TRBSD1->D1_DOC + " - " + TRBSE2->E2_PARCELA + " - " + DToC(SToD(TRBSE2->E2_VENCREA)) + " | "
 						EndIf
 					EndIf
 				EndIf
 
-				TRBSE2->(dbSkip())
+				TRBSE2->(DBSkip())
 			End
 
-			TRBSE2->(dbCloseArea())
+			TRBSE2->(DBCloseArea())
 	
-			TRBSD1->(dbSkip())
+			TRBSD1->(DBSkip())
 		End
 		
 		_cGetNF := _cNumNF
 		
-		TRBSD1->(dbCloseArea())
+		TRBSD1->(DBCloseArea())
 
-		TRBSC7->(dbSkip())
+		TRBSC7->(DBSkip())
 	End
 	
 	_dGetEE := _dDtFat
@@ -835,7 +839,7 @@ Else
 		_cGetFR := "SEM FRETE"
 	EndIf
 
-	TRBSC7->(dbCloseArea())
+	TRBSC7->(DBCloseArea())
 	
 	_cQrySC1 := "SELECT C1_NUM, C1_OBS "
 	_cQrySC1 += "FROM " + RetSqlName("SC1") + " "
@@ -849,7 +853,7 @@ Else
 	_cQrySC1 := ChangeQuery(_cQrySC1)
 	MPSysOpenQuery(_cQrySC1,"TRBSC1")
 
-	TRBSC1->(dbGoTop())
+	TRBSC1->(DBGoTop())
 	
 	While !TRBSC1->(Eof())
 		_nApoio++
@@ -859,16 +863,17 @@ Else
 			_cObsSC	:= AllTrim(TRBSC1->C1_OBS)
 		EndIf
 
-		TRBSC1->(dbSkip())
+		TRBSC1->(DBSkip())
 	End
 
 	_cGetSC := _cNumSC
 
-	TRBSC1->(dbCloseArea())
+	TRBSC1->(DBCloseArea())
 
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
+
 Return(_lRet)
 
 /*
@@ -882,10 +887,11 @@ Retorno-----------: _lRet - .T. Continua o processo / .F. Fica na linha do _aCol
 ===============================================================================================================================
 */
 User Function A017LOK()
+
 Local _lRet	:= .T.
 
 If Empty(_oMSNewGeZY1:aCols[_oMSNewGeZY1:nAt, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_COMENT"})])
-	u_itmsg("É necessário o preenchimento do campo comentário.","Atenção",,1)
+	U_ITMsg("É necessário o preenchimento do campo comentário.","Atenção",,1)
 	_lRet := .F.
 EndIf
 
@@ -902,19 +908,20 @@ Retorno-----------: _lRet - .T. Continua gravação / .F. Não continua com a grava
 ===============================================================================================================================
 */
 User Function A017TOK()
+
 Local _lRet	:= .T.
 Local _nX	:= 0
 
 If Empty(_cGetPC)
-	u_itmsg("Deverá ser informado um Pedido de Compras.","Atenção",,1)
+	U_ITMsg("Deverá ser informado um Pedido de Compras.","Atenção",,1)
 	_lRet := .F.
 EndIf
 
 If _lRet 
 	For _nX := 1 To Len(_oMSNewGeZY1:aCols)
-		If Empty(_oMSNewGeZY1:aCols[_nX, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_COMENT"})]) .and. ;
-			!(_oGetEE:ctext != _dGetOri .and. _nX == 1)
-			u_itmsg("O campo comentário da linha " + AllTrim(Str(_nX)) + " não está preenchido.","Atenção","Favor preencher o campo corretamente.",1)
+		If Empty(_oMSNewGeZY1:aCols[_nX, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_COMENT"})]) .And. ;
+			!(_oGetEE:ctext != _dGetOri .And. _nX == 1)
+			U_ITMsg("O campo comentário da linha " + AllTrim(Str(_nX)) + " não está preenchido.","Atenção","Favor preencher o campo corretamente.",1)
 			_lRet := .F.
 		EndIf
 	Next _nX
@@ -933,7 +940,8 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function A017PLA()
-Local _aArea	:= GetArea()
+
+Local _aArea	:= FWGetArea()
 Local _aCampPla	:= {	'Índice',;
 						'Nota',;
 						'Série',;
@@ -961,15 +969,15 @@ _cQrySD1 := ChangeQuery(_cQrySD1)
 
 MPSysOpenQuery(_cQrySD1,"TRBSD1")
 
-TRBSD1->(dbGoTop())
+TRBSD1->(DBGoTop())
 
 If !TRBSD1->(Eof())
 	While !TRBSD1->(Eof())
 		aAdd( _aLogPla , {	StrZero(_nCont++,4),;																//[1]Índice
 							TRBSD1->D1_DOC,;																	//[2]Nota
 							TRBSD1->D1_SERIE,;																	//[3]Série
-							StoD(TRBSD1->D1_EMISSAO),;											 				//[4]Dt. Emissão
-							StoD(TRBSD1->D1_DTDIGIT),;										   					//[5]Dt. Digitação
+							SToD(TRBSD1->D1_EMISSAO),;											 				//[4]Dt. Emissão
+							SToD(TRBSD1->D1_DTDIGIT),;										   					//[5]Dt. Digitação
 							TRBSD1->D1_FORNECE + "/" + TRBSD1->D1_LOJA + " - " + AllTrim(TRBSD1->A2_NREDUZ),;	//[6]Fornecedor
 							TRBSD1->D1_ITEM,;														  			//[7]Item
 							TRBSD1->D1_COD,;														   			//[8]Produto
@@ -978,18 +986,18 @@ If !TRBSD1->(Eof())
 							AllTrim(Transform(TRBSD1->D1_VUNIT,PesqPict("SD1","D1_VUNIT"))),;					//[11]Preço Unitário
 							AllTrim(Transform(TRBSD1->D1_TOTAL,PesqPict("SD1","D1_TOTAL"))) })					//[12]Valor Total
 							
-		TRBSD1->(dbSkip())
+		TRBSD1->(DBSkip())
 	End
 
 	U_ITListBox( 'Geração Planilha' , _aCampPla , _aLogPla , .T. , 1 )
 
 Else
-	u_itmsg("Não existem dados a serem mostrados para o Pedido selecionado.","Atenção","Favor selecionar outro pedido.",1)
+	U_ITMsg("Não existem dados a serem mostrados para o Pedido selecionado.","Atenção","Favor selecionar outro pedido.",1)
 EndIf
 
-TRBSD1->(dbCloseArea())
+TRBSD1->(DBCloseArea())
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 Return
 
 /*
@@ -1003,6 +1011,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function ACOM017P()
+
 Local _oSayFO
 Local _oGetFO
 Local _cGetFO := Space(60)
@@ -1013,8 +1022,8 @@ Local _cGetFR := Space(9)
 
 Local _oSayNE
 Local _oGetNE
-Local _dGetNE := StoD("")
-Local _dGetEE := StoD("")
+Local _dGetNE := SToD("")
+Local _dGetEE := SToD("")
 
 Local _oSayNF
 Local _oGetNF
@@ -1063,12 +1072,12 @@ Private _oMSNewGeZY1
 Private _oDlg
 
 //popula aheader
-Aadd(_aHeader,   {"Sequencia"    ,"ZY1_SEQUEN"," ",4,0," "," ","C"," "," "})
-Aadd(_aHeader,   {"Dt Monitoram" ,"ZY1_DTMONI"," ",8,0," "," ","D"," "," "})
-Aadd(_aHeader,   {"Hr Monitoram" ,"ZY1_HRMONI"," ",5,0," "," ","C"," "," "})
-Aadd(_aHeader,   {"Comentario"   ,"ZY1_COMENT"," ",200,0," "," ","C"," "," "})
-Aadd(_aHeader,   {"Cod Usuario"  ,"ZY1_CODUSR"," ",6,0," "," ","C"," "," "})
-Aadd(_aHeader,   {"Nome Usuario" ,"ZY1_NOMUSR"," ",40,0," "," ","C"," "," "})
+aAdd(_aHeader,   {"Sequencia"    ,"ZY1_SEQUEN"," ",4,0," "," ","C"," "," "})
+aAdd(_aHeader,   {"Dt Monitoram" ,"ZY1_DTMONI"," ",8,0," "," ","D"," "," "})
+aAdd(_aHeader,   {"Hr Monitoram" ,"ZY1_HRMONI"," ",5,0," "," ","C"," "," "})
+aAdd(_aHeader,   {"Comentario"   ,"ZY1_COMENT"," ",200,0," "," ","C"," "," "})
+aAdd(_aHeader,   {"Cod Usuario"  ,"ZY1_CODUSR"," ",6,0," "," ","C"," "," "})
+aAdd(_aHeader,   {"Nome Usuario" ,"ZY1_NOMUSR"," ",40,0," "," ","C"," "," "})
 
 U_ACOM017V(_cGetPC,@_cGetSC,@_cGetNF,@_dGetNE,@_cGetFR,@_nGetVL,@_cGetFO,@_cGetOR,@_cGetSP,@_dGetEE)
 
@@ -1081,13 +1090,13 @@ _cQryZY1 := ChangeQuery(_cQryZY1)
 
 MPSysOpenQuery(_cQryZY1,"TRBZY1")
 
-TRBZY1->(dbGoTop())
+TRBZY1->(DBGoTop())
 
 If !TRBZY1->(Eof())
 	If TRBZY1->ZY1_ENCMON == "S"
-		u_itmsg("Foi encerrado o monitoramento deste pedido.","Atenção","Favor consultar o monitoramento através da rotina de monitoramento.",1)
-		dbSelectArea("TRBZY1")
-		TRBZY1->(dbCloseArea())
+		U_ITMsg("Foi encerrado o monitoramento deste pedido.","Atenção","Favor consultar o monitoramento através da rotina de monitoramento.",1)
+		DBSelectArea("TRBZY1")
+		TRBZY1->(DBCloseArea())
 		Return
 	EndIf
 
@@ -1095,61 +1104,61 @@ If !TRBZY1->(Eof())
 
 Else
 	// Define field values
-	For _nX := 1 to Len(_aFields)
+	For _nX := 1 To Len(_aFields)
 		If _aFields[_nX] == "ZY1_SEQUEN"
-			Aadd(_aFieldFill, "0001")
+			aAdd(_aFieldFill, "0001")
 		Else
-			Aadd(_aFieldFill, CriaVar(_aFields[_nX]))
+			aAdd(_aFieldFill, CriaVar(_aFields[_nX]))
 		EndIf
 	Next _nX
-	Aadd(_aFieldFill, .F.)
-	Aadd(_aCols, _aFieldFill)
+	aAdd(_aFieldFill, .F.)
+	aAdd(_aCols, _aFieldFill)
 EndIf
 
-TRBZY1->(dbCloseArea())
+TRBZY1->(DBCloseArea())
 
 _aSize    := MsAdvSize()
 _aObjects := {}
 
-AAdd( _aObjects, { 100, 100, .T., .T. } )
-AAdd( _aObjects, { 100, 100, .T., .T. } )
-AAdd( _aObjects, { 100, 015, .T., .F. } )
+aAdd( _aObjects, { 100, 100, .T., .T. } )
+aAdd( _aObjects, { 100, 100, .T., .T. } )
+aAdd( _aObjects, { 100, 015, .T., .F. } )
 
 _aInfo   := { _aSize[ 1 ],_aSize[ 2 ],_aSize[ 3 ],_aSize[ 4 ],03,03 }
 _aPosObj := MsObjSize( _aInfo, _aObjects )
 _aPosGet := MsObjGetPos(_aSize[3]-_aSize[1],315,{{003,157,189,236,268}})
 _dGetOri := _dGetEE
 
-DEFINE MSDIALOG _oDlg TITLE "Monitoramento Pedido de Compras" FROM _aSize[7],0 to _aSize[6],_aSize[5] of oMainWnd PIXEL
+DEFINE MSDIALOG _oDlg TITLE "Monitoramento Pedido de Compras" FROM _aSize[7],0 To _aSize[6],_aSize[5] of oMainWnd PIXEL
 
-	@ 035, 002 SAY _oSayPC PROMPT "Número PC:" SIZE 031, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
+	@ 035, 002 Say _oSayPC PROMPT "Número PC:" SIZE 031, 007 OF _oDlg COLORS 16711680, 16777215 PIXEL
 	@ 047, 002 MSGET _oGetPC VAR _cGetPC SIZE 039, 010 OF _oDlg COLORS 0, 16777215 F3 "SC7" READONLY PIXEL
 
-	@ 035, 066 SAY _oSaySC PROMPT "Número Solicitação:" SIZE 050, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 035, 066 Say _oSaySC PROMPT "Número Solicitação:" SIZE 050, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 047, 066 MSGET _oGetSC VAR _cGetSC SIZE 039, 010 OF _oDlg COLORS 0, 16777215 READONLY PIXEL
 
-	@ 035, 122 SAY _oSayNF PROMPT "Número NF / Vencimento:" SIZE 080, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 035, 122 Say _oSayNF PROMPT "Número NF / Vencimento:" SIZE 080, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 047, 122 MSGET _oGetNF VAR _cGetNF SIZE 213, 010 OF _oDlg COLORS 0, 16777215 READONLY PIXEL
 	
-	@ 035, 450 SAY _oSayEE PROMPT "Dt. Faturamento: " SIZE 055, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 035, 450 Say _oSayEE PROMPT "Dt. Faturamento: " SIZE 055, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 047, 450 MSGET _oGetEE VAR _dGetEE SIZE 040, 010 OF _oDlg COLORS 0, 16777215 PIXEL
 	
-	@ 035, 394 SAY _oSayNE PROMPT "Dt. Necessidade: " SIZE 055, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 035, 394 Say _oSayNE PROMPT "Dt. Necessidade: " SIZE 055, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 047, 394 MSGET _oGetNE VAR _dGetNE SIZE 040, 010 OF _oDlg COLORS 0, 16777215 PICTURE READONLY PIXEL
 
-	@ 035, 500 SAY _oSayFR PROMPT "Tp Frete:" SIZE 025, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 035, 500 Say _oSayFR PROMPT "Tp Frete:" SIZE 025, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 047, 500 MSGET _oGetFR VAR _cGetFR SIZE 030, 010 OF _oDlg COLORS 0, 16777215 READONLY PIXEL
 
-	@ 035, 590 SAY _oSayVL PROMPT "Valor: " SIZE 017, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 035, 590 Say _oSayVL PROMPT "Valor: " SIZE 017, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 047, 590 MSGET _oGetVL VAR _nGetVL SIZE 060, 010 OF _oDlg COLORS 0, 16777215 PICTURE PesqPict("SC7","C7_TOTAL") READONLY PIXEL
 
-	@ 063, 002 SAY _oSayFO PROMPT "Fornecedor:" SIZE 031, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 063, 002 Say _oSayFO PROMPT "Fornecedor:" SIZE 031, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 075, 002 MSGET _oGetFO VAR _cGetFO SIZE 213, 010 OF _oDlg COLORS 0, 16777215 READONLY PIXEL
 
-	@ 063, 222 SAY _oSaySP PROMPT "Obs Pedido de Compras: " SIZE 040, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 063, 222 Say _oSaySP PROMPT "Obs Pedido de Compras: " SIZE 040, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 075, 222 MSGET _oGetSP VAR _cGetSP SIZE 336, 010 OF _oDlg COLORS 0, 16777215 READONLY PIXEL
 
-	@ 091, 002 SAY _oSayOR PROMPT "Origem: " SIZE 020, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 091, 002 Say _oSayOR PROMPT "Origem: " SIZE 020, 007 OF _oDlg COLORS 0, 16777215 PIXEL
 	@ 103, 002 MSGET _oGetOR VAR _cGetOR SIZE 118, 010 OF _oDlg COLORS 0, 16777215 READONLY PIXEL
 
 	_oMSNewGeZY1 := MsNewGetDados():New( _aPosGet[1,1] + 115, _aPosGet[1,1] - 5, _aPosGet[1,2] - 15, _aPosGet[1,4] + _aPosGet[1,2] - _aPosObj[2,1] - 10, GD_INSERT+GD_UPDATE, "U_A017LOK()", "AllwaysTrue", /*"+ZY1_SEQUEN"*/, _aAlterFields,, 999, "AllwaysTrue", "", "AllwaysTrue", _oDlg, _aHeader, _aCols)
@@ -1164,34 +1173,34 @@ If _nOpca == 1
 		U_A017DTFT(_dGetEE,_cGetPC)
 		
 		//Se só tem uma linha no acols com descrição em branco preenche descrição para registrar mudança de data
-		If len(_oMSNewGeZY1:aCols) == 1 .and. empty(_oMSNewGeZY1:aCols[1, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_COMENT"})])
+		If Len(_oMSNewGeZY1:aCols) == 1 .And. Empty(_oMSNewGeZY1:aCols[1, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_COMENT"})])
 			
-			_oMSNewGeZY1:aCols[1, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_COMENT"})] := "Data de faturamento alterada de " + dtoc(_dGetOri) + " para " + dtoc(_dGetEE)
+			_oMSNewGeZY1:aCols[1, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_COMENT"})] := "Data de faturamento alterada de " + DToC(_dGetOri) + " para " + DToC(_dGetEE)
 			
 		Else
 						
-			aadd(_oMSNewGeZY1:aCols,{	"",;//STRZERO(len(_oMSNewGeZY1:aCols)+1,4),;
-										date()			,;
-										time()			,;
-										"Data de faturamento alterada de " + dtoc(_dGetOri) + " para " + dtoc(_dGetEE)				,;
-										__CUSERID 		,;
-										USRFULLNAME(__CUSERID),;
+			aAdd(_oMSNewGeZY1:aCols,{	"",;//StrZero(Len(_oMSNewGeZY1:aCols)+1,4),;
+										Date()			,;
+										Time()			,;
+										"Data de faturamento alterada de " + DToC(_dGetOri) + " para " + DToC(_dGetEE)				,;
+										__cUserId 		,;
+										USRFULLNAME(__cUserId),;
 										.F. })
 															
 				
-		Endif
+		EndIf
 		
 			
-	Endif
+	EndIf
 	
 
 	Begin Transaction
 		For _nX := 1 To Len(_oMSNewGeZY1:aCols)
 			If !_oMSNewGeZY1:aCols[_nX, Len(_oMSNewGeZY1:aHeader) + 1]
-				dbSelectArea("ZY1")
-				ZY1->(dbSetOrder(1))
+				DBSelectArea("ZY1")
+				ZY1->(DBSetOrder(1))
 				_cSequen:=_oMSNewGeZY1:aCols[_nX, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_SEQUEN"})]
-				If !EMPTY(_cSequen) .AND. ZY1->(dbSeek(xFilial("ZY1") + _cGetPC + _cSequen ))
+				If !Empty(_cSequen) .And. ZY1->(DBSeek(xFilial("ZY1") + _cGetPC + _cSequen ))
 					RecLock("ZY1", .F.)
 						Replace ZY1->ZY1_FILIAL	With xFilial("ZY1")
 						Replace ZY1->ZY1_NUMPC	With _cGetPC
@@ -1201,13 +1210,13 @@ If _nOpca == 1
 						Replace ZY1->ZY1_COMENT	With _oMSNewGeZY1:aCols[_nX, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_COMENT"})]
 						Replace ZY1->ZY1_CODUSR	With _oMSNewGeZY1:aCols[_nX, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_CODUSR"})]
 						Replace ZY1->ZY1_NOMUSR	With _oMSNewGeZY1:aCols[_nX, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_NOMUSR"})]
-					ZY1->(MsUnLock())
+					ZY1->(MSUnLock())
 				Else
   				    nMaxGravado++
 					RecLock("ZY1", .T.)
 						Replace ZY1->ZY1_FILIAL	With xFilial("ZY1")
 						Replace ZY1->ZY1_NUMPC	With _cGetPC
-						Replace ZY1->ZY1_SEQUEN	With STRZERO(nMaxGravado,4)
+						Replace ZY1->ZY1_SEQUEN	With StrZero(nMaxGravado,4)
 						Replace ZY1->ZY1_DTMONI	With _oMSNewGeZY1:aCols[_nX, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_DTMONI"})]
 						Replace ZY1->ZY1_HRMONI	With _oMSNewGeZY1:aCols[_nX, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_HRMONI"})]
 						Replace ZY1->ZY1_COMENT	With _oMSNewGeZY1:aCols[_nX, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_COMENT"})]
@@ -1215,17 +1224,17 @@ If _nOpca == 1
 						Replace ZY1->ZY1_NOMUSR	With _oMSNewGeZY1:aCols[_nX, aScan(_oMSNewGeZY1:aHeader,{|x| AllTrim(x[2]) == "ZY1_NOMUSR"})]
 						Replace ZY1->ZY1_DTNECE With _dGetNE
 						Replace ZY1->ZY1_DTFAT With _dGetEE
-					ZY1->(MsUnLock())
+					ZY1->(MSUnLock())
 				EndIf
 			EndIf
 		Next
 	End Transaction
 
-    if _dGetEE = _dGetOri 
-	   U_ITMSG("Gravação completada com sucesso", "Atenção",,2)
-  	ELSE
-       U_ITMSG("Data de Faturamento alterada de " + dtoc(_dGetOri) + " para " + dtoc(_dGetEE)+" e Gravação completada com sucesso.","Atenção",,2)
-	ENDIF
+    If _dGetEE = _dGetOri 
+	   U_ITMsg("Gravação completada com sucesso", "Atenção",,2)
+  	Else
+       U_ITMsg("Data de Faturamento alterada de " + DToC(_dGetOri) + " para " + DToC(_dGetEE)+" e Gravação completada com sucesso.","Atenção",,2)
+	EndIf
 
 EndIf
 
@@ -1242,6 +1251,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function ACOM017E()
+
 Local _aTables		:= {"ZY1","SC7","SA2","SD1","SC1"}
 Local _lCriaAmb		:= .F.
 Local _aAlias		:= {}
@@ -1272,7 +1282,7 @@ Local _cGetSP		:= ""
 
 Local _cEmailWFC 	:= ""
 Local _cEmailWFG 	:= ""
-Local _dGetEE := StoD("")
+Local _dGetEE := SToD("")
 
 Local _aConfig		:= {}
 Local _cEmlLog		:= ""
@@ -1308,13 +1318,13 @@ If _lCriaAmb
 	//========================================================================================
 	// Mensagem que ficara armazenada no arquivo totvsconsole.log para posterior monitoramento
 	//======================================================================================== 
-	FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "ACOM017"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "ACOM01701"/*cMsgId*/, "ACOM01701 - Gerando envio de e-mail do monitoramento dos pedidos de compras na data: " + Dtoc(DATE()) + " - " + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+	FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "ACOM017"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "ACOM01701"/*cMsgId*/, "ACOM01701 - Gerando envio de e-mail do monitoramento dos pedidos de compras na data: " + DToC(Date()) + " - " + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
 EndIf
 
 _aConfig	:= U_ITCFGEML('')
-_cHostWF 	:= U_ItGetMv("IT_WFHOSTS","http://wfteste.italac.com.br:4034/")
-_dDtIni		:= DtoS(U_ItGetMv("IT_WFDTINI","20150101"))
+_cHostWF 	:= SuperGetMV("IT_WFHOSTS",.F.,"http://wfteste.italac.com.br:4034/")
+_dDtIni		:= DToS(SuperGetMV("IT_WFDTINI",.F.,"26/11/2025"))
 
 If _lCriaAmb
 	FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "ACOM017"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "ACOM01702"/*cMsgId*/, "ACOM01702 - Carregando filiais..."/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
@@ -1324,24 +1334,24 @@ Else
 	     Return
 	EndIf
 
-	FwMsgRun(,{|| _aAlias := ACOM017M(_lCriaAmb, .T.)},,"Aguarde, gerando e processando e-mail...")
+	FWMsgRun(,{|| _aAlias := ACOM017M(_lCriaAmb, .T.)},,"Aguarde, gerando e processando e-mail...")
 	
     _cAlias:= _aAlias[1]
-	IF (_cAlias)->(Eof()) .AND. (_cAlias)->(BOF())
-	   U_ITMSG( "Não tem registros para esses filtros",'ATENÇÃO',"Selecione outros filtros e tente novamente",2 )
-	   RETURN .F.
-	ENDIF
+	If (_cAlias)->(Eof()) .And. (_cAlias)->(Bof())
+	   U_ITMsg( "Não tem registros para esses filtros",'ATENÇÃO',"Selecione outros filtros e tente novamente",2 )
+	   Return .F.
+	EndIf
 
-	_dDtMond	:= DtoS(mv_par03)
-	_dDtMona	:= DtoS(mv_par04)
+	_dDtMond	:= DToS(MV_PAR03)
+	_dDtMona	:= DToS(MV_PAR04)
 EndIf
 
 _cAlias		:= _aAlias[1]
 _aColumns 	:= _aAlias[2]
 
-(_cAlias)->(dbGoTop())
+(_cAlias)->(DBGoTop())
 
-Do while !(_cAlias)->(Eof())
+While !(_cAlias)->(Eof())
 
 	_cFilial	:= (_cAlias)->ZY1_FILIAL
 	FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "ACOM017"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "ACOM01703"/*cMsgId*/, "ACOM01703 - Montando dados da filial " + _cfilial + "..."/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
@@ -1355,7 +1365,7 @@ Do while !(_cAlias)->(Eof())
 	_cHead += '<title>Pedido de Compras</title>'
 	_cHead += '</head>'
 	
-	_cHead += '<style type="text/css"><!--'
+	_cHead += '<style Type="text/css"><!--'
 	_cHead += 'table.bordasimples { border-collapse: collapse; }'
 	_cHead += 'table.bordasimples tr td { border:1px solid #777777; }'
 	_cHead += 'td.grupos	{ font-family:VERDANA; font-size:20px; V-align:middle; background-color: #C6E2FF; color:#000080; }'
@@ -1414,14 +1424,14 @@ Do while !(_cAlias)->(Eof())
 		_cQryZY1 += "WHERE ZY1.ZY1_FILIAL = '" + (_cAlias)->ZY1_FILIAL + "'"  
 		 		
 		If !_lCriaAmb
-			_cQryZY1 += "  AND ZY1.ZY1_DTMONI BETWEEN '" + DtoS(mv_par03) + "' AND '" + DtoS(mv_par04) + "' "
-			_cQryZY1 += "  AND ZY1.ZY1_NUMPC BETWEEN '" + MV_PAR01 + "' AND '" + mv_par02 + "' "
+			_cQryZY1 += "  AND ZY1.ZY1_DTMONI BETWEEN '" + DToS(MV_PAR03) + "' AND '" + DToS(MV_PAR04) + "' "
+			_cQryZY1 += "  AND ZY1.ZY1_NUMPC BETWEEN '" + MV_PAR01 + "' AND '" + MV_PAR02 + "' "
 		EndIf
 		
 		_cQryZY1 += "  AND ZY1.ZY1_ENCMON <> 'S' "
 		_cQryZY1 += "  AND ZY1.R_E_C_N_O_ = (SELECT MAX(ZY1A.R_E_C_N_O_) ZY1A_RECNO FROM " + RetSqlName("ZY1") + " ZY1A 
 		_cQryZY1 += "                              WHERE ZY1A.ZY1_FILIAL = ZY1.ZY1_FILIAL AND ZY1A.ZY1_NUMPC = ZY1.ZY1_NUMPC AND ZY1A.D_E_L_E_T_ = ' ' "
-		_cQryZY1 += "                                    AND NOT UPPER(ZY1A.ZY1_COMENT) LIKE 'DATA DE FATURAMENTO ALTERADA DE%' ) "
+		_cQryZY1 += "                                    AND NOT Upper(ZY1A.ZY1_COMENT) LIKE 'DATA DE FATURAMENTO ALTERADA DE%' ) "
 
 		_cQryZY1 += "  AND ZY1.D_E_L_E_T_ = ' ' "
 
@@ -1433,18 +1443,18 @@ Do while !(_cAlias)->(Eof())
 		_ntot := 0
 		_nni := 0
 		
-		TRBZY1->(dbGoTop())
-		COUNT TO _nTot
-		TRBZY1->(dbGoTop())
+		TRBZY1->(DBGoTop())
+		COUNT To _nTot
+		TRBZY1->(DBGoTop())
 
 		_cItem := ""
 		
 		If !TRBZY1->(Eof())
 		
-			Do While !TRBZY1->(Eof())
+			While !TRBZY1->(Eof())
 
 				_nni++
-				FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "ACOM017"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "ACOM01705"/*cMsgId*/, "ACOM01705 - Carregando monitoramentos da filial " + _cfilial + " - " + strzero(_nni,6) + " de " + strzero(_ntot,6) + "..."/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+				FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "ACOM017"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "ACOM01705"/*cMsgId*/, "ACOM01705 - Carregando monitoramentos da filial " + _cfilial + " - " + StrZero(_nni,6) + " de " + StrZero(_ntot,6) + "..."/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
 				_cItem += '<tr>'
 				_cItem += 	  '<td align="center" class="totais">Filial</td>
@@ -1469,30 +1479,30 @@ Do while !(_cAlias)->(Eof())
 				_cItem +=     '<td valign="top" align="left"	class="itens">' + _cGetNF + '</td>'
 				_cItem +=     '<td valign="top" align="left"	class="itens">' + AllTrim(_cGetFO) + '</td>'
 				_cItem +=     '<td valign="top" align="center"	class="itens">' + _cGetOR + '</td>'
-				_cItem +=     '<td valign="top" align="left"	class="itens">' + DtoC(_dGetNE) + '</td>'
-				_cItem +=     '<td valign="top" align="left"	class="itens">' + DtoC(_dGetEE) + '</td>'
+				_cItem +=     '<td valign="top" align="left"	class="itens">' + DToC(_dGetNE) + '</td>'
+				_cItem +=     '<td valign="top" align="left"	class="itens">' + DToC(_dGetEE) + '</td>'
 				_cItem +=     '<td valign="top" align="center"	class="itens">' + _cGetFR + '</td>'
 				_cItem +=     '<td valign="top" align="center"	class="itens">' + Transform(_nGetVL,PesqPict("SC7","C7_TOTAL")) + '</td>'
 				_cItem +=     '<td valign="top" align="center"	class="itens">' + _cGetSP + '</td>'
 				_cItem += '</tr>'
 
 				_cItem += '<tr>'
-				_cItem +=     '<td valign="top" align="left" colspan="13" class="itens">Status: ' + TRBZY1->ZY1_SEQUEN + " - " + DtoC(StoD(TRBZY1->ZY1_DTMONI)) + " - " + TRBZY1->ZY1_HRMONI + " - " + AllTrim(TRBZY1->ZY1_COMENT) + " ( " + TRBZY1->ZY1_CODUSR + "-" + AllTrim(TRBZY1->ZY1_NOMUSR) + " ) </td>'
+				_cItem +=     '<td valign="top" align="left" colspan="13" class="itens">Status: ' + TRBZY1->ZY1_SEQUEN + " - " + DToC(SToD(TRBZY1->ZY1_DTMONI)) + " - " + TRBZY1->ZY1_HRMONI + " - " + AllTrim(TRBZY1->ZY1_COMENT) + " ( " + TRBZY1->ZY1_CODUSR + "-" + AllTrim(TRBZY1->ZY1_NOMUSR) + " ) </td>'
 				_cItem += '</tr>'
 
-				ZY1->(dbSetOrder(1))
-				ZY1->(dbSeek(TRBZY1->ZY1_FILIAL + TRBZY1->ZY1_NUMPC + TRBZY1->ZY1_SEQUEN))
+				ZY1->(DBSetOrder(1))
+				ZY1->(DBSeek(TRBZY1->ZY1_FILIAL + TRBZY1->ZY1_NUMPC + TRBZY1->ZY1_SEQUEN))
 
 				RecLock("ZY1", .F.)
 					Replace ZY1->ZY1_ENVIAD With "S"
-				MsUnLock()
-				TRBZY1->(dbSkip())
+				MSUnLock()
+				TRBZY1->(DBSkip())
 			
-			Enddo
+			EndDo
 			
 		EndIf
 
-		TRBZY1->(dbCloseArea())
+		TRBZY1->(DBCloseArea())
 
 		_cHtml := _cHead
 		_cHtml += _cItem
@@ -1504,8 +1514,8 @@ Do while !(_cAlias)->(Eof())
 			
  			 cFilAnt := (_cAlias)->ZY1_FILIAL
 
-			_cEmailWFC 	:= AllTrim(U_ItGetMv("IT_EMAILWFC",""))
-			_cEmailWFG 	:= AllTrim(U_ItGetMv("IT_EMAILWFG",""))
+			_cEmailWFC 	:= AllTrim(SuperGetMV("IT_MAILWFC",.F.,""))
+			_cEmailWFG 	:= AllTrim(SuperGetMV("IT_MAILWFG",.F.,""))
 
 			_cTo := _cEmailWFG + ";" + _cEmailWFC
 
@@ -1513,8 +1523,8 @@ Do while !(_cAlias)->(Eof())
 
 		Else
 
-			_cEmailWFC 	:= AllTrim(U_ItGetMv("IT_EMAILWFC",""))
-			_cEmailWFG 	:= AllTrim(U_ItGetMv("IT_EMAILWFG",""))
+			_cEmailWFC 	:= AllTrim(SuperGetMV("IT_MAILWFC",.F.,""))
+			_cEmailWFG 	:= AllTrim(SuperGetMV("IT_MAILWFG",.F.,""))
 
 			_cTo := _cEmailWFG + ";" + _cEmailWFC
 			
@@ -1538,10 +1548,10 @@ Do while !(_cAlias)->(Eof())
 //          ITEnvMail(cFrom,cEmailTo,cEmailCo,cEmailBcc,cAssunto  ,cMensagem,cAttach  ,cAccount     ,cPassword    ,cServer      ,cPortCon     ,lRelauth     ,cUserAut     ,cPassAut     ,cLogErro  ,lExibeAmb)		
 		  U_ITENVMAIL( ""  , _cTo   , _cGetCc,_cMailCom,_cGetAssun, _cHtml  , _cGetAnx, _aConfig[01], _aConfig[02], _aConfig[03], _aConfig[04], _aConfig[05], _aConfig[06], _aConfig[07], @_cEmlLog )
 		  
-		Endif
+		EndIf
 	
 		If  !_lCriaAmb
-			u_itmsg( _cEmlLog , 'Término do processamento!' ,"Enviado para "+_cTo ,2 )
+			U_ITMsg( _cEmlLog , 'Término do processamento!' ,"Enviado para "+_cTo ,2 )
 		Else
 			FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "ACOM017"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "ACOM01708"/*cMsgId*/, "ACOM01708 - Email monitoramento da filial " + _cfilial +  " enviado com log:  " + _cEmlLog/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 		EndIf
@@ -1556,9 +1566,9 @@ Do while !(_cAlias)->(Eof())
 
 	EndIf
 	
-	(_cAlias)->( Dbskip() )
+	(_cAlias)->( DBSkip() )
 
-Enddo
+EndDo
 
 If _lCriaAmb
 
@@ -1567,7 +1577,7 @@ If _lCriaAmb
 	//=============================================================
 	RpcClearEnv()
 
-	FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "ACOM017"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "ACOM01709"/*cMsgId*/, "ACOM01709 - Termino do envio do envio de monitoramento de pedidos de compras na data: " + Dtoc(DATE()) + " - " + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+	FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "ACOM017"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "ACOM01709"/*cMsgId*/, "ACOM01709 - Termino do envio do envio de monitoramento de pedidos de compras na data: " + DToC(Date()) + " - " + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
 EndIf
 
@@ -1584,6 +1594,7 @@ Retorno-----------: Array [1] - Tabela temporária / [2] - Colunas do browse
 ===============================================================================================================================
 */
 Static Function ACOM017M(_lCriaAmb, _lfiliais)
+
 Local _cAliasTrb	:= GetNextAlias()		
 Local _aFields		:= {'ZY1_NUMPC','ZY1_FILIAL'}
 Local _cSelect		:= ""
@@ -1604,9 +1615,9 @@ IncProc('Inicializando a rotina...')
 If !_lCriaAmb
 
 	_cNumPCd	:= MV_PAR01
-	_cNumPCa	:= mv_par02
-	_dDtMond	:= DtoS(mv_par03)
-	_dDtMona	:= DtoS(mv_par04)
+	_cNumPCa	:= MV_PAR02
+	_dDtMond	:= DToS(MV_PAR03)
+	_dDtMona	:= DToS(MV_PAR04)
 
 EndIf
 
@@ -1620,31 +1631,22 @@ If _lCriaAmb
 	If _lfiliais
 	
 		
-		BeginSQL alias _cAliasTrb
+		BeginSql alias _cAliasTrb
 
 			SELECT DISTINCT(ZY1_FILIAL) ZY1_FILIAL
-			FROM %table:ZY1% ZY1
+			FROM %Table:ZY1% ZY1
 			WHERE ZY1.%notDel%
 			GROUP BY ZY1_FILIAL
 			ORDER BY ZY1_FILIAL
-
 		EndSql
-	
-			
 	Else
-	
-	
-		BeginSQL alias _cAliasTrb
-
+		BeginSql alias _cAliasTrb
 			SELECT DISTINCT(ZY1_FILIAL) ZY1_FILIAL, ZY1_NUMPC
-			FROM %table:ZY1% ZY1
+			FROM %Table:ZY1% ZY1
 			WHERE ZY1.%notDel%
 			ORDER BY ZY1_FILIAL
-
 		EndSql
-		
-	Endif
-	
+	EndIf
 Else
 
 	//===========================================================
@@ -1663,62 +1665,55 @@ Else
 	
 	If _lfiliais
 	
-			BeginSQL alias _cAliasTrb
+			BeginSql alias _cAliasTrb
 
 			SELECT DISTINCT(ZY1_FILIAL) ZY1_FILIAL
-			FROM %table:ZY1% ZY1
+			FROM %Table:ZY1% ZY1
 			WHERE ZY1_FILIAL = %xFilial:ZY1%
 			  AND %Exp:_cWNumPC%
 			  AND %Exp:_cWDtMon%	
 		 	  AND ZY1.%notDel%
 		 	GROUP BY ZY1_FILIAL
 			ORDER BY ZY1_FILIAL
-
 		EndSql	
-	
 	Else
-	
-		BeginSQL alias _cAliasTrb
-
+		BeginSql alias _cAliasTrb
 			SELECT DISTINCT(ZY1_FILIAL) ZY1_FILIAL, ZY1_NUMPC
-			FROM %table:ZY1% ZY1
+			FROM %Table:ZY1% ZY1
 			WHERE ZY1_FILIAL = %xFilial:ZY1%
 			  AND %Exp:_cWNumPC%
 			  AND %Exp:_cWDtMon%	
 		 	  AND ZY1.%notDel%
 			ORDER BY ZY1_FILIAL
-
 		EndSql
-		
-	Endif
-		
+	EndIf
 EndIf
 
 //----------------------------------------------------------------------
 // Cria arquivo de dados temporário
 //----------------------------------------------------------------------
-_cTempTab := GETNEXTALIAS()
+_cTempTab := GetNextAlias()
 _otemp := FWTemporaryTable():New( _cTempTab, _aStructZY1 )
 _otemp:Create()
 
-(_cAliasTrb)->(Dbgotop())
+(_cAliasTrb)->(DBGoTop())
 
-Do while !(_cAliasTrb)->(Eof())
+While !(_cAliasTrb)->(Eof())
 
-	Reclock(_cTempTab,.T.)
+	RecLock(_cTempTab,.T.)
 	If _lfiliais
 		(_cTempTab)->ZY1_FILIAL := (_cAliasTrb)->ZY1_FILIAL
 	Else
 		(_cTempTab)->ZY1_FILIAL := (_cAliasTrb)->ZY1_FILIAL
 		(_cTempTab)->ZY1_NUMPC := (_cAliasTrb)->ZY1_NUMPC
-	Endif
+	EndIf
 	
-	(_cAliasTrb)->(Dbskip())
+	(_cAliasTrb)->(DBSkip())
 	
-Enddo
+EndDo
 
 If ( Select( _cAliasTrb ) > 0 )
-	(_cAliasTrb)->(DbCloseArea())
+	(_cAliasTrb)->(DBCloseArea())
 EndIf
 
 IncProc('Lendo os dados...')
@@ -1727,7 +1722,7 @@ IncProc('Lendo os dados...')
 
 For nX := 1 To Len(_aFields)
 	If _aFields[nX] $ _cSelect 
-		AAdd(_aColumns,FWBrwColumn():New())
+		aAdd(_aColumns,FWBrwColumn():New())
 
 		_aColumns[Len(_aColumns)]:SetData( &("{||" + _aFields[nX] + "}") )
 		_aColumns[Len(_aColumns)]:SetTitle(RetTitle(_aFields[nX])) 
@@ -1750,23 +1745,24 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function A017ENC()
-Local _aArea	:= GetArea()
+
+Local _aArea	:= FWGetArea()
 Local _cNumPC	:= ZY1->ZY1_NUMPC
 Local _cQryZY1	:= ""
 Local _nSeq		:= 0
 
 If ZY1->ZY1_ENCMON == "S"
-	u_itmsg('O monitoramento deste pedido já foi encerrado.','Atenção','Favor verificar o pedido selecionado.',1)
+	U_ITMsg('O monitoramento deste pedido já foi encerrado.','Atenção','Favor verificar o pedido selecionado.',1)
 Else
-	If u_itmsg('Deseja realmente encerrar o monitoramento do pedido selecionado?',"Atenção",,3,2,2)
-		ZY1->(dbSetOrder(1))
-		ZY1->(dbSeek(ZY1->ZY1_FILIAL + ZY1->ZY1_NUMPC))
+	If U_ITMsg('Deseja realmente encerrar o monitoramento do pedido selecionado?',"Atenção",,3,2,2)
+		ZY1->(DBSetOrder(1))
+		ZY1->(DBSeek(ZY1->ZY1_FILIAL + ZY1->ZY1_NUMPC))
 	
 		While !ZY1->(Eof()) .And. ZY1->ZY1_NUMPC == _cNumPC
 			RecLock("ZY1", .F.)
 				Replace ZY1->ZY1_ENCMON With "S"
-			ZY1->(MsUnLock())
-			ZY1->(dbSkip())
+			ZY1->(MSUnLock())
+			ZY1->(DBSkip())
 		EndDo
 
 		_cQryZY1 := "SELECT ZY1_FILIAL, ZY1_NUMPC, ZY1_SEQUEN, ZY1_DTMONI, ZY1_HRMONI, ZY1_COMENT, ZY1_CODUSR, ZY1_NOMUSR "
@@ -1778,18 +1774,18 @@ Else
 
 		MPSysOpenQuery(_cQryZY1,"TRBZY1")
 
-		TRBZY1->(dbGoTop())
+		TRBZY1->(DBGoTop())
 
 		If !TRBZY1->(Eof())
 			While !TRBZY1->(Eof())
 				_nSeq++
-				TRBZY1->(dbSkip())
+				TRBZY1->(DBSkip())
 			End
 
 			_nSeq++
 
-			dbSelectArea("ZY1")
-			ZY1->(dbSetOrder(1))
+			DBSelectArea("ZY1")
+			ZY1->(DBSetOrder(1))
 			RecLock("ZY1",.T.)
 				Replace ZY1->ZY1_FILIAL	With xFilial("ZY1")
 				Replace ZY1->ZY1_NUMPC	With _cNumPC
@@ -1797,12 +1793,12 @@ Else
 				Replace ZY1->ZY1_DTMONI	With dDataBase
 				Replace ZY1->ZY1_HRMONI	With Time()
 				Replace ZY1->ZY1_COMENT	With "********** O pedido " + _cNumPC + " foi encerrado o monitoramento. **********"
-				Replace ZY1->ZY1_CODUSR	With __cUserID
-				Replace ZY1->ZY1_NOMUSR	With AllTrim(UsrFullName(__cUserID))
+				Replace ZY1->ZY1_CODUSR	With __cUserId
+				Replace ZY1->ZY1_NOMUSR	With AllTrim(UsrFullName(__cUserId))
 				Replace ZY1->ZY1_ENCMON With "S"
-			ZY1->(MsUnLock())
+			ZY1->(MSUnLock())
 		Else
-			ZY1->(dbSetOrder(1))
+			ZY1->(DBSetOrder(1))
 			RecLock("ZY1",.T.)
 				Replace ZY1->ZY1_FILIAL	With xFilial("ZY1")
 				Replace ZY1->ZY1_NUMPC	With _cNumPC
@@ -1810,20 +1806,20 @@ Else
 				Replace ZY1->ZY1_DTMONI	With dDataBase
 				Replace ZY1->ZY1_HRMONI	With Time()
 				Replace ZY1->ZY1_COMENT	With "********** O pedido " + _cNumPC + " foi encerrado o monitoramento. **********"
-				Replace ZY1->ZY1_CODUSR	With __cUserID
-				Replace ZY1->ZY1_NOMUSR	With AllTrim(UsrFullName(__cUserID))
+				Replace ZY1->ZY1_CODUSR	With __cUserId
+				Replace ZY1->ZY1_NOMUSR	With AllTrim(UsrFullName(__cUserId))
 				Replace ZY1->ZY1_ENCMON With "S"
-			ZY1->(MsUnLock())
+			ZY1->(MSUnLock())
 		EndIf
 
-	TRBZY1->(dbCloseArea())
+	TRBZY1->(DBCloseArea())
 
 	Else
-		u_itmsg('Processo cancelado pelo usuário.',"Atenção",,1)
+		U_ITMsg('Processo cancelado pelo usuário.',"Atenção",,1)
 	EndIf
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 Return
 
 /*
@@ -1837,6 +1833,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function A017LEG()
+
 aLegenda :=	{	{"BR_VERDE"		, "Acima 15 Dias"		},;
 				{"BR_AMARELO"	, "Entre 10 e 14 Dias"	},;
 				{"BR_VERMELHO"	, "Abaixo 9 Dias"		},;
@@ -1844,7 +1841,7 @@ aLegenda :=	{	{"BR_VERDE"		, "Acima 15 Dias"		},;
 
 BrwLegenda("Situação da previsão de faturamento","Legenda",aLegenda)
 
-return
+Return
 
 /*
 ===============================================================================================================================
@@ -1857,7 +1854,8 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function A017PDF(_cFilAtu, _cGetAnx, _lCriaAmb)
-Local _aArea		:= GetArea()
+
+Local _aArea		:= FWGetArea()
 Local _cFilial		:= SC7->C7_FILIAL
 Local _cPathSrvJ	:= GETMV("MV_RELT")
 Local _cQryZY1A		:= ""
@@ -1871,8 +1869,8 @@ Local nCont			:= 0
 
 Local _cGetSC		:= ""
 Local _cGetNF		:= ""
-Local _dGetNE		:= StoD("")
-Local _dGetEE     := Stod("")
+Local _dGetNE		:= SToD("")
+Local _dGetEE     := SToD("")
 Local _cGetFR		:= ""
 Local _nGetVL		:= 0
 Local _cGetFO		:= ""
@@ -1903,13 +1901,13 @@ Private oFont08		:= TFont():New("Arial",,08,,.F.,,,,,.F.,.F.)
 		_cQryZY1A += "FROM " + RetSqlName("ZY1") + " ZY1 "
 		_cQryZY1A += "WHERE ZY1.ZY1_FILIAL = '" + _cfilatu + "' "
 		If !_lCriaAmb
-			_cQryZY1A += "  AND ZY1.ZY1_DTMONI BETWEEN '" + DtoS(mv_par03) + "' AND '" + DtoS(mv_par04) + "' "
-			_cQryZY1A += "  AND ZY1.ZY1_NUMPC BETWEEN '" + MV_PAR01 + "' AND '" + mv_par02 + "' "
+			_cQryZY1A += "  AND ZY1.ZY1_DTMONI BETWEEN '" + DToS(MV_PAR03) + "' AND '" + DToS(MV_PAR04) + "' "
+			_cQryZY1A += "  AND ZY1.ZY1_NUMPC BETWEEN '" + MV_PAR01 + "' AND '" + MV_PAR02 + "' "
 		EndIf
 		_cQryZY1A += "  AND ZY1.ZY1_ENCMON <> 'S' "
 		_cQryZY1A += "  AND ZY1.R_E_C_N_O_ = (SELECT MAX(ZY1A.R_E_C_N_O_) ZY1A_RECNO FROM " + RetSqlName("ZY1") + " ZY1A 
 		_cQryZY1A += "                              WHERE ZY1A.ZY1_FILIAL = ZY1.ZY1_FILIAL AND ZY1A.ZY1_NUMPC = ZY1.ZY1_NUMPC AND ZY1A.D_E_L_E_T_ = ' ' "
-		_cQryZY1A += "                                    AND NOT UPPER(ZY1A.ZY1_COMENT) LIKE 'DATA DE FATURAMENTO ALTERADA DE%' ) "
+		_cQryZY1A += "                                    AND NOT Upper(ZY1A.ZY1_COMENT) LIKE 'DATA DE FATURAMENTO ALTERADA DE%' ) "
 		_cQryZY1A += "  AND ZY1.D_E_L_E_T_ = ' ' "
 
 		_cQryZY1A += "ORDER BY ZY1_FILIAL, ZY1_NUMPC "
@@ -1917,7 +1915,7 @@ Private oFont08		:= TFont():New("Arial",,08,,.F.,,,,,.F.,.F.)
 
 		MPSysOpenQuery(_cQryZY1A,"TRBZY1A")
 		
-		TRBZY1A->(dbGoTop())
+		TRBZY1A->(DBGoTop())
 
 		If !TRBZY1A->(Eof())
 
@@ -1960,14 +1958,14 @@ Private oFont08		:= TFont():New("Arial",,08,,.F.,,,,,.F.,.F.)
 			
 			_nnii := 0
 			_ntoti := 0
-			TRBZY1A->(Dbgotop())
-			Count to _ntoti
-			TRBZY1A->(Dbgotop())
+			TRBZY1A->(DBGoTop())
+			Count To _ntoti
+			TRBZY1A->(DBGoTop())
 
 			While !TRBZY1A->(Eof())
 			
 				_nnii++
-				FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "ACOM017"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "ACOM01710"/*cMsgId*/, "ACOM01710 - Montando pdf da filial " + _cfilatu + " - Linha " + strzero(_nnii,6) + " de " + strzero(_ntoti,6) + "..."/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+				FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "ACOM017"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "ACOM01710"/*cMsgId*/, "ACOM01710 - Montando pdf da filial " + _cfilatu + " - Linha " + StrZero(_nnii,6) + " de " + StrZero(_ntoti,6) + "..."/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
 				If nLinAux > (nLinIni+590)
 					lPagina := .T.
@@ -2027,8 +2025,8 @@ Private oFont08		:= TFont():New("Arial",,08,,.F.,,,,,.F.,.F.)
 				oPrint:Say( (nLinAux) , (nColIni+060) , TRBZY1A->ZY1_NUMPC								, oFont08 )
 				oPrint:Say( (nLinAux) , (nColIni+100) , AllTrim(_cGetFO)								, oFont08 )
 				oPrint:Say( (nLinAux) , (nColIni+250) , _cGetOR											, oFont08 )
-				oPrint:Say( (nLinAux) , (nColIni+370) , DtoC(_dGetNE)									, oFont08 )
-				oPrint:Say( (nLinAux) , (nColIni+410) , DtoC(_dGetEE)									, oFont08 )
+				oPrint:Say( (nLinAux) , (nColIni+370) , DToC(_dGetNE)									, oFont08 )
+				oPrint:Say( (nLinAux) , (nColIni+410) , DToC(_dGetEE)									, oFont08 )
 				oPrint:Say( (nLinAux) , (nColIni+465) , _cGetFR											, oFont08 )
 				oPrint:Say( (nLinAux) , (nColIni+500) , Transform(_nGetVL,PesqPict("SC7","C7_TOTAL"))	, oFont08 )
 				If Len(AllTrim(_cGetSP)) > 60
@@ -2167,7 +2165,7 @@ Private oFont08		:= TFont():New("Arial",,08,,.F.,,,,,.F.,.F.)
 					nCont++
 				EndIf
 
-				_cStatus := AllTrim("Status: " + TRBZY1A->ZY1_SEQUEN + " - " + DtoC(StoD(TRBZY1A->ZY1_DTMONI)) + " - " + TRBZY1A->ZY1_HRMONI + " - " + AllTrim(TRBZY1A->ZY1_COMENT) + " ( " + TRBZY1A->ZY1_CODUSR + "-" + AllTrim(TRBZY1A->ZY1_NOMUSR) + " )")
+				_cStatus := AllTrim("Status: " + TRBZY1A->ZY1_SEQUEN + " - " + DToC(SToD(TRBZY1A->ZY1_DTMONI)) + " - " + TRBZY1A->ZY1_HRMONI + " - " + AllTrim(TRBZY1A->ZY1_COMENT) + " ( " + TRBZY1A->ZY1_CODUSR + "-" + AllTrim(TRBZY1A->ZY1_NOMUSR) + " )")
 
 				If Len(_cStatus) > 182
 					_nTam2 := Len(_cStatus) / 182
@@ -2236,7 +2234,7 @@ Private oFont08		:= TFont():New("Arial",,08,,.F.,,,,,.F.,.F.)
 					nCont++
 				EndIf
 
-				TRBZY1A->(dbSkip())
+				TRBZY1A->(DBSkip())
 			End
 			
 			oPrint:EndPage()
@@ -2246,13 +2244,13 @@ Private oFont08		:= TFont():New("Arial",,08,,.F.,,,,,.F.,.F.)
 			
 		EndIf
 
-		TRBZY1A->(dbCloseArea())
+		TRBZY1A->(DBCloseArea())
 
 If File(_cPathSrvJ + _cFileName)
 	_cGetAnx := _cPathSrvJ + _cFileName
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -2267,6 +2265,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function A017GRID(_cFilial)
+
 Local nLinIni		:= 0		// Linha Lateral (inicial) Esquerda
 Local nColIni		:= 0		// Coluna Lateral (inicial) Esquerda
 Local nLinMax		:= 0600		// Para implementar layout A4
@@ -2315,12 +2314,13 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function A017DEL(cFile)
+
 Local nRet := 0
 
 If File(cFile)
 	nRet := fErase(cFile)
 	If nRet <> 0
-		FWLogMsg("ERROR"/*cSeverity*/, /*cTransactionId*/, "ACOM017"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "ACOM01711"/*cMsgId*/, "ACOM01711 - Erro ao excluir o arquivo: " + cFile + " - Erro: " + str(FError())/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+		FWLogMsg("ERROR"/*cSeverity*/, /*cTransactionId*/, "ACOM017"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "ACOM01711"/*cMsgId*/, "ACOM01711 - Erro ao excluir o arquivo: " + cFile + " - Erro: " + Str(FError())/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 	Else
 		FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "ACOM017"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "ACOM01712"/*cMsgId*/, "ACOM01712 - Arquivo: " + cFile + " foi excluído com sucesso."/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 	EndIf
@@ -2341,8 +2341,8 @@ Retorno-----------: Nenhum
 */
 User Function A017DTFT(_ddtfat,_cGetPC)
 
-Local aArea			:= GetArea()
-Local cGet1			:= StoD("//")
+Local aArea			:= FWGetArea()
+Local cGet1			:= SToD("//")
 Local nX			:= 0
 Local cQry			:= ""
 Local cAliasQry		:= GetNextAlias()
@@ -2352,31 +2352,31 @@ Local aRecnos		:= {}
 Local aAlterFields	:= {}
 Local nOpc			:= 0
 Local aRecnos2	    := {}
-Local _cMotivo   	:= SPACE(LEN(ZY1->ZY1_COMENT))
+Local _cMotivo   	:= Space(Len(ZY1->ZY1_COMENT))
 
 Local oGet1
 Local oSayNDF
 Local oSButton1
 Local oSButton2
 
-Default _ddtfat := stod("20010101")//Controle quando vem direto do menu do monitor e do PC
+Default _ddtfat := SToD("20010101")//Controle quando vem direto do menu do monitor e do PC
 Default _cGetPC := SC7->C7_NUM
 
 Private oDlg
 Private oMSNewSC7
 
-dbSelectArea("SY1")
-SY1->(dbSetOrder(3)) //Y1_FILIAL + Y1_USER
-If SY1->(dbSeek(xFilial("SY1") + __cUserID))
+DBSelectArea("SY1")
+SY1->(DBSetOrder(3)) //Y1_FILIAL + Y1_USER
+If SY1->(DBSeek(xFilial("SY1") + __cUserId))
 	
 	//popula aheader
-	Aadd(aHeader,   {"Numero PC   "    	,"C7_NUM"		," ",6	,0," "," ","C"," "," "})
-	Aadd(aHeader,   {"Tipo" 				,"C7_TIPO"		," ",1	,0," "," ","N"," "," "})
-	Aadd(aHeader,   {"Hr Monitoram" 		,"C7_ITEM"		," ",4	,0," "," ","C"," "," "})
-	Aadd(aHeader,   {"Produto     "   		,"C7_PRODUTO"	," ",15	,0," "," ","C"," "," "})
-	Aadd(aHeader,   {"Descricao   "  		,"C7_DESCRI"	," ",100,0," "," ","C"," "," "})
-	Aadd(aHeader,   {"Dt Faturado " 		,"C7_I_DTFAT"	," ",8	,0," "," ","D"," "," "})
-	Aadd(aHeader,   {"Razão Social" 		,"A2_NOME"		," ",40	,0," "," ","C"," "," "})
+	aAdd(aHeader,   {"Numero PC   "    	,"C7_NUM"		," ",6	,0," "," ","C"," "," "})
+	aAdd(aHeader,   {"Tipo" 				,"C7_TIPO"		," ",1	,0," "," ","N"," "," "})
+	aAdd(aHeader,   {"Hr Monitoram" 		,"C7_ITEM"		," ",4	,0," "," ","C"," "," "})
+	aAdd(aHeader,   {"Produto     "   		,"C7_PRODUTO"	," ",15	,0," "," ","C"," "," "})
+	aAdd(aHeader,   {"Descricao   "  		,"C7_DESCRI"	," ",100,0," "," ","C"," "," "})
+	aAdd(aHeader,   {"Dt Faturado " 		,"C7_I_DTFAT"	," ",8	,0," "," ","D"," "," "})
+	aAdd(aHeader,   {"Razão Social" 		,"A2_NOME"		," ",40	,0," "," ","C"," "," "})
 	
 	
 	// Somente sao selecionados itens que nao possuem restricoes
@@ -2398,9 +2398,9 @@ If SY1->(dbSeek(xFilial("SY1") + __cUserID))
 	If !(cAliasQry)->(Eof())
 	
 		While (cAliasQry)->(!Eof())
-			Aadd(aCols,		{(cAliasQry)->C7_NUM, (cAliasQry)->C7_TIPO, (cAliasQry)->C7_ITEM, (cAliasQry)->C7_PRODUTO, (cAliasQry)->C7_DESCRI, StoD((cAliasQry)->C7_I_DTFAT), (cAliasQry)->A2_NOME,.F.})
-			Aadd(aRecnos,	(cAliasQry)->RECSC7)
-			(cAliasQry)->(dbSkip())
+			aAdd(aCols,		{(cAliasQry)->C7_NUM, (cAliasQry)->C7_TIPO, (cAliasQry)->C7_ITEM, (cAliasQry)->C7_PRODUTO, (cAliasQry)->C7_DESCRI, SToD((cAliasQry)->C7_I_DTFAT), (cAliasQry)->A2_NOME,.F.})
+			aAdd(aRecnos,	(cAliasQry)->RECSC7)
+			(cAliasQry)->(DBSkip())
 		End
 		
 		_npos := ZY1->( Recno() )
@@ -2408,36 +2408,36 @@ If SY1->(dbSeek(xFilial("SY1") + __cUserID))
 		_cfilial := xFilial("SC7")
 		_cnumpc := _cGetPC
 
-		ZY1->( Dbgotop() )
-		ZY1->( Dbseek( _cfilial + _cnumpc) )
+		ZY1->( DBGoTop() )
+		ZY1->( DBSeek( _cfilial + _cnumpc) )
 		
 		
-		Do while ZY1->(!Eof()) .And. _cfilial == ZY1->ZY1_FILIAL .and. _cnumpc == ZY1->ZY1_NUMPC
+		While ZY1->(!Eof()) .And. _cfilial == ZY1->ZY1_FILIAL .And. _cnumpc == ZY1->ZY1_NUMPC
 		
-			Aadd(aRecnos2, ZY1->( Recno() ) )
+			aAdd(aRecnos2, ZY1->( Recno() ) )
 			
-			ZY1->( Dbskip() )
+			ZY1->( DBSkip() )
 			
-		Enddo
+		EndDo
 		
-		ZY1->( Dbgoto(_npos) )
+		ZY1->( DBGoTo(_npos) )
 		
 		cGet1 :=  ZY1->ZY1_DTFAT  
 		
-		If _ddtfat == stod("20010101")
+		If _ddtfat == SToD("20010101")
 		
-			DEFINE MSDIALOG oDlg TITLE "Pedido de Compra - Alt.Dt.Fat.PC" FROM 000, 000  TO 300, 700 COLORS 0, 16777215 PIXEL
+			DEFINE MSDIALOG oDlg TITLE "Pedido de Compra - Alt.Dt.Fat.PC" FROM 000, 000  To 300, 700 COLORS 0, 16777215 PIXEL
 	
 				oMSNewSC7 := MsNewGetDados():New( 001, 002, 101, 348, , "AllwaysTrue", "AllwaysTrue", "", aAlterFields,, 999, "AllwaysTrue", "", "AllwaysTrue", oDlg, aHeader, aCols)
 
-			    @ 109, 002 SAY oSayNDF PROMPT "Nova Data Faturamento: " SIZE 060, 007 OF oDlg COLORS 0, 16777215 PIXEL
+			    @ 109, 002 Say oSayNDF PROMPT "Nova Data Faturamento: " SIZE 060, 007 OF oDlg COLORS 0, 16777215 PIXEL
 			    @ 107, 064 MSGET oGet1 VAR cGet1 SIZE 055, 010 OF oDlg VALID U_VLDDTFAT(cGet1,2,aRecnos) COLORS 0, 16777215 PIXEL
 
-			    @ 109, 125 SAY "Comentario:" SIZE 060, 007 OF oDlg COLORS 0, 16777215 PIXEL
+			    @ 109, 125 Say "Comentario:" SIZE 060, 007 OF oDlg COLORS 0, 16777215 PIXEL
 			    @ 107, 155 MSGET _cMotivo    SIZE 190, 010 OF oDlg COLORS 0, 16777215 PIXEL			
 
-				DEFINE SBUTTON oSButton1 FROM 129, 142 TYPE 01 OF oDlg ENABLE ACTION (nOpc := 1, oDlg:End())
-				DEFINE SBUTTON oSButton2 FROM 129, 175 TYPE 02 OF oDlg ENABLE ACTION (nOpc := 2, oDlg:End())
+				DEFINE SBUTTON oSButton1 FROM 129, 142 Type 01 OF oDlg ENABLE ACTION (nOpc := 1, oDlg:End())
+				DEFINE SBUTTON oSButton2 FROM 129, 175 Type 02 OF oDlg ENABLE ACTION (nOpc := 2, oDlg:End())
 	
 			ACTIVATE MSDIALOG oDlg CENTERED
 			
@@ -2446,85 +2446,84 @@ If SY1->(dbSeek(xFilial("SY1") + __cUserID))
 			nOpc := 1
 			cGet1 := _ddtfat
 			
-		Endif
+		EndIf
 		
 		If nOpc == 1
 			If U_VLDDTFAT(cGet1,2,aRecnos)
 
 		        _dDataOld:=CTOD("")
-				dbSelectArea("SC7")
+				DBSelectArea("SC7")
 				For nX := 1 To Len(aRecnos)
-					SC7->(dbGoTo(aRecnos[nX]))
+					SC7->(DBGoTo(aRecnos[nX]))
 			        _dDataOld:=SC7->C7_I_DTFAT
 					RecLock("SC7",.F.)
 					SC7->C7_I_DTFAT := cGet1
-					SC7->(MsUnLock() )
+					SC7->(MSUnLock() )
 				Next nX
 				
 				_nmax := 1
-				dbSelectArea("ZY1")
+				DBSelectArea("ZY1")
 				For nX := 1 To Len(aRecnos2)
-					ZY1->(dbGoTo(aRecnos2[nX]))
-					If val(ZY1->ZY1_SEQUEN) > _nmax
-						_nmax := val(ZY1->ZY1_SEQUEN)
-					Endif
+					ZY1->(DBGoTo(aRecnos2[nX]))
+					If Val(ZY1->ZY1_SEQUEN) > _nmax
+						_nmax := Val(ZY1->ZY1_SEQUEN)
+					EndIf
 					RecLock("ZY1",.F.)
 					ZY1->ZY1_DTFAT :=cGet1
-					ZY1->(MsUnLock())
+					ZY1->(MSUnLock())
 				Next nX
 				
-  	            If _ddtfat == stod("20010101")
+  	            If _ddtfat == SToD("20010101")
 	            
 	            	//Cria registro de mudança da data de faturamento
-	            	ZY1->(Reclock("ZY1",.T.))
-	            	ZY1->ZY1_FILIAL := xfilial("ZY1")
-	            	ZY1->ZY1_SEQUEN := STRZERO(_nmax,4)
+	            	ZY1->(RecLock("ZY1",.T.))
+	            	ZY1->ZY1_FILIAL := xFilial("ZY1")
+	            	ZY1->ZY1_SEQUEN := StrZero(_nmax,4)
 	            	ZY1->ZY1_NUMPC  := SC7->C7_NUM
-	            	ZY1->ZY1_DTMONI := DATE()
-	            	ZY1->ZY1_HRMONI := TIME()
-                    IF EMPTY(_cMotivo)
-                       ZY1->ZY1_COMENT:="Data de faturamento alterada de " + dtoc(_dDataOld) + " para " + DTOC(SC7->C7_I_DTFAT)
-                    ELSE
+	            	ZY1->ZY1_DTMONI := Date()
+	            	ZY1->ZY1_HRMONI := Time()
+                    If Empty(_cMotivo)
+                       ZY1->ZY1_COMENT:="Data de faturamento alterada de " + DToC(_dDataOld) + " para " + DToC(SC7->C7_I_DTFAT)
+                    Else
                        ZY1->ZY1_COMENT:=_cMotivo
-                    ENDIF   	            	
-	            	ZY1->ZY1_CODUSR := __CUSERID                                                                                                                       
-	            	ZY1->ZY1_NOMUSR := USRFULLNAME(__CUSERID)
+                    EndIf   	            	
+	            	ZY1->ZY1_CODUSR := __cUserId                                                                                                                       
+	            	ZY1->ZY1_NOMUSR := USRFULLNAME(__cUserId)
 	            	ZY1->ZY1_DTFAT  := SC7->C7_I_DTFAT
 	            	ZY1->ZY1_DTNECE := SC7->C7_DATPRF  
-	            	ZY1->(Msunlock())
+	            	ZY1->(MSUnLock())
 
 	            	
-  	            Endif
+  	            EndIf
 
                 //Atualiza tabela ZZH de indicaores de pagamentos para pedidos de compra
-                U_ACOM008ZZH(alltrim(SC7->C7_FILIAL), alltrim(SC7->C7_NUM))	//Fica depois pq desposiciona o SC7
+                U_ACOM008ZZH(AllTrim(SC7->C7_FILIAL), AllTrim(SC7->C7_NUM))	//Fica depois pq desposiciona o SC7
 
-  	            If _ddtfat == stod("20010101")
-	            	U_ITMSG("Data de Faturamento alterada de " + dtoc(_dDataOld) + " para " + DTOC(cGet1) +" com sucesso.","Atenção",,2)
-	            ENDIF	
+  	            If _ddtfat == SToD("20010101")
+	            	U_ITMsg("Data de Faturamento alterada de " + DToC(_dDataOld) + " para " + DToC(cGet1) +" com sucesso.","Atenção",,2)
+	            EndIf	
 	            
 			Else
-				u_itmsg("Processo não pôde ser finalizado.","Atenção",,1)
+				U_ITMsg("Processo não pôde ser finalizado.","Atenção",,1)
 			EndIf
 		EndIf
 		
 	Else
 	
-		u_ITMSG("Pedido não pode sofrer alteração de data de faturamento." , "Atenção","Pedido já recebeu movimento de faturamento",1)
+		U_ITMsg("Pedido não pode sofrer alteração de data de faturamento." , "Atenção","Pedido já recebeu movimento de faturamento",1)
 	
 	EndIf
 	
 	(cAliasQry)->( DBCloseArea() )
 Else
 				
-	U_ITMSG("Usuário Inválido, O usuário: " + USRFULLNAME(__CUSERID) + " não possui acesso para alterar data de faturamento.", "Atenção", "Verifique o cadastro deste usuário como comprador.",1)
+	U_ITMsg("Usuário Inválido, O usuário: " + USRFULLNAME(__cUserId) + " não possui acesso para alterar data de faturamento.", "Atenção", "Verifique o cadastro deste usuário como comprador.",1)
 	
 EndIf
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return
-
 
 /*
 ===============================================================================================================================
@@ -2536,18 +2535,19 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-STATIC Function A017GrvaCols()
+Static Function A017GrvaCols()
+
 nMaxGravado:=0
-DO WHILE !TRBZY1->(Eof())
+While !TRBZY1->(Eof())
     
-    IF ! "DATA DE FATURAMENTO ALTERADA DE" $ UPPER(TRBZY1->ZY1_COMENT)
-	   AADD(_aCols,{TRBZY1->ZY1_SEQUEN, STOD(TRBZY1->ZY1_DTMONI), TRBZY1->ZY1_HRMONI, TRBZY1->ZY1_COMENT, TRBZY1->ZY1_CODUSR, TRBZY1->ZY1_NOMUSR, .F.})
-	ENDIF   
-    IF VAL(TRBZY1->ZY1_SEQUEN) > nMaxGravado
-       nMaxGravado:=VAL(TRBZY1->ZY1_SEQUEN)
-    ENDIF   
+    If ! "DATA DE FATURAMENTO ALTERADA DE" $ Upper(TRBZY1->ZY1_COMENT)
+	   aAdd(_aCols,{TRBZY1->ZY1_SEQUEN, SToD(TRBZY1->ZY1_DTMONI), TRBZY1->ZY1_HRMONI, TRBZY1->ZY1_COMENT, TRBZY1->ZY1_CODUSR, TRBZY1->ZY1_NOMUSR, .F.})
+	EndIf   
+    If Val(TRBZY1->ZY1_SEQUEN) > nMaxGravado
+       nMaxGravado:=Val(TRBZY1->ZY1_SEQUEN)
+    EndIf   
 
-    TRBZY1->(dbSkip())
-ENDDO                 
+    TRBZY1->(DBSkip())
+EndDo                 
 
-RETURN LEN(_aCols)
+Return Len(_aCols)

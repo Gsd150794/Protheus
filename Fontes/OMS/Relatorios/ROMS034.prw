@@ -11,7 +11,7 @@ Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para cont
 */
 
 #Include "Report.ch"
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -78,11 +78,11 @@ oReport:SetMsgPrint( 'Aguarde enquanto os dados estão sendo processados...' ) //
 //====================================================================================================
 // Secao dados da Transportadora
 //====================================================================================================
-DEFINE SECTION oSecTran1 OF oReport TITLE "Ordem_Fatura" TABLES "SA2" ORDERS aOrd
+DEFINE Section oSecTran1 OF oReport TITLE "Ordem_Fatura" TABLES "SA2" ORDERS aOrd
 
 DEFINE CELL NAME "CODTRANSP"  OF oSecTran1 ALIAS "SA2"  TITLE "Transportadora"      SIZE 15 
 DEFINE CELL NAME "LOJTRANSP"  OF oSecTran1 ALIAS "SA2"  TITLE "Loja" 		 	    SIZE 10
-DEFINE CELL NAME "CGCTRANSP"  OF oSecTran1 ALIAS "SA2"  TITLE "CNPJ/CPF" 		   	SIZE 20 BLOCK{|| IIF (Len(AllTrim(QRY1->CGCTRANSP)) == 11,Transform(AllTrim(QRY1->CGCTRANSP),"@R 999.999.999-99"),Transform(AllTrim(QRY1->CGCTRANSP),"@R! NN.NNN.NNN/NNNN-99"))  }
+DEFINE CELL NAME "CGCTRANSP"  OF oSecTran1 ALIAS "SA2"  TITLE "CNPJ/CPF" 		   	SIZE 20 BLOCK{|| IIf (Len(AllTrim(QRY1->CGCTRANSP)) == 11,Transform(AllTrim(QRY1->CGCTRANSP),"@R 999.999.999-99"),Transform(AllTrim(QRY1->CGCTRANSP),"@R! NN.NNN.NNN/NNNN-99"))  }
 DEFINE CELL NAME "DESCTRANSP" OF oSecTran1 ALIAS "SA2"  TITLE "Razao Social" 		SIZE 60
 
 DEFINE CELL NAME "TRANSPORT"  OF oSecTran1 ALIAS "ZZN"  TITLE "Ctr/Serie" 	 	    SIZE 10 BLOCK{|| QRY1->CODTRANSP + QRY1->LOJTRANSP }
@@ -97,7 +97,7 @@ oSecTran1:OnPrintLine( {|| cNomeTrans := QRY1->CODTRANSP +"/"+ QRY1->LOJTRANSP +
 //====================================================================================================
 // Secao numero da Fatura
 //====================================================================================================
-DEFINE SECTION oSecTran2 OF oSecTran1 TITLE "Numero_Fatura" TABLES "ZZN"
+DEFINE Section oSecTran2 OF oSecTran1 TITLE "Numero_Fatura" TABLES "ZZN"
 
 DEFINE CELL NAME "FATURA"	 OF oSecTran2 ALIAS "ZZN"    TITLE "Fatura" SIZE 40
 
@@ -108,7 +108,7 @@ oSecTran2:SetLinesBefore(0)
 //====================================================================================================
 // Secao dados da Fatura
 //====================================================================================================
-DEFINE SECTION oSecTran3 OF oSecTran2 TITLE "Dados_da_Fatura" TABLES "ZZN","SF2","CC2"
+DEFINE Section oSecTran3 OF oSecTran2 TITLE "Dados_da_Fatura" TABLES "ZZN","SF2","CC2"
 
 DEFINE CELL NAME "CTR"        OF oSecTran3 ALIAS "ZZN"  TITLE "Ctr/Serie" 	 	    SIZE 21 BLOCK{|| QRY1->CONTRANS + '/' + QRY1->SERCONRANS }
 DEFINE CELL NAME "VALOR"      OF oSecTran3 ALIAS "ZZN"  TITLE "Valor CTR" 		   	SIZE 20 PICTURE PesqPict("ZZN","ZZN_VLRCTR")
@@ -148,11 +148,11 @@ oSecTran3:SetTotalInLine(.F.)
 //====================================================================================================
 // Secao dados da Transportadora
 //====================================================================================================
-DEFINE SECTION oSecTran4 OF oReport TITLE "Ordem_Carga" TABLES "SA2" ORDERS aOrd
+DEFINE Section oSecTran4 OF oReport TITLE "Ordem_Carga" TABLES "SA2" ORDERS aOrd
 
 DEFINE CELL NAME "CODTRANSP"  OF oSecTran4 ALIAS "SA2"  TITLE "Transportadora"      SIZE 15
 DEFINE CELL NAME "LOJTRANSP"  OF oSecTran4 ALIAS "SA2"  TITLE "Loja" 		 	    SIZE 10
-DEFINE CELL NAME "CGCCPF"     OF oSecTran4 ALIAS "SA2"  TITLE "CNPJ/CPF" 		   	SIZE 20 BLOCK{|| IIF (Len(AllTrim(QRY2->CGCTRANSP)) == 11,Transform(AllTrim(QRY2->CGCTRANSP),"@R 999.999.999-99"),Transform(AllTrim(QRY2->CGCTRANSP),"@R! NN.NNN.NNN/NNNN-99"))  }
+DEFINE CELL NAME "CGCCPF"     OF oSecTran4 ALIAS "SA2"  TITLE "CNPJ/CPF" 		   	SIZE 20 BLOCK{|| IIf (Len(AllTrim(QRY2->CGCTRANSP)) == 11,Transform(AllTrim(QRY2->CGCTRANSP),"@R 999.999.999-99"),Transform(AllTrim(QRY2->CGCTRANSP),"@R! NN.NNN.NNN/NNNN-99"))  }
 DEFINE CELL NAME "DESCTRANSP" OF oSecTran4 ALIAS "SA2"  TITLE "Razao Social" 		SIZE 60
 DEFINE CELL NAME "TRANSPORT"  OF oSecTran4 ALIAS "ZZN"  TITLE "Ctr/Serie" 	 	    SIZE 10 BLOCK{|| QRY2->CODTRANSP + QRY2->LOJTRANSP }
 
@@ -166,7 +166,7 @@ oSecTran4:OnPrintLine({|| cNomeTrans := QRY2->CODTRANSP  + "/" + QRY2->LOJTRANSP
 //====================================================================================================
 // Secao numero da Carga
 //====================================================================================================
-DEFINE SECTION oSecTran5 OF oSecTran4 TITLE "Carga" TABLES "ZZN"
+DEFINE Section oSecTran5 OF oSecTran4 TITLE "Carga" TABLES "ZZN"
 
 DEFINE CELL NAME "CARGA" OF oSecTran5 ALIAS "ZZN"   TITLE "Carga" SIZE 40
 
@@ -177,7 +177,7 @@ oSecTran5:SetLinesBefore(0)
 //====================================================================================================
 // Secao dados da Carga
 //====================================================================================================
-DEFINE SECTION oSecTran6 OF oSecTran5 TITLE "Dados_da_Carga" TABLES "ZZN","SF2","CC2"
+DEFINE Section oSecTran6 OF oSecTran5 TITLE "Dados_da_Carga" TABLES "ZZN","SF2","CC2"
 
 DEFINE CELL NAME "CTR"        OF oSecTran6 ALIAS "ZZN"  TITLE "Ctr/Serie" 	 	    SIZE 21 BLOCK{|| QRY2->CONTRANS + '/' + QRY2->SERCONRANS }
 DEFINE CELL NAME "VALOR"      OF oSecTran6 ALIAS "ZZN"  TITLE "Valor CTR" 		   	SIZE 20 PICTURE PesqPict("ZZN","ZZN_VLRCTR")
@@ -218,10 +218,10 @@ oSecTran6:SetTotalInLine(.F.) // Define se os totalizadores serão impressos em l
 //====================================================================================================
 // Secao dados da Transportadora
 //====================================================================================================
-DEFINE SECTION oSecTran7 OF oReport TITLE "Ordem_Transportadora" TABLES "ZZN","SF2","CC2" ORDERS aOrd
+DEFINE Section oSecTran7 OF oReport TITLE "Ordem_Transportadora" TABLES "ZZN","SF2","CC2" ORDERS aOrd
 
 DEFINE CELL NAME "TRANSPLOJA" OF oSecTran7 ALIAS "ZZN"  TITLE "Transportadora"      SIZE 50 BLOCK{|| CODTRANSP + '/' + LOJTRANSP + ' - ' + AllTrim(DESCTRANSP) }
-DEFINE CELL NAME "CGCTRANSP"  OF oSecTran7 ALIAS "ZZN"  TITLE "CNPJ/CPF" 		   	SIZE 20 BLOCK{|| IIF (Len(AllTrim(QRY3->CGCTRANSP)) == 11,Transform(AllTrim(QRY3->CGCTRANSP),"@R 999.999.999-99"),Transform(AllTrim(QRY3->CGCTRANSP),"@R! NN.NNN.NNN/NNNN-99"))  }
+DEFINE CELL NAME "CGCTRANSP"  OF oSecTran7 ALIAS "ZZN"  TITLE "CNPJ/CPF" 		   	SIZE 20 BLOCK{|| IIf (Len(AllTrim(QRY3->CGCTRANSP)) == 11,Transform(AllTrim(QRY3->CGCTRANSP),"@R 999.999.999-99"),Transform(AllTrim(QRY3->CGCTRANSP),"@R! NN.NNN.NNN/NNNN-99"))  }
 
 oSecTran7:SetLineStyle(.T.)
 
@@ -235,7 +235,7 @@ oSecTran7:Disable()
 //====================================================================================================
 // Secao dados da Fatura
 //====================================================================================================
-DEFINE SECTION oSecTran8 OF oSecTran7 TITLE "Dados_do_Transp" TABLES "ZZN","SF2","CC2"
+DEFINE Section oSecTran8 OF oSecTran7 TITLE "Dados_do_Transp" TABLES "ZZN","SF2","CC2"
 
 DEFINE CELL NAME "FATURA" 	  OF oSecTran8 ALIAS "ZZN"  TITLE "Fatura" 	    		SIZE 17
 DEFINE CELL NAME "CTR"        OF oSecTran8 ALIAS "ZZN"  TITLE "Ctr/Serie" 	 	    SIZE 21 BLOCK{|| QRY3->CONTRANS + '/' + QRY3->SERCONRANS }
@@ -272,7 +272,7 @@ oSecTran8:Disable()
 //====================================================================================================
 oReport:PrintDialog()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -290,7 +290,7 @@ Local cFiltro	:= "%"
 Local _cFiltFil	:= "%"
 Private nOrdem	:= oSecTran1:GetOrder() //Busca ordem selecionada pelo usuario
 
-oReport:SetTitle( "Relação de Conhecimento Transporte x Nota Fiscal Saída - Ordem "+ aOrd[nOrdem] +" - Emissao de "+ dtoc(MV_PAR11) +" até "+ dtoc(MV_PAR12))
+oReport:SetTitle( "Relação de Conhecimento Transporte x Nota Fiscal Saída - Ordem "+ aOrd[nOrdem] +" - Emissao de "+ DToC(MV_PAR11) +" até "+ DToC(MV_PAR12))
 
 //====================================================================================================
 // Define o filtro de acordo com os parametros digitados
@@ -333,7 +333,7 @@ cFiltro += " AND ZZN.ZZN_NFISCA BETWEEN '"+ MV_PAR09 +"' AND '"+ MV_PAR10 +"' "
 //====================================================================================================
 // Emissao da nota fiscal
 //====================================================================================================
-cFiltro += " AND F2.F2_EMISSAO BETWEEN '"+ DtoS( MV_PAR11 ) +"' AND '"+ DtoS( MV_PAR12 ) +"' "
+cFiltro += " AND F2.F2_EMISSAO BETWEEN '"+ DToS( MV_PAR11 ) +"' AND '"+ DToS( MV_PAR12 ) +"' "
 
 //====================================================================================================
 // Carga
@@ -343,8 +343,8 @@ cFiltro += " AND ZZN.ZZN_CARGA BETWEEN '"+ MV_PAR13 +"' AND '"+ MV_PAR14 +"' "
 //====================================================================================================
 // Data de Previsao de pagamento - Incluido filtro para imprimir apenas pgto na data solicitada
 //====================================================================================================
-If Len( AllTrim( DtoS( MV_PAR15 ) ) ) + Len( AllTrim( DtoS( MV_PAR16 ) ) ) > 0
-	cFiltro += " AND ZZN.ZZN_PRVPAG BETWEEN '"+ DtoS( MV_PAR15 ) +"' AND '"+ DtoS( MV_PAR16 ) +"' "
+If Len( AllTrim( DToS( MV_PAR15 ) ) ) + Len( AllTrim( DToS( MV_PAR16 ) ) ) > 0
+	cFiltro += " AND ZZN.ZZN_PRVPAG BETWEEN '"+ DToS( MV_PAR15 ) +"' AND '"+ DToS( MV_PAR16 ) +"' "
 EndIf
 
 If !Empty( AllTrim( MV_PAR17 ) )
@@ -433,7 +433,7 @@ If nOrdem == 1
 					JOIN %Table:SF2% F2  ON ZZN.ZZN_FILIAL = ZZN.ZZN_FILIAL AND ZZN.ZZN_NFISCA = F2.F2_DOC     AND ZZN.ZZN_SERIE = F2.F2_SERIE
 					JOIN %Table:SA1% A1  ON A1.A1_COD      = F2.F2_CLIENTE  AND A1.A1_LOJA     = F2.F2_LOJA
 					JOIN %Table:CC2% CC2 ON CC2.CC2_EST    = A1.A1_EST      AND CC2.CC2_CODMUN = A1.A1_COD_MUN
-                    JOIN %table:SA2% SA2 ON SA2.A2_COD = F2.F2_I_CTRA AND SA2.A2_LOJA = F2.F2_I_LTRA
+                    JOIN %Table:SA2% SA2 ON SA2.A2_COD = F2.F2_I_CTRA AND SA2.A2_LOJA = F2.F2_I_LTRA
 					WHERE
 						ZZN.D_E_L_E_T_ = ' '
 					AND SA2.D_E_L_E_T_ = ' '
@@ -650,7 +650,7 @@ ElseIf nOrdem == 3
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -724,7 +724,7 @@ Else
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -743,14 +743,14 @@ Local i := 0
 Private nTam      := 0
 Private nMaxSelect:= 0
 Private aCat      := {}
-Private MvRet     := Alltrim(ReadVar())
+Private MvRet     := AllTrim(ReadVar())
 Private MvPar     := ""
 Private cTitulo   := ""
 Private MvParDef  := ""
 
 #IFDEF WINDOWS
 	oWnd := GetWndDefault()
-#ENDIF
+#EndIf
 
 //====================================================================================================
 // Tratamento para carregar variaveis da lista de opcoes
@@ -760,7 +760,7 @@ nMaxSelect	:= 25
 cTitulo		:= "Motivo Divergencia Frete"
 
 ZZO->( DBSetOrder(1) )
-ZZO->( DBGotop() )
+ZZO->( DBGoTop() )
 While ZZO->( !Eof() )
 	
 	MvParDef += AllTrim( ZZO->ZZO_CODIGO )
@@ -818,7 +818,7 @@ Retorno---------: Nenhum
 Static Function ROMS034S( _cFilial , _cTrans , _cLoja , _cTDoc , _cTSerie )
 
 Local _cStatus := "ABERTO" 
-Local _aArea   := GetArea()
+Local _aArea   := FWGetArea()
 
 DBSelectArea("SF1")   
 SF1->( DBSetOrder(1) )
@@ -827,19 +827,19 @@ If SF1->( DBSeek( _cFilial + _cTDoc + _cTSerie + _cTrans + _cLoja ) )
 	
 	DBSelectArea("SE2")   
 	SE2->( DBSetOrder(6) )
-	SE2->( DBGotop() )
+	SE2->( DBGoTop() )
 	If SE2->( DBSeek( _cFilial + _cTrans + _cLoja + _cTSerie + _cTDoc ) )
 	    
 	    Do Case
 	    	Case SE2->E2_SALDO == SE2->E2_VALOR							; _cStatus := "FISCAL"
 			Case SE2->E2_SALDO == 0										; _cStatus := "PAGO TOTAL"
-			Case SE2->E2_SALDO > 0 .AND. SE2->E2_SALDO <> SE2->E2_VALOR ; _cStatus := "PAGO PARCIAL"
+			Case SE2->E2_SALDO > 0 .And. SE2->E2_SALDO <> SE2->E2_VALOR ; _cStatus := "PAGO PARCIAL"
 		EndCase
 		
 	EndIf
 	
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return( _cStatus )

@@ -2,29 +2,22 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alexandre V.  | 22/12/2015 | Tratativa na cláusula "ORDER BY" para remover a referência numérica. Chamado 13062
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 02/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+Alexandre V.  |22/12/2015| Chamado 13062. Tratativa na cláusula "ORDER BY" para remover a referência numérica.
+Lucas Borges  |02/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa--------: RFIS002
 Autor-----------: Erich Buttner
 Data da Criacao-: 08/04/2013
-===============================================================================================================================
 Descrição-------: Relatório do código de Ajuste
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -45,19 +38,11 @@ Return
 Programa--------: RFIS002RUN
 Autor-----------: Erich Buttner
 Data da Criacao-: 08/04/2013
-===============================================================================================================================
 Descrição-------: Processa a execução do relatório
-===============================================================================================================================
-Uso-------------: Italac
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
-Setor-----------: TI
-===============================================================================================================================
 */
-
 Static Function RFIS002RUN()
 
 Local oReport	:= Nil
@@ -70,7 +55,7 @@ Public cNome	:= ""
 Public cDescr	:= ""
 Public nVlr		:= 0
 Public nDif		:= 0
-Public dDtDig	:= StoD('')
+Public dDtDig	:= SToD('')
 
 oReport := TReport():New( "RFIS002" , "Relatório de Codigo de Ajuste" , "RFIS002" , {|oReport| RFIS002PRT( oReport , cAliasZLD , cAliasSA2 , cAliasQRY ) } , "Relatório de Codigo de Ajuste" , .T. )
 
@@ -115,11 +100,8 @@ Return( oReport )
 Programa--------: RFIS002PRT
 Autor-----------: Erich Buttner
 Data da Criacao-: 08/04/2013
-===============================================================================================================================
 Descrição-------: Processa a impressão dos dados do relatório
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -170,7 +152,7 @@ BeginSql alias cAliasQRY
 	AND CC7.CC7_CODLAN	IN %exp:cCodAjust%
 	AND D1.D1_FILIAL	BETWEEN %exp:MV_PAR01% AND %exp:MV_PAR02%
 	AND D1.D1_DTDIGIT	BETWEEN %exp:MV_PAR11% AND %exp:MV_PAR12%
-	AND SUBSTR( D1.D1_CF , 1 , 1 ) = '2'
+	AND SubStr( D1.D1_CF , 1 , 1 ) = '2'
 	
 	UNION ALL
 	
@@ -211,7 +193,7 @@ BeginSql alias cAliasQRY
 	AND D1.D1_SERIE    BETWEEN %exp:MV_PAR05% AND %exp:MV_PAR06%
 	AND D1.D1_FILIAL   BETWEEN %exp:MV_PAR01% AND %exp:MV_PAR02%
 	AND D1.D1_DTDIGIT  BETWEEN %exp:MV_PAR11% AND %exp:MV_PAR12%
-	AND SUBSTR( D1.D1_CF , 1 , 1 ) = '2'
+	AND SubStr( D1.D1_CF , 1 , 1 ) = '2'
 	
 	ORDER BY CODLAN, FILIAL, DOC, SERIE, DTDIGIT, FORNECE, LOJA, ITEM
 	
@@ -223,17 +205,17 @@ oReport:Section(1):Section(1):Init()
 oReport:Section(1):Section(1):PrintLine()
 oReport:Section(1):Section(2):Init()
 
-nInc := reccount()
+nInc := RecCount()
 
 oReport:SetMeter(nInc)
 
 cCodAj := (cAliasQRY)->CODLAN
 
-While !oReport:Cancel() .And. (cAliasQRY)->( !EOF() )
+While !oReport:Cancel() .And. (cAliasQRY)->( !Eof() )
 	
 	cNome	:= GetAdvFVal( "SA2" , "A2_NOME"	, xFilial("SA2") + (cAliasQRY)->FORNECE + (cAliasQRY)->LOJA	, 1 , "" )
 	cDescr	:= GetAdvFVal( "SB1" , "B1_I_DESCD"	, xFilial("SB1") + (cAliasQRY)->PROD						, 1 , "" )
-	nVlr	:= IIF( (cAliasQRY)->CODLAN == 'GO10009029' , (cAliasQRY)->ICMS , IIF( (cAliasQRY)->CODLAN == 'GO000019  ' , (cAliasQRY)->DIF_ALQ , IIf( (cAliasQRY)->CODLAN == 'RO40000001' .Or. (cAliasQRY)->CODLAN == 'RO40000002' , (cAliasQRY)->DIF_ALQ , 0 ) ) )
+	nVlr	:= IIf( (cAliasQRY)->CODLAN == 'GO10009029' , (cAliasQRY)->ICMS , IIf( (cAliasQRY)->CODLAN == 'GO000019  ' , (cAliasQRY)->DIF_ALQ , IIf( (cAliasQRY)->CODLAN == 'RO40000001' .Or. (cAliasQRY)->CODLAN == 'RO40000002' , (cAliasQRY)->DIF_ALQ , 0 ) ) )
 	nDif	:= nVlr - (cAliasQRY)->APURACAO
 	dDtDig	:= SubStr( (cAliasQRY)->DTDIGIT , 7 , 2 ) +"\"+ SubStr( (cAliasQRY)->DTDIGIT , 5 , 2 ) +"\"+ SubStr( (cAliasQRY)->DTDIGIT , 1 , 4 )
 	

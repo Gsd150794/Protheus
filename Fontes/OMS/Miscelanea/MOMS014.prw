@@ -10,13 +10,13 @@ Alex Wallauer     | 04/02/2019 | Correção de error.log: array _aCliente vazia. C
 -------------------------------------------------------------------------------------------------------------------------------
  Lucas Borges     | 11/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
 -------------------------------------------------------------------------------------------------------------------------------
-Jonathan          | 27/02/2020 | Novo tratamento quando vendedor de origem ou de destino for do Canal Broker. Chamado 32075.
+Jonathan          | 27/02/2020 | Novo tratamento quando vendedor de origem ou de destino For do Canal Broker. Chamado 32075.
 ===============================================================================================================================
 */
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -58,24 +58,24 @@ DEFINE MSDIALOG _oDlg TITLE "Vendedores x Clientes - Substituição da carteira" F
 
 	_oDlg:lMaximized := .F.
 	
-	@046,009 SAY _oSay1 PROMPT "Atualizar:"		SIZE 041,008 OF _oDlg PIXEL COLORS 0,16777215
-	@066,009 SAY _oSay1 PROMPT "Vendedor de:"	SIZE 066,008 OF _oDlg PIXEL COLORS 0,16777215
-    @086,009 SAY _oSay2 PROMPT "Vendedor para:"	SIZE 066,008 OF _oDlg PIXEL COLORS 0,16777215
-    @106,009 SAY _oSay3 PROMPT "Rede:"			SIZE 025,008 OF _oDlg PIXEL COLORS 0,16777215
-    @126,009 SAY _oSay4 PROMPT "UF:"				SIZE 025,008 OF _oDlg PIXEL COLORS 0,16777215
+	@046,009 Say _oSay1 PROMPT "Atualizar:"		SIZE 041,008 OF _oDlg PIXEL COLORS 0,16777215
+	@066,009 Say _oSay1 PROMPT "Vendedor de:"	SIZE 066,008 OF _oDlg PIXEL COLORS 0,16777215
+    @086,009 Say _oSay2 PROMPT "Vendedor para:"	SIZE 066,008 OF _oDlg PIXEL COLORS 0,16777215
+    @106,009 Say _oSay3 PROMPT "Rede:"			SIZE 025,008 OF _oDlg PIXEL COLORS 0,16777215
+    @126,009 Say _oSay4 PROMPT "UF:"				SIZE 025,008 OF _oDlg PIXEL COLORS 0,16777215
     
     @046,068 MSCOMBOBOX _oCombo	VAR _cCombo		SIZE 133,010 OF _oDlg PIXEL COLORS 0,16777215 ITEMS { "Vendedor 1" , "Vendedor 2" }
-    @063,069 MSGET _oVenOri		VAR _cVenOri	SIZE 040,010 OF _oDlg PIXEL COLORS 0,16777215 F3 "SA3BLQ" VALID(IIF(!EMPTY(_cVenOri),IIF(EXISTCPO("SA3",_cVenOri,1),Eval({|| _oVenON:=Posicione("SA3",1,xFilial("SA3") + _cVenOri,"SA3->A3_NOME"),.T.}),Eval({|| _oVenOri:SETFOCUS(),.F.})),Eval({|| _oVenON:="",.T.})))
-    @083,069 MSGET _oVenDes		VAR _cVenDes	SIZE 040,010 OF _oDlg PIXEL COLORS 0,16777215 F3 "SA3BLQ" VALID(IIF(!EMPTY(_cVenDes),IIF(EXISTCPO("SA3",_cVenDes,1),Eval({|| _oVenDN:=Posicione("SA3",1,xFilial("SA3") + _cVenDes,"SA3->A3_NOME"),.T.}),Eval({|| _oVenDes:SETFOCUS(),.F.})),Eval({|| _oVenDN:="",.T.})))
+    @063,069 MSGET _oVenOri		VAR _cVenOri	SIZE 040,010 OF _oDlg PIXEL COLORS 0,16777215 F3 "SA3BLQ" VALID(IIf(!Empty(_cVenOri),IIf(EXISTCPO("SA3",_cVenOri,1),Eval({|| _oVenON:=Posicione("SA3",1,xFilial("SA3") + _cVenOri,"SA3->A3_NOME"),.T.}),Eval({|| _oVenOri:SETFOCUS(),.F.})),Eval({|| _oVenON:="",.T.})))
+    @083,069 MSGET _oVenDes		VAR _cVenDes	SIZE 040,010 OF _oDlg PIXEL COLORS 0,16777215 F3 "SA3BLQ" VALID(IIf(!Empty(_cVenDes),IIf(EXISTCPO("SA3",_cVenDes,1),Eval({|| _oVenDN:=Posicione("SA3",1,xFilial("SA3") + _cVenDes,"SA3->A3_NOME"),.T.}),Eval({|| _oVenDes:SETFOCUS(),.F.})),Eval({|| _oVenDN:="",.T.})))
     @103,069 MSGET _oGRede		VAR _cGRede	  	SIZE 195,010 OF _oDlg PIXEL COLORS 0,16777215 F3 "LSTRED"
     @123,069 MSGET _oGUF		VAR _cGUF	  	SIZE 195,010 OF _oDlg PIXEL COLORS 0,16777215 F3 "LSTEST"
     
     @063,123 MSGET _oVenON						SIZE 141,010 OF _oDlg PIXEL COLORS 0,16777215 WHEN .F.
     @083,123 MSGET _oVenDN						SIZE 141,010 OF _oDlg PIXEL COLORS 0,16777215 WHEN .F.
 
-ACTIVATE MSDIALOG _oDlg ON INIT (EnchoiceBar(_oDlg,{|| IIF(MOMS014V(),Eval({|| _nOpca := 1,_oDlg:End(),FWMsgRun( ,{|| MOMS014P() } , "Verificando os dados...",'Aguarde!' ) } ) , ) } , {|| _nOpca := 2,_oDlg:End()},,_aBotoes))
+ACTIVATE MSDIALOG _oDlg ON INIT (EnchoiceBar(_oDlg,{|| IIf(MOMS014V(),Eval({|| _nOpca := 1,_oDlg:End(),FWMsgRun( ,{|| MOMS014P() } , "Verificando os dados...",'Aguarde!' ) } ) , ) } , {|| _nOpca := 2,_oDlg:End()},,_aBotoes))
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -105,7 +105,7 @@ If !Empty( _cVenOri )
 		
 		_lRet := .F.
 
-		U_ITMSG('O código de vendedor de origem informado não é válido! ','Atenção!',,1)
+		U_ITMsg('O código de vendedor de origem informado não é válido! ','Atenção!',,1)
 	
 	EndIf
 	
@@ -117,7 +117,7 @@ If _lRet
 	
 		_lRet := .F.
 		
-		U_ITMSG('Não foi informado um código de vendedor de destino da carteira!  ','Atenção!',,1)		
+		U_ITMsg('Não foi informado um código de vendedor de destino da carteira!  ','Atenção!',,1)		
 		
 	Else
 	
@@ -125,7 +125,7 @@ If _lRet
 		
 			_lRet := .F.
 
-			U_ITMSG('O código de vendedor de destino informado está igual ao vendedor de origem!  ','Atenção!',,1)		
+			U_ITMsg('O código de vendedor de destino informado está igual ao vendedor de origem!  ','Atenção!',,1)		
 			
 		Else
 		
@@ -137,21 +137,21 @@ If _lRet
 				
 					_lRet := .F.
 					
-					U_ITMSG('O código de vendedor de origem informado não é válido! ','Atenção!',,1)			
+					U_ITMsg('O código de vendedor de origem informado não é válido! ','Atenção!',,1)			
 				
 				ElseIf SA3->A3_MSBLQL == '1'
 				
 					_lRet := .F.
 	
-					U_ITMSG('O código de vendedor de destino informado está bloqueado no sistema!','Atenção!',,1)
+					U_ITMsg('O código de vendedor de destino informado está bloqueado no sistema!','Atenção!',,1)
 					
-				EndIF
+				EndIf
 				
 			Else
 			
 				_lRet := .F.
 				
-				U_ITMSG('O código de vendedor de destino informado não é válido!','Atenção!',,1)
+				U_ITMsg('O código de vendedor de destino informado não é válido!','Atenção!',,1)
 			
 			EndIf
 		
@@ -194,10 +194,10 @@ If !Empty( _cVenOri )
 	FWMsgRun( , {|| MOMS014QRY( 1 , _cAlias ) },'Verificando os pedidos do vendedor de origem...' , 'Aguarde!'  )
 	
 	DBSelectArea(_cAlias)
-	(_cAlias)->( DBGotop() )
+	(_cAlias)->( DBGoTop() )
 	If (_cAlias)->( !Eof() )
 	
-		U_ITMSG( 'Foram encontrados pedidos em aberto para o vendedor de origem!' ,"Atenção",,1 )
+		U_ITMsg( 'Foram encontrados pedidos em aberto para o vendedor de origem!' ,"Atenção",,1 )
 		
 		While (_cAlias)->(!Eof())
 		
@@ -220,7 +220,7 @@ If !Empty( _cVenOri )
 		
 		U_ITListBox( 'Pedidos de venda em aberto para o vendedor de origem:' , _aHdrAux , _aPedVen , .F. , 1 ,,, _aSizes )
 		
-		_lOk := u_itmsg( 'Deseja continuar e processar a transferência dos clientes que não estejam com pedidos em aberto?' , 'Atenção!' ,,2,2,2)
+		_lOk := U_ITMsg( 'Deseja continuar e processar a transferência dos clientes que não estejam com pedidos em aberto?' , 'Atenção!' ,,2,2,2)
 		
 	EndIf
 
@@ -230,17 +230,17 @@ EndIf
 
 If _lOk
 
-	fwMsgRun( , {|| MOMS014QRY( 2 , _cAlias ) },'Selecionando os clientes do vendedor de origem...' , 'Aguarde!'  )
+	FWMsgRun( , {|| MOMS014QRY( 2 , _cAlias ) },'Selecionando os clientes do vendedor de origem...' , 'Aguarde!'  )
 	
 	DBSelectArea(_cAlias)
-	(_cAlias)->( DBGotop() )
+	(_cAlias)->( DBGoTop() )
 	COUNT TO _nContReg
 	
 	If _nContReg == 0
 		
 		_lOk := .F.
 		
-		U_ITMSG( 'Não foram encontrados clientes ativos na carteira do vendedor de origem!' ,"Atenção",,1 )
+		U_ITMsg( 'Não foram encontrados clientes ativos na carteira do vendedor de origem!' ,"Atenção",,1 )
 		
     Else
 		
@@ -267,20 +267,20 @@ If _lOk
 		(_cAlias)->( DBSkip() )
 		EndDo
         
-        IF LEN(_aCliente) = 0
-  		   U_ITMSG( 'Todos os clientes desses vendedores possuem Pedido em aberto' ,"Atenção",,1 )
-		ENDIF
+        If Len(_aCliente) = 0
+  		   U_ITMsg( 'Todos os clientes desses vendedores possuem Pedido em aberto' ,"Atenção",,1 )
+		EndIf
 
 		_aHdrAux	:= {'[ ]','Cód. Cliente','Loja Cliente','Nome Cliente','Nome Fantasia','CPF/CNPJ','Cód. Vendedor','Nome Vendedor','Cód. Grupo','Descrição','Estado'}
 		
-		If LEN(_aCliente) > 0 .AND. U_ITListBox( 'Clientes para transferência de carteira:' , _aHdrAux , @_aCliente , .T. , 2 , 'Selecione os clientes para transferir para o vendedor: '+ _cVenDes +' - '+ Posicione('SA3',1,xFilial('SA3')+_cVenDes,'A3_NOME') )
+		If Len(_aCliente) > 0 .And. U_ITListBox( 'Clientes para transferência de carteira:' , _aHdrAux , @_aCliente , .T. , 2 , 'Selecione os clientes para transferir para o vendedor: '+ _cVenDes +' - '+ Posicione('SA3',1,xFilial('SA3')+_cVenDes,'A3_NOME') )
 			
 			For _nI := 1 To Len(_aCliente)
 				
 				If _aCliente[_nI][01]
 
-					lVenOri := POSICIONE("SA3",1,xFilial("SA3")+_cVenOri,"A3_I_VBROK") = 'B'
-					lVenDes := POSICIONE("SA3",1,xFilial("SA3")+_cVenDes,"A3_I_VBROK") = 'B'
+					lVenOri := Posicione("SA3",1,xFilial("SA3")+_cVenOri,"A3_I_VBROK") = 'B'
+					lVenDes := Posicione("SA3",1,xFilial("SA3")+_cVenDes,"A3_I_VBROK") = 'B'
 					
 					DBSelectArea('SA1')
 					SA1->( DBGoTo( _aCliente[_nI][12] ) )
@@ -288,21 +288,21 @@ If _lOk
 					
 					If _cCombo == 'Vendedor 1'
 						SA1->A1_VEND	:= _cVenDes
-						IF lVenOri .OR. lVenDes
-							SA1->A1_RISCO := POSICIONE("SA3",1,xFilial("SA3")+_cVenDes,"A3_I_RISCO")
+						If lVenOri .Or. lVenDes
+							SA1->A1_RISCO := Posicione("SA3",1,xFilial("SA3")+_cVenDes,"A3_I_RISCO")
 							SA1->A1_LC := SA3->A3_I_LC
 							SA1->A1_TABELA := SA3->A3_I_TABPR		
-						ENDIF
+						EndIf
 					Else
 						SA1->A1_I_VEND2	:= _cVenDes
-						IF lVenOri .OR. lVenDes
-							SA1->A1_RISCO := POSICIONE("SA3",1,xFilial("SA3")+_cVenDes,"A3_I_RISCO")
+						If lVenOri .Or. lVenDes
+							SA1->A1_RISCO := Posicione("SA3",1,xFilial("SA3")+_cVenDes,"A3_I_RISCO")
 							SA1->A1_LC := SA3->A3_I_LC
 							SA1->A1_TABELA := SA3->A3_I_TABPR		
-						ENDIF
+						EndIf
 					EndIf
 					
-					SA1->( MsUnLock() )
+					SA1->( MSUnLock() )
 					
 					aAdd( _aRegSA1 , { SA1->A1_COD +'/'+ SA1->A1_LOJA , SA1->A1_NOME , SA1->A1_VEND , SA1->A1_I_VEND2 } )
 					
@@ -313,7 +313,7 @@ If _lOk
 		Else
 			
 			_lOk := .F.
-//			U_ITMSG( 'Operação cancelada pelo usuário!' ,"Atenção",,1 )
+//			U_ITMsg( 'Operação cancelada pelo usuário!' ,"Atenção",,1 )
 			
 		EndIf
 		
@@ -325,11 +325,11 @@ If _lOk
 
 	If Empty( _aRegSA1 )
 	
-		U_ITMSG( 'Não foram atualizados os cadastros de clientes no Sistema!' ,"Atenção",'Verifique os dados informados e/ou os cadastros dos clientes.',1 )
+		U_ITMsg( 'Não foram atualizados os cadastros de clientes no Sistema!' ,"Atenção",'Verifique os dados informados e/ou os cadastros dos clientes.',1 )
 		
 	Else
 		
-		If u_itmsg( 'Foram atualizados os cadastros de ['+ cValToChar( Len(_aRegSA1) ) +'] clientes! Deseja visualizar a relação de clientes atualizados?' , 'Concluído!',,2,2,2 )
+		If U_ITMsg( 'Foram atualizados os cadastros de ['+ cValToChar( Len(_aRegSA1) ) +'] clientes! Deseja visualizar a relação de clientes atualizados?' , 'Concluído!',,2,2,2 )
 			
 			_aHdrAux := { 'Código' , 'Nome' , 'Vendedor 1' , 'Vendedor 2' }
 			_aSizes  := { 40 , 200 , 50 , 50 }
@@ -341,7 +341,7 @@ If _lOk
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -418,15 +418,15 @@ Do Case
 		_cQuery += "     A1.A1_NOME    , "
 		_cQuery += "     A1.A1_NREDUZ  , "
 		_cQuery += "     A1.A1_CGC     , "
-		_cQuery += "     "+ IIF( _cCombo == 'Vendedor 1' , 'A1.A1_VEND ' , 'A1.A1_I_VEND2 ' ) +" AS CODVEN , "
-		_cQuery += IIF( Empty(_cVenOri) , " ' ' AS A3_NOME , " , "     A3.A3_NOME    , " )
+		_cQuery += "     "+ IIf( _cCombo == 'Vendedor 1' , 'A1.A1_VEND ' , 'A1.A1_I_VEND2 ' ) +" AS CODVEN , "
+		_cQuery += IIf( Empty(_cVenOri) , " ' ' AS A3_NOME , " , "     A3.A3_NOME    , " )
 		_cQuery += "     A1.A1_GRPVEN  , "
 		_cQuery += "     CY.ACY_DESCRI , "
 		_cQuery += "     A1.A1_EST     , "
 		_cQuery += "     A1.R_E_C_N_O_ AS REGSA1 "
 		_cQuery += " FROM "+ RetSqlName('SA1') +" A1 "
 		If !Empty(_cVenOri)
-		_cQuery += " JOIN "+ RetSqlName('SA3') +" A3 ON A3.A3_COD     = "+ IIF( _cCombo == 'Vendedor 1' , 'A1.A1_VEND' , 'A1.A1_I_VEND2' )
+		_cQuery += " JOIN "+ RetSqlName('SA3') +" A3 ON A3.A3_COD     = "+ IIf( _cCombo == 'Vendedor 1' , 'A1.A1_VEND' , 'A1.A1_I_VEND2' )
 		EndIf
 		_cQuery += " JOIN "+ RetSqlName('ACY') +" CY ON CY.ACY_GRPVEN = A1.A1_GRPVEN "
 		_cQuery += " WHERE "
@@ -435,7 +435,7 @@ Do Case
 		_cQuery += " AND A3.D_E_L_E_T_ = ' ' "
 		EndIf
 		_cQuery += " AND CY.D_E_L_E_T_ = ' ' "
-		_cQuery += " AND "+ IIF( _cCombo == 'Vendedor 1' , 'A1.A1_VEND' , 'A1.A1_I_VEND2' ) +" = '"+ _cVenOri +"' "
+		_cQuery += " AND "+ IIf( _cCombo == 'Vendedor 1' , 'A1.A1_VEND' , 'A1.A1_I_VEND2' ) +" = '"+ _cVenOri +"' "
 		
 		If !Empty( _cGRede )
 		_cQuery += " AND A1.A1_GRPVEN  IN "+ FormatIn( _cGRede , ";" )
@@ -455,4 +455,4 @@ Do Case
 	        
 EndCase
 
-Return()
+Return

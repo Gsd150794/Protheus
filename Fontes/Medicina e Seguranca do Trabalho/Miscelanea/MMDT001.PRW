@@ -1,34 +1,26 @@
 /*
 ===============================================================================================================================
-                                    ATUALIZACOES SOFRIDAS DESDE A CONSTRUÇAO INICIAL
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                           |
-------------------:------------:----------------------------------------------------------------------------------------------:
-Darcio Spörl      | 28/12/2016 | Programa criado para gerar a primeira carga da tabela TN3. Chamado: 18122					  |
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
+Darcio Spörl  |28/12/2016| Chamado 18122. Programa criado para gerar a primeira carga da tabela TN3.
 ===============================================================================================================================
 */
-#Include 'Protheus.ch'
-#Include 'rwmake.ch'
+#Include "TOTVS.ch"
+
 /*
 ===============================================================================================================================
 Programa----------: MMDT001
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 28/12/2016
-===============================================================================================================================
 Descrição---------: Rotina criada para gerar a primeira carga das descrições da tabela TN3 Chamado: 18122oe
-===============================================================================================================================
-Uso---------------: Italac
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
-Usuario-----------: 
-===============================================================================================================================
-Setor-------------: TI
-===============================================================================================================================
 */
-User Function MMDT001()
+User Function MMDT001
+
 Local _oGroup1
 Local _oSay1
 Local _oSay2
@@ -42,16 +34,16 @@ Private _oDlg
 DEFINE MSDIALOG _oDlg TITLE "ATUALIZAÇÃO DAS DESCRIÇÕES DOS EPI'S" FROM 000, 000  TO 100, 396 COLORS 0, 16777215 PIXEL
 
 	@ 003, 004 GROUP _oGroup1 TO 036, 195 OF _oDlg COLOR 0, 16777215 PIXEL
-	@ 008, 008 SAY _oSay1 PROMPT "Esta rotina tem como função fazer a atualização das descrições dos EPI's" SIZE 190, 007 OF _oDlg COLORS 0, 16777215 PIXEL
-	@ 015, 008 SAY _oSay2 PROMPT "Este processo tem a finalidade de criar mais um índice na consulta padrão" SIZE 230, 007 OF _oDlg COLORS 0, 16777215 PIXEL
-	@ 022, 008 SAY _oSay3 PROMPT "utilizada na rotina de Funcionários x EPI's, no campo código do EPI." SIZE 144, 007 OF _oDlg COLORS 0, 16777215 PIXEL
-	DEFINE SBUTTON _oSButton1 FROM 037, 075 TYPE 01 OF _oDlg ENABLE ACTION (_lOk := .T., _oDlg:End())
-	DEFINE SBUTTON _oSButton2 FROM 037, 106 TYPE 02 OF _oDlg ENABLE ACTION (_lOk := .F., _oDlg:End())
+	@ 008, 008 Say _oSay1 PROMPT "Esta rotina tem como função fazer a atualização das descrições dos EPI's" SIZE 190, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 015, 008 Say _oSay2 PROMPT "Este processo tem a finalidade de criar mais um índice na consulta padrão" SIZE 230, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	@ 022, 008 Say _oSay3 PROMPT "utilizada na rotina de Funcionários x EPI's, no campo código do EPI." SIZE 144, 007 OF _oDlg COLORS 0, 16777215 PIXEL
+	DEFINE SBUTTON _oSButton1 FROM 037, 075 Type 01 OF _oDlg ENABLE ACTION (_lOk := .T., _oDlg:End())
+	DEFINE SBUTTON _oSButton2 FROM 037, 106 Type 02 OF _oDlg ENABLE ACTION (_lOk := .F., _oDlg:End())
 
 ACTIVATE MSDIALOG _oDlg CENTERED
 
 If _lOk
-	FwMsgRun( ,{|| RunProc() }, , "Aguarde, atualizando descrições...")
+	FWMsgRun( ,{|| RunProc() }, , "Aguarde, atualizando descrições...")
 Else
 	MsgAlert("Rotina Cancelada pelo Usuário.")
 EndIf
@@ -63,35 +55,29 @@ Return
 Programa----------: RunProc
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 28/12/2016
-===============================================================================================================================
 Descrição---------: Rotina criada para executar o processamento de gravação entre as tabelas TN3 e SB1.
-===============================================================================================================================
-Uso---------------: Italac
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
-Usuario-----------: 
-===============================================================================================================================
-Setor-------------: TI
-===============================================================================================================================
-*/Static Function RunProc()
-Local _aArea := GetArea()
+*/
+Static Function RunProc
 
-dbSelectArea("TN3")
-TN3->(dbSetOrder(1))
+Local _aArea := FWGetArea()
+
+DBSelectArea("TN3")
+TN3->(DBSetOrder(1))
 
 While !TN3->(Eof())
-	dbSelectArea("SB1")
-	SB1->(dbSetOrder(1))
-	If dbSeek(xFilial("SB1") + TN3->TN3_CODEPI)
+	DBSelectArea("SB1")
+	SB1->(DBSetOrder(1))
+	If DBSeek(xFilial("SB1") + TN3->TN3_CODEPI)
 		RecLock("TN3", .F.)
 		TN3->TN3_I_DESC := SB1->B1_DESC
-		MsUnLock()
+		MSUnLock()
 	EndIf
-	TN3->(dbSkip())
-End
+	TN3->(DBSkip())
+EndDo
 
-RestArea(_aArea)
+FWRestArea(_aArea)
+
 Return

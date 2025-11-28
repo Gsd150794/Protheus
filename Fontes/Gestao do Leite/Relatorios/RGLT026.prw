@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 01/07/2021 | Incluído tratamento atravessador. Chamado 37026
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 31/03/2023 | Ajustado para imprimir até 12 meses, um em cada aba da planilha. Chamado 43445
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 25/09/2024 | Chamado 48465. Sanado problemas apresentados no Code Analysis
+Lucas Borges  |01/07/2021| Chamado 37026. Incluído tratamento atravessador.
+Lucas Borges  |31/03/2023| Chamado 43445. Ajustado para imprimir até 12 meses, um em cada aba da planilha.
+Lucas Borges  |25/09/2024| Chamado 48465. Sanado problemas apresentados no Code Analysis
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT026
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 11/02/2020
-===============================================================================================================================
 Descrição---------: Relatório Mapa Analítico Produtores
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -45,11 +37,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 11/02/2020
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -109,11 +98,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 11/02/2020
-===============================================================================================================================
 Descrição---------: Processa impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -166,10 +152,10 @@ Next _nX
 If MV_PAR09 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,_cAux)
-	Endif
+	EndIf
  Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -247,7 +233,7 @@ For _nX := 1 to Len(_aAux)
 	_cFiltro += " AND M."+ _cAux +"_RETILJ = I.A2_LOJA"
 	_cFiltro += " AND "+ _cTpVol +".A2_COD BETWEEN '"+MV_PAR02+"' AND '"+MV_PAR04+"'"
 	_cFiltro += " AND "+ _cTpVol +".A2_LOJA BETWEEN '"+MV_PAR03+"' AND '"+MV_PAR05+"'"
-	_cFiltro += " AND M."+ _cAux +"_DTCOLE BETWEEN '"+ DTOS(_aAux[_nX][01]) +"' AND '"+ DTOS(_aAux[_nX][02]) +"'"
+	_cFiltro += " AND M."+ _cAux +"_DTCOLE BETWEEN '"+ DToS(_aAux[_nX][01]) +"' AND '"+ DToS(_aAux[_nX][02]) +"'"
 
 	_cFiltro += " AND ZL2_FILIAL "+ GetRngFil( _aSelFil, _cAux, .T.,)
 	//Se preencheu os setores, já fiz a validação de acesso no SX1
@@ -286,7 +272,7 @@ For _nX := 1 to Len(_aAux)
 		_cOrder += ", ZL3_COD, ZL3_DESCRI, A2_COD, A2_LOJA, ZL2_COD, ZL2_DESCRI "
 	EndIf
 
-	_cCampo2 :=  _cCampo1 + _cCampo3 + " SUBSTR(M."+ _cAux +"_DTCOLE, 7, 2) DIA, SUBSTR(M."+ _cAux +"_DTCOLE, 5, 2)||'/'||SUBSTR(M."+ _cAux +"_DTCOLE, 1, 4) MES_ANO,"
+	_cCampo2 :=  _cCampo1 + _cCampo3 + " SubStr(M."+ _cAux +"_DTCOLE, 7, 2) DIA, SubStr(M."+ _cAux +"_DTCOLE, 5, 2)||'/'||SubStr(M."+ _cAux +"_DTCOLE, 1, 4) MES_ANO,"
 	If MV_PAR11 == 1 //Soma Volume de Leite
 		_cCampo2 += " SUM("+ _cAux +"_QTDBOM) QTD"
 	Else //Soma KM
@@ -354,7 +340,7 @@ For _nX := 1 to Len(_aAux)
 			%exp:_cFiltro%
 			GROUP BY ZL2_FILIAL, %exp:_cGroup%)
 	PIVOT(SUM(QTD)
-	FOR DIA IN('01' AS X01, '02' AS X02, '03' AS X03, '04' AS X04, '05' AS X05, '06' AS X06,
+	For DIA IN('01' AS X01, '02' AS X02, '03' AS X03, '04' AS X04, '05' AS X05, '06' AS X06,
 				'07' AS X07, '08' AS X08, '09' AS X09, '10' AS X10, '11' AS X11, '12' AS X12,
 				'13' AS X13, '14' AS X14, '15' AS X15, '16' AS X16, '17' AS X17, '18' AS X18,
 				'19' AS X19, '20' AS X20, '21' AS X21, '22' AS X22, '23' AS X23, '24' AS X24,
@@ -381,7 +367,7 @@ For _nX := 1 to Len(_aAux)
 	oReport:SetMeter(_nCountRec)
 		
 	&("oReport:Section("+_cX+")"):Init()
-	While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+	While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 		&("oReport:Section("+_cX+")"):PrintLine()
 		oReport:FatLine()
 		&("oReport:Section("+_cX+"):Section(1)"):Init()	
@@ -394,7 +380,7 @@ For _nX := 1 to Len(_aAux)
 		ElseIf _nOrdem == 5
 			_cDesc := (_cAlias)->ZL3_COD + " - " + (_cAlias)->ZL3_DESCRI
 		EndIf
-		(_cAlias)->(DbSkip())
+		(_cAlias)->(DBSkip())
 	EndDo
 	&("oReport:Section("+_cX+")"):Finish()
 Next _nX

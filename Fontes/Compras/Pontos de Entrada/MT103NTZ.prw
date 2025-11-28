@@ -1,39 +1,32 @@
 /*
 ===============================================================================================================================
-                                    ATUALIZACOES SOFRIDAS DESDE A CONSTRUÇAO INICIAL
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                           |
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges      | 05/04/2021 | Alterada regra das naturezas. Chamado 36141
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges      | 03/05/2022 | Tratamento para buscar natureza do Cadastro de TES Inteligente. Chamado 39985
+Lucas Borges  |05/04/2021| Chamado 36141. Alterada regra das naturezas.
+Lucas Borges  |03/05/2022| Chamado 39985. Tratamento para buscar natureza do Cadastro de TES Inteligente.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MT103NTZ
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 29/12/2020
-===============================================================================================================================
 Descrição---------: Este Ponto de Entrada tem por objetivo selecionar a natureza no Documento de Entrada. Ele é chamado em quase
                     todos os pontos do MATA103: ao clicar na aba duplicadas, no browse, ao editar células. Não é chamado quando 
                     a origem é o TOTVS Colaboração.
-===============================================================================================================================
-Parametros--------: ParamIxb[1] -> A -> Natureza
-===============================================================================================================================
+Parametros--------: ParamIXB[1] -> A -> Natureza
 Retorno-----------: cNatureza -> C -> Natureza
 ===============================================================================================================================
 */
-User Function MT103NTZ()
+User Function MT103NTZ
 
-Local _cNatOri  := ParamIxb[1]
-Local _cNature  := Space(Len(ParamIxb[1]))
+Local _cNatOri  := ParamIXB[1]
+Local _cNature  := Space(Len(ParamIXB[1]))
 Local _nI		:= 0
 Local _nEntSai  := 1 //Documento de 1-Entrada / 2-Saida
 Local _cTpOper  := ' '//Código da TES Inteligente
@@ -65,7 +58,7 @@ If !IsInCallStack("U_MGLT009") .And. (;//Não executa no fechamento do leite
             EndIf
         Next _nI
     EndIf
-    //Só pergunto se deseja manter a natureza informada manualmente se for na confirmação do documento
+    //Só pergunto se deseja manter a natureza informada manualmente se For na confirmação do documento
     If !l103Auto .And. !Empty(_cNature) .And. !Empty(_cNatOri) .And. AllTrim(_cNatOri) <> AllTrim(_cNature);
         .And. FWIsInCallStack("SAFEEVAL") .And.;
         MsgYesNo("A natureza identificada no cadastro de TES Inteligente '"+AllTrim(_cNature)+"' está diferente da informada no documento '"+AllTrim(_cNatOri)+"'. "+;

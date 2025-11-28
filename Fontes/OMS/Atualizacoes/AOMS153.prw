@@ -1,18 +1,18 @@
 /*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-       Autor      |    Data    |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-
-===============================================================================================================================
+=========================================================================================================================================================
+                          ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
+=========================================================================================================================================================
+Analista         - Programador       - Inicio     - Envio    - Chamado - Motivo da Alteração
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+Vanderlei/Jerry  - Alex Wallauer     - 02/09/2025 -          - 50463   - Novo campos de detalhes para mostrar do Z40.
+=========================================================================================================================================================
 */
 
-#INCLUDE "FWMBROWSE.CH"
-#INCLUDE "FWMVCDEF.CH"
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "TOPCONN.CH"
-#INCLUDE "RWMAKE.CH"
+#Include "FWMBROWSE.CH"
+#Include "FWMVCDEF.CH"
+#Include "TOTVS.ch"
+#Include "TOPCONN.CH"
+#Include "RWMAKE.CH"
 
 
 /*
@@ -21,7 +21,7 @@ Programa----------: AOMS153
 Autor-------------: Igor Melgaço
 Data da Criacao---: 28/12/2021
 ===============================================================================================================================
-Descrição---------: Cadastro de Premissa. Chamado: 50568 
+Descrição---------: Cadastro de Premissas. Chamado: 50568 
 ===============================================================================================================================
 Parametros--------: 
 ===============================================================================================================================
@@ -38,7 +38,7 @@ _oBrowse:SetMenuDef( 'AOMS153' )
 _oBrowse:SetDescription("Premissa")
 _oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -79,8 +79,8 @@ Retorno-----------: _oModel - Objeto do modelo de dados do MVC
 */
 Static Function ModelDef()
 Local _oStruZ38 := FWFormStruct(1,"Z38")
-Local _oStruZ39 := FWFormStruct(1,"Z39",{ |x| ALLTRIM(x) $ 'Z39_COD, Z39_DESC, Z39_PERIOD,Z39_PRODUT,Z39_DESCP,Z39_TIPO, Z39_UM, Z39_FATOR, Z39_TPCONV' } )
-Local _oStruZ40 := FWFormStruct(1,"Z40",{ |x| ALLTRIM(x) $ 'Z40_COD, Z40_DESC, Z40_PERIOD,Z40_COORD,Z40_NOME,Z40_ALVO, Z40_ATING' } )
+Local _oStruZ39 := FWFormStruct(1,"Z39",{ |x| AllTrim(x) $ 'Z39_COD, Z39_DESC, Z39_PERIOD,Z39_PRODUT,Z39_DESCP,Z39_TIPO, Z39_UM, Z39_FATOR, Z39_TPCONV' } )
+Local _oStruZ40 := FWFormStruct(1,"Z40",{ |x| !AllTrim(x) $ 'Z40_COD, Z40_DESC, Z40_PERIOD' } )
 Local _oModel
 Local _aAuxFWDGat := {}
 Local _bPosValidacao := {|| U_AOMS153H(_oModel) }
@@ -99,7 +99,7 @@ _oStruZ38:AddField( ;
         NIL , ;                     // [08] B Code-block de validação When do campo
         NIL , ;                     // [09] A Lista de valores permitido do campo
         NIL , ;                     // [10] L Indica se o campo tem preenchimento obrigatório
-        { || Iif(INCLUI, "2",Z38->Z38_MSBLQL) } , ;  // [11] B Code-block de inicializacao do campo
+        { || IIf(INCLUI, "2",Z38->Z38_MSBLQL) } , ;  // [11] B Code-block de inicializacao do campo
         NIL , ;                     // [12] L Indica se trata de um campo chave
         .T. , ;                     // [13] L Indica se o campo pode receber valor em uma operação de update.
         .F. )                       // [14] L Indica se o campo é virt
@@ -163,8 +163,8 @@ Retorno-----------: _oView - Objeto de exibição do MVC
 */ 
 Static Function ViewDef()
 Local _oStruZ38 := FWFormStruct(2,"Z38")
-Local _oStruZ39 := FWFormStruct(2,"Z39",{ |x| ALLTRIM(x) $ 'Z39_PRODUT,Z39_DESCP,Z39_TIPO, Z39_UM, Z39_FATOR, Z39_TPCONV' } )
-Local _oStruZ40 := FWFormStruct(2,"Z40",{ |x| ALLTRIM(x) $ 'Z40_COORD,Z40_NOME,Z40_ALVO, Z40_ATING' } )
+Local _oStruZ39 := FWFormStruct(2,"Z39",{ |x| AllTrim(x) $ 'Z39_PRODUT,Z39_DESCP,Z39_TIPO, Z39_UM, Z39_FATOR, Z39_TPCONV' } )
+Local _oStruZ40 := FWFormStruct(2,"Z40",{ |x| !AllTrim(x) $ 'Z40_COD, Z40_DESC, Z40_PERIOD' } )
 Local _oModel := FWLoadModel("AOMS153")
 Local _oView := Nil
 
@@ -238,43 +238,43 @@ User Function AOMS153H(_oModel)
    Local nOper := _oModel:GetOperation()
    
    If nOper == 3 //Inclusao
-      DbSelectArea("Z38")
-      DbSetOrder(1)
-      If DbSeek(_cFilial+_cCod+_cPeriodo)
+      DBSelectArea("Z38")
+      DBSetOrder(1)
+      If DBSeek(_cFilial+_cCod+_cPeriodo)
          lRet := .F.
-         U_ITMSG("Já existe um registro nesse cadastro com a mesma chave digitada Codigo: "+_cCod+" Periodo: "+_cPeriodo,"Atenção","Prencha pelo menos um desses campos com valores difrentes dos citados.",3 , , , .T.)
+         U_ITMsg("Já existe um registro nesse cadastro com a mesma chave digitada Codigo: "+_cCod+" Periodo: "+_cPeriodo,"Atenção","Prencha pelo menos um desses campos com valores difrentes dos citados.",3 , , , .T.)
       Else
          lRet := .T.
       EndIf
    ElseIf nOper == 5 //Exclusão
       lRet := .T.
-      DbSelectArea("Z39")
-      DbSetOrder(1)
-      If DbSeek(_cFilial+_cCod+_cPeriodo)
+      DBSelectArea("Z39")
+      DBSetOrder(1)
+      If DBSeek(_cFilial+_cCod+_cPeriodo)
          lRet := .F.
-         U_ITMSG("Existem registros relacionados a esse codigo: "+_cCod+" no cadastro de Premissa Vs Produtos.","Atenção","Antes da exclusão dessa Premissa exclua os registros relacionados no Cadastro de Premissa Vs Produtos.",3 , , , .T.)
+         U_ITMsg("Existem registros relacionados a esse codigo: "+_cCod+" no cadastro de Premissa Vs Produtos.","Atenção","Antes da exclusão dessa Premissa exclua os registros relacionados no Cadastro de Premissa Vs Produtos.",3 , , , .T.)
       EndIf
 
       If lRet
-         DbSelectArea("Z40")
-         DbSetOrder(1)
-         If DbSeek(_cFilial+_cCod+_cPeriodo)
+         DBSelectArea("Z40")
+         DBSetOrder(1)
+         If DBSeek(_cFilial+_cCod+_cPeriodo)
             lRet := .F.
-            U_ITMSG("Existem registros relacionados a esse codigo: "+_cCod+" no cadastro de Premissa Vs Coordenador.","Atenção","Antes da exclusão dessa Premissa exclua os registros relacionados no Cadastro de Premissa Vs Coordenador.",3 , , , .T.)
+            U_ITMsg("Existem registros relacionados a esse codigo: "+_cCod+" no cadastro de Premissa Vs Coordenador.","Atenção","Antes da exclusão dessa Premissa exclua os registros relacionados no Cadastro de Premissa Vs Coordenador.",3 , , , .T.)
          EndIf
       EndIf
    Else
       nRecno := Z38->(Recno()) 
-      DbSelectArea("Z38")
-      DbSetOrder(1)
-      If DbSeek(_cFilial+_cCod+_cPeriodo)
-         Do While _cFilial+_cCod+_cPeriodo == Z38->(Z38_FILIAL+Z38_COD+Z38_PERIOD) .AND. Z38->(!EOF())
+      DBSelectArea("Z38")
+      DBSetOrder(1)
+      If DBSeek(_cFilial+_cCod+_cPeriodo)
+         While _cFilial+_cCod+_cPeriodo == Z38->(Z38_FILIAL+Z38_COD+Z38_PERIOD) .And. Z38->(!Eof())
             If Z38->(Recno()) <> nRecno
                lRet := .F.
-               U_ITMSG("Já existe um registro nesse cadastro com a mesma chave digitada Codigo: "+_cCod+" Periodo: "+_cPeriodo,"Atenção","Prencha pelo menos um desses campos com valores difrentes dos citados.",3 , , , .T.)
+               U_ITMsg("Já existe um registro nesse cadastro com a mesma chave digitada Codigo: "+_cCod+" Periodo: "+_cPeriodo,"Atenção","Prencha pelo menos um desses campos com valores difrentes dos citados.",3 , , , .T.)
                Exit
             EndIf
-            Z38->(DbSkip())
+            Z38->(DBSkip())
          EndDo
          lRet := .T.
       Else
@@ -303,12 +303,12 @@ User Function AOMS153G(_cFilial,_cCod)
 
    _aAreaZ38 := GetArea("Z38")
 
-   DbSelectArea("Z38")
-   DbSetOrder(1)
-   DbSeek(_cFilial+_cCod)
+   DBSelectArea("Z38")
+   DBSetOrder(1)
+   DBSeek(_cFilial+_cCod)
    _cRetorno := Z38->Z38_DESC
    
-   RestArea(_aAreaZ38)
+   FWRestArea(_aAreaZ38)
 
 Return _cRetorno
 
@@ -329,12 +329,12 @@ User Function AOMS153I()
    Local lRet := .T. As Logical
    Local _cPeriodo := M->Z38_PERIOD //_oModel:GetValue("Z38CAB","Z38_PERIOD") 
    
-   If Len(ALLTRIM(_cPeriodo)) < 6
-      U_ITMSG("Contuedo inválido preenchido!","Atenção","Preencha com Ano e Mês (AAAA/MM) no Campo.",3 , , , .T.) 
+   If Len(AllTrim(_cPeriodo)) < 6
+      U_ITMsg("Contuedo inválido preenchido!","Atenção","Preencha com Ano e Mês (AAAA/MM) no Campo.",3 , , , .T.) 
       lRet := .F.
    ElseIf Subs(_cPeriodo,5,2) > "12"
       lRet := .F.
-      U_ITMSG("Mês digitado inválido!","Atenção","",3 , , , .T.)
+      U_ITMsg("Mês digitado inválido!","Atenção","",3 , , , .T.)
    Else
       lRet := .T.
    EndIf
@@ -396,42 +396,42 @@ Local lContinua := .F.
 
 Begin Transaction
 
-If _nOperation = 3 .AND. !Empty(ALLTRIM(__cCod)) .AND. !Empty(ALLTRIM(__cPeriod))
+If _nOperation = 3 .And. !Empty(AllTrim(__cCod)) .And. !Empty(AllTrim(__cPeriod))
 
    FWFormCommit( _oModel )
 
-   Dbselectarea("Z39")
-   DbSetOrder(1)
-   If Dbseek( _cFilial + __cCod + __cPeriod)
+   DBSelectArea("Z39")
+   DBSetOrder(1)
+   If DBSeek( _cFilial + __cCod + __cPeriod)
       lContinua := .T.
    EndIf
 
-   Dbselectarea("Z40")
-   DbSetOrder(1)
-   If Dbseek( _cFilial + __cCod + __cPeriod)
+   DBSelectArea("Z40")
+   DBSetOrder(1)
+   If DBSeek( _cFilial + __cCod + __cPeriod)
       lContinua := .T.
    EndIf
 
-   If lContinua .AND. U_ITMSG("Deseja copiar tb os registros relacionados de Premissa Vs Produtos e Premissa Vs Coordenador?",'Atenção!',,2,2,2)
-      Dbselectarea("Z39")
-      DbSetOrder(1)
-      If Dbseek( _cFilial + __cCod + __cPeriod)
-         Do While _cFilial + __cCod + __cPeriod == Z39->(Z39_FILIAL+Z39_COD+Z39_PERIOD) .AND. Z39->(!EOF())
-            AADD(aZ39,{Z39->Z39_PRODUT,Z39->Z39_TIPO,Z39->Z39_UM,Z39->Z39_FATOR,Z39->Z39_TPCONV})         
-            Z39->(DbSkip())
+   If lContinua .And. U_ITMsg("Deseja copiar tb os registros relacionados de Premissa Vs Produtos e Premissa Vs Coordenador?",'Atenção!',,2,2,2)
+      DBSelectArea("Z39")
+      DBSetOrder(1)
+      If DBSeek( _cFilial + __cCod + __cPeriod)
+         While _cFilial + __cCod + __cPeriod == Z39->(Z39_FILIAL+Z39_COD+Z39_PERIOD) .And. Z39->(!Eof())
+            aAdd(aZ39,{Z39->Z39_PRODUT,Z39->Z39_TIPO,Z39->Z39_UM,Z39->Z39_FATOR,Z39->Z39_TPCONV})         
+            Z39->(DBSkip())
          EndDo
       EndIf
 
-      Dbselectarea("Z40")
-      DbSetOrder(1)
-      If Dbseek( _cFilial + __cCod + __cPeriod)
-         Do While _cFilial + __cCod + __cPeriod == Z40->(Z40_FILIAL+Z40_COD+Z40_PERIOD) .AND. Z40->(!EOF())
-            AADD(aZ40,{Z40->Z40_COORD,Z40->Z40_ALVO,Z40->Z40_ATING})         
-            Z40->(DbSkip())
+      DBSelectArea("Z40")
+      DBSetOrder(1)
+      If DBSeek( _cFilial + __cCod + __cPeriod)
+         While _cFilial + __cCod + __cPeriod == Z40->(Z40_FILIAL+Z40_COD+Z40_PERIOD) .And. Z40->(!Eof())
+            aAdd(aZ40,{Z40->Z40_COORD,Z40->Z40_ALVO,Z40->Z40_ATING})         
+            Z40->(DBSkip())
          EndDo
       EndIf
 
-      Dbselectarea("Z39")
+      DBSelectArea("Z39")
       For i := 1 To Len(aZ39)
          Z39->(RecLock("Z39",.T.))
          Z39->Z39_FILIAL := _cFilial
@@ -442,10 +442,10 @@ If _nOperation = 3 .AND. !Empty(ALLTRIM(__cCod)) .AND. !Empty(ALLTRIM(__cPeriod)
          Z39->Z39_UM     := aZ39[i][3]
          Z39->Z39_FATOR  := aZ39[i][4]
          Z39->Z39_TPCONV := aZ39[i][5]
-         Z39->(MsUnlock())
+         Z39->(MSUnLock())
       Next
 
-      Dbselectarea("Z40")
+      DBSelectArea("Z40")
       
       For i := 1 To Len(aZ40)
          Z40->(RecLock("Z40",.T.))
@@ -454,8 +454,8 @@ If _nOperation = 3 .AND. !Empty(ALLTRIM(__cCod)) .AND. !Empty(ALLTRIM(__cPeriod)
          Z40->Z40_PERIOD := _cPeriodo
          Z40->Z40_COORD := aZ40[i][1]
          Z40->Z40_ALVO  := aZ40[i][2]
-         Z40->Z40_ATING := aZ40[i][3]
-         Z40->(MsUnlock())
+         //Z40->Z40_ATING := aZ40[i][3]
+         Z40->(MSUnLock())
       Next
    EndIf
 Else
@@ -466,4 +466,4 @@ EndIf
 
 End Transaction
 
-Return .t.
+Return .T.

@@ -2,20 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alexandre V.  | 22/12/2015 | Tratativa na cláusula "ORDER BY" para remover a referência numérica. Chamado 13062
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 19/09/2019 | Revisão do fonte. Chamado 28346 
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 02/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+Alexandre V.  |22/12/2015| Chamado 13062. Tratativa na cláusula "ORDER BY" para remover a referência numérica.
+Lucas Borges  |19/09/2019| Chamado 28346. Revisão do fonte.
+Lucas Borges  |02/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
 ===============================================================================================================================
 */
 
-//===========================================================================
-//| Definições de Includes                                                  |
-//===========================================================================
-#Include "Protheus.Ch"
+#Include "TOTVS.ch"
 
 #Define TITULO "Lotes de Processamento"
 
@@ -24,11 +19,8 @@ Lucas Borges  | 02/10/2019 | Removidos os Warning na compilação da release 12.1.
 Programa----------: CGPE001
 Autor-------------: Alexandre Villar
 Data da Criacao---: 21/02/2014
-===============================================================================================================================
 Descrição---------: Rotina de Consulta de Lotes de Processamento - Integração Funcionários x PLS
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -53,11 +45,8 @@ Return(.T.)
 Programa----------: CGPE001M
 Autor-------------: Alexandre Villar
 Data da Criacao---: 21/02/2014
-===============================================================================================================================
 Descrição---------: Monta a tela de consulta de Ítens do Lote
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -137,11 +126,8 @@ Return
 Programa----------: CGPE001SEL
 Autor-------------: Alexandre Villar
 Data da Criacao---: 21/02/2014
-===============================================================================================================================
 Descrição---------: Recupera os dados dos Ítens do Lote para exibição na Tela.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -157,14 +143,14 @@ Local nCont			:= 0
 //===========================================================================
 BeginSql alias cAlias
 	SELECT Z01.Z01_LOTE LOTE, Z01.Z01_CHAVE CHAVE,
-	       CASE WHEN Z01.Z01_TIPO = '1' THEN 'TITULAR' ELSE 'DEPENDENTE' END TIPO,
-	       CASE WHEN Z01.Z01_TIPO = '1' THEN SRA.RA_NOME ELSE SRB.RB_NOME END NOME,
-	       CASE WHEN Z01.Z01_TIPO = '1' THEN SRA.RA_ADMISSA ELSE SRB.RB_DTNASC END DT_AUX,
+	       Case WHEN Z01.Z01_TIPO = '1' THEN 'TITULAR' Else 'DEPENDENTE' END TIPO,
+	       Case WHEN Z01.Z01_TIPO = '1' THEN SRA.RA_NOME Else SRB.RB_NOME END NOME,
+	       Case WHEN Z01.Z01_TIPO = '1' THEN SRA.RA_ADMISSA Else SRB.RB_DTNASC END DT_AUX,
 	       Z01.Z01_DTPRO DT_PRO, Z01.Z01_HRPRO HR_PRO, Z01.Z01_TPFORN TP_FORN,
 	       Z01.Z01_CODFOR COD_FOR, Z01.Z01_TPPLAN TP_PLAN, Z01.Z01_PLANO PLANO, Z01.Z01_STATUS STS_AUX
 	  FROM %Table:Z01% Z01
 	  LEFT OUTER JOIN %Table:SRA% SRA
-	    ON SRA.RA_FILIAL || SRA.RA_MAT = SUBSTR(Z01.Z01_CHAVE, 1, 8)
+	    ON SRA.RA_FILIAL || SRA.RA_MAT = SubStr(Z01.Z01_CHAVE, 1, 8)
 	   AND SRA.D_E_L_E_T_ = ' '
 	  LEFT OUTER JOIN %Table:SRB% SRB
 	    ON SRB.RB_FILIAL || SRB.RB_MAT || SRB.RB_COD = Z01.Z01_CHAVE
@@ -176,7 +162,7 @@ EndSql
 //===========================================================================
 //| Prepara o Ambiente temporário.                                          |
 //===========================================================================
-(cAlias)->( dbEval( { || nTotReg++ } ) )
+(cAlias)->( DBEval( { || nTotReg++ } ) )
 
 ProcRegua(nTotReg)
 cTotReg := StrZero( nTotReg , 6 )
@@ -192,8 +178,8 @@ While !(cAlias)->(Eof())
 						(cAlias)->CHAVE								,; //02
 						(cAlias)->TIPO								,; //03
 						(cAlias)->NOME								,; //04
-				StoD(	(cAlias)->DT_AUX )							,; //05
-				StoD(	(cAlias)->DT_PRO )							,; //06
+				SToD(	(cAlias)->DT_AUX )							,; //05
+				SToD(	(cAlias)->DT_PRO )							,; //06
 						(cAlias)->HR_PRO							,; //07
 			U_ITRetBox(	(cAlias)->TP_FORN , "RHK_TPFORN" )			,; //08
 						(cAlias)->COD_FOR							,; //09
@@ -236,11 +222,8 @@ Return
 Programa----------: MenuDef
 Autor-------------: Alexandre Villar
 Data da Criacao---: 21/02/2014
-===============================================================================================================================
 Descrição---------: Definição do Menu da Rotina Principal
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -258,11 +241,8 @@ Return(aRotina)
 Programa----------: CGPE001L
 Autor-------------: Alexandre Villar
 Data da Criacao---: 21/02/2014
-===============================================================================================================================
 Descrição---------: Definição da Legenda da tela principal
-===============================================================================================================================
 Parametros--------: nReg
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -280,8 +260,8 @@ If	nReg == Nil
 
 	uRetorno := {}
 	
-	Aadd( uRetorno , { 'Z00->Z00_OPERAC == "001" '	, aLegenda[1][1] } )
-	Aadd( uRetorno , { 'Z00->Z00_OPERAC == "002" '	, aLegenda[2][1] } )
+	aAdd( uRetorno , { 'Z00->Z00_OPERAC == "001" '	, aLegenda[1][1] } )
+	aAdd( uRetorno , { 'Z00->Z00_OPERAC == "002" '	, aLegenda[2][1] } )
 
 Else
 	BrwLegenda( cCadastro , "Legenda" , aLegenda )

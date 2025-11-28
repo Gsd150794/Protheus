@@ -2,30 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 30/08/2019 | Incluído campo ZLX_LISTA para pode descontinuar RGLT063. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 16/08/2022 | Corrigida query para não considerar pre-notas. Chamado 41037
+Lucas Borges  |30/08/2019| Chamado 28346. Incluído campo ZLX_LISTA para pode descontinuar RGLT063.
+Lucas Borges  |16/08/2022| Chamado 41037. Corrigida query para não considerar pre-notas.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT041
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 19/07/2019
-===============================================================================================================================
 Descrição---------: Relatório Movimentação do Leite Cooperativa X Entrada Estoque Efetiva. Litas as recepções do Leite de Cooperativa para
 					avaliar as datas das recepções x movimentação de estoque. Chamado 30038
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -44,11 +37,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 19/07/2019
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -99,11 +89,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 19/07/2019
-===============================================================================================================================
 Descrição---------: Processa impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -124,10 +111,10 @@ Local _nCountRec	:= 0
 If MV_PAR14 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZLX")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -203,7 +190,7 @@ BeginSql alias _cAlias
 			ZLX_TRANSP||'-'||ZLX_LJTRAN TRANSP, SA2T.A2_NOME NOME_TRAN, ZLX_PLACA, ZLX_VOLREC, ZLX_VOLNF, ZLX_DIFVOL, F1_DTDIGIT, ZLX_DTENTR, ZLX_DTESTO, ZLX_LISTA
 	  FROM %Table:SX5% SX5, %Table:SA2% SA2F, %Table:SA2% SA2T,
 	       (SELECT ZLX_FILIAL, ZLX_CODIGO, ZLX_TIPOLT, F1_DOC, ZLX_FORNEC, ZLX_LJFORN, ZLX_TRANSP,ZLX_LJTRAN,
-	               ZLX_PLACA, ZLX_VOLREC, ZLX_VOLNF, ZLX_DIFVOL, F1_DTDIGIT, ZLX_DTENTR, ZLX_DTESTO, ZZX_CODPRD, UTL_RAW.CAST_TO_VARCHAR2(DBMS_LOB.SUBSTR(ZLX_LISTA, 500, 1)) ZLX_LISTA
+	               ZLX_PLACA, ZLX_VOLREC, ZLX_VOLNF, ZLX_DIFVOL, F1_DTDIGIT, ZLX_DTENTR, ZLX_DTESTO, ZZX_CODPRD, UTL_RAW.CAST_TO_VARCHAR2(DBMS_LOB.SubStr(ZLX_LISTA, 500, 1)) ZLX_LISTA
 	          FROM ZLX010 ZLX, ZZX010 ZZX, SF1010 SF1
 	         WHERE ZLX.D_E_L_E_T_ = ' '
 	           AND ZZX.D_E_L_E_T_ = ' '
@@ -228,7 +215,7 @@ BeginSql alias _cAlias
 	           AND ZLX.ZLX_ORIGEM = ' '
 	        UNION
 	        SELECT ZLX_FILIAL, ZLX_CODIGO, ZLX_TIPOLT, '', ZLX_FORNEC, ZLX_LJFORN, ZLX_TRANSP,ZLX_LJTRAN,
-	               ZLX_PLACA, ZLX_VOLREC, ZLX_VOLNF, ZLX_DIFVOL, '', ZLX_DTENTR, ZLX_DTESTO, ZZX_CODPRD, UTL_RAW.CAST_TO_VARCHAR2(DBMS_LOB.SUBSTR(ZLX_LISTA, 500, 1)) ZLX_LISTA
+	               ZLX_PLACA, ZLX_VOLREC, ZLX_VOLNF, ZLX_DIFVOL, '', ZLX_DTENTR, ZLX_DTESTO, ZZX_CODPRD, UTL_RAW.CAST_TO_VARCHAR2(DBMS_LOB.SubStr(ZLX_LISTA, 500, 1)) ZLX_LISTA
 	          FROM ZLX010 ZLX, ZZX010 ZZX
 	         WHERE ZLX.D_E_L_E_T_ = ' '
 	           AND ZZX.D_E_L_E_T_ = ' '
@@ -245,7 +232,7 @@ BeginSql alias _cAlias
 	           AND ZLX.ZLX_ORIGEM = '1'
 	        UNION
 	        SELECT ZLX_FILIAL, ZLX_CODIGO, ZLX_TIPOLT, ZLX_TICKET, ZLX_FORNEC, ZLX_LJFORN, ZLX_TRANSP, ZLX_LJTRAN, 
-	               ZLX_PLACA, ZLX_VOLREC, ZLX_VOLNF, ZLX_DIFVOL, D3_EMISSAO, ZLX_DTENTR, ZLX_DTESTO, ZZX_CODPRD, UTL_RAW.CAST_TO_VARCHAR2(DBMS_LOB.SUBSTR(ZLX_LISTA, 500, 1)) ZLX_LISTA
+	               ZLX_PLACA, ZLX_VOLREC, ZLX_VOLNF, ZLX_DIFVOL, D3_EMISSAO, ZLX_DTENTR, ZLX_DTESTO, ZZX_CODPRD, UTL_RAW.CAST_TO_VARCHAR2(DBMS_LOB.SubStr(ZLX_LISTA, 500, 1)) ZLX_LISTA
 	          FROM ZLX010 ZLX, ZZX010 ZZX, SD3010 SD3
 	         WHERE ZLX.D_E_L_E_T_ = ' '
 	           AND ZZX.D_E_L_E_T_ = ' '
@@ -291,16 +278,16 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->ZLX_FILIAL
 	_cProd := (_cAlias)->PRODUTO
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()

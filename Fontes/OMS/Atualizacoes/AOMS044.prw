@@ -14,7 +14,7 @@
 // Definicoes de Includes da Rotina.
 //====================================================================================================
 
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -39,7 +39,7 @@ Setor-------------: TI
 User Function AOMS044( _cCodVen , _nOpc )
 
 Local _lRet     := .T.
-Local _aArea    := GetArea()
+Local _aArea    := FWGetArea()
 Local _cVarAux	:= ''
 
 Default _nOpc	:= 0
@@ -153,6 +153,6 @@ Else
 
 EndIf
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return( _lRet )

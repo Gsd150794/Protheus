@@ -10,7 +10,7 @@ Lucas Borges  |23/05/2025| Chamado 50754. Incluído tratamento para CT-e Simplifi
 ==============================================================================================================================================================
 */
 
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -19,16 +19,16 @@ Autor-----------: Lucas Borges Ferreira
 Data da Criacao-: 20/04/2018
 Descrição-------: O Ponto de Entrada COLF1D1 permite adicionar acrescentar campos customizados na SF1 e SD1 antes da geração 
 				  do documento. O Ponto de entrada é executado antes do execauto.
-Parametros------: PARAMIXB -> Array -> Cabeçalho da NF (SF1)[1] -> Obrigatorio
-				  PARAMIXB -> Array -> Itens da NF (SD1)[2]		-> Obrigatorio
+Parametros------: ParamIXB -> Array -> Cabeçalho da NF (SF1)[1] -> Obrigatorio
+				  ParamIXB -> Array -> Itens da NF (SD1)[2]		-> Obrigatorio
 Retorno---------: aCab 	 -> Array	-> Cabeçalho da NF (SF1)[1]	-> Obrigatorio
 				  aItens -> Array	-> Itens da NF (SD1)[2]		-> Obrigatorio
 ===============================================================================================================================
 */
 User Function COLF1D1
 
-Local _aCab 	:= PARAMIXB[1] As Array
-Local _aItens	:= PARAMIXB[2] As Array
+Local _aCab 	:= ParamIXB[1] As Array
+Local _aItens	:= ParamIXB[2] As Array
 Local _aRet 	:= {} As Array
 Local _cMensFis := '' As Character
 Local _cMensCli := ''As Character
@@ -100,13 +100,13 @@ If !Empty( _cXML )
 				If ValType(XmlChildEx(_oXML:_InfNfe:_infAdic,"_INFADFISCO")) != "U"
 					If Type("_oXML:_InfNfe:_infAdic:_infAdFisco:TEXT")!="U"
 						_cMensFis := _oXML:_InfNfe:_infAdic:_infAdFisco:TEXT
-						aadd(_aCab,{"F1_I_MENFI",NoAcento(_cMensFis),NIL})
+						aAdd(_aCab,{"F1_I_MENFI",NoAcento(_cMensFis),NIL})
 					EndIf
 				EndIf
 				If ValType(XmlChildEx(_oXML:_InfNfe:_infAdic,"_INFCPL")) != "U"
 					If Type("_oXML:_InfNfe:_infAdic:_infCpl:TEXT")!="U"
 						_cMensCli := _oXML:_InfNfe:_infAdic:_infCpl:TEXT
-						aadd(_aCab,{"F1_I_MENSA",NoAcento(_cMensCli),NIL})
+						aAdd(_aCab,{"F1_I_MENSA",NoAcento(_cMensCli),NIL})
 					EndIf
 				EndIf
 			EndIf
@@ -125,7 +125,7 @@ If !Empty( _cXML )
 				_cMensCli := _oXML:_INFCTE:_COMPL:_OBSCONT:_XCAMPO:TEXT + ": "+ _oXML:_INFCTE:_COMPL:_OBSCONT:_XTEXTO:TEXT + ". "
 			EndIf
 			If ValType(XmlChildEx(_oXML:_InfCte,"_COMPL")) != "U" .And. ValType(XmlChildEx(_oXML:_InfCte:_Compl,"_OBSFISCO")) == "A"
-				For _nX := 1 to len(_oXML:_INFCTE:_COMPL:_OBSFISCO)
+				For _nX := 1 to Len(_oXML:_INFCTE:_COMPL:_OBSFISCO)
 					_cMensFis += _oXML:_INFCTE:_COMPL:_OBSFISCO[_nX]:_XCAMPO:TEXT + ": " + _oXML:_INFCTE:_COMPL:_OBSFISCO[_nX]:_XTEXTO:TEXT + ". " + CRLF
 				Next _nX
 			ElseIf ValType(XmlChildEx(_oXML:_InfCte,"_COMPL")) != "U" .And. ValType(XmlChildEx(_oXML:_InfCte:_Compl,"_OBSFISCO")) == "O" .And. !Empty(_oXML:_INFCTE:_COMPL:_OBSFISCO:TEXT) //ValType("_oXML:_INFCTE:_COMPL:_OBSFISCO:_XTEXTO:TEXT") <> "U" //ver
@@ -136,16 +136,16 @@ If !Empty( _cXML )
 	EndIf
 
 	If !Empty(_cMensCli)
-		aadd(_aCab,{"F1_I_MENSA",NoAcento(_cMensCli),NIL})
+		aAdd(_aCab,{"F1_I_MENSA",NoAcento(_cMensCli),NIL})
 	EndIf
 	If !Empty(_cMensFis)
-		aadd(_aCab,{"F1_I_MENFI",NoAcento(_cMensFis),NIL})
+		aAdd(_aCab,{"F1_I_MENFI",NoAcento(_cMensFis),NIL})
 	EndIf
 	_oXML := Nil
 	_oFullXML:= Nil
 	DelClassIntF()
 EndIf
-aadd(_aCab,{"F1_L_MIX",SDS->DS_L_MIX,NIL})//Campo usado para gerar contra-notas e fechamento do leite de Pessoa Jurídica
+aAdd(_aCab,{"F1_L_MIX",SDS->DS_L_MIX,NIL})//Campo usado para gerar contra-notas e fechamento do leite de Pessoa Jurídica
 
 //=======================================
 //Tratamento para gravação da Natureza
@@ -154,7 +154,7 @@ If SDS->DS_TIPO == "D"
     _cNature := SuperGetMV("IT_DEVNATU",.F.,"410001")
 Else
     For _nI := 1 To Len( _aItens )
-        _cProduto	:= _aItens[_nI][aScan(_aItens[_nI],{|x| Upper(Alltrim(x[1])) == "D1_COD"})][2]
+        _cProduto	:= _aItens[_nI][aScan(_aItens[_nI],{|x| Upper(AllTrim(x[1])) == "D1_COD"})][2]
         //CT-e não tem CFOP, logo, a regra deve ser explicida.
         If AllTrim(SDS->DS_ESPECI) == 'CTE'//Operações com CT-e
             If SDS->DS_UFORITR == SDS->DS_UFDESTR//SDS->DS_EST == SM0->M0_ESTENT
@@ -163,10 +163,10 @@ Else
                 _cTpOper := '11'
             EndIf
         Else//Demais documentos consigo buscar o tipo de operação pelo CFOP
-            If aScan(_aItens[_nI],{|x| Upper(Alltrim(x[1])) == "D1_OPER"}) > 0
-                _cTpOper := _aItens[_nI][aScan(_aItens[_nI],{|x| Upper(Alltrim(x[1])) == "D1_OPER"})][2]
+            If aScan(_aItens[_nI],{|x| Upper(AllTrim(x[1])) == "D1_OPER"}) > 0
+                _cTpOper := _aItens[_nI][aScan(_aItens[_nI],{|x| Upper(AllTrim(x[1])) == "D1_OPER"})][2]
             Else
-                _cTpOper := ColConDHJ(_aItens[_nI][aScan(_aItens[_nI],{|x| Upper(Alltrim(x[1])) == "CFOP"})][2])
+                _cTpOper := ColConDHJ(_aItens[_nI][aScan(_aItens[_nI],{|x| Upper(AllTrim(x[1])) == "CFOP"})][2])
             EndIf
         EndIf
         
@@ -179,7 +179,7 @@ Else
     Next _nI
 EndIf
 If !Empty(_cNature)
-    aadd(_aCab,{"E2_NATUREZ",_cNature,NIL})
+    aAdd(_aCab,{"E2_NATUREZ",_cNature,NIL})
 EndIf
 _aRet := {_aCab,_aItens}
 

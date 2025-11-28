@@ -13,7 +13,7 @@ Lucas Borges  | 11/02/2025 | Chamado 49877. Removido tratamento sobre a versão d
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 #Include 'FWMVCDef.ch'
 
 #Define CRLF	Chr(13)+Chr(10)
@@ -72,11 +72,11 @@ If ValType(_xValid) == 'C' .And. !Empty(_xValid) .And. _xValid $ ('12')
 
 Else
 	
-	u_itmsg( 'Usuário sem acesso à rotina de manutenção das programações de entrega da Logística!' , 'Atenção!' , ,1 )
+	U_ITMsg( 'Usuário sem acesso à rotina de manutenção das programações de entrega da Logística!' , 'Atenção!' , ,1 )
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -285,8 +285,8 @@ Retorno---------: _xRet - Lógico/Conteúdo de acordo com o ponto.
 */
 User Function AOMS028M()
 
-Local _aArea	:= GetArea()
-Local _aParam	:= PARAMIXB
+Local _aArea	:= FWGetArea()
+Local _aParam	:= ParamIXB
 Local _oModel	:= FWModelActive()
 Local _oObj		:= Nil
 Local _oView	:= FWViewActive()
@@ -301,7 +301,7 @@ Local _lPedPal	:= .F.
 Local _nLinha	:= 0
 Local _nQtdLin	:= 0
 Local _nI		:= 0
-Local _dDtEntr	:= StoD('')
+Local _dDtEntr	:= SToD('')
 
 If _aParam <> NIL
 
@@ -395,7 +395,7 @@ If _aParam <> NIL
 							
 							U_ITCADHLP( _aInfHlp , "AOMS02817" )
 							
-							u_itmsg( 'Para o pedido informado existe uma amarração referente à pedido de "Pallet" e esse pedido já encontra-se em na programação ['+ (_cAlias)->FILPRG +'-'+ (_cAlias)->CODPRG +']!',"Atenção" ,  , 1 )
+							U_ITMsg( 'Para o pedido informado existe uma amarração referente à pedido de "Pallet" e esse pedido já encontra-se em na programação ['+ (_cAlias)->FILPRG +'-'+ (_cAlias)->CODPRG +']!',"Atenção" ,  , 1 )
 							
 							_xRet := .F.
 							
@@ -412,7 +412,7 @@ If _aParam <> NIL
 								_oObj:SetValue(  'ZF8_CODCLI' , AllTrim( Posicione( 'SC5' , 1 , _cFilPal + _cPedPal , 'SC5->C5_CLIENTE' ) ) )
 								_oObj:SetValue(  'ZF8_LOJCLI' , SC5->C5_LOJACLI )
 								
-								u_itmsg( 'Para o pedido informado existe uma amarração referente à pedido de "Pallet" e o pedido de amarração foi incluído automaticamente na previsão!',"Atenção" , ,1 )
+								U_ITMsg( 'Para o pedido informado existe uma amarração referente à pedido de "Pallet" e o pedido de amarração foi incluído automaticamente na previsão!',"Atenção" , ,1 )
 								
 								_oView:Refresh()
 								
@@ -436,7 +436,7 @@ If _aParam <> NIL
 	
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return( _xRet )
 
@@ -644,7 +644,7 @@ If _lRet .And. _nAction == MODEL_OPERATION_DELETE
 	
 	@ 005,003 Get _oGet1 Var _cGet1 Size 212,020 COLOR CLR_BLACK MULTILINE PIXEL OF _oDlg
 	
-	DEFINE SBUTTON FROM 015,227 TYPE 1 ENABLE ACTION ( IIF( Empty(_cGet1) , u_itmsg('É obrigatório justificar a exclusão!','Atenção!',,1) , _oDlg:End() ) ) OF _oDlg
+	DEFINE SBUTTON FROM 015,227 Type 1 ENABLE ACTION ( IIf( Empty(_cGet1) , U_ITMsg('É obrigatório justificar a exclusão!','Atenção!',,1) , _oDlg:End() ) ) OF _oDlg
 	
 	ACTIVATE MSDIALOG _oDlg CENTERED
 	
@@ -680,11 +680,11 @@ If !Empty( _cFilPed ) .And. !Empty( _cNumPed )
 		
 		If SC5->C5_TIPO == 'B' .Or. SC5->C5_TIPO == 'D' //// NAO ESTA SAINDO O NOME NA CONFIGURACAO 2 /////
 		
-			_cRet := AllTrim( Posicione( 'SA2' , 1 , xFilial('SA2') + SC5->( C5_CLIENTE + C5_LOJACLI ) , IIF( _nOpc == 1 , 'A2_NOME' , 'A2_NREDUZ' ) ) )
+			_cRet := AllTrim( Posicione( 'SA2' , 1 , xFilial('SA2') + SC5->( C5_CLIENTE + C5_LOJACLI ) , IIf( _nOpc == 1 , 'A2_NOME' , 'A2_NREDUZ' ) ) )
 		
 		Else
 		
-			_cRet := AllTrim( Posicione( 'SA1' , 1 , xFilial('SA1') + SC5->( C5_CLIENTE + C5_LOJACLI ) , IIF( _nOpc == 1 , 'A1_NOME' , 'A1_NREDUZ' ) ) )
+			_cRet := AllTrim( Posicione( 'SA1' , 1 , xFilial('SA1') + SC5->( C5_CLIENTE + C5_LOJACLI ) , IIf( _nOpc == 1 , 'A1_NOME' , 'A1_NREDUZ' ) ) )
 		
 		EndIf
 		
@@ -718,7 +718,7 @@ If !Empty( _cFilPed ) .And. !Empty( _cNumPed )
 	SC5->( DBSetOrder(1) )
 	If SC5->( DBSeek( _cFilPed + _cNumPed ) )
 		
-			_cRet :=  IIF( _nOpc == 1 , SC5->C5_CLIENTE , SC5->C5_LOJACLI) 
+			_cRet :=  IIf( _nOpc == 1 , SC5->C5_CLIENTE , SC5->C5_LOJACLI) 
 		
 	EndIf
 
@@ -768,7 +768,7 @@ Retorno---------: Nenhum
 User Function AOMS028A( _nOpc )
 
 Local _xValAcs	:= U_ITACSUSR( 'ZZL_PRGLOG' )
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _aParBox	:= {}
 Local _aParRet	:= {}
 Local _aHeader	:= {}
@@ -791,16 +791,16 @@ Local _nCntDev	:= 0
 
 If ValType( _xValAcs ) <> 'C' .Or. !( _xValAcs $ '1/2' )
 	
-	u_itmsg( 'Usuário sem acesso à processar as rotinas de Programações de Entregas!' , 'Atenção!' , ,1 )
-	Return()
+	U_ITMsg( 'Usuário sem acesso à processar as rotinas de Programações de Entregas!' , 'Atenção!' , ,1 )
+	Return
 	
 EndIf
 
 If _nOpc == 1
 	
 	If _xValAcs <> '1'
-		u_itmsg( 'Somente usuários cadastrados com perfil "Comercial" podem realizar a aprovação de programações!' , ,1 )
-		Return()
+		U_ITMsg( 'Somente usuários cadastrados com perfil "Comercial" podem realizar a aprovação de programações!' , ,1 )
+		Return
 	EndIf
 	
 	If ZF7->ZF7_STATUS == '1'
@@ -812,14 +812,14 @@ If _nOpc == 1
 		EndIf
 		
 	Else
-		u_itmsg( 'Somente programações "Pendentes" podem ser aprovadas!' , 'Atenção!' , ,1 )
-	EndIF
+		U_ITMsg( 'Somente programações "Pendentes" podem ser aprovadas!' , 'Atenção!' , ,1 )
+	EndIf
 	
 ElseIf _nOpc == 2
     
    	If _xValAcs <> '2'
-		u_itmsg( 'Somente usuários cadastrados com perfil "Logística" podem realizar a devolução de programações!' , 'Atenção!' , ,1 )
-		Return()
+		U_ITMsg( 'Somente usuários cadastrados com perfil "Logística" podem realizar a devolução de programações!' , 'Atenção!' , ,1 )
+		Return
 	EndIf
     
     Begin Transaction
@@ -828,17 +828,17 @@ ElseIf _nOpc == 2
     
 		If ZF7->ZF7_STATUS == '2' .Or. ZF7->ZF7_STATUS == '4'
 		
-			If u_itmsg( 'Confirma a devolução da programação: '+ ZF7->ZF7_CODIGO +' ?' , 'Atenção!',,3,2,2 )
+			If U_ITMsg( 'Confirma a devolução da programação: '+ ZF7->ZF7_CODIGO +' ?' , 'Atenção!',,3,2,2 )
 				
 				DEFINE MSDIALOG _oDlg TITLE "Justificar:" FROM 178,181 TO 240,697 PIXEL
 				
 					@ 005,003 Get _oGet1 Var _cGet1 Size 212,020 COLOR CLR_BLACK MULTILINE PIXEL OF _oDlg
 					
-					DEFINE SBUTTON FROM 015,227 TYPE 1 ENABLE ACTION ( IIF( Empty(_cGet1) , u_itmsg( 'É obrigatório justificar a devolução!' , 'Atenção!' , ,1 ) , _oDlg:End() ) ) OF _oDlg
+					DEFINE SBUTTON FROM 015,227 Type 1 ENABLE ACTION ( IIf( Empty(_cGet1) , U_ITMsg( 'É obrigatório justificar a devolução!' , 'Atenção!' , ,1 ) , _oDlg:End() ) ) OF _oDlg
 				
 				ACTIVATE MSDIALOG _oDlg CENTERED
 				
-				If u_itmsg( 'Deseja devolver todos os ítens da programação? (Sim para todos, Não para devolver indiviudalmente)' , "Atenção",,3,2,2 ) 
+				If U_ITMsg( 'Deseja devolver todos os ítens da programação? (Sim para todos, Não para devolver indiviudalmente)' , "Atenção",,3,2,2 ) 
 				
 					//====================================================================================================
 					// Devolução Total
@@ -897,7 +897,7 @@ ElseIf _nOpc == 2
 						ZF7->ZF7_DATA		:= Date()
 						ZF7->ZF7_HORA		:= Time()
 						
-						ZF7->( MsUnLock() )
+						ZF7->( MSUnLock() )
 						
 						U_AOMS028H( { ZF7->ZF7_CODIGO , '3' , AllTrim( _cGet1 ) } )
 					
@@ -913,7 +913,7 @@ ElseIf _nOpc == 2
 						ZF7->ZF7_DATA		:= Date()
 						ZF7->ZF7_HORA		:= Time()
 						
-						ZF7->( MsUnLock() )
+						ZF7->( MSUnLock() )
 						
 						//====================================================================================================
 						// Grava histórico na origem para manter fácil a localização e atualização das programações
@@ -954,7 +954,7 @@ ElseIf _nOpc == 2
 							ZF7->ZF7_USRLOG		:= _aDadZF7[11]
 							ZF7->ZF7_USRPRG		:= _aDadZF7[12]
 							
-						ZF7->( MsUnLock() )
+						ZF7->( MSUnLock() )
 						
 						U_AOMS028H( { ZF7->ZF7_CODIGO , '3' , AllTrim( _cGet1 ) } )
 						
@@ -981,13 +981,13 @@ ElseIf _nOpc == 2
 								ZF9->( DBGoTo( _aZF9Dev[_nX] ) )
 								RecLock( 'ZF9' , .F. )
 								ZF9->ZF9_CODPRG := _aDadZF7[02]
-								ZF9->( MsUnLock() )
+								ZF9->( MSUnLock() )
 								
 							Next _nX
 							
 							RecLock( 'ZF8' , .F. )
 							ZF8->ZF8_CODPRG := _aDadZF7[02]
-							ZF8->( MsUnLock() )
+							ZF8->( MSUnLock() )
 							
 						Next _nI
 						
@@ -1047,7 +1047,7 @@ ElseIf _nOpc == 2
 						
 						If Empty( _aPedDev )
 						
-							u_itmsg( 'Não existem pedidos pendentes na programação atual! Verifique a programação selecionada e tente novamente.' , 'Atenção!' , ,1 )
+							U_ITMsg( 'Não existem pedidos pendentes na programação atual! Verifique a programação selecionada e tente novamente.' , 'Atenção!' , ,1 )
 							
 						Else
 							
@@ -1069,9 +1069,9 @@ ElseIf _nOpc == 2
 									For _nI := 1 To Len( _aPedAtn )
 										If _aPedAtn[_nI][01]
 											_nCntDev++
-											dbSelectArea("SC5")
-											dbSetOrder(1)
-											dbSeek(_aPedAtn[_nI][02] + _aPedAtn[_nI][03])
+											DBSelectArea("SC5")
+											DBSetOrder(1)
+											DBSeek(_aPedAtn[_nI][02] + _aPedAtn[_nI][03])
 											
 											//================================================================================================
 											// Se o pedido principal tiver pedido de pallet, este será automaticamente adicionado na devolução
@@ -1079,22 +1079,22 @@ ElseIf _nOpc == 2
 											If !Empty(SC5->C5_I_NPALE) .And. C5_I_PEDPA <> "S"
 												If !_aPedAtn[aScan(_aPedAtn,{|x| x[3] == SC5->C5_I_NPALE })][1]
 													_aPedAtn[aScan(_aPedAtn,{|x| x[3] == SC5->C5_I_NPALE })][1] := .T.
-													u_itmsg( 'Para o pedido informado existe uma amarração referente à pedido de "Pallet" e o pedido de amarração foi incluído automaticamente na devolução!' , 'Atenção' , ,1 )
+													U_ITMsg( 'Para o pedido informado existe uma amarração referente à pedido de "Pallet" e o pedido de amarração foi incluído automaticamente na devolução!' , 'Atenção' , ,1 )
 												EndIf
 											ElseIf !Empty(SC5->C5_I_NPALE) .And. C5_I_PEDPA == "S"
 												If !_aPedAtn[aScan(_aPedAtn,{|x| x[3] == SC5->C5_I_NPALE })][1]
 													_aPedAtn[aScan(_aPedAtn,{|x| x[3] == SC5->C5_I_NPALE })][1] := .T.
-													u_itmsg( 'Para o pedido de "Pallet" informado existe uma amarração com pedido principal, e o pedido de amarração foi incluído automaticamente na devolução!' , 'Atenção' , ,1 )
+													U_ITMsg( 'Para o pedido de "Pallet" informado existe uma amarração com pedido principal, e o pedido de amarração foi incluído automaticamente na devolução!' , 'Atenção' , ,1 )
 													_nCntDev++
 												EndIf
 											EndIf
 										EndIf
-//										IIF( _aPedAtn[_nI][01] , _nCntDev++ , Nil )
+//										IIf( _aPedAtn[_nI][01] , _nCntDev++ , Nil )
 									Next _nI
 									
 									If _nCntDev == 0
 										
-										u_itmsg( 'Não foram selecionados pedidos para processar!' , 'Atenção!' , ,1 )
+										U_ITMsg( 'Não foram selecionados pedidos para processar!' , 'Atenção!' , ,1 )
 										
 									Else
 									
@@ -1110,7 +1110,7 @@ ElseIf _nOpc == 2
 											ZF7->ZF7_DATA		:= Date()
 											ZF7->ZF7_HORA		:= Time()
 											
-											ZF7->( MsUnLock() )
+											ZF7->( MSUnLock() )
 											
 											U_AOMS028H( { ZF7->ZF7_CODIGO , '3' , AllTrim( _cGet1 ) } )
 										
@@ -1131,7 +1131,7 @@ ElseIf _nOpc == 2
 												ZF7->ZF7_DATA		:= Date()
 												ZF7->ZF7_HORA		:= Time()
 												
-												ZF7->( MsUnLock() )
+												ZF7->( MSUnLock() )
 												
 												U_AOMS028H( { ZF7->ZF7_CODIGO , '5' , 'Programação encerrada automaticamente.' } )
 												
@@ -1168,7 +1168,7 @@ ElseIf _nOpc == 2
 												ZF7->ZF7_USRLOG		:= _aDadZF7[11]
 												ZF7->ZF7_USRPRG		:= _aDadZF7[12]
 												
-											ZF7->( MsUnLock() )
+											ZF7->( MSUnLock() )
 											
 											U_AOMS028H( { ZF7->ZF7_CODIGO , '3' , AllTrim( _cGet1 ) } )
 											
@@ -1197,13 +1197,13 @@ ElseIf _nOpc == 2
 														ZF9->( DBGoTo( _aZF9Dev[_nX] ) )
 														RecLock( 'ZF9' , .F. )
 														ZF9->ZF9_CODPRG := _aDadZF7[02]
-														ZF9->( MsUnLock() )
+														ZF9->( MSUnLock() )
 														
 													Next _nX
 													
 													RecLock( 'ZF8' , .F. )
 													ZF8->ZF8_CODPRG := _aDadZF7[02]
-													ZF8->( MsUnLock() )
+													ZF8->( MSUnLock() )
 													
 												EndIf
 												
@@ -1218,7 +1218,7 @@ ElseIf _nOpc == 2
 								EndIf
 								
 							Else
-								u_itmsg( 'Operação cancelada pelo usuário!' , 'Atenção!' ,, 1 )
+								U_ITMsg( 'Operação cancelada pelo usuário!' , 'Atenção!' ,, 1 )
 							EndIf
 							
 						EndIf
@@ -1230,11 +1230,11 @@ ElseIf _nOpc == 2
 			EndIf
 		
 		Else
-			u_itmsg( 'Somente programações "Aprovadas" ou "Em Atendimento" podem ser devolvidas!' , 'Atenção!' , ,1 )
+			U_ITMsg( 'Somente programações "Aprovadas" ou "Em Atendimento" podem ser devolvidas!' , 'Atenção!' , ,1 )
 		EndIf
 	
 	Else
-		u_itmsg( 'Somente programações atribuídas ao seu usuário podem ser devolvidas! Verifique a programação selecionada e tente novamente.' , 'Atenção!' , ,1 )
+		U_ITMsg( 'Somente programações atribuídas ao seu usuário podem ser devolvidas! Verifique a programação selecionada e tente novamente.' , 'Atenção!' , ,1 )
 	EndIf
 	
 	End Transaction
@@ -1242,19 +1242,19 @@ ElseIf _nOpc == 2
 ElseIf _nOpc == 3
 	
 	If _xValAcs <> '1'
-		u_itmsg( 'Somente usuários cadastrados com perfil "Comercial" podem realizar o cancelamento de programações!' , 'Atenção!' , ,1 )
-		Return()
+		U_ITMsg( 'Somente usuários cadastrados com perfil "Comercial" podem realizar o cancelamento de programações!' , 'Atenção!' , ,1 )
+		Return
 	EndIf
 	
 	If ZF7->ZF7_STATUS == '1' .Or. ZF7->ZF7_STATUS == '3'
 	
-		If u_itmsg( 'Confirma o cancelamento da programação: '+ ZF7->ZF7_CODIGO +' ?' , 'Atenção!',,3,2,2 )
+		If U_ITMsg( 'Confirma o cancelamento da programação: '+ ZF7->ZF7_CODIGO +' ?' , 'Atenção!',,3,2,2 )
 			
 			DEFINE MSDIALOG _oDlg TITLE "Justificar:" FROM 178,181 TO 240,697 PIXEL
 			
 			@ 005,003 Get _oGet1 Var _cGet1 Size 212,020 COLOR CLR_BLACK MULTILINE PIXEL OF _oDlg
 			
-			DEFINE SBUTTON FROM 015,227 TYPE 1 ENABLE ACTION ( IIF( Empty(_cGet1) , u_itmsg('É obrigatório justificar o cancelamento!','Atenção!',,1) , _oDlg:End() ) ) OF _oDlg
+			DEFINE SBUTTON FROM 015,227 Type 1 ENABLE ACTION ( IIf( Empty(_cGet1) , U_ITMsg('É obrigatório justificar o cancelamento!','Atenção!',,1) , _oDlg:End() ) ) OF _oDlg
 			
 			ACTIVATE MSDIALOG _oDlg CENTERED
 			
@@ -1265,26 +1265,26 @@ ElseIf _nOpc == 3
 			ZF7->ZF7_APROVA		:= RetCodUsr()
 			ZF7->ZF7_DATA		:= Date()
 			ZF7->ZF7_HORA		:= Time()
-			ZF7->( MsUnLock() )
+			ZF7->( MSUnLock() )
 			
 		EndIf
 	
 	Else
-		u_itmsg( 'Somente programações pendentes ou devolvidas podem ser canceladas!' , 'Atenção!' , ,1 )
+		U_ITMsg( 'Somente programações pendentes ou devolvidas podem ser canceladas!' , 'Atenção!' , ,1 )
 	EndIf
 
 ElseIf _nOpc == 4
 	
    	If _xValAcs <> '2'
-		u_itmsg( 'Somente usuários cadastrados com perfil "Logística" podem realizar atendimentos de programações!' , 'Atenção!' , ,1 )
-		Return()
+		U_ITMsg( 'Somente usuários cadastrados com perfil "Logística" podem realizar atendimentos de programações!' , 'Atenção!' , ,1 )
+		Return
 	EndIf
 	
-	If u_itmsg( 'Utilizar a seleção múltipla de programações?',"Atenção",,3,2,2 )
+	If U_ITMsg( 'Utilizar a seleção múltipla de programações?',"Atenção",,3,2,2 )
 		
 		_aRegZF7 := AOMS028MSA()
 		
-		If !Empty(_aRegZF7) .And. u_itmsg( 'Confirma o atendimento das programações selecionadas?' , 'Atenção!',,3,2,2 )
+		If !Empty(_aRegZF7) .And. U_ITMsg( 'Confirma o atendimento das programações selecionadas?' , 'Atenção!',,3,2,2 )
 		
 			For _nI := 1 To Len( _aRegZF7 )
 				
@@ -1293,11 +1293,11 @@ ElseIf _nOpc == 4
 				
 				RecLock( 'ZF7' , .F. )
 				ZF7->ZF7_STATUS		:= '4'
-				ZF7->( MsUnLock() )
+				ZF7->( MSUnLock() )
 				
 			Next _nI
 			
-			u_itmsg(  'Programações atualizadas com sucesso!' , 'Concluído!',,2)
+			U_ITMsg(  'Programações atualizadas com sucesso!' , 'Concluído!',,2)
 		
 		EndIf
 		
@@ -1307,33 +1307,33 @@ ElseIf _nOpc == 4
 		
 			If ZF7->ZF7_STATUS == '2'
 			
-				If u_itmsg( 'Confirma o atendimento da programação: '+ ZF7->ZF7_CODIGO +' ?' , 'Atenção!',,3,2,2 )
+				If U_ITMsg( 'Confirma o atendimento da programação: '+ ZF7->ZF7_CODIGO +' ?' , 'Atenção!',,3,2,2 )
 					
 					RecLock( 'ZF7' , .F. )
 					ZF7->ZF7_STATUS	:= '4'
-					ZF7->( MsUnLock() )
+					ZF7->( MSUnLock() )
 					
 				EndIf
 			
 			Else
-				u_itmsg( 'Somente programações "Aprovadas" podem ser atendidas!' , 'Atenção!' , ,,1 )
+				U_ITMsg( 'Somente programações "Aprovadas" podem ser atendidas!' , 'Atenção!' , ,,1 )
 			EndIf
 		
 		Else
-			u_itmsg( 'Somente poderão ser atendidas as programações atribuídas ao seu usuário!' , 'Atenção!' , ,,1 )
+			U_ITMsg( 'Somente poderão ser atendidas as programações atribuídas ao seu usuário!' , 'Atenção!' , ,,1 )
 		EndIf
 	
 	EndIf
 
 ElseIf _nOpc == 5
 	
-	If u_itmsg( 'Confirma o envio de notificação aos responsáveis pra programação: '+ ZF7->ZF7_CODIGO +' ?' , 'Atenção!',,3,2,2 )
+	If U_ITMsg( 'Confirma o envio de notificação aos responsáveis pra programação: '+ ZF7->ZF7_CODIGO +' ?' , 'Atenção!',,3,2,2 )
 		
 		DEFINE MSDIALOG _oDlg TITLE "Notificação:" FROM 178,181 TO 240,697 PIXEL
 		
 		@ 005,003 Get _oGet1 Var _cGet1 Size 212,020 COLOR CLR_BLACK MULTILINE PIXEL OF _oDlg
 		
-		DEFINE SBUTTON FROM 015,227 TYPE 1 ENABLE ACTION ( IIF( Empty(_cGet1) , u_itmsg('É obrigatório preencher a notificação!','Atenção!',,,1) , _oDlg:End() ) ) OF _oDlg
+		DEFINE SBUTTON FROM 015,227 Type 1 ENABLE ACTION ( IIf( Empty(_cGet1) , U_ITMsg('É obrigatório preencher a notificação!','Atenção!',,,1) , _oDlg:End() ) ) OF _oDlg
 		
 		ACTIVATE MSDIALOG _oDlg CENTERED
 		
@@ -1344,8 +1344,8 @@ ElseIf _nOpc == 5
 ElseIf _nOpc == 6
 	
 	If _xValAcs <> '2'
-		u_itmsg( 'Somente usuários cadastrados com perfil "Logística" podem realizar a remoção de pedidos de programações!' , 'Atenção!' , ,,1 )
-		Return()
+		U_ITMsg( 'Somente usuários cadastrados com perfil "Logística" podem realizar a remoção de pedidos de programações!' , 'Atenção!' , ,,1 )
+		Return
 	EndIf
     
     Begin Transaction
@@ -1354,13 +1354,13 @@ ElseIf _nOpc == 6
     
 		If ZF7->ZF7_STATUS == '2' .Or. ZF7->ZF7_STATUS == '4'
 		
-			If u_itmsg( 'Confirma a remoção de pedidos da programação: '+ ZF7->ZF7_CODIGO +' ?' , 'Atenção!' ,,3,2,2)
+			If U_ITMsg( 'Confirma a remoção de pedidos da programação: '+ ZF7->ZF7_CODIGO +' ?' , 'Atenção!' ,,3,2,2)
 				
 				DEFINE MSDIALOG _oDlg TITLE "Justificar:" FROM 178,181 TO 240,697 PIXEL
 				
 					@ 005,003 Get _oGet1 Var _cGet1 Size 212,020 COLOR CLR_BLACK MULTILINE PIXEL OF _oDlg
 					
-					DEFINE SBUTTON FROM 015,227 TYPE 1 ENABLE ACTION ( IIF( Empty(_cGet1) , u_itmsg( 'É obrigatório justificar a remoção de pedidos!' , 'Atenção!' , ,1 ) , _oDlg:End() ) ) OF _oDlg
+					DEFINE SBUTTON FROM 015,227 Type 1 ENABLE ACTION ( IIf( Empty(_cGet1) , U_ITMsg( 'É obrigatório justificar a remoção de pedidos!' , 'Atenção!' , ,1 ) , _oDlg:End() ) ) OF _oDlg
 				
 				ACTIVATE MSDIALOG _oDlg CENTERED
 				
@@ -1413,7 +1413,7 @@ ElseIf _nOpc == 6
 					
 					If Empty( _aPedDev )
 					
-						u_itmsg( 'Não existem pedidos pendentes na programação atual! Verifique a programação selecionada e tente novamente.' , 'Atenção!' , ,,1 )
+						U_ITMsg( 'Não existem pedidos pendentes na programação atual! Verifique a programação selecionada e tente novamente.' , 'Atenção!' , ,,1 )
 						
 					Else
 						
@@ -1442,12 +1442,12 @@ ElseIf _nOpc == 6
 								_nCntDev := 0
 							
 								For _nI := 1 To Len( _aPedAtn )
-									IIF( _aPedAtn[_nI][01] , _nCntDev++ , Nil )
+									IIf( _aPedAtn[_nI][01] , _nCntDev++ , Nil )
 								Next _nI
 								
 								If _nCntDev == 0
 									
-									u_itmsg( 'Não foram selecionados pedidos para processar!' , 'Atenção!' ,,1 )
+									U_ITMsg( 'Não foram selecionados pedidos para processar!' , 'Atenção!' ,,1 )
 									
 								Else
 								
@@ -1463,7 +1463,7 @@ ElseIf _nOpc == 6
 										ZF7->ZF7_DATA		:= Date()
 										ZF7->ZF7_HORA		:= Time()
 										
-										ZF7->( MsUnLock() )
+										ZF7->( MSUnLock() )
 										
 										U_AOMS028H( { ZF7->ZF7_CODIGO , '4' , 'Todos os pedidos foram removidos: '+ AllTrim( _cGet1 ) } )
 									
@@ -1480,7 +1480,7 @@ ElseIf _nOpc == 6
 												
 												RecLock( 'ZF8' , .F. )
 												ZF8->( DBDelete() )
-												ZF8->( MsUnLock() )
+												ZF8->( MSUnLock() )
 												
 											EndIf
 											
@@ -1495,7 +1495,7 @@ ElseIf _nOpc == 6
 							EndIf
 							
 						Else
-							u_itmsg( 'Operação cancelada pelo usuário!' , 'Atenção!' , ,1 )
+							U_ITMsg( 'Operação cancelada pelo usuário!' , 'Atenção!' , ,1 )
 						EndIf
 						
 					EndIf
@@ -1505,11 +1505,11 @@ ElseIf _nOpc == 6
 			EndIf
 		
 		Else
-			u_itmsg( 'Somente programações "Aprovadas" ou "Em Atendimento" podem ser devolvidas!' , 'Atenção!' , ,1 )
+			U_ITMsg( 'Somente programações "Aprovadas" ou "Em Atendimento" podem ser devolvidas!' , 'Atenção!' , ,1 )
 		EndIf
 	
 	Else
-		u_itmsg( 'Somente programações atribuídas ao seu usuário podem ter pedidos removidos! Verifique a programação selecionada e tente novamente.' , 'Atenção!' , ,1 )
+		U_ITMsg( 'Somente programações atribuídas ao seu usuário podem ter pedidos removidos! Verifique a programação selecionada e tente novamente.' , 'Atenção!' , ,1 )
 	EndIf
 	
 	End Transaction
@@ -1517,11 +1517,11 @@ ElseIf _nOpc == 6
 ElseIf _nOpc == 7
 
 	If _xValAcs <> '2'
-		u_itmsg( 'Somente usuários cadastrados com perfil "Logística" podem realizar a transferência de programações!' , 'Atenção!' , ,1 )
-		Return()
+		U_ITMsg( 'Somente usuários cadastrados com perfil "Logística" podem realizar a transferência de programações!' , 'Atenção!' , ,1 )
+		Return
 	EndIf
 	
-	If u_itmsg(	'Essa rotina transfere as programações que forem selecionadas para outro usuário da Logística. Essa operação não poderá ser desfeita, a não ser que o usuário de '+ ;
+	If U_ITMsg(	'Essa rotina transfere as programações que forem selecionadas para outro usuário da Logística. Essa operação não poderá ser desfeita, a não ser que o usuário de '+ ;
 					'destino devolva todas as programações utilizando essa mesma rotina. Deseja continuar?' , 'Atenção!',,3,2,2 )
 		
 		_cQuery := " SELECT * "
@@ -1546,7 +1546,7 @@ ElseIf _nOpc == 7
 			aAdd( _aDados , {	.F.															,;
 								(_cAlias)->ZF7_FILIAL										,;
 								(_cAlias)->ZF7_CODIGO										,;
-								DtoC( StoD( (_cAlias)->ZF7_DATA ) )							,;
+								DToC( SToD( (_cAlias)->ZF7_DATA ) )							,;
 								(_cAlias)->ZF7_HORA											,;
 								(_cAlias)->ZF7_PRAZO										,;
 								U_ITRETBOX( (_cAlias)->ZF7_STATUS , 'ZF7_STATUS' )			,;
@@ -1580,7 +1580,7 @@ ElseIf _nOpc == 7
 				
 				If ParamBox( _aParBox , "Informar o usuário da logística que receberá as programações:" , @_aParRet , {|| AOMS028VUL( _aParRet[01] ) } ,, .T. , , , , , .F. , .F. )
 					
-					If u_itmsg(	'Confirma a transferência das programações para o usuário: '+ CRLF		+;
+					If U_ITMsg(	'Confirma a transferência das programações para o usuário: '+ CRLF		+;
 									_aParRet[01] +' - '+ Capital( AllTrim( EVAL(bFullName,  _aParRet[01] ) ) )	,;
 									'Atenção!',,3,2,2																 )
 						
@@ -1599,7 +1599,7 @@ ElseIf _nOpc == 7
 									
 									RecLock( 'ZF7' , .F. )
 									ZF7->ZF7_USRLOG := _aParRet[01]
-									ZF7->( MsUnLock() )
+									ZF7->( MSUnLock() )
 									
 									_nX++
 									
@@ -1611,25 +1611,25 @@ ElseIf _nOpc == 7
 						
 						If _nX > 0
 						
-							u_itmsg( 'Foram transferidas '+ cValToChar(_nX) +' programações!' , 'Concluído!' , ,2 )
+							U_ITMsg( 'Foram transferidas '+ cValToChar(_nX) +' programações!' , 'Concluído!' , ,2 )
 							_oBrowse:Refresh()
 							
 						ElseIf _nZ > 0
 							
-							u_itmsg( 'Falhou ao processar os registros selecionados!' , 'Atenção!' , ,1 )
+							U_ITMsg( 'Falhou ao processar os registros selecionados!' , 'Atenção!' , ,1 )
 							
 						Else
 							
-							u_itmsg( 'Não foi selecionado nenhum registro, operação não realizada!' , 'Atenção!' , ,1 )
+							U_ITMsg( 'Não foi selecionado nenhum registro, operação não realizada!' , 'Atenção!' , ,1 )
 							
 						EndIf
 						
 					Else
-						u_itmsg( 'Operação cancelada pelo usuário!' , 'Atenção!' , ,1 )
+						U_ITMsg( 'Operação cancelada pelo usuário!' , 'Atenção!' , ,1 )
 					EndIf
 					
 				Else
-					u_itmsg( 'Operação cancelada pelo usuário!' , 'Atenção!' , ,1 )
+					U_ITMsg( 'Operação cancelada pelo usuário!' , 'Atenção!' , ,1 )
 				EndIf
 				
 			EndIf
@@ -1640,9 +1640,9 @@ ElseIf _nOpc == 7
 
 EndIf
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1661,7 +1661,7 @@ Local _oModel	:= FWModelActive()
 Local _oView	:= FWViewActive()
 Local _lRet		:= AOMS028GRV( .F. )
 
-If _lRet .And. u_itmsg( 'Confirma a aprovação da programação de entrega?' , 'Atenção!',,3,2,2 )
+If _lRet .And. U_ITMsg( 'Confirma a aprovação da programação de entrega?' , 'Atenção!',,3,2,2 )
 	
 	_oModel:LoadValue( 'ZF7MASTER' , 'ZF7_STATUS'	, '2'			)
 	_oModel:LoadValue( 'ZF7MASTER' , 'ZF7_APROVA'	, RetCodUsr()	)
@@ -1756,11 +1756,11 @@ If Pergunte( _cPerg )
 
 Else
 
-	u_itmsg( 'Operação cancelada pelo usuário' , 'Atenção!' , ,1 )
+	U_ITMsg( 'Operação cancelada pelo usuário' , 'Atenção!' , ,1 )
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1775,7 +1775,7 @@ Retorno---------: Nenhum
 
 Static Function AOMS028PRT()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _aDados	:= {}
 Local _aChvPed	:= {}
 Local _oPrt		:= Nil
@@ -1810,8 +1810,8 @@ IncProc( 'Verificando as programações...' )
 _aDados := AOMS028SEL()
 
 If Empty(_aDados)
-	u_itmsg( 'Não foram encontrados registros para exibir! Verifique os parâmetros e tente novamente.' , 'Atenção!' , ,1 )
-	Return()
+	U_ITMsg( 'Não foram encontrados registros para exibir! Verifique os parâmetros e tente novamente.' , 'Atenção!' , ,1 )
+	Return
 EndIf
 
 IncProc( 'Imprimindo os dados...' )
@@ -1875,21 +1875,21 @@ For _nI := 1 To Len( _aDados )
 	
 	_nLinha += 050
 	
-	_oPrt:FillRect( { _nlinha + 001 , _nColIni        , _nlinha + 032 , _nColIni + 0100 } , _oBrush )
-	_oPrt:FillRect( { _nlinha + 001 , _nColIni + 0115 , _nlinha + 032 , _nColIni + 0280 } , _oBrush )
-	_oPrt:FillRect( { _nlinha + 001 , _nColIni + 0295 , _nlinha + 032 , _nColIni + 0480 } , _oBrush )
-	_oPrt:FillRect( { _nlinha + 001 , _nColIni + 0495 , _nlinha + 032 , _nColIni + 0650 } , _oBrush )
-	_oPrt:FillRect( { _nlinha + 001 , _nColIni + 0665 , _nlinha + 032 , _nColIni + 0950 } , _oBrush )
-	_oPrt:FillRect( { _nlinha + 001 , _nColIni + 0965 , _nlinha + 032 , _nColIni + 1350 } , _oBrush )
-	_oPrt:FillRect( { _nlinha + 001 , _nColIni + 1365 , _nlinha + 032 , _nColIni + 1600 } , _oBrush )
-	_oPrt:FillRect( { _nlinha + 001 , _nColIni + 1615 , _nlinha + 032 , _nColIni + 1750 } , _oBrush )
-	_oPrt:FillRect( { _nlinha + 001 , _nColIni + 1765 , _nlinha + 032 , _nColIni + 2380 } , _oBrush )
-	_oPrt:FillRect( { _nlinha + 001 , _nColIni + 2395 , _nlinha + 032 , _nColIni + 2580 } , _oBrush )
-	_oPrt:FillRect( { _nlinha + 001 , _nColIni + 2595 , _nlinha + 032 , _nColFim        } , _oBrush )
+	_oPrt:FillRect( { _nLinha + 001 , _nColIni        , _nLinha + 032 , _nColIni + 0100 } , _oBrush )
+	_oPrt:FillRect( { _nLinha + 001 , _nColIni + 0115 , _nLinha + 032 , _nColIni + 0280 } , _oBrush )
+	_oPrt:FillRect( { _nLinha + 001 , _nColIni + 0295 , _nLinha + 032 , _nColIni + 0480 } , _oBrush )
+	_oPrt:FillRect( { _nLinha + 001 , _nColIni + 0495 , _nLinha + 032 , _nColIni + 0650 } , _oBrush )
+	_oPrt:FillRect( { _nLinha + 001 , _nColIni + 0665 , _nLinha + 032 , _nColIni + 0950 } , _oBrush )
+	_oPrt:FillRect( { _nLinha + 001 , _nColIni + 0965 , _nLinha + 032 , _nColIni + 1350 } , _oBrush )
+	_oPrt:FillRect( { _nLinha + 001 , _nColIni + 1365 , _nLinha + 032 , _nColIni + 1600 } , _oBrush )
+	_oPrt:FillRect( { _nLinha + 001 , _nColIni + 1615 , _nLinha + 032 , _nColIni + 1750 } , _oBrush )
+	_oPrt:FillRect( { _nLinha + 001 , _nColIni + 1765 , _nLinha + 032 , _nColIni + 2380 } , _oBrush )
+	_oPrt:FillRect( { _nLinha + 001 , _nColIni + 2395 , _nLinha + 032 , _nColIni + 2580 } , _oBrush )
+	_oPrt:FillRect( { _nLinha + 001 , _nColIni + 2595 , _nLinha + 032 , _nColFim        } , _oBrush )
 	
 	_oPrt:Say( _nLinha , _nColIni + 0020 , ZF7->ZF7_FILIAL																				, _oFont01 )
 	_oPrt:Say( _nLinha , _nColIni + 0120 , ZF7->ZF7_CODIGO																				, _oFont01 )
-	_oPrt:Say( _nLinha , _nColIni + 0295 , DtoC( ZF7->ZF7_DATA )																		, _oFont01 )
+	_oPrt:Say( _nLinha , _nColIni + 0295 , DToC( ZF7->ZF7_DATA )																		, _oFont01 )
 	_oPrt:Say( _nLinha , _nColIni + 0520 , SubStr( ZF7->ZF7_HORA , 1 , 5 )																, _oFont01 )
 	_oPrt:Say( _nLinha , _nColIni + 0800 , U_ITRETBOX( ZF7->ZF7_STATUS , 'ZF7_STATUS' )													, _oFont01 ,,,, 2 )
 	_oPrt:Say( _nLinha , _nColIni + 0970 , U_ITRETBOX( ZF7->ZF7_TIPCAR , 'ZF7_TIPCAR' )													, _oFont01 )
@@ -1989,8 +1989,8 @@ For _nI := 1 To Len( _aDados )
 			
 			_nLinha += 040
 			
-			_oPrt:FillRect( { _nlinha + 001 , _nColIni        , _nlinha + 032 , _nColIni + 1600 } , _oBrush )
-			_oPrt:FillRect( { _nlinha + 001 , _nColIni + 1615 , _nlinha + 032 , _nColFim        } , _oBrush )
+			_oPrt:FillRect( { _nLinha + 001 , _nColIni        , _nLinha + 032 , _nColIni + 1600 } , _oBrush )
+			_oPrt:FillRect( { _nLinha + 001 , _nColIni + 1615 , _nLinha + 032 , _nColFim        } , _oBrush )
 			
 			_oPrt:Say( _nLinha + 5 , _nColIni + 0010 , _aPedidos[_nX][12] , _oFntObs )
 			_oPrt:Say( _nLinha + 5 , _nColIni + 1610 , _aPedidos[_nX][13] , _oFntObs )
@@ -2000,7 +2000,7 @@ For _nI := 1 To Len( _aDados )
 		Next _nX
 		
 		_nLinha += 060
-		_oPrt:FillRect( { _nlinha - 035 , _nColIni , _nlinha - 028 , _nColfim } , _oBrushD )
+		_oPrt:FillRect( { _nLinha - 035 , _nColIni , _nLinha - 028 , _nColfim } , _oBrushD )
 		
 	ElseIf MV_PAR16 == 2
 	
@@ -2048,7 +2048,7 @@ For _nI := 1 To Len( _aDados )
 			EndIf
 			
 			If _nCtrl == 1
-				_oPrt:FillRect( { _nlinha + 001 , _nColIni , _nlinha + 032 , _nColFim } , _oBrush )
+				_oPrt:FillRect( { _nLinha + 001 , _nColIni , _nLinha + 032 , _nColFim } , _oBrush )
 				_nCtrl := 0
 			Else
 				_nCtrl := 1
@@ -2131,7 +2131,7 @@ For _nI := 1 To Len( _aDados )
 			
 		EndIf
 		
-		_oPrt:FillRect( { _nlinha + 001 , _nColIni , _nlinha + 032 , _nColFim } , _oBrush )
+		_oPrt:FillRect( { _nLinha + 001 , _nColIni , _nLinha + 032 , _nColFim } , _oBrush )
 		_oPrt:Say( _nLinha , _nColIni , 'TOTAIS DA PROGRAMAÇÃO--------->'											, _oFont01 )
 		_oPrt:Say( _nLinha , _nColIni + 2580 , AllTrim( Transform( _nTotPal , '@E 999,999,999,999' ) ) +' Pallets'	, _oFont01 ,,,, 2 )
 		_oPrt:Say( _nLinha , _nColIni + 3100 , Transform( _nTotPes , '@E 999,999,999,999.9999' )					, _oFont01 ,,,, 1 )
@@ -2195,7 +2195,7 @@ For _nI := 1 To Len( _aDados )
 				EndIf
 				
 				If _nCtrl == 1
-					_oPrt:FillRect( { _nlinha + 001 , _nColIni , _nlinha + 032 , _nColFim } , _oBrush )
+					_oPrt:FillRect( { _nLinha + 001 , _nColIni , _nLinha + 032 , _nColFim } , _oBrush )
 					_nCtrl := 0
 				Else
 					_nCtrl := 1
@@ -2247,12 +2247,12 @@ For _nI := 1 To Len( _aDados )
 		
 		_oPrt:Say( _nLinha , _nColIni , 'Entregas: '+ _cEntreg															, _oFont01 ) ; _nLinha += 030
 		
-		_oPrt:FillRect( { _nlinha + 001 , _nColIni , _nlinha + 032 , _nColFim } , _oBrush )
+		_oPrt:FillRect( { _nLinha + 001 , _nColIni , _nLinha + 032 , _nColFim } , _oBrush )
 		_oPrt:Say( _nLinha , _nColIni , 'Regiões: '+ _cRegEnt															, _oFont01 ) ; _nLinha += 030
 		
 		_oPrt:Say( _nLinha , _nColIni , 'Municípios: '+ _cMunEnt														, _oFont01 ) ; _nLinha += 030
 		
-		_oPrt:FillRect( { _nlinha + 001 , _nColIni , _nlinha + 032 , _nColFim } , _oBrush )
+		_oPrt:FillRect( { _nLinha + 001 , _nColIni , _nLinha + 032 , _nColFim } , _oBrush )
 		_oPrt:Say( _nLinha , _nColIni , 'Responsável Comercial: '+ Capital( AllTrim( EVAL(bFullName,  ZF7->ZF7_USRPRG ) ) )	, _oFont01 )
 		
 		_oPrt:Line( _nLinha + 045 , _nColIni , _nLinha + 045 , _nColFim )
@@ -2269,9 +2269,9 @@ Next _nI
 _oPrt:EndPage()
 _oPrt:Preview()
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2320,13 +2320,13 @@ _cQuery += " AND EXISTS ( SELECT SC6.C6_NUM FROM "+ RetSqlName('SC6') +" SC6 WHE
 EndIf
 
 _cQuery += " AND ZF7.ZF7_CODIGO BETWEEN '"+ MV_PAR01			+"' AND '"+ MV_PAR02			+"' "
-_cQuery += " AND ZF7.ZF7_DATA   BETWEEN '"+ DTOS( MV_PAR07 )	+"' AND '"+ DTOS( MV_PAR08 )	+"' "
-_cQuery += " AND ZF8.ZF8_DTENTR BETWEEN '"+ DTOS( MV_PAR09 )	+"' AND '"+ DTOS( MV_PAR10 )	+"' "
+_cQuery += " AND ZF7.ZF7_DATA   BETWEEN '"+ DToS( MV_PAR07 )	+"' AND '"+ DToS( MV_PAR08 )	+"' "
+_cQuery += " AND ZF8.ZF8_DTENTR BETWEEN '"+ DToS( MV_PAR09 )	+"' AND '"+ DToS( MV_PAR10 )	+"' "
 _cQuery += " AND SC5.C5_CLIENTE BETWEEN '"+ MV_PAR03			+"' AND '"+ MV_PAR05			+"' "
 _cQuery += " AND SC5.C5_LOJACLI BETWEEN '"+ MV_PAR04			+"' AND '"+ MV_PAR06			+"' "
-_cQuery += IIF( Empty(MV_PAR13) , '' , " AND SC5.C5_VEND1   = '"+ MV_PAR13 +"' "				)
-_cQuery += IIF( Empty(MV_PAR14) , '' , " AND SC5.C5_VEND2   = '"+ MV_PAR14 +"' "				)
-_cQuery += IIF( Empty(MV_PAR11) , '' , " AND SC5.C5_I_EST   IN "+ FormatIn( MV_PAR11 , ';' )	)
+_cQuery += IIf( Empty(MV_PAR13) , '' , " AND SC5.C5_VEND1   = '"+ MV_PAR13 +"' "				)
+_cQuery += IIf( Empty(MV_PAR14) , '' , " AND SC5.C5_VEND2   = '"+ MV_PAR14 +"' "				)
+_cQuery += IIf( Empty(MV_PAR11) , '' , " AND SC5.C5_I_EST   IN "+ FormatIn( MV_PAR11 , ';' )	)
 
 If !Empty(MV_PAR12)
 	
@@ -2427,7 +2427,7 @@ If _nLinha >= _nLimPag
 	EndCase
 	
 	_oPrt:Say( _nLinha , _nColIni + 0020 , 'Relatório das programações : '+ _cStatus				, _oFntDes )
-	_oPrt:Say( _nLinha , _nColIni + 1000 , 'Período : '+ DtoC( MV_PAR07 ) +' / '+ DtoC( MV_PAR08 )	, _oFntDes )
+	_oPrt:Say( _nLinha , _nColIni + 1000 , 'Período : '+ DToC( MV_PAR07 ) +' / '+ DToC( MV_PAR08 )	, _oFntDes )
 	
 	_nLinha += 100
 	
@@ -2471,7 +2471,7 @@ While (_cAlias)->( !Eof() )
 	
 	aAdd( _aDados , {	.F.												,;
 						ZF7->ZF7_CODIGO									,;
-						DTOC( ZF7->ZF7_DATA )							,;
+						DToC( ZF7->ZF7_DATA )							,;
 						ZF7->ZF7_HORA									,;
 						U_ITRETBOX( ZF7->ZF7_STATUS , 'ZF7_STATUS' )	,;
 						U_ITRETBOX( ZF7->ZF7_TIPCAR , 'ZF7_TIPCAR' )	,;
@@ -2485,7 +2485,7 @@ EndDo
 
 If Empty(_aDados)
 	
-	u_itmsg( 'Não foram encontrados registros pendentes para o seu usuário!' , 'Atenção!' , ,1 )
+	U_ITMsg( 'Não foram encontrados registros pendentes para o seu usuário!' , 'Atenção!' , ,1 )
 	
 Else
 
@@ -2502,12 +2502,12 @@ Else
 		Next _nI
 		
 		If Empty(_aRet)
-			u_itmsg( 'Não foram selecionados registros para o processamento! Verifique os dados e tente novamente.' , 'Atenção!' , ,1)
+			U_ITMsg( 'Não foram selecionados registros para o processamento! Verifique os dados e tente novamente.' , 'Atenção!' , ,1)
 		EndIf
 		
 	Else
 	
-		u_itmsg( 'Operação cancelada pelo usuário!' , 'Atenção',,1 )
+		U_ITMsg( 'Operação cancelada pelo usuário!' , 'Atenção',,1 )
 	
 	EndIf
 	
@@ -2528,7 +2528,7 @@ Retorno---------: Nenhum
 
 User Function AOMS028U()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 
 Local _oModel	:= FWModelActive()
 Local _oModZF8	:= _oModel:GetModel( 'ZF8DETAIL' )
@@ -2598,7 +2598,7 @@ If !Empty( _cFilPed ) .And. !Empty( _cNumPed )
 				
 				If Select(_cAlias) > 0
 					(_cAlias)->( DBCloseArea() )
-				EndIF
+				EndIf
 				
 				DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQuery ) , _cAlias , .T. , .F. )
 				
@@ -2651,7 +2651,7 @@ If !Empty( _cFilPed ) .And. !Empty( _cNumPed )
 				
 				If Select(_cAlias) > 0
 					(_cAlias)->( DBCloseArea() )
-				EndIF
+				EndIf
 				
 				DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQuery ) , _cAlias , .T. , .F. )
 				
@@ -2756,7 +2756,7 @@ If !Empty( _cFilPed ) .And. !Empty( _cNumPed )
 	
 EndIf
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return( _lRet )
 
@@ -2780,7 +2780,7 @@ Local _cItem 	:= _oModel:GetValue( 'ZF9DETAIL' , 'ZF9_ITEM' )
 Local _cOpTran	:= U_ITGETMV( 'IT_OPTRAN' , '20,41' )
 
 Local _aInfHlp	:= {}
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _lRet		:= .T.
 
 
@@ -2789,7 +2789,7 @@ _cQuery += "     ZF9.ZF9_PEDIDO "
 _cQuery += " FROM  "+ RetSqlName('ZF9') +" ZF9 "
 _cQuery += " WHERE "
 _cQuery += "     ZF9.D_E_L_E_T_ = ' ' "
-_cQuery += " AND ZF9.ZF9_FILIAL = '" + xfilial("SC5") + "'"
+_cQuery += " AND ZF9.ZF9_FILIAL = '" + xFilial("SC5") + "'"
 _cQuery += " AND ZF9.ZF9_CODPRG = '" + _cCodPrg + "'"    
 _cQuery += " AND ZF9.ZF9_ITEM = '" + _cItem + "'"
 	
@@ -2797,7 +2797,7 @@ _cAlias := GetNextAlias()
 	
 If Select(_cAlias) > 0
 	(_cAlias)->( DBCloseArea() )
-EndIF
+EndIf
 	
 DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQuery ) , _cAlias , .T. , .F. )
 	
@@ -2806,7 +2806,7 @@ DBSelectArea(_cAlias)
 
 If (_cAlias)->( !Eof() )
 
-	_lret := .F.    
+	_lRet := .F.    
 		
 	_aInfHlp := {}
 	   //                  |....:....|....:....|....:....|....:....|
@@ -2819,7 +2819,7 @@ If (_cAlias)->( !Eof() )
 	U_ITCADHLP( _aInfHlp , "AOMS0280E" )
 
 
-Endif
+EndIf
 
 
 DBSelectArea('SC5')
@@ -2897,7 +2897,7 @@ If _lRet
 	
 	If Select(_cAlias) > 0
 		(_cAlias)->( DBCloseArea() )
-	EndIF
+	EndIf
 	
 	DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQuery ) , _cAlias , .T. , .F. )
 	
@@ -2951,7 +2951,7 @@ If _lRet
 	
 	If Select(_cAlias) > 0
 		(_cAlias)->( DBCloseArea() )
-	EndIF
+	EndIf
 	
 	DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQuery ) , _cAlias , .T. , .F. )
 	
@@ -2984,7 +2984,7 @@ If _lRet
 
 EndIf
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return( _lRet )
 
@@ -3013,8 +3013,8 @@ Default _cMsgAux	:= ''
 
 If Empty(_cStatus)
 	
-	u_itmsg( 'Falha ao identificar o Status inicial da programação de entrega! Informe a área de TI/ERP.' , 'Atenção!' , ,1)
-	Return()
+	U_ITMsg( 'Falha ao identificar o Status inicial da programação de entrega! Informe a área de TI/ERP.' , 'Atenção!' , ,1)
+	Return
 	
 EndIf
 
@@ -3030,21 +3030,21 @@ DBSelectArea('ZZL')
 ZZL->( DBSetOrder(3) )
 If ZZL->( DBSeek( xFilial('ZZL') + ZF7->ZF7_USRPRG ) )
 	
-	IIF( !Empty(_cEmail) , _cEmail += ',' , Nil )
+	IIf( !Empty(_cEmail) , _cEmail += ',' , Nil )
 	_cEmail += AllTrim( ZZL->ZZL_EMAIL )
 	
 EndIf
 
 If Empty( _cEmail )
 	
-	u_itmsg( 'Falha ao localizar o e-mail do destinatário do WF! Verifique com a área de TI/ERP.' , 'Atenção!' , ,1 )
+	U_ITMsg( 'Falha ao localizar o e-mail do destinatário do WF! Verifique com a área de TI/ERP.' , 'Atenção!' , ,1 )
 	
 Else
 
 	_cMsgEml := '<html>'
 	_cMsgEml += '<head><title>Programação de Entrega</title></head>'
 	_cMsgEml += '<body>'
-	_cMsgEml += '<style type="text/css"><!--'
+	_cMsgEml += '<style Type="text/css"><!--'
 	_cMsgEml += 'table.bordasimples { border-collapse: collapse; }'
 	_cMsgEml += 'table.bordasimples tr td { border:1px solid #777777; }'
 	_cMsgEml += 'td.titulos	{ font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #C6E2FF; }'
@@ -3085,7 +3085,7 @@ Else
 	_cMsgEml += '    </tr>'
 	_cMsgEml += '    <tr>'
 	_cMsgEml += '      <td class="itens" align="center" width="30%"><b>Data Aprov.:</b></td>'
-	_cMsgEml += '      <td class="itens" >'+ DtoC( ZF7->ZF7_DATA ) +' - '+ SubStr( ZF7->ZF7_HORA , 1 , 5 ) +'</td>'
+	_cMsgEml += '      <td class="itens" >'+ DToC( ZF7->ZF7_DATA ) +' - '+ SubStr( ZF7->ZF7_HORA , 1 , 5 ) +'</td>'
 	_cMsgEml += '    </tr>'
 	_cMsgEml += '    <tr>'
 	_cMsgEml += '      <td class="itens" align="center" width="30%"><b>Prazo:</b></td>'
@@ -3206,15 +3206,15 @@ Else
 		_cStsAux := U_ITRETBOX( _cStatus , 'ZF7_STATUS' )
 	EndIf
 	
-	U_ITENVMAIL( _aConfig[01] , _cEmail ,,, 'Programação de entregas - '+ _cStsAux +' ['+ DtoC( Date() ) +']' , _cMsgEml ,, _aConfig[01] , _aConfig[02] , _aConfig[03] , _aConfig[04] , _aConfig[05] , _aConfig[06] , _aConfig[07] , @_cEmlLog )
+	U_ITENVMAIL( _aConfig[01] , _cEmail ,,, 'Programação de entregas - '+ _cStsAux +' ['+ DToC( Date() ) +']' , _cMsgEml ,, _aConfig[01] , _aConfig[02] , _aConfig[03] , _aConfig[04] , _aConfig[05] , _aConfig[06] , _aConfig[07] , @_cEmlLog )
 	
-	IF !Empty( _cEmlLog )
-		u_itmsg( _cEmlLog , 'Término do processamento!' , ,1 )
-	EndIF
+	If !Empty( _cEmlLog )
+		U_ITMsg( _cEmlLog , 'Término do processamento!' , ,1 )
+	EndIf
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -3230,7 +3230,7 @@ Retorno---------: Nenhum
 Static Function AOMS028PRD( _cCodPrg )
 
 Local _aRet		:= {}
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cQuery	:= ''
 Local _cAlias	:= GetNextAlias()
 
@@ -3247,10 +3247,10 @@ _cQuery += " AND SC5.C5_NUM     = ZF8.ZF8_NUMPED "
 _cQuery += " AND SC6.C6_NUM     = ZF8.ZF8_NUMPED "
 _cQuery += " AND ZF8.ZF8_CODPRG = '"+ _cCodPrg +"' "
 
-_cQuery += " AND ZF8.ZF8_DTENTR BETWEEN '"+ DTOS( MV_PAR09 )	+"' AND '"+ DTOS( MV_PAR10 )	+"' "
+_cQuery += " AND ZF8.ZF8_DTENTR BETWEEN '"+ DToS( MV_PAR09 )	+"' AND '"+ DToS( MV_PAR10 )	+"' "
 _cQuery += " AND SC5.C5_CLIENTE BETWEEN '"+ MV_PAR03			+"' AND '"+ MV_PAR05			+"' "
 _cQuery += " AND SC5.C5_LOJACLI BETWEEN '"+ MV_PAR04			+"' AND '"+ MV_PAR06			+"' "
-_cQuery += IIF( Empty(MV_PAR11) , '' , " AND SC5.C5_I_EST   IN "+ FormatIn( MV_PAR11 , ';' )	)
+_cQuery += IIf( Empty(MV_PAR11) , '' , " AND SC5.C5_I_EST   IN "+ FormatIn( MV_PAR11 , ';' )	)
 
 _cQuery += " GROUP BY SC6.C6_PRODUTO "
 _cQuery += " ORDER BY SC6.C6_PRODUTO "
@@ -3274,7 +3274,7 @@ EndDo
 
 (_cAlias)->( DBCloseArea() )
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return( _aRet )
 
@@ -3291,7 +3291,7 @@ Retorno---------: Nenhum
 
 Static Function AOMS028ENT( _cCodPrg )
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cAlias	:= GetNextAlias()
 Local _cQuery	:= ''
 Local _aDatas	:= {}
@@ -3306,10 +3306,10 @@ _cQuery += " AND   "+ RetSqlDel('SC5')
 _cQuery += " AND ZF8.ZF8_FILPED = SC5.C5_FILIAL "
 _cQuery += " AND ZF8.ZF8_NUMPED = SC5.C5_NUM "
 _cQuery += " AND ZF8.ZF8_CODPRG = '"+ _cCodPrg +"' "
-_cQuery += " AND ZF8.ZF8_DTENTR BETWEEN '"+ DTOS( MV_PAR09 )	+"' AND '"+ DTOS( MV_PAR10 )	+"' "
+_cQuery += " AND ZF8.ZF8_DTENTR BETWEEN '"+ DToS( MV_PAR09 )	+"' AND '"+ DToS( MV_PAR10 )	+"' "
 _cQuery += " AND SC5.C5_CLIENTE BETWEEN '"+ MV_PAR03			+"' AND '"+ MV_PAR05			+"' "
 _cQuery += " AND SC5.C5_LOJACLI BETWEEN '"+ MV_PAR04			+"' AND '"+ MV_PAR06			+"' "
-_cQuery += IIF( Empty(MV_PAR11) , '' , " AND SC5.C5_I_EST   IN "+ FormatIn( MV_PAR11 , ';' )	)
+_cQuery += IIf( Empty(MV_PAR11) , '' , " AND SC5.C5_I_EST   IN "+ FormatIn( MV_PAR11 , ';' )	)
 
 If Select(_cAlias) > 0
 	(_cAlias)->( DBCloseArea() )
@@ -3336,10 +3336,10 @@ EndDo
 aSort( _aDatas )
 
 For _nI := 1 To Len( _aDatas )
-	_cDtsEnt += IIF( Empty(_cDtsEnt) , '' , ' - ' ) + DtoC( _aDatas[_nI] )
+	_cDtsEnt += IIf( Empty(_cDtsEnt) , '' , ' - ' ) + DToC( _aDatas[_nI] )
 Next _nI
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return( _cDtsEnt )
 
@@ -3373,10 +3373,10 @@ If _nOpc == 1 .Or. _nOpc == 2
 	_cQuery += " AND ZF8.ZF8_FILPED = SC5.C5_FILIAL "
 	_cQuery += " AND ZF8.ZF8_NUMPED = SC5.C5_NUM "
 	_cQuery += " AND ZF8.ZF8_CODPRG = '"+ _cCodPrg +"' "
-	_cQuery += " AND ZF8.ZF8_DTENTR BETWEEN '"+ DTOS( MV_PAR09 )	+"' AND '"+ DTOS( MV_PAR10 )	+"' "
+	_cQuery += " AND ZF8.ZF8_DTENTR BETWEEN '"+ DToS( MV_PAR09 )	+"' AND '"+ DToS( MV_PAR10 )	+"' "
 	_cQuery += " AND SC5.C5_CLIENTE BETWEEN '"+ MV_PAR03			+"' AND '"+ MV_PAR05			+"' "
 	_cQuery += " AND SC5.C5_LOJACLI BETWEEN '"+ MV_PAR04			+"' AND '"+ MV_PAR06			+"' "
-	_cQuery += IIF( Empty(MV_PAR11) , '' , " AND SC5.C5_I_EST   IN "+ FormatIn( MV_PAR11 , ';' )	)
+	_cQuery += IIf( Empty(MV_PAR11) , '' , " AND SC5.C5_I_EST   IN "+ FormatIn( MV_PAR11 , ';' )	)
 	
 	If Select(_cAlias) > 0
 		(_cAlias)->( DBCloseArea() )
@@ -3552,10 +3552,10 @@ _cQuery += " AND ZF8.ZF8_CODPRG = '"+ _cCodPrg +"' "
 
 If _lRelat
 
-_cQuery += " AND ZF8.ZF8_DTENTR BETWEEN '"+ DTOS( MV_PAR09 )	+"' AND '"+ DTOS( MV_PAR10 )	+"' "
+_cQuery += " AND ZF8.ZF8_DTENTR BETWEEN '"+ DToS( MV_PAR09 )	+"' AND '"+ DToS( MV_PAR10 )	+"' "
 _cQuery += " AND SC5.C5_CLIENTE BETWEEN '"+ MV_PAR03			+"' AND '"+ MV_PAR05			+"' "
 _cQuery += " AND SC5.C5_LOJACLI BETWEEN '"+ MV_PAR04			+"' AND '"+ MV_PAR06			+"' "
-_cQuery += IIF( Empty(MV_PAR11) , '' , " AND SC5.C5_I_EST   IN "+ FormatIn( MV_PAR11 , ';' )	)
+_cQuery += IIf( Empty(MV_PAR11) , '' , " AND SC5.C5_I_EST   IN "+ FormatIn( MV_PAR11 , ';' )	)
 
 EndIf
 
@@ -3613,7 +3613,7 @@ While (_cAlias)->( !Eof() )
 	
 		aAdd( _aRet , {	(_cAlias)->FILPED																		,;
 						(_cAlias)->NUMPED																		,;
-						DTOC( STOD( (_cAlias)->DTENTR ) )														,;
+						DToC( SToD( (_cAlias)->DTENTR ) )														,;
 						(_cAlias)->CODCLI																		,;
 						(_cAlias)->LOJACLI																		,;
 						U_AOMS028N( 1 , (_cAlias)->FILPED , (_cAlias)->NUMPED )									,;
@@ -3677,13 +3677,13 @@ RecLock( 'ZFB' , .T. )
 	ZFB->ZFB_ITNLOG	:= _cCodItn
 	ZFB->ZFB_ACAO	:= _aDadLog[02]
 	ZFB->ZFB_OBS	:= _aDadLog[03]
-	ZFB->ZFB_DATA	:= DATE()
-	ZFB->ZFB_HORA	:= TIME()
+	ZFB->ZFB_DATA	:= Date()
+	ZFB->ZFB_HORA	:= Time()
 	ZFB->ZFB_USR	:= RetCodUsr()
 	
-ZFB->( MsUnLock() )
+ZFB->( MSUnLock() )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -3707,7 +3707,7 @@ If ZFB->( DBSeek( xFilial('ZFB') + ZF7->ZF7_CODIGO ) )
 	While ZFB->( !Eof() ) .And. ZFB->( ZFB_FILIAL + ZFB_CODPRG ) == xFilial('ZFB') + ZF7->ZF7_CODIGO
 		
 		aAdd( _aLog , {	ZFB->ZFB_ITNLOG										,;
-						DtoC( ZFB->ZFB_DATA )								,;
+						DToC( ZFB->ZFB_DATA )								,;
 						ZFB->ZFB_HORA										,;
 						Capital( AllTrim( EVAL(bFullName,  ZFB->ZFB_USR ) ) )	,;
 						U_ITRetBox( ZFB->ZFB_ACAO , 'ZFB_ACAO' )			,;
@@ -3720,11 +3720,11 @@ If ZFB->( DBSeek( xFilial('ZFB') + ZF7->ZF7_CODIGO ) )
 	
 Else
 
-	u_itmsg( 'Sem registro de histórico para exibir!' , 'Atenção!' , ,1 )
+	U_ITMsg( 'Sem registro de histórico para exibir!' , 'Atenção!' , ,1 )
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -3832,12 +3832,12 @@ DEFINE MSDIALOG _oDlg TITLE "Busca Avançada:" FROM 0,0 TO 050,186 PIXEL
 	@ 002,003 Say 'Digite a Filial + Pedido:'	SIZE 060,010 COLOR CLR_BLACK PIXEL OF _oDlg
 	@ 012,003 Get _oGet1 Var _cGet1				SIZE 060,010 COLOR CLR_BLACK PIXEL OF _oDlg
 	
-	DEFINE SBUTTON FROM 012,066 TYPE 1 ENABLE ACTION ( IIF( Empty(_cGet1) .Or. Len( AllTrim(_cGet1) ) < 8 , u_itmsg('É obrigatório informar uma chave válida de busca!','Atenção!',,1) , _oDlg:End() ) ) OF _oDlg
+	DEFINE SBUTTON FROM 012,066 Type 1 ENABLE ACTION ( IIf( Empty(_cGet1) .Or. Len( AllTrim(_cGet1) ) < 8 , U_ITMsg('É obrigatório informar uma chave válida de busca!','Atenção!',,1) , _oDlg:End() ) ) OF _oDlg
 
 ACTIVATE MSDIALOG _oDlg CENTERED
 
 If Empty(_cGet1)
-	u_itmsg( 'Operação cancelada pelo usuário!' , 'Atenção!' , ,1 )
+	U_ITMsg( 'Operação cancelada pelo usuário!' , 'Atenção!' , ,1 )
 Else
 	
 	_cQuery := " SELECT ZF7.ZF7_CODIGO AS CODZF7 FROM "+ RETSQLNAME('ZF7') +" ZF7, "+ RETSQLNAME('ZF8') +" ZF8 WHERE "+ RETSQLCOND('ZF7,ZF8') +" AND ZF7.ZF7_CODIGO = ZF8.ZF8_CODPRG AND ZF8.ZF8_FILPED || ZF8.ZF8_NUMPED = '"+ _cGet1 +"' ORDER BY ZF7.ZF7_CODIGO "
@@ -3865,13 +3865,13 @@ Else
 			
 		Else
 		
-			u_itmsg( 'Falhou ao posicionar na programação: '+ (_cAlias)->CODZF7 +' !'									, 'Atenção!' , ,1 )
+			U_ITMsg( 'Falhou ao posicionar na programação: '+ (_cAlias)->CODZF7 +' !'									, 'Atenção!' , ,1 )
 			
 		EndIf
 		
 	Else
 	
-		u_itmsg( 'A chave de pedido informada ['+ _cGet1 +'] não foi encontrada nas programações na Filial atual!'		, 'Atenção!' ,,1 )
+		U_ITMsg( 'A chave de pedido informada ['+ _cGet1 +'] não foi encontrada nas programações na Filial atual!'		, 'Atenção!' ,,1 )
 		
 	EndIf
 	
@@ -3879,7 +3879,7 @@ Else
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -4086,7 +4086,7 @@ Retorno---------: _lRet - .T. - Permite usuário informado / .F. - Não permite us
 ===============================================================================================================================
 */
 User Function A028VLD()
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _lRet		:= .F.
 Local _nX		:= 0
 
@@ -4135,7 +4135,7 @@ Else
 	_lRet := .F.
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 Return(_lRet)
 
 /*
@@ -4159,6 +4159,6 @@ If _nlinAtu > 0
 
  _cfilial := _oModel:GetValue( 'ZF8DETAIL' , 'ZF8_FILPED' )
  
-Endif
+EndIf
 
 Return _cfilial

@@ -2,21 +2,14 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 08/05/2018 | Padronização dos cabeçalhos dos fontes e funções do módulo financeiro. Chamado 24726.
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 03/05/2019 | Revisão de fontes. Help 28346
+Julio Paz     |08/05/2018| Chamado 24726. Padronização dos cabeçalhos dos fontes e funções do módulo financeiro.
+Lucas Borges  |03/05/2019| Chamado 28346. Revisão de fontes.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "FWBROWSE.CH"
-#INCLUDE "TBICONN.CH"
-#INCLUDE "TBICODE.CH"
+#Include "TOTVS.ch"
 #Include 'FWMVCDef.ch'
 
 /*
@@ -24,11 +17,8 @@ Lucas Borges  | 03/05/2019 | Revisão de fontes. Help 28346
 Programa----------: MFIN001                                   
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 29/07/2015                                                                                                
-===============================================================================================================================
 Descrição---------: Rotina responsável por limpar o flag para reimpressão de cheques
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -37,7 +27,7 @@ User Function MFIN001()
 Local aColumns		:= {}
 Local bChkMarca		:= {|| IIf( aScan( aRegsSEF , { |x| x[1] == (_cAlias)->SEFRECNO } ) == 0 , 'LBNO' , 'LBOK' ) }
 Local bSelMarca		:= {|| ( IIf( ( nPos := aScan( aRegsSEF , { |x| x[1] == (_cAlias)->SEFRECNO } ) ) == 0 , ( aAdd( aRegsSEF , { (_cAlias)->SEFRECNO } ) , lMarcou := .T. ) , ( aDel( aRegsSEF , nPos ) , aSize( aRegsSEF , Len( aRegsSEF ) -1 ) ) ) ) }
-Local bAllMarca		:= {|| IIF( Empty( aRegsSEF ) , aRegsSEF := aClone( aRegsAll ) , aRegsSEF := {} ) , oMrkBrowse:Refresh() , oMrkBrowse:GoTop() }
+Local bAllMarca		:= {|| IIf( Empty( aRegsSEF ) , aRegsSEF := aClone( aRegsAll ) , aRegsSEF := {} ) , oMrkBrowse:Refresh() , oMrkBrowse:GoTop() }
 Local nX			:= 0
 Local _aStru		:= {}
 Local _cQuery		:= ""
@@ -48,7 +38,7 @@ Private aRegsAll	:= {}
 Private cPerg		:= "MFIN001"
 Private aRotina	 	:= Menudef()
 
-If !pergunte(cPerg,.T.)
+If !Pergunte(cPerg,.T.)
      Return
 EndIf
 
@@ -92,7 +82,7 @@ EndDo
 
 If !(_cAlias)->(Eof())
 	For nX := 2 To Len(_aStru)-1 // retiro 1ª e última colunas
-		AAdd(aColumns,FWBrwColumn():New())
+		aAdd(aColumns,FWBrwColumn():New())
 		aColumns[Len(aColumns)]:SetData( &("{||"+_aStru[nX][1]+"}") )
 		aColumns[Len(aColumns)]:SetTitle(GetSX3Cache(_aStru[nX][1],"X3_TITULO")) 
 		aColumns[Len(aColumns)]:SetSize(_aStru[nX][3]) 
@@ -126,11 +116,8 @@ Return
 Programa----------: MenuDef
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 29/07/2015
-===============================================================================================================================
 Descrição---------: Função utilizada para criação do menu
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: aRotina - Opções de menu
 ===============================================================================================================================
 */
@@ -146,17 +133,14 @@ Return(Aclone(aRot))
 Programa----------: F001REIMP
 Autor-------------: Darcio Ribeiro Spörl
 Data da Criacao---: 29/07/2015
-===============================================================================================================================
 Descrição---------: Função utilizada para limpar a flag de reimpressão
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function F001REIMP()
 
-Local aArea			:= GetArea()
+Local aArea			:= FWGetArea()
 Local nX			:= 0
 Local nLenRegs 		:= 0
 Local cInfo			:= ""
@@ -177,10 +161,10 @@ If nLenRegs > 0
 			IncProc('Processando ['+ StrZero( nX , 6 ) +'] de ['+ StrZero( nLenRegs , 6 ) +']')
 			
 			DBSelectArea('SEF')
-			SEF->( DBGoto( aRegsSEF[nX][1] ) )
+			SEF->( DBGoTo( aRegsSEF[nX][1] ) )
 			RecLock( "SEF" , .F. )
 				SEF->EF_IMPRESS := " "
-			SEF->( MsUnLock() )
+			SEF->( MSUnLock() )
 			
 		Next nX
 		
@@ -189,20 +173,20 @@ If nLenRegs > 0
 	If nLenRegs == 1
 		cInfo := 'Foi processado 1 cheque.'
 	Else
-		cInfo := "Foram processados " + Alltrim(STR(nLenregs)) + " cheques."
+		cInfo := "Foram processados " + AllTrim(Str(nLenregs)) + " cheques."
 	EndIf
 
-	MSGINFO(cInfo)
+	MsgInfo(cInfo)
 	oMrkBrowse:GetOwner():End()
 
 Else
 
 	MsgAlert("Não foi selecionado nenhum item para o processamento!","MFIN002")
 
-Endif
+EndIf
 
 FreeUsedCode()  //libera codigos de correlativos reservados pela MayIUseCode()
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return

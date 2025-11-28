@@ -10,7 +10,7 @@ Lucas Borges  |23/05/2025| Chamado 50754. Incluído tratamento para CT-e Simplifi
 ===============================================================================================================================
 */
 
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -65,11 +65,11 @@ If !Empty(_cDirDes)
 
 		If "ObsContxCampo" $ _cXML
 			_cXML := StrTran(_cXML,"ObsContxCampo","ObsCont xCampo")
-		Endif
+		EndIf
 			
 		If "ReferenceURI" $ _cXML
 			_cXML := StrTran(_cXML,"ReferenceURI","Reference URI") 
-		Endif
+		EndIf
 
 		_cXML := SubStr( _cXML , At( '<' , _cXML ) )
 		_cXMLOri:= _cXML
@@ -122,7 +122,7 @@ If !Empty(_cDirDes)
 
 		//Atualiza o CKO
 		DBSelectArea("CKO")
-		CKO->(DBSetorder(1))
+		CKO->(DBSetOrder(1))
 		If CKO->(DBSeek(_cTipo+_cChave+'.xml'))
 			//Atualiza registro
 			RecLock("CKO",.F.)
@@ -154,9 +154,9 @@ If !Empty(_cDirDes)
 			If _cTipo =="109"
 				CKO->CKO_I_FINA := Val(_oXML:_InfNfe:_Ide:_finNFe:Text)
 				If ValType(XmlChildEx(_oXML:_InfNfe:_Ide,"_DEMI")) == "O"
-					CKO->CKO_I_EMIS := StoD(StrTran(AllTrim(_oXML:_InfNfe:_Ide:_DEmi:Text),"-",""))
+					CKO->CKO_I_EMIS := SToD(StrTran(AllTrim(_oXML:_InfNfe:_Ide:_DEmi:Text),"-",""))
 				ElseIf ValType(XmlChildEx(_oXML:_InfNfe:_Ide,"_DHEMI")) == "O"
-					CKO->CKO_I_EMIS := StoD(StrTran(Substr((_oXML:_InfNfe:_Ide:_DhEmi:Text),1,10),"-",""))
+					CKO->CKO_I_EMIS := SToD(StrTran(SubStr((_oXML:_InfNfe:_Ide:_DhEmi:Text),1,10),"-",""))
 				EndIf
 				If ValType(XmlChildEx(_oXML:_InfNfe:_EMIT,"_CNPJ")) == "O"
 					CKO->CKO_I_EMIT := _oXML:_InfNfe:_EMIT:_CNPJ:TEXT
@@ -165,7 +165,7 @@ If !Empty(_cDirDes)
 				EndIf
 			ElseIf _cTipo $ "214/273"
 				CKO->CKO_I_FINA := Val(If(ValType(XmlChildEx(_oXML:_InfCte,"_IDE")) == "O",AllTrim(_oXML:_InfCte:_Ide:_tpCTe:Text),""))
-				CKO->CKO_I_EMIS := StoD(StrTran(AllTrim(_oXML:_InfCte:_Ide:_Dhemi:Text),"-",""))
+				CKO->CKO_I_EMIS := SToD(StrTran(AllTrim(_oXML:_InfCte:_Ide:_Dhemi:Text),"-",""))
 				If ValType(XmlChildEx(_oXML:_InfCte:_Emit,"_CNPJ")) == "O"
 					CKO->CKO_I_EMIT := AllTrim(_oXML:_InfCte:_Emit:_CNPJ:Text)
 				Else
@@ -182,7 +182,7 @@ If !Empty(_cDirDes)
 				
 		EndIf
 		
-		CKO->(Msunlock())
+		CKO->(MSUnLock())
 
 		FreeObj(_oFile)
 
@@ -207,12 +207,12 @@ Static Function Scheddef()
     Local aParam := {} As Array
     Local aOrd := {} As Array
 
-    Aadd(aParam, "P"        ) // 01 - Tipo R para relatorio P para processo
-    Aadd(aParam, "PARAMDEFF") // 02 - Pergunte do relatorio, caso nao use passar ParamDef
-    Aadd(aParam, ""         ) // 03 - Alias
-    Aadd(aParam, aOrd       ) // 04 - Array de ordens
-    Aadd(aParam, ""         ) // 05 - Titulo
-    Aadd(aParam, ""         ) // 06 - Nome do relatório (parametro 1 do metodo new da classe TReport)
+    aAdd(aParam, "P"        ) // 01 - Tipo R para relatorio P para processo
+    aAdd(aParam, "PARAMDEFF") // 02 - Pergunte do relatorio, caso nao use passar ParamDef
+    aAdd(aParam, ""         ) // 03 - Alias
+    aAdd(aParam, aOrd       ) // 04 - Array de ordens
+    aAdd(aParam, ""         ) // 05 - Titulo
+    aAdd(aParam, ""         ) // 06 - Nome do relatório (parametro 1 do metodo new da classe TReport)
  
 Return aParam
 
@@ -266,7 +266,7 @@ ElseIf ValType(XmlChildEx(_oFullXML,"_CTEOSPROC")) == "O" //-- Nota de transport
 EndIf
 
 //-- Verifica se CTe é do tipo complementar
-_lComp      := If(Valtype(XmlChildEx(_oXml:_InfCte,"_INFCTECOMP")) != "U",.T.,.F.)
+_lComp      := If(ValType(XmlChildEx(_oXml:_InfCte,"_INFCTECOMP")) != "U",.T.,.F.)
 _cTpCte     := If(ValType(XmlChildEx(_oXML:_InfCte,"_IDE")) == "O",AllTrim(_oXML:_InfCte:_Ide:_tpCTe:Text),"") //-- Armazena o tipo do CT-e.
 _cTagRem    := If(ValType(XmlChildEx(_oXML:_InfCte,"_REM")) == "O",If(ValType(XmlChildEx(_oXML:_InfCte:_Rem,"_CNPJ")) == "O","_CNPJ","_CPF"),"")
 If !Empty(_cTagRem)
@@ -275,7 +275,7 @@ EndIf
 
 If !Empty(_cTagRem) .And. !(_lComp .Or. _cTpCte == '2') .And. _cCNPJ_CF $ _cForTroca//Situações onde não deve substituir o documento referenciado
 
-    _cXMLNew := Substr(_cXML,1,At("<infDoc>",_cXML)+7)
+    _cXMLNew := SubStr(_cXML,1,At("<infDoc>",_cXML)+7)
 
     If ValType(XmlChildEx(_oXML:_InfCte:_Imp,"_INFADFISCO")) == "O" .And. !Empty(_oXML:_INFCTE:_IMP:_INFADFISCO:TEXT)
         _cMensagem += _oXML:_INFCTE:_IMP:_INFADFISCO:TEXT + ". "
@@ -291,18 +291,18 @@ If !Empty(_cTagRem) .And. !(_lComp .Or. _cTpCte == '2') .And. _cCNPJ_CF $ _cForT
         _cMensagem := _oXML:_INFCTE:_COMPL:_OBSCONT:_XCAMPO:TEXT + ": "+ _oXML:_INFCTE:_COMPL:_OBSCONT:_XTEXTO:TEXT + ". "
     EndIf
     If ValType(XmlChildEx(_oXML:_InfCte,"_COMPL")) != "U" .And. ValType(XmlChildEx(_oXML:_InfCte:_Compl,"_OBSFISCO")) == "A"
-        For _nX := 1 to len(_oXML:_INFCTE:_COMPL:_OBSFISCO)
+        For _nX := 1 to Len(_oXML:_INFCTE:_COMPL:_OBSFISCO)
             _cMensagem += _oXML:_INFCTE:_COMPL:_OBSFISCO[_nX]:_XCAMPO:TEXT + ": " + _oXML:_INFCTE:_COMPL:_OBSFISCO[_nX]:_XTEXTO:TEXT + ". "
         Next _nX
     ElseIf ValType(XmlChildEx(_oXML:_InfCte,"_COMPL")) != "U" .And. ValType(XmlChildEx(_oXML:_InfCte:_Compl,"_OBSFISCO")) == "O" .And. !Empty(_oXML:_INFCTE:_COMPL:_OBSFISCO:TEXT) //ValType("_oXML:_INFCTE:_COMPL:_OBSFISCO:_XTEXTO:TEXT") <> "U" //ver
         _cMensagem := _oXML:_INFCTE:_COMPL:_OBSFISCO:_XCAMPO:TEXT + ": "+ _oXML:_INFCTE:_COMPL:_OBSFISCO:_XTEXTO:TEXT + ". "
     EndIf
-    _cXMLNew := Substr(_cXML,1,At("<infDoc>",_cXML)+7)
+    _cXMLNew := SubStr(_cXML,1,At("<infDoc>",_cXML)+7)
     //Separa o número das notas e depois converte em array
-    //_cMensagem :=  Substr(_cMensagem,At("NF DE VENDA :",_cMensagem)+13,At("Usuario",_cMensagem)-At("NF DE VENDA :",_cMensagem)-13)
+    //_cMensagem :=  SubStr(_cMensagem,At("NF DE VENDA :",_cMensagem)+13,At("Usuario",_cMensagem)-At("NF DE VENDA :",_cMensagem)-13)
     _nPosIni := At(" NF",_cMensagem)
     If _nPosIni > 0
-        _cMensagem:= Substr(_cMensagem,_nPosIni,Len(_cMensagem))//coloco msg começando com NF
+        _cMensagem:= SubStr(_cMensagem,_nPosIni,Len(_cMensagem))//coloco msg começando com NF
         _nPosIni := 0
         For _nX:= 1 To Len(_cMensagem)
             _cChar:=SubStr(_cMensagem, _nX, 1)
@@ -314,7 +314,7 @@ If !Empty(_cTagRem) .And. !(_lComp .Or. _cTpCte == '2') .And. _cCNPJ_CF $ _cForT
                 Exit
             EndIf
         Next _nX
-        _cMensagem:= Substr(_cMensagem,_nPosIni,_nPosFim-_nPosIni)
+        _cMensagem:= SubStr(_cMensagem,_nPosIni,_nPosFim-_nPosIni)
         If !Empty(_cMensagem)
             _aItens := StrTokArr2(Replace(_cMensagem,' ',''),",",.T.)
         EndIf
@@ -324,10 +324,10 @@ If !Empty(_cTagRem) .And. !(_lComp .Or. _cTpCte == '2') .And. _cCNPJ_CF $ _cForT
                 _cAlias := GetNextAlias()
                 _aItens[_nX] := StrZero(Val(_aItens[_nX]),9)
                 BeginSql alias _cAlias
-                    SELECT SUBSTR(CKO_ARQUIV,4,44) CHAVE FROM %Table:CKO%
+                    SELECT SubStr(CKO_ARQUIV,4,44) CHAVE FROM %Table:CKO%
                     WHERE D_E_L_E_T_ = ' '
-                    AND SUBSTR(CKO_ARQUIV,10,14) = %exp:_cCNPJ_CF%
-                    AND SUBSTR(CKO_ARQUIV,29,9) = %exp:_aItens[_nX]%
+                    AND SubStr(CKO_ARQUIV,10,14) = %exp:_cCNPJ_CF%
+                    AND SubStr(CKO_ARQUIV,29,9) = %exp:_aItens[_nX]%
 					ORDER BY R_E_C_N_O_ DESC
                 EndSql
                 If !Empty((_cAlias)->CHAVE)
@@ -339,7 +339,7 @@ If !Empty(_cTagRem) .And. !(_lComp .Or. _cTpCte == '2') .And. _cCNPJ_CF $ _cForT
         EndIf
 
         If _nFindChv > 0
-            _cXMLNew += Substr(_cXML,At("</infDoc>",_cXML),Len(_cXML))
+            _cXMLNew += SubStr(_cXML,At("</infDoc>",_cXML),Len(_cXML))
             _cXML := _cXMLNew
 			_lAlterou := .T.
         EndIf

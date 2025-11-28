@@ -2,48 +2,29 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor           |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Josué Danich    | 30/11/2018 | Retirada de função itputsx6 e ajuste de mensagens - Chamado 27175
--------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges    | 01/08/2019 | Alterada chamada do parâmetro LT_NATGLT. Chamado 30151
--------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges    | 09/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
-------------------------------------------------------------------------------------------------------------------------------
- Alex Wallauer   | 29/10/2020 | Remoção de bugs apontados pelo Totvs CodeAnalysis. Chamado: 34262
+Lucas Borges  |01/08/2019| Chamado 30151. Alterada chamada do parâmetro LT_NATGLT.
+Lucas Borges  |09/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
+Alex Wallauer |29/10/2020| Chamado 34262. Remoção de bugs apontados pelo Totvs CodeAnalysis.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "Protheus.ch"
-#Include "Protheus.ch"
-#Include "RwMake.ch"
-#Include "TopConn.ch"
+#Include "TOTVS.ch"
 
-#Define P_FILIAL   		02
 #Define P_FORNECEDOR	03
 #Define P_LOJA			04
 #Define P_NOMFOR		05
-#Define P_QTDTIT		06
 #Define P_VALOR	 		07
-#Define P_SDACRES		08
-#Define P_SDDECRE		09
 #Define P_SALDO			10
-#Define P_L_MIX	 		11
-#Define P_L_SETOR		12
 
 /*
 ===============================================================================================================================
 Programa----------: AFIN022
 Autor-------------: Talita Teixeira
 Data da Criacao---: 14/01/2013
-===============================================================================================================================
 Descrição---------: Rotina responsavel pela geracao das faturas a pagar de forma automatica. Chamado Help Desk 2152
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -54,27 +35,24 @@ Local cAlias		:= "SE2"
 Private cCadastro	:= "Faturas a Pagar"
 Private aRotina		:= {}
 
-AADD( aRotina , { "Pesquisar"	, "AxPesqui"		, 0 , 1 } ) 
-AADD( aRotina , { "Selecionar"	, "U_AFIN22SL"		, 0 , 3 } )
-AADD( aRotina , { "Legenda"		, "FA040Legenda"	, 0 , 7 ,, .F. } )
+aAdd( aRotina , { "Pesquisar"	, "AxPesqui"		, 0 , 1 } ) 
+aAdd( aRotina , { "Selecionar"	, "U_AFIN22SL"		, 0 , 3 } )
+aAdd( aRotina , { "Legenda"		, "FA040Legenda"	, 0 , 7 ,, .F. } )
 
 DBSelectArea(cAlias)
 (cAlias)->( DBSetOrder(1) )
 
 MBrowse( ,,,, "SE2" ,,,,,, Fa040Legenda("SE2") ,,,,,,,, )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AFIN22SL
 Autor-------------: Talita Teixeira
 Data da Criacao---: 14/01/2013
-===============================================================================================================================
 Descrição---------: Rotina que controla a incialização do processamento
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -100,41 +78,38 @@ DEFINE MSDIALOG _oDlg FROM 000,000 TO 250,400 TITLE OemToAnsi( 'Geração de Fatur
 	_oPanel:Align 		:= CONTROL_ALIGN_ALLCLIENT
 	
 	@ _nPosLin       , _nPosCol TO _nPosLin + 035 , _nPosCol + 190										OF _oPanel PIXEL
-	@ _nPosLin + 015 , _nPosCol + 014 SAY	OemToAnsi( "Digite o número do MIX:" )						OF _oPanel PIXEL SIZE 060,061
+	@ _nPosLin + 015 , _nPosCol + 014 Say	OemToAnsi( "Digite o número do MIX:" )						OF _oPanel PIXEL SIZE 060,061
 	@ _nPosLin + 012 , _nPosCol + 130 MSGET _cMix	F3 'ZLE_01' 										OF _oPanel PIXEL SIZE 010,011
 	
 	@ _nPosLin + 036 , _nPosCol TO _nPosLin + 070 , _nPosCol + 190										OF _oPanel PIXEL
-	@ _nPosLin + 050 , _nPosCol + 014 SAY	OemToAnsi( "Digite o Setor:" )								OF _oPanel PIXEL SIZE 060,061
+	@ _nPosLin + 050 , _nPosCol + 014 Say	OemToAnsi( "Digite o Setor:" )								OF _oPanel PIXEL SIZE 060,061
 	@ _nPosLin + 047 , _nPosCol + 130 MSGET _cSetor	F3 'ZL2_01'											OF _oPanel PIXEL SIZE 010,011
 	
 	@ _nPosLin + 071 , _nPosCol TO _nPosLin + 100 , _nPosCol + 190										OF _oPanel PIXEL
-	@ _nPosLin + 085 , _nPosCol + 014 SAY	OemToAnsi( "Digite a data de Vencimento da Fatura:" )		OF _oPanel PIXEL SIZE 100,110
+	@ _nPosLin + 085 , _nPosCol + 014 Say	OemToAnsi( "Digite a data de Vencimento da Fatura:" )		OF _oPanel PIXEL SIZE 100,110
 	@ _nPosLin + 082 , _nPosCol + 130 MSGET	_dDatVen Valid If( _nOpca <> 0 , !Empty( _dDatVen) , .T. )	OF _oPanel PIXEL SIZE 050,011 HASBUTTON
 	
-	DEFINE SBUTTON FROM _nPosLin + 105 , 144 TYPE 1 ENABLE OF _oDlg;
-		ACTION ( IIF(	AFIN022PAR( _cMix , _cSetor , _dDatVen )									,;
+	DEFINE SBUTTON FROM _nPosLin + 105 , 144 Type 1 ENABLE OF _oDlg;
+		ACTION ( IIf(	AFIN022PAR( _cMix , _cSetor , _dDatVen )									,;
 						( AFIN022PRC( _cMix , _cSetor , _dDatVen ) , _oDlg:End() )					,;
 						Nil	) )
 		
-	DEFINE SBUTTON FROM _nPosLin + 105 , 169 TYPE 2 ENABLE OF _oDlg;
+	DEFINE SBUTTON FROM _nPosLin + 105 , 169 Type 2 ENABLE OF _oDlg;
 		ACTION ( MsgStop("Operação cancelada pelo usuário!","AFIN02201") , _oDlg:End() )
 
 ACTIVATE MSDIALOG _oDlg CENTERED
 
 aRotina := _aRotBkp
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AFIN022PRC
 Autor-------------: Alexandre Villar
 Data da Criacao---: 10/09/2014
-===============================================================================================================================
 Descrição---------: Rotina que controla o processamento
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -171,8 +146,8 @@ aRotina := {}
 //================================================================================
 // Cores da MsSelect
 //================================================================================
-Aadd( _aColors , { "TRB_SALDO==TRB_VALOR .AND. TRB_SALDO>0" , "BR_VERDE"	} ) //Titulo em Aberto
-Aadd( _aColors , { "TRB_SALDO<>TRB_VALOR .AND. TRB_SALDO>0" , "BR_AZUL"		} ) //Titulo parcialmente baixado
+aAdd( _aColors , { "TRB_SALDO==TRB_VALOR .And. TRB_SALDO>0" , "BR_VERDE"	} ) //Titulo em Aberto
+aAdd( _aColors , { "TRB_SALDO<>TRB_VALOR .And. TRB_SALDO>0" , "BR_AZUL"		} ) //Titulo parcialmente baixado
 
 //================================================================================
 // Consulta os dados para a montar a tela de seleção
@@ -227,7 +202,7 @@ DEFINE MSDIALOG _oDlg TITLE _cTitAux FROM _aCoors[1],_aCoors[2] TO _aCoors[3],_a
 	
 		If _nI == 1
 			
-			_cColsAux := "{|| {	IIF( _aColRes[_oLbxAux:nAt,"+ cValtoChar(_nI) +"] , LoadBitmap( GetResources() , 'LBOK' ) , LoadBitmap( GetResources() , 'LBNO' ) ) ,"
+			_cColsAux := "{|| {	IIf( _aColRes[_oLbxAux:nAt,"+ cValtoChar(_nI) +"] , LoadBitmap( GetResources() , 'LBOK' ) , LoadBitmap( GetResources() , 'LBNO' ) ) ,"
 			
 		Else
 		
@@ -249,18 +224,15 @@ If _lRet
 	LjMsgRun( 'Processando a geração das Faturas...' , 'Aguarde!' , {|| CursorWait() , AFIN022GRV( _aColRes , _aColTit , _dDatVen , _cMix ) , CursorArrow() } )
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AFIN022PSQ
 Autor-------------: Alexandre Villar
 Data da Criacao---: 10/09/2014
-===============================================================================================================================
 Descrição---------: Rotina que controla o processamento
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -281,8 +253,8 @@ DEFINE MSDIALOG _oDlg TITLE "Pesquisar" FROM 178,181 TO 259,697 PIXEL
 @004,003 ComboBox _cComboBx1 Items _aComboBx1	Size 213,010 PIXEL OF _oDlg
 @020,003 MsGet _oGet1 Var _cGet1				Size 212,009 PIXEL OF _oDlg COLOR CLR_BLACK Picture "@!"
 
-DEFINE SBUTTON FROM 004,227 TYPE 1 ENABLE ACTION ( _nOpca := 1 , _oDlg:End() ) OF _oDlg
-DEFINE SBUTTON FROM 021,227 TYPE 2 ENABLE ACTION ( _nOpca := 0 , _oDlg:End() ) OF _oDlg
+DEFINE SBUTTON FROM 004,227 Type 1 ENABLE ACTION ( _nOpca := 1 , _oDlg:End() ) OF _oDlg
+DEFINE SBUTTON FROM 021,227 Type 2 ENABLE ACTION ( _nOpca := 0 , _oDlg:End() ) OF _oDlg
 
 ACTIVATE MSDIALOG _oDlg CENTERED
 
@@ -362,18 +334,15 @@ If _lAchou
 	_oLbxAux:Refresh()
 EndIf
 
-Return()
+Return
  
 /*
 ===============================================================================================================================
 Programa----------: AFIN022SEL
 Autor-------------: Alexandre Villar
 Data da Criacao---: 10/09/2014
-===============================================================================================================================
 Descrição---------: Rotina que controla o processamento
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -410,7 +379,7 @@ _cQuery += " AND SE2.E2_NUMBOR	= ' ' "
 _cQuery += " AND SE2.E2_IDCNAB  = ' ' "
 _cQuery += " AND SE2.E2_L_MIX   = '"+ _cMix +"' "
 _cQuery += " AND SE2.E2_L_SETOR = '"+ _cSetor +"' "
-_cQuery += " AND SE2.E2_FILIAL  = '"+ xFILIAL("SE2") +"' "
+_cQuery += " AND SE2.E2_FILIAL  = '"+ xFilial("SE2") +"' "
 _cQuery += " AND EXISTS (	SELECT E2.E2_FILIAL , E2.E2_FORNECE , E2.E2_LOJA , COUNT(E2.R_E_C_N_O_) "
 _cQuery += " 				FROM " + RetSqlName("SE2") + " E2 "
 _cQuery += " 				WHERE "
@@ -435,9 +404,9 @@ EndIf
 
 DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQuery ) , _cAlias , .T. , .F. )
 
-DbSelectArea(_cAlias)
+DBSelectArea(_cAlias)
 (_cAlias)->( DBGoTop() )
-While (_cAlias)->(!EOF())
+While (_cAlias)->(!Eof())
 	
 	If (_cAlias)->( E2_FORNECE + E2_LOJA ) <> _cCodFor + _cLojFor
 		
@@ -484,21 +453,18 @@ EndDo
 
 (_cAlias)->( DBCloseArea() )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AFIN022GRV
 Autor-------------: Alexandre Villar
 Data da Criacao---: 09/09/2014
-===============================================================================================================================
-Descrição---------: Rotina que processa a geração da Fatura e a Atualização dos Títulos
-===============================================================================================================================
+Descrição---------: Rotina que Processa a geração da Fatura e a Atualização dos Títulos
 Parametros--------: _aColRes = Dados a serem gerados
                     _aColTit = Titulos
                     _dDatVen = Data vencimento
                     _cMix    = Codigo do Mix
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -517,8 +483,8 @@ Local _cFatAux	:= ''
 
 Local _nModAtu	:= nModulo
 Local _cModAtu	:= cModulo
-Local _dDataDe	:= StoD('')
-Local _dDataAte	:= StoD('')
+Local _dDataDe	:= SToD('')
+Local _dDataAte	:= SToD('')
 Local _bGetMV  	:= {||  GetMV( 'MV_NUMFATP' ,, '0' ) }
 
 
@@ -533,8 +499,8 @@ If _nTot > 0 .And. !Empty( _aColRes )
 	For _nI := 1 To _nTot
 		
 		_aTit		:= {}
-		_dDataDe	:= StoD('')
-		_dDataAte	:= StoD('')
+		_dDataDe	:= SToD('')
+		_dDataAte	:= SToD('')
 		
 		If _aColRes[_nI][01] //Verifica se o Fornecedor foi selecionado na lista
 		
@@ -546,7 +512,7 @@ If _nTot > 0 .And. !Empty( _aColRes )
 				
 				While _nX <= _nTit
 					
-					IF SA2->( A2_COD + A2_LOJA ) == _aColTit[_nX][02] + _aColTit[_nX][03]
+					If SA2->( A2_COD + A2_LOJA ) == _aColTit[_nX][02] + _aColTit[_nX][03]
 					
 						DBSelectArea("SE2")
 						SE2->( DBGoTo( _aColTit[_nX][04] ) )
@@ -596,7 +562,7 @@ If _nTot > 0 .And. !Empty( _aColRes )
 			_cFatAux := EVAL(_bGetMV)//GetMV( 'MV_NUMFATP' ,, '0' )
 			
 			If _cNumFat > _cFatAux
-			   PUTMV( 'MV_NUMFATP' , _cNumFat )
+			   PutMV( 'MV_NUMFATP' , _cNumFat )
 			EndIf
 		    
 			_aArray		:= { 'MAN' , 'FT' , _cNumFat , _cCodNat , _dDataDe , _dDataAte , SA2->A2_COD , SA2->A2_LOJA , SA2->A2_COD , SA2->A2_LOJA , '001' , 01 , _aTit , 0 , 0 }
@@ -637,11 +603,8 @@ Return
 Programa----------: ITDBLCLK
 Autor-------------: Alexandre Villar
 Data da Criacao---: 14/03/2014
-===============================================================================================================================
 Descrição---------: Processa função do duplo click
-===============================================================================================================================
 Parametros--------: oLbxDados - Objeto de Dados do ListBox
-===============================================================================================================================
 Retorno-----------: lRet	- Caso o usuário saia da tela clicando em "Confirmar" retorna .T.
 ===============================================================================================================================
 */
@@ -668,11 +631,8 @@ Return
 Programa----------: ITOrdLbx
 Autor-------------: Alexandre Villar
 Data da Criacao---: 14/03/2014
-===============================================================================================================================
 Descrição---------: Processa função do duplo click no cabeçalho da coluna
-===============================================================================================================================
 Parametros--------: oLbxDados - Objeto de Dados do ListBox
-===============================================================================================================================
 Retorno-----------: lRet	- Caso o usuário saia da tela clicando em "Confirmar" retorna .T.
 ===============================================================================================================================
 */
@@ -702,7 +662,7 @@ If _nCol == 1
 Else
 
 	If	Type("_nITPosAnt") == "U"
-		Return()
+		Return
 	EndIf
 	
 	If	_nCol > 0
@@ -721,18 +681,15 @@ EndIf
 
 _oLbxAux:Refresh()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AFIN022
 Autor-------------: Alexandre Villar
 Data da Criacao---: 14/03/2014
-===============================================================================================================================
 Descrição---------: Valida o preenchimento dos parâmetros na tela inicial do processamento
-===============================================================================================================================
 Parametros--------: oLbxDados - Objeto de Dados do ListBox
-===============================================================================================================================
 Retorno-----------: lRet	- Caso o usuário saia da tela clicando em "Confirmar" retorna .T.
 ===============================================================================================================================
 */
@@ -749,7 +706,7 @@ If _lRet
 
 	DBSelectArea('ZLF')
 	ZLF->( DBSetOrder(1) )
-	IF !ZLF->( DBSeek( xFilial('ZLF') + _cMix ) )
+	If !ZLF->( DBSeek( xFilial('ZLF') + _cMix ) )
 		MsgStop("O Mix informado não é válido ou não possui movimentações registradas! Verifique os dados e tente novamente.","AFIN02205")
 		_lRet := .F.
 	EndIf
@@ -765,7 +722,7 @@ If _lRet
 
 	DBSelectArea('ZLF')
 	ZLF->( DBSetOrder(5) ) //Filial + Cód. Mix. + Versão + Setor
-	IF !ZLF->( DBSeek( xFilial('ZLF') + _cMix + '1' + _cSetor ) )
+	If !ZLF->( DBSeek( xFilial('ZLF') + _cMix + '1' + _cSetor ) )
 		MsgStop("O Setor informado não é válido ou não possui movimentações no Mix informado! Verifique os dados e tente novamente.","AFIN02207")
 		_lRet := .F.
 	EndIf
@@ -789,17 +746,14 @@ Return( _lRet )
 Programa----------: AFIN022
 Autor-------------: Alexandre Villar
 Data da Criacao---: 14/03/2014
-===============================================================================================================================
 Descrição---------: Processa a atualização do vencimento da fatura pois a rotina automática gera com a data do sistema
-===============================================================================================================================
 Parametros--------: oLbxDados - Objeto de Dados do ListBox
-===============================================================================================================================
 Retorno-----------: lRet	- Caso o usuário saia da tela clicando em "Confirmar" retorna .T.
 ===============================================================================================================================
 */
 Static Function AFIN022VEN( _dDatVen , _cMix )
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cChave	:= SE2->( E2_FILIAL + E2_FATPREF + E2_FATURA + '01' + E2_TIPOFAT + E2_FATFOR + E2_FATLOJ )
 
 DBSelectArea('SE2')
@@ -808,7 +762,7 @@ If SE2->( DBSeek( _cChave ) )
 	
 	DBSelectArea("ZL3")
 	ZL3->( DBSetOrder(1) )
-	ZL3->( DBSeek( xFILIAL("ZL3") + SA2->A2_L_LI_RO ) )
+	ZL3->( DBSeek( xFilial("ZL3") + SA2->A2_L_LI_RO ) )
 	
 	SE2->( RecLock('SE2',.F.) )
 		SE2->E2_VENCTO	:= _dDatVen
@@ -817,24 +771,21 @@ If SE2->( DBSeek( _cChave ) )
 		SE2->E2_L_MIX	:= _cMix
 		SE2->E2_L_SETOR	:= ZL3->ZL3_SETOR
 		SE2->E2_L_LINRO := SA2->A2_L_LI_RO
-	SE2->( MsUnlock() )
+	SE2->( MSUnLock() )
 	
 EndIf
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: F290TIT
 Autor-------------: Alexandre Villar
 Data da Criacao---: 14/03/2014
-===============================================================================================================================
 Descrição---------: Ponto de Entrada que valida os títulos selecionados na lista
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: lRet	- Caso o título esteja ok para o processamento retorna .T.
 ===============================================================================================================================
 */

@@ -2,33 +2,25 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 11/04/2019 | Revisão de fontes. Help 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 27/09/2019 | Revisão de fontes. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 22/05/2020 | Tratamento de error.log e geração de janelas na navegação. Chamado 33020
+Lucas Borges  |11/04/2019| Chamado 28346. Revisão de fontes
+Lucas Borges  |27/09/2019| Chamado 28346. Revisão de fontes.
+Lucas Borges  |22/05/2020| Chamado 33020. Tratamento de error.log e geração de janelas na navegação.
 ===============================================================================================================================
 */
 
-//===========================================================================
-//| Definições de Includes                                                  |
-//===========================================================================
 #Include "FWMVCDef.ch"
-#INCLUDE "Protheus.Ch"
-#INCLUDE "MsGraphi.Ch"
+#Include "TOTVS.ch"
+#Include "MsGraphi.Ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MGLT013
 Autor-------------: Alexandre Villar
 Data da Criacao---: 08/12/2014
-===============================================================================================================================
 Descrição---------: Rotina para processar o fechamento da Recepção de Leite de Terceiros
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -53,18 +45,15 @@ _oBrowse:AddLegend( '!Empty(ZLY->ZLY_DFECHA)' , 'RED'    , 'Período de Recepção 
 
 _oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MenuDef
 Autor-------------: Alexandre Villar
 Data da Criacao---: 08/12/2014
-===============================================================================================================================
 Descrição---------: Rotina para montar o menu da tela principal com as funcionalidades da rotina
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -84,11 +73,8 @@ Return( _aRet )
 Programa----------: MGLT013A
 Autor-------------: Alexandre Villar
 Data da Criacao---: 08/12/2014
-===============================================================================================================================
 Descrição---------: Rotina para montar a View de Dados da Rotina
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -96,7 +82,7 @@ User Function MGLT013A()
 
 Local _aFilZLX	:= {}
 Local _nOper	:= IIf( Inclui , MODEL_OPERATION_INSERT , MODEL_OPERATION_DELETE )
-Local _cDtIni	:= SubStr( DtoS( dDataBase ) , 1 , 6 ) + IIf( Day( dDataBase ) <= 15 , '01' , '16' )
+Local _cDtIni	:= SubStr( DToS( dDataBase ) , 1 , 6 ) + IIf( Day( dDataBase ) <= 15 , '01' , '16' )
 Local _cAlias	:= ''
 Local _aRotBkp	:= aClone( aRotina )
 
@@ -104,7 +90,7 @@ If _nOper == MODEL_OPERATION_INSERT
 	_cAlias	:= GetNextAlias()
 	BeginSql alias _cAlias
 		SELECT ZLY_CODIGO
-		FROM %table:ZLY%
+		FROM %Table:ZLY%
 		WHERE D_E_L_E_T_ = ' '
 		AND ZLY_FILIAL = %xFilial:ZLY%
 		AND ZLY_REFINI = %exp:_cDtIni%
@@ -120,27 +106,27 @@ If _nOper == MODEL_OPERATION_INSERT
 			
 			ZLY->ZLY_FILIAL	:= xFilial('ZLY')
 			ZLY->ZLY_CODIGO := GETSXENUM('ZLY','ZLY_CODIGO')
-			ZLY->ZLY_REFINI	:= StoD( _cDtIni )
-			ZLY->ZLY_REFFIM	:= IIf( Day( dDataBase ) <= 15 , StoD( SubStr(_cDtIni,1,6) + '15' ) , LastDay( dDataBase , 0 ) )
+			ZLY->ZLY_REFINI	:= SToD( _cDtIni )
+			ZLY->ZLY_REFFIM	:= IIf( Day( dDataBase ) <= 15 , SToD( SubStr(_cDtIni,1,6) + '15' ) , LastDay( dDataBase , 0 ) )
 			
-			ZLY->( MsUnlock() )
+			ZLY->( MSUnLock() )
 			
 			If __lSX8
 				ConfirmSX8()
-			Endif
+			EndIf
 		
 		End Transaction
 		
 		MsgInfo("Criado o Fechamento ["+ ZLY->ZLY_CODIGO +"] para o período atual!","MGLT01302")
 		
 	EndIf
-	(_cAlias)->(DbCloseArea())
+	(_cAlias)->(DBCloseArea())
 Else
 
 	_cAlias	:= GetNextAlias()
 	BeginSql alias _cAlias
 		SELECT DISTINCT ZLX_FILIAL
-		FROM %table:ZLX%
+		FROM %Table:ZLX%
 		WHERE D_E_L_E_T_ = ' '
 		AND ZLX_DTENTR BETWEEN %exp:ZLY->ZLY_REFINI% AND %exp:ZLY->ZLY_REFFIM%
 	EndSql
@@ -159,28 +145,25 @@ Else
 	If Empty( _aFilZLX )
 		ZLY->( RecLock('ZLY',.F.) )
 		ZLY->( DBDelete() )
-		ZLY->( MsUnLock() )
+		ZLY->( MSUnLock() )
 	Else
 		MsgStop("Não será possível excluir o Período pois existem lançamentos de Recepção de Leite de Terceiros!","MGLT001304")
-		U_ITListBox( 'Registro de Recepção no período - Leite de Terceiros' , {'Filiais'} , _aFilZLX , .F. , 1 , 'Lista de Filiais que contém lançamentos de Recepção no período: '+ DtoC( ZLY->ZLY_REFINI ) +' - '+ DtoC( ZLY->ZLY_REFFIM ) )
+		U_ITListBox( 'Registro de Recepção no período - Leite de Terceiros' , {'Filiais'} , _aFilZLX , .F. , 1 , 'Lista de Filiais que contém lançamentos de Recepção no período: '+ DToC( ZLY->ZLY_REFINI ) +' - '+ DToC( ZLY->ZLY_REFFIM ) )
 	EndIf
 
 EndIf
 
 aRotina := aClone( _aRotBkp )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MGLT013B
 Autor-------------: Alexandre Villar
 Data da Criacao---: 08/12/2014
-===============================================================================================================================
 Descrição---------: Rotina para verificar e processar o Encerramento do período selecionado
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -195,7 +178,7 @@ Local _aRotBkp	:= aClone( aRotina )
 If Empty(ZLY->ZLY_DFECHA)
 	BeginSql alias _cAlias
 		SELECT ZLX_FILIAL, COUNT(1) QTREG
-		FROM %table:ZLX%
+		FROM %Table:ZLX%
 		WHERE D_E_L_E_T_ = ' '
 		AND ZLX_STATUS = '1'
 		AND ZLX_DTENTR BETWEEN %exp:ZLY->ZLY_REFINI% AND %exp:ZLY->ZLY_REFFIM%
@@ -224,7 +207,7 @@ If Empty(ZLY->ZLY_DFECHA)
 			ZLY->( RecLock( 'ZLY' , .F. ) )
 			ZLY->ZLY_DFECHA	:= Date()
 			ZLY->ZLY_USRFEC	:= _cUsrID
-			ZLY->( MsUnLock() )
+			ZLY->( MSUnLock() )
 			
 			MsgInfo("Período e registros do período fechados com sucesso!","MGLT01303")
 			
@@ -235,7 +218,7 @@ If Empty(ZLY->ZLY_DFECHA)
 		MsgAlert("Existem recepções que ainda estão pendentes e que não podem ser fechadas! Verifique as Filiais que ainda tiverem registros nessa situação para " +;
 					"conseguir Fechar o período.","MGLT01304")
 		
-		U_ITListBox("Recepção de Leite de Terceiros - Registros Pendentes", {"Filiais","Qtde. Registros"} , _aResumo , .F. , 1 , "Lançamentos pendentes no período: "+ DtoC( ZLY->ZLY_REFINI ) +" - "+ DtoC( ZLY->ZLY_REFFIM ) )
+		U_ITListBox("Recepção de Leite de Terceiros - Registros Pendentes", {"Filiais","Qtde. Registros"} , _aResumo , .F. , 1 , "Lançamentos pendentes no período: "+ DToC( ZLY->ZLY_REFINI ) +" - "+ DToC( ZLY->ZLY_REFFIM ) )
 	
 	EndIf
 	
@@ -244,24 +227,21 @@ Else
 	MsgInfo("O período informado já se encontra fechado e não será processado.","MGLT01305")
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MGLT013C
 Autor-------------: Alexandre Villar
 Data da Criacao---: 08/12/2014
-===============================================================================================================================
 Descrição---------: Rotina para verificar o Status de todas as Recepções do Período e processar o Encerramento de Registros
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function MGLT013C()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _aRotBkp	:= aClone( aRotina )
 Local _aInfo	:= {}
 Local _aObjects	:= {}
@@ -272,8 +252,8 @@ Local _oDlg		:= Nil
 Local _oLbxAux	:= Nil
 Local _oGraph	:= Nil
 
-Local _cDtIni	:= DtoC( ZLY->ZLY_REFINI )
-Local _cDtFim	:= DtoC( ZLY->ZLY_REFFIM )
+Local _cDtIni	:= DToC( ZLY->ZLY_REFINI )
+Local _cDtFim	:= DToC( ZLY->ZLY_REFFIM )
 
 Local _bDados	:= {|| MGLT013SEL( @_oLbxAux	, ZLY->ZLY_REFINI , ZLY->ZLY_REFFIM ) }
 Local _bGraph	:= {|| MGLT013GRP( @_oGraph		, ZLY->ZLY_REFINI , ZLY->ZLY_REFFIM , _oLbxAux ) }
@@ -324,7 +304,7 @@ DEFINE MSDIALOG _oDlg FROM _aSize[7],0 TO _aSize[6],_aSize[5] PIXEL TITLE "Fecha
 	//====================================================================================================
 	// Construção inicial do gráfico
 	//====================================================================================================
-	@_aPosObj[02][01]+05 , _aPosObj[02][02] SAY "Movimentação no Período: "+ _cDtIni +" até "+ _cDtFim	OF _oDlg PIXEL FONT oBold
+	@_aPosObj[02][01]+05 , _aPosObj[02][02] Say "Movimentação no Período: "+ _cDtIni +" até "+ _cDtFim	OF _oDlg PIXEL FONT oBold
 	@_aPosObj[02][01]+14 , _aPosObj[02][02] TO _aPosObj[02][03]+16,_aPosObj[02][04]						OF _oDlg PIXEL LABEL ''
 	
 	@_aPosObj[02][01]+17 , _aPosObj[02][02]+10 BITMAP RESOURCE 'BR_AZUL' NO BORDER SIZE 010,010			OF _oDlg PIXEL
@@ -339,22 +319,19 @@ DEFINE MSDIALOG _oDlg FROM _aSize[7],0 TO _aSize[6],_aSize[5] PIXEL TITLE "Fecha
 
 ACTIVATE MSDIALOG _oDlg CENTER 
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 aRotina := aClone( _aRotBkp )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MGLT013SEL
 Autor-------------: Alexandre Villar
 Data da Criacao---: 08/12/2014
-===============================================================================================================================
 Descrição---------: Rotina para realizar a busca dos dados e montar o objeto do Grid
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -365,10 +342,10 @@ Local _cAlias	:= GetNextAlias()
 
 BeginSql alias _cAlias
 	SELECT ZLX_FILIAL, MIN(ZLX_DTENTR) PRI_REC, MAX(ZLX_DTENTR) ULT_REC, COUNT(ZLX_CODIGO),
-	SUM(CASE WHEN ZLX_STATUS = '1' THEN 1 ELSE 0 END) PENDENTES,
-	SUM(CASE WHEN ZLX_STATUS = '2' THEN 1 ELSE 0 END) CLASSIF,
-	SUM(CASE WHEN ZLX_STATUS = '3' THEN 1 ELSE 0 END) FECHADOS
-	FROM %table:ZLX%
+	SUM(Case WHEN ZLX_STATUS = '1' THEN 1 Else 0 END) PENDENTES,
+	SUM(Case WHEN ZLX_STATUS = '2' THEN 1 Else 0 END) CLASSIF,
+	SUM(Case WHEN ZLX_STATUS = '3' THEN 1 Else 0 END) FECHADOS
+	FROM %Table:ZLX%
 	WHERE D_E_L_E_T_ = ' '
 	AND ZLX_DTENTR BETWEEN %exp:ZLY->ZLY_REFINI% AND %exp:ZLY->ZLY_REFFIM%
 	GROUP BY ZLX_FILIAL
@@ -378,8 +355,8 @@ EndSql
 While (_cAlias)->(!Eof())
 	
 	aAdd( _aDados , {	(_cAlias)->ZLX_FILIAL +" - "+ AllTrim( FWFilialName( cEmpAnt , (_cAlias)->ZLX_FILIAL ) )	,;
-						DtoC( StoD( (_cAlias)->PRI_REC ) )											,;
-						DtoC( StoD( (_cAlias)->ULT_REC ) )											,;
+						DToC( SToD( (_cAlias)->PRI_REC ) )											,;
+						DToC( SToD( (_cAlias)->ULT_REC ) )											,;
 						(_cAlias)->PENDENTES														,;
 						(_cAlias)->CLASSIF															,;
 						(_cAlias)->FECHADOS															})
@@ -401,18 +378,15 @@ If !Empty(_aDados)
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MGLT013GRP
 Autor-------------: Alexandre Villar
 Data da Criacao---: 08/12/2014
-===============================================================================================================================
 Descrição---------: Rotina para consultar os dados e montar o Gráfico referente à linha do GRID que estiver selecionada
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -431,7 +405,7 @@ BeginSql alias _cAlias
 	  FROM (SELECT ZLX_DTENTR DATAREF, Count(1) RECEP, 0 CLASSIF
 	          FROM %Table:ZLX% ZLX
 	         WHERE ZLX.D_E_L_E_T_ = ' '
-	           AND ZLX.ZLX_FILIAL = %exp:Substr(_oLbxAux :aArray [ _oLbxAux :nAt ] [ 01 ], 1, 2)%
+	           AND ZLX.ZLX_FILIAL = %exp:SubStr(_oLbxAux :aArray [ _oLbxAux :nAt ] [ 01 ], 1, 2)%
 	           AND ZLX.ZLX_DTENTR BETWEEN %exp:_dDtIni% AND %exp:_dDtFim%
 	         GROUP BY ZLX_DTENTR
 	        UNION ALL
@@ -447,7 +421,7 @@ EndSql
 
 While (_cAlias)->(!Eof())
 	
-	aAdd( _aDados , {	StrZero( Day( StoD( (_cAlias)->DATAREF ) ) , 2 )	,;
+	aAdd( _aDados , {	StrZero( Day( SToD( (_cAlias)->DATAREF ) ) , 2 )	,;
 						(_cAlias)->RECEP									,;
 						(_cAlias)->CLASSIF									})
 
@@ -470,11 +444,11 @@ If !Empty(_aDados)
 			
 			If _nMax < _aDados[_nPos][02]
 				_nMax := _aDados[_nPos][02]
-			Endif
+			EndIf
 			
 			If _nMax < _aDados[_nPos][03]
 				_nMax := _aDados[_nPos][03]
-			Endif
+			EndIf
 			
 		Else
 			
@@ -493,18 +467,15 @@ If !Empty(_aDados)
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MGLT013GRF
 Autor-------------: Alexandre Villar
 Data da Criacao---: 08/12/2014
-===============================================================================================================================
 Descrição---------: Rotina para atualizar o gráfico quando mudar a seleção da linha do GRID
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -516,18 +487,15 @@ _oGraph := TMSGraphic():New( _aPosObj[02][01] + 22 , _aPosObj[02][02] , _oDlg ,,
 
 MGLT013GRP( @_oGraph , ZLY->ZLY_REFINI , ZLY->ZLY_REFFIM , _oLbxAux )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MGLT013DFL
 Autor-------------: Alexandre Villar
 Data da Criacao---: 08/12/2014
-===============================================================================================================================
 Descrição---------: Rotina para detalhar os dados da Filial selecionada no GRID
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -540,9 +508,9 @@ Local _lReProc	:= .F.
 
 BeginSql alias _cAlias
 	SELECT ZLX.ZLX_FORNEC, ZLX.ZLX_LJFORN, SA2.A2_NREDUZ, ZLX.ZLX_PRODLT,
-	       CASE  WHEN ZLX.ZLX_CODANA <> ' ' THEN 'S' ELSE 'N' END ANALISE,
-	       CASE WHEN ZLX.ZLX_STATUS >= '2' THEN 'S' ELSE 'N' END CLASSIF,
-	       CASE WHEN ZLX.ZLX_STATUS = '3' THEN 'S' ELSE 'N' END FECHADO,
+	       Case  WHEN ZLX.ZLX_CODANA <> ' ' THEN 'S' Else 'N' END ANALISE,
+	       Case WHEN ZLX.ZLX_STATUS >= '2' THEN 'S' Else 'N' END CLASSIF,
+	       Case WHEN ZLX.ZLX_STATUS = '3' THEN 'S' Else 'N' END FECHADO,
 	       COUNT(ZLX.R_E_C_N_O_) QTD_REC
 	  FROM %Table:ZLX% ZLX
 	  LEFT OUTER JOIN %Table:SA2% SA2
@@ -553,9 +521,9 @@ BeginSql alias _cAlias
 	   AND ZLX.ZLX_FILIAL = %exp:_cFilial%
 	   AND ZLX.ZLX_DTENTR BETWEEN %exp:ZLY->ZLY_REFINI% AND %exp:ZLY->ZLY_REFFIM%
 	 GROUP BY ZLX.ZLX_FORNEC, ZLX.ZLX_LJFORN, SA2.A2_NREDUZ, ZLX.ZLX_PRODLT,
-	          CASE WHEN ZLX.ZLX_CODANA <> ' ' THEN 'S' ELSE 'N' END,
-	          CASE WHEN ZLX.ZLX_STATUS >= '2' THEN 'S' ELSE 'N' END,
-	          CASE WHEN ZLX.ZLX_STATUS = '3' THEN 'S' ELSE 'N' END
+	          Case WHEN ZLX.ZLX_CODANA <> ' ' THEN 'S' Else 'N' END,
+	          Case WHEN ZLX.ZLX_STATUS >= '2' THEN 'S' Else 'N' END,
+	          Case WHEN ZLX.ZLX_STATUS = '3' THEN 'S' Else 'N' END
 	 ORDER BY ZLX.ZLX_FORNEC, ZLX.ZLX_LJFORN, ANALISE, CLASSIF
 EndSql
 
@@ -590,13 +558,8 @@ Return( IIf( _lReproc , MGLT013DFL(_cFilial) , Nil ) )
 Programa----------: MGLT013FTR
 Autor-------------: Alexandre Villar
 Data da Criacao---: 08/12/2014
-===============================================================================================================================
 Descrição---------: Rotina para montar a Tela de Detalhes da Filial Selecionada
-===============================================================================================================================
-Uso---------------: Italac
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -636,7 +599,7 @@ aAdd( aButtons , { "Excel" , {|| DlgToExcel( { { "ARRAY" , cTitAux , aHeader , a
 
 DEFINE MSDIALOG oDlg TITLE cTitAux FROM aCoors[1],aCoors[2] TO aCoors[3],aCoors[4] PIXEL
 	
-	@aPosAux[01][01] , aPosAux[01][02] SAY cMsgTop OF oDlg PIXEL
+	@aPosAux[01][01] , aPosAux[01][02] Say cMsgTop OF oDlg PIXEL
 	aPosAux[01][01] += 010
 	
 	@aPosAux[01][01] , aPosAux[01][02]	LISTBOX	oLbxAux						;
@@ -654,7 +617,7 @@ DEFINE MSDIALOG oDlg TITLE cTitAux FROM aCoors[1],aCoors[2] TO aCoors[3],aCoors[
 	For nI := 1 To Len(_aHeader)
 	
 		If nI == 1
-			cColsAux := "{|| {	IIF( _aDados[oLbxAux:nAt,"+ cValtoChar(nI) +"] , LoadBitmap( GetResources() , 'LBOK' ) , LoadBitmap( GetResources() , 'LBNO' ) ) ,"
+			cColsAux := "{|| {	IIf( _aDados[oLbxAux:nAt,"+ cValtoChar(nI) +"] , LoadBitmap( GetResources() , 'LBOK' ) , LoadBitmap( GetResources() , 'LBNO' ) ) ,"
 		Else
 			cColsAux += "            _aDados[oLbxAux:nAt,"+ cValtoChar(nI) +"] ,"
 		EndIf
@@ -679,11 +642,8 @@ Return( _lRet )
 Programa----------: MenuDef
 Autor-------------: Alexandre Villar
 Data da Criacao---: 08/12/2014
-===============================================================================================================================
 Descrição---------: Rotina para validar a seleção de ítens na tela de detalhe para não permitir fechar registros pendentes
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -698,7 +658,7 @@ Else
 	If oLbxDados:aArray[ oLbxDados:nAt][07] == 'S' .And. oLbxDados:aArray[ oLbxDados:nAt][08] == 'S' .And. oLbxDados:aArray[ oLbxDados:nAt][09] == 'N'
 		oLbxDados:aArray[ oLbxDados:nAt , 01 ] := !oLbxDados:aArray[ oLbxDados:nAt , 01 ]
 		oLbxDados:Refresh()
-	Endif
+	EndIf
 EndIf
 
 Return
@@ -708,11 +668,8 @@ Return
 Programa----------: MenuDef
 Autor-------------: Alexandre Villar
 Data da Criacao---: 08/12/2014
-===============================================================================================================================
 Descrição---------: Rotina para processar o fechamento dos registros das Transportadoras selecionados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -729,7 +686,7 @@ For _nI := 1 To Len( oLbxAux:aArray )
 		_cAlias	:= GetNextAlias()
 		BeginSql alias _cAlias
 			SELECT R_E_C_N_O_ REGZLX
-			FROM %table:ZLX%
+			FROM %Table:ZLX%
 			WHERE D_E_L_E_T_ = ' '
 			AND ZLX_FILIAL = %exp:_cFilial%
 			AND ZLX_FORNEC = %exp:oLbxAux:aArray[_nI][02]%
@@ -741,13 +698,13 @@ For _nI := 1 To Len( oLbxAux:aArray )
 		While (_cAlias)->( !Eof() ) .And. !Empty( (_cAlias)->REGZLX )
 			
 			DBSelectArea('ZLX')
-			ZLX->( DBGoto( (_cAlias)->REGZLX ) )
+			ZLX->( DBGoTo( (_cAlias)->REGZLX ) )
 			ZLX->( RecLock( 'ZLX' , .F. ) )
 			ZLX->ZLX_STATUS	:= '3'
 			ZLX->ZLX_USRFEC	:= _cUsrID
 			ZLX->ZLX_DTFECH	:= Date()
 			ZLX->ZLX_HRFECH	:= Time()
-			ZLX->( MsUnLock() )
+			ZLX->( MSUnLock() )
 
 			(_cAlias)->( DBSkip() )
 		EndDo
@@ -760,18 +717,15 @@ Next _nI
 
 End Transaction
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MGLT013B
 Autor-------------: Alexandre Villar
 Data da Criacao---: 08/12/2014
-===============================================================================================================================
 Descrição---------: Rotina para verificar e processar o Encerramento do período selecionado
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -792,7 +746,7 @@ _cFiltro += " %"
 
 BeginSql alias _cAlias
 	SELECT ZLX.R_E_C_N_O_ REGZLX, TRANS.A2_NREDUZ TRANS_NOME, FORN.A2_NREDUZ FORN_NOME
-	FROM %table:ZLX% ZLX, %table:SA2% TRANS, %table:SA2% FORN
+	FROM %Table:ZLX% ZLX, %Table:SA2% TRANS, %Table:SA2% FORN
 	WHERE ZLX.D_E_L_E_T_ = ' '
 	AND TRANS.D_E_L_E_T_ (+) = ' '
 	AND FORN.D_E_L_E_T_ = ' '
@@ -814,7 +768,7 @@ While (_cAlias)->( !Eof() )
 	ZLX->ZLX_USRFEC	:= _cUsrID
 	ZLX->ZLX_DTFECH	:= Date()
 	ZLX->ZLX_HRFECH	:= Time()
-	ZLX->( MsUnLock() )
+	ZLX->( MSUnLock() )
 	
 	aAdd( _aResumo , {	ZLX->ZLX_FILIAL,;
 						ZLX->ZLX_CODIGO,;
@@ -827,7 +781,7 @@ While (_cAlias)->( !Eof() )
 	(_cAlias)->( DBSkip() )
 EndDo
 
-(_cAlias)->(DbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 If !Empty(_aResumo)
 	If _lShowMsg
@@ -849,11 +803,8 @@ Return( _lRet )
 Programa----------: MGLT013VRP
 Autor-------------: Alexandre Villar
 Data da Criacao---: 08/12/2014
-===============================================================================================================================
 Descrição---------: Rotina para verificar resgistros pendentes
-===============================================================================================================================
 Parametros--------: _dDtIni , _dDtFim
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -866,7 +817,7 @@ Local _lRet		:= .T.
 BeginSql alias _cAlias
 	SELECT ZLX_FILIAL, ZLX_CODIGO, ZLX_TIPOLT, ZLX_TRANSP, ZLX_LJTRAN, ZLX_FORNEC, ZLX_LJFORN, ZLX_PRODLT, ZLX_DTSAID,
 			TRANS.A2_NREDUZ TRANS_NOME, FORN.A2_NREDUZ FORN_NOME, B1_DESC
-	FROM %table:ZLX% ZLX, %table:SA2% TRANS, %table:SA2% FORN, %table:SB1% SB1
+	FROM %Table:ZLX% ZLX, %Table:SA2% TRANS, %Table:SA2% FORN, %Table:SB1% SB1
 	WHERE ZLX.D_E_L_E_T_ = ' '
 	AND TRANS.D_E_L_E_T_ (+) = ' '
 	AND FORN.D_E_L_E_T_ = ' '

@@ -4,17 +4,14 @@
 ===============================================================================================================================
  Autor        |   Data   |                              Motivo                      										 
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  |16/07/2024| Chamado 47889. Permitir transferência entre filiais
 Lucas Borges  |02/01/2025| Chamado 49500. Incluído no tipo P-Pagamento
 Lucas Borges  |07/01/2025| Chamado 49528. Corrigida sintaxe da query
+Lucas Borges  |07/10/2025| Chamado 52420. Corrigido erro gerado pelo problema ao usasr o Replace do VSCode
 ===============================================================================================================================
 */
 
-//===========================================================================
-//Definições de Includes
-//===========================================================================
-#INCLUDE 'Protheus.ch' 
-#INCLUDE "FWMVCDEF.CH"
+#Include "TOTVS.ch" 
+#Include "FWMVCDEF.CH"
 
 /*
 ===============================================================================================================================
@@ -30,7 +27,7 @@ User Function AGLT012
 
 Local _oBrowse := Nil
 
-Private	_cNUseAp	:= Substr(UsrFullName(RetCodUsr()),1,GetSX3Cache("ZLM_NUSEAP","X3_TAMANHO"))
+Private	_cNUseAp	:= SubStr(UsrFullName(RetCodUsr()),1,GetSX3Cache("ZLM_NUSEAP","X3_TAMANHO"))
 Private _cMatUsr	:= FWSFAllUsers({RetCodUsr()},{"USR_FILIAL","USR_CODFUNC"})[1][3]+FWSFAllUsers({RetCodUsr()},{"USR_FILIAL","USR_CODFUNC"})[1][4]
 Private	_cTipo01	:= SuperGetMV("LT_3EMPTP1",.F.,"NDF")
 Private	_cTipo02	:= SuperGetMV("LT_3EMPTP2",.F.,"NF")
@@ -39,7 +36,7 @@ Private _cPrefixo	:= ""
 
 If dDataBase <> LastDate(dDataBase)
 	MsgStop("Operações permitidas somente com ultimo dia do mês!",'AGLT01201')
-	Return()
+	Return
 EndIf
 
 //====================================================================================================
@@ -60,7 +57,7 @@ _oBrowse:AddLegend( "ZLM_STATUS == '6'" , 'GRAY'	, 'Transferência'	)
 
 _oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -112,7 +109,7 @@ Local _aGatAux	:= {}
 //====================================================================================================
 // Monta a estrutura de gatilhos
 //====================================================================================================
-_aGatAux := FwStruTrigger( 'ZLM_SA2COD' , 'ZLM_SA2LJ' , 'SA2->A2_LOJA' , .T. , 'SA2' , 1 , 'xFilial("SA2")+M->ZLM_SA2COD+IF(SA2->A2_COD==M->ZLM_SA2COD,SA2->A2_LOJA,"")' )
+_aGatAux := FwStruTrigger( 'ZLM_SA2COD' , 'ZLM_SA2LJ' , 'SA2->A2_LOJA' , .T. , 'SA2' , 1 , 'xFilial("SA2")+M->ZLM_SA2COD+If(SA2->A2_COD==M->ZLM_SA2COD,SA2->A2_LOJA,"")' )
 _oStruZLM:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 _aGatAux := FwStruTrigger( 'ZLM_SA2COD' , 'ZLM_SA2NOM' , 'SA2->A2_NOME' , .T. , 'SA2' , 1 , 'xFilial("SA2")+M->(ZLM_SA2COD)' )
@@ -209,7 +206,7 @@ Static Function AGLT012L( _oModel )
 
 Local _nOper		:= _oModel:GetOperation()
 Local _lRet			:= .T.
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
 
 If _nOper == MODEL_OPERATION_DELETE .Or. _nOper == MODEL_OPERATION_UPDATE
 	If ZLM->ZLM_STATUS <> '1'
@@ -219,7 +216,7 @@ If _nOper == MODEL_OPERATION_DELETE .Or. _nOper == MODEL_OPERATION_UPDATE
 	EndIf
 EndIf
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return( _lRet )
 
@@ -235,7 +232,7 @@ Retorno-----------: Nenhum
 */
 Static Function VALIDCOMIT( _oModel )
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _lRet		:= .T.
 Local _cCODSA2	:= ''
 Local _cLOJSA2	:= ''
@@ -256,7 +253,7 @@ EndIf
 If _lRet .And. _dDtVenc < _dDtCred
 	Help(NIL, NIL, "AGLT01205", NIL, "Não é permitido informar uma data de 1º vencimento menor que a data do Crédito!", 1, 0, NIL, NIL, NIL, NIL, NIL, {"Verique as datas informadas!"})
 	_lRet := .F.
-EndIF
+EndIf
 
 If _lRet .And. _nOper == MODEL_OPERATION_INSERT
 	
@@ -287,7 +284,7 @@ If _lRet .And. _nOper == MODEL_OPERATION_INSERT
 	EndIf
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return( _lRet )
 
@@ -303,11 +300,11 @@ Retorno-----------: _cRet - Setor do Fornecedor informado
 */
 User Function AGLT012SET( _cSA2COD , _cSA2LOJ )
 
-Local _aArea	:= GetArea()
-Local _cLinha	:= Posicione( 'SA2' , 1 , xFilial('SA2') + _cSA2COD + IF(SA2->A2_COD==_cSA2COD,SA2->A2_LOJA,_cSA2LOJ), 'A2_L_LI_RO')
+Local _aArea	:= FWGetArea()
+Local _cLinha	:= Posicione( 'SA2' , 1 , xFilial('SA2') + _cSA2COD + If(SA2->A2_COD==_cSA2COD,SA2->A2_LOJA,_cSA2LOJ), 'A2_L_LI_RO')
 Local _cRet		:= Posicione( 'ZL3' , 1 , xFilial('ZL3') + _cLinha				                                     , 'ZL3_SETOR' )
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return( _cRet )
 
@@ -335,7 +332,7 @@ Local _nValPag		:= 0
 Local _nI			:= 0
 Local _nRest		:= 0
 Local _aVenctos		:= {}
-Local _dDtAux		:= StoD('')
+Local _dDtAux		:= SToD('')
 Local _nTxJuro		:= 0
 Local _nTemp		:= 0
 Local _nTemp2		:= 0
@@ -358,7 +355,7 @@ If ( _nValTot <> 0 ) .And. ( _nParc <> 0 )
 			_nValPag *= ( ( _nJuros / 100 ) + 1 )
 		Next _nI
 		
-		_nTxJuro	:= round( ( _nJuros / 100 ) , 3 )
+		_nTxJuro	:= Round( ( _nJuros / 100 ) , 3 )
 		_nTemp		:= ( 1 + _nTxJuro )
 		
 		For _nI:=1 To int(_nParc) - 1
@@ -436,7 +433,7 @@ User Function AGLT012A()
 
 FWExecView( '[ Avaliação da Solicitação ]' , 'AGLT012' , 4 ,, {|| .T. } , {|| AGLT012ATU() } , 010 )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -497,7 +494,7 @@ If Pergunte(_cPerg)
 	Processa( {|| AGLT012DLG() } , 'Aguarde!' , 'Montando a tela de processamento...' )
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -559,7 +556,7 @@ DEFINE MSDIALOG _oDlg TITLE cCadastro From aSize[7],000 to aSize[6],aSize[5] Of 
 	
 ACTIVATE MSDIALOG _oDlg	ON INIT EnchoiceBar(_oDlg,_bOk,_bCancel,,_aButtons) CENTERED
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -578,7 +575,7 @@ Local _cAlias	:= GetNextAlias()
 
 BeginSql alias _cAlias
 	SELECT SA2.A2_COD FORNECE, SA2.A2_LOJA LOJA, SA2.A2_NOME NOME, SUM(ZLD_QTDBOM) TOTAL
-	FROM %table:ZLD% ZLD, %table:SA2% SA2
+	FROM %Table:ZLD% ZLD, %Table:SA2% SA2
 	WHERE ZLD.D_E_L_E_T_ = ' '
 	AND SA2.D_E_L_E_T_ = ' '
 	AND ZLD_FILIAL = %xFilial:ZLD%
@@ -589,10 +586,10 @@ BeginSql alias _cAlias
 	AND A2_L_ATIVO <> 'N'
 	AND ZLD_DTCOLE BETWEEN %exp:MV_PAR02% AND %exp:MV_PAR03%
 	AND ZLD_SETOR = %exp:MV_PAR01%
-	AND ( CASE WHEN SUBSTR( A2_COD , 1 , 1 ) = 'P' THEN ZLD_RETIRO
-			ELSE ZLD_FRETIS END ) = A2_COD
-	AND ( CASE WHEN SUBSTR( A2_COD , 1 , 1 ) = 'P' THEN ZLD_RETILJ
-			ELSE ZLD_LJFRET END ) = A2_LOJA
+	AND ( Case WHEN SubStr( A2_COD , 1 , 1 ) = 'P' THEN ZLD_RETIRO
+			Else ZLD_FRETIS END ) = A2_COD
+	AND ( Case WHEN SubStr( A2_COD , 1 , 1 ) = 'P' THEN ZLD_RETILJ
+			Else ZLD_LJFRET END ) = A2_LOJA
 	GROUP BY A2_COD, A2_LOJA, A2_NOME
 	ORDER BY A2_COD, A2_LOJA
 EndSql
@@ -603,8 +600,8 @@ While (_cAlias)->( !Eof() )
 						(_cAlias)->NOME														,;
 						MV_PAR01															,;
 						AllTrim( Posicione('ZL2',1,xFilial('ZL2')+MV_PAR01,'ZL2_DESCRI') )	,;
-						DtoC( MV_PAR02 )													,;
-						DtoC( MV_PAR03 )													,;
+						DToC( MV_PAR02 )													,;
+						DToC( MV_PAR03 )													,;
 						TransForm( (_cAlias)->TOTAL				, '@E 999,999,999'		)	,;
 						TransForm( MV_PAR09						, '@E 99.99'			)	,;
 						TransForm( (_cAlias)->TOTAL * MV_PAR09	, '@E 999,999,999.99'	)	})
@@ -633,7 +630,7 @@ If ValType(_oLbxAux) == "O"
 	_oLbxAux:Refresh()
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -683,23 +680,23 @@ If !Empty(_aDados)
 					ZLM->ZLM_DTCRED		:= MV_PAR10
 					ZLM->ZLM_DTLIB		:= LastDay( MonthSub( MV_PAR11 , 1 ) )
 					ZLM->ZLM_PAGTO		:= _nValTot
-				ZLM->( MsUnlock() )
+				ZLM->( MSUnLock() )
 				ConfirmSx8()
 				
 				ZLO->( DBSetOrder(1) )
 				ZLO->( RecLock( 'ZLO' , .T. ) )
-					ZLO->ZLO_FILIAL	:= XFILIAL("ZLO")
+					ZLO->ZLO_FILIAL	:= xFilial("ZLO")
 					ZLO->ZLO_COD	:= ZLM->ZLM_COD
 					ZLO->ZLO_ITEM	:= '001'
 					ZLO->ZLO_VECTO	:= ZLM->ZLM_VENCTO
 					ZLO->ZLO_VALOR	:= ZLM->ZLM_VLRPAR
-				ZLO->( MsUnlock() )
+				ZLO->( MSUnLock() )
 			EndIf
 		End Transaction
 	Next _nI
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -751,11 +748,11 @@ Private oOk			:= LoadBitmap( GetResources(), "LBOK" )
 Private oNo			:= LoadBitmap( GetResources(), "LBNO" )
 
 If !Pergunte(cPerg)
-	Return()
+	Return
 EndIf
 
-ZLM->( DbSetOrder(1) )
-ZLM->( DbGoTop() )
+ZLM->( DBSetOrder(1) )
+ZLM->( DBGoTop() )
 
 Processa({|| AGLT012GET( _cTpAplic ) })
 
@@ -763,7 +760,7 @@ If Len( aDados ) == 0
 	MsgStop('Nao Foram encontrados registros de solicitações para o processamento! É preciso que existam solicitações '	+;
 				IIf( _cTpAplic == 1 , '"em aberto"' , '"aprovadas"' )											+;
 				' para processar a '+ IIf( _cTpAplic == 1 , '"Avaliação Múltipla"' , '"Efetivação Múltipla"' ) +'!.' ,"AGLT01210" )
-	Return()
+	Return
 EndIf
 
 aSort( aDados ,,, {|x,y| x[3] < y[3] } )
@@ -793,23 +790,23 @@ DEFINE MSDIALOG oDlg TITLE "Emprestimos - "+ IIf( _cTpAplic == 1 , "Aprovar" , "
 								aDados[oF3:nAt][08]														,;
 								aDados[oF3:nAt][09]														,;
 								aDados[oF3:nAt][10]														,;
-					DtoC( StoD(	aDados[oF3:nAt][13] ) )													,;
-					DtoC( StoD(	aDados[oF3:nAt][14] ) )													,;
+					DToC( SToD(	aDados[oF3:nAt][13] ) )													,;
+					DToC( SToD(	aDados[oF3:nAt][14] ) )													,;
 								aDados[oF3:nAt][15]														}}
 	
 	oF3:bHeaderClick := {|| AGLT012MTD() , oF3:Refresh() }
 	
-	DEFINE SBUTTON FROM 160,010 TYPE 01 ACTION Processa( {|| nOpca := 1 , AGLT012APR( aDados , _cTpAplic ) , oDlg:End() } )	ENABLE OF oDlg
-	DEFINE SBUTTON FROM 160,050 TYPE 02 ACTION ( nOpca := 0 , oDlg:End() )													ENABLE OF oDlg
+	DEFINE SBUTTON FROM 160,010 Type 01 ACTION Processa( {|| nOpca := 1 , AGLT012APR( aDados , _cTpAplic ) , oDlg:End() } )	ENABLE OF oDlg
+	DEFINE SBUTTON FROM 160,050 Type 02 ACTION ( nOpca := 0 , oDlg:End() )													ENABLE OF oDlg
 	
 	@160,090 Button	OemToAnsi( "Visualizar"			) Size 50,11 OF oDlg PIXEL Action {|| ZLM->(DBSeek(xFilial("ZLM")+aDados[oF3:nAt][02])),FWExecView( '[ Avaliação da Solicitação ]' , 'AGLT012' , 1 ,, {|| .T. } ,, 010 ) }
 	@160,150 Button	OemToAnsi( "Imprimir"			) Size 50,11 OF oDlg PIXEL Action {|| U_RGLT030( aDados ) }
 	@160,210 Button	OemToAnsi( "Análise Financeira"	) Size 50,11 OF oDlg PIXEL Action {|| U_RGLT045( aDados[oF3:nAt][11] , aDados[oF3:nAt][12] ) }
 	
-	@162,280 SAY	"Valor Total:"															OF oDlg PIXEL
+	@162,280 Say	"Valor Total:"															OF oDlg PIXEL
 	@160,310 MSGET	oVlrTotal VAR _nVlrTot PICTURE "@E 99,999,999.99" WHEN .F. SIZE 50,10	OF oDlg PIXEL
 	
-	@175,010 SAY	"As linhas que não vieram marcadas é devido aos 50 % da média dos 3 últimos pagamentos para o Fornecedor não ser maior que a sua solicitação." COLORS 255, 16777215 Pixel OF oDlg
+	@175,010 Say	"As linhas que não vieram marcadas é devido aos 50 % da média dos 3 últimos pagamentos para o Fornecedor não ser maior que a sua solicitação." COLORS 255, 16777215 Pixel OF oDlg
 	
 	// Calcula total dos selecionados
 	AGLT012RCL( aDados , 5 )
@@ -817,7 +814,7 @@ DEFINE MSDIALOG oDlg TITLE "Emprestimos - "+ IIf( _cTpAplic == 1 , "Aprovar" , "
 
 ACTIVATE MSDIALOG oDlg CENTERED
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -829,14 +826,14 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User function AGLT012E()
+User Function AGLT012E()
 
 Local nParcelas	:= 0
 Local _lOk		:= .T.
 
 If ZLM->ZLM_STATUS <> "4" .And. ZLM->ZLM_STATUS <> "2"
 	MsgStop("Essa solicitacao nao pode ser Estornada por nao ter sido Efetivada/Aprovada!","AGLT01211")
-	Return()
+	Return
 EndIf
 
 //====================================================================================================
@@ -878,7 +875,7 @@ If ZLM->ZLM_STATUS == '4'
 	EndIf
 	
 	If !MsgYesNo( "Essa rotina irá cancelar a efetivacao dessa solicitacao. Deseja continuar?" )
-		Return()
+		Return
 	EndIf
 	
 	Begin Transaction
@@ -886,11 +883,11 @@ If ZLM->ZLM_STATUS == '4'
     	//====================================================================================================
 	    // Deleta o Título no Financeiro
 	    //====================================================================================================
-	   	If AGLT012DE2( _cPrefixo , ZLM->ZLM_COD , padr("1",TamSx3("E2_PARCELA")[1]) , "NF " , ZLM->ZLM_SA2COD , ZLM->ZLM_SA2LJ , _cNaturez )
+	   	If AGLT012DE2( _cPrefixo , ZLM->ZLM_COD , PadR("1",TamSX3("E2_PARCELA")[1]) , "NF " , ZLM->ZLM_SA2COD , ZLM->ZLM_SA2LJ , _cNaturez )
 	   		// Deleta as Parcelas
 			If ZLM->ZLM_TIPO <> 'P' //Pagamentos não possuem NDF
 				For nParcelas := 1 To Int( ZLM->ZLM_PARC )
-					If !AGLT012DE2( _cPrefixo , ZLM->ZLM_COD , PadR(AllTrim(Str(nParcelas)) , TamSx3("E2_PARCELA")[1]) , "NDF" , ZLM->ZLM_SA2COD , ZLM->ZLM_SA2LJ , _cNaturez )
+					If !AGLT012DE2( _cPrefixo , ZLM->ZLM_COD , PadR(AllTrim(Str(nParcelas)) , TamSX3("E2_PARCELA")[1]) , "NDF" , ZLM->ZLM_SA2COD , ZLM->ZLM_SA2LJ , _cNaturez )
 						_lOk := .F.
 					EndIf
 				Next nParcelas
@@ -902,7 +899,7 @@ If ZLM->ZLM_STATUS == '4'
 		If _lOk
 	  		ZLM->( RecLock( 'ZLM' , .F. ) )
 		    ZLM->ZLM_STATUS := '2'
-		    ZLM->( MsUnLock() )
+		    ZLM->( MSUnLock() )
 		Else
 			MsgStop("Falha ao processar a exclusão dos Títulos no Financeiro! InForme a área de TI/ERP.","AGLT01212")
 		    DisarmTransaction()
@@ -914,18 +911,18 @@ If ZLM->ZLM_STATUS == '4'
 //====================================================================================================
 ElseIf ZLM->ZLM_STATUS == '2'
 	If !MsgYesNo( "Essa rotina irá cancelar a aprovação dessa solicitacao. Deseja continuar?" )
-		Return()
+		Return
 	EndIf
 
 	ZLM->( RecLock( 'ZLM' , .F. ) )
 	    ZLM->ZLM_STATUS := '1'
-	    ZLM->ZLM_DTAPRO := StoD('')
+	    ZLM->ZLM_DTAPRO := SToD('')
 	    ZLM->ZLM_USERAP	:= ''
 	    ZLM->ZLM_NUSEAP	:= ''
-    ZLM->( MsUnLock() )
+    ZLM->( MSUnLock() )
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -937,22 +934,22 @@ Parâmetros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static function AGLT012DE2( _cPrefixo , _cNum , _cParcela , _cTipo , _cForn , _cLoja , _cNaturez )
+Static Function AGLT012DE2( _cPrefixo , _cNum , _cParcela , _cTipo , _cForn , _cLoja , _cNaturez )
 
 Local _aAutoSE2	:= {}
 Local _lOk		:= .T.
 Local _nModAux	:= nModulo
 Local _cModAux	:= cModulo
 
-Private lMsErroAuto := .f.
+Private lMsErroAuto := .F.
 
-AAdd( _aAutoSE2 , { "E2_PREFIXO"	, _cPrefixo		, Nil } )
-AAdd( _aAutoSE2 , { "E2_NUM"		, _cNum			, nil } )
-AAdd( _aAutoSE2 , { "E2_PARCELA"	, _cParcela		, nil } )
-AAdd( _aAutoSE2 , { "E2_TIPO"		, _cTipo		, nil } )
-AAdd( _aAutoSE2 , { "E2_NATUREZ"	, _cNaturez		, nil } )
-AAdd( _aAutoSE2 , { "E2_FORNECE"	, _cForn		, nil } )
-AAdd( _aAutoSE2 , { "E2_LOJA"		, _cLoja		, nil } )
+aAdd( _aAutoSE2 , { "E2_PREFIXO"	, _cPrefixo		, Nil } )
+aAdd( _aAutoSE2 , { "E2_NUM"		, _cNum			, nil } )
+aAdd( _aAutoSE2 , { "E2_PARCELA"	, _cParcela		, nil } )
+aAdd( _aAutoSE2 , { "E2_TIPO"		, _cTipo		, nil } )
+aAdd( _aAutoSE2 , { "E2_NATUREZ"	, _cNaturez		, nil } )
+aAdd( _aAutoSE2 , { "E2_FORNECE"	, _cForn		, nil } )
+aAdd( _aAutoSE2 , { "E2_LOJA"		, _cLoja		, nil } )
 
 nModulo := 6
 cModulo := "FIN"
@@ -1008,7 +1005,7 @@ EndCase
 
 BeginSql alias _cAlias
 	SELECT ZLM_SETOR, ZL2_DESCRI, ZLM_COD, ZLM_SA2COD, ZLM_SA2LJ, A2_NOME, ZLM_TOTAL, ZLM_JUROS, ZLM_JUROS, ZLM_VLRPAR, ZLM_VENCTO, ZLM_DTCRED, ZLM_OBS, ZLM_PARC,
-	(SELECT ROUND(NVL(AVG(VOL),0),2) 
+	(SELECT Round(NVL(AVG(VOL),0),2) 
 		FROM (SELECT ZLE_COD, SUM(ZLD_QTDBOM) VOL
 			FROM %Table:ZLD% ZLD,
 				(SELECT ZLE_COD, ZLE_DTINI, ZLE_DTFIM FROM %Table:ZLE%
@@ -1022,8 +1019,8 @@ BeginSql alias _cAlias
 			AND ZLD_RETIRO = A2_COD
 			AND ZLD_RETILJ = A2_LOJA
 			GROUP BY ZLE_COD)) MEDIA_VOL,
-	(SELECT ROUND(NVL(AVG(VALOR),0), 2) 
-		FROM (SELECT ZLE_COD, SUM(CASE WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL ELSE ZLF_TOTAL * -1 END) VALOR
+	(SELECT Round(NVL(AVG(VALOR),0), 2) 
+		FROM (SELECT ZLE_COD, SUM(Case WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL Else ZLF_TOTAL * -1 END) VALOR
 			FROM %Table:ZLF% ZLF,
 				(SELECT ZLE_COD FROM %Table:ZLE%
 					WHERE D_E_L_E_T_ = ' '
@@ -1036,7 +1033,7 @@ BeginSql alias _cAlias
 			AND ZLF_A2COD = A2_COD
 			AND ZLF_A2LOJA = A2_LOJA
 			GROUP BY ZLE_COD)) MEDIA_VALOR
-	FROM %table:ZLM% ZLM, %table:SA2% SA2, %table:ZL2% ZL2
+	FROM %Table:ZLM% ZLM, %Table:SA2% SA2, %Table:ZL2% ZL2
 	WHERE ZLM.D_E_L_E_T_ = ' '
 	AND SA2.D_E_L_E_T_ = ' '
 	AND ZL2.D_E_L_E_T_ = ' '
@@ -1079,7 +1076,7 @@ EndDo
 
 (_cAlias)->( DBCloseArea() )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1104,14 +1101,14 @@ For _nI := 1 To Len( _aLista )
 	EndIf
 Next _nI
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT012APR
 Autor-------------: Alexandre Villar
 Data da Criacao---: 27/11/2014
-Descrição---------: Rotina que processa a gravação das Avaliações/Efetivações
+Descrição---------: Rotina que Processa a gravação das Avaliações/Efetivações
 Parametros--------: _aGrava	- Dados para a gravação
 ------------------: _cTipo	- Tipo de Processamento ( 1 - Aprovação / 2 - Efetivação )
 Retorno-----------: Nenhum
@@ -1128,7 +1125,7 @@ Local _dMV_DATAFIN:= GetMV( 'MV_DATAFIN' )
 
 ProcRegua( Len( _aGrava ) )
 
-For _nI := 1 to len(_aGrava)
+For _nI := 1 to Len(_aGrava)
 	IncProc( "Gerando Titulo "+ _aGrava[_nI][02] )
 	_lValid := .T.
 	
@@ -1137,22 +1134,22 @@ For _nI := 1 to len(_aGrava)
 		// Processa os registros selecionados - Aprovar/Efetivar
 		//====================================================================================================
 		If _aGrava[_nI][01] == .T.
-			ZLM->( DBSetorder(1) )
-			If ZLM->( DBSeek( XFILIAL("ZLM") + _aGrava[_nI][02] ) )
+			ZLM->( DBSetOrder(1) )
+			If ZLM->( DBSeek( xFilial("ZLM") + _aGrava[_nI][02] ) )
 				//====================================================================================================
 				// Valida a data de liberação para não dar erro no ExecAuto
 				//====================================================================================================
 				If _cTipo == 2
-					IF dDataBase < _dMV_DATAFIN
+					If dDataBase < _dMV_DATAFIN
 						MsgStop("Não é possível efetivar a solicitação ["+ ZLM->ZLM_COD +"]!"+ CRLF			 																		+;
-									"A data de Efetivação ["+ DtoC( dDataBase ) +"] é anterior à data Limite Contábil para lançamentos Financeiros ["+ DtoC(_dMV_DATAFIN) +"]."	,;
+									"A data de Efetivação ["+ DToC( dDataBase ) +"] é anterior à data Limite Contábil para lançamentos Financeiros ["+ DToC(_dMV_DATAFIN) +"]."	,;
 									"AGLT01215")
 						_lValid := .F.
 					EndIf
 					
 					If _lValid .And. dDataBase > ZLM->ZLM_VENCTO
 						MsgStop("Não é possível efetivar a solicitação ["+ ZLM->ZLM_COD +"]!"+ CRLF+;
-									"A data de Efetivação ["+ DtoC( dDataBase ) +"] é posterior à data do 1º Vencimento configurada ["+ DtoC( ZLM->ZLM_VENCTO ) +"]."	,;
+									"A data de Efetivação ["+ DToC( dDataBase ) +"] é posterior à data do 1º Vencimento configurada ["+ DToC( ZLM->ZLM_VENCTO ) +"]."	,;
 									"AGLT01216")
 						_lValid := .F.
 					EndIf
@@ -1172,8 +1169,8 @@ For _nI := 1 to len(_aGrava)
 							aTItens	:= {}
 							
 							ZLO->( DBSetOrder(1) )
-							ZLO->( DBSeek( XFILIAL("ZLM") + ZLM->ZLM_COD ) )
-							While ZLO->( !Eof() ) .And. XFILIAL("ZLM") + ZLM->ZLM_COD == ZLO->(ZLO_FILIAL+ZLO_COD)
+							ZLO->( DBSeek( xFilial("ZLM") + ZLM->ZLM_COD ) )
+							While ZLO->( !Eof() ) .And. xFilial("ZLM") + ZLM->ZLM_COD == ZLO->(ZLO_FILIAL+ZLO_COD)
 								aAdd( aTItens , { ZLO->ZLO_VECTO , ZLO->ZLO_VALOR } )
 								ZLO->( DBSkip() )
 							EndDo
@@ -1181,7 +1178,7 @@ For _nI := 1 to len(_aGrava)
 							lOk := .T.
 							lOk := AGLT012IE2(aTCab,aTItens)
 						EndIf
-					ZLM->( MSUNLOCK() )
+					ZLM->( MSUnLock() )
 				EndIf
 			EndIf
 		
@@ -1189,14 +1186,14 @@ For _nI := 1 to len(_aGrava)
 		// Processa os registros não selecionados - Reprovar
 		//====================================================================================================
 		Else
-			ZLM->( DBSetorder(1) )
-			If ZLM->( DBSeek( XFILIAL("ZLM") + _aGrava[_nI][02] ) )
-				ZLM->( RECLOCK( "ZLM" , .F. ) )
+			ZLM->( DBSetOrder(1) )
+			If ZLM->( DBSeek( xFilial("ZLM") + _aGrava[_nI][02] ) )
+				ZLM->( RecLock( "ZLM" , .F. ) )
 					ZLM->ZLM_DTAPRO := ddatabase
 					ZLM->ZLM_STATUS := "3"
 					ZLM->ZLM_USERAP := _cMatUsr
 					ZLM->ZLM_NUSEAP := _cNUseAp
-				ZLM->( MSUNLOCK() )
+				ZLM->( MSUnLock() )
 			EndIf	
 		EndIf
 
@@ -1207,14 +1204,14 @@ For _nI := 1 to len(_aGrava)
 	End Transaction
 Next _nI
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT012MTD
 Autor-------------: Alexandre Villar
 Data da Criacao---: 27/11/2014
-Descrição---------: Rotina que processa a inversão da seleção ao clicar no cabeçalho do ListBox
+Descrição---------: Rotina que Processa a inversão da seleção ao clicar no cabeçalho do ListBox
 Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
@@ -1233,7 +1230,7 @@ AGLT012RCL( aDados , 5 )
 
 oVlrTotal:Refresh()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1304,7 +1301,7 @@ Begin Transaction
 
 	BeginSql alias _cAlias
 		SELECT COUNT(1) QTD
-		FROM %table:SE2%
+		FROM %Table:SE2%
 		WHERE D_E_L_E_T_ = ' '
 		AND E2_FILIAL = %xFilial:SE2%
 		AND E2_PREFIXO = %exp:_cPrefixo%
@@ -1320,7 +1317,7 @@ Begin Transaction
 				// Gravando título à pagar
 				//====================================================================================================
 				If _nI < Len( aItens )
-					nValor	:= Round( aCab[4] / len(aItens) , 2 )
+					nValor	:= Round( aCab[4] / Len(aItens) , 2 )
 					nRest	+= nValor
 				Else
 					nValor	:= aCab[4] - nRest
@@ -1328,23 +1325,23 @@ Begin Transaction
 				
 				_aAutoSE2 := {}
 				
-				AAdd( _aAutoSE2 , { "E2_PREFIXO"	, _cPrefixo			, nil } )		
-				AAdd( _aAutoSE2 , { "E2_NUM"		, aCab[1]			, nil } )
-				AAdd( _aAutoSE2 , { "E2_PARCELA"	, AllTrim(str(_nI))	, nil } )	
-				AAdd( _aAutoSE2 , { "E2_TIPO"		, _cTipo01			, nil } )
-				AAdd( _aAutoSE2 , { "E2_NATUREZ"	, _cNaturez			, nil } ) 
-				AAdd( _aAutoSE2 , { "E2_FORNECE"	, aCab[2]			, nil } )	
-				AAdd( _aAutoSE2 , { "E2_LOJA"		, aCab[3]			, nil } )	
-				AAdd( _aAutoSE2 , { "E2_EMISSAO"	, aCab[5]			, nil } )
-				AAdd( _aAutoSE2 , { "E2_EMIS1"		, aCab[5]			, nil } )
-				AAdd( _aAutoSE2 , { "E2_VENCTO"		, aItens[_nI,1]		, nil } )
-				AAdd( _aAutoSE2 , { "E2_VALOR"		, nValor			, nil } )
-				AAdd( _aAutoSE2 , { "E2_HIST"		, "GLT "+_DescHist+" PROPRIO " + AllTrim( STR( _nI ) ) +"/"+ AllTrim( STR( Len( aItens ) ) ) , Nil } )
-				AAdd( _aAutoSE2 , { "E2_DATALIB"	, aCab[7]			, nil } )
-				AAdd( _aAutoSE2 , { "E2_USUALIB"	, cUserName			, nil } )
-				AAdd( _aAutoSE2 , { "E2_ACRESC"		, Round( aItens[_nI][02] - nValor , 2 )			, nil } )
-				AAdd( _aAutoSE2 , { "E2_L_SETOR"	, MV_PAR01			, nil } )
-				AAdd( _aAutoSE2 , { "E2_ORIGEM"		, "AGLT012"			, nil } )
+				aAdd( _aAutoSE2 , { "E2_PREFIXO"	, _cPrefixo			, nil } )		
+				aAdd( _aAutoSE2 , { "E2_NUM"		, aCab[1]			, nil } )
+				aAdd( _aAutoSE2 , { "E2_PARCELA"	, AllTrim(Str(_nI))	, nil } )	
+				aAdd( _aAutoSE2 , { "E2_TIPO"		, _cTipo01			, nil } )
+				aAdd( _aAutoSE2 , { "E2_NATUREZ"	, _cNaturez			, nil } ) 
+				aAdd( _aAutoSE2 , { "E2_FORNECE"	, aCab[2]			, nil } )	
+				aAdd( _aAutoSE2 , { "E2_LOJA"		, aCab[3]			, nil } )	
+				aAdd( _aAutoSE2 , { "E2_EMISSAO"	, aCab[5]			, nil } )
+				aAdd( _aAutoSE2 , { "E2_EMIS1"		, aCab[5]			, nil } )
+				aAdd( _aAutoSE2 , { "E2_VENCTO"		, aItens[_nI,1]		, nil } )
+				aAdd( _aAutoSE2 , { "E2_VALOR"		, nValor			, nil } )
+				aAdd( _aAutoSE2 , { "E2_HIST"		, "GLT "+_DescHist+" PROPRIO " + AllTrim( Str( _nI ) ) +"/"+ AllTrim( Str( Len( aItens ) ) ) , Nil } )
+				aAdd( _aAutoSE2 , { "E2_DATALIB"	, aCab[7]			, nil } )
+				aAdd( _aAutoSE2 , { "E2_USUALIB"	, cUserName			, nil } )
+				aAdd( _aAutoSE2 , { "E2_ACRESC"		, Round( aItens[_nI][02] - nValor , 2 )			, nil } )
+				aAdd( _aAutoSE2 , { "E2_L_SETOR"	, MV_PAR01			, nil } )
+				aAdd( _aAutoSE2 , { "E2_ORIGEM"		, "AGLT012"			, nil } )
 				
 				lMsErroAuto := .F.
 				
@@ -1372,20 +1369,20 @@ Begin Transaction
 		//====================================================================================================
 		_aAutoSE2 := {}
 		
-		AAdd( _aAutoSE2 , { "E2_PREFIXO"	, _cPrefixo						, nil } )
-		AAdd( _aAutoSE2 , { "E2_NUM"		, aCab[1]						, nil } )
-		AAdd( _aAutoSE2 , { "E2_PARCELA"	, "1"							, nil } )
-		AAdd( _aAutoSE2 , { "E2_TIPO"		, _cTipo02						, nil } )
-		AAdd( _aAutoSE2 , { "E2_NATUREZ"	, _cNaturez						, nil } )
-		AAdd( _aAutoSE2 , { "E2_FORNECE"	, aCab[2]						, nil } )
-		AAdd( _aAutoSE2 , { "E2_LOJA"		, aCab[3]						, nil } )
-		AAdd( _aAutoSE2 , { "E2_EMISSAO"	, aCab[7]						, nil } )
-		AAdd( _aAutoSE2 , { "E2_EMIS1"		, aCab[7]						, nil } )
-		AAdd( _aAutoSE2 , { "E2_VENCTO"		, aCab[8]						, nil } )
-		AAdd( _aAutoSE2 , { "E2_VALOR"		, aCab[4]						, nil } )
-		AAdd( _aAutoSE2 , { "E2_HIST"		,"GLT "+_DescHist+" PROPRIO"	, nil } )
-		AAdd( _aAutoSE2 , { "E2_L_SETOR"	,MV_PAR01						, nil } )
-		AAdd( _aAutoSE2 , { "E2_ORIGEM"		, "AGLT012"						, nil } )
+		aAdd( _aAutoSE2 , { "E2_PREFIXO"	, _cPrefixo						, nil } )
+		aAdd( _aAutoSE2 , { "E2_NUM"		, aCab[1]						, nil } )
+		aAdd( _aAutoSE2 , { "E2_PARCELA"	, "1"							, nil } )
+		aAdd( _aAutoSE2 , { "E2_TIPO"		, _cTipo02						, nil } )
+		aAdd( _aAutoSE2 , { "E2_NATUREZ"	, _cNaturez						, nil } )
+		aAdd( _aAutoSE2 , { "E2_FORNECE"	, aCab[2]						, nil } )
+		aAdd( _aAutoSE2 , { "E2_LOJA"		, aCab[3]						, nil } )
+		aAdd( _aAutoSE2 , { "E2_EMISSAO"	, aCab[7]						, nil } )
+		aAdd( _aAutoSE2 , { "E2_EMIS1"		, aCab[7]						, nil } )
+		aAdd( _aAutoSE2 , { "E2_VENCTO"		, aCab[8]						, nil } )
+		aAdd( _aAutoSE2 , { "E2_VALOR"		, aCab[4]						, nil } )
+		aAdd( _aAutoSE2 , { "E2_HIST"		,"GLT "+_DescHist+" PROPRIO"	, nil } )
+		aAdd( _aAutoSE2 , { "E2_L_SETOR"	,MV_PAR01						, nil } )
+		aAdd( _aAutoSE2 , { "E2_ORIGEM"		, "AGLT012"						, nil } )
 		
 		lMsErroAuto	:= .F.
 		
@@ -1409,17 +1406,17 @@ Begin Transaction
 		MsgStop("Já foram encontrados títulos para esse fornecedor e o processo será abortado. Acione a TI/Sistemas.","AGLT01219")
 		lok1 := .F.
 	EndIf
-	(_cAlias)->(DbCloseArea())
+	(_cAlias)->(DBCloseArea())
 
-	If lok1 .and. lok2
+	If lok1 .And. lok2
 		//====================================================================================================
 		// Grava solicitação como efetivada
 		//====================================================================================================
-		ZLM->( DBSetorder(1) )
+		ZLM->( DBSetOrder(1) )
 		If ZLM->( DBSeek( xFilial('ZLM') + aCab[1] ) )
 			ZLM->( RecLock( 'ZLM' , .F. ) )
 			ZLM->ZLM_STATUS := "4"
-			ZLM->( MsUnlock() )
+			ZLM->( MSUnLock() )
 		Else
 			MsgStop("Erro ao gravar o Status na Solicitação: ("+ aCab[1] +")! Comunique a área de TI/ERP.","AGLT01220")
 			DisarmTransaction()
@@ -1431,7 +1428,7 @@ EndIf
 
 End Transaction
 
-Return( lok1 .and. lok2 )
+Return( lok1 .And. lok2 )
 
 /*
 ===============================================================================================================================
@@ -1526,7 +1523,7 @@ Local oSay6		:= Nil
 Local oSay7		:= Nil
 Local oFont12b	:= Nil
 Local nopc		:= 0  
-Local _aArea	:= GetArea()       
+Local _aArea	:= FWGetArea()       
 Local lVldTrans	:= .F.   
 Local cGDescri	:= Space(70)
 
@@ -1551,15 +1548,15 @@ Define Font oFont12b   Name "Courier New"       Size 0,-12 Bold  // Tamanho 12 N
 // Monta tela para configuração da transferência
 DEFINE MSDIALOG oDlg TITLE "Transferência de Empréstimos" FROM 000,000 TO 350,425 COLORS 0,16777215 PIXEL
 
-    @ 039, 012 SAY oSay1     PROMPT "Empréstimo:"			SIZE 031,007 OF oDlg COLORS 0,16777215 PIXEL
-	@ 039, 120 SAY oSay1     PROMPT "Filial Dest.:"			SIZE 031,007 OF oDlg COLORS 0,16777215 PIXEL
-    @ 059, 012 SAY oSay2     PROMPT "Fornecedor:"			SIZE 031,007 OF oDlg COLORS 0,16777215 PIXEL
-    @ 059, 120 SAY oSay3     PROMPT "Loja:"       			SIZE 025,007 OF oDlg COLORS 0,16777215 PIXEL
-    @ 079, 012 SAY oSay5     PROMPT "Descrição:"  			SIZE 025,007 OF oDlg COLORS 0,16777215 PIXEL
-    @ 099, 012 SAY oSay4     PROMPT "Setor:"      			SIZE 025,007 OF oDlg COLORS 0,16777215 PIXEL
-	@ 099, 120 SAY oSDescSet PROMPT SubStr(_cDescSet,1,24)	SIZE 175,009 OF oDlg COLORS 0,16777215 PIXEL FONT oFont12b
-    @ 119, 012 SAY oSay6     PROMPT "1 Vencto: "  			SIZE 030,007 OF oDlg COLORS 0,16777215 PIXEL
-    @ 139, 012 SAY oSay7     PROMPT "Observação:"			SIZE 030,007 OF oDlg COLORS 0,16777215 PIXEL
+    @ 039, 012 Say oSay1     PROMPT "Empréstimo:"			SIZE 031,007 OF oDlg COLORS 0,16777215 PIXEL
+	@ 039, 120 Say oSay1     PROMPT "Filial Dest.:"			SIZE 031,007 OF oDlg COLORS 0,16777215 PIXEL
+    @ 059, 012 Say oSay2     PROMPT "Fornecedor:"			SIZE 031,007 OF oDlg COLORS 0,16777215 PIXEL
+    @ 059, 120 Say oSay3     PROMPT "Loja:"       			SIZE 025,007 OF oDlg COLORS 0,16777215 PIXEL
+    @ 079, 012 Say oSay5     PROMPT "Descrição:"  			SIZE 025,007 OF oDlg COLORS 0,16777215 PIXEL
+    @ 099, 012 Say oSay4     PROMPT "Setor:"      			SIZE 025,007 OF oDlg COLORS 0,16777215 PIXEL
+	@ 099, 120 Say oSDescSet PROMPT SubStr(_cDescSet,1,24)	SIZE 175,009 OF oDlg COLORS 0,16777215 PIXEL FONT oFont12b
+    @ 119, 012 Say oSay6     PROMPT "1 Vencto: "  			SIZE 030,007 OF oDlg COLORS 0,16777215 PIXEL
+    @ 139, 012 Say oSay7     PROMPT "Observação:"			SIZE 030,007 OF oDlg COLORS 0,16777215 PIXEL
     
     @ 035, 044 MSGET oGEmprest VAR cGEmprest	SIZE 060,010 OF oDlg COLORS 0, 16777215 PIXEL F3 "ZLM" Valid !Empty(cGEmprest) .And. ExistCPO("ZLM", cGEmprest, 1) 
 	@ 035, 145 MSGET oGEmprest VAR cGFil		SIZE 060,010 OF oDlg COLORS 0, 16777215 PIXEL F3 "SM0" Valid !Empty(cGFil) .And. ExistCPO("SM0", cEmpAnt+cGFil, 1) 
@@ -1572,14 +1569,14 @@ DEFINE MSDIALOG oDlg TITLE "Transferência de Empréstimos" FROM 000,000 TO 350,42
 
 ACTIVATE MSDIALOG oDlg CENTERED ON INIT EnchoiceBar(oDlg,{|| MsgRun("Realizando a validação da transferência...",,{||CursorWait(),lVldTrans:=VldTransf(cGEmprest,cGFornec,cGLjForn,cMObs,dDtPriVen,cGSetor,cGFil),CursorArrow()}),IIf(lVldTrans,Eval({|| nopc:=1,oDlg:End()}),)}, {||oDlg:End()},,)    
 
-// Caso confirmado, processa a transferência
+// Caso confirmado, Processa a transferência
 If nopc == 1
  	MsgRun( "Processando a transferência..." , 'Aguarde!' , {|| CursorWait() , ProcTransf() , CursorArrow() } )
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1703,7 +1700,7 @@ Return( _lRet )
 Programa----------: ProcTransf
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 29/11/2010
-Descrição---------: Rotina que processa a transferência do empréstimo
+Descrição---------: Rotina que Processa a transferência do empréstimo
 Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
@@ -1836,7 +1833,7 @@ Else
 					ZLM->ZLM_DATTRA := Date()
 					ZLM->ZLM_HORTRA := Time()
 					ZLM->ZLM_OBSTRA := cMObs
-        			ZLM->( MsUnlock() )
+        			ZLM->( MSUnLock() )
         		EndIf
         		
        			MsgRun( "Processando inclusões no Financeiro..." , 'Aguarde!' , {|| CursorWait() , IncSE2(_cFilOri) , CursorArrow() } )
@@ -1863,14 +1860,14 @@ Else
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: BaixaSE2
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 29/11/2010
-Descrição---------: Rotina que processa as baixas de Títulos via ExecAuto
+Descrição---------: Rotina que Processa as baixas de Títulos via ExecAuto
 Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
@@ -1890,7 +1887,7 @@ Private lMsHelpAuto:= .T.
 //==========================================================
 DBSelectArea("SE2")
 SE2->( DBSetOrder(1) )
-If SE2->( DBSeek( xFILIAL("SE2") + cPrefixo + cNroTit + cParcela + cTipo + cFornec + cLjForn ) )
+If SE2->( DBSeek( xFilial("SE2") + cPrefixo + cNroTit + cParcela + cTipo + cFornec + cLjForn ) )
 	If Empty(SE2->E2_DATALIB) //Se nao foi liberado ainda
 		RecLock("SE2",.F.)
 		SE2->E2_DATALIB := dDataBase
@@ -1911,7 +1908,7 @@ aTitulo := {	{ "E2_PREFIXO"		, cPrefixo							, Nil },;
 				{ "AUTMOTBX"		, cMotBaixa							, Nil },;
 				{ "AUTDTBAIXA"		, dDataBase							, Nil },;
 				{ "AUTDTCREDITO"	, dDataBase							, Nil },;
-				{ "AUTBENEF"		, cFornec +" - "+ ALLTRIM(cA2Nome)	, Nil },;
+				{ "AUTBENEF"		, cFornec +" - "+ AllTrim(cA2Nome)	, Nil },;
 				{ "AUTHIST"			, cHist								, Nil },;
 				{ "AUTVLRPG"		, nVlrBx							, Nil } }
 
@@ -1924,7 +1921,7 @@ cModulo := "FIN"
 // SigaAuto de Baixa de Contas a Pagar
 MSExecAuto( {|x,y| Fina080(x,y) } , aTitulo , 3 )
 
-SE2->( MsUnLock() )
+SE2->( MSUnLock() )
 
 // Restaura o modulo em uso
 nModulo := nModAnt
@@ -1945,7 +1942,7 @@ Return
 Programa----------: incEmprest
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 29/11/2010
-Descrição---------: Rotina que processa a inclusão de empréstimos
+Descrição---------: Rotina que Processa a inclusão de empréstimos
 Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
@@ -1965,7 +1962,7 @@ If SA2->( DBSeek( xFilial("SA2") + cGFornec + cGLjForn ) )
 		ZLM->ZLM_SA2NOM	:= SA2->A2_NOME
 		ZLM->ZLM_DATA	:= dDataBase
 		ZLM->ZLM_OBS	:= "Transferência: "+ _cFilOri+"-"+cGEmprest
-		ZLM->ZLM_VENCTO	:= StoD( _aTitulos[1][8] ) // Passa o menor vencimento
+		ZLM->ZLM_VENCTO	:= SToD( _aTitulos[1][8] ) // Passa o menor vencimento
 		ZLM->ZLM_TOTAL	:= nTotSaldo-_nTotAcDc
 		ZLM->ZLM_PARC	:= Len( _aTitulos )
 		ZLM->ZLM_JUROS	:= _nJuros
@@ -1984,7 +1981,7 @@ If SA2->( DBSeek( xFilial("SA2") + cGFornec + cGLjForn ) )
 		ZLM->ZLM_DATTRA	:= Date()
 		ZLM->ZLM_HORTRA	:= Time()
 		ZLM->ZLM_OBSTRA	:= cMObs
-	ZLM->( MsUnlock() )
+	ZLM->( MSUnLock() )
 	
 	//=======================================
 	// Gera as NDF que o fornecedor ira pagar
@@ -1994,10 +1991,10 @@ If SA2->( DBSeek( xFilial("SA2") + cGFornec + cGLjForn ) )
 		    ZLO->ZLO_FILIAL	:= xFilial("ZLO")
 			ZLO->ZLO_COD	:= _nCodEmp
 			ZLO->ZLO_ITEM	:= StrZero( _nX , 3 )
-			ZLO->ZLO_VECTO	:= StoD( _aTitulos[_nX][8] )
+			ZLO->ZLO_VECTO	:= SToD( _aTitulos[_nX][8] )
 			ZLO->ZLO_VALOR	:= _aTitulos[_nX][9]+_aTitulos[_nX][13]+_aTitulos[_nX][14]
 		    ZLO->ZLO_CHAVET	:= _cFilOri + _aTitulos[_nX][1] + _aTitulos[_nX][3] + _aTitulos[_nX][4] + _aTitulos[_nX][2] + _aTitulos[_nX][5] + _aTitulos[_nX][6]
-		ZLO->( MsUnlock() )
+		ZLO->( MSUnLock() )
 	Next _nX
 		
 	ConfirmSx8()
@@ -2010,7 +2007,7 @@ Else
 	MsgStop("Nao foi encontrado os dados do cadastro do fornecedor indicado para gerar o(a) " + _cTipo + "  de transferência. Favor checar se os dados foram corretamente inseridos.","AGLT01232")
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2032,7 +2029,7 @@ Private lMsErroAuto := .F.
 
 BeginSql alias _cAlias
 	SELECT COUNT(1) NREG
-	FROM %table:SE2%
+	FROM %Table:SE2%
 	WHERE D_E_L_E_T_ = ' '
 	AND E2_FILIAL = %exp:_cFilOri%
 	AND E2_PREFIXO = %exp:_cPrefixo%
@@ -2046,24 +2043,24 @@ If(_cAlias)->NREG == 0
 	For _nX := 1 to Len( _aTitulos )
 		_aAutoSE2 := {}
 		
-		AAdd( _aAutoSE2 , { "E2_PREFIXO"	, _cPrefixo									, Nil } )
-		AAdd( _aAutoSE2 , { "E2_NUM"		, _nCodEmp									, Nil } )
-		AAdd( _aAutoSE2 , { "E2_PARCELA"	, alltrim( str(_nX) )						, Nil } )
-		AAdd( _aAutoSE2 , { "E2_TIPO"		, _cTipo01									, Nil } )
-		AAdd( _aAutoSE2 , { "E2_NATUREZ"	, _cNaturez									, Nil } )
-		AAdd( _aAutoSE2 , { "E2_FORNECE"	, cGFornec									, Nil } )
-		AAdd( _aAutoSE2 , { "E2_LOJA"		, cGLjForn									, Nil } )
-		AAdd( _aAutoSE2 , { "E2_EMISSAO"	, dDataBase									, Nil } )
-		AAdd( _aAutoSE2 , { "E2_EMIS1"		, dDataBase									, Nil } )
-		AAdd( _aAutoSE2 , { "E2_VENCTO"		, DataValida(StoD( _aTitulos[_nX][8] ))		, Nil } )
-		AAdd( _aAutoSE2 , { "E2_VALOR"		, _aTitulos[_nX][9]							, Nil } )
-		AAdd( _aAutoSE2 , { "E2_HIST"		, "TRANSFERENCIA " + Upper(_cTipo) + " :" + _cFilori+"-"+cGEmprest	, Nil } )
-		AAdd( _aAutoSE2 , { "E2_DATALIB"	, StoD(_aTitulos[_nX][12])					, Nil } )
-		AAdd( _aAutoSE2 , { "E2_USUALIB"	, cUserName									, Nil } )
-		AAdd( _aAutoSE2 , { "E2_ACRESC"		, _aTitulos[_nX][13]						, Nil } )
-		AAdd( _aAutoSE2 , { "E2_DECRESC"	, _aTitulos[_nX][14]						, Nil } )
-		AAdd( _aAutoSE2 , { "E2_L_SETOR"	, cGSetor									, Nil } )
-		AAdd( _aAutoSE2 , { "E2_ORIGEM"		, "AGLT012"									, nil } )
+		aAdd( _aAutoSE2 , { "E2_PREFIXO"	, _cPrefixo									, Nil } )
+		aAdd( _aAutoSE2 , { "E2_NUM"		, _nCodEmp									, Nil } )
+		aAdd( _aAutoSE2 , { "E2_PARCELA"	, AllTrim( Str(_nX) )						, Nil } )
+		aAdd( _aAutoSE2 , { "E2_TIPO"		, _cTipo01									, Nil } )
+		aAdd( _aAutoSE2 , { "E2_NATUREZ"	, _cNaturez									, Nil } )
+		aAdd( _aAutoSE2 , { "E2_FORNECE"	, cGFornec									, Nil } )
+		aAdd( _aAutoSE2 , { "E2_LOJA"		, cGLjForn									, Nil } )
+		aAdd( _aAutoSE2 , { "E2_EMISSAO"	, dDataBase									, Nil } )
+		aAdd( _aAutoSE2 , { "E2_EMIS1"		, dDataBase									, Nil } )
+		aAdd( _aAutoSE2 , { "E2_VENCTO"		, DataValida(SToD( _aTitulos[_nX][8] ))		, Nil } )
+		aAdd( _aAutoSE2 , { "E2_VALOR"		, _aTitulos[_nX][9]							, Nil } )
+		aAdd( _aAutoSE2 , { "E2_HIST"		, "TRANSFERENCIA " + Upper(_cTipo) + " :" + _cFilori+"-"+cGEmprest	, Nil } )
+		aAdd( _aAutoSE2 , { "E2_DATALIB"	, SToD(_aTitulos[_nX][12])					, Nil } )
+		aAdd( _aAutoSE2 , { "E2_USUALIB"	, cUserName									, Nil } )
+		aAdd( _aAutoSE2 , { "E2_ACRESC"		, _aTitulos[_nX][13]						, Nil } )
+		aAdd( _aAutoSE2 , { "E2_DECRESC"	, _aTitulos[_nX][14]						, Nil } )
+		aAdd( _aAutoSE2 , { "E2_L_SETOR"	, cGSetor									, Nil } )
+		aAdd( _aAutoSE2 , { "E2_ORIGEM"		, "AGLT012"									, nil } )
 		
 		lMsErroAuto := .F.
 		
@@ -2103,7 +2100,7 @@ Retorno---------: Nenhum
 */
 Static Function validSetor()
 
-Local aArea     := GetArea()
+Local aArea     := FWGetArea()
 Local _lRet     := .F.
 
 If SubStr( cGFornec , 1 , 1 ) == 'P'
@@ -2120,7 +2117,7 @@ If _lRet
 EndIf
 
 ZL2->( DBCloseArea() )
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return(_lRet)
 
@@ -2137,7 +2134,7 @@ Retorno---------: _lRet
 Static Function AGLT012VLF( cGFornec , cGLjForn , cGDescri )
 
 Local _lRet := .T.
-Local _cChave := IIF(Empty(cGLjForn),cGFornec,cGFornec+cGLjForn)
+Local _cChave := IIf(Empty(cGLjForn),cGFornec,cGFornec+cGLjForn)
 
 DBSelectArea("SA2")
 SA2->( DBSetOrder(1) )
@@ -2183,10 +2180,10 @@ Private _cCodEmpOr	:= ""
 Private _cTipo		:= ""
 
 If !Pergunte(cPerg,.T.) 
-     return
+     Return
 EndIf      
 
-dBSetOrder(1)
+DBSetOrder(1)
 
 Processa( {||lProcEstor:=vldEstorno()}/*bAction*/, "Aguarde..."/*cTitle */, "Processando validações para realizar o estorno!"/*cMsg */,.F./*lAbort */)
      
@@ -2209,12 +2206,12 @@ Retorno-----------: Nenhum
 */
 Static Function vldEstorno()   
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _lRet		:= .T.
 Local _cAlias	:= GetNextAlias()
 Local _cFilOri 	:= cFilAnt
 
-If ZLM->(DbSeek(xFilial('ZLM')+MV_PAR01)) .And. ZLM->ZLM_STATUS == "6"
+If ZLM->(DBSeek(xFilial('ZLM')+MV_PAR01)) .And. ZLM->ZLM_STATUS == "6"
 	_cCodEmp	:= ZLM->ZLM_COD   //Armazena o codigo do emprestimo transferido a ser estornado
 	_cCodForn	:= ZLM->ZLM_SA2COD
 	_cLjForn	:= ZLM->ZLM_SA2LJ      
@@ -2241,7 +2238,7 @@ If ZLM->(DbSeek(xFilial('ZLM')+MV_PAR01)) .And. ZLM->ZLM_STATUS == "6"
 	//Verifica se o mvimento a ser estornado sofre alguma baixa, pois somente podera ser realizado o estorno de um movimento que não sofreu nenhuma baixa
 	BeginSql alias _cAlias
 		SELECT COUNT(1) QTD
-		FROM %table:SE2%
+		FROM %Table:SE2%
 		WHERE D_E_L_E_T_ = ' '
 		AND E2_FILIAL = %exp:_cFilOri%
 		AND E2_PREFIXO = %exp:_cPrefixo%
@@ -2261,10 +2258,10 @@ Else
 	_lRet:= .F.
 EndIf
 
-(_cAlias)->(DbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 cFilAnt := _cFilOri
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return _lRet     
 
@@ -2325,7 +2322,7 @@ Static Function ExcluiSE2()
 
 Local nModAnt	:= nModulo
 Local cModAnt	:= cModulo
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _aAutoSE2	:= {}
 Local _nContReg	:= 0
 Local _cAlias	:= GetNextAlias()
@@ -2334,7 +2331,7 @@ Private lMsHelpAuto:= .T.
 
 BeginSql alias _cAlias
 	SELECT E2_PREFIXO, E2_NUM, E2_PARCELA, E2_TIPO, E2_FORNECE, E2_LOJA
-	FROM %table:SE2%
+	FROM %Table:SE2%
 	WHERE D_E_L_E_T_ = ' '
 	AND E2_FILIAL = %xFilial:SE2%
 	AND E2_PREFIXO = %exp:_cPrefixo%
@@ -2344,16 +2341,16 @@ BeginSql alias _cAlias
 EndSql
 	
 COUNT TO _nContReg //Contabiliza o numero de registros encontrados pela query  
-(_cAlias)->(DbGoTop())
+(_cAlias)->(DBGoTop())
 
 //=============================================
 //Econtrou registros para realizar a exclusao
 //=============================================
 If _nContReg > 0
 	While (_cAlias)->(!Eof()) .And. !lDeuErro
-		DbSelectArea("SE2")
-		SE2->(DbSetOrder(1))
-		If SE2->(DbSeek(xFILIAL("SE2")+(_cAlias)->(E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA)))
+		DBSelectArea("SE2")
+		SE2->(DBSetOrder(1))
+		If SE2->(DBSeek(xFilial("SE2")+(_cAlias)->(E2_PREFIXO+E2_NUM+E2_PARCELA+E2_TIPO+E2_FORNECE+E2_LOJA)))
 			
 			//=============================================
 			//Array com os dados a serem passados para o SigaAuto
@@ -2392,16 +2389,16 @@ If _nContReg > 0
 			cModulo := cModAnt           
 		EndIf	
 	
-		(_cAlias)->(DbSkip())
+		(_cAlias)->(DBSkip())
 	EndDo  
-(_cAlias)->(DbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Else
 	lDeuErro := .T.
 	MsgStop("Não foi(ram) econtrado(s) título(s) no financeiro para realizar a exclusão. Favor acionar a área de TI/Sistemas.","AGLT01240")
 EndIf   
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return  
 
@@ -2419,7 +2416,7 @@ Static Function CancBxSE2()
 
 Local nModAnt		:= nModulo
 Local cModAnt		:= cModulo
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
 Local _nContReg		:= 0      
 Local _cMotBaixa	:= GetMv("IT_MOTBXTR") 
 Local _aTitulo		:= {}
@@ -2437,14 +2434,14 @@ Private lMsHelpAuto	:= .T.
 
 BeginSql alias _cAliasZLO
 	SELECT ZLO_VALOR,ZLO_CHAVET
-	FROM %table:ZLO%
+	FROM %Table:ZLO%
 	WHERE D_E_L_E_T_ = ' '
 	AND ZLO_FILIAL = %xFilial:ZLO%
 	AND ZLO_COD = %exp:_cCodEmp%
 EndSql
 	
 COUNT TO _nContReg //Contabiliza o numero de registros encontrados pela query  
-(_cAliasZLO)->(DbGoTop())
+(_cAliasZLO)->(DBGoTop())
 
 If _nContReg > 0
 	While !(_cAliasZLO)->(Eof()) .And. !lDeuErro
@@ -2463,7 +2460,7 @@ If _nContReg > 0
 			//============================================================================================
 			BeginSql alias _cAliasSE5
 				SELECT E5_FILIAL,E5_PREFIXO,E5_NUMERO,E5_PARCELA,E5_TIPO,E5_VALOR,E5_SEQ,E5_MOTBX,E5_DATA,E5_CLIFOR,E5_LOJA
-				FROM %table:SE5%
+				FROM %Table:SE5%
 				WHERE D_E_L_E_T_ = ' '
 				AND E5_TIPODOC = 'BA'
 				AND E5_SITUACA <> 'C'
@@ -2479,11 +2476,11 @@ If _nContReg > 0
 			EndSql
 
 			COUNT TO _cContReg //Contabiliza o numero de registros encontrados pela query  
-			(_cAliasSE5)->(DbGoTop())
+			(_cAliasSE5)->(DBGoTop())
 			If _cContReg > 0        
 				While !(_cAliasSE5)->(Eof()) .And. !lDeuErro
-					DbSelectArea("SE2")
-					SE2->(DbSetOrder(1))
+					DBSelectArea("SE2")
+					SE2->(DBSetOrder(1))
 					
 					_aTitulo := {{"E2_PREFIXO",(_cAliasSE5)->E5_PREFIXO						,Nil},;
 					{"E2_NUM"	    ,(_cAliasSE5)->E5_NUMERO          						,Nil},;
@@ -2526,9 +2523,9 @@ If _nContReg > 0
 					  	Mostraerro()
 				    EndIf       				    		
 													
-					(_cAliasSE5)->(DbSkip())			
+					(_cAliasSE5)->(DBSkip())			
 				EndDo
-				(_cAliasSE5)->(DbCloseArea())
+				(_cAliasSE5)->(DBCloseArea())
 			Else
 				lDeuErro := .T.
 				MsgStop("Não foram econtrados dados para a realização do cancelamento das baixas no financeiro do(a) " + _cTipo + " de origem. Favor acionar a equipe de TI/Sistemas.","AGLT01242")
@@ -2538,9 +2535,9 @@ If _nContReg > 0
 			MsgStop("A chave de estorno do(a) " + _cTipo +" " + _cCodEmp + " esta vazia. Favor acionar a equipe de TI/Sistemas.", "AGLT01243")
 		EndIf	
 		
-		(_cAliasZLO)->(DbSkip())
+		(_cAliasZLO)->(DBSkip())
 	EndDo
-	(_cAliasZLO)->(DbCloseArea())	  
+	(_cAliasZLO)->(DBCloseArea())	  
 //=============================================================
 //Nao encontrou dados do emprestimo de origem
 //=============================================================
@@ -2550,7 +2547,7 @@ Else
 EndIf
 cFilAnt := _cFilOri
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -2566,23 +2563,23 @@ Retorno-----------: Nenhum
 */
 Static Function ProcZLM()
 
-Local _aArea:= GetArea()
+Local _aArea:= FWGetArea()
 Local _cFilOri := ""
 
 //Efetua exclusao do cabecalho do emprestimo transferido bem como de seus itens
-If ZLM->(DbSeek(xFilial("ZLM") + _cCodEmp))
+If ZLM->(DBSeek(xFilial("ZLM") + _cCodEmp))
 	_cFilOri := ZLM->ZLM_FILTRA
 	ZLM->(RecLock("ZLM",.F.)) 
 		ZLM->(dbDelete())
-	ZLM->(MsUnlock())    
+	ZLM->(MSUnLock())    
 	
-	ZLO->(DbSetOrder(1))
-	If ZLO->(DbSeek(xFilial("ZLO") + _cCodEmp))  
+	ZLO->(DBSetOrder(1))
+	If ZLO->(DBSeek(xFilial("ZLO") + _cCodEmp))  
 		While !ZLO->(Eof()) .And. xFilial("ZLO") == ZLO->ZLO_FILIAL .And. _cCodEmp == ZLO->ZLO_COD
 			ZLO->(RecLock("ZLO",.F.))    
 				ZLO->(dbDelete())  
-			ZLO->(MsUnlock()) 
-		ZLO->(DbSkip())
+			ZLO->(MSUnLock()) 
+		ZLO->(DBSkip())
 		EndDo  
 	//Nao foram encontrados os dados dos itens do emprestimo para realizar a sua exclusao
 	Else  
@@ -2603,7 +2600,7 @@ If !lDeuErro
 	ZLM->(dbCommit()) 
 	ZLO->(dbCommit()) 
 
-	If ZLM->(dbSeek(_cFilOri + _cCodEmpOr))
+	If ZLM->(DBSeek(_cFilOri + _cCodEmpOr))
 		ZLM->(RecLock("ZLM",.F.))
 	 		ZLM->ZLM_STATUS:= "4" //Efetivado
         	ZLM->ZLM_CODTRA:= ""
@@ -2612,7 +2609,7 @@ If !lDeuErro
 			ZLM->ZLM_DATTRA:= CtoD("")
 			ZLM->ZLM_HORTRA:= ""
 			ZLM->ZLM_OBSTRA:= ""
-		ZLM->(MsUnlock())
+		ZLM->(MSUnLock())
 	Else
 		lDeuErro := .T.
 		Help(NIL, NIL, "AGLT01247", NIL, "Não foram encontrados os dados do cabecalho do(A)" + _cTipo +" " + _cCodEmp + " para realizar a sua alteração na tabela ZLM.";
@@ -2620,7 +2617,7 @@ If !lDeuErro
 	EndIf
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -2653,17 +2650,17 @@ Private nTotImpost:= 0
 Private nTotAdto  := 0
 Private aBaixaSE5 := {}
 
-DbSelectArea("SE2")
-SE2->(DbSetOrder(1))
-SE2->(DbSeek(xFilial("SE2")+cPrefixo+cNum+cParcela+cTipo+cFor+cLoja))
+DBSelectArea("SE2")
+SE2->(DBSetOrder(1))
+SE2->(DBSeek(xFilial("SE2")+cPrefixo+cNum+cParcela+cTipo+cFor+cLoja))
 
 //Funcao Padrao do Sistema que retorna um array com as baixas a serem canceladas
 aBaixaSE5 := Sel080Baixa("VL /V2 /BA /RA /CP /LJ /NCC/",cPrefixo,cNum,cParcela,cTipo,@nTotAdto,@lBaixaAbat,cFor,cLoja,@lBxCec,.T.,@lNotBax,@nTotImpost,@lAglImp)
-For nPos := 1 to len(aBaixaSE5)
-	If Substr(aBaixaSE5[nPos],LEN(aBaixaSE5[nPos])-1,2) == cSeq
+For nPos := 1 to Len(aBaixaSE5)
+	If SubStr(aBaixaSE5[nPos],Len(aBaixaSE5[nPos])-1,2) == cSeq
 		nRet := nPos
 		Exit
-	Endif
+	EndIf
 Next nPos
 
 Return nRet

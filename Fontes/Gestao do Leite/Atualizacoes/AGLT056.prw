@@ -2,18 +2,17 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex          | 26/12/2024 | Chamado 48915. Ajustes para a integração WebService Italac x Evomilk
-Julio Paz     | 11/02/2025 | Chamado 49770. Desenvolvimento de Rotina para o Usuário Reenviar Produtores, Associações ou 
-              |            | Cooperativas informando Código e Loja, CNPJ e Setor.
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Julio Paz     |21/08/2025| Chamado 48915. Ajustes na rotina para chamar funções do Cia do Leite quando usuário estiver na 
+              |          | integrção Cia do Leite e da Evomilk quando o usuário estiver na integração Evomilk.
+Julio Paz     |23/09/2025| Chamado 51973. Recompilar este fonte para atualização do ambiente de produção.
 ===============================================================================================================================
 */
 
-#include "APWEBSRV.CH"  
-#Include 'Protheus.ch'  
-#INCLUDE "TBICONN.CH"   
+#Include "APWEBSRV.CH"  
+#Include "TOTVS.ch"  
 
 /*
 ===============================================================================================================================
@@ -31,74 +30,74 @@ User Function AGLT056()
  Local _aParRet:= {}
  Local _aOpcoes:= {}
  Local nI As Numeric
- AADD( _aOpcoes , "1–Integrações Evomilk")
- AADD( _aOpcoes , "2–Integrações Cia do Leite")
- AADD( _aOpcoes , "3–SEM FILTRO") 
+ aAdd( _aOpcoes , "1.Integrações Evomilk")
+ aAdd( _aOpcoes , "2.Integrações Cia do Leite")
+ aAdd( _aOpcoes , "3.SEM FILTRO") 
  MV_PAR01:=1 
 
- AADD( _aParAux , { 3 , "Filtrar", MV_PAR01, _aOpcoes, 99, "", .T., .T. , .T. } )
+ aAdd( _aParAux , { 3 , "Filtrar", MV_PAR01, _aOpcoes, 99, "", .T., .T. , .T. } )
 
  For nI := 1 To Len( _aParAux )
      aAdd( _aParRet , _aParAux[nI][03] )
  Next nI
  
  _cFiltro:=NIL
- IF !ParamBox( _aParAux , "FILTROS" , @_aParRet,,, .T. , , , , , .T. , .T. )
-    RETURN .F.///////////////////// RETORNA //////////////////////////
+ If !ParamBox( _aParAux , "FILTROS" , @_aParRet,,, .T. , , , , , .T. , .T. )
+    Return .F.///////////////////// RETORNA //////////////////////////
  EndIf
  _cFiltroSQL:=""//USADO NO U_MGLT32OM() E U_MGLT29OM()
  cCadastro := "Produtores Integrados para os Sistemas Cia do Leite e/ou Evomilk"   
 
  Private aRotina := {}
- Aadd(aRotina,{"Pesquisar"                                                    ,"AxPesqui"       ,0,1})
- Aadd(aRotina,{"Visualizar"                                                   ,"AxVisual"       ,0,2})
- Aadd(aRotina,{"Produtores Aceitos"                                           ,"U_AGLT056V('A')",0,2})
- Aadd(aRotina,{"Produtores Rejeitados"                                        ,"U_AGLT056V('R')",0,2})
- Aadd(aRotina,{"Gera Arquivo Texto Produtores Ativos/Inativos"                ,'U_MGLT29OM("A")',0,2})
- Aadd(aRotina,{"Gera Arquivo Texto Produtores Usuarios Tanques Col."          ,'U_MGLT29OM("B")',0,2})
- Aadd(aRotina,{"Gera Arquivo Texto Produtores Mais de Uma Propriedade"        ,'U_MGLT29OM("C")',0,2})
+ aAdd(aRotina,{"Pesquisar"                                                    ,"AxPesqui"       ,0,1})
+ aAdd(aRotina,{"Visualizar"                                                   ,"AxVisual"       ,0,2})
+ aAdd(aRotina,{"Produtores Aceitos"                                           ,"U_AGLT056V('A')",0,2})
+ aAdd(aRotina,{"Produtores Rejeitados"                                        ,"U_AGLT056V('R')",0,2})
+ aAdd(aRotina,{"Gera Arquivo Texto Produtores Ativos/Inativos"                ,'U_MGLT29OM("A")',0,2})
+ aAdd(aRotina,{"Gera Arquivo Texto Produtores Usuarios Tanques Col."          ,'U_MGLT29OM("B")',0,2})
+ aAdd(aRotina,{"Gera Arquivo Texto Produtores Mais de Uma Propriedade"        ,'U_MGLT29OM("C")',0,2})
  
- IF MV_PAR01 <> 3
-    IF MV_PAR01 = 1 
+ If MV_PAR01 <> 3
+    If MV_PAR01 = 1 
        _cFiltro:=" ZBH_WEBINT = 'E' "
        _cFiltroSQL:=" AND ZBH_WEBINT = 'E' "//USADO NO U_MGLT32OM() E U_MGLT29OM()
        cCadastro := "Produtores Integrados para o Sistema Evomilk"   
-       Aadd(aRotina,{"Gera Arquivo Texto Produtores Rejeitados nas Integrações"     ,'U_MGLT32OM("D")',0,2})
-       Aadd(aRotina,{"Gera Arquivo Texto Produtores Aceitos nas Integrações"        ,'U_MGLT32OM("E")',0,2})
-    ELSE
+       aAdd(aRotina,{"Gera Arquivo Texto Produtores Rejeitados nas Integrações"     ,'U_MGLT32OM("D")',0,2})
+       aAdd(aRotina,{"Gera Arquivo Texto Produtores Aceitos nas Integrações"        ,'U_MGLT32OM("E")',0,2})
+    Else
        _cFiltro:=" ZBH_WEBINT <> 'E' "
        _cFiltroSQL:=" AND ZBH_WEBINT <> 'E' "//USADO NO U_MGLT32OM() E U_MGLT29OM()
        cCadastro := "Produtores Integrados para o Sistema Cia do Leite"   
-       Aadd(aRotina,{"Gera Arquivo Texto Produtores Rejeitados nas Integrações"     ,'U_MGLT29OM("D")',0,2})
-       Aadd(aRotina,{"Gera Arquivo Texto Produtores Aceitos nas Integrações"        ,'U_MGLT29OM("E")',0,2})
-       Aadd(aRotina,{"Gera Arquivo Texto Associações/Cooperativas Ativas e Inativas",'U_MGLT29OM("H")',0,2})
+       aAdd(aRotina,{"Gera Arquivo Texto Produtores Rejeitados nas Integrações"     ,'U_MGLT29OM("D")',0,2})
+       aAdd(aRotina,{"Gera Arquivo Texto Produtores Aceitos nas Integrações"        ,'U_MGLT29OM("E")',0,2})
+       aAdd(aRotina,{"Gera Arquivo Texto Associações/Cooperativas Ativas e Inativas",'U_MGLT29OM("H")',0,2})
 
-       Aadd(aRotina,{"Reenviar Produtor Comum",'U_AGLT056A("PRD_COMUM")',0,2})
-       Aadd(aRotina,{"Reenviar Associação/Cooperativa por Código/Loja",'U_AGLT056A("ASS_CODIGO_LOJA")',0,2})
-       Aadd(aRotina,{"Reenviar Associação/Cooperativa por CNPJ",'U_AGLT056A("ASS_CNPJ")',0,2})
-       Aadd(aRotina,{"Reenviar Produtor por Setor",'U_AGLT056A("SETOR")',0,2})
+       aAdd(aRotina,{"Reenviar Produtor Comum",'U_AGLT056A("PRD_COMUM")',0,2})
+       aAdd(aRotina,{"Reenviar Associação/Cooperativa por Código/Loja",'U_AGLT056A("ASS_CODIGO_LOJA")',0,2})
+       aAdd(aRotina,{"Reenviar Associação/Cooperativa por CNPJ",'U_AGLT056A("ASS_CNPJ")',0,2})
+       aAdd(aRotina,{"Reenviar Produtor por Setor",'U_AGLT056A("SETOR")',0,2})
     EndIf
  Else
-    Aadd(aRotina,{"Gera Arquivo Texto Produtores Rejeitados nas Integrações"     ,'U_MGLT29OM("D")',0,2})
-    Aadd(aRotina,{"Gera Arquivo Texto Produtores Aceitos nas Integrações"        ,'U_MGLT29OM("E")',0,2})
-    Aadd(aRotina,{"Gera Arquivo Texto Associações/Cooperativas Ativas e Inativas",'U_MGLT29OM("H")',0,2})
+    aAdd(aRotina,{"Gera Arquivo Texto Produtores Rejeitados nas Integrações"     ,'U_MGLT29OM("D")',0,2})
+    aAdd(aRotina,{"Gera Arquivo Texto Produtores Aceitos nas Integrações"        ,'U_MGLT29OM("E")',0,2})
+    aAdd(aRotina,{"Gera Arquivo Texto Associações/Cooperativas Ativas e Inativas",'U_MGLT29OM("H")',0,2})
  EndIf 
  
- Aadd(aRotina,{"Legenda"                                                      ,"U_AGLT056L()"       ,0,2}) 
+ aAdd(aRotina,{"Legenda"                                                      ,"U_AGLT056L()"       ,0,2}) 
  
- Aadd(_aCores,{"ZBH_STATUS == 'A'" ,"BR_VERDE"   })
- Aadd(_aCores,{"ZBH_STATUS == 'R'" ,"BR_VERMELHO"}) 
+ aAdd(_aCores,{"ZBH_STATUS == 'A'" ,"BR_VERDE"   })
+ aAdd(_aCores,{"ZBH_STATUS == 'R'" ,"BR_VERMELHO"}) 
  
- DbSelectArea("ZBH")
- ZBH->(DbSetOrder(1))  
+ DBSelectArea("ZBH")
+ ZBH->(DBSetOrder(1))  
 
- IF MV_PAR01 <> 3
-    FWMSGRUN(,{||  mBrowse(,,,,"ZBH",,,,,,_aCores,,,,,,,,_cFiltro) },'Aguarde Filtrando...',cCadastro)
+ If MV_PAR01 <> 3
+    FWMsgRun(,{||  mBrowse(,,,,"ZBH",,,,,,_aCores,,,,,,,,_cFiltro) },'Aguarde Filtrando...',cCadastro)
  Else
     mBrowse(,,,,"ZBH",,,,,,_aCores) 
- Endif
+ EndIf
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -131,23 +130,23 @@ Begin Sequence
    ZBH->(DBGoTop())
 
    _aCampos := {}
-   Aadd(_aCampos,"ZBH_CODPRO")
-   Aadd(_aCampos,"ZBH_LOJPRO")
-   Aadd(_aCampos,"ZBH_NOMPRO")
-   Aadd(_aCampos,"ZBH_MOTIVO")
-   Aadd(_aCampos,"ZBH_DTREJ")
-   Aadd(_aCampos,"ZBH_HRREJ") 
-   Aadd(_aCampos,"ZBH_JSONEN")
-   Aadd(_aCampos,"ZBH_DTENV") 
-   Aadd(_aCampos,"ZBH_HRENV")
-   Aadd(_aCampos,"ZBH_STATUS")
+   aAdd(_aCampos,"ZBH_CODPRO")
+   aAdd(_aCampos,"ZBH_LOJPRO")
+   aAdd(_aCampos,"ZBH_NOMPRO")
+   aAdd(_aCampos,"ZBH_MOTIVO")
+   aAdd(_aCampos,"ZBH_DTREJ")
+   aAdd(_aCampos,"ZBH_HRREJ") 
+   aAdd(_aCampos,"ZBH_JSONEN")
+   aAdd(_aCampos,"ZBH_DTENV") 
+   aAdd(_aCampos,"ZBH_HRENV")
+   aAdd(_aCampos,"ZBH_STATUS")
 
-   Aadd(aRotina,{"Pesquisar"                      ,"AxPesqui"   ,0,1,0})
-   Aadd(aRotina,{"Visualizar"                     ,"U_AGLT056W('ZBH', _aCampos, cCadastro)" ,0,2,0})
+   aAdd(aRotina,{"Pesquisar"                      ,"AxPesqui"   ,0,1,0})
+   aAdd(aRotina,{"Visualizar"                     ,"U_AGLT056W('ZBH', _aCampos, cCadastro)" ,0,2,0})
 
-   DbSelectArea("ZBH")
-   ZBH->(DbSetOrder(1)) 
-   ZBH->(DbGoTop())
+   DBSelectArea("ZBH")
+   ZBH->(DBSetOrder(1)) 
+   ZBH->(DBGoTop())
       
    MBrowse(6,1,22,75,"ZBH")
 
@@ -155,7 +154,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil    
+Return    
 
 /*
 =================================================================================================================================
@@ -183,14 +182,14 @@ Begin Sequence
    // Carrega os dados da tabela para visulização de dados.
    //================================================================================
    For _nI := 1 To Len(_aCampos)
-       &("M->" + _aCampos[_ni]) :=  &(_cTab + "->" +_aCampos[_nI])
+       &("M->" + _aCampos[_nI]) :=  &(_cTab + "->" +_aCampos[_nI])
    Next
  
    //================================================================================
    // Monta a tela Enchoice 
    //================================================================================    
    _aObjects := {} 
-   AAdd( _aObjects, { 315,  50, .T., .T. } )
+   aAdd( _aObjects, { 315,  50, .T., .T. } )
 
    _aInfo := { _aSizeAut[ 1 ], _aSizeAut[ 2 ], _aSizeAut[ 3 ], _aSizeAut[ 4 ], 3, 3 } 
 
@@ -207,7 +206,7 @@ Begin Sequence
 
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -223,14 +222,14 @@ User Function AGLT056L()
 Local _aLegenda := {}
 
 Begin Sequence
-   Aadd(_aLegenda,{"BR_VERDE"    ,"Integrados com Sucesso!" })
-   Aadd(_aLegenda,{"BR_VERMELHO","Rejeitados!" })
+   aAdd(_aLegenda,{"BR_VERDE"    ,"Integrados com Sucesso!" })
+   aAdd(_aLegenda,{"BR_VERMELHO","Rejeitados!" })
       
    BrwLegenda(cCadastro, "Legenda", _aLegenda)
 
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -305,8 +304,8 @@ Begin Sequence
       EndIf 
 	
 	   
-      DEFINE SBUTTON FROM 55, 050 TYPE 1 ENABLE ACTION (If(U_AGLT056B(_cOpcao,_cCodigo,_cLoja,_cCnpj,_cSetor),( _nOpca := 1 , _oDlgP:End()),"") ) OF _oDlgP
-	   DEFINE SBUTTON FROM 55, 090 TYPE 2 ENABLE ACTION ( _nOpca := 0 , _oDlgP:End() ) OF _oDlgP
+      DEFINE SBUTTON FROM 55, 050 Type 1 ENABLE ACTION (If(U_AGLT056B(_cOpcao,_cCodigo,_cLoja,_cCnpj,_cSetor),( _nOpca := 1 , _oDlgP:End()),"") ) OF _oDlgP
+	   DEFINE SBUTTON FROM 55, 090 Type 2 ENABLE ACTION ( _nOpca := 0 , _oDlgP:End() ) OF _oDlgP
    ACTIVATE MSDIALOG _oDlgP CENTERED
 
    If _nOpca == 1
@@ -320,7 +319,7 @@ Begin Sequence
          _cPergunta := "Confirma o Reenvio de todos os produtores do Setor: " + _cSetor + "-" + _cNome + ", para o App Cia do Leite?"
       EndIf 
 
-      If U_ITMSG(_cPergunta,"Atenção" , , ,2, 2)
+      If U_ITMsg(_cPergunta,"Atenção" , , ,2, 2)
          U_AGLT056C(_cOpcao,_cCodigo,_cLoja,_cCnpj,_cSetor)
       EndIf 
 
@@ -328,7 +327,7 @@ Begin Sequence
 
 End Sequence
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -356,31 +355,31 @@ Begin Sequence
 
    If _cOpcao == "PRD_COMUM" .Or. _cOpcao == "ASS_CODIGO_LOJA"
       If Empty(_cCodProd) .Or. Empty(_cLojaProd)
-         U_ItMsg("O preenchimento do código e da loja do produtor são obrigatórios.","Atenção",,2)
+         U_ITMsg("O preenchimento do código e da loja do produtor são obrigatórios.","Atenção",,2)
          _lRet := .F.
          Break
       EndIf 
 
-      SA2->(DbSetOrder(1))
+      SA2->(DBSetOrder(1))
       If ! SA2->(MsSeek(xFilial("SA2")+_cCodProd+_cLojaProd))
-         U_ItMsg("O código e loja do produtor informado, não existe no cadastro de produtores.","Atenção",,2)
+         U_ITMsg("O código e loja do produtor informado, não existe no cadastro de produtores.","Atenção",,2)
          _lRet := .F.
          Break
       EndIf 
 
       If _cOpcao == "PRD_COMUM" .And. SA2->A2_L_NFPRO = 'S' 
-          U_ItMsg("O produtor informado não é um produtor comum. Está cadastrado como uma Associação/Cooperativa ou Pessoa Jurídica.","Atenção",,2)
+          U_ITMsg("O produtor informado não é um produtor comum. Está cadastrado como uma Associação/Cooperativa ou Pessoa Jurídica.","Atenção",,2)
          _lRet := .F.
          Break
       EndIf 
 
       If _cOpcao == "ASS_CODIGO_LOJA" .And. SA2->A2_L_NFPRO <> 'S' 
-          U_ItMsg("O produtor informado não é ou não faz parte de uma Associação/Cooperativa.","Atenção",,2)
+          U_ITMsg("O produtor informado não é ou não faz parte de uma Associação/Cooperativa.","Atenção",,2)
          _lRet := .F.
          Break
       EndIf 
 
-      ZL3->(DbSetOrder(1)) //ZL3_FILIAL+ZL3_COD+ZL3_TIPO
+      ZL3->(DBSetOrder(1)) //ZL3_FILIAL+ZL3_COD+ZL3_TIPO
       If ! ZL3->(MsSeek(xFilial("ZL3")+SA2->A2_L_LI_RO))
          _cQry := " SELECT ZL3_FILIAL FROM " + RetSqlName("ZL3") + " ZL3 " 
          _cQry += " WHERE ZL3.D_E_L_E_T_ = ' ' AND ZL3_COD = '" + SA2->A2_L_LI_RO + "' "
@@ -391,11 +390,11 @@ Begin Sequence
          
          _cFilial := (_cAlias)->ZL3_FILIAL
          
-         (_cAlias)->(DbCloseArea())
+         (_cAlias)->(DBCloseArea())
 
          _aFilial  := FwLoadSM0()
 
-         _nI := Ascan(_aFilial,{|x| x[2] = _cFilial})
+         _nI := aScan(_aFilial,{|x| x[2] = _cFilial})
          
          If _nI > 0
             _cNomeFil := AllTrim(_aFilial[_nI,7])
@@ -403,7 +402,7 @@ Begin Sequence
             _cNomeFil := ""
          EndIf 
 
-         U_ItMsg("O produtor informado não está vinculado a esta filial.","Atenção","Para reenviá-lo para o App Cia do Leite faça login na filial: " + _cNomeFil ,2)
+         U_ITMsg("O produtor informado não está vinculado a esta filial.","Atenção","Para reenviá-lo para o App Cia do Leite faça login na filial: " + _cNomeFil ,2)
          _lRet := .F.
          Break 
       EndIf 
@@ -414,28 +413,28 @@ Begin Sequence
 
    If _cOpcao == "ASS_CNPJ"
       If Empty(_cCnpjProd) 
-         U_ItMsg("O preenchimento do CNPJ da Associação/Cooperativa é obrigatório.","Atenção",,2)
+         U_ITMsg("O preenchimento do CNPJ da Associação/Cooperativa é obrigatório.","Atenção",,2)
          _lRet := .F.
          Break
       EndIf 
 
-      SA2->(DbSetOrder(3))
+      SA2->(DBSetOrder(3))
       If ! SA2->(MsSeek(xFilial("SA2")+_cCnpjProd))
-         U_ItMsg("O CNPJ da Associação/Cooperativa informado, não existe no cadastro de produtores.","Atenção",,2)
+         U_ITMsg("O CNPJ da Associação/Cooperativa informado, não existe no cadastro de produtores.","Atenção",,2)
          _lRet := .F.
          Break
       EndIf 
 
       If Empty(SA2->A2_L_LI_RO)
-         Do While ! SA2->(Eof()) .And. SA2->A2_FILIAL + SA2->A2_CGC == xFilial("SA2")+_cCnpjProd
+         While ! SA2->(Eof()) .And. SA2->A2_FILIAL + SA2->A2_CGC == xFilial("SA2")+_cCnpjProd
             If SA2->A2_L_ATIVO == "S" .And. ! Empty(SA2->A2_L_LI_RO)
                Exit 
             EndIf 
-            SA2->(DbSkip())
+            SA2->(DBSkip())
          EndDo 
       EndIf 
 
-      ZL3->(DbSetOrder(1)) //ZL3_FILIAL+ZL3_COD+ZL3_TIPO
+      ZL3->(DBSetOrder(1)) //ZL3_FILIAL+ZL3_COD+ZL3_TIPO
       If ! ZL3->(MsSeek(xFilial("ZL3")+SA2->A2_L_LI_RO))
          _cQry := " SELECT ZL3_FILIAL FROM " + RetSqlName("ZL3") + " ZL3 " 
          _cQry += " WHERE ZL3.D_E_L_E_T_ = ' ' AND ZL3_COD = '" + SA2->A2_L_LI_RO + "' "
@@ -446,11 +445,11 @@ Begin Sequence
          
          _cFilial := (_cAlias)->ZL3_FILIAL
          
-         (_cAlias)->(DbCloseArea())
+         (_cAlias)->(DBCloseArea())
 
          _aFilial  := FwLoadSM0()
 
-         _nI := Ascan(_aFilial,{|x| x[2] = _cFilial})
+         _nI := aScan(_aFilial,{|x| x[2] = _cFilial})
          
          If _nI > 0
             _cNomeFil := AllTrim(_aFilial[_nI,7])
@@ -458,7 +457,7 @@ Begin Sequence
             _cNomeFil := ""
          EndIf 
 
-         U_ItMsg("A Associação/Cooperativa informada não está vinculado a esta filial.","Atenção","Para reenviá-la para o App Cia do Leite faça login na filial: " + _cNomeFil ,2)
+         U_ITMsg("A Associação/Cooperativa informada não está vinculado a esta filial.","Atenção","Para reenviá-la para o App Cia do Leite faça login na filial: " + _cNomeFil ,2)
          _lRet := .F.
          Break 
       EndIf 
@@ -469,12 +468,12 @@ Begin Sequence
 
    If _cOpcao == "SETOR"
       If Empty(_cSetor) 
-         U_ItMsg("O preenchimento do Setor é obrigatório.","Atenção",,2)
+         U_ITMsg("O preenchimento do Setor é obrigatório.","Atenção",,2)
          _lRet := .F.
          Break
       EndIf 
   
-      ZL2->(DbSetOrder(1)) //ZL2_FILIAL+ZL2_COD 
+      ZL2->(DBSetOrder(1)) //ZL2_FILIAL+ZL2_COD 
       
       If ! ZL2->(MsSeek(xFilial("ZL2")+_cSetor))
          _cQry := " SELECT ZL2_FILIAL FROM " + RetSqlName("ZL2") + " ZL2 " 
@@ -486,17 +485,17 @@ Begin Sequence
          
          If ! (_cAlias)->(Eof()) .And. ! (_cAlias)->(Bof()) 
             _cFilial := (_cAlias)->ZL2_FILIAL
-            (_cAlias)->(DbCloseArea())
+            (_cAlias)->(DBCloseArea())
          Else 
-            (_cAlias)->(DbCloseArea())
-            U_ItMsg("O Setor informado não existe no Cadastro de Setores.","Atenção",,2)
+            (_cAlias)->(DBCloseArea())
+            U_ITMsg("O Setor informado não existe no Cadastro de Setores.","Atenção",,2)
             _lRet := .F.
             Break
          EndIf 
 
          _aFilial  := FwLoadSM0()
 
-         _nI := Ascan(_aFilial,{|x| x[2] = _cFilial})
+         _nI := aScan(_aFilial,{|x| x[2] = _cFilial})
          
          If _nI > 0
             _cNomeFil := AllTrim(_aFilial[_nI,7])
@@ -504,7 +503,7 @@ Begin Sequence
             _cNomeFil := ""
          EndIf 
 
-         U_ItMsg("O Setor Informado não está vinculado a esta filial.","Atenção","Para reenviá-lo para o App Cia do Leite faça login na filial: " + _cNomeFil ,2)
+         U_ITMsg("O Setor Informado não está vinculado a esta filial.","Atenção","Para reenviá-lo para o App Cia do Leite faça login na filial: " + _cNomeFil ,2)
          _lRet := .F.
          Break 
       EndIf 
@@ -549,7 +548,7 @@ Begin Sequence
          Processa( {|| U_MGLT029Q("M","PRD_COMUM",_cCodProd,_cLojaProd,_cCnpjProd,_cSetor) } , 'Aguarde!' , 'Enviando dados dos Produtores...' ) // Envia os dados dos Produtores via Integração WebService.
       EndIf
 
-      U_ItMsg("Envio dos dados dos Produtores para o sistema Companhia do Leite concluído.","Atenção",,2)
+      U_ITMsg("Envio dos dados dos Produtores para o sistema Companhia do Leite concluído.","Atenção",,2)
 
    ElseIf _cOpcao == "ASS_CODIGO_LOJA"
       //==========================================================
@@ -565,7 +564,7 @@ Begin Sequence
          Processa( {|| U_MGLT029K("M","REENVASS")} , 'Aguarde!' , 'Reenviando dados das Associações / Cooperativas...' ) 
       EndIf
 
-      U_ItMsg("Reenvio dos dados das Associações / Cooperativas para o sistema Companhia do Leite Concluido.","Atenção",,2)
+      U_ITMsg("Reenvio dos dados das Associações / Cooperativas para o sistema Companhia do Leite Concluido.","Atenção",,2)
 
    ElseIf _cOpcao == "ASS_CNPJ"
       //==========================================================
@@ -581,7 +580,7 @@ Begin Sequence
          Processa( {|| U_MGLT029K("M","REENVASS")} , 'Aguarde!' , 'Reenviando dados das Associações / Cooperativas...' ) 
       EndIf
 
-      U_ItMsg("Reenvio dos dados das Associações / Cooperativas para o sistema Companhia do Leite Concluido.","Atenção",,2)
+      U_ITMsg("Reenvio dos dados das Associações / Cooperativas para o sistema Companhia do Leite Concluido.","Atenção",,2)
 
 
    ElseIf _cOpcao == "SETOR" 
@@ -598,9 +597,9 @@ Begin Sequence
          Processa( {|| U_MGLT029Q("M","SETOR",_cCodProd,_cLojaProd,_cCnpjProd,_cSetor) } , 'Aguarde!' , 'Enviando dados dos Produtores...' ) // Envia os dados dos Produtores via Integração WebService.
       EndIf
 
-      U_ItMsg("Reenvio dos dados dos Produtores por Setor para o sistema Companhia do Leite concluído.","Atenção",,2)
+      U_ITMsg("Reenvio dos dados dos Produtores por Setor para o sistema Companhia do Leite concluído.","Atenção",,2)
 
    EndIf 
 End Sequence 
 
-Return Nil 
+Return 

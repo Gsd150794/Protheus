@@ -2,15 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 18/08/2024 | Chamado 46978. Ajustar rotina Visualização dados de integração e retorno de integração Produtor. 
-Lucas Borges  | 09/10/2024 | Chamado 48465. Retirada manipulação do SX1
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Julio Paz     |18/08/2024| Chamado 46978. Ajustar rotina Visualização dados de integração e retorno de integração Produtor. 
+Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
 ===============================================================================================================================
 */
 
-#Include "Protheus.Ch"
+#Include "TOTVS.ch"
 #Include "FWMVCDef.Ch"
 
 #Define	TITULO	"Análise de Dados dos Produtores Rurais Recebidos do APP Cia do Leite"
@@ -40,7 +40,7 @@ Begin Sequence
 
 End Sequence 
 	
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -104,7 +104,7 @@ Begin Sequence
    COUNT TO _nTotReg
 
    If Select(cAliasAux) > 0
-	  (cAliasAux)->(Dbclosearea())
+	  (cAliasAux)->(DBCloseArea())
    EndIf
 
    _otemp := FWTemporaryTable():New( cAliasAux, _aCpos )
@@ -119,7 +119,7 @@ Begin Sequence
    ProcRegua(_nTotReg)
 
    (_cAliasQry)->( DBGoTop() )
-   Do While (_cAliasQry)->( !Eof() )
+   While (_cAliasQry)->( !Eof() )
       _lHaDados := .T.
       (cAliasAux)->( RecLock( cAliasAux , .T. ) )
       (cAliasAux)->ZBG_TIPREG := If((_cAliasQry)->ZBG_TIPREG=="N","NOVO PRODUTOR","ALTERAÇÃO DE PRODUTOR")     // Tipo de Registro	N=Novo Produtor;A=Alteração de Produtor
@@ -134,7 +134,7 @@ Begin Sequence
       (cAliasAux)->ZBG_CEP    := (_cAliasQry)->ZBG_CEP	     // CEP	
       (cAliasAux)->ZBG_FAZEN  := (_cAliasQry)->ZBG_FAZEN      // Fazenda do Produtor
       (cAliasAux)->ZBG_IDPROD := (_cAliasQry)->ZBG_IDPROD	  // Id.Produtor	
-      (cAliasAux)->ZBG_DATA   := Stod((_cAliasQry)->ZBG_DATA) // Data Integra	
+      (cAliasAux)->ZBG_DATA   := SToD((_cAliasQry)->ZBG_DATA) // Data Integra	
       (cAliasAux)->ZBG_HORA	:= (_cAliasQry)->ZBG_HORA       // Hora Intagra	
       (cAliasAux)->ZBG_STATUS := (_cAliasQry)->ZBG_STATUS	  // Status		P=Pendente Atualização;A=Atualizado;R=Rejeitado
       (cAliasAux)->WK_RECNO	:= (_cAliasQry)->REGZBG         // Recno da tabela ZBG
@@ -155,7 +155,7 @@ Begin Sequence
 
    (_cAliasQry)->( DBCloseArea() )
 
-   DbSelectArea("ZBG")
+   DBSelectArea("ZBG")
 
    aAdd( _aFields , { "Tipo de Registro"   , {|| (cAliasAux)->ZBG_TIPREG} , "C" , "@!"                   , 0 , 22 , 0 } )     // Tipo de Registro	N=Novo Produtor;A=Alteração de Produtor
    aAdd( _aFields , { "Código do Produtor" , {|| (cAliasAux)->ZBG_COD   } , "C" , "@!"                   , 0 , 6  , 0 } )     // Código do Produtor	
@@ -194,10 +194,10 @@ Begin Sequence
 End Sequence 
 
 If Select(cAliasAux) > 0
-   (cAliasAux)->(Dbclosearea())
+   (cAliasAux)->(DBCloseArea())
 EndIf
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -222,7 +222,7 @@ ADD OPTION aRotina Title 'Visul.Rej.Envio Produtor' Action 'U_AGLT054V("R")'    
 ADD OPTION aRotina Title 'Visulizar Envio Produtor' Action 'U_AGLT054V("A")'                     OPERATION 2 ACCESS 0
 ADD OPTION aRotina Title 'Visul.Rej.Dados Coleta'   Action 'U_AGLT054Y("R")'                     OPERATION 2 ACCESS 0
 ADD OPTION aRotina Title 'Visulizar Envio Coleta'   Action 'U_AGLT054Y("A")'                     OPERATION 2 ACCESS 0
-//---------------------------------------------
+
 ADD OPTION aRotina Title 'Gera Arq.Txt Produtores Ativos/Inativos'                  Action 'U_MGLT29OM("A")' OPERATION 2 ACCESS 0
 ADD OPTION aRotina Title 'Gera Arq.Txt Produtores Usuarios Tanques Col.'            Action 'U_MGLT29OM("B")' OPERATION 2 ACCESS 0
 ADD OPTION aRotina Title 'Gera Arq.Txt Produtores Mais de Uma Propriedade'          Action 'U_MGLT29OM("C")' OPERATION 2 ACCESS 0
@@ -231,8 +231,7 @@ ADD OPTION aRotina Title 'Gera Arq.Txt Produtores Aceitos nas Integrações'      
 ADD OPTION aRotina Title 'Gera Arq.Txt Coletas Rejeitadas nas Integrações'          Action 'U_MGLT29OM("F")' OPERATION 2 ACCESS 0
 ADD OPTION aRotina Title 'Gera Arq.Txt Coletas Aceitas nas Integrações'             Action 'U_MGLT29OM("G")' OPERATION 2 ACCESS 0
 ADD OPTION aRotina Title 'Gera Arq.Txt Associações/Cooperativas Ativas e Inativas'  Action 'U_MGLT29OM("H")' OPERATION 2 ACCESS 0
-//ADD OPTION aRotina Title 'Reenvia Dados das Associações/Cooperativas'               Action 'U_MGLT29OM("I")' OPERATION 2 ACCESS 0
-//---------------------------------------------
+
 
 ADD OPTION aRotina Title 'Legenda'                  Action 'U_AGLT054LEG()'                      OPERATION 2 ACCESS 0
 
@@ -264,7 +263,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -294,7 +293,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -351,7 +350,7 @@ Local _aLegenda :=	{	{"BR_VERMELHO", "Pendente Atualização"},;
 
 BrwLegenda(TITULO,"Legenda",_aLegenda)
 
-return
+Return
 
 /*
 ===============================================================================================================================
@@ -384,31 +383,31 @@ Begin Sequence
       @ 004,003 ComboBox	_cComboBx1	Items _aComboBx1 Size 213,010 OF _oDlgP PIXEL
 	   @ 020,003 MsGet		_oGet1	Var _cGet1		Size 212,009 OF _oDlgP PIXEL COLOR CLR_BLACK Picture "@!"
 	
-	   DEFINE SBUTTON FROM 004,227 TYPE 1 ENABLE ACTION ( _nOpca := 1 , _oDlgP:End() ) OF _oDlgP
-	   DEFINE SBUTTON FROM 021,227 TYPE 2 ENABLE ACTION ( _nOpca := 0 , _oDlgP:End() ) OF _oDlgP
+	   DEFINE SBUTTON FROM 004,227 Type 1 ENABLE ACTION ( _nOpca := 1 , _oDlgP:End() ) OF _oDlgP
+	   DEFINE SBUTTON FROM 021,227 Type 2 ENABLE ACTION ( _nOpca := 0 , _oDlgP:End() ) OF _oDlgP
 
    ACTIVATE MSDIALOG _oDlgP CENTERED
 
    If _nOpca == 1
-      If ALLTRIM(_cComboBx1) == ALLTRIM(_aComboBx1[1])
-         (cAliasAux)->(DbSetOrder(1)) // Ordem por ID.PRODUTOR
+      If AllTrim(_cComboBx1) == AllTrim(_aComboBx1[1])
+         (cAliasAux)->(DBSetOrder(1)) // Ordem por ID.PRODUTOR
       Else
-         (cAliasAux)->(DbSetOrder(3)) // Ordem por NOME       
+         (cAliasAux)->(DBSetOrder(3)) // Ordem por NOME       
       EndIf 
    
       If ! (cAliasAux)->(MsSeek(RTrim(_cGet1)))
-         U_ITMSG("Registro não encontrado.","Atenção",,1)
-         (cAliasAux)->(DbSetOrder(1))
-         (cAliasAux)->(DbGoTo(_nRegAtu))
+         U_ITMsg("Registro não encontrado.","Atenção",,1)
+         (cAliasAux)->(DBSetOrder(1))
+         (cAliasAux)->(DBGoTo(_nRegAtu))
       Else 
-         (cAliasAux)->(DbSetOrder(1))
+         (cAliasAux)->(DBSetOrder(1))
          _oMarkBRW:Refresh()
       EndIf 
    EndIf
 
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -429,7 +428,7 @@ Begin Sequence
       Break 
    EndIf
 
-   If ! U_ITMSG("Confirma a atualização do cadastro de Produtores para os registros selecionados?","Atenção" , , ,2, 2)
+   If ! U_ITMsg("Confirma a atualização do cadastro de Produtores para os registros selecionados?","Atenção" , , ,2, 2)
       Break 
    EndIf 
     
@@ -437,7 +436,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -453,34 +452,30 @@ User Function AGLT054H(nRegZBG)
 Local _cCodFor, _cLojaFor 
 Local _lIncluir 
 Local _aDadosFor := {}
-Local _cNomeUser := UsrFullName(__cUserID)
+Local _cNomeUser := UsrFullName(__cUserId)
 
 Private lMSErroAuto
 
 Begin Sequence 
    
-  // If Empty(nRegZBG)
-  //    Break 
-  // EndIf 
-
    ProcRegua(0)
 
-   (cAliasAux)->(DbGoTop())
-   Do While ! (cAliasAux)->(Eof())
+   (cAliasAux)->(DBGoTop())
+   While ! (cAliasAux)->(Eof())
       
       IncProc("Atualizando Cadastro Produtor...")
 
       If _oMarkBRW:IsMark()
          
-          ZBG->(DbGoTo((cAliasAux)->WK_RECNO))
+          ZBG->(DBGoTo((cAliasAux)->WK_RECNO))
 
          If (cAliasAux)->ZBG_STATUS == "R"
-            U_ITMSG("Não é permitido a atualização de Registros rejeitados. Produtor: " + AllTrim(ZBG->ZBG_NOME) + "." ,"Atenção",,1)
-            (cAliasAux)->(DbSkip())
+            U_ITMsg("Não é permitido a atualização de Registros rejeitados. Produtor: " + AllTrim(ZBG->ZBG_NOME) + "." ,"Atenção",,1)
+            (cAliasAux)->(DBSkip())
             Loop 
          ElseIf (cAliasAux)->ZBG_STATUS == "A"
-            U_ITMSG("Os dados do produtor: "  + AllTrim(ZBG->ZBG_NOME) + ", já foram atualizados.","Atenção",,1)
-            (cAliasAux)->(DbSkip())
+            U_ITMsg("Os dados do produtor: "  + AllTrim(ZBG->ZBG_NOME) + ", já foram atualizados.","Atenção",,1)
+            (cAliasAux)->(DBSkip())
             Loop 
          EndIf 
 
@@ -496,8 +491,8 @@ Begin Sequence
             // cCodigo   = Devera ser passado o conteudo do campo A2_COD.
             // cClass    = Devera ser passado o conteudo do campo A2_I_CLASS.
             If Empty(_cCodFor)
-               U_ITMSG("Não foi possivel gerar o código do fornecedor para o produtor: " + AllTrim(ZBG->ZBG_NOME)+".","Atenção",,1)
-               (cAliasAux)->(DbSkip())
+               U_ITMsg("Não foi possivel gerar o código do fornecedor para o produtor: " + AllTrim(ZBG->ZBG_NOME)+".","Atenção",,1)
+               (cAliasAux)->(DBSkip())
                Loop
             EndIf 
             _cLojaFor := U_ACOM006( ZBG->ZBG_CNPJ , _cCodFor , "P" )
@@ -510,7 +505,6 @@ Begin Sequence
             aAdd( _aDadosFor , {	"A2_PAIS"		, '105'		 					               , nil } )
             aAdd( _aDadosFor , {	"A2_CODPAIS"	, '01058'	 					               , nil } )
             aAdd( _aDadosFor , {	"A2_TRIBFAV"	, '2'	 						                	, nil } )
-            //aAdd( _aDadosFor , {	"A2_MSBLQL"	   , '2'		   				                	, nil } )
             aAdd( _aDadosFor , {	"A2_INDCP"	   , '1'		   				                	, nil } )
             aAdd( _aDadosFor , {	"A2_TIPORUR"	, 'F'		   				                	, nil } )
             aAdd( _aDadosFor , {	"A2_RECINSS"	, 'S'		   				                	, nil } )
@@ -530,7 +524,7 @@ Begin Sequence
                aAdd( _aDadosFor , {	"A2_COD_MUN"	, AllTrim(ZBG->ZBG_CODMUN) , nil } ) 
             EndIf 
             If ! Empty(ZBG->ZBG_MUN)
-               aAdd( _aDadosFor , {	"A2_MUN"	      , ALLTRIM(ZBG->ZBG_MUN)    , nil } )                                                           
+               aAdd( _aDadosFor , {	"A2_MUN"	      , AllTrim(ZBG->ZBG_MUN)    , nil } )                                                           
             EndIf 
             If ! Empty(ZBG->ZBG_CEP)
                aAdd( _aDadosFor , {	"A2_CEP"		   , AllTrim(ZBG->ZBG_CEP)	  , nil } )
@@ -559,26 +553,26 @@ Begin Sequence
             aAdd( _aDadosFor , {	"A2_LOJA"		, ZBG->ZBG_LOJA		              	, nil } )
             
             If ! Empty(ZBG->ZBG_COD)
-               SA2->(DbSetOrder(1))
+               SA2->(DBSetOrder(1))
                If ! SA2->(MsSeek(xFilial("SA2")+ZBG->ZBG_COD+ZBG->ZBG_LOJA))
-                  U_ITMSG("Não foi possivel Localizar o produtor: " + AllTrim(ZBG->ZBG_NOME)+".","Atenção",,1)
-                  (cAliasAux)->(DbSkip())
+                  U_ITMsg("Não foi possivel Localizar o produtor: " + AllTrim(ZBG->ZBG_NOME)+".","Atenção",,1)
+                  (cAliasAux)->(DBSkip())
                   Loop
                EndIf
             ElseIf ! Empty(ZBG->ZBG_CNPJ)   
-               SA2->(DbSetOrder(3))
+               SA2->(DBSetOrder(3))
                If ! SA2->(MsSeek(xFilial("SA2")+ZBG->ZBG_CNPJ))
-                  U_ITMSG("Não foi possivel Localizar o produtor: " + AllTrim(ZBG->ZBG_NOME)+".","Atenção",,1)
-                  (cAliasAux)->(DbSkip())
+                  U_ITMsg("Não foi possivel Localizar o produtor: " + AllTrim(ZBG->ZBG_NOME)+".","Atenção",,1)
+                  (cAliasAux)->(DBSkip())
                   Loop
                EndIf 
             Else 
-               U_ITMSG("Não foi possivel Localizar o produtor: " + AllTrim(ZBG->ZBG_NOME)+".","Atenção",,1)
-               (cAliasAux)->(DbSkip())
+               U_ITMsg("Não foi possivel Localizar o produtor: " + AllTrim(ZBG->ZBG_NOME)+".","Atenção",,1)
+               (cAliasAux)->(DBSkip())
                Loop
             EndIf 
             
-            SA2->(DbSetOrder(1))
+            SA2->(DBSetOrder(1))
 
             //========================================================================
             // Dados Cadastrais
@@ -603,7 +597,7 @@ Begin Sequence
          EndIf 
 
          If MV_PAR03 == 1 .And. ! Empty(ZBG->ZBG_MUN)  // MV_PAR06
-            aAdd( _aDadosFor , {	"A2_MUN"	      , ALLTRIM(ZBG->ZBG_MUN)    , nil } )                                                           
+            aAdd( _aDadosFor , {	"A2_MUN"	      , AllTrim(ZBG->ZBG_MUN)    , nil } )                                                           
          EndIf 
 
          If MV_PAR04 == 1 .And. ! Empty(ZBG->ZBG_CEP)  // MV_PAR07
@@ -711,11 +705,11 @@ Begin Sequence
             MSExecAuto( {|x,y| Mata020(x,y) } , _aDadosFor , 4 )   
          EndIf 
 
-         IF lMSErroAuto
+         If lMSErroAuto
             If _lIncluir
-               U_ITMSG("Não foi possivel incluir o produtor: " + AllTrim(ZBG->ZBG_NOME)+".","Atenção",,1)
+               U_ITMsg("Não foi possivel incluir o produtor: " + AllTrim(ZBG->ZBG_NOME)+".","Atenção",,1)
             Else 
-               U_ITMSG("Não foi possivel alterar o produtor: " + AllTrim(ZBG->ZBG_NOME)+".","Atenção",,1)
+               U_ITMsg("Não foi possivel alterar o produtor: " + AllTrim(ZBG->ZBG_NOME)+".","Atenção",,1)
             EndIf 
 
 	         Mostraerro()
@@ -726,30 +720,30 @@ Begin Sequence
             ZBG->ZBG_USRAPR := _cNomeUser	// Usuário Altualiz.Cad.Produtor
             ZBG->ZBG_DTAPR	 := Date()     // Atualiz.Cad. Produtor
             ZBG->ZBG_HRAPR	 := Time()     // Hora Atualiz.Cad.Produtor
-            ZBG->(MsUnLock())
+            ZBG->(MSUnLock())
             
             (cAliasAux)->(RecLock((cAliasAux),.F.))
             (cAliasAux)->ZBG_STATUS := "A"
-            (cAliasAux)->(MsUnLock())
+            (cAliasAux)->(MSUnLock())
 
-            U_ITMSG("Atualização do cadastro de produtores realizada com sucesso: " + AllTrim(ZBG->ZBG_NOME)+".","Atenção",,1)
+            U_ITMsg("Atualização do cadastro de produtores realizada com sucesso: " + AllTrim(ZBG->ZBG_NOME)+".","Atenção",,1)
 
 	      EndIf				
 
       EndIf
 
-      (cAliasAux)->(DbSKip())
+      (cAliasAux)->(DBSkip())
    EndDo
    
-   (cAliasAux)->(DbGoTop())
+   (cAliasAux)->(DBGoTop())
 
    _oMarkBRW:Refresh()
 
-   U_ITMSG("Atualização de Produtores Finalizada...","Atenção",,2)
+   U_ITMsg("Atualização de Produtores Finalizada...","Atenção",,2)
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -763,7 +757,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AGLT054T()
-Local _cNomeUser := UsrFullName(__cUserID)
+Local _cNomeUser := UsrFullName(__cUserId)
 
 Begin Sequence 
 
@@ -771,11 +765,11 @@ Begin Sequence
    ZBG->ZBG_USRALT := _cNomeUser	// Usuário da Alteração
    ZBG->ZBG_DTALT	 := Date()   // Data da Alteração
    ZBG->ZBG_HRALT	 := Time()   // Hora da Alteração
-   ZBG->(MsUnlock())
+   ZBG->(MSUnLock())
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -797,7 +791,6 @@ Private _aCampos := {}
 Begin Sequence 
    
    If _cTipoDado == "R"
-      //(cT1)->(DbSetFilter( { || Left( FIELD_NAME, 4 ) = "BABA" }, 'Left(FIELD_NAME, 4) = "BABA"' ) )
       ZBH->(DbSetFilter( { || ZBH_STATUS == "R" }, 'ZBH_STATUS == "R"' ) )
       cCadastro := "Produtores Rejeitados no Envio de Dados para o Sistema Cia do Leite" 
    Else
@@ -808,23 +801,23 @@ Begin Sequence
    ZBH->(DBGoTop())
 
    _aCampos := {}
-   Aadd(_aCampos,"ZBH_CODPRO")
-   Aadd(_aCampos,"ZBH_LOJPRO")
-   Aadd(_aCampos,"ZBH_NOMPRO")
-   Aadd(_aCampos,"ZBH_MOTIVO")
-   Aadd(_aCampos,"ZBH_DTREJ")
-   Aadd(_aCampos,"ZBH_HRREJ") 
-   Aadd(_aCampos,"ZBH_JSONEN")
-   Aadd(_aCampos,"ZBH_DTENV") 
-   Aadd(_aCampos,"ZBH_HRENV")
-   Aadd(_aCampos,"ZBH_STATUS")
+   aAdd(_aCampos,"ZBH_CODPRO")
+   aAdd(_aCampos,"ZBH_LOJPRO")
+   aAdd(_aCampos,"ZBH_NOMPRO")
+   aAdd(_aCampos,"ZBH_MOTIVO")
+   aAdd(_aCampos,"ZBH_DTREJ")
+   aAdd(_aCampos,"ZBH_HRREJ") 
+   aAdd(_aCampos,"ZBH_JSONEN")
+   aAdd(_aCampos,"ZBH_DTENV") 
+   aAdd(_aCampos,"ZBH_HRENV")
+   aAdd(_aCampos,"ZBH_STATUS")
 
-   Aadd(aRotina,{"Pesquisar"                      ,"AxPesqui"   ,0,1})
-   Aadd(aRotina,{"Visualizar"                     ,"U_AGLT054W('ZBH', _aCampos, cCadastro)" ,0,2})
+   aAdd(aRotina,{"Pesquisar"                      ,"AxPesqui"   ,0,1})
+   aAdd(aRotina,{"Visualizar"                     ,"U_AGLT054W('ZBH', _aCampos, cCadastro)" ,0,2})
 
-   DbSelectArea("ZBH")
-   ZBH->(DbSetOrder(1)) 
-   ZBH->(DbGoTop())
+   DBSelectArea("ZBH")
+   ZBH->(DBSetOrder(1)) 
+   ZBH->(DBGoTop())
       
    MBrowse(6,1,22,75,"ZBH")
 
@@ -832,7 +825,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil    
+Return    
 
 /*
 ===============================================================================================================================
@@ -862,27 +855,27 @@ Begin Sequence
    EndIf 
 
    _aCampos := {}
-   Aadd(_aCampos,"ZBI_TICKET")
-   Aadd(_aCampos,"ZBI_DTCOLE")
-   Aadd(_aCampos,"ZBI_CODPRO")
-   Aadd(_aCampos,"ZBI_LOJPRO")
-   Aadd(_aCampos,"ZBI_NOMPRO")
-   Aadd(_aCampos,"ZBI_MOTIVO") 
-   Aadd(_aCampos,"ZBI_DTREJ")
-   Aadd(_aCampos,"ZBI_HRREJ") 
-   Aadd(_aCampos,"ZBI_JSONEN")
-   Aadd(_aCampos,"ZBI_DTENV")
-   Aadd(_aCampos,"ZBI_HRENV")
-   Aadd(_aCampos,"ZBI_STATUS")
+   aAdd(_aCampos,"ZBI_TICKET")
+   aAdd(_aCampos,"ZBI_DTCOLE")
+   aAdd(_aCampos,"ZBI_CODPRO")
+   aAdd(_aCampos,"ZBI_LOJPRO")
+   aAdd(_aCampos,"ZBI_NOMPRO")
+   aAdd(_aCampos,"ZBI_MOTIVO") 
+   aAdd(_aCampos,"ZBI_DTREJ")
+   aAdd(_aCampos,"ZBI_HRREJ") 
+   aAdd(_aCampos,"ZBI_JSONEN")
+   aAdd(_aCampos,"ZBI_DTENV")
+   aAdd(_aCampos,"ZBI_HRENV")
+   aAdd(_aCampos,"ZBI_STATUS")
 
    ZBI->(DBGoTop())
 
-   Aadd(aRotina,{"Pesquisar"                      ,"AxPesqui"   ,0,1})
-   Aadd(aRotina,{"Visualizar"                     ,"U_AGLT054W('ZBI', _aCampos, cCadastro)" ,0,2})
+   aAdd(aRotina,{"Pesquisar"                      ,"AxPesqui"   ,0,1})
+   aAdd(aRotina,{"Visualizar"                     ,"U_AGLT054W('ZBI', _aCampos, cCadastro)" ,0,2})
 
-   DbSelectArea("ZBI")
-   ZBI->(DbSetOrder(1)) 
-   ZBI->(DbGoTop())
+   DBSelectArea("ZBI")
+   ZBI->(DBSetOrder(1)) 
+   ZBI->(DBGoTop())
       
    MBrowse(6,1,22,75,"ZBI")
 
@@ -890,7 +883,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil    
+Return    
 
 /*
 ===============================================================================================================================
@@ -911,30 +904,30 @@ Begin Sequence
       Break 
    EndIf 
 
-   If U_ITMSG("Confirma a rejeição dos dados do Produtor posicionado?","Atenção" , , ,2, 2)
+   If U_ITMsg("Confirma a rejeição dos dados do Produtor posicionado?","Atenção" , , ,2, 2)
       
-      ZBG->(DbGoto((cAliasAux)->WK_RECNO))
+      ZBG->(DBGoTo((cAliasAux)->WK_RECNO))
       ZBG->(RecLock("ZBG",.F.))
       ZBG->ZBG_STATUS := "R"
-      ZBG->(MsUnlock())
+      ZBG->(MSUnLock())
 
       (cAliasAux)->(RecLock("ZBG",.F.))
       (cAliasAux)->ZBG_STATUS := "R"
-      (cAliasAux)->(MsUnlock())
+      (cAliasAux)->(MSUnLock())
     
       _oMarkBRW:Refresh()
       
-      U_ITMSG("Rejeição de Produtor concluida com sucesso.","Atenção",,2)
+      U_ITMsg("Rejeição de Produtor concluida com sucesso.","Atenção",,2)
    
    Else 
       
-      U_ITMSG("Rejeição de Produtor cancelada.","Atenção",,2)
+      U_ITMsg("Rejeição de Produtor cancelada.","Atenção",,2)
 
    EndIf 
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 =================================================================================================================================
@@ -962,14 +955,14 @@ Begin Sequence
    // Carrega os dados da tabela para visulização de dados.
    //================================================================================
    For _nI := 1 To Len(_aCampos)
-       &("M->" + _aCampos[_ni]) :=  &(_cTab + "->" +_aCampos[_nI])
+       &("M->" + _aCampos[_nI]) :=  &(_cTab + "->" +_aCampos[_nI])
    Next
  
    //================================================================================
    // Monta a tela Enchoice 
    //================================================================================    
    _aObjects := {} 
-   AAdd( _aObjects, { 315,  50, .T., .T. } )
+   aAdd( _aObjects, { 315,  50, .T., .T. } )
 
    _aInfo := { _aSizeAut[ 1 ], _aSizeAut[ 2 ], _aSizeAut[ 3 ], _aSizeAut[ 4 ], 3, 3 } 
 
@@ -986,4 +979,4 @@ Begin Sequence
 
 End Sequence
 
-Return Nil
+Return

@@ -2,34 +2,29 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 10/07/2024 | Incluída exportação para planilha. Chamado 47820
+Lucas Borges  |10/07/2024| Chamado 47820. Incluída exportação para planilha.
+Lucas Borges  |01/10/2025| Chamado 52143. Incluido filtro para fornecedore Centro Leite
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MGLT008
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 19/12/2023
-===============================================================================================================================
 Descrição---------: Fechamento de terceiros (RGLT020) por e-mail. Chamado 45906
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function MGLT008
 
-Local _cPerg		:= "MGLT008"
-Local _oSelf		:= nil
+Local _cPerg	:= "MGLT008" As Character
+Local _oSelf	:= Nil As Object
 
 //============================================
 //Cria interface principal
@@ -53,33 +48,30 @@ Return
 Programa----------: MGLT008P
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 19/12/2023
-===============================================================================================================================
 Descrição---------: Realiza o processamento da rotina.
-===============================================================================================================================
 Parametros--------: _oSelf, _cPerg
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function MGLT008P(_oSelf,_cPerg)
+Static Function MGLT008P(_oSelf As Object,_cPerg As Character)
 
-Local _cAlias 	:= GetNextAlias()
-Local _cReplyTo	:= AllTrim(MV_PAR12)
-Local _cFrom	:= Lower(FWSFAllUsers({RetCodUsr()})[1][5])//retorna o e-mail do usuário
-Local _cAssunto	:= ""
-Local _cMensagem:= ""
-Local _aAttach 	:= {}
-Local _cDtIni 	:= ""
-Local _cDtFim 	:= ""
-Local _cFiltro	:= "%"
-Local _lJob 	:= .T.
-Local _aPergunte:= {}
-Local _nX 		:= 1
-Local _nCountRec:= 0
-Local _cDirPlan := ""
-Local _lEnvMail := .F.
+Local _cAlias 	:= GetNextAlias() As Character
+Local _cReplyTo	:= AllTrim(MV_PAR13) As Character
+Local _cFrom	:= Lower(FWSFAllUsers({RetCodUsr()})[1][5]) As Character//retorna o e-mail do usuário
+Local _cAssunto	:= "" As Character
+Local _cMensagem:= "" As Character
+Local _aAttach 	:= {} As Array
+Local _cDtIni 	:= "" As Character
+Local _cDtFim 	:= "" As Character
+Local _cFiltro	:= "%" As Character
+Local _lJob 	:= .T. As Logical
+Local _aPergunte:= {} As Array
+Local _nX 		:= 1 As Numeric
+Local _nCountRec:= 0 As Numeric
+Local _cDirPlan := "" As Character
+Local _lEnvMail := .F. As Logical
 
-For _nX := 1 To 11//Tamanho do pergunte do RGLT020
+For _nX := 1 To 12//Tamanho do pergunte do RGLT020
 	aAdd(_aPergunte, &("MV_PAR"+StrZero(_nX,2,0)))
 Next _nX
 
@@ -91,14 +83,20 @@ If MV_PAR01 == 1
 	_cDtFim := SubStr( MV_PAR02 , 3 , 4 ) + SubStr( MV_PAR02 , 1 , 2 ) + '15'
 Else
 	_cDtIni := SubStr( MV_PAR02 , 3 , 4 ) + SubStr( MV_PAR02 , 1 , 2 ) + '16'
-	_cDtFim := DtoS( LastDay( StoD( SubStr( MV_PAR02 , 3 , 4 ) + SubStr( MV_PAR02 , 1 , 2 ) + '01' ) ) )
+	_cDtFim := DToS( LastDay( SToD( SubStr( MV_PAR02 , 3 , 4 ) + SubStr( MV_PAR02 , 1 , 2 ) + '01' ) ) )
 EndIf
 
 
 _cFiltro += IIf( MV_PAR03 == 1 , " AND SC7.C7_FORNECE  = 'F00001' ", "" )
-_cFiltro += IIf( MV_PAR03 == 2 , " AND SC7.C7_FORNECE <> 'F00001' AND SUBSTR(SC7.C7_FORNECE,1,1) <> 'Z' ", "" )
-_cFiltro += IIf( MV_PAR03 == 3 , " AND SUBSTR(SC7.C7_FORNECE,1,1) = 'Z' ", "" )
+_cFiltro += IIf( MV_PAR03 == 2 , " AND SC7.C7_FORNECE <> 'F00001' AND SubStr(SC7.C7_FORNECE,1,1) <> 'Z' ", "" )
+_cFiltro += IIf( MV_PAR03 == 3 , " AND SubStr(SC7.C7_FORNECE,1,1) = 'Z' ", "" )
 _cFiltro += IIf( !Empty(MV_PAR04) , " AND ZA7.ZA7_TIPPRD IN "+ FormatIn( MV_PAR04 , ';' ), "" )
+//Centro Leite
+If MV_PAR11 == 1
+	_cFiltro += " AND A2_L_CENTR = '1' "
+ElseIf MV_PAR11 == 2
+	_cFiltro += " AND A2_L_CENTR = '2' "
+EndIf
 _cFiltro += "%"
 
 BeginSql alias _cAlias
@@ -139,12 +137,12 @@ SELECT A2_COD, A2_LOJA, A2_EMAIL, A2_NOME
 EndSql
 
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 
 _oSelf:SetRegua1(_nCountRec)
 _oSelf:IncRegua1("Processando fornecedor "+(_cAlias)->A2_COD+"\"+(_cAlias)->A2_LOJA)
 //Criando as Linhas
-While (_cAlias)->(!EOF())
+While (_cAlias)->(!Eof())
 	_aAttach := {}
 	_aPergunte[5] := (_cAlias)->A2_COD
 	_aPergunte[7] := (_cAlias)->A2_COD
@@ -163,22 +161,22 @@ While (_cAlias)->(!EOF())
 	_cMensagem += "·        Para notas fiscais complementares de valor – Volume igual a 0 (zero);<br><br>"
 	_cMensagem += "·        Referenciar o xml de uma NF de origem, emitida durante a quinzena que está sendo acertada. (Não basta descrever a NF de referência no campo informações complementares, é necessário amarrar o xml da NF de origem ao xml da NF complementar de valor que está sendo emitida).<br><br>"
 	_cMensagem += "    * A referência do mês e quinzena deve ser incluída no campo das 'informações complementares' indicando , ao menos , uma nota de origem.<br>"
-	_cMensagem += "            (exemplo 1: Nota fiscal complementar de litragem referente a "+If(MV_PAR01==1,"1ª","2ª")+ " quinzena de "+If(MV_PAR01==1,MesExtenso(StoD(_cDtIni),1),MesExtenso(MonthSum(StoD(_cDtIni),1)))+ " "+SubStr(MV_PAR02,3,4)+" ref.  Nfs: 000.000 , 000.000 , 000.000).<br>"
-	_cMensagem += "               (exemplo 2: Nota fiscal complementar de valor referente a "+If(MV_PAR01==1,"1ª","2ª")+ " quinzena de "+If(MV_PAR01==1,MesExtenso(StoD(_cDtIni),1),MesExtenso(MonthSum(StoD(_cDtIni),1)))+ " "+SubStr(MV_PAR02,3,4)+" ref.  Nfs: 000.000 , 000.000 , 000.000).<br>"
+	_cMensagem += "            (exemplo 1: Nota fiscal complementar de litragem referente a "+If(MV_PAR01==1,"1ª","2ª")+ " quinzena de "+If(MV_PAR01==1,MesExtenso(SToD(_cDtIni),1),MesExtenso(MonthSum(SToD(_cDtIni),1)))+ " "+SubStr(MV_PAR02,3,4)+" ref.  Nfs: 000.000 , 000.000 , 000.000).<br>"
+	_cMensagem += "               (exemplo 2: Nota fiscal complementar de valor referente a "+If(MV_PAR01==1,"1ª","2ª")+ " quinzena de "+If(MV_PAR01==1,MesExtenso(SToD(_cDtIni),1),MesExtenso(MonthSum(SToD(_cDtIni),1)))+ " "+SubStr(MV_PAR02,3,4)+" ref.  Nfs: 000.000 , 000.000 , 000.000).<br>"
 	
 	_cMensagem += "</Font></BODY></HTML>"
-	If MV_PAR13 == 1
+	If MV_PAR14 == 1
 		_lEnvMail := .T.
 	EndIf
-	If MV_PAR11 <> 2
+	If MV_PAR12 <> 2
 		_cDirPlan := __RelDir+(_cAlias)->A2_COD+(_cAlias)->A2_LOJA+"_RGLT020.pdf"
 		aAdd(_aAttach,_cDirPlan)
-		U_RGLT020(_lJob,_aPergunte,.T.,_lEnvMail,_cDirPlan,MV_PAR14)
+		U_RGLT020(_lJob,_aPergunte,.T.,_lEnvMail,_cDirPlan,MV_PAR15)
 	EndIf
-	If MV_PAR11 <> 1
+	If MV_PAR12 <> 1
 		_cDirPlan := __RelDir+(_cAlias)->A2_COD+(_cAlias)->A2_LOJA+"_RGLT020.xlsx"
 		aAdd(_aAttach,_cDirPlan)
-		U_RGLT020(_lJob,_aPergunte,.F.,_lEnvMail,_cDirPlan,MV_PAR14)
+		U_RGLT020(_lJob,_aPergunte,.F.,_lEnvMail,_cDirPlan,MV_PAR15)
 	EndIf
 
 	If _lEnvMail
@@ -192,8 +190,8 @@ While (_cAlias)->(!EOF())
 	For _nX := 1 To Len(_aAttach)
 		FErase(_aAttach[_nX])
 	Next _nX
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
-(_cAlias)->(DbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

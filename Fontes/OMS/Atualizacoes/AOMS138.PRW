@@ -1,56 +1,38 @@
 /*
-==============================================================================================================================
+===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-==============================================================================================================================
-Autor         |    Data    |                              Motivo                      										 
-------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 26/07/2023 | Chamado 44096. Ajustar rotina incl/alter gravar Grupo Tributação "023" p/Parana e Simples Nac
-Julio Paz     | 28/08/2023 | Chamado 44715. Ajustar a rotina para utilizar apenas links CISP-MAXXI.
-Alex Wallauer | 11/12/2023 | Chamado 45804. Segregar o bloquear quando o cliente não fez compra nos últimos 30 dias.
-Julio Paz     | 08/03/2024 | Chamado 45006. Ajustar variável __cUserId em ambiente Scheduller p/ Protheus criar e preencher. 
-Igor Melgaço  | 19/06/2024 | Chamado 47534. Ajuste para gravação do CNAE. 
-Igor Melgaço  | 02/07/2024 | Chamado 47718. Ajuste para consulta do CNAE. 
-Julio Paz     | 17/07/2024 | Chamado 47908. Correções de error log na atualização do cadastro de clientes com os dados da CISP
-Igor Melgaço  | 19/07/2024 | Chamado 47896. Ajuste para correção de error log. 
-Igor Melgaço  | 29/07/2024 | Chamado 47955. Ajuste para tratamento da inscrição estadual. 
-Lucas Borges  | 23/07/2025 | Chamado 51340. Trocado e-mail padrão para sistema@italac.com.br
-=========================================================================================================================================================
-Analista         - Programador       - Inicio     - Envio      - Chamado - Motivo da Alteração
----------------------------------------------------------------------------------------------------------------------------------------------------------
-Antonio Ramos    -  Igor Melgaço     - 28/01/2025 - 28/01/2025 - 49712   - Ajustes no retorno da integração.
-=========================================================================================================================================================
+===============================================================================================================================
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
+Igor Melgaço  |28/01/2025| Chamado 49712. Ajustes no retorno da integração.
+Lucas Borges  |23/07/2025| Chamado 51340. Trocado e-mail padrão para sistema@italac.com.br
+Lucas Borges  |02/10/2025| Chamado 51526. Modificada forma para recuperar a matrícula do usuário.
+Jose Gavetti  |07/10/2025| Chamado 52346. Ajuste para inscrição estadual isento estado MG.
+Jose Gavetti  |26/11/2025| Chamado 51341. __cUserId não deve ter seu conteúdo alterado orientação TOTVS. 
+===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#include "APWEBSRV.CH"
-#Include 'Protheus.ch'  
-#INCLUDE "TBICONN.CH"   
-#INCLUDE "RESTFUL.CH"
+#Include "TOTVS.ch"  
 #Include "TopConn.ch"
-//#DEFINE ENTER	Chr(13)+Chr(10)
+
 /*
 ===============================================================================================================================
 Programa----------: AOMS138
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 13/09/2017
-===============================================================================================================================
 Descrição---------: Rotina integração de dados cadastrais cisp/sintegra/receita e atualização do cadastro de clientes.
                     Chamado 44289.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 User Function AOMS138()
 
-Local _cMatUsr			:= U_UCFG001(1) 
+Local _cMatUsr			:= FWSFAllUsers({__cUserID},{"USR_FILIAL"})[1][3]+FWSFAllUsers({__cUserID},{"USR_CODFUNC"})[1][3]
 Local _cAutoriz		:= GetAdvFVal( "ZZL" , "ZZL_ATUCLI" , xFilial("ZZL") + _cMatUsr , 1 , "N" )
 
 Private oproc
-Private _cdtl := date() - u_itgetmv("ITDIASCLI",30) //data limite de atualização dos clientes
+Private _cdtl := Date() - u_itgetmv("ITDIASCLI",30) //data limite de atualização dos clientes
 Private _bType := {|x| Type(x)}
 Private _aDadosRel := {}
 
@@ -59,7 +41,7 @@ Begin Sequence
    // Controle de acesso por usuario conforme parametrizacao no Gerenciador (Gestao de Usuarios) 
    //====================================================================================================
    If !( _cAutoriz == "S" )
-	   U_ITMSG("Usuário sem acesso à rotina de avaliação dos Pedidos bloqueados para análise de Crédito.","Atenção!",,1)
+	   U_ITMsg("Usuário sem acesso à rotina de avaliação dos Pedidos bloqueados para análise de Crédito.","Atenção!",,1)
 	   Break 
    EndIf
 
@@ -77,25 +59,22 @@ Begin Sequence
    _aCores :=   {{'SA1->A1_I_D3ST > _cdtl ', 'ENABLE'},;        // Atualizado
                  {'SA1->A1_I_D3ST <= _cdtl' , 'BR_VERMELHO' }}        // Desautalizado
  
-   SA1->(MsFilter("SA1->A1_PESSOA == 'J' .AND. SA1->A1_COD	> '000001'")) // 000001 = Código Italac, não atualizar via CISP.
+   SA1->(MsFilter("SA1->A1_PESSOA == 'J' .And. SA1->A1_COD	> '000001'")) // 000001 = Código Italac, não atualizar via CISP.
    MBrowse( ,,,, "SA1" ,,,,,, _acores )
    SA1->(Dbclearfilter())
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS138M
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 14/07/2023
-===============================================================================================================================
 Descrição---------: Chamada das rotinas, conforme opção de menu.
-===============================================================================================================================
 Parametros--------: _cOpcMenu = P = Registro posicionado. 
                               = G = Geral, todo o cadastro.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
@@ -111,7 +90,7 @@ Begin Sequence
 End Sequence
 
 
-Return Nil 
+Return 
 
 
 /*
@@ -119,14 +98,11 @@ Return Nil
 Programa----------: AOMS138A
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 14/07/2023
-===============================================================================================================================
 Descrição---------: Chamada de integração webservice de atualização do CISP/SINTEGRA/RECEITA FEDERAL posicionado no cliente.
-===============================================================================================================================
 Parametros--------: _lSchedule  = .T. = Rotina chamada via Scheduller / .F. = Rotina chamada manualmente.
                     _lEnvMail   = .T. / .F. = Envia e-mail = Sim / Não
                     _aDadosGeral = Daddo de processamento geral
                     _lExibeMsg   = Exibe mensagem na tela .T. / Não exibe mensagem na tela.
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
@@ -205,10 +181,10 @@ Begin Sequence
    If (SA1->A1_MSBLQL = "1")
 
       If ! _lSchedule .And. _lExibeMsg
-         U_ItMsg("Cliente Bloqueado. Esta rotina não atualiza cliente bloqueado.","Atenção",,1)
+         U_ITMsg("Cliente Bloqueado. Esta rotina não atualiza cliente bloqueado.","Atenção",,1)
       Else 
          U_ITConout("[AMOS138] - Cliente Bloqueado. Esta rotina não atualiza cliente bloqueado.")
-      Endif
+      EndIf
 	   
       _lRet :=  .F.
 	   
@@ -222,12 +198,12 @@ Begin Sequence
    If !(SA1->A1_PESSOA = "J")
 
       If ! _lSchedule .And. _lExibeMsg
-    	   U_ItMsg("Cliente pessoa fisica. Esta rotina só atualiza pessoa jurídica.","Atenção",,1)
+    	   U_ITMsg("Cliente pessoa fisica. Esta rotina só atualiza pessoa jurídica.","Atenção",,1)
       Else 
          U_ITConout("[AMOS138] - Cliente pessoa fisica. Esta rotina só atualiza pessoa jurídica.")
       EndIf
 	   
-      _lret :=  .F.
+      _lRet :=  .F.
 	   
       Break
 	
@@ -238,12 +214,12 @@ Begin Sequence
    //==========================================================
    If SA1->A1_I_ATCIS == "N"
       If ! _lSchedule .And. _lExibeMsg
-    	   U_ItMsg("Este Cliente esta marcado para não ser atualizado Via CISP.","Atenção",,1)
+    	   U_ITMsg("Este Cliente esta marcado para não ser atualizado Via CISP.","Atenção",,1)
       Else 
          U_ITConout("[AMOS138] - Este Cliente esta marcado para não ser atualizado Via CISP.")
       EndIf
 	   
-      _lret :=  .F.
+      _lRet :=  .F.
 	   
       Break
    EndIf
@@ -252,7 +228,7 @@ Begin Sequence
    If _lSchedule 
       _cUsuario := "SCHEDULLER"
    Else 
-      _cUsuario := __cUserID + "-" + UsrFullName(__cUserID)
+      _cUsuario := __cUserId + "-" + UsrFullName(__cUserId)
    EndIf 
 
    If ! _lSchedule .And. _lExibeMsg
@@ -263,17 +239,17 @@ Begin Sequence
    // Define se os links a serem utilizados serão de Produção ou de Homologação.
    //=============================================================================
    If _lLinkPrd
-      _cUrlCisp  := _cLinkCspP + substr(alltrim(SA1->A1_CGC),1,8)
-      _cUrlRecF  := _cLinkRecP + alltrim(SA1->A1_CGC) + _cToknRecP
-      _cUrlSufr  := _cLinkSufP + alltrim(SA1->A1_CGC) + "/uf/" + AllTrim(SA1->A1_EST) + _cToknSufP
-      _cUrlSimp  := _cLinkSimP + alltrim(SA1->A1_CGC) + _cToknSimP
-      _cUrlSint  := _cLinkSnTP + Alltrim(SA1->A1_CGC )+ "/uf/" + AllTrim(SA1->A1_EST) + _cToknSnTP
+      _cUrlCisp  := _cLinkCspP + SubStr(AllTrim(SA1->A1_CGC),1,8)
+      _cUrlRecF  := _cLinkRecP + AllTrim(SA1->A1_CGC) + _cToknRecP
+      _cUrlSufr  := _cLinkSufP + AllTrim(SA1->A1_CGC) + "/uf/" + AllTrim(SA1->A1_EST) + _cToknSufP
+      _cUrlSimp  := _cLinkSimP + AllTrim(SA1->A1_CGC) + _cToknSimP
+      _cUrlSint  := _cLinkSnTP + AllTrim(SA1->A1_CGC )+ "/uf/" + AllTrim(SA1->A1_EST) + _cToknSnTP
    Else 
-      _cUrlCisp  := _cLinkCspH + substr(alltrim(SA1->A1_CGC),1,8)
-      _cUrlRecF  := _cLinkRecH + alltrim(SA1->A1_CGC) + _cToknRecH
-      _cUrlSufr  := _cLinkSufH + alltrim(SA1->A1_CGC) + "/uf/" + AllTrim(SA1->A1_EST)  + _cToknSufH
-      _cUrlSimp  := _cLinkSimH + alltrim(SA1->A1_CGC) + _cToknSimH
-      _cUrlSint  := _cLinkSnTH + Alltrim(SA1->A1_CGC )+ "/uf/" + AllTrim(SA1->A1_EST) + _cToknSnTH
+      _cUrlCisp  := _cLinkCspH + SubStr(AllTrim(SA1->A1_CGC),1,8)
+      _cUrlRecF  := _cLinkRecH + AllTrim(SA1->A1_CGC) + _cToknRecH
+      _cUrlSufr  := _cLinkSufH + AllTrim(SA1->A1_CGC) + "/uf/" + AllTrim(SA1->A1_EST)  + _cToknSufH
+      _cUrlSimp  := _cLinkSimH + AllTrim(SA1->A1_CGC) + _cToknSimH
+      _cUrlSint  := _cLinkSnTH + AllTrim(SA1->A1_CGC )+ "/uf/" + AllTrim(SA1->A1_EST) + _cToknSnTH
    EndIf 
 
    //========================================
@@ -450,27 +426,27 @@ Begin Sequence
    // Verifica se os retornos do WebService Foram bem sucedidos ou não.
    //===================================================================
    _lRetCisp  := .F. // Retorno Cisp
-   If substr(_cHdcisp,1,15) == "HTTP/1.1 200 OK"
+   If SubStr(_cHdcisp,1,15) == "HTTP/1.1 200 OK"
       _lRetCisp  := .T.
    EndIf 
 
    _lRetSint  := .F. // Retorno Sintegra
-   If substr(_cHdSint,1,12) == "HTTP/1.1 200"
+   If SubStr(_cHdSint,1,12) == "HTTP/1.1 200"
       _lRetSint  := .T. 
    EndIf 
 
    _lRetRec   := .F. // Retorno Receita Federal
-   If substr(_cHdReceit,1,12) == "HTTP/1.1 200"
+   If SubStr(_cHdReceit,1,12) == "HTTP/1.1 200"
       _lRetRec   := .T. 
    EndIf 
 
    _lRetSufr  := .F. // Retorno Suframa
-   If substr(_cHdSufra,1,12) == "HTTP/1.1 200"
+   If SubStr(_cHdSufra,1,12) == "HTTP/1.1 200"
       _lRetSufr  := .T.
    EndIf 
 
    _lRetSimpN := .F. // Retorno Simples Nacional 
-   If substr(_cHdSimple,1,12) == "HTTP/1.1 200"
+   If SubStr(_cHdSimple,1,12) == "HTTP/1.1 200"
       _lRetSimpN := .T.
    EndIf  
 
@@ -479,16 +455,16 @@ Begin Sequence
    //=============================================================
    If ! _lRetCisp .And. _lRetSint .And. _lRetRec  // Se as três consultas principais retornar erro, não atualizar cliente.
     
-      Reclock("SA1",.F.)
+      RecLock("SA1",.F.)
       SA1->A1_I_SCST := "ERRO DE CONSULTA"
-  	   SA1->A1_I_D1ST := STOD("20010101")
-  	   SA1->A1_I_D2ST := STOD("20010101") //Grava uma data impossível para facilitar localização de registros com problema de consulta
-  	   SA1->A1_I_D3ST := DATE()
-  	   SA1->A1_I_HRST := TIME()
-      SA1->(Msunlock())
+  	   SA1->A1_I_D1ST := SToD("20010101")
+  	   SA1->A1_I_D2ST := SToD("20010101") //Grava uma data impossível para facilitar localização de registros com problema de consulta
+  	   SA1->A1_I_D3ST := Date()
+  	   SA1->A1_I_HRST := Time()
+      SA1->(MSUnLock())
 
       If ! _lSchedule .And. _lExibeMsg
-    	   U_ItMsg("Erro ao consultar os links CISP / SINTEGRA / RECEITA FEDERAL.","Atenção",,1)
+    	   U_ITMsg("Erro ao consultar os links CISP / SINTEGRA / RECEITA FEDERAL.","Atenção",,1)
       Else 
          U_ITConout("[AMOS138] - Erro ao consultar os links CISP / SINTEGRA / RECEITA FEDERAL.")
       EndIf
@@ -631,10 +607,10 @@ Begin Sequence
 
       If ! Empty(_cUfCisp) .And. ! Empty(_cMunCisp)
          //4=CC2_FILIAL+CC2_EST+CC2_MUN
-         _cCMunCisp := Posicione("CC2",4,xfilial("CC2")+_cUfCisp+U_ItKey(_cMunCisp,"CC2_MUN"),"CC2_CODMUN")
+         _cCMunCisp := Posicione("CC2",4,xFilial("CC2")+_cUfCisp+U_ItKey(_cMunCisp,"CC2_MUN"),"CC2_CODMUN")
       EndIf
 
-      _cDtARCisp := Dtoc(Date())
+      _cDtARCisp := DToC(Date())
       _cHrAcCisp := Time()
 
    EndIf 
@@ -700,20 +676,20 @@ Begin Sequence
          _cSitCSint := Upper(_oJSonSint:COMPANY[1]:REGISTER:STATUS)
       EndIf 
 
-      _cDtCSSint := DATE()
+      _cDtCSSint := Date()
    
       If Type("_oJSonSint:UPDATEDATE") <> "U"
          _cDtASSint := _oJSonSint:UPDATEDATE
 
          If ! Empty(_cDtASSint)
             _cDtASSint := StrTran(_cDtASSint,"-","")
-            _cDtASSint := Dtoc(StoD(_cDtASSint))
+            _cDtASSint := DToC(SToD(_cDtASSint))
          EndIf 
       EndIf 
 
       If ! Empty(_cUfSint) .And. ! Empty(_cMunSint)
          //4=CC2_FILIAL+CC2_EST+CC2_MUN
-         _cCMunSint := Posicione("CC2",4,xfilial("CC2")+_cUfSint+U_ItKey(_cMunSint,"CC2_MUN"),"CC2_CODMUN")
+         _cCMunSint := Posicione("CC2",4,xFilial("CC2")+_cUfSint+U_ItKey(_cMunSint,"CC2_MUN"),"CC2_CODMUN")
       EndIf 
 
       If Type("_oJSonSint:COMPANY[1]:ADDRESS:LINE1") <> "U"
@@ -758,7 +734,7 @@ Begin Sequence
    _cComERecF := ""
    
    
-   If _lRetRec .AND. Type("_oJSonRece") == "U"
+   If _lRetRec .And. Type("_oJSonRece") == "U"
       _oJSonRece := ""
 
       _lRetRec := FWJsonDeserialize(_cRetRece,@_oJSonRece)
@@ -788,7 +764,7 @@ Begin Sequence
       _cDesecNegoc := ""
 
       If ValType(_oBusiness) == "O"
-         If Valtype(_oBusiness:industries) == "A"
+         If ValType(_oBusiness:industries) == "A"
             _oIndustri := _oBusiness:industries
          Else
             _oIndustri := {_oBusiness:industries}
@@ -807,7 +783,7 @@ Begin Sequence
          EndIf 
       Next
       
-      _cCodNegoc := substr(_cCodNegoc,1,2) + substr(_cCodNegoc,4,4) + "/" + substr(_cCodNegoc,9,2)
+      _cCodNegoc := SubStr(_cCodNegoc,1,2) + SubStr(_cCodNegoc,4,4) + "/" + SubStr(_cCodNegoc,9,2)
       _cCNAECisp := AllTrim(_cCodNegoc) 
 
       If Type("_oJSonRece:COMPANY[1]:REGISTEREDNAME") <> "U"
@@ -843,13 +819,13 @@ Begin Sequence
 
          If ! Empty(_cDtARRecF)
             _cDtARRecF := StrTran(_cDtARRecF,"-","")
-            _cDtARRecF := Dtoc(StoD(_cDtARRecF))
+            _cDtARRecF := DToC(SToD(_cDtARRecF))
          EndIf 
       EndIf 
 
       If ! Empty(_cUfRecF) .And. ! Empty(_cMunRecF)
          //4=CC2_FILIAL+CC2_EST+CC2_MUN
-         _cCMunRecF:= Posicione("CC2",4,xfilial("CC2")+_cUfRecF+U_ItKey(_cMunRecF,"CC2_MUN"),"CC2_CODMUN")
+         _cCMunRecF:= Posicione("CC2",4,xFilial("CC2")+_cUfRecF+U_ItKey(_cMunRecF,"CC2_MUN"),"CC2_CODMUN")
       EndIf 
 
       If Type("_oJSonRece:COMPANY[1]:ADDRESS:LINE1") <> "U"
@@ -978,55 +954,55 @@ Begin Sequence
       EndIf
 
       If ! Empty(_cUfSufr) .And. ! Empty(_cMunSufr)
-        _cCMunSufr := Posicione("CC2",4,xfilial("CC2")+ _cUfSufr + U_ItKey(_cMunSufr,"CC2_MUN"),"CC2_CODMUN")
+        _cCMunSufr := Posicione("CC2",4,xFilial("CC2")+ _cUfSufr + U_ItKey(_cMunSufr,"CC2_MUN"),"CC2_CODMUN")
       EndIf
 
    EndIf 
 
-   If !(_cSitCSint== "HABILITADO"          .OR. _cSitCSint == "HABILITADA"          .OR. _cSitCSint == "ATIVO"            .OR. _cSitCSint== "ATIVA" .OR. Empty(Alltrim(_cSitCSint)) .OR. ;
-        _cSitCSint == "ATIVO - HABILITADO" .OR. _cSitCSint == "HABILITADO - ATIVO") .OR. !(alltrim(_cSitCRecF) == "ATIVA" .OR. alltrim(_cSitCRecF) == "ATIVO" .OR. Empty(Alltrim(_cSitCRecf)))
+   If !(_cSitCSint== "HABILITADO"          .Or. _cSitCSint == "HABILITADA"          .Or. _cSitCSint == "ATIVO"            .Or. _cSitCSint== "ATIVA" .Or. Empty(AllTrim(_cSitCSint)) .Or. ;
+        _cSitCSint == "ATIVO - HABILITADO" .Or. _cSitCSint == "HABILITADO - ATIVO") .Or. !(AllTrim(_cSitCRecF) == "ATIVA" .Or. AllTrim(_cSitCRecF) == "ATIVO" .Or. Empty(AllTrim(_cSitCRecf)))
   	   _cBlqSint := "SIM"	
       _cBlqRecF := "SIM"
-   ELSEIF AllTrim(_cSitCCisp) == "ERRO DE CONSULTA" .AND. (dDatabase-30) >= STOD(SA1->A1_ULTCOM)
+   ElseIf AllTrim(_cSitCCisp) == "ERRO DE CONSULTA" .And. (dDatabase-30) >= SToD(SA1->A1_ULTCOM)
   	   _cBlqSint := "SIM"	
       _cBlqRecF := "SIM"
    Else 
       _cBlqSint := "NAO"	
       _cBlqRecF := "NAO"
-   Endif
+   EndIf
 
    _aDados := {}
 
-   Aadd(_aDados,{"A1_NOME"   ,"Razão Social"               , _cNomCisp  , _cNomSint  ,	_cNomRecF  ,_cNomSimN  , _cNomSufr})
-   Aadd(_aDados,{"A1_NREDUZ" ,"Nome Fantasia"              , _cFanCisp  , _cFanSint  ,	_cFanRecF  ,_cFanSimN  , _cFanSufr})
-   Aadd(_aDados,{"A1_INSCR"  ,"Inscrição Estadual"         , _cInscCisp , _cInscSint ,	_cInscRecF ,_cInscSimN , _cInscSufr})
-   Aadd(_aDados,{"A1_END"    ,"Endereço"                   , _cEndCisp  , _cEndSint  ,	_cEndRecF  ,_cEndSimN  , _cEndSufr})
-   Aadd(_aDados,{"A1_BAIRRO" ,"Bairro"                     , _cBairCisp , _cBairSint ,	_cBairRecF ,_cBairSimN , _cBairSufr})
-   Aadd(_aDados,{"A1_EST"    ,"Estado"                     , _cUfCisp   , _cUfSint   ,	_cUfRecF	  , _cUfSimN  , _cUfSufr})
-   Aadd(_aDados,{"A1_MUN"    ,"Municipio"                  , _cMunCisp  , _cMunSint  ,	_cMunRecF  ,_cMunSimN  , _cMunSufr})
-   Aadd(_aDados,{"A1_COD_MUN","Código Município"           , _cCMunCisp , _cCMunSint ,	_cCMunRecF ,_cCMunSimN , _cCMunSufr})
-   Aadd(_aDados,{"A1_CEP"    ,"Cep"                        , _cCepCisp  , _cCepSint  , _cCepRecF  ,_cCepSimN  , _cCepSufr })
-   Aadd(_aDados,{"A1_SIMPNAC","Simples Nacional"           , _cSimNCisp , _cSimNSint ,	_cSimNRecF ,_cSimNSimN , _cSimNSufr})
-   Aadd(_aDados,{"A1_SUFRAMA","Suframa"                    , _cSufrCisp , _cSufrSint ,	_cSufrRecF ,_cSufrSimN , _cSufrSufr})
-   Aadd(_aDados,{"A1_I_SCST" ,"Sit Cadastral Sintegra"     , ""         , _cSitCSint ,	""         ,""         , ""        })
-   Aadd(_aDados,{"A1_I_D1ST" ,"Data Consulta Sintegra"     , ""         , _cDtCSSint ,	"" /*_cDtCSRecF*/ ,_cDtCSSimN , _cDtCSSufr})
-   Aadd(_aDados,{"A1_I_D2ST" ,"Data Atualizacao Sintegra"  , ""         , _cDtASSint ,	/*_cDtARSecF*/"" ,_cDtASSimN , _cDtASSufr})
-   Aadd(_aDados,{"A1_I_D3ST" ,"Data Atualizacao Reg Cisp"  , _cDtARCisp , _cDtARSint ,	/*_cDtARRecF*/ "" ,_cDtARSimN , _cDtARSufr})
-   Aadd(_aDados,{"A1_I_HRST" ,"Hora Atualizacao Cisp"      , _cHrAcCisp , _cHrACSint ,	_cHrACRecF ,_cHrACSimN , _cHrACSufr})
-   Aadd(_aDados,{"A1_I_SCRC" ,"Sit Cadastral Receita Fed"  , ""         , _cSitRSint ,	_cSitCRecF ,_cSitRSimN , _cSitRSufr})
-   Aadd(_aDados,{"A1_I_D1RC" ,"Data Consulta Receita Fed"  , ""         , _cDtCRSint ,	_cDtCRRecF ,_cDtCRSimN , _cDtCRSufr})
-   Aadd(_aDados,{"A1_I_D2RC" ,"Data Atualizacao Receita"   , ""         , _cDtATSint ,	_cDtARRecF ,_cDtATSimN , _cDtATSufr})
-   Aadd(_aDados,{"A1_MSBLQL" ,"Bloqueado"                  , _cBlqCisp  , _cBlqSint  ,	_cBlqRecF  ,_cBlqSimN  , _cBlqSufr})
-   Aadd(_aDados,{"A1_I_LOGRA","Logradouro  / Endereço"     , _cLogrCisp , _cLogrSint ,	_cLogrRecF ,_cLogrSimN , _cLogrSufr})
-   Aadd(_aDados,{"A1_I_NUMER","Numero do Endereço"         , _cNumECisp , _cNumESint ,	_cNumERecF ,_cNumESimN , _cNumESufr})
-   Aadd(_aDados,{"A1_I_COMPL","Complemento do Endereço Sin", _cComECisp , _cComESint ,	_cComERecF ,_cComESimN , _cComESufr})
-   Aadd(_aDados,{"A1_CNAE"   ,"CNAE"                       , _cCNAECisp , ""         ,	""         ,""         , ""        })
+   aAdd(_aDados,{"A1_NOME"   ,"Razão Social"               , _cNomCisp  , _cNomSint  ,	_cNomRecF  ,_cNomSimN  , _cNomSufr})
+   aAdd(_aDados,{"A1_NREDUZ" ,"Nome Fantasia"              , _cFanCisp  , _cFanSint  ,	_cFanRecF  ,_cFanSimN  , _cFanSufr})
+   aAdd(_aDados,{"A1_INSCR"  ,"Inscrição Estadual"         , _cInscCisp , _cInscSint ,	_cInscRecF ,_cInscSimN , _cInscSufr})
+   aAdd(_aDados,{"A1_END"    ,"Endereço"                   , _cEndCisp  , _cEndSint  ,	_cEndRecF  ,_cEndSimN  , _cEndSufr})
+   aAdd(_aDados,{"A1_BAIRRO" ,"Bairro"                     , _cBairCisp , _cBairSint ,	_cBairRecF ,_cBairSimN , _cBairSufr})
+   aAdd(_aDados,{"A1_EST"    ,"Estado"                     , _cUfCisp   , _cUfSint   ,	_cUfRecF	  , _cUfSimN  , _cUfSufr})
+   aAdd(_aDados,{"A1_MUN"    ,"Municipio"                  , _cMunCisp  , _cMunSint  ,	_cMunRecF  ,_cMunSimN  , _cMunSufr})
+   aAdd(_aDados,{"A1_COD_MUN","Código Município"           , _cCMunCisp , _cCMunSint ,	_cCMunRecF ,_cCMunSimN , _cCMunSufr})
+   aAdd(_aDados,{"A1_CEP"    ,"Cep"                        , _cCepCisp  , _cCepSint  , _cCepRecF  ,_cCepSimN  , _cCepSufr })
+   aAdd(_aDados,{"A1_SIMPNAC","Simples Nacional"           , _cSimNCisp , _cSimNSint ,	_cSimNRecF ,_cSimNSimN , _cSimNSufr})
+   aAdd(_aDados,{"A1_SUFRAMA","Suframa"                    , _cSufrCisp , _cSufrSint ,	_cSufrRecF ,_cSufrSimN , _cSufrSufr})
+   aAdd(_aDados,{"A1_I_SCST" ,"Sit Cadastral Sintegra"     , ""         , _cSitCSint ,	""         ,""         , ""        })
+   aAdd(_aDados,{"A1_I_D1ST" ,"Data Consulta Sintegra"     , ""         , _cDtCSSint ,	"" /*_cDtCSRecF*/ ,_cDtCSSimN , _cDtCSSufr})
+   aAdd(_aDados,{"A1_I_D2ST" ,"Data Atualizacao Sintegra"  , ""         , _cDtASSint ,	/*_cDtARSecF*/"" ,_cDtASSimN , _cDtASSufr})
+   aAdd(_aDados,{"A1_I_D3ST" ,"Data Atualizacao Reg Cisp"  , _cDtARCisp , _cDtARSint ,	/*_cDtARRecF*/ "" ,_cDtARSimN , _cDtARSufr})
+   aAdd(_aDados,{"A1_I_HRST" ,"Hora Atualizacao Cisp"      , _cHrAcCisp , _cHrACSint ,	_cHrACRecF ,_cHrACSimN , _cHrACSufr})
+   aAdd(_aDados,{"A1_I_SCRC" ,"Sit Cadastral Receita Fed"  , ""         , _cSitRSint ,	_cSitCRecF ,_cSitRSimN , _cSitRSufr})
+   aAdd(_aDados,{"A1_I_D1RC" ,"Data Consulta Receita Fed"  , ""         , _cDtCRSint ,	_cDtCRRecF ,_cDtCRSimN , _cDtCRSufr})
+   aAdd(_aDados,{"A1_I_D2RC" ,"Data Atualizacao Receita"   , ""         , _cDtATSint ,	_cDtARRecF ,_cDtATSimN , _cDtATSufr})
+   aAdd(_aDados,{"A1_MSBLQL" ,"Bloqueado"                  , _cBlqCisp  , _cBlqSint  ,	_cBlqRecF  ,_cBlqSimN  , _cBlqSufr})
+   aAdd(_aDados,{"A1_I_LOGRA","Logradouro  / Endereço"     , _cLogrCisp , _cLogrSint ,	_cLogrRecF ,_cLogrSimN , _cLogrSufr})
+   aAdd(_aDados,{"A1_I_NUMER","Numero do Endereço"         , _cNumECisp , _cNumESint ,	_cNumERecF ,_cNumESimN , _cNumESufr})
+   aAdd(_aDados,{"A1_I_COMPL","Complemento do Endereço Sin", _cComECisp , _cComESint ,	_cComERecF ,_cComESimN , _cComESufr})
+   aAdd(_aDados,{"A1_CNAE"   ,"CNAE"                       , _cCNAECisp , ""         ,	""         ,""         , ""        })
 
    _aCabec := {"Campos","Descrição","CISP","SINTEGRA","RECEITA FEDERAL","SIMPLES NACIONAL","SUFRAMA"}
 
    If ! _lSchedule .And. _lExibeMsg
       If ! U_ItlistBox("Dados Cisp para Atualização",_aCabec,_aDados,.T.,1)
-         U_ItMsg("Atualização de cliente cancelada pelo usuário.","Atenção",,1)
+         U_ITMsg("Atualização de cliente cancelada pelo usuário.","Atenção",,1)
          Break 
       EndIf 
    EndIf  
@@ -1046,7 +1022,7 @@ Begin Sequence
    _nPodFin := Len(_aDados) + _nPosIni
    //_aDadosRel
    For _nI := 1 To Len(_aDados)
-       Aadd(_aDadosRel,{SA1->A1_COD,;                        //  1 - Codigo Cliente 
+       aAdd(_aDadosRel,{SA1->A1_COD,;                        //  1 - Codigo Cliente 
                         SA1->A1_LOJA,;                       //  2 - Loja Cliente
                         SA1->A1_CGC,;                        //  3 - CNPJ Cliente
                         _aDados[_nI,1],;                     //  4 - Campo Atualizado
@@ -1068,7 +1044,7 @@ Begin Sequence
    //===================================================================
   	If U_ITGETMV("ITGRVCLI",.F.)
   	   
-  	  	SA1->(Reclock("SA1",.F.))
+  	  	SA1->(RecLock("SA1",.F.))
       If ! Empty(_cNomCisp) .Or. ! Empty(_cNomRecF)
          SA1->A1_NOME := If(!Empty(_cNomRecF), _cNomRecF, _cNomCisp) // _aDados[1,3]  // Razão Social"               , _cNomCisp  , _cNomSint  ,	_cNomRecF  ,_cNomSimN  , _cNomSufr})
       EndIf 
@@ -1082,7 +1058,7 @@ Begin Sequence
       //EndIf 
 
       If ! Empty(_cInscSint)
-         SA1->A1_INSCR := U_AOMS138N(_cInscSint,Iif(Empty(_cUfSint),_cUfRecF,_cUfSint))     // Inscrição Estadual"         , _cInscCisp , _cInscSint ,	_cInscRecF ,_cInscSimN , _cInscSufr})
+         SA1->A1_INSCR := U_AOMS138N(_cInscSint,IIf(Empty(_cUfSint),_cUfRecF,_cUfSint))     // Inscrição Estadual"         , _cInscCisp , _cInscSint ,	_cInscRecF ,_cInscSimN , _cInscSufr})
       EndIf 
 
       If ! Empty(_cEndSint)
@@ -1136,7 +1112,7 @@ Begin Sequence
             If AllTrim(_cSimNSimN) <> "NAO"
                SA1->A1_GRPTRIB := _cTRIBMVA // "023" // Solicitação Chamado: 44096 = Motivo: estado reduz o MVA para 30% (exceção fiscal) e estamos iniciando operação de 4 Brokers que atenderão este grupo.
             Else 
-               If Alltrim(SA1->A1_GRPTRIB) == AllTrim(_cTRIBMVA)
+               If AllTrim(SA1->A1_GRPTRIB) == AllTrim(_cTRIBMVA)
                   SA1->A1_GRPTRIB := " "
                EndIf 
             EndIf 
@@ -1183,7 +1159,7 @@ Begin Sequence
          SA1->A1_MSBLQL := If(AllTrim(_cBlqSint) == "NAO","2","1")  // Bloqueado"                  , _cBlqCisp  , _cBlqSint  ,	_cBlqRecF  ,_cBlqSimN  , _cBlqSufr})
       EndIf 
       
-      If SA1->A1_I_ATCIS != "N" .and. U_ITGETMV("ITGRVCLI",.F.)
+      If SA1->A1_I_ATCIS != "N" .And. U_ITGETMV("ITGRVCLI",.F.)
          If ! Empty(_cLogrSint)
             SA1->A1_I_LOGRA := _cLogrSint // Logradouro  / Endereço"     , _cLogrCisp , _cLogrSint ,	_cLogrRecF ,_cLogrSimN , _cLogrSufr})
          ElseIf ! Empty(_cLogrRecF)
@@ -1203,7 +1179,7 @@ Begin Sequence
          EndIf 
       EndIf 
 
-      SA1->(MsUnLock())
+      SA1->(MSUnLock())
       _cObserv := "Cadastro de Clientes atualizados com os dados da CISP."
 
    Else 
@@ -1213,7 +1189,7 @@ Begin Sequence
    //=====================================================
    // Grava log de Consulta e Atualização
    //=====================================================
-   ZGF->(Reclock("ZGF",.T.))
+   ZGF->(RecLock("ZGF",.T.))
   	ZGF->ZGF_CODCLI := SA1->A1_COD
   	ZGF->ZGF_LOJA := SA1->A1_LOJA
   	ZGF->ZGF_NOMEA := SA1->A1_NOME
@@ -1243,11 +1219,11 @@ Begin Sequence
   	ZGF->ZGF_D2STA := SA1->A1_I_D2ST
   	ZGF->ZGF_D2STN := CTod(_cDtASSint) 
   	ZGF->ZGF_D3STA := SA1->A1_I_D3ST
-  	ZGF->ZGF_D3STN := DATE()
+  	ZGF->ZGF_D3STN := Date()
    ZGF->ZGF_MSBLA := SA1->A1_MSBLQL
    ZGF->ZGF_MSBLN := If(AllTrim(_cBlqSint) == "NAO","2","1")
    ZGF->ZGF_HRSTA := SA1->A1_I_HRST
-   ZGF->ZGF_HRSTN := TIME()
+   ZGF->ZGF_HRSTN := Time()
    ZGF->ZGF_RCSTA := SA1->A1_I_SCRC
    ZGF->ZGF_RCSTN := _cSitCRecF 
    ZGF->ZGF_D1RCA := SA1->A1_I_D1RC
@@ -1258,7 +1234,7 @@ Begin Sequence
    ZGF->ZGF_OBS   := _cObserv
    ZGF->ZGF_SUFRA := SA1->A1_SUFRAMA
    ZGF->ZGF_SUFRN := _cSufrSufr
-   ZGF->(Msunlock())
+   ZGF->(MSUnLock())
     
    For _nI := _nPosIni To (_nPodFin - 1)  // Atualiza observações
        _aDadosRel[_nI,13] := Upper(_cObserv)
@@ -1293,11 +1269,8 @@ Return _lRet
 Programa----------: AOMS138E
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 19/07/2023
-===============================================================================================================================
 Descrição---------: Rotina para enviar e-mail de notificação de atualização de cadastro de cliente
-===============================================================================================================================
 Parametros--------: _aDadosEnv = Dados a serem enviados no e-mail
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1306,30 +1279,30 @@ User Function AOMS138E(_aDadosEnv)
 Local _aConfig	:= U_ITCFGEML('')
 Local _cMsgEml	:= ''
 Local _cEmail	:= U_ITGETMV( 'IT_CISPCLI' , 'sistema@italac.com.br' )
-Local _cData	:= Dtoc(DATE())
-Local _cHoraT   := time()
-Local _cAssunto := 'Workflow - Atualização de cadastro de cliente com os dados da CISP - ' + alltrim(SA1->A1_COD) + "/" + ALLTRIM(SA1->A1_LOJA) + " - " + alltrim(SA1->A1_NOME)
+Local _cData	:= DToC(DATE())
+Local _cHoraT   := Time()
+Local _cAssunto := 'Workflow - Atualização de cadastro de cliente com os dados da CISP - ' + AllTrim(SA1->A1_COD) + "/" + AllTrim(SA1->A1_LOJA) + " - " + AllTrim(SA1->A1_NOME)
 Local _cNomeArq,_cDirExcel ,_cTitulo, _aCabec
 Local _cAnexo
 
 Begin Sequence 
-   _cNomeArq  := "Workflow_Atualizacao_Clientes_com_dados_CISP_" + Dtos(Date()) + "-" + StrTran(TIME(),":","" )+".xml" 
+   _cNomeArq  := "Workflow_Atualizacao_Clientes_com_dados_CISP_" + DToS(Date()) + "-" + StrTran(TIME(),":","" )+".xml" 
    _cDirExcel := "\SPOOL\"
    _cTitulo   := 'Workflow - Atualização de cadastro de cliente com os dados da CISP ' 
    _aCabec    := {}
-   Aadd(_aCabec,{"Codigo Cliente"                 ,1           ,1         ,.F.})   
-   Aadd(_aCabec,{"Loja Client"                    ,1           ,1         ,.F.})   
-   Aadd(_aCabec,{"CNPJ Cliente"                   ,1           ,1         ,.F.})   
-   Aadd(_aCabec,{"Campo Atualizado"               ,1           ,1         ,.F.})   
-   Aadd(_aCabec,{"Descrição Campo Atualizado"     ,1           ,1         ,.F.})   
-   Aadd(_aCabec,{"Informação Antes Atualização"   ,1           ,1         ,.F.})   
-   Aadd(_aCabec,{"Dados Cisp"                     ,1           ,1         ,.F.})   
-   Aadd(_aCabec,{"Dados Cisp-Sintegra"            ,1           ,1         ,.F.})   
-   Aadd(_aCabec,{"Dados Cisp-Receita Federal"     ,1           ,1         ,.F.})   
-   Aadd(_aCabec,{"Dados Cisp-Simples Nacional"    ,1           ,1         ,.F.})   
-   Aadd(_aCabec,{"Dados Cisp-Suframa"             ,1           ,1         ,.F.})   
-   Aadd(_aCabec,{"Usuário responsável"            ,1           ,1         ,.F.})   
-   Aadd(_aCabec,{"Observação"                     ,1           ,1         ,.F.})   
+   aAdd(_aCabec,{"Codigo Cliente"                 ,1           ,1         ,.F.})   
+   aAdd(_aCabec,{"Loja Client"                    ,1           ,1         ,.F.})   
+   aAdd(_aCabec,{"CNPJ Cliente"                   ,1           ,1         ,.F.})   
+   aAdd(_aCabec,{"Campo Atualizado"               ,1           ,1         ,.F.})   
+   aAdd(_aCabec,{"Descrição Campo Atualizado"     ,1           ,1         ,.F.})   
+   aAdd(_aCabec,{"Informação Antes Atualização"   ,1           ,1         ,.F.})   
+   aAdd(_aCabec,{"Dados Cisp"                     ,1           ,1         ,.F.})   
+   aAdd(_aCabec,{"Dados Cisp-Sintegra"            ,1           ,1         ,.F.})   
+   aAdd(_aCabec,{"Dados Cisp-Receita Federal"     ,1           ,1         ,.F.})   
+   aAdd(_aCabec,{"Dados Cisp-Simples Nacional"    ,1           ,1         ,.F.})   
+   aAdd(_aCabec,{"Dados Cisp-Suframa"             ,1           ,1         ,.F.})   
+   aAdd(_aCabec,{"Usuário responsável"            ,1           ,1         ,.F.})   
+   aAdd(_aCabec,{"Observação"                     ,1           ,1         ,.F.})   
    U_ITGEREXCEL(_cNomeArq,_cDirExcel ,_cTitulo,"Workflow_Atualização_Cliente_CISP",_aCabec    ,_aDadosEnv  ,.F.        ,          ,        ,.T.         ,            ,          ,   .T. ) 
 
    Sleep(2000)
@@ -1339,7 +1312,7 @@ Begin Sequence
    _cMsgEml := '<html>'
    _cMsgEml += '<head><title></title>Log de Processamento</head>'
    _cMsgEml += '<body>'
-   _cMsgEml += '<style type="text/css"><!--'
+   _cMsgEml += '<style Type="text/css"><!--'
    _cMsgEml += 'table.bordasimples { border-collapse: collapse; }'
    _cMsgEml += 'table.bordasimples tr td { border:1px solid #777777; }'
    _cMsgEml += 'td.titulos	{ font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #C6E2FF; }'
@@ -1352,7 +1325,7 @@ Begin Sequence
    _cMsgEml += '<img src="http://www.italac.com.br/wf/italac-wf.jpg" width="700" height="50"><br>'
    _cMsgEml += '<table class="bordasimples" width="700">'
    _cMsgEml += '    <tr>'
-   //_cMsgEml += '	<td class="titulos"><center>Atualização dados Manual no cadasto de clientes - ' + alltrim(SA1->A1_COD) + "/" + ALLTRIM(SA1->A1_LOJA) + " - " + alltrim(SA1->A1_NOME) + "</center></td>'
+   //_cMsgEml += '	<td class="titulos"><center>Atualização dados Manual no cadasto de clientes - ' + AllTrim(SA1->A1_COD) + "/" + AllTrim(SA1->A1_LOJA) + " - " + AllTrim(SA1->A1_NOME) + "</center></td>'
    _cMsgEml += '	<td class="titulos"><center>Atualização do cadasto de clientes com os dados da CISP.</center></td>'
    _cMsgEml += '	</tr>'
    _cMsgEml += '</table>'
@@ -1400,11 +1373,8 @@ Return .T.
 Programa----------: AOMS138G
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 20/07/2023
-===============================================================================================================================
 Descrição---------: Atualização geral de clientes
-===============================================================================================================================
 Parametros--------: _lSchedule = .T. / .F. = Indica se a rotina foi chamada via Scheduller ou via Menu. 
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
@@ -1470,7 +1440,7 @@ Default _lSchedule := .F.
 Begin Sequence 
 
    If ! _lSchedule  .And. ! U_AOMS138T()
-      U_ItMsg( "Rotina cancelada pelo usuário!" , "Atenção!",,1 )
+      U_ITMsg( "Rotina cancelada pelo usuário!" , "Atenção!",,1 )
       Break
    EndIf 
 
@@ -1515,7 +1485,7 @@ Begin Sequence
    // Verifica se os retornos do WebService Foram bem sucedidos ou não.
    //===================================================================
    _lRetCisp  := .F. // Retorno Cisp
-   If substr(_cHdcisp,1,15) == "HTTP/1.1 200 OK"
+   If SubStr(_cHdcisp,1,15) == "HTTP/1.1 200 OK"
       _lRetCisp  := .T.
    EndIf 
 
@@ -1545,7 +1515,7 @@ Begin Sequence
    //===================================================================================
    If _lRetCisp 
       
-      SA1->(DbSetOrder(3))
+      SA1->(DBSetOrder(3))
 
       _nTotJSons := Len(_oJSonCisp)
 
@@ -1589,13 +1559,13 @@ Begin Sequence
           // Define se os links a serem utilizados serão de Produção ou de Homologação.
           //=============================================================================
           If _lLinkPrd
-             _cUrlSufr  := _cLinkSufP + alltrim(SA1->A1_CGC) + "/uf/" + AllTrim(SA1->A1_EST) + _cToknSufP
-             _cUrlSimp  := _cLinkSimP + alltrim(SA1->A1_CGC) + _cToknSimP
-             _cUrlRecF  := _cLinkRecP + alltrim(SA1->A1_CGC) + _cToknRecP
+             _cUrlSufr  := _cLinkSufP + AllTrim(SA1->A1_CGC) + "/uf/" + AllTrim(SA1->A1_EST) + _cToknSufP
+             _cUrlSimp  := _cLinkSimP + AllTrim(SA1->A1_CGC) + _cToknSimP
+             _cUrlRecF  := _cLinkRecP + AllTrim(SA1->A1_CGC) + _cToknRecP
           Else 
-             _cUrlSufr  := _cLinkSufH + alltrim(SA1->A1_CGC) + "/uf/" + AllTrim(SA1->A1_EST)  + _cToknSufH
-             _cUrlSimp  := _cLinkSimH + alltrim(SA1->A1_CGC) + _cToknSimH
-             _cUrlRecF  := _cLinkRecH + alltrim(SA1->A1_CGC) + _cToknRecH
+             _cUrlSufr  := _cLinkSufH + AllTrim(SA1->A1_CGC) + "/uf/" + AllTrim(SA1->A1_EST)  + _cToknSufH
+             _cUrlSimp  := _cLinkSimH + AllTrim(SA1->A1_CGC) + _cToknSimH
+             _cUrlRecF  := _cLinkRecH + AllTrim(SA1->A1_CGC) + _cToknRecH
           EndIf 
 
           //=============================================================================
@@ -1654,14 +1624,14 @@ Begin Sequence
             _cSitCCisp  := _oItemCisp:situacaoCadastral
 
              //4=CC2_FILIAL+CC2_EST+CC2_MUN
-             _cCMunCisp := Posicione("CC2",4,xfilial("CC2")+_cUfCisp+U_ItKey(_cMunCisp,"CC2_MUN"),"CC2_CODMUN")
-             _cDtARCisp := Dtoc(Date())
+             _cCMunCisp := Posicione("CC2",4,xFilial("CC2")+_cUfCisp+U_ItKey(_cMunCisp,"CC2_MUN"),"CC2_CODMUN")
+             _cDtARCisp := DToC(Date())
              _cHrAcCisp := Time()
 	
-             If !(_cSitCCisp == "HABILITADO" .OR. _cSitCCisp == "HABILITADA"         .OR. _cSitCCisp == "ATIVO" .OR.;
-                  _cSitCCisp == "ATIVA"      .OR. _cSitCCisp == "ATIVO - HABILITADO" .OR. _cSitCCisp == "HABILITADO - ATIVO")
+             If !(_cSitCCisp == "HABILITADO" .Or. _cSitCCisp == "HABILITADA"         .Or. _cSitCCisp == "ATIVO" .OR.;
+                  _cSitCCisp == "ATIVA"      .Or. _cSitCCisp == "ATIVO - HABILITADO" .Or. _cSitCCisp == "HABILITADO - ATIVO")
   	             _cBlqCisp := "SIM"	
-             ELSEIF AllTrim(_cSitCCisp) == "ERRO DE CONSULTA" .AND. (dDatabase-30) >= STOD(SA1->A1_ULTCOM)
+             ElseIf AllTrim(_cSitCCisp) == "ERRO DE CONSULTA" .And. (dDatabase-30) >= SToD(SA1->A1_ULTCOM)
   	             _cBlqCisp := "SIM"	
              Else 
                 _cBlqCisp := "NAO"	
@@ -1690,7 +1660,7 @@ Begin Sequence
             _cRetRece := U_ITSUBCHR(_cRetRece, _aStrSubst)
 
             _lRetRec   := .F. // Retorno Receita Federal
-            If substr(_cHdReceit,1,15) == "HTTP/1.1 200 OK"
+            If SubStr(_cHdReceit,1,15) == "HTTP/1.1 200 OK"
                _lRetRec   := .T. 
             EndIf 
 
@@ -1730,7 +1700,7 @@ Begin Sequence
 
                EndIf 
 
-               _cCodNegoc := substr(_cCodNegoc,1,2) + substr(_cCodNegoc,4,4) + "/" + substr(_cCodNegoc,9,2)
+               _cCodNegoc := SubStr(_cCodNegoc,1,2) + SubStr(_cCodNegoc,4,4) + "/" + SubStr(_cCodNegoc,9,2)
                _cCNAECisp := AllTrim(_cCodNegoc) 
             EndIf
             
@@ -1859,12 +1829,12 @@ Begin Sequence
             EndIf
     
             _lRetSufr  := .F. // Retorno Suframa
-            If substr(_cHdSufra,1,15) == "HTTP/1.1 200 OK"
+            If SubStr(_cHdSufra,1,15) == "HTTP/1.1 200 OK"
                _lRetSufr  := .T.
             EndIf 
 
             _lRetSimpN := .F. // Retorno Simples Nacional 
-            If substr(_cHdSimple,1,15) == "HTTP/1.1 200 OK"
+            If SubStr(_cHdSimple,1,15) == "HTTP/1.1 200 OK"
                _lRetSimpN := .T.
             EndIf  
 
@@ -2000,35 +1970,35 @@ Begin Sequence
             EndIf
 
             If ! Empty(_cUfSufr) .And. ! Empty(_cMunSufr)
-               _cCMunSufr := Posicione("CC2",4,xfilial("CC2")+ _cUfSufr + U_ItKey(_cMunSufr,"CC2_MUN"),"CC2_CODMUN")
+               _cCMunSufr := Posicione("CC2",4,xFilial("CC2")+ _cUfSufr + U_ItKey(_cMunSufr,"CC2_MUN"),"CC2_CODMUN")
             EndIf
          EndIf  
          
          _aDados := {}
-         Aadd(_aDados,{"A1_NOME"   ,"Razão Social"               , _cNomCisp  , _cNomSint  ,	_cNomRecF  ,_cNomSimN  , _cNomSufr})
-         Aadd(_aDados,{"A1_NREDUZ" ,"Nome Fantasia"              , _cFanCisp  , _cFanSint  ,	_cFanRecF  ,_cFanSimN  , _cFanSufr})
-         Aadd(_aDados,{"A1_INSCR"  ,"Inscrição Estadual"         , _cInscCisp , _cInscSint ,	_cInscRecF ,_cInscSimN , _cInscSufr})
-         Aadd(_aDados,{"A1_END"    ,"Endereço"                   , _cEndCisp  , _cEndSint  ,	_cEndRecF  ,_cEndSimN  , _cEndSufr})
-         Aadd(_aDados,{"A1_BAIRRO" ,"Bairro"                     , _cBairCisp , _cBairSint ,	_cBairRecF ,_cBairSimN , _cBairSufr})
-         Aadd(_aDados,{"A1_EST"    ,"Estado"                     , _cUfCisp   , _cUfSint   ,	_cUfRecF	  , _cUfSimN  , _cUfSufr})
-         Aadd(_aDados,{"A1_MUN"    ,"Municipio"                  , _cMunCisp  , _cMunSint  ,	_cMunRecF  ,_cMunSimN  , _cMunSufr})
-         Aadd(_aDados,{"A1_COD_MUN","Código Município"           , _cCMunCisp , _cCMunSint ,	_cCMunRecF ,_cCMunSimN , _cCMunSufr})
-         Aadd(_aDados,{"A1_CEP"    ,"Cep"                        , _cCepCisp  , _cCepSint  , _cCepRecF  ,_cCepSimN  , _cCepSufr })
-         Aadd(_aDados,{"A1_SIMPNAC","Simples Nacional"           , _cSimNCisp , _cSimNSint ,	_cSimNRecF ,_cSimNSimN , _cSimNSufr})
-         Aadd(_aDados,{"A1_SUFRAMA","Suframa"                    , _cSufrCisp , _cSufrSint ,	_cSufrRecF ,_cSufrSimN , _cSufrSufr})
-         Aadd(_aDados,{"A1_I_SCST" ,"Sit Cadastral Sintegra"     , ""         , _cSitCSint ,	""         ,""         , ""        })
-         Aadd(_aDados,{"A1_I_D1ST" ,"Data Consulta Sintegra"     , ""         , _cDtCSSint ,	"" /*_cDtCSRecF*/ ,_cDtCSSimN , _cDtCSSufr})
-         Aadd(_aDados,{"A1_I_D2ST" ,"Data Atualizacao Sintegra"  , ""         , _cDtASSint ,	/*_cDtARSecF*/"" ,_cDtASSimN , _cDtASSufr})
-         Aadd(_aDados,{"A1_I_D3ST" ,"Data Atualizacao Reg Cisp"  , _cDtARCisp , _cDtARSint ,	/*_cDtARRecF*/ "" ,_cDtARSimN , _cDtARSufr})
-         Aadd(_aDados,{"A1_I_HRST" ,"Hora Atualizacao Cisp"      , _cHrAcCisp , _cHrACSint ,	_cHrACRecF ,_cHrACSimN , _cHrACSufr})
-         Aadd(_aDados,{"A1_I_SCRC" ,"Sit Cadastral Receita Fed"  , ""         , _cSitRSint ,	_cSitCRecF ,_cSitRSimN , _cSitRSufr})
-         Aadd(_aDados,{"A1_I_D1RC" ,"Data Consulta Receita Fed"  , ""         , _cDtCRSint ,	_cDtCRRecF ,_cDtCRSimN , _cDtCRSufr})
-         Aadd(_aDados,{"A1_I_D2RC" ,"Data Atualizacao Receita"   , ""         , _cDtATSint ,	_cDtARRecF ,_cDtATSimN , _cDtATSufr})
-         Aadd(_aDados,{"A1_MSBLQL" ,"Bloqueado"                  , _cBlqCisp  , _cBlqSint  ,	_cBlqRecF  ,_cBlqSimN  , _cBlqSufr})
-         Aadd(_aDados,{"A1_I_LOGRA","Logradouro  / Endereço"     , _cLogrCisp , _cLogrSint ,	_cLogrRecF ,_cLogrSimN , _cLogrSufr})
-         Aadd(_aDados,{"A1_I_NUMER","Numero do Endereço"         , _cNumECisp , _cNumESint ,	_cNumERecF ,_cNumESimN , _cNumESufr})
-         Aadd(_aDados,{"A1_I_COMPL","Complemento do Endereço Sin", _cComECisp , _cComESint ,	_cComERecF ,_cComESimN , _cComESufr})
-         Aadd(_aDados,{"A1_CNAE"   ,"CNAE"                       , _cCNAECisp , ""         ,	""         ,""         , ""        })
+         aAdd(_aDados,{"A1_NOME"   ,"Razão Social"               , _cNomCisp  , _cNomSint  ,	_cNomRecF  ,_cNomSimN  , _cNomSufr})
+         aAdd(_aDados,{"A1_NREDUZ" ,"Nome Fantasia"              , _cFanCisp  , _cFanSint  ,	_cFanRecF  ,_cFanSimN  , _cFanSufr})
+         aAdd(_aDados,{"A1_INSCR"  ,"Inscrição Estadual"         , _cInscCisp , _cInscSint ,	_cInscRecF ,_cInscSimN , _cInscSufr})
+         aAdd(_aDados,{"A1_END"    ,"Endereço"                   , _cEndCisp  , _cEndSint  ,	_cEndRecF  ,_cEndSimN  , _cEndSufr})
+         aAdd(_aDados,{"A1_BAIRRO" ,"Bairro"                     , _cBairCisp , _cBairSint ,	_cBairRecF ,_cBairSimN , _cBairSufr})
+         aAdd(_aDados,{"A1_EST"    ,"Estado"                     , _cUfCisp   , _cUfSint   ,	_cUfRecF	  , _cUfSimN  , _cUfSufr})
+         aAdd(_aDados,{"A1_MUN"    ,"Municipio"                  , _cMunCisp  , _cMunSint  ,	_cMunRecF  ,_cMunSimN  , _cMunSufr})
+         aAdd(_aDados,{"A1_COD_MUN","Código Município"           , _cCMunCisp , _cCMunSint ,	_cCMunRecF ,_cCMunSimN , _cCMunSufr})
+         aAdd(_aDados,{"A1_CEP"    ,"Cep"                        , _cCepCisp  , _cCepSint  , _cCepRecF  ,_cCepSimN  , _cCepSufr })
+         aAdd(_aDados,{"A1_SIMPNAC","Simples Nacional"           , _cSimNCisp , _cSimNSint ,	_cSimNRecF ,_cSimNSimN , _cSimNSufr})
+         aAdd(_aDados,{"A1_SUFRAMA","Suframa"                    , _cSufrCisp , _cSufrSint ,	_cSufrRecF ,_cSufrSimN , _cSufrSufr})
+         aAdd(_aDados,{"A1_I_SCST" ,"Sit Cadastral Sintegra"     , ""         , _cSitCSint ,	""         ,""         , ""        })
+         aAdd(_aDados,{"A1_I_D1ST" ,"Data Consulta Sintegra"     , ""         , _cDtCSSint ,	"" /*_cDtCSRecF*/ ,_cDtCSSimN , _cDtCSSufr})
+         aAdd(_aDados,{"A1_I_D2ST" ,"Data Atualizacao Sintegra"  , ""         , _cDtASSint ,	/*_cDtARSecF*/"" ,_cDtASSimN , _cDtASSufr})
+         aAdd(_aDados,{"A1_I_D3ST" ,"Data Atualizacao Reg Cisp"  , _cDtARCisp , _cDtARSint ,	/*_cDtARRecF*/ "" ,_cDtARSimN , _cDtARSufr})
+         aAdd(_aDados,{"A1_I_HRST" ,"Hora Atualizacao Cisp"      , _cHrAcCisp , _cHrACSint ,	_cHrACRecF ,_cHrACSimN , _cHrACSufr})
+         aAdd(_aDados,{"A1_I_SCRC" ,"Sit Cadastral Receita Fed"  , ""         , _cSitRSint ,	_cSitCRecF ,_cSitRSimN , _cSitRSufr})
+         aAdd(_aDados,{"A1_I_D1RC" ,"Data Consulta Receita Fed"  , ""         , _cDtCRSint ,	_cDtCRRecF ,_cDtCRSimN , _cDtCRSufr})
+         aAdd(_aDados,{"A1_I_D2RC" ,"Data Atualizacao Receita"   , ""         , _cDtATSint ,	_cDtARRecF ,_cDtATSimN , _cDtATSufr})
+         aAdd(_aDados,{"A1_MSBLQL" ,"Bloqueado"                  , _cBlqCisp  , _cBlqSint  ,	_cBlqRecF  ,_cBlqSimN  , _cBlqSufr})
+         aAdd(_aDados,{"A1_I_LOGRA","Logradouro  / Endereço"     , _cLogrCisp , _cLogrSint ,	_cLogrRecF ,_cLogrSimN , _cLogrSufr})
+         aAdd(_aDados,{"A1_I_NUMER","Numero do Endereço"         , _cNumECisp , _cNumESint ,	_cNumERecF ,_cNumESimN , _cNumESufr})
+         aAdd(_aDados,{"A1_I_COMPL","Complemento do Endereço Sin", _cComECisp , _cComESint ,	_cComERecF ,_cComESimN , _cComESufr})
+         aAdd(_aDados,{"A1_CNAE"   ,"CNAE"                       , _cCNAECisp , ""         ,	""         ,""         , ""        })
 
          //===========================================================================
          // Grava array com dados das atualizações antes/depois para envio de e-mail.
@@ -2045,7 +2015,7 @@ Begin Sequence
          _nPodFin := Len(_aDados) + _nPosIni
   
          For _nI := 1 To Len(_aDados)
-             Aadd(_aDadosRel,{SA1->A1_COD,;                        //  1 - Codigo Cliente 
+             aAdd(_aDadosRel,{SA1->A1_COD,;                        //  1 - Codigo Cliente 
                               SA1->A1_LOJA,;                       //  2 - Loja Cliente
                               SA1->A1_CGC,;                        //  3 - CNPJ Cliente
                               _aDados[_nI,1],;                     //  4 - Campo Atualizado
@@ -2067,7 +2037,7 @@ Begin Sequence
          //===================================================================         
   	      If U_ITGETMV("ITGRVCLI",.F.)
   	     	  	
-            SA1->(Reclock("SA1",.F.))
+            SA1->(RecLock("SA1",.F.))
             If ! Empty(_cNomCisp) 
                SA1->A1_NOME := _cNomCisp // _aDados[1,3]  // Razão Social"               , _cNomCisp  , _cNomSint  ,	_cNomRecF  ,_cNomSimN  , _cNomSufr})
             EndIf 
@@ -2156,7 +2126,7 @@ Begin Sequence
                SA1->A1_MSBLQL := If(AllTrim(_cBlqCisp) == "NAO","2","1")  // Bloqueado"                  , _cBlqCisp  , _cBlqSint  ,	_cBlqRecF  ,_cBlqSimN  , _cBlqSufr})
             EndIf 
       
-            If SA1->A1_I_ATCIS != "N" .and. U_ITGETMV("ITGRVCLI",.F.)
+            If SA1->A1_I_ATCIS != "N" .And. U_ITGETMV("ITGRVCLI",.F.)
                If ! Empty(_cLogrCisp)
                   SA1->A1_I_LOGRA := _cLogrCisp // Logradouro  / Endereço"     , _cLogrCisp , _cLogrSint ,	_cLogrRecF ,_cLogrSimN , _cLogrSufr})
                EndIf 
@@ -2170,7 +2140,7 @@ Begin Sequence
                EndIf 
             EndIf 
      
-            SA1->(MsUnLock())
+            SA1->(MSUnLock())
             _cObserv := "Cadastro de Clientes atualizados com os dados da Cisp-Monitoramento-Sintegra."
 
             //===================================================================================
@@ -2189,7 +2159,7 @@ Begin Sequence
          //=====================================================
          // Grava log de Consulta e Atualização
          //=====================================================
-         ZGF->(Reclock("ZGF",.T.))
+         ZGF->(RecLock("ZGF",.T.))
         	ZGF->ZGF_CODCLI := SA1->A1_COD
   	      ZGF->ZGF_LOJA := SA1->A1_LOJA
   	      ZGF->ZGF_NOMEA := SA1->A1_NOME
@@ -2219,11 +2189,11 @@ Begin Sequence
   	      ZGF->ZGF_D2STA := SA1->A1_I_D2ST
   	      ZGF->ZGF_D2STN := CTod(_cDtARCisp)
   	      ZGF->ZGF_D3STA := SA1->A1_I_D3ST
-  	      ZGF->ZGF_D3STN := DATE()
+  	      ZGF->ZGF_D3STN := Date()
          ZGF->ZGF_MSBLA := SA1->A1_MSBLQL
          ZGF->ZGF_MSBLN := If(AllTrim(_cBlqCisp) == "NAO","2","1")
          ZGF->ZGF_HRSTA := SA1->A1_I_HRST
-         ZGF->ZGF_HRSTN := TIME()
+         ZGF->ZGF_HRSTN := Time()
          ZGF->ZGF_RCSTA := SA1->A1_I_SCRC
          ZGF->ZGF_RCSTN := _cSitCCisp
          ZGF->ZGF_D1RCA := SA1->A1_I_D1RC
@@ -2234,7 +2204,7 @@ Begin Sequence
          ZGF->ZGF_OBS   := _cObserv
          ZGF->ZGF_SUFRA := SA1->A1_SUFRAMA
          ZGF->ZGF_SUFRN := _cSufrSufr
-         ZGF->(Msunlock())
+         ZGF->(MSUnLock())
     
          For _nI := _nPosIni To (_nPodFin - 1)  // Atualiza observações
              _aDadosRel[_nI,13] := Upper(_cObserv)
@@ -2253,7 +2223,7 @@ Begin Sequence
       U_ITConout("[AMOS138] - Atualizando demais clientes ativos na CISP...")
    EndIf
   
-   _cdatalim := dtos(date() - u_itgetmv("ITDIASCLI",30)) //data limite de atualização dos clientes
+   _cdatalim := DToS(Date() - u_itgetmv("ITDIASCLI",30)) //data limite de atualização dos clientes
    _nlimite  := u_itgetmv("ITLIMCLI",10) // quantidade máxima de clientes a ser atualizada
 
    _cFiltCnpj := ""
@@ -2266,7 +2236,7 @@ Begin Sequence
    // Monta a consulta de atualização do Cadastro de Clientes na base da CISP |
    //===========================================================================
    _cQry := " SELECT SA1.R_E_C_N_O_ NREC "
-   _cQry += " FROM "+ RetSqlName("SA1") +" SA1 JOIN "+ RetSqlName("SZY") +" SZY ON TRIM(SZY.ZY_PCCCLI) = TRIM(SUBSTR(SA1.A1_CGC,1,8)) "
+   _cQry += " FROM "+ RetSqlName("SA1") +" SA1 JOIN "+ RetSqlName("SZY") +" SZY ON TRIM(SZY.ZY_PCCCLI) = TRIM(SubStr(SA1.A1_CGC,1,8)) "
    _cQry += " WHERE "   
    _cQry += " 		SA1.D_E_L_E_T_			= ' ' "
    _cQry += " AND		 SA1.A1_PESSOA			= 'J' "
@@ -2274,7 +2244,7 @@ Begin Sequence
    _cQry += " AND     SA1.A1_MSBLQL          <> '1' "
    _cQry += " AND     (((SA1.A1_I_D1ST < '" + _cdatalim + "' OR SA1.A1_I_D1RC  < '" + _cdatalim + "') "
    _cQry += " AND     SA1.A1_I_D3ST < '" +  _cdatalim + "') OR SA1.A1_SIMPNAC = ' ') "
-   _cQry += " AND     SZY.ZY_PCDUCM > '" + DTOS(DATE()-365) + "' "
+   _cQry += " AND     SZY.ZY_PCDUCM > '" + DToS(DATE()-365) + "' "
    _cQry += " AND     SZY.D_E_L_E_T_ = ' ' " 
       
    If ! Empty(_cFiltCnpj)
@@ -2304,15 +2274,15 @@ Begin Sequence
    //ProcRegua(_nTotReg)
    ProcRegua(_nLimite)
 
-   Do While ! TRBCISP->( Eof() ) .And. _nI <= _nLimite
+   While ! TRBCISP->( Eof() ) .And. _nI <= _nLimite
   	 
       If ! _lSchedule
-         IncProc("Atualizando registros - " + Strzero(_nI,6) + "/Limite: " + StrZero(_nLimite,6) + "-Total Regs: " + Strzero(_nTotReg,6))
+         IncProc("Atualizando registros - " + StrZero(_nI,6) + "/Limite: " + StrZero(_nLimite,6) + "-Total Regs: " + StrZero(_nTotReg,6))
       Else  
-         U_ITConout("[AMOS138] - Atualizando registros - " + StrZero(_ni,6) + " de " + StrZero(_nTotReg,6))
+         U_ITConout("[AMOS138] - Atualizando registros - " + StrZero(_nI,6) + " de " + StrZero(_nTotReg,6))
       EndIf
 
-	   SA1->(Dbgoto(TRBCISP->NREC))
+	   SA1->(DBGoTo(TRBCISP->NREC))
 
       //========================================================
       // Chama a rotina de atualização de clientes Posicionado.
@@ -2321,7 +2291,7 @@ Begin Sequence
 
       _nI += 1 
 
-      TRBCISP->(DbSkip())
+      TRBCISP->(DBSkip())
    EndDo
 	   
    If ! _lSchedule 
@@ -2340,18 +2310,15 @@ If Select("TRBCISP") > 0
    TRBCISP->( DBCloseArea() )
 EndIf
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS138S
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 24/07/2023
-===============================================================================================================================
 Descrição---------: Rotina de atualização dos dados cadastrais do cliente com os dados da CISP, via Scheduller.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
@@ -2360,7 +2327,7 @@ Private _aDadosRel
 
 Begin Sequence
 
-   U_ItConOut( '[AOMS138] - Atualização Clientes com a CISP: ['+ DtoC(Date()) +' - '+ Time() +'] - Abrindo o ambiente...' )
+   U_ItConOut( '[AOMS138] - Atualização Clientes com a CISP: ['+ DToC(Date()) +' - '+ Time() +'] - Abrindo o ambiente...' )
    RpcClearEnv()
    RPCSetType(2)
       
@@ -2368,9 +2335,8 @@ Begin Sequence
    
    Sleep( 5000 ) //Aguarda 5 segundos para subam as configurações do ambiente.
 
-   cUSUARIO := SPACE(06)+"Administrador  "
-   cUsername:= "Schedure"
-   __CUSERID:= "SCHEDULE"
+   cUSUARIO := Space(06)+"Administrador  "
+   cUserName:= "Schedure"
    
    _aDadosRel := {}
 
@@ -2378,20 +2344,17 @@ Begin Sequence
    
 End Sequence
 
-Return Nil    
+Return    
 
 /*
-=================================================================================================================================
+===============================================================================================================================
 Programa--------: AOMS138T()
 Autor-----------: Julio de Paula Paz
 Data da Criacao-: 28/06/2023
-=================================================================================================================================
 Descrição-------: Tela para seleção filtros para processamento geral.
-=================================================================================================================================
 Parametros------: Nenhum
-=================================================================================================================================
 Retorno---------: Nenhum
-=================================================================================================================================
+===============================================================================================================================
 */
 User Function AOMS138T()
 Local _lRet := .T.
@@ -2413,9 +2376,9 @@ Begin Sequence
 
    Activate MsDialog _oDlgCISP On Init EnchoiceBar(_oDlgCISP,_bOk,_bCancel) CENTERED 
 
-   If _lRet .And. ! U_ItMsg("Confirma a atualização geral de clientes?","Atenção",,3,2,2)
+   If _lRet .And. ! U_ITMsg("Confirma a atualização geral de clientes?","Atenção",,3,2,2)
 		_lRet := .F.
-	Endif
+	EndIf
 
 End Sequence
 
@@ -2426,11 +2389,8 @@ Return _lRet   
 Programa----------: AOMS138L
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 28/08/2023
-===============================================================================================================================
 Descrição---------: Função utilizada no botão de legenda mostrar o significado das legendas.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -2441,18 +2401,15 @@ Local cCadastro:=OemToAnsi("Efetivação do Cadastro de Prospect")
 BrwLegenda(cCadastro,"Legenda",{	{'ENABLE'     ,"Atualizado"},;
 	                              {"BR_VERMELHO","Desatualizado"}})
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AOMS138N
 Autor-------------: Igor Melgaço
 Data da Criacao---: 24/07/2024
-===============================================================================================================================
 Descrição---------: Limpa a Inscricao Estadual.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -2460,7 +2417,7 @@ User Function AOMS138N(cInscEst,cUF)
 Local cIncricao := ""
 Local n := 0
 
-If Upper(Alltrim(cInscEst)) == "ISENTO"
+If Upper(AllTrim(cInscEst)) == "ISENTO"
    cIncricao := "ISENTO"
 Else
    For n := 1 To Len(cInscEst)
@@ -2470,7 +2427,7 @@ Else
    Next
 EndIf
 
-If Alltrim(cUF) == "MG"
+If AllTrim(cUF) == "MG" .And. cIncricao <> "ISENTO"
    cIncricao := StrZero(Val(cIncricao),13)
 EndIf
 

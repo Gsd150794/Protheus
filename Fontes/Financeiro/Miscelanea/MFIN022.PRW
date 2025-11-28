@@ -10,13 +10,8 @@ Lucas Borges  |23/07/2025| Chamado 51340. Trocado e-mail padrão para sistema@ita
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "rwmake.ch"
-#INCLUDE "TBICONN.CH"  
-#INCLUDE 'TOPCONN.CH'
+#Include "TOTVS.ch"
+
 /*
 ===============================================================================================================================
 Programa----------: MFIN022
@@ -33,7 +28,7 @@ Local _aParRet   := {}
 Local _aParAux   := {}
 Local _bOK       := {|| .T. }
 Local _lTela     := .T.
-Local _cTimeIni  := TIME()
+Local _cTimeIni  := Time()
 Local _lRet      := .F.
 
 //Testa se esta sendo rodado do menu
@@ -45,31 +40,31 @@ If Select('SX3') == 0
 	sleep( 5000 )					//Aguarda 5 segundos para que as jobs IPC subam.
 		
 	MV_PAR01 := U_ItGetMV( 'IT_SIWF022' , "T" ) 
-	MV_PAR02 := U_ItGetMV( 'IT_DTWF022' , StoD('20230101') )
+	MV_PAR02 := U_ItGetMV( 'IT_DTWF022' , SToD('20230101') )
 	
 	_lTela := .F.
 
-ELSE
+Else
 
 	MV_PAR01 := U_ItGetMV( 'IT_SIWF022' , "T" ) 
-	MV_PAR02 := U_ItGetMV( 'IT_DTWF022' , StoD('20230101') )
+	MV_PAR02 := U_ItGetMV( 'IT_DTWF022' , SToD('20230101') )
 
-	AADD( _aParAux , { 2 , "Situação:"              , MV_PAR01, {"A-Abertos","L-Liquidados","T-Todos"}     , 050 ,".T.",.T.,".T."}) 
-	AADD( _aParAux , { 1 , "Emissão a partir de:"	, MV_PAR02, "@E"	, ""	, ""	, "" , 050 , .F. } )
+	aAdd( _aParAux , { 2 , "Situação:"              , MV_PAR01, {"A-Abertos","L-Liquidados","T-Todos"}     , 050 ,".T.",.T.,".T."}) 
+	aAdd( _aParAux , { 1 , "Emissão a partir de:"	, MV_PAR02, "@E"	, ""	, ""	, "" , 050 , .F. } )
 
 	For nI := 1 To Len( _aParAux )
 			aAdd( _aParRet , _aParAux[nI][03] )
 	Next nI
 	
 	If !ParamBox( _aParAux , "Títulos à Pagar Paytrack" , @_aParRet, _bOK )
-		RETURN .F.
+		Return .F.
 	EndIf
    
 EndIf
 
 If _lTela
 	
-	FWMSGRUN( ,{|oProc|  _lRet := MFIN022EM(oProc) } , "Hora Inicial: "+_cTimeIni+" Lendo Títulos a partir de: "+DTOC(MV_PAR02))
+	FWMsgRun( ,{|oProc|  _lRet := MFIN022EM(oProc) } , "Hora Inicial: "+_cTimeIni+" Lendo Títulos a partir de: "+DToC(MV_PAR02))
 
 Else
 	//Atualização tabela SM2
@@ -107,7 +102,7 @@ Local _aTit       := {}
 Local _nTit       := 0
 Local _nContTit   := 0
 Local _nTotalTit  := 0
-local j           := 0
+Local j           := 0
 
 //           01       02        03     04       05        06        07             08     09         10             11      12            13       14    15
 _aSizes := {"10"    ,"02"     ,"02"  ,"08"    ,"04"     ,"05"          ,"05"  ,"20"          ,"04"    ,"03"  ,"08"          ,"04"    ,"08"   , "03"     }
@@ -119,13 +114,13 @@ If oProc <> Nil
 	ProcessMessages()
 EndIf
 
-	_cTit    := "Titulos paytrack " + Iif(Subs(MV_PAR01,1,1) == "A","Em Aberto",Iif(Subs(MV_PAR01,1,1) == "L","Liquidados",""))
+	_cTit    := "Titulos paytrack " + IIf(Subs(MV_PAR01,1,1) == "A","Em Aberto",IIf(Subs(MV_PAR01,1,1) == "L","Liquidados",""))
 
 	//Logo Italac
 	_cMsgEml := '<html>'
 	_cMsgEml += '<head><title>'+_cTit+'</title></head>'
 	_cMsgEml += '<body>'
-	_cMsgEml += '<style type="text/css"><!--'
+	_cMsgEml += '<style Type="text/css"><!--'
 	_cMsgEml += 'table.bordasimples { border-collapse: collapse; }'
 	_cMsgEml += 'table.bordasimples tr td { border:1px solid #777777; }'
 	_cMsgEml += 'td.titulos	{ font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #C6E2FF; }'
@@ -160,10 +155,10 @@ EndIf
 		_cMsgEml += '<br>'
 		_cMsgEml += '<table class="bordasimples" width="1300">'
 		_cMsgEml += '    <tr>'
-		_cMsgEml += '		<td align="center" colspan="'+ALLTRIM(STR(LEN(_aSizes)))+'" class="grupos"><b>'+cGetAssun+'</b></td>'
+		_cMsgEml += '		<td align="center" colspan="'+AllTrim(Str(Len(_aSizes)))+'" class="grupos"><b>'+cGetAssun+'</b></td>'
 		_cMsgEml += '    </tr>'
 		_cMsgEml += '    <tr>'
-		for j := 1 To Len(_aCab)
+		For j := 1 To Len(_aCab)
 			_cMsgEml += '      <td class="itens" align="'+_align[j]+'"   width="'+_aSizes[j]+'%"><b>'+_aCab[j]+'</b></td>'
 		Next
 		_cMsgEml += '    </tr>'
@@ -174,14 +169,14 @@ EndIf
 			
 
 			_cGetLista += '    <tr>'
-				for j := 1 To Len(_aCab)
+				For j := 1 To Len(_aCab)
 					_cGetLista += '      <td class="itens" align="'+_align[j]+'"   width="'+_aSizes[j]+'%">'+ _aTit[_nContTit][j] +'</td>' 
 				Next
 			_cGetLista += '    </tr>'
 
 		Next
 
-		_cMsgEml := STRTRAN(_cMsgEml,"#LISTA#",_cGetLista)
+		_cMsgEml := StrTran(_cMsgEml,"#LISTA#",_cGetLista)
 
 	EndIf
 
@@ -207,7 +202,7 @@ EndIf
 	U_ITENVMAIL(_aConfig[01], cGetPara,   cGetCc,       "",cGetAssun, _cMsgEml,        "",_aConfig[01], _aConfig[02],_aConfig[03],_aConfig[04],_aConfig[05],_aConfig[06],_aConfig[07], @_cEmlLog )
 	
 	If oProc <> Nil
-		U_ITMSG(UPPER(_cEmlLog)+CHR(13)+CHR(10)+;
+		U_ITMsg(Upper(_cEmlLog)+CHR(13)+CHR(10)+;
 		"E-mail para: "+cGetPara+;
 		" Com Copia: "+cGetCc+CHR(13)+CHR(10),"Envio do E-MAIL",,3)
 	EndIf 
@@ -241,7 +236,7 @@ ElseIf Subs(MV_PAR01,1,1) == "L"
 	_cFiltro += " AND SE2.E2_SALDO <= 0 
 EndIf 
 
-_cFiltro += " AND SE2.E2_EMISSAO >='"+ DTOS(MV_PAR02) +"' "
+_cFiltro += " AND SE2.E2_EMISSAO >='"+ DToS(MV_PAR02) +"' "
 _cFiltro += " AND (SE2.E2_PREFIXO = 'RVI') "
 _cFiltro += " AND SE2.E2_FILIAL = '92' "
 _cFiltro += " %"
@@ -256,26 +251,26 @@ BeginSql Alias _cAliasSE2
 			ORDER BY SE2.E2_FORNECE, SE2.E2_LOJA, SE2.E2_FILIAL, SE2.E2_PREFIXO, SE2.E2_TIPO, SE2.E2_NUM, SE2.E2_PARCELA
 EndSql
 
-DbSelectArea(_cAliasSE2)
+DBSelectArea(_cAliasSE2)
 (_cAliasSE2)->(DBGoTop())
-If !(_cAliasSE2)->(EOF())
+If !(_cAliasSE2)->(Eof())
 	
-	Do While !(_cAliasSE2)->(EOF())
+	While !(_cAliasSE2)->(Eof())
 		
-		AADD(_aRet,{(_cAliasSE2)->E2_FILIAL + " - " + AllTrim(FWFilialName(cEmpAnt,(_cAliasSE2)->E2_FILIAL,1)),;
+		aAdd(_aRet,{(_cAliasSE2)->E2_FILIAL + " - " + AllTrim(FWFilialName(cEmpAnt,(_cAliasSE2)->E2_FILIAL,1)),;
 						(_cAliasSE2)->E2_PREFIXO,;
 						(_cAliasSE2)->E2_TIPO,;
 						(_cAliasSE2)->E2_NUM,;
-						Dtoc(Stod((_cAliasSE2)->E2_EMISSAO)),;
-						Alltrim((_cAliasSE2)->E2_FORNECE),;
-						Alltrim((_cAliasSE2)->E2_LOJA),;
+						DToC(SToD((_cAliasSE2)->E2_EMISSAO)),;
+						AllTrim((_cAliasSE2)->E2_FORNECE),;
+						AllTrim((_cAliasSE2)->E2_LOJA),;
 						(_cAliasSE2)->A2_NOME,;
 						(_cAliasSE2)->A2_MUN,;
 						(_cAliasSE2)->A2_EST,;
 						Transform((_cAliasSE2)->E2_VALOR,"@E 999,999,999,999.99"),;
-						Dtoc(Stod((_cAliasSE2)->E2_VENCTO)),;
+						DToC(SToD((_cAliasSE2)->E2_VENCTO)),;
                         Transform((_cAliasSE2)->E2_SALDO,"@E 999,999,999,999.99") ,;
-                        Dtoc(Stod((_cAliasSE2)->E2_BAIXA))})
+                        DToC(SToD((_cAliasSE2)->E2_BAIXA))})
 		
 		(_cAliasSE2)->(DBSkip())
 

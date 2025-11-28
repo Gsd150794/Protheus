@@ -4,19 +4,14 @@
 ===============================================================================================================================
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer |08/08/2023| Chamado 48144 . Andre. Retirado os IFs de teste de Ambiente.
 Lucas Borges  |13/10/2024| Chamado 48465. Retirada da função de conout
 Lucas Borges  |23/07/2025| Chamado 51340. Trocado e-mail padrão para sistema@italac.com.br
+Lucas Borges  |22/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "rwmake.ch"
-#INCLUDE "TBICONN.CH"  
-#INCLUDE 'TOPCONN.CH'
+#Include "TOTVS.ch"
+
 /*
 ===============================================================================================================================
 Programa----------: MFIN017
@@ -27,16 +22,16 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function MFIN017()
+User Function MFIN017
+
 Local nI         := 0
 Local _aParRet   := {}
 Local _aParAux   := {}
 Local _bOK       := {|| .T. }
-Local _cTimeIni  := TIME()
+Local _cTimeIni  := Time()
 Local _lRet      := .F.
-PRIVATE _lTela   := .T.
 
-
+Private _lTela   := .T.
 
 //Testa se esta sendo rodado do menu
 If Select('SX3') == 0
@@ -46,31 +41,31 @@ If Select('SX3') == 0
 	RpcSetEnv('01','01',,,,GetEnvServer(),{ "SA3","SE1" })
 	sleep( 5000 )					//Aguarda 5 segundos para que as jobs IPC subam.
 		
-	MV_PAR01 := U_ItGetMV( 'IT_DTWI017' , dDatabase ) 
-	MV_PAR02 := U_ItGetMV( 'IT_DTWF017' , StoD('20210401') )
+	MV_PAR01 := SuperGetMV( 'IT_DTWI017',.F.,dDatabase ) 
+	MV_PAR02 := SuperGetMV( 'IT_DTWF017',.F.,SToD('20210401') )
 	
 	_lTela := .F.
 
-ELSE
+Else
 
-	MV_PAR01 := U_ItGetMV( 'IT_DTWI017' , dDatabase ) 
-	MV_PAR02 := U_ItGetMV( 'IT_DTWF017' , StoD('20210401') )
+	MV_PAR01 := SuperGetMV('IT_DTWI017',.F.,dDatabase ) 
+	MV_PAR02 := SuperGetMV('IT_DTWF017',.F.,SToD('20210401') )
 
-	AADD( _aParAux , {1,"Data atual:"		  ,MV_PAR01,"@E","","","",50,.F.} )
-	AADD( _aParAux , {1,"Emissão a partir de:",MV_PAR02,"@E","","","",50,.F.} )
+	aAdd( _aParAux , {1,"Data atual:"		  ,MV_PAR01,"@E","","","",50,.F.} )
+	aAdd( _aParAux , {1,"Emissão a partir de:",MV_PAR02,"@E","","","",50,.F.} )
 
 	For nI := 1 To Len( _aParAux )
 			aAdd( _aParRet , _aParAux[nI][03] )
 	Next nI
 	
 	If !ParamBox( _aParAux , "Seleção de filtros [MFIN017]" , @_aParRet, _bOK )
-		RETURN .F.
+		Return .F.
 	EndIf
 EndIf
 
 If _lTela
 	
-	FWMSGRUN( ,{|oProc|  _lRet := MFIN017EM(oProc) } , "Hora Inicial: "+_cTimeIni+" Lendo Títulos a partir de: "+DTOC(MV_PAR02))
+	FWMsgRun( ,{|oProc|  _lRet := MFIN017EM(oProc) } , "Hora Inicial: "+_cTimeIni+" Lendo Títulos a partir de: "+DToC(MV_PAR02))
 
 Else
 	//Atualização tabela SM2
@@ -95,6 +90,7 @@ Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function MFIN017EM(oProc)
+
 Local _aConfig	  := {}
 Local _cEmlLog	  := ""
 Local _cMsgEml	  := ""
@@ -103,7 +99,7 @@ Local _aCab      := {}
 Local _aSizes    := {}
 Local cGetCc	  := ""
 Local cGetPara	  := ""
-Local cGetAssun  := "Títulos à receber vencidos anteriores a "+IF( _lTela,DTOC(MV_PAR01),DTOC(STOD(Subs(Dtos(MV_PAR01),1,6)+"01")))+". "
+Local cGetAssun  := "Títulos à receber vencidos anteriores a "+If( _lTela,DToC(MV_PAR01),DToC(SToD(Subs(DToS(MV_PAR01),1,6)+"01")))+". "
 Local _cTit      := " "
 Local _aVend     := {}
 Local _nCont     := 0
@@ -133,7 +129,7 @@ For _nCont := 1 to Len(_aVend)
 	_cMsgEml := '<html>'
 	_cMsgEml += '<head><title>'+_cTit+'</title></head>'
 	_cMsgEml += '<body>'
-	_cMsgEml += '<style type="text/css"><!--'
+	_cMsgEml += '<style Type="text/css"><!--'
 	_cMsgEml += 'table.bordasimples { border-collapse: collapse; }'
 	_cMsgEml += 'table.bordasimples tr td { border:1px solid #777777; }'
 	_cMsgEml += 'td.titulos	{ font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #C6E2FF; }'
@@ -168,7 +164,7 @@ For _nCont := 1 to Len(_aVend)
 		_cMsgEml += '<br>'
 		_cMsgEml += '<table class="bordasimples" width="1300">'
 		_cMsgEml += '    <tr>'
-		_cMsgEml += '		<td align="center" colspan="'+ALLTRIM(STR(LEN(_aSizes)))+'" class="grupos"><b>'+cGetAssun+'</b></td>'
+		_cMsgEml += '		<td align="center" colspan="'+AllTrim(Str(Len(_aSizes)))+'" class="grupos"><b>'+cGetAssun+'</b></td>'
 		_cMsgEml += '    </tr>'
 		_cMsgEml += '    <tr>'
 		_cMsgEml += '      <td class="itens" align="center" width="'+_aSizes[07]+'%"><b>'+_aCab[07]+'</b></td>'
@@ -205,7 +201,7 @@ For _nCont := 1 to Len(_aVend)
 			_cGetLista += '      <td class="itens" align="left"   width="'+_aSizes[04]+'%">'+ _aTit[_nContTit][04] +'</td>' 
 			_cGetLista += '      <td class="itens" align="left"   width="'+_aSizes[05]+'%">'+ _aTit[_nContTit][05] +'</td>' 
 			_cGetLista += '      <td class="itens" align="left"   width="'+_aSizes[06]+'%">'+ _aTit[_nContTit][06] +'</td>'
-			_cGetLista += '      <td class="itens" align="right"  width="'+_aSizes[11]+'%">'+ ALLTRIM(Transform( _aTit[_nContTit][11],"@E 999,999,999,999.99")) +'</td>' 
+			_cGetLista += '      <td class="itens" align="right"  width="'+_aSizes[11]+'%">'+ AllTrim(Transform( _aTit[_nContTit][11],"@E 999,999,999,999.99")) +'</td>' 
 			_cGetLista += '      <td class="itens" align="left"   width="'+_aSizes[12]+'%">'+ _aTit[_nContTit][12] +'</td>' 
 			_cGetLista += '      <td class="itens" align="left"   width="'+_aSizes[15]+'%">'+ _aTit[_nContTit][15] +'</td>'
 			_cGetLista += '    </tr>'
@@ -228,12 +224,12 @@ For _nCont := 1 to Len(_aVend)
 		_cGetLista += '      <td class="itens" align="left"   width="'+_aSizes[04]+'%">'+ "" +'</td>' 
 		_cGetLista += '      <td class="itens" align="left"   width="'+_aSizes[05]+'%">'+ "" +'</td>' 
 		_cGetLista += '      <td class="itens" align="center" width="'+_aSizes[06]+'%"><b>'+ "Total" +'</b></td>'
-		_cGetLista += '      <td class="itens" align="center" width="'+_aSizes[11]+'%"><b>'+ ALLTRIM(Transform(_nTotalTit,"@E 999,999,999,999.99")) +'</b></td>' 
+		_cGetLista += '      <td class="itens" align="center" width="'+_aSizes[11]+'%"><b>'+ AllTrim(Transform(_nTotalTit,"@E 999,999,999,999.99")) +'</b></td>' 
 		_cGetLista += '      <td class="itens" align="left"   width="'+_aSizes[12]+'%">'+ "" +'</td>' 
 		_cGetLista += '      <td class="itens" align="left"   width="'+_aSizes[15]+'%">'+ "" +'</td>'
 		_cGetLista += '    </tr>'
 
-		_cMsgEml := STRTRAN(_cMsgEml,"#LISTA#",_cGetLista)
+		_cMsgEml := StrTran(_cMsgEml,"#LISTA#",_cGetLista)
 
 	EndIf
 
@@ -263,14 +259,14 @@ For _nCont := 1 to Len(_aVend)
 	U_ITENVMAIL(_aConfig[01], cGetPara,   cGetCc,       "",cGetAssun, _cMsgEml,        "",_aConfig[01], _aConfig[02],_aConfig[03],_aConfig[04],_aConfig[05],_aConfig[06],_aConfig[07], @_cEmlLog )
 	
 	If oProc <> Nil
-		U_ITMSG(UPPER(_cEmlLog)+CHR(13)+CHR(10)+;
+		U_ITMsg(Upper(_cEmlLog)+CHR(13)+CHR(10)+;
 		"E-mail para: "+cGetPara+;
 		" Com Copia: "+cGetCc+CHR(13)+CHR(10),"Envio do E-MAIL",,3)
 	EndIf 
 Next
 
 If Len(_aVend) = 0 .And. oProc <> Nil
-   U_ITMSG("Não há títulos atrasados de vendedores com atividade de Broker no periodo para listar.","Envio do E-MAIL",,3)
+   U_ITMsg("Não há títulos atrasados de vendedores com atividade de Broker no periodo para listar.","Envio do E-MAIL",,3)
 EndIf
 
 Return .T.
@@ -285,7 +281,8 @@ Parametros--------: Nenhum
 Retorno-----------: _aVend = Lista dos vendedores
 ===============================================================================================================================
 */  
-Static Function MFIN017BRO()
+Static Function MFIN017BRO
+
 Local _cAliasSA3 := '' , _nCont
 Local _cFiltro	 := ''
 Local _aVend     := {}
@@ -294,15 +291,14 @@ _cAliasSA3:= GetNextAlias()
 
 _cFiltro += "% "
 _cFiltro += " SE1.D_E_L_E_T_ = ' ' "
-//_cFiltro += " AND SE1.E1_VENCTO <'"+ Subs(Dtos(MV_PAR01),1,6)+"01' "
-IF _lTela
-   _cFiltro += " AND ((SE1.E1_I_DTPRO <> ' ' AND SE1.E1_I_DTPRO <'"+ DTOS(MV_PAR01)+"')     "
-   _cFiltro += " OR   (SE1.E1_I_DTPRO =  ' ' AND SE1.E1_VENCTO  <'"+ DTOS(MV_PAR01)+"'))    "
-ELSE
-   _cFiltro += " AND ((SE1.E1_I_DTPRO <> ' ' AND SE1.E1_I_DTPRO <'"+ Subs(Dtos(MV_PAR01),1,6)+"01')     "
-   _cFiltro += " OR   (SE1.E1_I_DTPRO =  ' ' AND SE1.E1_VENCTO  <'"+ Subs(Dtos(MV_PAR01),1,6)+"01'))    "
-ENDIF
-_cFiltro += " AND SE1.E1_EMISSAO >='"+ DTOS(MV_PAR02) +"' "
+If _lTela
+   _cFiltro += " AND ((SE1.E1_I_DTPRO <> ' ' AND SE1.E1_I_DTPRO <'"+ DToS(MV_PAR01)+"')     "
+   _cFiltro += " OR   (SE1.E1_I_DTPRO =  ' ' AND SE1.E1_VENCTO  <'"+ DToS(MV_PAR01)+"'))    "
+Else
+   _cFiltro += " AND ((SE1.E1_I_DTPRO <> ' ' AND SE1.E1_I_DTPRO <'"+ Subs(DToS(MV_PAR01),1,6)+"01')     "
+   _cFiltro += " OR   (SE1.E1_I_DTPRO =  ' ' AND SE1.E1_VENCTO  <'"+ Subs(DToS(MV_PAR01),1,6)+"01'))    "
+EndIf
+_cFiltro += " AND SE1.E1_EMISSAO >='"+ DToS(MV_PAR02) +"' "
 _cFiltro += " AND (SE1.E1_TIPO = 'NF' OR SE1.E1_TIPO = 'FT' OR SE1.E1_TIPO = 'FTF' OR SE1.E1_TIPO = 'FTC') "
 _cFiltro += " AND SE1.E1_SALDO > 0 "
 _cFiltro += " AND SE1.E1_PREFIXO <> 'R' "
@@ -344,20 +340,20 @@ BeginSql Alias _cAliasSA3
 EndSql
 
 cListaEmail:=""
-DbSelectArea(_cAliasSA3)
+DBSelectArea(_cAliasSA3)
 (_cAliasSA3)->(DBGoTop())
-If !(_cAliasSA3)->(EOF())
-	Do While !(_cAliasSA3)->(EOF())
+If !(_cAliasSA3)->(Eof())
+	While !(_cAliasSA3)->(Eof())
 
-       _cEmailPA:=ALLTRIM((_cAliasSA3)->A3_I_EMWF)
-       _cEmailCC:=ALLTRIM((_cAliasSA3)->A3_I_CCWF)
-	   IF !_cEmailPA $ cListaEmail
+       _cEmailPA:=AllTrim((_cAliasSA3)->A3_I_EMWF)
+       _cEmailCC:=AllTrim((_cAliasSA3)->A3_I_CCWF)
+	   If !_cEmailPA $ cListaEmail
 	      cListaEmail+=_cEmailPA+CHR(13)+CHR(10)
-	   ENDIF
-	   IF !_cEmailCC $ cListaEmail
+	   EndIf
+	   If !_cEmailCC $ cListaEmail
 	      cListaEmail+=_cEmailCC+CHR(13)+CHR(10)
-	   ENDIF
-		AADD(_aVend,{(_cAliasSA3)->E1_VEND1,;
+	   EndIf
+		aAdd(_aVend,{(_cAliasSA3)->E1_VEND1,;
 		              (_cAliasSA3)->A3_NOME,;
 					  _cEmailPA,;
 					  _cEmailCC})
@@ -367,25 +363,23 @@ If !(_cAliasSA3)->(EOF())
 	(_cAliasSA3)->( DBCloseArea() )
 EndIf
 
-IF _lTela 
-   cListaEmail:=STRTRAN(cListaEmail,";",CHR(13)+CHR(10))
-   cListaEmail:=STRTRAN(cListaEmail,",",CHR(13)+CHR(10))
-   bBloco:={||  U_ITMsgLog(cListaEmail, "E-MAILs",1,.F.) }
+If _lTela 
+	cListaEmail:=StrTran(cListaEmail,";",CHR(13)+CHR(10))
+	cListaEmail:=StrTran(cListaEmail,",",CHR(13)+CHR(10))
+	bBloco:={||  U_ITMsgLog(cListaEmail, "E-MAILs",1,.F.) }
 
-   _cEmailPA:=AllTrim(UsrRetMail(__cUserId))
+	_cEmailPA:=AllTrim(UsrRetMail(__cUserId))
 
-   IF U_ITMSG("Deseja enviar o relatório somente para "+_cEmailPA+", ou enviar para todos os envolvidos (visualize em mais detalhes).",'Atenção!',,3,2,4,,"USUARIO","TODOS",bBloco)
-
-      FOR _nCont := 1 to Len(_aVend)
-	      _aVend[_nCont][3] := _cEmailPA
-	      _aVend[_nCont][4] := ""
-	  NEXT
-
-    ENDIF
- 
-ENDIF
+	If U_ITMsg("Deseja enviar o relatório somente para "+_cEmailPA+", ou enviar para todos os envolvidos (visualize em mais detalhes).",'Atenção!',,3,2,4,,"USUARIO","TODOS",bBloco)
+		For _nCont := 1 to Len(_aVend)
+			_aVend[_nCont][3] := _cEmailPA
+			_aVend[_nCont][4] := ""
+		Next _nCont
+	EndIf
+EndIf
 
 Return _aVend
+
 /*
 ===============================================================================================================================
 Programa----------: MFIN017QRY
@@ -406,15 +400,14 @@ _cAliasSE1 := GetNextAlias()
 
 _cFiltro += "% "
 _cFiltro += " SE1.D_E_L_E_T_ = ' ' "
-//_cFiltro += " AND SE1.E1_VENCTO <'"+ Subs(Dtos(MV_PAR01),1,6)+"01' "
-IF _lTela
-   _cFiltro += " AND ((SE1.E1_I_DTPRO <> ' ' AND SE1.E1_I_DTPRO <'"+ DTOS(MV_PAR01)+"')     "
-   _cFiltro += " OR   (SE1.E1_I_DTPRO =  ' ' AND SE1.E1_VENCTO  <'"+ DTOS(MV_PAR01)+"'))    "
-ELSE
-   _cFiltro += " AND ((SE1.E1_I_DTPRO <> ' ' AND SE1.E1_I_DTPRO <'"+ Subs(Dtos(MV_PAR01),1,6)+"01')     "
-   _cFiltro += " OR   (SE1.E1_I_DTPRO =  ' ' AND SE1.E1_VENCTO  <'"+ Subs(Dtos(MV_PAR01),1,6)+"01'))    "
-ENDIF
-_cFiltro += " AND SE1.E1_EMISSAO >='"+ DTOS(MV_PAR02) +"' "
+If _lTela
+   _cFiltro += " AND ((SE1.E1_I_DTPRO <> ' ' AND SE1.E1_I_DTPRO <'"+ DToS(MV_PAR01)+"')     "
+   _cFiltro += " OR   (SE1.E1_I_DTPRO =  ' ' AND SE1.E1_VENCTO  <'"+ DToS(MV_PAR01)+"'))    "
+Else
+   _cFiltro += " AND ((SE1.E1_I_DTPRO <> ' ' AND SE1.E1_I_DTPRO <'"+ Subs(DToS(MV_PAR01),1,6)+"01')     "
+   _cFiltro += " OR   (SE1.E1_I_DTPRO =  ' ' AND SE1.E1_VENCTO  <'"+ Subs(DToS(MV_PAR01),1,6)+"01'))    "
+EndIf
+_cFiltro += " AND SE1.E1_EMISSAO >='"+ DToS(MV_PAR02) +"' "
 _cFiltro += " AND (SE1.E1_TIPO = 'NF' OR SE1.E1_TIPO = 'FT' OR SE1.E1_TIPO = 'FTF' OR SE1.E1_TIPO = 'FTC') "
 _cFiltro += " AND SE1.E1_SALDO > 0 "
 _cFiltro += " AND SE1.E1_PREFIXO <> 'R' "
@@ -436,24 +429,24 @@ BeginSql Alias _cAliasSE1
 			ORDER BY SE1.E1_CLIENTE, SE1.E1_LOJA, SE1.E1_FILIAL, SE1.E1_PREFIXO, SE1.E1_TIPO, SE1.E1_NUM, SE1.E1_PARCELA
 EndSql
 
-DbSelectArea(_cAliasSE1)
+DBSelectArea(_cAliasSE1)
 (_cAliasSE1)->(DBGoTop())
-If !(_cAliasSE1)->(EOF())
+If !(_cAliasSE1)->(Eof())
 	
-	Do While !(_cAliasSE1)->(EOF())
+	While !(_cAliasSE1)->(Eof())
 		
-		AADD(_aRet,{(_cAliasSE1)->E1_FILIAL,;
+		aAdd(_aRet,{(_cAliasSE1)->E1_FILIAL,;
 						(_cAliasSE1)->E1_PREFIXO,;
 						(_cAliasSE1)->E1_TIPO,;
 						(_cAliasSE1)->E1_NUM,;
 						(_cAliasSE1)->E1_PARCELA,;
-						Dtoc(Stod((_cAliasSE1)->E1_EMISSAO)),;
-						Alltrim((_cAliasSE1)->E1_CLIENTE),;
-						Alltrim((_cAliasSE1)->E1_LOJA),;
+						DToC(SToD((_cAliasSE1)->E1_EMISSAO)),;
+						AllTrim((_cAliasSE1)->E1_CLIENTE),;
+						AllTrim((_cAliasSE1)->E1_LOJA),;
 						(_cAliasSE1)->A1_NREDUZ,;
 						(_cAliasSE1)->A1_NOME,;
 						(_cAliasSE1)->E1_VALOR,;
-						IF(!EMPTY((_cAliasSE1)->E1_I_DTPRO),Dtoc(Stod((_cAliasSE1)->E1_I_DTPRO))+"*", Dtoc(Stod((_cAliasSE1)->E1_VENCTO)) ),;
+						If(!Empty((_cAliasSE1)->E1_I_DTPRO),DToC(SToD((_cAliasSE1)->E1_I_DTPRO))+"*", DToC(SToD((_cAliasSE1)->E1_VENCTO)) ),;
 						(_cAliasSE1)->A1_MUN,;
 						(_cAliasSE1)->A1_EST,;
 						(_cAliasSE1)->E1_HIST})

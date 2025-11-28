@@ -14,9 +14,9 @@ Lucas Borges  	  | 17/10/2019 | Removidos os Warning na compilação da release 12
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
-#include "report.ch"
-#include "protheus.ch"      
-#include "rwmake.ch"
+#Include "report.ch"
+#Include "TOTVS.ch"      
+#Include "rwmake.ch"
 
 /*
 ===============================================================================================================================
@@ -59,7 +59,7 @@ Private oBrush      := TBrush():New( ,CLR_LIGHTGRAY)
 
 Private cPerg       := "ROMS023"      
 
-Private horaImp     := TIME()         
+Private horaImp     := Time()         
 
 Private aMes:={"Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"}
 
@@ -78,7 +78,7 @@ oPrint:= TMSPrinter():New("FATURAMENTO GERENCIAL")
 oPrint:SetPaperSize(9)	// Seta para papel A4  
 	                 		
 If !Pergunte(cPerg,.T.) 
-     return
+     Return
 EndIf       
 
 //Para efetuar o redimensionamento da pagina de acordo com o tipo de relatorio escolhido
@@ -151,7 +151,7 @@ ElseIf MV_PAR20 == '4'
 
 EndIf      
 
-cTitulo     := cTipoRel + DtoC(MV_PAR02) + ' a ' + DtoC(MV_PAR03) 
+cTitulo     := cTipoRel + DToC(MV_PAR02) + ' a ' + DToC(MV_PAR03) 
 
 nLinha      := 0100
  
@@ -164,7 +164,7 @@ Else
 	oPrint:Say (nlinha + 150,nColFinal - 550,"EMPRESA: " + AllTrim(SM0->M0_NOME) + '/' + AllTrim(SM0->M0_FILIAL),oFont12b)
 EndIf
 
-oPrint:Say (nlinha + 50 ,nColFinal - 550,"DATA DE EMISSAO: " + DtoC(DATE()),oFont12b)   
+oPrint:Say (nlinha + 50 ,nColFinal - 550,"DATA DE EMISSAO: " + DToC(DATE()),oFont12b)   
 oPrint:Say (nlinha + 100,nColFinal - 550,"HORA: " + horaImp                ,oFont12b)
 nlinha+=(nSaltoLinha * 3)           
 	                                                   
@@ -591,99 +591,99 @@ Private _aPorce:= {} //Armazena os totais de cadas vendedor para ser usado pelo 
 
 //Filtros
 //Filtra Filial da SF2,SD2,SA1,SB1,SBM,SA3,ACY
-if !empty(alltrim(mv_par01))	
-	if !empty(xFilial("SF2"))
-		cFiltro += " AND F2.F2_FILIAL IN " + FormatIn(mv_par01,";")
-	endif	  
-	if !empty(xFilial("SF4"))
-		cFiltro += " AND F4.F4_FILIAL IN " + FormatIn(mv_par01,";")
-	endif	                       
-	if !empty(xFilial("SD2"))
-		cFiltro += " AND D2.D2_FILIAL IN " + FormatIn(mv_par01,";")
-	endif                 	
-	if !empty(xFilial("SA1"))
-		cFiltro += " AND A1.A1_FILIAL IN " + FormatIn(mv_par01,";")
-	endif
-	if !empty(xFilial("SB1"))	
-		cFiltro += " AND B1.B1_FILIAL IN " + FormatIn(mv_par01,";")
-	endif
-	if !empty(xFilial("SA3"))
-		cFiltro += " AND A3.A3_FILIAL IN " + FormatIn(mv_par01,";")
-	endif
-endif 
+If !Empty(AllTrim(MV_PAR01))	
+	If !Empty(xFilial("SF2"))
+		cFiltro += " AND F2.F2_FILIAL IN " + FormatIn(MV_PAR01,";")
+	EndIf	  
+	If !Empty(xFilial("SF4"))
+		cFiltro += " AND F4.F4_FILIAL IN " + FormatIn(MV_PAR01,";")
+	EndIf	                       
+	If !Empty(xFilial("SD2"))
+		cFiltro += " AND D2.D2_FILIAL IN " + FormatIn(MV_PAR01,";")
+	EndIf                 	
+	If !Empty(xFilial("SA1"))
+		cFiltro += " AND A1.A1_FILIAL IN " + FormatIn(MV_PAR01,";")
+	EndIf
+	If !Empty(xFilial("SB1"))	
+		cFiltro += " AND B1.B1_FILIAL IN " + FormatIn(MV_PAR01,";")
+	EndIf
+	If !Empty(xFilial("SA3"))
+		cFiltro += " AND A3.A3_FILIAL IN " + FormatIn(MV_PAR01,";")
+	EndIf
+EndIf 
 
 //Filtra Emissao da SF2
-if !empty(mv_par02) .and. !empty(mv_par03)
-	cFiltro += " AND F2.F2_EMISSAO BETWEEN '" + dtos(mv_par02) + "' AND '" + dtos(mv_par03) + "'"
-endif
+If !Empty(MV_PAR02) .And. !Empty(MV_PAR03)
+	cFiltro += " AND F2.F2_EMISSAO BETWEEN '" + DToS(MV_PAR02) + "' AND '" + DToS(MV_PAR03) + "'"
+EndIf
 
 //Filtra Produto
-if !empty(mv_par04) .and. !empty(mv_par05)
-	cFiltro += " AND D2.D2_COD BETWEEN '" + mv_par04 + "' AND '" + mv_par05 + "'"
-endif
+If !Empty(MV_PAR04) .And. !Empty(MV_PAR05)
+	cFiltro += " AND D2.D2_COD BETWEEN '" + MV_PAR04 + "' AND '" + MV_PAR05 + "'"
+EndIf
 
 //Filtra Cliente
-if !empty(mv_par06) .and. !empty(mv_par08)
-	cFiltro += " AND D2.D2_CLIENTE BETWEEN '" + mv_par06 + "' AND '" + mv_par08 + "'"
-endif
+If !Empty(MV_PAR06) .And. !Empty(MV_PAR08)
+	cFiltro += " AND D2.D2_CLIENTE BETWEEN '" + MV_PAR06 + "' AND '" + MV_PAR08 + "'"
+EndIf
 
 //Filtra Loja Cliente
-if !empty(mv_par07) .and. !empty(mv_par09)
-	cFiltro += " AND D2.D2_LOJA BETWEEN '" + mv_par07 + "' AND '" + mv_par09 + "'"
-endif
+If !Empty(MV_PAR07) .And. !Empty(MV_PAR09)
+	cFiltro += " AND D2.D2_LOJA BETWEEN '" + MV_PAR07 + "' AND '" + MV_PAR09 + "'"
+EndIf
 
 //Filtra Rede Cliente
-if !empty(mv_par10)
-	cFiltro += " AND A1.A1_GRPVEN IN " + FormatIn(mv_par10,";")
-endif
+If !Empty(MV_PAR10)
+	cFiltro += " AND A1.A1_GRPVEN IN " + FormatIn(MV_PAR10,";")
+EndIf
      
 //Filtra Estado Cliente
-if !empty(mv_par11) 
-	cFiltro += " AND A1.A1_EST IN " + FormatIn(mv_par11,";")
-endif
+If !Empty(MV_PAR11) 
+	cFiltro += " AND A1.A1_EST IN " + FormatIn(MV_PAR11,";")
+EndIf
 
 //Filtra Cod Municipio Cliente
-if !empty(mv_par12) 
-	cFiltro += " AND A1.A1_COD_MUN IN " + FormatIn(mv_par12,";")
-endif
+If !Empty(MV_PAR12) 
+	cFiltro += " AND A1.A1_COD_MUN IN " + FormatIn(MV_PAR12,";")
+EndIf
 
 //Filtra Vendedor
-if !empty(mv_par13) 
-	cFiltro += " AND F2.F2_VEND1 IN " + FormatIn(mv_par13,";")
-endif
+If !Empty(MV_PAR13) 
+	cFiltro += " AND F2.F2_VEND1 IN " + FormatIn(MV_PAR13,";")
+EndIf
 
 //Filtra Supervisor
-if !empty(mv_par14)
-	cFiltro += " AND F2.F2_VEND2 IN " + FormatIn(mv_par14,";")
-endif 
+If !Empty(MV_PAR14)
+	cFiltro += " AND F2.F2_VEND2 IN " + FormatIn(MV_PAR14,";")
+EndIf 
 
 //Filtra Grupo de Produtos
-if !empty(mv_par15)
-	cFiltro += " AND B1.B1_GRUPO IN " + FormatIn(mv_par15,";")
-endif      
+If !Empty(MV_PAR15)
+	cFiltro += " AND B1.B1_GRUPO IN " + FormatIn(MV_PAR15,";")
+EndIf      
 
 //Filtra Sub Grupo de Produto
-if !empty(mv_par16)
-	cFiltro += " AND B1.B1_I_SUBGR IN " + FormatIn(mv_par16,";")
-endif
+If !Empty(MV_PAR16)
+	cFiltro += " AND B1.B1_I_SUBGR IN " + FormatIn(MV_PAR16,";")
+EndIf
 
 //Filtra Produto Nivel 2
-if !empty(mv_par17)
-	cFiltro += " AND B1.B1_I_NIV2 IN " + FormatIn(mv_par17,";")
-endif
+If !Empty(MV_PAR17)
+	cFiltro += " AND B1.B1_I_NIV2 IN " + FormatIn(MV_PAR17,";")
+EndIf
 
 //Filtra Produto Nivel 3
-if !empty(mv_par18)
-	cFiltro += " AND B1.B1_I_NIV3 IN " + FormatIn(mv_par18,";")
-endif
+If !Empty(MV_PAR18)
+	cFiltro += " AND B1.B1_I_NIV3 IN " + FormatIn(MV_PAR18,";")
+EndIf
 
 //Filtra Produto Nivel 4
-if !empty(mv_par19)
-	cFiltro += " AND B1.B1_I_NIV4 IN " + FormatIn(mv_par19,";")
-endif        
+If !Empty(MV_PAR19)
+	cFiltro += " AND B1.B1_I_NIV4 IN " + FormatIn(MV_PAR19,";")
+EndIf        
 
 //Somente considera CFOP de vendas
-cCfops  := U_ITCFOPS(alltrim(upper('V')))
+cCfops  := U_ITCFOPS(AllTrim(Upper('V')))
 cFiltro += " AND D2.D2_CF IN " + FormatIn(cCfops,";")	
 
 cFiltro += "%"      
@@ -736,8 +736,8 @@ If MV_PAR20 == '1'
 	
 	EndSql 
 	
-	dbSelectArea(_cAlias)	      
-	(_cAlias)->(dbGotop()) 
+	DBSelectArea(_cAlias)	      
+	(_cAlias)->(DBGoTop()) 
 	    
 	COUNT TO nCountRec //Contabiliza o numero de registros encontrados pela query            
 	    
@@ -745,8 +745,8 @@ If MV_PAR20 == '1'
 	
 	If nCountRec > 0
 	  
-	     dbSelectArea(_cAlias)	      
-		(_cAlias)->(dbGotop())     
+	     DBSelectArea(_cAlias)	      
+		(_cAlias)->(DBGoTop())     
 		//Efetua a aglutinacao dos dados	
 		While (_cAlias)->(!Eof())                         
 		
@@ -768,7 +768,7 @@ If MV_PAR20 == '1'
 			
 			EndIf
 		
-		(_cAlias)->(dbSkip())
+		(_cAlias)->(DBSkip())
 		EndDo                   
 		
 		//Inicia uma nova pagina para impressao
@@ -926,8 +926,8 @@ If MV_PAR20 == '1'
 		ROMS023PT('TOTAL COORDENADOR:',_cCoord,_aCoord[aScan(_aCoord,{|x| x[1] == _cCoord}),2],_nTotCoord) 
 		
 		//Fecha o alias criado
-		dbSelectArea(_cAlias)
-		(_cAlias)->(dbCloseArea())
+		DBSelectArea(_cAlias)
+		(_cAlias)->(DBCloseArea())
 		
 	EndIf       
 	
@@ -1015,8 +1015,8 @@ ElseIf MV_PAR20 == '2'
 				F2.F2_VEND2, F2.F2_VEND1, A3.A3_NOME, F2.F2_EMISSAO, D2.D2_FILIAL, D2.D2_DOC, D2.D2_SERIE, D2.D2_CLIENTE, D2.D2_LOJA, D2.D2_UM, D2.D2_SEGUM, B1.B1_I_SUBGR, D2.D2_COD		
 		EndSql   
 		
-		dbSelectArea(_cAlias)	      
-	(_cAlias)->(dbGotop()) 
+		DBSelectArea(_cAlias)	      
+	(_cAlias)->(DBGoTop()) 
 	    
 	COUNT TO nCountRec //Contabiliza o numero de registros encontrados pela query            
 	    
@@ -1024,8 +1024,8 @@ ElseIf MV_PAR20 == '2'
 	
 	If nCountRec > 0
 	  
-	     dbSelectArea(_cAlias)	      
-		(_cAlias)->(dbGotop())     
+	     DBSelectArea(_cAlias)	      
+		(_cAlias)->(DBGoTop())     
 		//Efetua a aglutinacao dos dados	
 		While (_cAlias)->(!Eof())                         
 		
@@ -1057,7 +1057,7 @@ ElseIf MV_PAR20 == '2'
 			
 			EndIf
 		
-		(_cAlias)->(dbSkip())
+		(_cAlias)->(DBSkip())
 		EndDo                   
 		
 		//Inicia uma nova pagina para impressao
@@ -1317,8 +1317,8 @@ ElseIf MV_PAR20 == '2'
 		ROMS023T3('TOTAL COORDENADOR: ' + _cCoord  + '-' + _aCoord[aScan(_aCoord,{|x| x[1] == _cCoord}),2],_nTotCoord)
 		
 		//Fecha o alias criado
-		dbSelectArea(_cAlias)
-		(_cAlias)->(dbCloseArea())
+		DBSelectArea(_cAlias)
+		(_cAlias)->(DBCloseArea())
 		
 		
 	EndIf 	
@@ -1372,8 +1372,8 @@ ElseIf MV_PAR20 == '3'
 	
 	EndSql 
 	
-	dbSelectArea(_cAlias)	      
-	(_cAlias)->(dbGotop()) 
+	DBSelectArea(_cAlias)	      
+	(_cAlias)->(DBGoTop()) 
 	    
 	COUNT TO nCountRec //Contabiliza o numero de registros encontrados pela query            
 	    
@@ -1381,8 +1381,8 @@ ElseIf MV_PAR20 == '3'
 	
 	If nCountRec > 0
 	  
-	     dbSelectArea(_cAlias)	      
-		(_cAlias)->(dbGotop())     
+	     DBSelectArea(_cAlias)	      
+		(_cAlias)->(DBGoTop())     
 		//Efetua a aglutinacao dos dados	
 		While (_cAlias)->(!Eof())                         
 		
@@ -1402,7 +1402,7 @@ ElseIf MV_PAR20 == '3'
 			
 			EndIf
 		
-		(_cAlias)->(dbSkip())
+		(_cAlias)->(DBSkip())
 		EndDo                   
 		
 		//Inicia uma nova pagina para impressao
@@ -1494,8 +1494,8 @@ ElseIf MV_PAR20 == '3'
 		ROMS023PT('TOTAL COORDENADOR:',_cCoord,_aCoord[aScan(_aCoord,{|x| x[1] == _cCoord}),2],_nTotCoord) 
 		
 		//Fecha o alias criado
-		dbSelectArea(_cAlias)
-		(_cAlias)->(dbCloseArea())
+		DBSelectArea(_cAlias)
+		(_cAlias)->(DBCloseArea())
 		
 	EndIf       
 
@@ -1581,8 +1581,8 @@ ElseIf MV_PAR20 == '4'
 				F2.F2_VEND2, F2.F2_VEND1, A3.A3_NOME, F2.F2_EMISSAO, D2.D2_FILIAL, D2.D2_DOC, D2.D2_SERIE, D2.D2_CLIENTE, D2.D2_LOJA, D2.D2_UM, D2.D2_SEGUM, B1.B1_I_SUBGR, D2.D2_COD		
 		EndSql   
 		
-		dbSelectArea(_cAlias)	      
-	(_cAlias)->(dbGotop()) 
+		DBSelectArea(_cAlias)	      
+	(_cAlias)->(DBGoTop()) 
 	    
 	COUNT TO nCountRec //Contabiliza o numero de registros encontrados pela query            
 	    
@@ -1590,8 +1590,8 @@ ElseIf MV_PAR20 == '4'
 	
 	If nCountRec > 0
 	  
-	     dbSelectArea(_cAlias)	      
-		(_cAlias)->(dbGotop())     
+	     DBSelectArea(_cAlias)	      
+		(_cAlias)->(DBGoTop())     
 		//Efetua a aglutinacao dos dados	
 		While (_cAlias)->(!Eof())                         
 		
@@ -1623,7 +1623,7 @@ ElseIf MV_PAR20 == '4'
 			
 			EndIf
 		
-		(_cAlias)->(dbSkip())
+		(_cAlias)->(DBSkip())
 		EndDo                   
 		
 		//Inicia uma nova pagina para impressao
@@ -1793,8 +1793,8 @@ ElseIf MV_PAR20 == '4'
 		ROMS023T3('TOTAL COORDENADOR: ' + _cCoord  + '-' + _aCoord[aScan(_aCoord,{|x| x[1] == _cCoord}),2],_nTotCoord)
 		
 		//Fecha o alias criado
-		dbSelectArea(_cAlias)
-		(_cAlias)->(dbCloseArea())
+		DBSelectArea(_cAlias)
+		(_cAlias)->(DBCloseArea())
 		
 	EndIf 
 		 
@@ -1960,7 +1960,7 @@ Parametros------: Nenhum
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-User function lstTpRelat()
+User Function lstTpRelat()
 
 Local i 		  := 0 
 Local aOpcoes	  := {}	
@@ -1968,14 +1968,14 @@ Local aOpcoes	  := {}
 Private nTam      := 0
 Private nMaxSelect:= 0
 Private aCat      := {}
-Private MvRet     := Alltrim(ReadVar())
+Private MvRet     := AllTrim(ReadVar())
 Private MvPar     := ""
 Private cTitulo   := ""
 Private MvParDef  := ""
 
 #IFDEF WINDOWS
 	oWnd := GetWndDefault()
-#ENDIF
+#EndIf
 
 //Tratamento para carregar variaveis da lista de opcoes
 nTam:= 1
@@ -1988,12 +1988,12 @@ aAdd(aOpcoes,{'4','Evolucao de Vendas Mes a Mes - Coordenador x Sub-Grupo'})
 
 nMaxSelect := 1        
 
-for i := 1 to len (aOpcoes)
+For i := 1 to Len (aOpcoes)
 
 	MvParDef += aOpcoes[i,1]
 	aAdd(aCat,aOpcoes[i,2])	
 		
-next i 			 
+Next i 			 
 
 MvPar:= PadR(AllTrim(StrTran(&MvRet,";","")),Len(aCat))
 &MvRet:= PadR(AllTrim(StrTran(&MvRet,";","")),Len(aCat))
@@ -2005,11 +2005,11 @@ f_Opcoes(@MvPar,cTitulo,aCat,MvParDef,12,49,.F.,nTam,nMaxSelect)
 
 //Tratamento para separar retorno com barra ";"
 &MvRet := ""
-for i:=1 to Len(MvPar) step 1
-	if !(SubStr(MvPar,i,1) $ " |*")
+For i:=1 to Len(MvPar) step 1
+	If !(SubStr(MvPar,i,1) $ " |*")
 		&MvRet  += SubStr(MvPar,i,1) + ";"
-	endIf
-next i
+	EndIf
+Next i
 
 
 //Trata para tirar o ultimo caracter

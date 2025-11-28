@@ -2,15 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 22/10/2019 | Chamado 30961. Alterações nos dizeres para Pessoa Jurídica
-Lucas Borges  | 25/03/2022 | Chamado 39465. Retirado campo A2_L_CTRC que foi descontinuado
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Lucas Borges  |22/10/2019| Chamado 30961. Alterações nos dizeres para Pessoa Jurídica
+Lucas Borges  |25/03/2022| Chamado 39465. Retirado campo A2_L_CTRC que foi descontinuado
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -84,8 +84,8 @@ _cFiltro += " AND "+ _cAux +"_Filial = '" + xFilial(_cAux) + "'"
 _cFiltro += " AND "+ _cAux +"_COD = '" + &(_cAux+"->"+_cAux+"_COD") + "'"
 _cFiltro += " AND A2_COD = "+ _cAux +"_SA2COD "
 _cFiltro += " AND A2_LOJA = "+ _cAux +"_SA2LJ "
-_cFiltro += " AND RA_FILIAL = SUBSTR("+ _cAux +"_USER,1,2)
-_cFiltro += " AND RA_MAT = SUBSTR("+ _cAux +"_USER,3,6)
+_cFiltro += " AND RA_FILIAL = SubStr("+ _cAux +"_USER,1,2)
+_cFiltro += " AND RA_MAT = SubStr("+ _cAux +"_USER,3,6)
 
 _cCampo += "%"
 _cTabela += "%"
@@ -145,7 +145,7 @@ If !(_cAlias)->(Eof())
 	nlinha+=nSaltoLinha                                                                                                     
 	oPrint:Say (nlinha,nColFinal / 2,(_cAlias)->A2_COD + '/' + (_cAlias)->A2_LOJA + ' - ' + AllTrim((_cAlias)->A2_NOME),oFont14,nColFinal,,,2) 
 	nlinha+=nSaltoLinha
-	oPrint:Say (nlinha,nColFinal / 2,IIF((_cAlias)->A2_TIPO == 'J','CNPJ: ' + Transform((_cAlias)->A2_CGC,"@R! NN.NNN.NNN/NNNN-99"),'CPF: ' + Transform((_cAlias)->A2_CGC,"@R 999.999.999-99")),oFont14,nColFinal,,,2) 
+	oPrint:Say (nlinha,nColFinal / 2,IIf((_cAlias)->A2_TIPO == 'J','CNPJ: ' + Transform((_cAlias)->A2_CGC,"@R! NN.NNN.NNN/NNNN-99"),'CPF: ' + Transform((_cAlias)->A2_CGC,"@R 999.999.999-99")),oFont14,nColFinal,,,2) 
 	nlinha+=nSaltoLinha
 	nlinha+=nSaltoLinha
 	nlinha+=nSaltoLinha     
@@ -167,7 +167,7 @@ If !(_cAlias)->(Eof())
 	oPrint:Say (nlinha + nAjuAltLi1,nColInic + 950 ,"CPF:",oFont12)
 
 	Processa({||CursorWait(),impPromiss(_cAlias),CursorArrow()})
-	(_cAlias)->(dbCloseArea())
+	(_cAlias)->(DBCloseArea())
 EndIf                     
 
 Return
@@ -408,7 +408,7 @@ For _nX:=1 to Len(_aTexto)
 			_nNumEspac:= _nNumCarac - Len(_cLinImpr) 	
 			_cLinImpr := ""					 					 					                  					
 					
-			//Se numero de caracteres for possivel de se distribuir os espacos em branco entre os numero de palavras
+			//Se numero de caracteres For possivel de se distribuir os espacos em branco entre os numero de palavras
 			If _nNumEspac < _nNumPalav - 2												
 				For _nK:=_nPosInic to _nX-1  
 					If Len(_cLinImpr) == 0
@@ -454,7 +454,7 @@ For _nX:=1 to Len(_aTexto)
 		  	EndIf    	                 	                	                	                
 
 		    _nPosInic:= _nX
-            //Para que a palavra que nao foi impressa neste loop seja impressa na proxima execucao
+            //Para que a palavra que nao foi impressa neste Loop seja impressa na proxima execucao
             _nX:= _nX-1
             _lEntrou:= .T.     
 		EndIf 	
@@ -550,10 +550,10 @@ While !(_cAlias2)->(Eof())
 	promissori(_cAlias,_cAlias2)  
 	_nQbrPag++	               
 
-	(_cAlias2)->(dbSkip())
+	(_cAlias2)->(DBSkip())
 EndDo
 	
-(_cAlias2)->(dbCloseArea())
+(_cAlias2)->(DBCloseArea())
 
 Return
 
@@ -591,7 +591,7 @@ qbrTexto("Local de Pagamento: " + AllTrim(SM0->M0_ENDCOB) + " Data da Emissão: "
 
 qbrTexto("Nome do Emitente: " + (_cAlias)->A2_COD + "/" + (_cAlias)->A2_LOJA + " - " + AllTrim((_cAlias)->A2_NOME)) 
 
-qbrTexto("CPF/CNPJ: " + IIF((_cAlias)->A2_TIPO == 'J',Transform((_cAlias)->A2_CGC,"@R! NN.NNN.NNN/NNNN-99"),Transform((_cAlias)->A2_CGC,"@R 999,999,999-99")) + " Endereço: " + AllTrim((_cAlias)->A2_END) + " Cidade: " + AllTrim((_cAlias)->CC2_MUN) + "-" + (_cAlias)->A2_EST)
+qbrTexto("CPF/CNPJ: " + IIf((_cAlias)->A2_TIPO == 'J',Transform((_cAlias)->A2_CGC,"@R! NN.NNN.NNN/NNNN-99"),Transform((_cAlias)->A2_CGC,"@R 999,999,999-99")) + " Endereço: " + AllTrim((_cAlias)->A2_END) + " Cidade: " + AllTrim((_cAlias)->CC2_MUN) + "-" + (_cAlias)->A2_EST)
 nLinInBox+=nSaltoLinha 
 nLinInBox+=nSaltoLinha
 

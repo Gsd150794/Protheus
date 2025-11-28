@@ -2,32 +2,26 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 13/06/2024 | Chamado 47576. Incluídos novos filtros na rotina
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 01/10/2024 | Chamado 48644. Incluído tratamento para rotina de consulta de chave
+Lucas Borges  |13/06/2024| Chamado 47576. Incluídos novos filtros na rotina
+Lucas Borges  |01/10/2024| Chamado 48644. Incluído tratamento para rotina de consulta de chave
 ===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "TBICONN.CH"
-#INCLUDE "COLORS.CH"
-#INCLUDE "RPTDEF.CH"
-#INCLUDE "FWPrintSetup.ch" 
+
+#Include "TOTVS.ch"
+#Include "TBICONN.CH"
+#Include "COLORS.CH"
+#Include "RPTDEF.CH"
+#Include "FWPrintSetup.ch" 
 
 /*
 ===============================================================================================================================
 Programa--------: MCOM023
 Autor-----------: Lucas Borges Ferreira
 Data da Criacao-: 16/05/2024
-===============================================================================================================================
 Descrição-------: Tela para visualização de XMLs recebidos. Chamado 47282
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -48,7 +42,7 @@ If Pergunte("MCOM023",.T.)
 			_aSelFil := AdmGetFil(.F.,.F.,"SDS")
 		EndIf
 	Else
-		Aadd(_aSelFil,cFilAnt)
+		aAdd(_aSelFil,cFilAnt)
 	EndIf
 
 	_cFilQry := "CKO_I_EMIT BETWEEN '" + MV_PAR06 + "' AND  '" + MV_PAR07 + "' AND "
@@ -95,7 +89,7 @@ If Pergunte("MCOM023",.T.)
 		_cFilQry += " AND "+If(MV_PAR14==2,"","NOT")+" EXISTS (SELECT 1 FROM "+RetSqlName("SA2")+" SA2 WHERE SA2.D_E_L_E_T_ = ' ' "
 		_cFilQry += " 			AND CKO_I_EMIT = A2_CGC "
 		_cFilQry += " 			AND A2_MSBLQL = '2' "
-		_cFilQry += " 			AND SUBSTR(A2_COD,1,1) IN ('C','G')) "
+		_cFilQry += " 			AND SubStr(A2_COD,1,1) IN ('C','G')) "
 	EndIf
 	_oMrkBrowse:= FWMarkBrowse():New()
 	_oMrkBrowse:SetFieldMark("CKO_I_OK")
@@ -129,11 +123,8 @@ Return
 Programa--------: MenuDef
 Autor-----------: Lucas Borges Ferreira
 Data da Criacao-: 16/05/2024
-===============================================================================================================================
 Descrição-------: Menu Fila Processamento Totvs Colaboração
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -151,11 +142,8 @@ Return aRotina
 Programa--------: MCOM023D
 Autor-----------: Realiza a impressão do Danfe/Dacte
 Data da Criacao-: 16/05/2024
-===============================================================================================================================
 Descrição-------: Menu Fila Processamento Totvs Colaboração
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -179,9 +167,9 @@ Local _lSaida	:= .F.
 Default _cChvNFe := ""
 
 DBSelectArea("CKO")
-CKO->(Dbsetorder(1))
+CKO->(DBSetOrder(1))
 
-If FWIsInCallStack("MATA103") .oR. FWIsInCallStack("MATA140")
+If FWIsInCallStack("MATA103") .Or. FWIsInCallStack("MATA140")
 	If AllTrim(SF1->F1_ESPECIE) == 'SPED'
 		_cTipo := '109'
 	ElseIf AllTrim(SF1->F1_ESPECIE) == 'CTE'
@@ -189,13 +177,13 @@ If FWIsInCallStack("MATA103") .oR. FWIsInCallStack("MATA140")
 	ElseIf AllTrim(SF1->F1_ESPECIE) == 'CTEOS'
 		_cTipo := '273'
 	EndIf
-	CKO->(Dbseek(_cTipo+SF1->F1_CHVNFE+'.xml'))
+	CKO->(DBSeek(_cTipo+SF1->F1_CHVNFE+'.xml'))
 ElseIf FWIsInCallStack("COMXCOL")
-	CKO->(Dbseek(SDS->DS_ARQUIVO))
+	CKO->(DBSeek(SDS->DS_ARQUIVO))
 	_cTipo := CKO->CKO_CODEDI
 ElseIf FWIsInCallStack("U_MCOM027")
-	CKO->(Dbsetorder(6))
-	If CKO->(Dbseek(_cChvNFe))
+	CKO->(DBSetOrder(6))
+	If CKO->(DBSeek(_cChvNFe))
 		_cTipo := CKO->CKO_CODEDI
 	Else
 		BeginSql alias _cAlias
@@ -218,21 +206,21 @@ Else
 	EndSql
 	_nQtd:= (_cAlias)->QTD
 	_cTipo := (_cAlias)->CKO_CODEDI
-	(_cAlias)->(dbCloseArea())
+	(_cAlias)->(DBCloseArea())
 EndIf
 
 If Empty(_cTipo)
 	FWAlertWarning("Esse modelo de documento não permite a impressão","MCOM02301")
 Else
 
-	AADD(aDevice,"DISCO") // 1
-	AADD(aDevice,"SPOOL") // 2
-	AADD(aDevice,"EMAIL") // 3
-	AADD(aDevice,"EXCEL") // 4
-	AADD(aDevice,"HTML" ) // 5
-	AADD(aDevice,"PDF"  ) // 6
+	aAdd(aDevice,"DISCO") // 1
+	aAdd(aDevice,"SPOOL") // 2
+	aAdd(aDevice,"EMAIL") // 3
+	aAdd(aDevice,"EXCEL") // 4
+	aAdd(aDevice,"HTML" ) // 5
+	aAdd(aDevice,"PDF"  ) // 6
 
-	cFilePrint := "DANFE_DACTE_"+cFilAnt+"_"+Dtos(MSDate())+StrTran(Time(),":","")
+	cFilePrint := "DANFE_DACTE_"+cFilAnt+"_"+DToS(MSDate())+StrTran(Time(),":","")
 
 	nLocal       	:= If(fwGetProfString(cSession,"LOCAL","SERVER",.T.)=="SERVER",1,2 )
 	nOrientation 	:= If(fwGetProfString(cSession,"ORIENTATION","PORTRAIT",.T.)=="PORTRAIT",1,2)
@@ -245,28 +233,28 @@ Else
 	EndIf
 
 	cDir := __RelDir
-	if !empty(cDir) .and. !ExistDir(cDir)
+	If !Empty(cDir) .And. !ExistDir(cDir)
 		aDir := StrTokArr(cDir, cBarra)
 		cDir := ""
-		for _nX := 1 to len(aDir)
+		For _nX := 1 to Len(aDir)
 			cDir += aDir[_nX] + cBarra
-			if !ExistDir(cDir)
+			If !ExistDir(cDir)
 				MakeDir(cDir)
-			endif
-		next
-	endif
+			EndIf
+		Next
+	EndIf
 
 	lAdjustToLegacy := .F. // Inibe legado de resolução com a TMSPrinter
 	oDanfe := FWMSPrinter():New(cFilePrint, IMP_PDF, lAdjustToLegacy, cDir /*cPathInServer*/, .T. )
 
-	if lJob
+	If lJob
 		oDanfe:SetViewPDF(.F.)
 		oDanfe:lInJob := .T.
-	endif
+	EndIf
 
 	// ----------------------------------------------
 	// Cria e exibe tela de Setup Customizavel
-	// OBS: Utilizar include "FWPrintSetup.ch"
+	// OBS: Utilizar Include "FWPrintSetup.ch"
 	// ----------------------------------------------
 	//nFlags := PD_ISTOTVSPRINTER+ PD_DISABLEORIENTATION + PD_DISABLEPAPERSIZE + PD_DISABLEPREVIEW + PD_DISABLEMARGIN
 	nFlags := PD_ISTOTVSPRINTER + PD_DISABLEPAPERSIZE + PD_DISABLEPREVIEW + PD_DISABLEMARGIN
@@ -286,17 +274,17 @@ Else
 	// ----------------------------------------------
 	// Pressionado botão OK na tela de Setup
 	// ----------------------------------------------
-	If lJob .or. oSetup:Activate() == PD_OK // PD_OK =1
+	If lJob .Or. oSetup:Activate() == PD_OK // PD_OK =1
 		//Salva os Parametros no Profile
 
-		fwWriteProfString( cSession, "LOCAL"      , if( lJob, "SERVER"		, If(oSetup:GetProperty(PD_DESTINATION)==1 ,"SERVER"    ,"CLIENT"    )), .T. )
-		fwWriteProfString( cSession, "PRINTTYPE"  , if( lJob, "PDF"		, If(oSetup:GetProperty(PD_PRINTTYPE)==2   ,"SPOOL"     ,"PDF"       )), .T. )
-		fwWriteProfString( cSession, "ORIENTATION", if( lJob, "LANDSCAPE"	, If(oSetup:GetProperty(PD_ORIENTATION)==1 ,"PORTRAIT"  ,"LANDSCAPE" )), .T. )
+		fwWriteProfString( cSession, "LOCAL"      , If( lJob, "SERVER"		, If(oSetup:GetProperty(PD_DESTINATION)==1 ,"SERVER"    ,"CLIENT"    )), .T. )
+		fwWriteProfString( cSession, "PRINTTYPE"  , If( lJob, "PDF"		, If(oSetup:GetProperty(PD_PRINTTYPE)==2   ,"SPOOL"     ,"PDF"       )), .T. )
+		fwWriteProfString( cSession, "ORIENTATION", If( lJob, "LANDSCAPE"	, If(oSetup:GetProperty(PD_ORIENTATION)==1 ,"PORTRAIT"  ,"LANDSCAPE" )), .T. )
 
 		// Configura o objeto de impressão com o que foi configurado na interface.
-		oDanfe:setCopies( val( if( lJob, "1", oSetup:cQtdCopia )) )
+		oDanfe:setCopies( Val( If( lJob, "1", oSetup:cQtdCopia )) )
 
-		If ( lJob ) .or. ( !lJob .and. oSetup:GetProperty(PD_ORIENTATION) == 1 )
+		If ( lJob ) .Or. ( !lJob .And. oSetup:GetProperty(PD_ORIENTATION) == 1 )
 			If _cTipo == "109" //Danfe
 				U_MCOM024(oDanfe,oSetup,cFilePrint,IIf(_lSaida,'SAIDA',IIf(_nQtd==0,'',oMark:cMark)))
 			ElseIf _cTipo $ "214/273" //Dacte
@@ -305,7 +293,7 @@ Else
 			
 		EndIf
 
-	Endif
+	EndIf
 
 	oDanfe := Nil
 	oSetup := Nil

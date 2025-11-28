@@ -2,17 +2,16 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 14/05/2021 | Chamado 36494. Inclusão do novo evento R-2055
-Julio Paz     | 03/09/2021 | Chamado 37676. Inclusão nova coluna.Não exibir dados quando Valor INSS/Valor Senar/Valor Funrural=0
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Julio Paz     |14/05/2021| Chamado 36494. Inclusão do novo evento R-2055
+Julio Paz     |03/09/2021| Chamado 37676. Inclusão nova coluna.Não exibir dados quando Valor INSS/Valor Senar/Valor Funrural=0
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
-#Include "report.ch"
-#INCLUDE 'TOPCONN.CH'
+#Include "TOTVS.ch"
+#Include 'TOPCONN.CH'
 
 /*
 ===============================================================================================================================
@@ -65,7 +64,7 @@ Begin Sequence
 	
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -391,7 +390,7 @@ Begin Sequence
  
 End Sequence
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -415,7 +414,7 @@ Begin Sequence
    _cQry := U_RFIN016Q(1)
    
    If Select("TRB_A") > 0
-	  TRB_A->(DbCloseArea())
+	  TRB_A->(DBCloseArea())
    EndIf
    
    TCQUERY _cQry NEW ALIAS "TRB_A"	
@@ -423,20 +422,20 @@ Begin Sequence
    TCSetField('TRB_A',"D1_DTDIGIT","D",8,0)
    TCSetField('TRB_A',"D1_EMISSAO","D",8,0)
    	
-   DbSelectArea("TRB_A")
-   TRB_A->(dbGoTop())
+   DBSelectArea("TRB_A")
+   TRB_A->(DBGoTop())
 
    Count to _nTotRegs	
    _oReport:SetMeter(_ntotRegs)	
    
-   TRB_A->(dbGoTop())
+   TRB_A->(DBGoTop())
    
    //====================================================================================================
    // Inicializando a seção _oSect0_A
    //====================================================================================================		 
    _oSect0_A:Init()
    _oSect0_A:Cell("EVENTO"):SetValue("R-2010-Documentos Fiscais(T013)")
-   _oSect0_A:Printline()
+   _oSect0_A:PrintLine()
    
    //====================================================================================================
    // Inicializando a seção _oSect1_A
@@ -448,7 +447,7 @@ Begin Sequence
    //====================================================================================================
    // Inicia processo de impressão.
    //====================================================================================================		
-   Do While !TRB_A->(Eof())
+   While !TRB_A->(Eof())
 		
       If _oReport:Cancel()
 		 Exit
@@ -517,9 +516,9 @@ Begin Sequence
 	 EndIf
      _oSect1_A:Cell("OCORRENCIA"):SetValue(_cOcorrencia)
      
-     _oSect1_A:Printline()
+     _oSect1_A:PrintLine()
  
-     TRB_A->(DbSkip())
+     TRB_A->(DBSkip())
    EndDo   
    //====================================================================================================
    // Imprime linha separadora.
@@ -539,10 +538,10 @@ Begin Sequence
 End Sequence
 
 If Select("TRB_A") > 0
-   TRB_A->(DbCloseArea())
+   TRB_A->(DBCloseArea())
 EndIf
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -567,27 +566,27 @@ Begin Sequence
    _cQry := U_RFIN016Q(2)
    
    If Select("TRB_B") > 0
-	  TRB_B->(DbCloseArea())
+	  TRB_B->(DBCloseArea())
    EndIf
    
    TCQUERY _cQry NEW ALIAS "TRB_B"	
    
    TCSetField('TRB_B',"E2_EMISSAO","D",8,0)
    	
-   DbSelectArea("TRB_B")
-   TRB_B->(dbGoTop())
+   DBSelectArea("TRB_B")
+   TRB_B->(DBGoTop())
 
    Count to _nTotRegs	
    _oReport:SetMeter(_ntotRegs)	
    
-   TRB_B->(dbGoTop())
+   TRB_B->(DBGoTop())
    
    //====================================================================================================
    // Inicializando a seção _oSect0_B
    //====================================================================================================		 
    _oSect0_B:Init()
    _oSect0_B:Cell("EVENTO"):SetValue("R-2010-Faturas(T154)")
-   _oSect0_B:Printline()
+   _oSect0_B:PrintLine()
    
    //====================================================================================================
    // Inicializando a primeira seção
@@ -597,7 +596,7 @@ Begin Sequence
    //====================================================================================================
    // Inicia processo de impressão.
    //====================================================================================================		
-   Do While !TRB_B->(Eof())
+   While !TRB_B->(Eof())
 		
       If _oReport:Cancel()
 		 Exit
@@ -637,9 +636,9 @@ Begin Sequence
 	   
       _oSect1_B:Cell("OCORRENCIA"):SetValue(_cOcorrencia)
       
-	  _oSect1_B:Printline()
+	  _oSect1_B:PrintLine()
  
-      TRB_B->(DbSkip())
+      TRB_B->(DBSkip())
    EndDo   
    //====================================================================================================
    // Imprime linha separadora.
@@ -660,10 +659,10 @@ Begin Sequence
 End Sequence
 
 If Select("TRB_B") > 0
-   TRB_B->(DbCloseArea())
+   TRB_B->(DBCloseArea())
 EndIf
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -686,27 +685,27 @@ Begin Sequence
    _cQry := U_RFIN016Q(3)
    
    If Select("TRB_C") > 0
-	  TRB_C->(DbCloseArea())
+	  TRB_C->(DBCloseArea())
    EndIf
    
    TCQUERY _cQry NEW ALIAS "TRB_C"	
    
    TCSetField('TRB_C',"D2_EMISSAO","D",8,0)
    	
-   DbSelectArea("TRB_C")
-   TRB_C->(dbGoTop())
+   DBSelectArea("TRB_C")
+   TRB_C->(DBGoTop())
 
    Count to _nTotRegs	
    _oReport:SetMeter(_ntotRegs)	
    
-   TRB_C->(dbGoTop())
+   TRB_C->(DBGoTop())
    
    //====================================================================================================
    // Inicializando a seção _oSect0_C
    //====================================================================================================		 
    _oSect0_C:Init()
    _oSect0_C:Cell("EVENTO"):SetValue("R-2020-Documentos Fiscais(T013)")
-   _oSect0_C:Printline()
+   _oSect0_C:PrintLine()
    
    //====================================================================================================
    // Inicializando a primeira seção
@@ -716,7 +715,7 @@ Begin Sequence
    //====================================================================================================
    // Inicia processo de impressão.
    //====================================================================================================		
-   Do While !TRB_C->(Eof())
+   While !TRB_C->(Eof())
 		
       If _oReport:Cancel()
 		 Exit
@@ -781,9 +780,9 @@ Begin Sequence
       
       _oSect1_C:Cell("OCORRENCIA"):SetValue(_cOcorrencia)	
       
-	  _oSect1_C:Printline()
+	  _oSect1_C:PrintLine()
  
-      TRB_C->(DbSkip())
+      TRB_C->(DBSkip())
    EndDo   
    //====================================================================================================
    // Imprime linha separadora.
@@ -803,10 +802,10 @@ Begin Sequence
 End Sequence
 
 If Select("TRB_C") > 0
-   TRB_C->(DbCloseArea())
+   TRB_C->(DBCloseArea())
 EndIf
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -829,27 +828,27 @@ Begin Sequence
    _cQry := U_RFIN016Q(4)
    
    If Select("TRB_D") > 0
-	  TRB_D->(DbCloseArea())
+	  TRB_D->(DBCloseArea())
    EndIf
    
    TCQUERY _cQry NEW ALIAS "TRB_D"	
    
    TCSetField('TRB_D',"E1_EMISSAO","D",8,0)
    	
-   DbSelectArea("TRB_D")
-   TRB_D->(dbGoTop())
+   DBSelectArea("TRB_D")
+   TRB_D->(DBGoTop())
 
    Count to _nTotRegs	
    _oReport:SetMeter(_ntotRegs)	
    
-   TRB_D->(dbGoTop())
+   TRB_D->(DBGoTop())
 
    //====================================================================================================
    // Inicializando a seção _oSect0_D
    //====================================================================================================		 
    _oSect0_D:Init()
    _oSect0_D:Cell("EVENTO"):SetValue("R-2020-Faturas(T154)")
-   _oSect0_D:Printline()
+   _oSect0_D:PrintLine()
    
    //====================================================================================================
    // Inicializando a primeira seção
@@ -859,7 +858,7 @@ Begin Sequence
    //====================================================================================================
    // Inicia processo de impressão.
    //====================================================================================================		
-   Do While !TRB_D->(Eof())
+   While !TRB_D->(Eof())
 		
       If _oReport:Cancel()
 		 Exit
@@ -894,9 +893,9 @@ Begin Sequence
       
       _oSect1_D:Cell("OCORRENCIA"):SetValue(_cOcorrencia )
 
-	  _oSect1_D:Printline()
+	  _oSect1_D:PrintLine()
 
-      TRB_D->(DbSkip())
+      TRB_D->(DBSkip())
    EndDo   
    //====================================================================================================
    // Imprime linha separadora.
@@ -916,10 +915,10 @@ Begin Sequence
 End Sequence
 
 If Select("TRB_D") > 0
-   TRB_D->(DbCloseArea())
+   TRB_D->(DBCloseArea())
 EndIf
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -942,7 +941,7 @@ Begin Sequence
    _cQry := U_RFIN016Q(5)
    
    If Select("TRB_G") > 0
-	  TRB_G->(DbCloseArea())
+	  TRB_G->(DBCloseArea())
    EndIf
    
    TCQUERY _cQry NEW ALIAS "TRB_G"	
@@ -950,20 +949,20 @@ Begin Sequence
    TCSetField('TRB_G',"D1_DTDIGIT","D",8,0)
    TCSetField('TRB_G',"D1_EMISSAO","D",8,0)
    	
-   DbSelectArea("TRB_G")
-   TRB_G->(dbGoTop())
+   DBSelectArea("TRB_G")
+   TRB_G->(DBGoTop())
 
    Count to _nTotRegs	
    _oReport:SetMeter(_ntotRegs)	
    
-   TRB_G->(dbGoTop())
+   TRB_G->(DBGoTop())
    
    //====================================================================================================
    // Inicializando a seção _oSect0_F
    //====================================================================================================		 
    _oSect0_G:Init()
    _oSect0_G:Cell("EVENTO"):SetValue("R-2040-Documentos Fiscais(T013)")
-   _oSect0_G:Printline()
+   _oSect0_G:PrintLine()
    
 
    //====================================================================================================
@@ -974,7 +973,7 @@ Begin Sequence
    //====================================================================================================
    // Inicia processo de impressão.
    //====================================================================================================		
-   Do While !TRB_G->(Eof())
+   While !TRB_G->(Eof())
 		
       If _oReport:Cancel()
 		 Exit
@@ -1038,9 +1037,9 @@ Begin Sequence
 
       _oSect1_G:Cell("OCORRENCIA"):SetValue(_cOcorrencia)
       
-	  _oSect1_G:Printline()
+	  _oSect1_G:PrintLine()
  
-      TRB_G->(DbSkip())
+      TRB_G->(DBSkip())
    EndDo   
    //====================================================================================================
    // Imprime linha separadora.
@@ -1060,10 +1059,10 @@ Begin Sequence
 End Sequence
 
 If Select("TRB_G") > 0
-   TRB_G->(DbCloseArea())
+   TRB_G->(DBCloseArea())
 EndIf
    
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -1086,27 +1085,27 @@ Begin Sequence
    _cQry := U_RFIN016Q(6)
    
    If Select("TRB_H") > 0
-	  TRB_H->(DbCloseArea())
+	  TRB_H->(DBCloseArea())
    EndIf
    
    TCQUERY _cQry NEW ALIAS "TRB_H"	
    
    TCSetField('TRB_H',"E2_EMISSAO","D",8,0)
    	
-   DbSelectArea("TRB_H")
-   TRB_H->(dbGoTop())
+   DBSelectArea("TRB_H")
+   TRB_H->(DBGoTop())
 
    Count to _nTotRegs	
    _oReport:SetMeter(_ntotRegs)	
    
-   TRB_H->(dbGoTop())
+   TRB_H->(DBGoTop())
    
    //====================================================================================================
    // Inicializando a seção _oSect0_H
    //====================================================================================================		 
    _oSect0_H:Init()
    _oSect0_H:Cell("EVENTO"):SetValue("R-2040-Faturas(T154)")
-   _oSect0_H:Printline()
+   _oSect0_H:PrintLine()
    
    //====================================================================================================
    // Inicializando a primeira seção
@@ -1116,7 +1115,7 @@ Begin Sequence
    //====================================================================================================
    // Inicia processo de impressão.
    //====================================================================================================		
-   Do While !TRB_H->(Eof())
+   While !TRB_H->(Eof())
 		
       If _oReport:Cancel()
 		 Exit
@@ -1162,9 +1161,9 @@ Begin Sequence
       
       _oSect1_H:Cell("OCORRENCIA"):SetValue(_cOcorrencia)
       
-	  _oSect1_H:Printline()
+	  _oSect1_H:PrintLine()
  
-      TRB_H->(DbSkip())
+      TRB_H->(DBSkip())
    EndDo   
    //====================================================================================================
    // Imprime linha separadora.
@@ -1184,10 +1183,10 @@ Begin Sequence
 End Sequence
 
 If Select("TRB_H") > 0
-   TRB_H->(DbCloseArea())
+   TRB_H->(DBCloseArea())
 EndIf
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -1256,7 +1255,7 @@ Begin Sequence
       _cQry += " A2_NOME, "       // Nome do fornecedor
       _cQry += " A2_CGC "
       _cQry += " FROM "+RetSqlName("SD1")+ " SD1, " + RetSqlName("SA2") + " SA2, " + RetSqlName("SB1") + " SB1, " + RetSqlName("SF1") + " SF1 "  
-      _cQry += " WHERE SD1.D_E_L_E_T_ <> '*' AND SA2.D_E_L_E_T_ <> '*' AND SB1.D_E_L_E_T_ <> '*' AND SF1.D_E_L_E_T_ <> '*' "
+      _cQry += " WHERE SD1.D_E_L_E_T_ = ' ' AND SA2.D_E_L_E_T_ = ' ' AND SB1.D_E_L_E_T_ = ' ' AND SF1.D_E_L_E_T_ = ' ' "
       _cQry += " AND D1_TPREPAS = ' ' AND D1_FORNECE = A2_COD AND D1_LOJA  = A2_LOJA AND A2_TIPO = 'J' AND A2_CGC <> ' ' AND A2_DESPORT = ' ' "    // (A2_DESPORT = ' ' OR A2_DESPORT = '0') "
       //_cQry += " AND B1_INSS = 'S' "
       _cQry += " AND D1_FORNECE = F1_FORNECE AND D1_LOJA  = F1_LOJA AND D1_FILIAL = F1_FILIAL AND F1_DOC = D1_DOC AND F1_SERIE = D1_SERIE "
@@ -1268,11 +1267,11 @@ Begin Sequence
 
       If ! Empty(MV_PAR02) // Data de  
       
-         _cQry += " AND D1_EMISSAO >= '"+Dtos(MV_PAR02)+"' " // D1_DTDIGIT
+         _cQry += " AND D1_EMISSAO >= '"+DToS(MV_PAR02)+"' " // D1_DTDIGIT
       EndIf
    
       If ! Empty(MV_PAR03) // Data até 
-         _cQry += " AND D1_EMISSAO <= '"+Dtos(MV_PAR03)+"' " // D1_DTDIGIT
+         _cQry += " AND D1_EMISSAO <= '"+DToS(MV_PAR03)+"' " // D1_DTDIGIT
       EndIf
 
       If ! Empty(MV_PAR04) // Produto
@@ -1298,7 +1297,7 @@ Begin Sequence
       _cQry +=  " E2_INSS, "
       _cQry +=  " A2_CGC "
       _cQry +=  " FROM "+RetSqlName("SE2")+ " SE2, " + RetSqlName("FK7") + " FK7, " + RetSqlName("FKF") + " FKF, "+RetSqlName("SA2")+ " SA2 " 
-      _cQry +=  " WHERE SE2.D_E_L_E_T_ <> '*' AND FK7.D_E_L_E_T_ <> '*' AND FKF.D_E_L_E_T_ <> '*' AND SA2.D_E_L_E_T_ <> '*' "
+      _cQry +=  " WHERE SE2.D_E_L_E_T_ = ' ' AND FK7.D_E_L_E_T_ = ' ' AND FKF.D_E_L_E_T_ = ' ' AND SA2.D_E_L_E_T_ = ' ' "
       _cQry +=  " AND (E2_FILIAL ||'|'||E2_PREFIXO||'|'||E2_NUM||'|'||E2_PARCELA||'|'||E2_TIPO||'|'||E2_FORNECE||'|'||E2_LOJA) = FK7_CHAVE "
       _cQry +=  " AND E2_FILIAL = FK7_FILIAL AND FK7_ALIAS = 'SE2' "
       _cQry +=  " AND E2_FORNECE = A2_COD AND E2_LOJA = A2_LOJA "
@@ -1313,11 +1312,11 @@ Begin Sequence
        EndIf
 
        If ! Empty(MV_PAR02) // Data de  
-          _cQry += " AND E2_EMISSAO >= '"+Dtos(MV_PAR02)+"' " 
+          _cQry += " AND E2_EMISSAO >= '"+DToS(MV_PAR02)+"' " 
        EndIf
    
        If ! Empty(MV_PAR03) // Data até 
-          _cQry += " AND E2_EMISSAO <= '"+Dtos(MV_PAR03)+"' "
+          _cQry += " AND E2_EMISSAO <= '"+DToS(MV_PAR03)+"' "
        EndIf
    ElseIf _nQuery == 3 // RELATORIO C - R-2020 - Documentos Fiscais (T013):
       _cQry := " SELECT DISTINCT "
@@ -1338,7 +1337,7 @@ Begin Sequence
       _cQry += " A1_NOME, "       // Nome do fornecedor
       _cQry += " A1_CGC "
       _cQry += " FROM "+RetSqlName("SD2")+ " SD2, " + RetSqlName("SB1") + " SB1, " + RetSqlName("SF2") + " SF2, " + RetSqlName("SA1")+ " SA1 " 
-      _cQry += " WHERE SD2.D_E_L_E_T_ <> '*' AND SB1.D_E_L_E_T_ <> '*' AND SF2.D_E_L_E_T_ <> '*' AND SA1.D_E_L_E_T_ <> '*' "
+      _cQry += " WHERE SD2.D_E_L_E_T_ = ' ' AND SB1.D_E_L_E_T_ = ' ' AND SF2.D_E_L_E_T_ = ' ' AND SA1.D_E_L_E_T_ = ' ' "
       _cQry += " AND D2_CLIENTE = F2_CLIENTE AND D2_LOJA  = F2_LOJA AND D2_FILIAL = F2_FILIAL AND F2_DOC = D2_DOC AND F2_SERIE = D2_SERIE " 
       _cQry += " AND A1_COD = F2_CLIENTE AND A1_LOJA  = F2_LOJA "
       _cQry += " AND A1_PESSOA = 'J' AND A1_CGC <> ' ' " // AND B1_INSS = 'S'
@@ -1349,11 +1348,11 @@ Begin Sequence
       EndIf
 
       If ! Empty(MV_PAR02) // Data de  
-         _cQry += " AND D2_EMISSAO >= '"+Dtos(MV_PAR02)+"' "
+         _cQry += " AND D2_EMISSAO >= '"+DToS(MV_PAR02)+"' "
       EndIf
    
       If ! Empty(MV_PAR03) // Data até 
-         _cQry += " AND D2_EMISSAO <= '"+Dtos(MV_PAR03)+"' "
+         _cQry += " AND D2_EMISSAO <= '"+DToS(MV_PAR03)+"' "
       EndIf
 
       If ! Empty(MV_PAR04) // Produto
@@ -1376,7 +1375,7 @@ Begin Sequence
       _cQry += " FKF_TPSERV,"
       _cQry += " A1_CGC "
       _cQry += " FROM "+RetSqlName("SE1")+ " SE1, " + RetSqlName("FK7") + " FK7, " + RetSqlName("FKF") + " FKF, "+RetSqlName("SA1")+ " SA1 " 
-      _cQry += " WHERE SE1.D_E_L_E_T_ <> '*' AND FK7.D_E_L_E_T_ <> '*' AND FKF.D_E_L_E_T_ <> '*' AND SA1.D_E_L_E_T_ <> '*' "
+      _cQry += " WHERE SE1.D_E_L_E_T_ = ' ' AND FK7.D_E_L_E_T_ = ' ' AND FKF.D_E_L_E_T_ = ' ' AND SA1.D_E_L_E_T_ = ' ' "
       _cQry += " AND (E1_FILIAL ||'|'||E1_PREFIXO||'|'||E1_NUM||'|'||E1_PARCELA||'|'||E1_TIPO||'|'||E1_CLIENTE||'|'||E1_LOJA) = FK7_CHAVE "
       _cQry += " AND E1_FILIAL = FK7_FILIAL AND FK7_ALIAS = 'SE1' "
       _cQry += " AND E1_CLIENTE = A1_COD AND E1_LOJA = A1_LOJA "
@@ -1391,11 +1390,11 @@ Begin Sequence
       EndIf
 
       If ! Empty(MV_PAR02) // Data de  
-         _cQry += " AND E1_EMISSAO >= '"+Dtos(MV_PAR02)+"' "
+         _cQry += " AND E1_EMISSAO >= '"+DToS(MV_PAR02)+"' "
       EndIf
    
       If ! Empty(MV_PAR03) // Data até 
-         _cQry += " AND E1_EMISSAO <= '"+Dtos(MV_PAR03)+"' "
+         _cQry += " AND E1_EMISSAO <= '"+DToS(MV_PAR03)+"' "
       EndIf										  
        
    ElseIf _nQuery == 5 // 7 // RELATORIO G - R-2040 - Documentos Fiscais (T013):
@@ -1420,7 +1419,7 @@ Begin Sequence
        _cQry += " A2_NOME, "       // Nome do fornecedor
        _cQry += " A2_CGC "
        _cQry += " FROM "+RetSqlName("SD1")+ " SD1, " + RetSqlName("SA2") + " SA2, " + RetSqlName("SB1") + " SB1, "  + RetSqlName("SF1") + " SF1 " 
-       _cQry += " WHERE SD1.D_E_L_E_T_ <> '*' AND SA2.D_E_L_E_T_ <> '*' AND SB1.D_E_L_E_T_ <> '*' AND SF1.D_E_L_E_T_ <> '*' "
+       _cQry += " WHERE SD1.D_E_L_E_T_ = ' ' AND SA2.D_E_L_E_T_ = ' ' AND SB1.D_E_L_E_T_ = ' ' AND SF1.D_E_L_E_T_ = ' ' "
        _cQry += " AND D1_TPREPAS = ' ' AND D1_FORNECE = A2_COD AND D1_LOJA  = A2_LOJA AND A2_TIPO = 'J' AND A2_CGC <> ' ' AND A2_DESPORT = '1' "      //AND (A2_DESPORT = ' ' OR A2_DESPORT = '0') "
        //_cQry += " AND B1_INSS = 'S' " 
        _cQry += " AND D1_FORNECE = F1_FORNECE AND D1_LOJA  = F1_LOJA AND D1_FILIAL = F1_FILIAL AND F1_DOC = D1_DOC AND F1_SERIE = D1_SERIE " 
@@ -1431,11 +1430,11 @@ Begin Sequence
        EndIf
 
        If ! Empty(MV_PAR02) // Data de  
-          _cQry += " AND D1_EMISSAO >= '"+Dtos(MV_PAR02)+"' " // D1_DTDIGIT
+          _cQry += " AND D1_EMISSAO >= '"+DToS(MV_PAR02)+"' " // D1_DTDIGIT
        EndIf
    
        If ! Empty(MV_PAR03) // Data até 
-          _cQry += " AND D1_EMISSAO <= '"+Dtos(MV_PAR03)+"' " // D1_DTDIGIT
+          _cQry += " AND D1_EMISSAO <= '"+DToS(MV_PAR03)+"' " // D1_DTDIGIT
        EndIf
 
        If ! Empty(MV_PAR04) // Produto
@@ -1461,7 +1460,7 @@ Begin Sequence
       _cQry += " E2_INSS, "
       _cQry += " A2_CGC "
       _cQry += " FROM "+RetSqlName("SE2")+ " SE2, " + RetSqlName("FK7") + " FK7, " + RetSqlName("FKF") + " FKF, "+RetSqlName("SA2")+ " SA2 " 
-      _cQry += " WHERE SE2.D_E_L_E_T_ <> '*' AND FK7.D_E_L_E_T_ <> '*' AND FKF.D_E_L_E_T_ <> '*' AND SA2.D_E_L_E_T_ <> '*'  "
+      _cQry += " WHERE SE2.D_E_L_E_T_ = ' ' AND FK7.D_E_L_E_T_ = ' ' AND FKF.D_E_L_E_T_ = ' ' AND SA2.D_E_L_E_T_ = ' '  "
       _cQry += " AND (E2_FILIAL ||'|'||E2_PREFIXO||'|'||E2_NUM||'|'||E2_PARCELA||'|'||E2_TIPO||'|'||E2_FORNECE||'|'||E2_LOJA) = FK7_CHAVE "
       _cQry += " AND E2_FILIAL = FK7_FILIAL AND FK7_ALIAS = 'SE2'  "
       _cQry += " AND E2_FORNECE = A2_COD AND E2_LOJA = A2_LOJA  "
@@ -1477,11 +1476,11 @@ Begin Sequence
       EndIf
 
       If ! Empty(MV_PAR02) // Data de  
-         _cQry += " AND E2_EMISSAO >= '"+Dtos(MV_PAR02)+"' "
+         _cQry += " AND E2_EMISSAO >= '"+DToS(MV_PAR02)+"' "
       EndIf
    
       If ! Empty(MV_PAR03) // Data até 
-         _cQry += " AND E2_EMISSAO <= '"+Dtos(MV_PAR03)+"' "
+         _cQry += " AND E2_EMISSAO <= '"+DToS(MV_PAR03)+"' "
       EndIf
 
    ElseIf _nQuery == 7 // R-2055 - Aquisição Produtor Rural - Documentos Fiscais (T013)
@@ -1516,7 +1515,7 @@ Begin Sequence
       _cQry += " FT_INDISEN,  "  // Ind Isent Contr Previdenc
       _cQry += " D1_TES"         // TES  
       _cQry += " FROM "+RetSqlName("SD1")+ " SD1, " + RetSqlName("SA2") + " SA2, " + RetSqlName("SB1") + " SB1, " + RetSqlName("SF1") + " SF1 , " + RetSqlName("SFT") + " SFT "   
-      _cQry += " WHERE SD1.D_E_L_E_T_ <> '*' AND SA2.D_E_L_E_T_ <> '*' AND SB1.D_E_L_E_T_ <> '*' AND SF1.D_E_L_E_T_ <> '*' AND SFT.D_E_L_E_T_ <> '*' "
+      _cQry += " WHERE SD1.D_E_L_E_T_ = ' ' AND SA2.D_E_L_E_T_ = ' ' AND SB1.D_E_L_E_T_ = ' ' AND SF1.D_E_L_E_T_ = ' ' AND SFT.D_E_L_E_T_ = ' ' "
       _cQry += " AND D1_FORNECE = A2_COD AND D1_LOJA  = A2_LOJA AND A2_CGC <> ' ' "
       _cQry += " AND D1_FORNECE = F1_FORNECE AND D1_LOJA  = F1_LOJA AND D1_FILIAL = F1_FILIAL AND F1_DOC = D1_DOC AND F1_SERIE = D1_SERIE "
       _cQry += " AND D1_COD = B1_COD  "
@@ -1531,11 +1530,11 @@ Begin Sequence
 
       If ! Empty(MV_PAR02) // Data de  
       
-         _cQry += " AND D1_EMISSAO >= '"+Dtos(MV_PAR02)+"' " // D1_DTDIGIT
+         _cQry += " AND D1_EMISSAO >= '"+DToS(MV_PAR02)+"' " // D1_DTDIGIT
       EndIf
    
       If ! Empty(MV_PAR03) // Data até 
-         _cQry += " AND D1_EMISSAO <= '"+Dtos(MV_PAR03)+"' " // D1_DTDIGIT
+         _cQry += " AND D1_EMISSAO <= '"+DToS(MV_PAR03)+"' " // D1_DTDIGIT
       EndIf
 
       If ! Empty(MV_PAR04) // Produto
@@ -1570,10 +1569,10 @@ Begin Sequence
    //====================================================================================================
    If "R-2010" $ MV_PAR05 .Or. "R-2020" $ MV_PAR05 .Or. "R-2030" $ MV_PAR05 .Or. "R-2040" $ MV_PAR05 .Or. "R-2055" $ MV_PAR05  
       If "R-2070" $ MV_PAR05
-         U_ITMSG("O relatório 'R-2070-Retenções na Fonte - IR, CSLL, Cofins, PIS/PASEP' não está disponível para emissão. Estamos aguardando liberação do governo para darmos inicio a análise e desenvolvimento.","Atenção", ,1) 
+         U_ITMsg("O relatório 'R-2070-Retenções na Fonte - IR, CSLL, Cofins, PIS/PASEP' não está disponível para emissão. Estamos aguardando liberação do governo para darmos inicio a análise e desenvolvimento.","Atenção", ,1) 
       EndIf
    ElseIf "R-2070" $ MV_PAR05
-      U_ITMSG("O relatório 'R-2070-Retenções na Fonte - IR, CSLL, Cofins, PIS/PASEP' não está disponível para emissão. Estamos aguardando liberação do governo para darmos inicio a análise e desenvolvimento.","Atenção", ,1) 
+      U_ITMsg("O relatório 'R-2070-Retenções na Fonte - IR, CSLL, Cofins, PIS/PASEP' não está disponível para emissão. Estamos aguardando liberação do governo para darmos inicio a análise e desenvolvimento.","Atenção", ,1) 
       _lRet := .F.
    EndIf
 
@@ -1602,7 +1601,7 @@ Begin Sequence
    _cQry := U_RFIN016Q(7)
    
    If Select("TRB_I") > 0
-	  TRB_I->(DbCloseArea())
+	  TRB_I->(DBCloseArea())
    EndIf
    
    TCQUERY _cQry NEW ALIAS "TRB_I"	
@@ -1610,20 +1609,20 @@ Begin Sequence
    TCSetField('TRB_I',"D1_DTDIGIT","D",8,0)
    TCSetField('TRB_I',"D1_EMISSAO","D",8,0)
    	
-   DbSelectArea("TRB_I")
-   TRB_I->(dbGoTop())
+   DBSelectArea("TRB_I")
+   TRB_I->(DBGoTop())
 
    Count to _nTotRegs	
    _oReport:SetMeter(_ntotRegs)	
    
-   TRB_I->(dbGoTop())
+   TRB_I->(DBGoTop())
    
    //====================================================================================================
    // Inicializando a seção _oSect0_I
    //====================================================================================================		 
    _oSect0_I:Init()
    _oSect0_I:Cell("EVENTO"):SetValue("R-2055 - Documentos Fiscais (T013)")
-   _oSect0_I:Printline()
+   _oSect0_I:PrintLine()
    
    //====================================================================================================
    // Inicializando a seção _oSect1_I
@@ -1635,7 +1634,7 @@ Begin Sequence
    //====================================================================================================
    // Inicia processo de impressão.
    //====================================================================================================		
-   Do While !TRB_I->(Eof())
+   While !TRB_I->(Eof())
 		
       If _oReport:Cancel()
 		   Exit
@@ -1643,7 +1642,7 @@ Begin Sequence
           
       // Valor INSS, Valor Senar, e Valor Funrural 
       If TRB_I->D1_VLSENAR == 0 .And. TRB_I->D1_VALINS == 0 .And. TRB_I->D1_VALFUN == 0
-         TRB_I->(DbSkip())
+         TRB_I->(DBSkip())
          Loop
       EndIf     
 
@@ -1698,9 +1697,9 @@ Begin Sequence
 
      _oSect1_I:Cell("OCORRENCIA"):SetValue(_cOcorrencia)
      
-     _oSect1_I:Printline()
+     _oSect1_I:PrintLine()
  
-     TRB_I->(DbSkip())
+     TRB_I->(DBSkip())
    EndDo   
    //====================================================================================================
    // Imprime linha separadora.
@@ -1720,9 +1719,9 @@ Begin Sequence
 End Sequence
 
 If Select("TRB_I") > 0
-   TRB_I->(DbCloseArea())
+   TRB_I->(DBCloseArea())
 EndIf
 
-Return Nil
+Return
 
 

@@ -1,4 +1,4 @@
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -10,10 +10,10 @@ Descrição---------: Ponto de Entrada para Inclusão de Botões na Enchoice da tela
 ===============================================================================================================================
 Uso---------------: Italac
 ===============================================================================================================================
-Parametros--------: PARAMIXB[01] - _nOpc      : Opção de processamento
-------------------: PARAMIXB[02] - C5_NUM     : Número do Pedido de Vendas Atual
-------------------: PARAMIXB[03] - C5_CLIENTE : Código do Cliente do Pedido de Vendas Atual
-------------------: PARAMIXB[04] - C5_LOJA    : Código da Loja do Cliente do Pedido de Vendas Atual
+Parametros--------: ParamIXB[01] - _nOpc      : Opção de processamento
+------------------: ParamIXB[02] - C5_NUM     : Número do Pedido de Vendas Atual
+------------------: ParamIXB[03] - C5_CLIENTE : Código do Cliente do Pedido de Vendas Atual
+------------------: ParamIXB[04] - C5_LOJA    : Código da Loja do Cliente do Pedido de Vendas Atual
 ===============================================================================================================================
 Retorno-----------: _aRet : Array com a configuração dos botões a incluir
 ===============================================================================================================================
@@ -32,7 +32,7 @@ Setor-------------: TI
 User Function GMMA410BUT()
 
 Local _aRet := {}
-Local _nOpc := PARAMIXB[01] // 1="Pesquisar"/2="Visual"/3="Incluir"/4="Alterar"/5=Excluir/6="Copia"/7="Dev. Compras"/8="Prep.Doc.Saída"/9="Legenda"/10="Conhecimento"
+Local _nOpc := ParamIXB[01] // 1="Pesquisar"/2="Visual"/3="Incluir"/4="Alterar"/5=Excluir/6="Copia"/7="Dev. Compras"/8="Prep.Doc.Saída"/9="Legenda"/10="Conhecimento"
 
 If _nOpc == 2 .Or. _nOpc == 4 .Or. _nOpc == 5
 	aAdd( _aRet , { 'OMSDIVIDE' , {|| U_COMS001( 'SC5' , SC5->( C5_FILIAL + C5_NUM ) ) } , "Histórico" , "Consulta Histórico do Pedido" } )

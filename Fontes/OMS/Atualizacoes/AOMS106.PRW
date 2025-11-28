@@ -11,7 +11,7 @@ Lucas Borges      | 14/10/2019 | Removidos os Warning na compilação da release 1
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 #Include "FWMVCDEF.ch"
 
 #DEFINE _ENTER CHR(13) + CHR(10)
@@ -39,11 +39,11 @@ Private aRotina	:= {}
 //Verifica permissão de acesso a rotina
 If !_lAcesso
 
-	u_itmsg("Usuário sem acesso a rotina","Atenção","Solicite liberação de acesso ao seu gestor",1)
+	U_ITMsg("Usuário sem acesso a rotina","Atenção","Solicite liberação de acesso ao seu gestor",1)
 	
 	Return
 	
-Endif
+EndIf
 
 //Log de acesso
 u_itlogacs()
@@ -99,13 +99,13 @@ Local _aGatAux	:= {}
 //================================================================================
 // Criação dos gatilhos para o cabeçalho da rotina
 //================================================================================
-_aGatAux := FwStruTrigger( 'ZGO_CLIENT'	, 'ZGO_CLINOM'	, 'IIF(EMPTY(ALLTRIM(M->ZGO_CLIENT+M->ZGO_LOJA)),"  ",POSICIONE("SA1",1,XFILIAL("SA1")+M->ZGO_CLIENT+M->ZGO_LOJA,"A1_NOME"))'			, .F. )
+_aGatAux := FwStruTrigger( 'ZGO_CLIENT'	, 'ZGO_CLINOM'	, 'IIf(Empty(AllTrim(M->ZGO_CLIENT+M->ZGO_LOJA)),"  ",Posicione("SA1",1,xFilial("SA1")+M->ZGO_CLIENT+M->ZGO_LOJA,"A1_NOME"))'			, .F. )
 oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZGO_LOJA'	, 'ZGO_CLINOM'	, 'IIF(EMPTY(ALLTRIM(M->ZGO_CLIENT+M->ZGO_LOJA)),"  ",POSICIONE("SA1",1,XFILIAL("SA1")+M->ZGO_CLIENT+M->ZGO_LOJA,"A1_NOME"))'			, .F. )
+_aGatAux := FwStruTrigger( 'ZGO_LOJA'	, 'ZGO_CLINOM'	, 'IIf(Empty(AllTrim(M->ZGO_CLIENT+M->ZGO_LOJA)),"  ",Posicione("SA1",1,xFilial("SA1")+M->ZGO_CLIENT+M->ZGO_LOJA,"A1_NOME"))'			, .F. )
 oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZGO_REDE'	, 'ZGO_REDNOM'	, 'IIF(EMPTY(ALLTRIM(M->ZGO_REDE)),"    ",POSICIONE("ACY",1,XFILIAL("ACY")+M->ZGO_REDE,"ACY_DESCRI"))'			, .F. )
+_aGatAux := FwStruTrigger( 'ZGO_REDE'	, 'ZGO_REDNOM'	, 'IIf(Empty(AllTrim(M->ZGO_REDE)),"    ",Posicione("ACY",1,xFilial("ACY")+M->ZGO_REDE,"ACY_DESCRI"))'			, .F. )
 oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 
@@ -113,10 +113,10 @@ oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 // Criação dos gatilhos para o grid da rotina
 //================================================================================
 
-_aGatAux := FwStruTrigger( 'ZGO_PRODUT'	, 'ZGO_PRONOM'	, 'IIF(EMPTY(ALLTRIM(M->ZGO_PRODUT)),"   ",POSICIONE("SB1",1,XFILIAL("SB1")+M->ZGO_PRODUT,"B1_DESC"))'			, .F. )
+_aGatAux := FwStruTrigger( 'ZGO_PRODUT'	, 'ZGO_PRONOM'	, 'IIf(Empty(AllTrim(M->ZGO_PRODUT)),"   ",Posicione("SB1",1,xFilial("SB1")+M->ZGO_PRODUT,"B1_DESC"))'			, .F. )
 oStruITN:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZGO_CONDPA'	, 'ZGO_CONDNI'	, 'POSICIONE("SE4",1,xfilial("SE4")+M->ZGO_CONDPA,"E4_DESCRI")'		, .F. )
+_aGatAux := FwStruTrigger( 'ZGO_CONDPA'	, 'ZGO_CONDNI'	, 'Posicione("SE4",1,xFilial("SE4")+M->ZGO_CONDPA,"E4_DESCRI")'		, .F. )
 oStruITN:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 
@@ -248,7 +248,7 @@ Retorno-----------: Nenhum
 
 User Function AOMS106M()
 
-Local _aParam		:= PARAMIXB
+Local _aParam		:= ParamIXB
 Local _xRet			:= .T.
 Local _oObj			:= ''
 Local _oModel		:= Nil
@@ -286,32 +286,32 @@ If _aParam <> NIL
 			_xret := .F.
 			Break
 		
-		Endif
+		EndIf
 			
 		//Validação de campos obrigatórios
-		If empty(_oModelMAS:GetValue("ZGO_CLIENT")) .AND. empty(_oModelMAS:GetValue("ZGO_REDE"))
+		If Empty(_oModelMAS:GetValue("ZGO_CLIENT")) .And. Empty(_oModelMAS:GetValue("ZGO_REDE"))
 		
 			Help( ,, 'Atenção!',, "Cliente ou rede obrigatório !",1, 0,, ,,, , {"Preencha o campo cliente ou o campo rede"} )
 
 			_xret := .F.
 			Break
 		
-		Endif
+		EndIf
 		
 		//Validação de campos duplicados
-		If !empty(_oModelMAS:GetValue("ZGO_CLIENT")) .AND. !empty(_oModelMAS:GetValue("ZGO_REDE"))
+		If !Empty(_oModelMAS:GetValue("ZGO_CLIENT")) .And. !Empty(_oModelMAS:GetValue("ZGO_REDE"))
 		
 			Help( ,, 'Atenção!',, "Cliente e rede não podem ser preenchidos ao mesmo tempo !",1, 0,, ,,, , {"Preencha o campo cliente ou o campo rede"} )
 
 			_xret := .F.
 			Break
 		
-		Endif
+		EndIf
 		
 		
 	
 	
-	Endif
+	EndIf
 	
 	
 	//Gravação de log
@@ -323,7 +323,7 @@ If _aParam <> NIL
 		_nlinhas    := _oModelDET:GetQtdLine()
 		
 		//Inclusão
-		if _nOper == 3
+		If _nOper == 3
 		
 			//Varre linhas criando uma linha de log para cada linha do modelo
 			For _nni := 1 to _nlinhas
@@ -331,53 +331,53 @@ If _aParam <> NIL
 				If !_oModelDET:IsDeleted(_nni)
 				
 					_oModelDET::SetLine(_nni)
-					Reclock("ZGP",.T.)
-					ZGP->ZGP_FILIAL := xfilial("ZGP")
+					RecLock("ZGP",.T.)
+					ZGP->ZGP_FILIAL := xFilial("ZGP")
 					ZGP->ZGP_ITEM   := _oModelDET:GetValue("ZGO_ITEM")
 					ZGP->ZGP_CONDPA := _oModelDET:GetValue("ZGO_CONDPA")
 					ZGP->ZGP_CLIENT := _oModelMAS:GetValue("ZGO_CLIENT")
 					ZGP->ZGP_LOJA   := _oModelMAS:GetValue("ZGO_LOJA")
 					ZGP->ZGP_PRODUT := _oModelDET:GetValue("ZGO_PRODUT")
 					ZGP->ZGP_REDE   := _oModelMAS:GetValue("ZGO_REDE")
-					ZGP->ZGP_DATA   := date()
-					ZGP->ZGP_HORA   := time()
-					ZGP->ZGP_USUARI := cusername
+					ZGP->ZGP_DATA   := Date()
+					ZGP->ZGP_HORA   := Time()
+					ZGP->ZGP_USUARI := cUserName
 					ZGP->ZGP_FILCS  := _oModelDET:GetValue("ZGO_FILCD")
-					ZGP->(Msunlock())
+					ZGP->(MSUnLock())
 					
-				Endif
+				EndIf
 				
 			Next
 			
-		Endif
+		EndIf
 		
 		//Alteração
-		if _nOper == 4
+		If _nOper == 4
 		
 			//Varre linhas criando uma linha de log para cada linha do modelo
 			For _nni := 1 to _nlinhas
 			
 				_oModelDET::SetLine(_nni)
 				_nposi := ZGO->(Recno())
-				ZGO->(Dbsetorder(8)) //ZGO_CLIENT+ZGO_LOJA+ZGO_ITEM
+				ZGO->(DBSetOrder(8)) //ZGO_CLIENT+ZGO_LOJA+ZGO_ITEM
 				
-				If .not. (_oModelDET:IsDeleted(_nni) .and. _oModelDET:IsInserted(_nni))
+				If .not. (_oModelDET:IsDeleted(_nni) .And. _oModelDET:IsInserted(_nni))
 				
-					Reclock("ZGP",.T.)
-					ZGP->ZGP_FILIAL := xfilial("ZGP")
+					RecLock("ZGP",.T.)
+					ZGP->ZGP_FILIAL := xFilial("ZGP")
 					ZGP->ZGP_ITEM   := _oModelDET:GetValue("ZGO_ITEM")
 					ZGP->ZGP_CONDPA := _oModelDET:GetValue("ZGO_CONDPA")
 					ZGP->ZGP_CLIENT := _oModelMAS:GetValue("ZGO_CLIENT")
 					ZGP->ZGP_LOJA   := _oModelMAS:GetValue("ZGO_LOJA")
 					ZGP->ZGP_PRODUT := _oModelDET:GetValue("ZGO_PRODUT")
 					ZGP->ZGP_REDE   := _oModelMAS:GetValue("ZGO_REDE")
-					ZGP->ZGP_DATA   := date()
-					ZGP->ZGP_HORA   := time()
-					ZGP->ZGP_USUARI := cusername
+					ZGP->ZGP_DATA   := Date()
+					ZGP->ZGP_HORA   := Time()
+					ZGP->ZGP_USUARI := cUserName
 					ZGP->ZGP_FILCS  := _oModelDET:GetValue("ZGO_FILCD")
 
 					//Se já existe linha no zgo grava valores antigos
-					If ZGO->(Dbseek(_oModelMAS:GetValue("ZGO_CLIENT")+_oModelMAS:GetValue("ZGO_LOJA")+_oModelDET:GetValue("ZGO_ITEM")))
+					If ZGO->(DBSeek(_oModelMAS:GetValue("ZGO_CLIENT")+_oModelMAS:GetValue("ZGO_LOJA")+_oModelDET:GetValue("ZGO_ITEM")))
 
 						ZGP->ZGP_OCLI   := ZGO->ZGO_CLIENT
 						ZGP->ZGP_OLOJ   := ZGO->ZGO_LOJA
@@ -386,52 +386,52 @@ If _aParam <> NIL
 						ZGP->ZGP_FILO   := ZGO->ZGO_FILCD
 						ZGP->ZGP_OCON   := ZGO->ZGO_CONDPA
 												
-					Endif
+					EndIf
 					
 					//Se apagou a linha grava que foi deletada
 					If _oModelDET:IsDeleted(_nni)
 				
 						ZGP->ZGP_DELETA := "X"
 					
-					Endif
+					EndIf
 					
 					//mantém posicionamento original do ZGO
-					ZGO->(Dbgoto(_nposi))
+					ZGO->(DBGoTo(_nposi))
 									
-					ZGP->(Msunlock())
+					ZGP->(MSUnLock())
 					
-				Endif
+				EndIf
 				
 			Next
 			
-		Endif
+		EndIf
 		
 		//Exclusão
-		if _nOper == 5
+		If _nOper == 5
 		
 			//Varre linhas criando uma linha de log para cada linha do modelo
 			For _nni := 1 to _nlinhas
 			
 				_oModelDET::SetLine(_nni)
 				_nposi := ZGO->(Recno())
-				ZGO->(Dbsetorder(8)) //ZGO_CLIENT+ZGO_LOJA+ZGO_ITEM
+				ZGO->(DBSetOrder(8)) //ZGO_CLIENT+ZGO_LOJA+ZGO_ITEM
 				
-				Reclock("ZGP",.T.)
-				ZGP->ZGP_FILIAL := xfilial("ZGP")
+				RecLock("ZGP",.T.)
+				ZGP->ZGP_FILIAL := xFilial("ZGP")
 				ZGP->ZGP_ITEM   := _oModelDET:GetValue("ZGO_ITEM")
 				ZGP->ZGP_CONDPA := _oModelDET:GetValue("ZGO_CONDPA")
 				ZGP->ZGP_CLIENT := _oModelMAS:GetValue("ZGO_CLIENT")
 				ZGP->ZGP_LOJA   := _oModelMAS:GetValue("ZGO_LOJA")
 				ZGP->ZGP_PRODUT := _oModelDET:GetValue("ZGO_PRODUT")
 				ZGP->ZGP_REDE   := _oModelMAS:GetValue("ZGO_REDE")
-				ZGP->ZGP_DATA   := date()
-				ZGP->ZGP_HORA   := time()
-				ZGP->ZGP_USUARI := cusername
+				ZGP->ZGP_DATA   := Date()
+				ZGP->ZGP_HORA   := Time()
+				ZGP->ZGP_USUARI := cUserName
 				ZGP->ZGP_FILCS  := _oModelDET:GetValue("ZGO_FILCD")
 				ZGP->ZGP_DELETA := "X"
 
 				//Se já existe linha no zgo grava valores antigos
-				If ZGO->(Dbseek(_oModelMAS:GetValue("ZGO_CLIENT")+_oModelMAS:GetValue("ZGO_LOJA")+_oModelDET:GetValue("ZGO_ITEM")))
+				If ZGO->(DBSeek(_oModelMAS:GetValue("ZGO_CLIENT")+_oModelMAS:GetValue("ZGO_LOJA")+_oModelDET:GetValue("ZGO_ITEM")))
 
 						ZGP->ZGP_OCLI   := ZGO->ZGO_CLIENT
 						ZGP->ZGP_OLOJ   := ZGO->ZGO_LOJA
@@ -440,18 +440,18 @@ If _aParam <> NIL
 						ZGP->ZGP_FILO   := ZGO->ZGO_FILCD
 						ZGP->ZGP_OCON   := ZGO->ZGO_CONDPA
 												
-				Endif
+				EndIf
 					
 				//mantém posicionamento original do ZGO
-				ZGO->(Dbgoto(_nposi))
+				ZGO->(DBGoTo(_nposi))
 									
-				ZGP->(Msunlock())
+				ZGP->(MSUnLock())
 				
 			Next
 			
-		Endif
+		EndIf
 	
-	Endif
+	EndIf
 	
 	//Validação de linha 
 	If _cIdPonto == 'FORMLINEPOS'
@@ -462,20 +462,20 @@ If _aParam <> NIL
 		
 	
 		//Validação de campos obrigatórios
-		If empty(_oModelDET:GetValue("ZGO_CONDPA")) 
+		If Empty(_oModelDET:GetValue("ZGO_CONDPA")) 
 		
 			Help( ,, 'Atenção!',, "Campo condição de pagamento precisa ser preenchido !",1, 0,, ,,, , {"Preencha o campo condição de pagamento"} )
 
 			_xret := .F.
 			Break
 		
-		Endif
+		EndIf
 					
-	Endif
+	EndIf
 		
 	End Sequence
 	
-Endif
+EndIf
 	
 Return( _xRet )
 
@@ -496,7 +496,7 @@ Retorno-----------: lRet - indica se campo foi validado
 
 User Function AOMS106V(_ccampo)  
 
-Local _lret := .T.
+Local _lRet := .T.
 Local _cQuery := ""
 Local _oModel 		:= FWModelActive()
 Local _oModelMAS 	:= _oModel:GetModel('ZGOMASTER')
@@ -508,37 +508,37 @@ _cQuery += " FROM "+ RetSqlName("ZGO") + " WHERE "
 
 If _ccampo == "ZGO_CLIENT"
 
-	_cQuery += " D_E_L_E_T_ = ' ' AND ZGO_CLIENT = '" + ALLTRIM(_oModelMAS:GetValue("ZGO_CLIENT")) + "' AND ZGO_LOJA = '" + ALLTRIM(_oModelMAS:GetValue("ZGO_LOJA")) + "'"
+	_cQuery += " D_E_L_E_T_ = ' ' AND ZGO_CLIENT = '" + AllTrim(_oModelMAS:GetValue("ZGO_CLIENT")) + "' AND ZGO_LOJA = '" + AllTrim(_oModelMAS:GetValue("ZGO_LOJA")) + "'"
 	_cmsg := "Já existe cadastro para esse cliente!"
 	
 
-Elseif _ccampo == "ZGO_REDE"
+ElseIf _ccampo == "ZGO_REDE"
 
-	_cQuery += " D_E_L_E_T_ = ' ' AND ZGO_REDE = '" + ALLTRIM(_oModelMAS:GetValue("ZGO_REDE")) + "'"
+	_cQuery += " D_E_L_E_T_ = ' ' AND ZGO_REDE = '" + AllTrim(_oModelMAS:GetValue("ZGO_REDE")) + "'"
 	_cmsg := "Já existe cadastro para essa rede!"
 
-endif	
+EndIf	
 
 		
-If select("ZGOT") > 0
+If Select("ZGOT") > 0
 		
-	Dbselectarea("ZGOT")
-	ZGOT->(Dbclosearea())
+	DBSelectArea("ZGOT")
+	ZGOT->(DBCloseArea())
 			
-Endif
+EndIf
 		
 DBUseArea( .T. , "TOPCONN" , TCGenQry(,,_cQuery) , "ZGOT" , .T. , .F. )
 	
-If !(ZGOT->(EOF())) .AND. ZGOT->CONT > 0
+If !(ZGOT->(Eof())) .And. ZGOT->CONT > 0
 
 	Help( ,, 'Atenção!',, _cmsg ,1, 0,, ,,, , {"Utilize a função de alteração"} )
 
-	_lret := .F.
+	_lRet := .F.
 	
-Endif
+EndIf
 
 
-Return _lret
+Return _lRet
 
 
 
@@ -562,18 +562,18 @@ User Function AOMS106G(_ccampo,_par01,_par02)
 
 Local _cret := "  "
 
-If _ccampo == "ZGO_CONDNI" .and. !Empty(alltrim(_par01))  
+If _ccampo == "ZGO_CONDNI" .And. !Empty(AllTrim(_par01))  
 
-	_cret := POSICIONE("SE4",1,xfilial("SE4")+_par01,"E4_DESCRI")
+	_cret := Posicione("SE4",1,xFilial("SE4")+_par01,"E4_DESCRI")
 	
-Endif   
+EndIf   
 
 
-If _ccampo == "ZGO_PRONOM" .and. !Empty(alltrim(_par01)) 
+If _ccampo == "ZGO_PRONOM" .And. !Empty(AllTrim(_par01)) 
 
-	_cret := POSICIONE("SB1",1,XFILIAL("SB1")+_par01,"B1_DESC")
+	_cret := Posicione("SB1",1,xFilial("SB1")+_par01,"B1_DESC")
 	
-Endif   
+EndIf   
 
 Return _cret  
 
@@ -587,22 +587,22 @@ Descrição---------: Validação do campo C5_CONDPAG
 ===============================================================================================================================
 Parametros--------: Nenhum
 ===============================================================================================================================
-Retorno-----------: _lret - Validação do campo
+Retorno-----------: _lRet - Validação do campo
 ===============================================================================================================================
 */
 User Function AOMS106D()
 
-Local _lret := .T.
+Local _lRet := .T.
 Local _ccondr := U_IT_conpv() //carrega condição de pagamento personalizada do pedido aberto
 
 If M->C5_CONDPAG != _ccondr
 
 	M->C5_I_CPMAN := "1"  //Marca como alteração manual somente se condição de pgto escolhida manualmente é diferente da regra automática
 
-Endif
+EndIf
 
 
-Return _lret
+Return _lRet
 
 /*
 ===============================================================================================================================
@@ -641,8 +641,8 @@ _cQuery += " AND    ZGP.ZGP_LOJA	>= '"+ MV_PAR02 +"' "
 _cQuery += " AND    ZGP.ZGP_LOJA	<= '"+ MV_PAR04 +"' "
 _cQuery += " AND    ZGP.ZGP_REDE	>= '"+ MV_PAR05 +"' "
 _cQuery += " AND    ZGP.ZGP_REDE	<= '"+ MV_PAR06 +"' "
-_cQuery += " AND	ZGP.ZGP_DATA	>= '"+ DTOS(MV_PAR07) +"' "
-_cQuery += " AND	ZGP.ZGP_DATA	<= '"+ DTOS(MV_PAR08) +"' "
+_cQuery += " AND	ZGP.ZGP_DATA	>= '"+ DToS(MV_PAR07) +"' "
+_cQuery += " AND	ZGP.ZGP_DATA	<= '"+ DToS(MV_PAR08) +"' "
 _cQuery += " AND ZGP.D_E_L_E_T_	= ' ' "
 _cQuery += " ORDER BY ZGP_CONDPA,ZGP_ITEM,ZGP_DATA,ZGP_HORA"
 
@@ -655,37 +655,37 @@ DBUseArea( .T. , "TOPCONN" , TcGenQry(,,_cQuery) , cAlias , .T. , .F. )
 DBSelectArea(cAlias)
 (cAlias)->( DBGoTop() )
 
-Do while  (cAlias)->(!Eof()) 
+While  (cAlias)->(!Eof()) 
 
-	aadd(_alista,{  sTOd((cAlias)->ZGP_DATA),;
-					ALLTRIM((cAlias)->ZGP_HORA),;
-					ALLTRIM((cAlias)->ZGP_USUARI),;
+	aAdd(_alista,{  SToD((cAlias)->ZGP_DATA),;
+					AllTrim((cAlias)->ZGP_HORA),;
+					AllTrim((cAlias)->ZGP_USUARI),;
 					(cAlias)->ZGP_CLIENT + "/" + (cAlias)->ZGP_LOJA,;
 					(cAlias)->ZGP_REDE,;
-					ALLTRIM((cAlias)->ZGP_ITEM),;
-					ALLTRIM((cAlias)->ZGP_OCON),;
-					ALLTRIM((cAlias)->ZGP_CONDPA),;
+					AllTrim((cAlias)->ZGP_ITEM),;
+					AllTrim((cAlias)->ZGP_OCON),;
+					AllTrim((cAlias)->ZGP_CONDPA),;
 					(cAlias)->ZGP_OPRO,;
 					(cAlias)->ZGP_PRODUT,;
 					(cAlias)->ZGP_FILO,;
 					(cAlias)->ZGP_FILCS,;
-					If(!EMPTY((cAlias)->ZGP_DELETA),"DELETADO","ATIVO") })
+					If(!Empty((cAlias)->ZGP_DELETA),"DELETADO","ATIVO") })
 
-	(cAlias)->( Dbskip() )
+	(cAlias)->( DBSkip() )
 	
-Enddo
+EndDo
 
-If len(_alista) > 0
+If Len(_alista) > 0
 
- U_ITListBox( "Histórico para clientes/loja/rede de " + ALLTRIM(MV_PAR01)+"/"+ ALLTRIM(MV_PAR02)+"/"+ ALLTRIM(MV_PAR05) + " até " + ALLTRIM(MV_PAR04) +"/"+ ALLTRIM(MV_PAR03)+"/"+ ALLTRIM(MV_PAR06) + " da data " + dtoc(MV_PAR07) + " até " + dtoc(MV_PAR08) + ":" ,;
+ U_ITListBox( "Histórico para clientes/loja/rede de " + AllTrim(MV_PAR01)+"/"+ AllTrim(MV_PAR02)+"/"+ AllTrim(MV_PAR05) + " até " + AllTrim(MV_PAR04) +"/"+ AllTrim(MV_PAR03)+"/"+ AllTrim(MV_PAR06) + " da data " + DToC(MV_PAR07) + " até " + DToC(MV_PAR08) + ":" ,;
   				{'Data','Hora','Usuário','Cliente', 'Rede','Item','Cond ori','Cond alt','Produto ori','Produto alt','Filial ori','Filial alt','Situação'} ,;
   				 _alista , .F. , 1 )
 
 Else
 
-	u_itmsg("Não foram localizados históricos com os parâmetros indicados","Atenção",,1)
+	U_ITMsg("Não foram localizados históricos com os parâmetros indicados","Atenção",,1)
 	
-Endif
+EndIf
 
 
 Return

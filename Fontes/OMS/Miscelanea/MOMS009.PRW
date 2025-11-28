@@ -19,10 +19,10 @@ Jeryy       - Alex Wallauer - 05/06/2025 - 06/06/2025 - 50902   - Ajuste de tela
 // Definicoes de Includes da Rotina.
 //====================================================================================================
 
-#INCLUDE "PROTHEUS.CH" 
-#INCLUDE "FWMVCDEF.CH"
+#Include "TOTVS.ch" 
+#Include "FWMVCDEF.CH"
 #Include "TOPCONN.CH"
-#INCLUDE "RWMAKE.CH"    
+#Include "RWMAKE.CH"    
 #define	MB_OK							0
 #define 	MB_ICONEXCLAMATION          48
 #define   	MB_ICONASTERISK				64
@@ -54,15 +54,15 @@ _oBrowse:SetDescription( 'Gestão de Fechamento de Comissão' )
 _oBrowse:DisableDetails()
 
 //define legendas
-_oBrowse:AddLegend( "ALLTRIM(ZC9_STATUS)=='0'" ,   "GREEN"    , "Aberto"  )
-_oBrowse:AddLegend( "ALLTRIM(ZC9_STATUS)=='1'" ,   "YELLOW"   , "Em fechamento"  )
-_oBrowse:AddLegend( "ALLTRIM(ZC9_STATUS)=='2'" ,   "RED"      , "Fechado" )   
-_oBrowse:AddLegend( "ALLTRIM(ZC9_STATUS)=='3'" ,   "ORANGE"   , "Aguardando Integração" )
-_oBrowse:AddLegend( "ALLTRIM(ZC9_STATUS)=='4'" ,   "BLUE"     , "Integrado com Sucesso" )
+_oBrowse:AddLegend( "AllTrim(ZC9_STATUS)=='0'" ,   "GREEN"    , "Aberto"  )
+_oBrowse:AddLegend( "AllTrim(ZC9_STATUS)=='1'" ,   "YELLOW"   , "Em fechamento"  )
+_oBrowse:AddLegend( "AllTrim(ZC9_STATUS)=='2'" ,   "RED"      , "Fechado" )   
+_oBrowse:AddLegend( "AllTrim(ZC9_STATUS)=='3'" ,   "ORANGE"   , "Aguardando Integração" )
+_oBrowse:AddLegend( "AllTrim(ZC9_STATUS)=='4'" ,   "BLUE"     , "Integrado com Sucesso" )
 
 _oBrowse:Activate()
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return .T.
 
@@ -185,9 +185,9 @@ User Function MOMS009F()
 Local _aalertas 	:= {}
 Local _cAlias		:= GetNextAlias()
 Local _cDataF    := ZC9->ZC9_COMP  // Data do fechamento posicionado
-Local _nmes      := month(stod(substr(_cDataf,4,4)+substr(_cDataf,1,2)+'01'))
-Local _nano      := year(stod(substr(_cDataf,4,4)+substr(_cDataf,1,2)+'01'))
-Local _ni		:= 0
+Local _nmes      := month(SToD(SubStr(_cDataf,4,4)+SubStr(_cDataf,1,2)+'01'))
+Local _nano      := year(SToD(SubStr(_cDataf,4,4)+SubStr(_cDataf,1,2)+'01'))
+Local _nI		:= 0
 //================================================================================
 //verifica parametro de fechamento de comissao
 //================================================================================
@@ -203,65 +203,65 @@ ZZL->( DBSetOrder(3) )
 
 If !(ZZL->( DBSeek( xFilial('ZZL') + RetCodUsr() ) ) .And. ZZL->ZZL_BLQCOM == 'S')
 
-    aadd(_aalertas,"Usuário " + alltrim(substr(cUsuario,7,15)) + " sem permissão fechamento financeiro de comissões!") 
+    aAdd(_aalertas,"Usuário " + AllTrim(SubStr(cUsuario,7,15)) + " sem permissão fechamento financeiro de comissões!") 
 
 End If
 
-_cDataf := strzero(_nano,4)+strzero(_nmes,2)+"01"
+_cDataf := StrZero(_nano,4)+StrZero(_nmes,2)+"01"
 
 //================================================================================
 //verifica se não está fazendo fechamento o mês atual ou futuro
 //================================================================================
 
-If alltrim(str(_nano))+alltrim(strzero(_nmes,2)) >= alltrim(str(year(date())))+alltrim(strzero(month(date()),2))
+If AllTrim(Str(_nano))+AllTrim(StrZero(_nmes,2)) >= AllTrim(Str(year(date())))+AllTrim(StrZero(month(date()),2))
 
-  aadd(_aalertas,"Mês " + strzero(_nmes,2) + "/" + strzero(_nano,4) + " não terminou ainda!") 
+  aAdd(_aalertas,"Mês " + StrZero(_nmes,2) + "/" + StrZero(_nano,4) + " não terminou ainda!") 
   
-Endif
+EndIf
 
 //================================================================================
 //verifica se já não tem fechamento de financeiro após último fechamento
 //================================================================================
 
 _cQuery := " SELECT ZC8_SEQ FROM "+ RETSQLNAME('ZC8') +" ZC8 WHERE ZC8_ROTINA = 'Fechamento Financeiro' "
-_cQuery += " and ZC8_COMP = '" + strzero(_nmes,2) + "/" + strzero(_nano,4) + "' and  D_E_L_E_T_ <> '*'"
+_cQuery += " and ZC8_COMP = '" + StrZero(_nmes,2) + "/" + StrZero(_nano,4) + "' and  D_E_L_E_T_ <> '*'"
 
 DBUseArea( .T. , "TOPCONN" , TCGenQry( ,, _cQuery ) , _cAlias , .F. , .T. )
 DBSelectArea(_cAlias)
 
-if .not. (_cAlias)->( Eof() )
+If .not. (_cAlias)->( Eof() )
 
-  aadd(_aalertas,"Já existe um fechamento financeiro para o período de comissões selecionado! (" + strzero(_nmes,2) + "/" + strzero(_nano,4) + ") (Sequência: " + alltrim((_cAlias)->ZC8_SEQ) +")")
+  aAdd(_aalertas,"Já existe um fechamento financeiro para o período de comissões selecionado! (" + StrZero(_nmes,2) + "/" + StrZero(_nano,4) + ") (Sequência: " + AllTrim((_cAlias)->ZC8_SEQ) +")")
   
-endif
+EndIf
 
-(_cAlias)->( Dbclosearea() )
+(_cAlias)->( DBCloseArea() )
 
 //================================================================================
 //se teve qualquer alerta na verificação monta mensagem e impede o processamento
 //================================================================================
 
-if len(_aalertas) > 0
+If Len(_aalertas) > 0
   
 	_cMensagem := "Foram encontrados problemas com o processo!<br>"
 	_cMensagem += "Fechamento não será efetuado, corrija o processo e execute novamente.<br>"
 		
-   for _ni = 1 to len(_aalertas)
+   For _nI = 1 to Len(_aalertas)
   
 		_cMensagem += "<hr>"
-		_cMensagem += _aalertas[_ni] 
+		_cMensagem += _aalertas[_nI] 
 
-		if _ni < len(_aalertas) 
+		If _nI < Len(_aalertas) 
 		  _cMensagem += "<hr>"
-		endif
+		EndIf
 		
-	next
+	Next
 				
-	U_ITMSG(_cMensagem, "Problema no processo.", ,1)
+	U_ITMsg(_cMensagem, "Problema no processo.", ,1)
 
-    return
+    Return
     
-endif 
+EndIf 
 			
 //================================================================================	  
 //se está tudo certo inclui o resgistro de fechamento do financeiro
@@ -272,14 +272,14 @@ RecLock("ZC8",.T.)
 ZC8->ZC8_FILIAL     := xFilial("ZC8")   
 ZC8->ZC8_SEQ        := U_MOMS009C()  //Gera nova sequência do ZC8
 ZC8->ZC8_ROTINA     := "Fechamento Financeiro"
-ZC8->ZC8_DATA       := DATE()
-ZC8->ZC8_HORA       := TIME()
-ZC8->ZC8_USER       := CUSERNAME
-ZC8->ZC8_CODUSU     := __CUSERID
-ZC8->ZC8_COMP       := strzero(_nmes,2) + "/" + strzero(_nano,4)
-ZC8->ZC8_OBS        := strzero(_nmes,2) + "/" + strzero(_nano,4)  
+ZC8->ZC8_DATA       := Date()
+ZC8->ZC8_HORA       := Time()
+ZC8->ZC8_USER       := cUserName
+ZC8->ZC8_CODUSU     := __cUserId
+ZC8->ZC8_COMP       := StrZero(_nmes,2) + "/" + StrZero(_nano,4)
+ZC8->ZC8_OBS        := StrZero(_nmes,2) + "/" + StrZero(_nano,4)  
  
-MSUNLOCK()     
+MSUnLock()     
 
 //===============================================================================
 //Coloca competencia atual em modo de fechamento
@@ -288,7 +288,7 @@ RecLock("ZC9",.F.)
  
 ZC9->ZC9_STATUS   := "1"   
   
-MSUNLOCK()    
+MSUnLock()    
  
 //================================================================================
 //manda email de liberação do fechamento do financeiro
@@ -296,9 +296,9 @@ MSUNLOCK()
 
 MOMS009Z()
 
-U_ITMSG("Fechamento Financeiro Concluído", "Processo Concluído", ,2)
+U_ITMsg("Fechamento Financeiro Concluído", "Processo Concluído", ,2)
   
-return
+Return
 
 /*
 ===============================================================================================================================
@@ -324,11 +324,11 @@ DBUseArea( .T. , "TOPCONN" , TCGenQry( ,, _cQuery ) , _cAlias , .F. , .T. )
 DBSelectArea(_cAlias)
 (_cAlias)->( DBGoTop() )
 
-if .not. (_cAlias)->( Eof() )
+If .not. (_cAlias)->( Eof() )
 
-	_nmax := strzero(val((_cAlias)->MAXIMO)+1,6)
+	_nmax := StrZero(Val((_cAlias)->MAXIMO)+1,6)
 
-Endif
+EndIf
 
 (_cAlias)->( DBCloseArea() )
 
@@ -347,11 +347,11 @@ Parametros--------: Nenhum
 Retorno-----------: _aalertas - Matriz com mensagem de erro ou vazia
 ===============================================================================================================================
 */
-user function MOMS009VS()
+User Function MOMS009VS()
 
-Local _cDataF    := SUBSTR(ZC9->ZC9_COMP,4,4)  + SUBSTR(ZC9->ZC9_COMP,1,2) + "01"  // Data do fechamento posicionado
-Local _nmes      := month(stod(substr(_cDataf,4,4)+substr(_cDataf,1,2)+'01'))+1
-Local _nano      := year(stod(substr(_cDataf,4,4)+substr(_cDataf,1,2)+'01'))
+Local _cDataF    := SubStr(ZC9->ZC9_COMP,4,4)  + SubStr(ZC9->ZC9_COMP,1,2) + "01"  // Data do fechamento posicionado
+Local _nmes      := month(SToD(SubStr(_cDataf,4,4)+SubStr(_cDataf,1,2)+'01'))+1
+Local _nano      := year(SToD(SubStr(_cDataf,4,4)+SubStr(_cDataf,1,2)+'01'))
 Local _aalertas  := {}
 
 //================================================================================ 
@@ -363,22 +363,22 @@ If _nmes == 13
   _nmes := 1
   _nano += 1
 
-endif
+EndIf
 
-_dDataf := stod(strzero(_nano,4)+strzero(_nmes,2)+"01")
+_dDataf := SToD(StrZero(_nano,4)+StrZero(_nmes,2)+"01")
 
 //================================================================================
 //verifica se as datas não afetam período de comissão já fechado
 //================================================================================
 
-If date() < _dDataF 
+If Date() < _dDataF 
   
-    aadd(_aalertas,"Período até " + dtoc(_dDataF-1) + " já encerrado!")
+    aAdd(_aalertas,"Período até " + DToC(_dDataF-1) + " já encerrado!")
   
 End If 
 
  
-return _aalertas
+Return _aalertas
 
 /*
 ===============================================================================================================================
@@ -402,28 +402,28 @@ Local _cMsgAux	:= ""
 Local _cMail		:= ""
 
 DBSelectArea('ZZL')
-ZZL->( Dbsetfilter({ | | ZZL->ZZL_ADMCMS="S" .OR. ZZL->ZZL_BLQCOM = "S" }, 'ZZL->ZZL_ADMCMS="S" .OR. ZZL->ZZL_BLQCOM="S"') )
-ZZL->( Dbgotop() )
+ZZL->( Dbsetfilter({ | | ZZL->ZZL_ADMCMS="S" .Or. ZZL->ZZL_BLQCOM = "S" }, 'ZZL->ZZL_ADMCMS="S" .Or. ZZL->ZZL_BLQCOM="S"') )
+ZZL->( DBGoTop() )
 
-Do while .not. ZZL->( EOF() )
+While .not. ZZL->( Eof() )
 	
 	_cmail += AllTrim( ZZL->ZZL_EMAIL ) + ";"
 		
-	ZZL->( Dbskip() )
+	ZZL->( DBSkip() )
 	
-Enddo
+EndDo
 
-_cmail := substr(_cmail,1,len(_cmail)-1)
+_cmail := SubStr(_cmail,1,Len(_cmail)-1)
 
 _cMsgAux := '<HMTL>'
 _cMsgAux += '<HEAD>'
 _cMsgAux += '<META http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />'
-_cMsgAux += '<TITLE>Liberação de fechamento de Comissão da competência ' + ALLTRIM(ZC9->ZC9_COMP) + ' -  Liberado em ' + dtoc(date()) + ' </TITLE>'
+_cMsgAux += '<TITLE>Liberação de fechamento de Comissão da competência ' + AllTrim(ZC9->ZC9_COMP) + ' -  Liberado em ' + DToC(date()) + ' </TITLE>'
 _cMsgAux += '</HEAD>'
 _cMsgAux += '<BODY><br>'
 _cMsgAux += '<FONT FACE="Courier New" Style="font-size:12px">'
-_cMsgAux	+= 'O departamento financeiro finalizou as baixas de títulos para a competência ' + ALLTRIM(ZC9->ZC9_COMP) + ' <br>'
-_cMsgAux	+= 'O processo de recálculo e fechamento de comissões está liberado a partir de ' + dtoc(date()) + '.<br>'
+_cMsgAux	+= 'O departamento financeiro finalizou as baixas de títulos para a competência ' + AllTrim(ZC9->ZC9_COMP) + ' <br>'
+_cMsgAux	+= 'O processo de recálculo e fechamento de comissões está liberado a partir de ' + DToC(date()) + '.<br>'
 _cMsgAux += '<br>'
 _cMsgAux += '<br>'
 _cMsgAux += '=======================================================================================================<br>'
@@ -433,11 +433,11 @@ _cMsgAux += '</FONT>'
 _cMsgAux += '</BODY>'
 _cMsgAux += '</HMTL>'
 
-U_ITENVMAIL( _aConfig[01] , _cMail ,,, 'Liberação de fechamento de Comissão da competência ' + ALLTRIM(ZC9->ZC9_COMP) + ' -  Liberado em ' + dtoc(date()) , _cMsgAux ,, _aConfig[01] , _aConfig[02] , _aConfig[03] , _aConfig[04] , _aConfig[05] , _aConfig[06] , _aConfig[07] , @_cLog )
+U_ITENVMAIL( _aConfig[01] , _cMail ,,, 'Liberação de fechamento de Comissão da competência ' + AllTrim(ZC9->ZC9_COMP) + ' -  Liberado em ' + DToC(date()) , _cMsgAux ,, _aConfig[01] , _aConfig[02] , _aConfig[03] , _aConfig[04] , _aConfig[05] , _aConfig[06] , _aConfig[07] , @_cLog )
 
 u_itconout( "[MOMS009] - Envio de e-mail: "+ _cLog )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -452,17 +452,17 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User function MOMS009Y()
+User Function MOMS009Y()
 
 Local _oDlg := nil
 Local _aSize 	:= MSADVSIZE()
 Local _oBrowse	:= nil
 
-dbselectarea("ZC8")
+DBSelectArea("ZC8")
 ZC8->(dbsetfilter({ | | ZC8->ZC8_COMP = ZC9->ZC9_COMP }, 'ZC8->ZC8_COMP = "' + ZC9->ZC9_COMP + "'" ) )
-ZC8->( dbgotop() )	
+ZC8->( DBGoTop() )	
 
-DEFINE MSDIALOG _oDlg FROM _aSize[7]+150,150 TO _aSize[6]-150,_aSize[5]-150 PIXEL TITLE 'Fechamento Comissão - Competência ' + ALLTRIM(ZC9->ZC9_COMP)
+DEFINE MSDIALOG _oDlg FROM _aSize[7]+150,150 TO _aSize[6]-150,_aSize[5]-150 PIXEL TITLE 'Fechamento Comissão - Competência ' + AllTrim(ZC9->ZC9_COMP)
 
 	DEFINE FONT oBold NAME "Arial" SIZE 0, -13 BOLD
     
@@ -475,13 +475,13 @@ DEFINE MSDIALOG _oDlg FROM _aSize[7]+150,150 TO _aSize[6]-150,_aSize[5]-150 PIXE
 	_oBrowse:AddColumn(TCColumn():New("Usuário"		,{ || ZC8->ZC8_USER}		,,,,"LEFT",,.F.,.F.,,,,.F.,))
 	_oBrowse:AddColumn(TCColumn():New("Obs"			,{ || ZC8->ZC8_OBS}		,,,,"LEFT",,.F.,.F.,,,,.F.,))
 	  		
-	@ 120,100 BUTTON _oButton PROMPT "Fech Financeiro"	        SIZE 045,12 ACTION IIF(MOMS009T(1),Eval({|| U_MOMS009F(),_oBrowse:GoTop()})	,_oBrowse:GoTop()) 	OF _oDlg PIXEL
-	@ 120,160 BUTTON _oButton PROMPT "Rec. Comissão"	        SIZE 045,12 ACTION IIF(MOMS009T(2),Eval({|| fwmsgrun(,{ || U_MOMS009R()},"Carregando...","Aguarde..."),_oBrowse:GoTop()})	,_oBrowse:GoTop()) 	OF _oDlg PIXEL
-	@ 120,220 BUTTON _oButton PROMPT "Adic. Comissao"	        SIZE 045,12 ACTION IIF(MOMS009T(3),Eval({|| U_MOMS005()	, _oBrowse:GoTop()})	,_oBrowse:GoTop()) 	OF _oDlg PIXEL	
-	@ 120,280 BUTTON _oButton PROMPT "Integrar Dados Gerencias" SIZE 065,12 ACTION IIF(MOMS009T(5),Eval({|| U_MOMS009I(), _oBrowse:GoTop()})	,_oBrowse:GoTop()) 	OF _oDlg PIXEL
-	@ 120,355 BUTTON _oButton PROMPT "Fech. Comissao"	        SIZE 045,12 ACTION IIF(MOMS009T(4),Eval({|| U_MOMS013()	,close(_oDlg)})		,_oBrowse:GoTop()) 	OF _oDlg PIXEL
+	@ 120,100 BUTTON _oButton PROMPT "Fech Financeiro"	        SIZE 045,12 ACTION IIf(MOMS009T(1),Eval({|| U_MOMS009F(),_oBrowse:GoTop()})	,_oBrowse:GoTop()) 	OF _oDlg PIXEL
+	@ 120,160 BUTTON _oButton PROMPT "Rec. Comissão"	        SIZE 045,12 ACTION IIf(MOMS009T(2),Eval({|| FWMsgRun(,{ || U_MOMS009R()},"Carregando...","Aguarde..."),_oBrowse:GoTop()})	,_oBrowse:GoTop()) 	OF _oDlg PIXEL
+	@ 120,220 BUTTON _oButton PROMPT "Adic. Comissao"	        SIZE 045,12 ACTION IIf(MOMS009T(3),Eval({|| U_MOMS005()	, _oBrowse:GoTop()})	,_oBrowse:GoTop()) 	OF _oDlg PIXEL	
+	@ 120,280 BUTTON _oButton PROMPT "Integrar Dados Gerencias" SIZE 065,12 ACTION IIf(MOMS009T(5),Eval({|| U_MOMS009I(), _oBrowse:GoTop()})	,_oBrowse:GoTop()) 	OF _oDlg PIXEL
+	@ 120,355 BUTTON _oButton PROMPT "Fech. Comissao"	        SIZE 045,12 ACTION IIf(MOMS009T(4),Eval({|| U_MOMS013()	,close(_oDlg)})		,_oBrowse:GoTop()) 	OF _oDlg PIXEL
 	@ 120,415 BUTTON _oButton PROMPT "Sair"				        SIZE 045,12 ACTION close(_oDlg) 	OF _oDlg PIXEL
-	//@ 120,280 BUTTON _oButton PROMPT "Grava Dados Gerenciais" SIZE 065,12 ACTION IIF(MOMS009T(5),Eval({|| U_MOMS064()	,_oBrowse:GoTop()})	,_oBrowse:GoTop()) 	OF _oDlg PIXEL
+	//@ 120,280 BUTTON _oButton PROMPT "Grava Dados Gerenciais" SIZE 065,12 ACTION IIf(MOMS009T(5),Eval({|| U_MOMS064()	,_oBrowse:GoTop()})	,_oBrowse:GoTop()) 	OF _oDlg PIXEL
 	
 	_oDlg:lMaximized := .T.
 
@@ -504,57 +504,57 @@ Retorno-----------: Nenhum
 */
 Static Function MOMS009T(_nopc)
 
-Local _lret := .T.
+Local _lRet := .T.
 
 If ZC9->ZC9_STATUS == '0' 
 
-	If _nopc == 2 .or. _nopc == 3 .or. _nopc == 4 .Or. _nopc == 5
+	If _nopc == 2 .Or. _nopc == 3 .Or. _nopc == 4 .Or. _nopc == 5
 	
-		U_ITMSG("Competência ainda não está está em fechamento!","Atenção",,1)
+		U_ITMsg("Competência ainda não está está em fechamento!","Atenção",,1)
 	
-		_lret := .F.
+		_lRet := .F.
 		
-	Endif
+	EndIf
 	
-Endif
+EndIf
 
 If ZC9->ZC9_STATUS == '1' 
 
 	If _nopc == 1
 	
-		U_ITMSG("Competência já está em fechamento!","Atenção",,1)
+		U_ITMsg("Competência já está em fechamento!","Atenção",,1)
 	
-		_lret := .F.
+		_lRet := .F.
 		
-	Endif
+	EndIf
 	
-Endif
+EndIf
 
 If ZC9->ZC9_STATUS == '2'
 
-	U_ITMSG("Competência já está encerrada!","Atenção",,1)
+	U_ITMsg("Competência já está encerrada!","Atenção",,1)
 	
-	_lret := .F.
+	_lRet := .F.
 	
-Endif
+EndIf
 
 If ZC9->ZC9_STATUS == '3' .And. _nopc == 4
 
-	U_ITMSG("Integração dos dados gerenciais em andamento, não é possível concluir o fechamento antes do término da integração!" ,"Atenção",,1)
+	U_ITMsg("Integração dos dados gerenciais em andamento, não é possível concluir o fechamento antes do término da integração!" ,"Atenção",,1)
 	
-	_lret := .F.
+	_lRet := .F.
 	
 EndIf
 
 If ZC9->ZC9_STATUS <> '3' .And. ZC9->ZC9_STATUS <> '4' .And. _nopc == 4
 
-	U_ITMSG("Antes do Fechamento da Comissão é necessário concluir a integração dos dados gerenciais." ,"Atenção",,1)
+	U_ITMsg("Antes do Fechamento da Comissão é necessário concluir a integração dos dados gerenciais." ,"Atenção",,1)
 	
-	_lret := .F.
+	_lRet := .F.
 	
 EndIf
 
-Return _lret 
+Return _lRet 
 
 /*
 ===============================================================================================================================
@@ -580,11 +580,11 @@ DBUseArea( .T. , "TOPCONN" , TCGenQry( ,, _cQuery ) , _cAlias , .F. , .T. )
 DBSelectArea(_cAlias)
 (_cAlias)->( DBGoTop() )
 
-if .not. (_cAlias)->( Eof() )
+If .not. (_cAlias)->( Eof() )
 
-	_nmax := strzero(val((_cAlias)->MAXIMO)+1,6)
+	_nmax := StrZero(Val((_cAlias)->MAXIMO)+1,6)
 
-Endif
+EndIf
 
 (_cAlias)->( DBCloseArea() )
 
@@ -603,16 +603,16 @@ Parametros--------: Nenhum
 Retorno-----------: Logico
 ===============================================================================================================================
 */
-User function MOMS009R()
+User Function MOMS009R()
 
 Local _cAlias 	:= ""
 Local _cQuery 	:= ""
 Local _afiliais 	:= {}
-Local _ni 			:= 1
+Local _nI 			:= 1
 
 Local _cDataF    := ZC9->ZC9_COMP  // Data do fechamento posicionado
-Local _nmes      := month(stod(substr(_cDataf,4,4)+substr(_cDataf,1,2)+'01'))
-Local _nano      := year(stod(substr(_cDataf,4,4)+substr(_cDataf,1,2)+'01'))
+Local _nmes      := month(SToD(SubStr(_cDataf,4,4)+SubStr(_cDataf,1,2)+'01'))
+Local _nano      := year(SToD(SubStr(_cDataf,4,4)+SubStr(_cDataf,1,2)+'01'))
 
 Local _cfilial	:= cfilant
 
@@ -630,25 +630,25 @@ Private nMaxSelect 	:= 14
 _cAlias	:= GetNextAlias()
 
 _cQuery := " SELECT ZC8_SEQ FROM "+ RETSQLNAME('ZC8') +" ZC8 WHERE ZC8_ROTINA = 'Adicionais de Comissao' "
-_cQuery += " and ZC8_COMP = '" + strzero(_nmes,2) + "/" + strzero(_nano,4) + "' and ZC8_OBS = '2 - Bonificações'"
+_cQuery += " and ZC8_COMP = '" + StrZero(_nmes,2) + "/" + StrZero(_nano,4) + "' and ZC8_OBS = '2 - Bonificações'"
 _cQuery += " and D_E_L_E_T_ <> '*'"
 
 DBUseArea( .T. , "TOPCONN" , TCGenQry( ,, _cQuery ) , _cAlias , .F. , .T. )
 DBSelectArea(_cAlias)
 
-if !(_cAlias)->( Eof() )
+If !(_cAlias)->( Eof() )
 
 		_cMensagem := "Foram encontrados problemas com o processo!<br>"
 		_cMensagem += "Recálculo não será efetuado, corrija o processo e execute novamente.<br>"
-		_cMensagem += "Já existe um cálculo de adicionais de bonificação após a liberação do financeiro para o período de comissões em aberto!(" + strzero(_nmes,2) + "/" + strzero(_nano,4) + ")<br>"
+		_cMensagem += "Já existe um cálculo de adicionais de bonificação após a liberação do financeiro para o período de comissões em aberto!(" + StrZero(_nmes,2) + "/" + StrZero(_nano,4) + ")<br>"
 				
-		U_ITMSG(_cMensagem, "Problema no processo", ,1)
+		U_ITMsg(_cMensagem, "Problema no processo", ,1)
 		
 		Return
   			
-Endif
+EndIf
 		
-(_cAlias)->( Dbclosearea() )
+(_cAlias)->( DBCloseArea() )
 
 
 
@@ -659,21 +659,21 @@ Endif
 _cAlias	:= GetNextAlias()
 
 _cQuery := " SELECT E3_FILIAL FROM "+ RETSQLNAME('SE3') +" SE3 WHERE E3_I_ORIGE = '       ' "
-_cQuery += " AND E3_EMISSAO >= '" + strzero(_nano,4) + strzero(_nmes,2) + "01' AND E3_EMISSAO <= '" + strzero(_nano,4) + strzero(_nmes,2) + "31'"
-_cQuery += " AND D_E_L_E_T_ <> '*' AND E3_ORIGEM <> 'R' AND E3_ORIGEM <> 'F'"
+_cQuery += " AND E3_EMISSAO >= '" + StrZero(_nano,4) + StrZero(_nmes,2) + "01' AND E3_EMISSAO <= '" + StrZero(_nano,4) + StrZero(_nmes,2) + "31'"
+_cQuery += " AND D_E_L_E_T_ = ' ' AND E3_ORIGEM <> 'R' AND E3_ORIGEM <> 'F'"
 _cQuery += " GROUP BY E3_FILIAL ORDER BY E3_FILIAL"
 
 DBUseArea( .T. , "TOPCONN" , TCGenQry( ,, _cQuery ) , _cAlias , .F. , .T. )
 DBSelectArea(_cAlias)
 
-Do while !((_cAlias)->( Eof() ))
+While !((_cAlias)->( Eof() ))
 
-	aadd(_afiliais, {alltrim( (_cAlias)->E3_FILIAL ), FWFilialName(cEmpAnt,alltrim( (_cAlias)->E3_FILIAL )),  "Falta Calcular"} )
-	(_cAlias)->( Dbskip() )
+	aAdd(_afiliais, {AllTrim( (_cAlias)->E3_FILIAL ), FWFilialName(cEmpAnt,AllTrim( (_cAlias)->E3_FILIAL )),  "Falta Calcular"} )
+	(_cAlias)->( DBSkip() )
 		
-Enddo
+EndDo
 		
-(_cAlias)->( dbclosearea() )
+(_cAlias)->( DBCloseArea() )
 
 //=====================================================================================
 //Carrega novamente sem filtro, se acahar só aqui são filiais com rec. ok
@@ -682,37 +682,37 @@ Enddo
 _cAlias	:= GetNextAlias()
 
 _cQuery := " SELECT E3_FILIAL FROM "+ RETSQLNAME('SE3') +" SE3 WHERE "
-_cQuery += " E3_EMISSAO >= '" + strzero(_nano,4) + strzero(_nmes,2) + "01' AND E3_EMISSAO <= '" + strzero(_nano,4) + strzero(_nmes,2) + "31'"
+_cQuery += " E3_EMISSAO >= '" + StrZero(_nano,4) + StrZero(_nmes,2) + "01' AND E3_EMISSAO <= '" + StrZero(_nano,4) + StrZero(_nmes,2) + "31'"
 _cQuery += " AND D_E_L_E_T_ <> '*'"
 _cQuery += " GROUP BY E3_FILIAL ORDER BY E3_FILIAL"
 
 DBUseArea( .T. , "TOPCONN" , TCGenQry( ,, _cQuery ) , _cAlias , .F. , .T. )
 DBSelectArea(_cAlias)
 
-Do while !((_cAlias)->( Eof() ))
+While !((_cAlias)->( Eof() ))
 
 	
-	If ascan(_afiliais, { |x| x[1] = alltrim( (_cAlias)->E3_FILIAL ) } ) == 0
+	If aScan(_afiliais, { |x| x[1] = AllTrim( (_cAlias)->E3_FILIAL ) } ) == 0
 		
-		aadd(_afiliais, {alltrim( (_cAlias)->E3_FILIAL ), FWFilialName(cEmpAnt,alltrim( (_cAlias)->E3_FILIAL )), "Calculado       "} )
+		aAdd(_afiliais, {AllTrim( (_cAlias)->E3_FILIAL ), FWFilialName(cEmpAnt,AllTrim( (_cAlias)->E3_FILIAL )), "Calculado       "} )
 		
-	Endif
+	EndIf
 	
-	(_cAlias)->( Dbskip() )		
+	(_cAlias)->( DBSkip() )		
 		
-Enddo
+EndDo
 		
-(_cAlias)->( dbclosearea() )
+(_cAlias)->( DBCloseArea() )
 
 //=====================================================================================
 //Monta tela de seleção
 //=====================================================================================
 
-_afiliais := asort(_afiliais, , , { | x,y | x[1] < y[1] })
+_afiliais := aSort(_afiliais, , , { | x,y | x[1] < y[1] })
 
-For _ni := 1 to len(_afiliais)
-	MvParDef += AllTrim(_afiliais[_ni][1])
-	aAdd(aCat,AllTrim(_afiliais[_ni][3] + " - " + _afiliais[_ni][2]) )
+For _nI := 1 to Len(_afiliais)
+	MvParDef += AllTrim(_afiliais[_nI][1])
+	aAdd(aCat,AllTrim(_afiliais[_nI][3] + " - " + _afiliais[_nI][2]) )
 Next
 
 //==========================================================================
@@ -722,8 +722,8 @@ Next
 //Executa funcao que monta tela de opcoes
 If f_Opcoes(@MvPar,cTitulo,aCat,MvParDef,12,49,.F.,nTam,nMaxSelect)
 	//Executa recálculos selecionados
-	For _ni := 1 to len(MvPar)
-		cfilant := alltrim(mvpar[_ni])
+	For _nI := 1 to Len(MvPar)
+		cfilant := AllTrim(mvpar[_nI])
 		FINA440()
 	Next
 	cfilant := _cfilial
@@ -748,7 +748,7 @@ User Function MOMS009I()
 
 Begin Sequence
    
-   If ! U_ITMSG(" A rotina de integração de dados gerenciais pode levar em média de 4hs a 6hs para ser executada, ao clicar em 'Sim' "+;
+   If ! U_ITMsg(" A rotina de integração de dados gerenciais pode levar em média de 4hs a 6hs para ser executada, ao clicar em 'Sim' "+;
               " a comissão será colocada no status de aguardando integração e a integração será agendada para ser gravada " +;
               " no periodo noturno via servidor. Ao finalizar a integração o sistema liberará o encerramento do período. " ,"Atenção" , , ,2, 2)  
       Break 
@@ -756,10 +756,10 @@ Begin Sequence
    
    ZC9->(RecLock("ZC9", .F.))
    ZC9->ZC9_STATUS := "3"
-   ZC9->(MsUnLock())
+   ZC9->(MSUnLock())
 
 End Sequence 
 
-Return Nil 
+Return 
 
 

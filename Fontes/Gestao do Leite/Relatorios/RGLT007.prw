@@ -2,14 +2,14 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 19/02/2020 | Chamado 32081. Corrigido error.log ao cancelar o relatório.
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Lucas Borges  |19/02/2020| Chamado 32081. Corrigido error.log ao cancelar o relatório.
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -38,26 +38,26 @@ Private m_pag	:= 01 // Contador de Paginas
 Private nLastKey:= 0 // Controla o cancelamento da SetPrint e SetDefault
 Private lEnd	:= .F.// Controle de cancelamento do relatorio
 
-Pergunte(_cPerg,.f.)
+Pergunte(_cPerg,.F.)
 
 // Monta a interface padrao com o usuario...                           ³
 wnrel := SetPrint("",NomeProg,_cPerg,@_cTitulo,cDesc1,cDesc2,cDesc3,.T.,aOrd,.T.,cTamanho,,.T.)
 
 If nLastKey == 27
 	Return
-Endif
+EndIf
 
 SetDefault(aReturn,"")
 
 If nLastKey == 27
    Return
-Endif
+EndIf
 
 nTipo := If(aReturn[4]==1,15,18)
 
 RptStatus({|lEnd|RGLT007P(@lEnd) },_cTitulo)
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -104,7 +104,7 @@ If MV_PAR01 == 1
 		_aSelFil := AdmGetFil(.F.,.F.,"ZLF")
 	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
+	aAdd(_aSelFil,cFilAnt)
 EndIf
 
 _cFiltro += " AND ZLF_FILIAL "+ GetRngFil( _aSelFil, "ZLF", .T.,)
@@ -124,7 +124,7 @@ _cFiltro+= "%"
 // Obtem dados de impressao
 BeginSql alias _cAlias
 	SELECT ZLF_FILIAL, ZLF_DTFIM, A2_COD, A2_LOJA, A2_NOME, ZLF_SETOR, A2_CGC, ZL8_DESCRI, SUM(ZLF_TOTAL) ZLF_TOTAL
-	  FROM %table:ZLF% ZLF, %table:ZL8% ZL8, %table:SA2% SA2
+	  FROM %Table:ZLF% ZLF, %Table:ZL8% ZL8, %Table:SA2% SA2
 	 WHERE ZLF.D_E_L_E_T_ = ' '
 	   AND ZL8.D_E_L_E_T_ = ' '
 	   AND SA2.D_E_L_E_T_ = ' '
@@ -133,7 +133,7 @@ BeginSql alias _cAlias
 	   AND ZLF_A2COD = A2_COD
 	   AND ZLF_A2LOJA = A2_LOJA
 	   AND ZLF_DEBCRE = 'D'
-	   AND SUBSTR(ZLF_A2COD,1,1) = 'G'
+	   AND SubStr(ZLF_A2COD,1,1) = 'G'
 	   %exp:_cFiltro%
 	   AND ZLF_CODZLE = %exp:MV_PAR02%
 	   AND ZLF_A2COD BETWEEN %exp:MV_PAR05% AND %exp:MV_PAR06%
@@ -145,21 +145,21 @@ Count to nQtdReg
 
 ProcRegua(nQtdReg)
 
-(_cAlias)->(DbGoTop())
+(_cAlias)->(DBGoTop())
 
-While !(_cAlias)->(EOf())
+While !(_cAlias)->(Eof())
 	If lEnd
 		@ Prow()+1,001 PSay "CANCELADO PELO OPERADOR"
 		Exit
 	EndIf
 	nCount++                   
-	incproc((_cAlias)->A2_COD)
+	IncProc((_cAlias)->A2_COD)
 
 	If (_cAlias)->(A2_COD+A2_LOJA) <> _cTransp .And. !_lNovo
 		oPrint:Say(nL,100,"Total de Débitos: ",oFont14B)
 		oPrint:Say(nL,1900,"R$ "+Transform(_nTotal,GetSx3Cache("ZLF_TOTAL","X3_PICTURE")),oFont14B,/*nWidth*/,/*nClrText*/,,1/*nAlign*/)
 		nL += 250
-		oPrint:Say(nL,100,_cCidade+", "+Substr(_cData,7,2)+" de "+MesExtenso(SToD(_cData))+" de "+Substr(_cData,1,4)+".",oFont14)
+		oPrint:Say(nL,100,_cCidade+", "+SubStr(_cData,7,2)+" de "+MesExtenso(SToD(_cData))+" de "+SubStr(_cData,1,4)+".",oFont14)
 		nL += 250
 		oPrint:Say(nL,800,_cNome,oFont14)	
 		oPrint:FillRect({nL,300,nL+1,2100},TBrush():New("",0)) 
@@ -170,7 +170,7 @@ While !(_cAlias)->(EOf())
 	
 	If (_cAlias)->(A2_COD+A2_LOJA) <> _cTransp
 		_cTransp := (_cAlias)->(A2_COD+A2_LOJA)
-		SM0->(DbSeek(cEmpAnt + (_cAlias)->ZLF_FILIAL))
+		SM0->(DBSeek(cEmpAnt + (_cAlias)->ZLF_FILIAL))
 		_cCidade := AllTrim(SM0->M0_CIDENT)
 		_cNome := (_cAlias)->A2_NOME
 		_cData := (_cAlias)->ZLF_DTFIM
@@ -210,7 +210,7 @@ While !(_cAlias)->(EOf())
 		nL += 50
 		oPrint:Say(nL,100,'será descontado no pagamento do frete que a CONTRATANTE efetuará à CONTRATADA, refe-',oFont14)
 		nL += 50
-		oPrint:Say(nL,100,'rente ao transporte de leite efetuado no mês de '+MesExtenso(SToD(_cData))+' de '+Substr(_cData,1,4)+'.',oFont14)
+		oPrint:Say(nL,100,'rente ao transporte de leite efetuado no mês de '+MesExtenso(SToD(_cData))+' de '+SubStr(_cData,1,4)+'.',oFont14)
 		nL += 150
 
 		oPrint:Say(nL,100,"Descrição dos Débitos",oFont14BU)
@@ -223,7 +223,7 @@ While !(_cAlias)->(EOf())
 	_nTotal += (_cAlias)->ZLF_TOTAL
 	nL += 50
 
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 	
 EndDo
 
@@ -231,16 +231,16 @@ EndDo
 oPrint:Say(nL,100,"Total de Débitos: ",oFont14B)
 oPrint:Say(nL,1900,"R$ "+Transform(_nTotal,GetSx3Cache("ZLF_TOTAL","X3_PICTURE")),oFont14B,/*nWidth*/,/*nClrText*/,,1/*nAlign*/)
 nL += 250
-oPrint:Say(nL,100,_cCidade+", "+Substr(_cData,7,2)+" de "+MesExtenso(SToD(_cData))+" de "+Substr(_cData,1,4)+".",oFont14)
+oPrint:Say(nL,100,_cCidade+", "+SubStr(_cData,7,2)+" de "+MesExtenso(SToD(_cData))+" de "+SubStr(_cData,1,4)+".",oFont14)
 nL += 250
 oPrint:Say(nL,800,_cNome,oFont14)	
 oPrint:FillRect({nL,300,nL+1,2100},TBrush():New("",0)) 
 oPrint:EndPage()
 
-(_cAlias)->(DbCloseArea())
+(_cAlias)->(DBCloseArea())
 	
 oPrint:Preview()
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return

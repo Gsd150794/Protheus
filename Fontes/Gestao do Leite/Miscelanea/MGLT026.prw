@@ -2,32 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 27/10/2020 | Validação para gerar evento apenas quando produtor tiver movimento no Mix destino. Chamado 34509
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 05/11/2020 | Retirado filtro de setor e linha. Basta ter entregue leite no período.  Chamado 34598
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 29/12/2020 | Retirada função UCFG001. Chamado 35123
+Lucas Borges  |27/10/2020| Chamado 34509. Validação para gerar evento apenas quando produtor tiver movimento no Mix destino.
+Lucas Borges  |05/11/2020| Chamado 34509. Retirado filtro de setor e linha. Basta ter entregue leite no período.
+Lucas Borges  |29/12/2020| Chamado 35123. Retirada função UCFG001.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-
-#Include "PROTHEUS.CH"  
+#Include "TOTVS.ch"  
 
 /*
 ===============================================================================================================================
 Programa----------: MGLT026
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 12/01/2011
-===============================================================================================================================
 Descrição---------: Rotina que possibilita gerar o complemento de pagamento a ser pago no próximo Mix
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -53,9 +44,7 @@ Return
 Programa----------: MenuDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 08/10/2018
-===============================================================================================================================
 Descrição---------: Utilizacao de Menu Funcional
-===============================================================================================================================
 Parametros--------: aRotina
 					1. Nome a aparecer no cabecalho
 					2. Nome da Rotina associada
@@ -69,7 +58,6 @@ Parametros--------: aRotina
 						6 - Altera determinados campos sem incluir novos Regs
 					5. Nivel de acesso
 					6. Habilita Menu Funcional
-===============================================================================================================================
 Retorno-----------: Array com opcoes da rotina
 ===============================================================================================================================
 */
@@ -90,12 +78,9 @@ Return( aRotina )
 Programa----------: AGLT026Z
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 01/02/2011
-===============================================================================================================================
 Descrição---------: Funcao desenvolvida para possibilitar a verificacao dos dados por produtor que foram gerados os complementos 
 						de pagamento, por codigo de complemento de pagamento.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -117,8 +102,8 @@ Private aRotina     := {}
 
 _cCondicao  := "ZZG_CODIGO == '" + ZZD->ZZD_CODIGO + "'"                                    
 
-dbSelectArea(_cAlias)
-(_cAlias)->(dbSetOrder(1))
+DBSelectArea(_cAlias)
+(_cAlias)->(DBSetOrder(1))
 
 set filter to  &(_cCondicao)   
 
@@ -148,12 +133,9 @@ Return
 Programa----------: MGLT026T
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 13/01/2011
-===============================================================================================================================
 Descrição---------: Tela desenvolvida para possibilitar a realizacoes das operacoes de inclusao,alteracao e cancelamento do 
 						complemento de pagamento.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -185,31 +167,31 @@ Local _oSay8
 Local _oSay9
 Local _oSetor     
 Local _oGNumero      
-Local _cDescSet    := IIF(_nOperac == 1,"",Posicione("ZL2",1,xFilial("ZL2") + ZZD->ZZD_SETOR,"ZL2->ZL2_DESCRI"))
-Local _lInclui      := IIF(_nOperac == 1,.T.,.F.) 
-Local _lIncExc      := IIF(_nOperac == 1 .Or. _nOperac == 3,.T.,.F.)
+Local _cDescSet    := IIf(_nOperac == 1,"",Posicione("ZL2",1,xFilial("ZL2") + ZZD->ZZD_SETOR,"ZL2->ZL2_DESCRI"))
+Local _lInclui      := IIf(_nOperac == 1,.T.,.F.) 
+Local _lIncExc      := IIf(_nOperac == 1 .Or. _nOperac == 3,.T.,.F.)
 Local _oFont12b
 
 Private oSDadMixOr 
 Private oSDadMixDe  
 Private _nContReg  := 0    
 Private _sDtInic,_sDtFin,_sDtDesIni,_sDtDesFin                
-Private cGSetor    := IIF(_nOperac == 1,Space(06),ZZD->ZZD_SETOR) 
-Private cGProdIni  := IIF(_nOperac == 1,Space(06),ZZD->ZZD_PROINI)
-Private cGProdFin  := IIF(_nOperac == 1,Space(06),ZZD->ZZD_PROFIN)
-Private cGMixOrig  := IIF(_nOperac == 1,Space(06),ZZD->ZZD_MIXORI)
-Private cGMixDest  := IIF(_nOperac == 1,Space(06),ZZD->ZZD_MIXDES)
-Private cGLjProdIn := IIF(_nOperac == 1,Space(04),ZZD->ZZD_LOJINI)
-Private cGLjProdFi := IIF(_nOperac == 1,Space(04),ZZD->ZZD_LOJFIN)
-Private cGLinIni   := IIF(_nOperac == 1,Space(06),ZZD->ZZD_LININI)
-Private cGLinFin   := IIF(_nOperac == 1,Space(06),ZZD->ZZD_LINFIN)     
-Private cGVlrRepor := IIF(_nOperac == 1,0,ZZD->ZZD_VALOR)    
-Private cCbOperac  := IIF(_nOperac == 1,'Incluir',IIF(_nOperac == 2,'Alterar','Cancelar'))
-Private cGNumero   := IIF(_nOperac == 1,GETSXENUM("ZZD","ZZD_CODIGO"),ZZD->ZZD_CODIGO) 
-Private cGProdFora := IIF(_nOperac == 1,SPACE(1600),ZZD->ZZD_PROOUT) 
-Private cGProdFor2 := IIF(_nOperac == 1,SPACE(1600),ZZD->ZZD_PROOU2) 
-Private _cDadMixOr := IIF(_nOperac == 1,"",MGLT026M(ZZD->ZZD_MIXORI,1))
-Private _cDadMixDe := IIF(_nOperac == 1,"",MGLT026M(ZZD->ZZD_MIXDES,2))   
+Private cGSetor    := IIf(_nOperac == 1,Space(06),ZZD->ZZD_SETOR) 
+Private cGProdIni  := IIf(_nOperac == 1,Space(06),ZZD->ZZD_PROINI)
+Private cGProdFin  := IIf(_nOperac == 1,Space(06),ZZD->ZZD_PROFIN)
+Private cGMixOrig  := IIf(_nOperac == 1,Space(06),ZZD->ZZD_MIXORI)
+Private cGMixDest  := IIf(_nOperac == 1,Space(06),ZZD->ZZD_MIXDES)
+Private cGLjProdIn := IIf(_nOperac == 1,Space(04),ZZD->ZZD_LOJINI)
+Private cGLjProdFi := IIf(_nOperac == 1,Space(04),ZZD->ZZD_LOJFIN)
+Private cGLinIni   := IIf(_nOperac == 1,Space(06),ZZD->ZZD_LININI)
+Private cGLinFin   := IIf(_nOperac == 1,Space(06),ZZD->ZZD_LINFIN)     
+Private cGVlrRepor := IIf(_nOperac == 1,0,ZZD->ZZD_VALOR)    
+Private cCbOperac  := IIf(_nOperac == 1,'Incluir',IIf(_nOperac == 2,'Alterar','Cancelar'))
+Private cGNumero   := IIf(_nOperac == 1,GETSXENUM("ZZD","ZZD_CODIGO"),ZZD->ZZD_CODIGO) 
+Private cGProdFora := IIf(_nOperac == 1,Space(1600),ZZD->ZZD_PROOUT) 
+Private cGProdFor2 := IIf(_nOperac == 1,Space(1600),ZZD->ZZD_PROOU2) 
+Private _cDadMixOr := IIf(_nOperac == 1,"",MGLT026M(ZZD->ZZD_MIXORI,1))
+Private _cDadMixDe := IIf(_nOperac == 1,"",MGLT026M(ZZD->ZZD_MIXDES,2))   
    
 Static oDlg                
 
@@ -235,49 +217,49 @@ EndIf
   	//Comanando para impedir o uso da tecla ESC para fechar a janela
 	oDlg:LESCCLOSE := .F.
   
-	@ 041, 014 SAY _oSay11 PROMPT "Numero:" SIZE 040, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
+	@ 041, 014 Say _oSay11 PROMPT "Numero:" SIZE 040, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
     @ 041, 054 MSGET _oGNumero VAR cGNumero SIZE 040, 008 OF oDlg COLORS 0, 16777215 WHEN .F. PIXEL 
         
-    @ 055, 014 SAY _oSay10 PROMPT "Operação:" SIZE 025, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
+    @ 055, 014 Say _oSay10 PROMPT "Operação:" SIZE 025, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
     @ 055, 054 MSCOMBOBOX _oCbOperac VAR cCbOperac ITEMS {"Incluir","Alterar","Cancelar"} SIZE 040, 010 OF oDlg COLORS 0, 16777215 PIXEL  WHEN .F.     
 
-    @ 069, 014 SAY _oSay1 PROMPT "Mix de Origem:" SIZE 040, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
-    @ 069, 054 MSGET _oGMixOrig VAR cGMixOrig SIZE 040, 008 OF oDlg VALID IIF(!Empty(cGMixOrig),MGLT026V(cGMixOrig,1),.T.) COLORS 0, 16777215 F3 "ZLE_01" WHEN _lInclui PIXEL
-    @ 069, 112 SAY oSDadMixOr PROMPT _cDadMixOr SIZE 175, 008 OF oDlg COLORS 0, 16777215 FONT _oFont12b PIXEL  
+    @ 069, 014 Say _oSay1 PROMPT "Mix de Origem:" SIZE 040, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
+    @ 069, 054 MSGET _oGMixOrig VAR cGMixOrig SIZE 040, 008 OF oDlg VALID IIf(!Empty(cGMixOrig),MGLT026V(cGMixOrig,1),.T.) COLORS 0, 16777215 F3 "ZLE_01" WHEN _lInclui PIXEL
+    @ 069, 112 Say oSDadMixOr PROMPT _cDadMixOr SIZE 175, 008 OF oDlg COLORS 0, 16777215 FONT _oFont12b PIXEL  
     
-    @ 083, 014 SAY _oSay2 PROMPT "Mix de Destino:" SIZE 040, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
-    @ 083, 054 MSGET _oGMixDest VAR cGMixDest SIZE 040, 008 OF oDlg VALID IIF(!Empty(cGMixDest),MGLT026V(cGMixDest,2),.T.) COLORS 0, 16777215 F3 "ZLE_01" WHEN _lInclui PIXEL
-    @ 083, 112 SAY oSDadMixDe PROMPT _cDadMixDe SIZE 175, 008 OF oDlg COLORS 0, 16777215 FONT _oFont12b PIXEL
+    @ 083, 014 Say _oSay2 PROMPT "Mix de Destino:" SIZE 040, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
+    @ 083, 054 MSGET _oGMixDest VAR cGMixDest SIZE 040, 008 OF oDlg VALID IIf(!Empty(cGMixDest),MGLT026V(cGMixDest,2),.T.) COLORS 0, 16777215 F3 "ZLE_01" WHEN _lInclui PIXEL
+    @ 083, 112 Say oSDadMixDe PROMPT _cDadMixDe SIZE 175, 008 OF oDlg COLORS 0, 16777215 FONT _oFont12b PIXEL
     
-    @ 097, 014 SAY _oSetor PROMPT "Setor:" SIZE 025, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
-    @ 097, 054 MSGET _oGSetor VAR cGSetor SIZE 040, 008 OF oDlg VALID IIF(!Empty(cGSetor),IIF(U_VSetor(.T.),Eval({|| _cDescSet:= Posicione("ZL2",1,xFilial("ZL2") + cGSetor,"ZL2->ZL2_DESCRI")},oSDescSet:Refresh()),.F.),.T.) COLORS 0, 16777215 F3 "ZL2_01" WHEN _lInclui PIXEL
-    @ 097, 112 SAY oSDescSet PROMPT _cDescSet SIZE 175, 008 OF oDlg COLORS 0, 16777215 FONT _oFont12b PIXEL
+    @ 097, 014 Say _oSetor PROMPT "Setor:" SIZE 025, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
+    @ 097, 054 MSGET _oGSetor VAR cGSetor SIZE 040, 008 OF oDlg VALID IIf(!Empty(cGSetor),IIf(U_VSetor(.T.),Eval({|| _cDescSet:= Posicione("ZL2",1,xFilial("ZL2") + cGSetor,"ZL2->ZL2_DESCRI")},oSDescSet:Refresh()),.F.),.T.) COLORS 0, 16777215 F3 "ZL2_01" WHEN _lInclui PIXEL
+    @ 097, 112 Say oSDescSet PROMPT _cDescSet SIZE 175, 008 OF oDlg COLORS 0, 16777215 FONT _oFont12b PIXEL
     
-    @ 111, 014 SAY _oSay7 PROMPT "Linha Inicial:" SIZE 035, 008 OF oDlg COLORS 0, 16777215 PIXEL
-    @ 111, 054 MSGET _oGLinIni VAR cGLinIni SIZE 040, 008 OF oDlg VALID IIF(!Empty(cGLinIni) .And. cGLinIni <> 'ZZZZZZ',ExistCpo("ZL3",cGLinIni),.T.) COLORS 0, 16777215 F3 "ZL3_01" WHEN _lIncExc PIXEL
-    @ 111, 112 SAY _oSay8 PROMPT "Linha Final:" SIZE 029, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
-    @ 111, 144 MSGET _oGLinFin VAR cGLinFin SIZE 040, 008 OF oDlg VALID IIF(!Empty(cGLinFin) .And. cGLinFin <> 'ZZZZZZ',ExistCpo("ZL3",cGLinFin),.T.) COLORS 0, 16777215 F3 "ZL3_01" WHEN _lIncExc PIXEL
+    @ 111, 014 Say _oSay7 PROMPT "Linha Inicial:" SIZE 035, 008 OF oDlg COLORS 0, 16777215 PIXEL
+    @ 111, 054 MSGET _oGLinIni VAR cGLinIni SIZE 040, 008 OF oDlg VALID IIf(!Empty(cGLinIni) .And. cGLinIni <> 'ZZZZZZ',ExistCpo("ZL3",cGLinIni),.T.) COLORS 0, 16777215 F3 "ZL3_01" WHEN _lIncExc PIXEL
+    @ 111, 112 Say _oSay8 PROMPT "Linha Final:" SIZE 029, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
+    @ 111, 144 MSGET _oGLinFin VAR cGLinFin SIZE 040, 008 OF oDlg VALID IIf(!Empty(cGLinFin) .And. cGLinFin <> 'ZZZZZZ',ExistCpo("ZL3",cGLinFin),.T.) COLORS 0, 16777215 F3 "ZL3_01" WHEN _lIncExc PIXEL
     
-    @ 125, 014 SAY _oSay3 PROMPT "Produtor De:" SIZE 034, 008 OF oDlg COLORS 0, 16777215 PIXEL
-    @ 125, 054 MSGET _oGProdIni VAR cGProdIni SIZE 040, 008 OF oDlg VALID IIF(!Empty(cGProdIni) .And. cGProdIni <> 'ZZZZZZ',ExistCpo("SA2",cGProdIni),.T.) COLORS 0, 16777215 F3 "SA2_L4" WHEN _lIncExc PIXEL
-    @ 125, 112 SAY _oSay4 PROMPT "Loja De:" SIZE 025, 008 OF oDlg COLORS 0, 16777215 PIXEL
-    @ 125, 144 MSGET _oGLjProdIn VAR cGLjProdIn SIZE 040, 008 OF oDlg VALID IIF(!Empty(cGProdIni) .And. cGProdIni <> 'ZZZZZZ' .And. !Empty(cGLjProdIn) .And. cGLjProdIn <> 'ZZZZ',ExistCpo("SA2",cGProdIni + cGLjProdIn),.T.) COLORS 0, 16777215 WHEN _lIncExc PIXEL
+    @ 125, 014 Say _oSay3 PROMPT "Produtor De:" SIZE 034, 008 OF oDlg COLORS 0, 16777215 PIXEL
+    @ 125, 054 MSGET _oGProdIni VAR cGProdIni SIZE 040, 008 OF oDlg VALID IIf(!Empty(cGProdIni) .And. cGProdIni <> 'ZZZZZZ',ExistCpo("SA2",cGProdIni),.T.) COLORS 0, 16777215 F3 "SA2_L4" WHEN _lIncExc PIXEL
+    @ 125, 112 Say _oSay4 PROMPT "Loja De:" SIZE 025, 008 OF oDlg COLORS 0, 16777215 PIXEL
+    @ 125, 144 MSGET _oGLjProdIn VAR cGLjProdIn SIZE 040, 008 OF oDlg VALID IIf(!Empty(cGProdIni) .And. cGProdIni <> 'ZZZZZZ' .And. !Empty(cGLjProdIn) .And. cGLjProdIn <> 'ZZZZ',ExistCpo("SA2",cGProdIni + cGLjProdIn),.T.) COLORS 0, 16777215 WHEN _lIncExc PIXEL
     
-    @ 139, 014 SAY _oSay5 PROMPT "Produtor Ate:" SIZE 034, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
-    @ 139, 054 MSGET _oGProdFin VAR cGProdFin SIZE 040, 008 OF oDlg VALID IIF(!Empty(cGProdFin) .And. cGProdFin <> 'ZZZZZZ',ExistCpo("SA2",cGProdFin),.T.) COLORS 0, 16777215 F3 "SA2_L4" WHEN _lIncExc PIXEL
-    @ 139, 112 SAY _oSay6 PROMPT "Loja Ate:" SIZE 034, 008 OF oDlg COLORS 16711680, 16777215 PIXEL    
-    @ 139, 144 MSGET _oGLjProdFi VAR cGLjProdFi SIZE 040, 008 OF oDlg VALID IIF(!Empty(cGProdFin) .And. cGProdFin <> 'ZZZZZZ' .And. !Empty(cGLjProdFi) .And. cGLjProdFi <> 'ZZZZ',ExistCpo("SA2",cGProdFin + cGLjProdFi),.T.) COLORS 0, 16777215 WHEN _lIncExc PIXEL
+    @ 139, 014 Say _oSay5 PROMPT "Produtor Ate:" SIZE 034, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
+    @ 139, 054 MSGET _oGProdFin VAR cGProdFin SIZE 040, 008 OF oDlg VALID IIf(!Empty(cGProdFin) .And. cGProdFin <> 'ZZZZZZ',ExistCpo("SA2",cGProdFin),.T.) COLORS 0, 16777215 F3 "SA2_L4" WHEN _lIncExc PIXEL
+    @ 139, 112 Say _oSay6 PROMPT "Loja Ate:" SIZE 034, 008 OF oDlg COLORS 16711680, 16777215 PIXEL    
+    @ 139, 144 MSGET _oGLjProdFi VAR cGLjProdFi SIZE 040, 008 OF oDlg VALID IIf(!Empty(cGProdFin) .And. cGProdFin <> 'ZZZZZZ' .And. !Empty(cGLjProdFi) .And. cGLjProdFi <> 'ZZZZ',ExistCpo("SA2",cGProdFin + cGLjProdFi),.T.) COLORS 0, 16777215 WHEN _lIncExc PIXEL
     
-    @ 153, 014 SAY _oSay9 PROMPT "Valor a repor:" SIZE 036, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
-    @ 153, 054 MSGET _oGVlrRepor VAR cGVlrRepor SIZE 040, 008 OF oDlg PICTURE "@E 99.9999" COLORS 0, 16777215 WHEN IIF(_nOperac == 1 .Or. _nOperac == 2,.T.,.F.) PIXEL            
+    @ 153, 014 Say _oSay9 PROMPT "Valor a repor:" SIZE 036, 008 OF oDlg COLORS 16711680, 16777215 PIXEL
+    @ 153, 054 MSGET _oGVlrRepor VAR cGVlrRepor SIZE 040, 008 OF oDlg PICTURE "@E 99.9999" COLORS 0, 16777215 WHEN IIf(_nOperac == 1 .Or. _nOperac == 2,.T.,.F.) PIXEL            
     
-    @ 167, 014 SAY _oSay10 PROMPT "Produt.Fora 1:" SIZE 035, 008 OF oDlg COLORS 0, 16777215 PIXEL
+    @ 167, 014 Say _oSay10 PROMPT "Produt.Fora 1:" SIZE 035, 008 OF oDlg COLORS 0, 16777215 PIXEL
     @ 167, 054 MSGET _oGProdFora VAR cGProdFora SIZE 231, 008 OF oDlg COLORS 0, 16777215 WHEN _lInclui PIXEL
 
-	@ 181, 014 SAY _oSay12 PROMPT "Produt.Fora 2:" SIZE 035, 008 OF oDlg COLORS 0, 16777215 PIXEL
+	@ 181, 014 Say _oSay12 PROMPT "Produt.Fora 2:" SIZE 035, 008 OF oDlg COLORS 0, 16777215 PIXEL
     @ 181, 054 MSGET _oGProdFor2 VAR cGProdFor2 SIZE 231, 008 OF oDlg COLORS 0, 16777215 WHEN _lInclui PIXEL
 
-    ACTIVATE MSDIALOG oDlg CENTERED ON INIT EnchoiceBar(oDlg,{||nopc:=1,IIF(MGLT026K(),IIF(MGLT026G(),oDlg:End(),),)}, {||nopc:=2,oDlg:End(),RollBackSX8()},,)   	    
+    ACTIVATE MSDIALOG oDlg CENTERED ON INIT EnchoiceBar(oDlg,{||nopc:=1,IIf(MGLT026K(),IIf(MGLT026G(),oDlg:End(),),)}, {||nopc:=2,oDlg:End(),RollBackSX8()},,)   	    
     	    
 Return              
 
@@ -286,12 +268,9 @@ Return
 Programa----------: MGLT026T
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 13/01/2011
-===============================================================================================================================
 Descrição---------: Efetua a validacao para verificar o fornecimento correto do Mix de destino e de origem.
-===============================================================================================================================
 Parametros--------: _cCodMix - Codigo do Mix, _cTpMix - 1 == Mix de Origem e 2 == Mix de Destino 
-===============================================================================================================================
-Retorno-----------: _lret - lógico validando ou não o campo de Mix
+Retorno-----------: _lRet - lógico validando ou não o campo de Mix
 ===============================================================================================================================
 */
 Static Function MGLT026V(_cCodMix,_cTpMix)       
@@ -309,17 +288,17 @@ _nCountRec := _nContReg
 	
 If _nCountRec > 0      
 		
-	(_cAliasZLE)->(dbGotop())
+	(_cAliasZLE)->(DBGoTop())
 	  
 	//Mix de Origem
 	If _cTpMix == 1	     
-		_cDadMixOr:= DtoC(StoD((_cAliasZLE)->ZLE_DTINI)) + " = " + DtoC(StoD((_cAliasZLE)->ZLE_DTFIM))
+		_cDadMixOr:= DToC(SToD((_cAliasZLE)->ZLE_DTINI)) + " = " + DToC(SToD((_cAliasZLE)->ZLE_DTFIM))
 		//Armazena a data inicial e final do mix de origem para ser utilizada em query futura	 
 		_sDtInic  := (_cAliasZLE)->ZLE_DTINI
 		_sDtFin   := (_cAliasZLE)->ZLE_DTFIM  
    	//Mix de Destino           
 	Else 
-		_cDadMixDe	 := DtoC(StoD((_cAliasZLE)->ZLE_DTINI)) + " = " + DtoC(StoD((_cAliasZLE)->ZLE_DTFIM)) 
+		_cDadMixDe	 := DToC(SToD((_cAliasZLE)->ZLE_DTINI)) + " = " + DToC(SToD((_cAliasZLE)->ZLE_DTFIM)) 
 		_sDtDesIni   := (_cAliasZLE)->ZLE_DTINI
 		_sDtDesFin   := (_cAliasZLE)->ZLE_DTFIM 
 	EndIf			     
@@ -330,7 +309,7 @@ Else
 	_lRet:= .F.	   
 EndIf         
 
-(_cAliasZLE)->(DbCloseArea())
+(_cAliasZLE)->(DBCloseArea())
 	
 oSDadMixOr:Refresh()
 oSDadMixDe:Refresh()	
@@ -342,12 +321,9 @@ Return _lRet
 Programa----------: MGLT026S
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 30/07/2012
-===============================================================================================================================
 Descrição---------: Efetua a validacao para verificar o fornecimento correto do Mix de destino e de origem.
-===============================================================================================================================
 Parametros--------: _nTipoMix - 1 == Mix de Origem e 2 == Mix de Destino,_cCdMix - Codigo do Mix, _cCdSetor - Codigo do Setor.
-===============================================================================================================================
-Retorno-----------: _lret - Lógico indicando validação do campo
+Retorno-----------: _lRet - Lógico indicando validação do campo
 ===============================================================================================================================
 */
 Static Function MGLT026S(_nTipoMix,_cCdMix,_cCdSetor)
@@ -388,18 +364,18 @@ If _nTipoMix == 1
 	If (_cAlias)->NUMREG > 0
 		If !MsgYesNo("Mix fornecido incorretamente no campo Mix de Origem. Deseja continuar mesmo com status aberto?.","MGLT02602")
 			_lRet:= .F.
-		Endif
+		EndIf
 	EndIf
 Else
 	If (_cAlias)->NUMREG > 0
 		If !MsgYesNo("Mix fornecido incorretamente no campo Mix de Destino. Deseja continuar mesmo com status fechado?.","MGLT02603")
 			_lRet:= .F.
-		Endif
+		EndIf
 	EndIf
 EndIf
 
 //Finaliza a area criada anteriormente
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return _lRet
 
@@ -408,12 +384,9 @@ Return _lRet
 Programa----------: MGLT026K
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 12/01/2011
-===============================================================================================================================
 Descrição---------: Efetua a validacao do preenchimento dos dados da tela.	
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
-Retorno-----------: _lret - Lógico indicando validação do dos dados
+Retorno-----------: _lRet - Lógico indicando validação do dos dados
 ===============================================================================================================================
 /*/ 
 Static Function MGLT026K()       
@@ -458,13 +431,10 @@ Return _lRet
 Programa----------: MGLT026G
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 12/01/2011
-===============================================================================================================================
 Descrição---------: Rotina utilizada para realizar a insercao do complemento de pagamento no Mix para faturo pagamento quando o
-						mix de destino for fechado.
-===============================================================================================================================
+						mix de destino For fechado.
 Parametros--------: Nenhum
-===============================================================================================================================
-Retorno-----------: _lret - Lógico indicando validação do dos dados
+Retorno-----------: _lRet - Lógico indicando validação do dos dados
 ===============================================================================================================================
 /*/ 
 Static Function MGLT026G
@@ -487,7 +457,7 @@ _nCountRec := _nContReg
 //geracao automatica do complemento.                           
 //===============================================================
 If _nCountRec == 1                  
-	(_cAliasZL8)->(dbGotop())
+	(_cAliasZL8)->(DBGoTop())
 	_cCodEvent:= (_cAliasZL8)->ZL8_COD
 	_cDesEvent:= (_cAliasZL8)->ZL8_NREDUZ
 
@@ -524,7 +494,7 @@ Else
    _lRet:= .F.
 EndIf		
 
-(_cAliasZL8)->(DbCloseArea())
+(_cAliasZL8)->(DBCloseArea())
 
 Return _lRet
 
@@ -533,13 +503,10 @@ Return _lRet
 Programa----------: MGLT026P
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 12/01/2011
-===============================================================================================================================
 Descrição---------: Funcao utilizada para gravar na tabela ZLF os dados do complemento de pagamento aos Produtores
-===============================================================================================================================
 Parametros--------: _cCodEvent - Codigo do evento
 					  _cDesEvent - Descrição do evento
-===============================================================================================================================
-Retorno-----------: _lret - Lógico indicando sucesso na gravação
+Retorno-----------: _lRet - Lógico indicando sucesso na gravação
 ===============================================================================================================================
 */ 
 Static Function MGLT026P(_cCodEvent,_cDesEvent)
@@ -560,7 +527,7 @@ Private _cAliasZLD
 Processa( {||MGLT026Q(5,"")}/*bAction*/, "Aguarde..."/*cTitle */, "Verificando stadus dos produtores selecionados no Mix..."/*cMsg */,.F./*lAbort */)
 _nCountRec := _nContReg   
 
-(_cAliaIncl)->(dbCloseArea())
+(_cAliaIncl)->(DBCloseArea())
 
 If _nCountRec == 0     
 	_cAliasZLD:= GetNextAlias()      
@@ -625,7 +592,7 @@ If _nCountRec == 0
 		
 		Begin Transaction
 		
-			(_cAliasZLD)->(dbGoTop())
+			(_cAliasZLD)->(DBGoTop())
 
 			While (_cAliasZLD)->(!Eof())
 
@@ -633,7 +600,7 @@ If _nCountRec == 0
 
 				_nQtdeVolu  += (_cAliasZLD)->QTDELEITE
 
-				Reclock("ZLF", .T.)
+				RecLock("ZLF", .T.)
 					ZLF->ZLF_FILIAL := xFilial("ZLF")
 					ZLF->ZLF_CODZLE := cGMixDest
 					ZLF->ZLF_VERSAO := '1'
@@ -646,8 +613,8 @@ If _nCountRec == 0
 					ZLF->ZLF_EVENTO := _cCodEvent
 					ZLF->ZLF_ENTMIX := "S"
 					ZLF->ZLF_DEBCRED:= "C"
-					ZLF->ZLF_DTINI  := sToD(_sDtDesIni)
-					ZLF->ZLF_DTFIM  := sToD(_sDtDesFin)
+					ZLF->ZLF_DTINI  := SToD(_sDtDesIni)
+					ZLF->ZLF_DTFIM  := SToD(_sDtDesFin)
 					ZLF->ZLF_QTDBOM := (_cAliasZLD)->QTDELEITE
 					ZLF->ZLF_TOTAL  := (_cAliasZLD)->QTDELEITE * cGVlrRepor
 					ZLF->ZLF_VLRLTR := (ZLF->ZLF_TOTAL/ZLF->ZLF_QTDBOM)
@@ -658,15 +625,15 @@ If _nCountRec == 0
 					ZLF->ZLF_SEQ	:= u_getSeqZLF(cGMixDest,_cCodEvent,(_cAliasZLD)->ZLD_RETIRO,(_cAliasZLD)->ZLD_RETILJ)
 					ZLF->ZLF_STATUS := "A"
 					ZLF->ZLF_SEEKCO := cGNumero+"MGLT026"
-				ZLF->(MsUnlock())
-				(_cAliasZLD)->(dbSkip())
+				ZLF->(MSUnLock())
+				(_cAliasZLD)->(DBSkip())
 			EndDo
 
 			//==========================================================
 			//Efetua a inserção dos itens do complemento de pagamento.
 			//==========================================================
 
-			(_cAliasZLD)->(dbGoTop())
+			(_cAliasZLD)->(DBGoTop())
 			While (_cAliasZLD)->(!Eof())
 				RecLock("ZZG",.T.)
 					ZZG->ZZG_FILIAL:= xFilial("ZZF")
@@ -680,8 +647,8 @@ If _nCountRec == 0
 					ZZG->ZZG_VOLUME:= (_cAliasZLD)->QTDELEITE
 					ZZG->ZZG_VLRTOT:= (_cAliasZLD)->QTDELEITE * cGVlrRepor 
 					ZZG->ZZG_STATUS:= '1'
-				ZZG->(MsUnLock())
-				(_cAliasZLD)->(dbSkip())
+				ZZG->(MSUnLock())
+				(_cAliasZLD)->(DBSkip())
 			EndDo
 
 			//=========================================================
@@ -705,12 +672,12 @@ If _nCountRec == 0
 				ZZD->ZZD_VLRTOT:= _nQtdeVolu * cGVlrRepor
 				ZZD->ZZD_NRREGI:= _nCountRec   
 				ZZD->ZZD_NRREGE:= 0     
-				ZZD->ZZD_DATA  := date()
+				ZZD->ZZD_DATA  := Date()
 				ZZD->ZZD_USERIN:= _cMatUsr
 				ZZD->ZZD_USERAC:= ""
 				ZZD->ZZD_PROOUT:= cGProdFora
 				ZZD->ZZD_PROOU2:= cGProdFor2
-			ZZD->(MsUnlock())       
+			ZZD->(MSUnLock())       
 			
 			If (__lSX8)
 				ConfirmSX8()
@@ -725,7 +692,7 @@ If _nCountRec == 0
 				"Favor checar se os parâmetros de filtro foram informados corretamente.","MGLT02607")
 		_lRet:= .F.	 
 	EndIf
-	(_cAliasZLD)->(DbCloseArea())
+	(_cAliasZLD)->(DBCloseArea())
 		
 	//====================================================================
 	//Existem produtores com o status fechado ou efetivado, inclusao nao
@@ -744,12 +711,9 @@ Return _lRet
 Programa----------: MGLT026Q
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 12/01/2011
-===============================================================================================================================
 Descrição---------: Rotina desenvolvida para possibilitar o armazenamento de todas as query executas no fonte MGLT026
-===============================================================================================================================
 Parametros--------: _nQuery - numero da query a ser executada		
 					  _cCodMix - Codigo do Mix na validacao do GET(origem ou destino)
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */ 
@@ -856,12 +820,9 @@ Return
 Programa----------: MGLT026Q
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 12/01/2011
-===============================================================================================================================
 Descrição---------: Retorna a data inicial e final do mix de origem e destino para visualizacao na alteracao e cancelmento.
-===============================================================================================================================
 Parametros--------: _cCodMix - Codigo do Mix
 						 _cTpMix - 1 == Mix de Origem  2 == Mix de Destino        
-===============================================================================================================================
 Retorno-----------: _cDescri - data inicial e final do mix 
 ===============================================================================================================================
 */ 
@@ -880,24 +841,24 @@ _nCountRec := _nContReg
 	
 If _nCountRec > 0      
 		
-	(_cAliasZLE)->(dbGotop())
+	(_cAliasZLE)->(DBGoTop())
   
 	//Mix de Origem
 	If _cTpMix == 1	
-		_cDescri:= DtoC(StoD((_cAliasZLE)->ZLE_DTINI)) + " = " + DtoC(StoD((_cAliasZLE)->ZLE_DTFIM))
+		_cDescri:= DToC(SToD((_cAliasZLE)->ZLE_DTINI)) + " = " + DToC(SToD((_cAliasZLE)->ZLE_DTFIM))
 		//Armazena a data inicial e final do mix de origem para ser utilizada em query futura	 
 		_sDtInic  := (_cAliasZLE)->ZLE_DTINI
 		_sDtFin   := (_cAliasZLE)->ZLE_DTFIM  				
 	//Mix de Destino           
 	Else 			
-		_cDescri:= DtoC(StoD((_cAliasZLE)->ZLE_DTINI)) + " = " + DtoC(StoD((_cAliasZLE)->ZLE_DTFIM)) 
+		_cDescri:= DToC(SToD((_cAliasZLE)->ZLE_DTINI)) + " = " + DToC(SToD((_cAliasZLE)->ZLE_DTFIM)) 
 		_sDtDesIni   := (_cAliasZLE)->ZLE_DTINI
 		_sDtDesFin   := (_cAliasZLE)->ZLE_DTFIM 					
 	EndIf				     
   						
 EndIf         
 
-(_cAliasZLE)->(dbCloseArea())
+(_cAliasZLE)->(DBCloseArea())
 
 Return _cDescri
 
@@ -906,13 +867,8 @@ Return _cDescri
 Programa----------: MGLT026E
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 12/01/2011
-===============================================================================================================================
 Descrição---------: Legenda do browse principal (ZZE)
-===============================================================================================================================
-Uso---------------: Italac
-===============================================================================================================================
 Parametros--------: Nenhum   
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */ 
@@ -929,11 +885,8 @@ Return(.T.)
 Programa----------: MGLT026D
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 12/01/2011
-===============================================================================================================================
 Descrição---------: Legenda do browse auxiliar (ZZG)
-===============================================================================================================================
 Parametros--------: Nenhum   
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 /*/ 
@@ -948,11 +901,8 @@ Return(.T.)
 Programa----------: MGLT026C
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 12/01/2011
-===============================================================================================================================
 Descrição---------: Processa o cancelamento dos registros de complemento de pagamento.
-===============================================================================================================================
 Parametros--------: _cCodEvent - codigo do evento  
-===============================================================================================================================
 Retorno-----------: _lRet - Lógico indicando sucesso do cancelamento
 ===============================================================================================================================
 */       
@@ -975,7 +925,7 @@ Private _cAliaIncl:= GetNextAlias()
 Processa( {||MGLT026Q(5,"")}/*bAction*/, "Aguarde..."/*cTitle */, "Verificando o status dos produteos selecionados no Mix..."/*cMsg */,.F./*lAbort */)
 _nCountRec := _nContReg   
 
-(_cAliaIncl)->(dbCloseArea())
+(_cAliaIncl)->(DBCloseArea())
 
 If _nCountRec == 0 
 
@@ -996,14 +946,14 @@ If _nCountRec == 0
 	
 		Begin Transaction                       
 	
-			(_cAliasExc)->(dbGoTop())
+			(_cAliasExc)->(DBGoTop())
 		
 			While (_cAliasExc)->(!Eof())   
 		
 				IncProc()		                         
 				                         
-				dbSelectArea("ZLF")	                         
-				ZLF->(dbGoto((_cAliasExc)->RECNOZLF))
+				DBSelectArea("ZLF")	                         
+				ZLF->(DBGoTo((_cAliasExc)->RECNOZLF))
 				
 				If ZLF->ZLF_EVENTO == _cCodEvent .And. cGNumero+"MGLT026" $ ZLF->ZLF_SEEKCO  
 					_nVolLeite += ZLF->ZLF_QTDBOM
@@ -1011,7 +961,7 @@ If _nCountRec == 0
 				    
 					RecLock("ZLF",.F.)
 					dbDelete()     
-					ZLF->(MsUnlock())	
+					ZLF->(MSUnLock())	
 					
 					_nCountRec++
 				Else
@@ -1020,7 +970,7 @@ If _nCountRec == 0
 					_lRet:= .F.
 					Exit
 				EndIf        				    							                     
-				(_cAliasExc)->(dbSkip())
+				(_cAliasExc)->(DBSkip())
 			EndDo       
 		
 			//=============================================================
@@ -1031,9 +981,9 @@ If _nCountRec == 0
 			//=============================================================
 			If _lRet
 				
-				dbSelectArea("ZZD")
-				ZZD->(dbSetOrder(1))
-				If ZZD->(dbSeek(xFilial("ZZD") + cGNumero))
+				DBSelectArea("ZZD")
+				ZZD->(DBSetOrder(1))
+				If ZZD->(DBSeek(xFilial("ZZD") + cGNumero))
 					
 					RecLock("ZZD",.F.)     
 						
@@ -1045,7 +995,7 @@ If _nCountRec == 0
 						ZZD->ZZD_NRREGE:= ZZD->ZZD_NRREGE + _nCountRec     
 						ZZD->ZZD_USERAC:= _cMatUsr
 						
-					ZZD->(MsUnlock())     
+					ZZD->(MSUnLock())     
 					
 				Else
 					MsgStop("Problema encontrado no cancelamento do complemento de pagamento. Não foi possível atualizar a tabela ZZD,favor "+;
@@ -1097,7 +1047,7 @@ If _nCountRec == 0
 		_lRet:= .F.	 
 	EndIf          
 	
-	(_cAliasExc)->(DbCloseArea())
+	(_cAliasExc)->(DBCloseArea())
 	    	
 	//=================================================================
 	//Produtores com o status efetivado ou fechado no Mix, nao podera
@@ -1116,11 +1066,8 @@ Return _lRet
 Programa----------: MGLT026A
 Autor-------------: Fabiano Dias da Silva
 Data da Criacao---: 12/01/2011
-===============================================================================================================================
 Descrição---------: Processa a alteracao do valor do complemento de pagamento gerados na inclusao. 
-===============================================================================================================================
 Parametros--------: _cCodEvent - codigo do evento  
-===============================================================================================================================
 Retorno-----------: _lRet - Lógico indicando sucesso do cancelamento
 ===============================================================================================================================
 /*/  
@@ -1142,7 +1089,7 @@ Private _cAliaIncl:= GetNextAlias()
 Processa( {||MGLT026Q(5,"")}/*bAction*/, "Aguarde..."/*cTitle */, "Verificando status dos produtores selecionados no Mix..."/*cMsg */,.F./*lAbort */)
 _nCountRec := _nContReg   
 
-(_cAliaIncl)->(DbCloseArea())
+(_cAliaIncl)->(DBCloseArea())
 
 If _nCountRec == 0     
 
@@ -1161,8 +1108,8 @@ If _nCountRec == 0
 	
 		Begin Transaction                       
 	
-		dbSelectArea(_cAliasExc)
-		(_cAliasExc)->(dbGoTop())
+		DBSelectArea(_cAliasExc)
+		(_cAliasExc)->(DBGoTop())
 		
 		While (_cAliasExc)->(!Eof())  			 
 		
@@ -1170,14 +1117,14 @@ If _nCountRec == 0
 			
 				_nNovoVlr:= (_cAliasExc)->QTDELEITE * cGVlrRepor
 			                         
-				dbSelectArea("ZLF")	                         
-				ZLF->(dbGoto((_cAliasExc)->RECNOZLF))
+				DBSelectArea("ZLF")	                         
+				ZLF->(DBGoTo((_cAliasExc)->RECNOZLF))
 				
 				If ZLF->ZLF_EVENTO == _cCodEvent .And. cGNumero+"MGLT026" $ ZLF->ZLF_SEEKCO 
 					RecLock("ZLF",.F.)  
 							ZLF->ZLF_TOTAL  := _nNovoVlr
 							ZLF->ZLF_VLRLTR := (_nNovoVlr/ZLF->ZLF_QTDBOM)   
-					ZLF->(MsUnlock())	
+					ZLF->(MSUnLock())	
 				Else 
 					MsgStop("Problema encontrado no cancelamento do complemento de pagamento. Favor comunicar ao departamento de informática de tal "+;
 							"problema encontrado, o erro ocorreu no R_E_C_N_O_ : " + AllTrim(Str((_cAliasExc)->RECNOZLF)),"MGLT02614")
@@ -1185,8 +1132,8 @@ If _nCountRec == 0
 					Exit	 
 				EndIf     				
 		                         
-			dbSelectArea(_cAliasExc)
-			(_cAliasExc)->(dbSkip())
+			DBSelectArea(_cAliasExc)
+			(_cAliasExc)->(DBSkip())
 		EndDo       
 		
 		//=============================================================
@@ -1197,14 +1144,14 @@ If _nCountRec == 0
 		//=============================================================
 		If _lRet
 			
-			dbSelectArea("ZZD")
-			ZZD->(dbSetOrder(1))
-			If ZZD->(dbSeek(xFilial("ZZD") + cGNumero))
+			DBSelectArea("ZZD")
+			ZZD->(DBSetOrder(1))
+			If ZZD->(DBSeek(xFilial("ZZD") + cGNumero))
 				RecLock("ZZD",.F.)     
 					ZZD->ZZD_VALOR := cGVlrRepor
 					ZZD->ZZD_VLRTOT:= cGVlrRepor * ZZD->ZZD_VOLUME    
 					ZZD->ZZD_USERAC:= _cMatUsr
-				ZZD->(MsUnlock())     
+				ZZD->(MSUnLock())     
 			Else
 				MsgStop("Problema encontrado na alteração do complemento de pagamento. Não foi possível atualizar a tabela ZZD,favor comunicar ao "+;
 						"departamento de informática.","MGLT02615")
@@ -1246,7 +1193,7 @@ If _nCountRec == 0
 		_lRet:= .F.	 
 	EndIf          
 	
-	(_cAliasExc)->(DbCloseArea())
+	(_cAliasExc)->(DBCloseArea())
 	
 //=================================================================
 //Produtores com o status efetivado ou fechado no Mix, nao podera

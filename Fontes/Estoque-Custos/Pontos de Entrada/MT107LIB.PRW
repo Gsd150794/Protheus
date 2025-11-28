@@ -1,30 +1,23 @@
 /*
 ===============================================================================================================================
-                         ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                           
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Josué Danich 	  | 04/09/2015 | Gravar campos de data/hora e usuário de liberação de SA - Chamado 11726                 
--------------------------------------------------------------------------------------------------------------------------------
-Josué Danich      | 10/07/2017 | Modificada leitura de usuário da função ITRETMAT para padrão Totvs - Chamado 20625
+Josué Danich  |04/09/2015| Chamado 11726. Gravar campos de data/hora e usuário de liberação de SA
+Josué Danich  |10/07/2017| Chamado 20625. Modificada leitura de usuário da função ITRETMAT para padrão Totvs
 ===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#include "protheus.ch"
-#include "topconn.ch"
-#include "rwmake.ch"
+
+#Include "TOTVS.ch"
+
 /*
 ===============================================================================================================================
 Programa----------: MT107LIB
 Autor-------------: Andre Lisboa
 Data da Criacao---: 03/02/2015
-===============================================================================================================================
 Descrição---------: Ponto de entrada valida e efetua liberação das SAs
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: _lRet -> valor logico que permite ou não a liberação
 ===============================================================================================================================
 */
@@ -33,15 +26,15 @@ User Function MT107LIB()
 Local _lRet 	   	:= .F.  
 Local _nCodA		:= RetCodUsr()
 Local _cGrpP		:= SB1->B1_GRUPO
-Local _cSolic  	:= Alltrim(SCP->CP_SOLICIT)
+Local _cSolic  	:= AllTrim(SCP->CP_SOLICIT)
 	
     
-dbselectarea("ZZL")
-dbsetorder(3)
+DBSelectArea("ZZL")
+DBSetOrder(3)
 //Verifica se usuário tem permissão de liberar SA
-If DBSeek(xFilial("ZZL") + _nCodA) .and. ZZL->ZZL_LIBSAS <> 'S'
+If DBSeek(xFilial("ZZL") + _nCodA) .And. ZZL->ZZL_LIBSAS <> 'S'
 
-		xmaghelpfis("Específicos Italac","Liberação não permitida.Usuário não tem permIssão para liberar SAs",;
+		xMagHelpFis("Específicos Italac","Liberação não permitida.Usuário não tem permIssão para liberar SAs",;
 						"Favor solicitar ao responsável pelas aprovações do seu departamento.")
 Else
 
@@ -57,15 +50,15 @@ Else
 
 		Else
 
-			xmaghelpfis("Específicos Italac","Liberação não permitida.",;
+			xMagHelpFis("Específicos Italac","Liberação não permitida.",;
 			"Usuários do grupo SESMT podem liberar somente produto do grupo Indumentaria (0805) .")	
 
-		Endif
+		EndIf
 
    	Else
 
 		//Verifica se SA é do mesmo grupo de aprovação do usuário
-		If cGrpU == cGrpA .and. _cGrpP <> '0805'
+		If cGrpU == cGrpA .And. _cGrpP <> '0805'
 
 			_lRet := .T.
 
@@ -77,38 +70,38 @@ Else
 
 			Else	
 
-				xmaghelpfis("Específicos Italac","Liberação não permitida.",;
+				xMagHelpFis("Específicos Italac","Liberação não permitida.",;
 				"Solicitação não pertence ao grupo do aprovador.")
 
-			Endif
+			EndIf
 
-		Endif	
+		EndIf	
 
-	Endif						
+	EndIf						
 
-Endif
+EndIf
 	
 //Se está liberado grava campos de usuário e data/hora de liberação
-if _lRet
+If _lRet
 
 	//Determina matricula do usuário
 	PswOrder(1)
-	IF PswSeek( _nCodA )
+	If PswSeek( _nCodA )
 		aUsrAux := PswRet(1)
 		cMatric := SubStr( aUsrAux[01][22] , 3 , 8 )
 	Else
 		cMatric := " "
-	EndIF
+	EndIf
 	
-	dbSelectArea("SCP")
+	DBSelectArea("SCP")
 	RecLock("SCP",.F.)
 	
-	SCP->CP_I_DTAPR 	:=	date()
-	SCP->CP_I_HRAPR		:=	time()
+	SCP->CP_I_DTAPR 	:=	Date()
+	SCP->CP_I_HRAPR		:=	Time()
 	SCP->CP_I_CDAPR		:= 	cMatric
 		
-	MsUnlock()
+	MSUnLock()
 		
-Endif
+EndIf
 		
-return(_lRet)
+Return(_lRet)

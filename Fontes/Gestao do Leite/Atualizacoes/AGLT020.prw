@@ -2,33 +2,25 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 03/04/2023 | Corrigida edição de evento de transportadores quando o valor é zerado. Chamado 43458
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 19/06/2024 | Tratamento para gerar apenas 1 item na NF-e de Produtor. Chamado 47627
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 24/07/2024 | Corrigido cálculo dos impostos. Chamado 47975
+Lucas Borges  |19/06/2024| Chamado 47627. Tratamento para gerar apenas 1 item na NF-e de Produtor.
+Lucas Borges  |24/07/2024| Chamado 47975. Corrigido cálculo dos impostos.
+Lucas Borges  |10/10/2025| Chamado 52520. Passagem correta de usuário para as novas threads
+Igor Melgaço  |05/11/2025| Chamado 52841. Ajuste para corrigir erro.log ao clicar em gerar eventos.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
-#Include "RWMake.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT020
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Tela de Mix - Lista os setores, linhas, produtores e seus respectivos valores
 ------------------: Possibilita lancamento,alteracao,exclusao de valores dos eventos de solicitacao de emprestimo ao fornecedor
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -56,7 +48,7 @@ Private _oTempTRBF	:= ""
 Private _oTempTRBG	:= ""
 
 // Obtem tamanhos das telas
-aAdd( aObjects, { 0, 0, .t., .t., .t. } )
+aAdd( aObjects, { 0, 0, .T., .T., .T. } )
 aInfo		:= { _aSize[ 1 ], _aSize[ 2 ], _aSize[ 3 ], _aSize[ 4 ], 3, 3 }
 aPosObj1	:= MsObjSize( aInfo, aObjects,  , .T. )
 
@@ -72,9 +64,9 @@ EndIf
 
 // Obtendo setores que o usuario pode acessar por Fabrica, executado só na manutencao ou visualizacao
 If _nTipo == 2 .Or. _nTipo == 10
-	DbSelectArea("ZLU")
-	ZLU->( DbSetOrder(1) )
-	If ZLU->( DbSeek( xFilial("ZLU") + RetCodUsr() ) )
+	DBSelectArea("ZLU")
+	ZLU->( DBSetOrder(1) )
+	If ZLU->( DBSeek( xFilial("ZLU") + RetCodUsr() ) )
 		If ZLU->ZLU_FILMIX == 'S'//Se o usuário tem acesso, exibo tela para seleção de filiais
 			_cFilMix := LstFabrica()
 			If !Empty( _cFilMix )
@@ -129,7 +121,7 @@ Do Case
 		ShowSetores(_cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1)
 	Case _ntipo == 5 // Exclusão
 		_cAlias := GetNextAlias()
-		BeginSql alias _cALias
+		BeginSql alias _cAlias
 			SELECT COUNT(1) QTD
 			FROM %Table:ZLF%
 			WHERE D_E_L_E_T_ = ' '
@@ -137,13 +129,13 @@ Do Case
 			AND ZLF_ACERTO = 'S'
 		EndSql
 
-		If (_cALias)->QTD > 0
+		If (_cAlias)->QTD > 0
 			MsgStop("O MIX atual não pode ser excluído pois existem fechamentos realizados!","AGLT02008")
-			(_cALias)->( DBCloseArea())
+			(_cAlias)->( DBCloseArea())
 			Return
 		EndIf
 			
-	    (_cALias)->( DBCloseArea())
+	    (_cAlias)->( DBCloseArea())
 	    
 		// Verifica a confirmação e apaga os registros da ZLE e ZLF
 		If MsgYesNo( "Confirma a exclusão do MIX: "+ ZLE->ZLE_COD +" ?" , "AGLT02009" )
@@ -168,11 +160,8 @@ Return
 Programa----------: AGLT020I
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Realiza a inclusão de um novo mix com base na database
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -199,7 +188,7 @@ If (_cAlias)->QTD == 0
 	ZLE->ZLE_DTINI  := _dDataIni
 	ZLE->ZLE_DTFIM  := _dDataFim
 	ZLE->ZLE_STATUS := "A"
-	ZLE->(MsUnLock())
+	ZLE->(MSUnLock())
 	ConfirmSX8()
 	MsgInfo("Mix "+ZLE->ZLE_COD+" - "+DToC(_dDataIni)+"-"+DToC(_dDataFim)+" criado com sucesso!",'AGLT02011')
 Else
@@ -215,11 +204,8 @@ Return
 Programa----------: LstFabrica
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Monta Tela para seleção de Filias
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -247,7 +233,7 @@ Next _nX
 #EndIf
 
 DBSelectArea("ZLS")
-ZLS->(DbSetOrder(1))
+ZLS->(DBSetOrder(1))
 ZLS->(DBGoTop())
 While ZLS->(!Eof())
     //Quando o usuario nao tiver acesso a todas as Filiais       
@@ -287,11 +273,8 @@ Return(_cFilMix)
 Programa----------: CriaTmp
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Cria tabelas temporárias de todas as telas do Mix
-===============================================================================================================================
 Parametros--------: _cTab,_nTipo,_lAgrupa,_cFilSet,_aStruct1,_cFilial,_cSetor,_cLinha,_cFornece,_cLoja
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -314,34 +297,34 @@ _aStruct1	:= {}
 
 //Criando estrutura da tabela temporaria
 //Nome do campo,Tipo,Tamanho,Decimal,Picture,Título,Largura da coluna
-AAdd(_aStruct1,{"FILIAL","C",GetSX3Cache("ZLF_FILIAL","X3_TAMANHO"),00,NiL,"Filial",05})// Filial
-AAdd(_aStruct1,{"COD","C",GetSX3Cache("ZLF_A2COD","X3_TAMANHO"),00,Nil,"Codigo",25})//Código do setor, linha, produtor e fretista
+aAdd(_aStruct1,{"FILIAL","C",GetSX3Cache("ZLF_FILIAL","X3_TAMANHO"),00,"","Filial",05})// Filial
+aAdd(_aStruct1,{"COD","C",GetSX3Cache("ZLF_A2COD","X3_TAMANHO"),00,"","Codigo",25})//Código do setor, linha, produtor e fretista
 If _cTab $ "TRBP/TRBF/TRBG"
-	AAdd(_aStruct1,{"LOJA","C",GetSX3Cache("ZLF_A2LOJA","X3_TAMANHO"),00,Nil,"Loja",18})//loja do produtor e fretista
+	aAdd(_aStruct1,{"LOJA","C",GetSX3Cache("ZLF_A2LOJA","X3_TAMANHO"),00,"","Loja",18})//loja do produtor e fretista
 EndIf
-AAdd(_aStruct1,{"DESCRI","C",40,00,Nil,"Nome",90})//Descrição da linha, setor, nome produtor e fretista
+aAdd(_aStruct1,{"DESCRI","C",40,00,"","Nome",90})//Descrição da linha, setor, nome produtor e fretista
 If _cTab=="TRBG"
-	aAdd(_aStruct1,{"LINHA","C",GetSX3Cache("ZLF_LINROT","X3_TAMANHO"),00,NiL,"Linha",06})//Linha do fretista (detalhes)
+	aAdd(_aStruct1,{"LINHA","C",GetSX3Cache("ZLF_LINROT","X3_TAMANHO"),00,"","Linha",06})//Linha do fretista (detalhes)
 EndIf
-AAdd(_aStruct1,{"VOL","N",11,00,"@E 999,999,999","Volume",40}) //Volume de Leite
-AAdd(_aStruct1,{"POR","N",08,04,"@E 999.9999","(%)",30}) //% do volume para aquela linha
+aAdd(_aStruct1,{"VOL","N",11,00,"@E 999,999,999","Volume",40}) //Volume de Leite
+aAdd(_aStruct1,{"POR","N",08,04,"@E 999.9999","(%)",30}) //% do volume para aquela linha
 If _cTab $ "TRBS/TRBL"
-	AAdd(_aStruct1,{"NUMPRO","N",06,00,"@E 99,999","No.Produtores",45}) //No.Produtores
+	aAdd(_aStruct1,{"NUMPRO","N",06,00,"@E 99,999","No.Produtores",45}) //No.Produtores
 EndIf
-AAdd(_aStruct1,{"MEDVDI","N",09,00,"@E 9,999,999","Volume Diario",43}) //Volume Diário
+aAdd(_aStruct1,{"MEDVDI","N",09,00,"@E 9,999,999","Volume Diario",43}) //Volume Diário
 If _cTab$"TRBS/TRBL/TRBP"
-	AAdd(_aStruct1,{"VLIQFR","N",16,02,"@E 999,999,999.99","Mix",50}) //Total Líquido Produtores+Fretistas (créditos-débitos-imp)
-EndIF
-AAdd(_aStruct1,{"VBRUTO","N",16,02,"@E 999,999,999.99","Valor Nota"+CRLF+"Fiscal",50}) //Total Bruto (créditos)
-AAdd(_aStruct1,{"VLIQCI","N",16,02,"@E 999,999,999.99","Tot.Líq."+CRLF+_cTitulo,50}) //Total Liquido Produtor ou Fretista (créditos-débitos-imp)
-AAdd(_aStruct1,{"VLIQSI","N",16,02,"@E 999,999,999.99","Total Brut"+CRLF+_cTitulo,50}) //Total Líquido Sem Impostos Produtor ou Fretista (créditos-débitos)
-AAdd(_aStruct1,{"VIMP","N",16,02,"@E 999,999,999.99","Tot.Imp."+CRLF+_cTitulo,50}) //Total do Imposto
-If _cTab$"TRBS/TRBL/TRBP"
-	AAdd(_aStruct1,{"LLIQFR","N",10,04,"@E 9,999.9999","Mix p/Litro",50}) //Líq. p/Litro (Prod.+Fret.)
+	aAdd(_aStruct1,{"VLIQFR","N",16,02,"@E 999,999,999.99","Mix",50}) //Total Líquido Produtores+Fretistas (créditos-débitos-imp)
 EndIf
-AAdd(_aStruct1,{"LBRUTO","N",10,04,"@E 9,999.9999","Valor Litro"+CRLF+"Nota Fiscal",50}) //Total Bruto (créditos) p/Litro
-AAdd(_aStruct1,{"LLIQCI","N",10,04,"@E 9,999.9999","Tot.Liq."+CRLF+"p/Litro "+_cTitulo,50}) //Total Líquido Com Impostos (créditos-débitos-imp) p/Litro
-AAdd(_aStruct1,{"LLIQSI","N",10,04,"@E 9,999.9999","Total Bruto"+CRLF+"p/Litro"+_cTitulo,50}) //Total Liquido sem impostos (créditos-débitos) p/Litro
+aAdd(_aStruct1,{"VBRUTO","N",16,02,"@E 999,999,999.99","Valor Nota"+CRLF+"Fiscal",50}) //Total Bruto (créditos)
+aAdd(_aStruct1,{"VLIQCI","N",16,02,"@E 999,999,999.99","Tot.Líq."+CRLF+_cTitulo,50}) //Total Liquido Produtor ou Fretista (créditos-débitos-imp)
+aAdd(_aStruct1,{"VLIQSI","N",16,02,"@E 999,999,999.99","Total Brut"+CRLF+_cTitulo,50}) //Total Líquido Sem Impostos Produtor ou Fretista (créditos-débitos)
+aAdd(_aStruct1,{"VIMP","N",16,02,"@E 999,999,999.99","Tot.Imp."+CRLF+_cTitulo,50}) //Total do Imposto
+If _cTab$"TRBS/TRBL/TRBP"
+	aAdd(_aStruct1,{"LLIQFR","N",10,04,"@E 9,999.9999","Mix p/Litro",50}) //Líq. p/Litro (Prod.+Fret.)
+EndIf
+aAdd(_aStruct1,{"LBRUTO","N",10,04,"@E 9,999.9999","Valor Litro"+CRLF+"Nota Fiscal",50}) //Total Bruto (créditos) p/Litro
+aAdd(_aStruct1,{"LLIQCI","N",10,04,"@E 9,999.9999","Tot.Liq."+CRLF+"p/Litro "+_cTitulo,50}) //Total Líquido Com Impostos (créditos-débitos-imp) p/Litro
+aAdd(_aStruct1,{"LLIQSI","N",10,04,"@E 9,999.9999","Total Bruto"+CRLF+"p/Litro"+_cTitulo,50}) //Total Liquido sem impostos (créditos-débitos) p/Litro
 
 If _cTab=="TRBG"
 	aAdd(_aStruct1,{"KMROD","N",6,00,"@E 99,999","KM Rodado",35})//KM Rodado
@@ -389,7 +372,7 @@ If _nTipo == 10
 	If !Empty(_cSetor)
 		_cFiltro += " AND ZLF.ZLF_SETOR = '"+ _cSetor  +"' "
 	EndIf
-	IF !Empty(_cLinha)
+	If !Empty(_cLinha)
 		_cFiltro += " AND ZLF.ZLF_LINROT = '"+ _cLinha  +"' "
 	EndIf
 	If !Empty(_cFornece)
@@ -403,7 +386,7 @@ If _nTipo == 10
 	EndIf
 EndIf
 //Na tela de Setor, sempre será agrupado e pode apresentar todas as filiais, logo, não filtro filial.
-//Quando não for, ai estarei em uma filial específica e já consigo filtrar
+//Quando não For, ai estarei em uma filial específica e já consigo filtrar
 If _cTab <> "TRBS" 
 	_cFiltro += " AND ZL8_FILIAL = '"+ _cFilial +"' "
 EndIf
@@ -426,14 +409,14 @@ EndSql
 
 While (_cAlias)->( !Eof() )
 	//Nome do campo,Tipo,Tamanho,Decimal,Picture,Título,Largura da coluna
-	AAdd(_aStruct1,{"T"+(_cAlias)->COD,"N",16,2,"@E 999,999,999.99","Total"+CRLF+Capital((_cAlias)->NREDUZ),50}) //Sempre criar a coluna do total do evento para poder calcular os totais sem divergências no arredondamento
+	aAdd(_aStruct1,{"T"+(_cAlias)->COD,"N",16,2,"@E 999,999,999.99","Total"+CRLF+Capital((_cAlias)->NREDUZ),50}) //Sempre criar a coluna do total do evento para poder calcular os totais sem divergências no arredondamento
 	//Nome do campo,Tipo,Tamanho,Decimal,Picture,Título,Largura da coluna - _cTab=="TRBG" -> Não exibe o valor por litro, ou seja, 2 casas decimais
-	AAdd(_aStruct1,{"E"+(_cAlias)->COD,"N",10,4,"@E 9,999.9999",Capital((_cAlias)->NREDUZ),50})
+	aAdd(_aStruct1,{"E"+(_cAlias)->COD,"N",10,4,"@E 9,999.9999",Capital((_cAlias)->NREDUZ),50})
 	(_cAlias)->( DBSkip() )
 EndDo
 (_cAlias)->( DBCloseArea() )
 
-AAdd(_aStruct1,{"STATUS","C",12,00,Nil,"Status",30})
+aAdd(_aStruct1,{"STATUS","C",12,00,"","Status",30})
 
 //Criando tabelas temporaria a partir da estrutura definida
 If Select(_cTab) == 0//Evita criar desnecessáriamente a tabela quando estiver "voltando" (drill Up) na tela
@@ -449,11 +432,8 @@ Return
 Programa----------: GravaTmp
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Grava informações do Mix na tabela temporária criada
-===============================================================================================================================
 Parametros--------: _cTab,_nTipo,_lAgrupa,_cFilSet,_aStruct1,_cFilial,_cSetor,_cLinha,_cFornece,_cLoja
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -476,7 +456,7 @@ Local _cGroupZLD	:= "%%"
 Local _cGroupZLF	:= "%%"
 Local _cOrder		:= "%%"
 Local _nX			:= 0
-Local _nDiasMix		:= Val( SubStr( DtoS( ZLE->ZLE_DTFIM ) , 7 , 2 ) )
+Local _nDiasMix		:= Val( SubStr( DToS( ZLE->ZLE_DTFIM ) , 7 , 2 ) )
 Local _cAlias		:= GetNextAlias()
 Local _cBonif		:= SuperGetMV("LT_CODBON",.F.,"")
 Default	_cFilial	:= ""
@@ -557,7 +537,7 @@ If _cTab $ "TRBS/TRBL/TRBP"
 				WHERE ZLD.D_E_L_E_T_ = ' '
 				%exp:_cFilVolTo%
 				AND ZLD_DTCOLE BETWEEN %exp:ZLE->ZLE_DTINI% AND %exp:ZLE->ZLE_DTFIM%) VOLTOT,
-			(SELECT NVL(SUM(CASE WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL ELSE ZLF.ZLF_TOTAL * -1 END), 0)
+			(SELECT NVL(SUM(Case WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL Else ZLF.ZLF_TOTAL * -1 END), 0)
 				FROM %Table:ZLF% ZLF
 				WHERE ZLF.D_E_L_E_T_ = ' '
 				AND ZLF_FILIAL = FILIAL
@@ -566,7 +546,7 @@ If _cTab $ "TRBS/TRBL/TRBP"
 				AND ZLF_TP_MIX = 'L'
 				AND ZLF_ENTMIX = 'S'
 				AND ZLF_DEBCRE = 'C') TOT_CRED,
-			(SELECT NVL(SUM(CASE WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL ELSE ZLF.ZLF_TOTAL * -1 END), 0)
+			(SELECT NVL(SUM(Case WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL Else ZLF.ZLF_TOTAL * -1 END), 0)
 				FROM %Table:ZLF% ZLF
 				WHERE ZLF.D_E_L_E_T_ = ' '
 				AND ZLF_FILIAL = FILIAL
@@ -583,14 +563,14 @@ If _cTab $ "TRBS/TRBL/TRBP"
 						%exp:_cFilZLD%
 						AND ZLD_DTCOLE BETWEEN %exp:ZLE->ZLE_DTINI% AND %exp:ZLE->ZLE_DTFIM%
 						GROUP BY ZLD_RETIRO, ZLD_RETILJ)) QTD_PRD, ' ' EVENTO, 
-			(SELECT NVL(SUM(CASE WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL ELSE ZLF.ZLF_TOTAL * -1 END), 0)
+			(SELECT NVL(SUM(Case WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL Else ZLF.ZLF_TOTAL * -1 END), 0)
 				FROM %Table:ZLF% ZLF
 				WHERE ZLF.D_E_L_E_T_ = ' '
 				AND ZLF_FILIAL = FILIAL
 				%exp:_cFilZLF%
 				AND ZLF_CODZLE = %exp:ZLE->ZLE_COD%
 				AND ZLF_ENTMIX = 'S') VALOR,
-			(SELECT NVL(SUM(CASE WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL ELSE ZLF.ZLF_TOTAL * -1 END), 0)
+			(SELECT NVL(SUM(Case WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL Else ZLF.ZLF_TOTAL * -1 END), 0)
 				FROM %Table:ZLF% ZLF, %Table:ZL8% ZL8
 				WHERE ZLF.D_E_L_E_T_ = ' '
 				AND ZL8.D_E_L_E_T_ = ' '
@@ -601,7 +581,7 @@ If _cTab $ "TRBS/TRBL/TRBP"
 				AND ZLF_CODZLE = %exp:ZLE->ZLE_COD%
 				AND ZLF_TP_MIX = 'L'
 				AND ZL8_GRUPO = '000007') IMP,
-			(SELECT CASE
+			(SELECT Case
 				WHEN FECHADO = 0 AND ABERTO = 0 AND PREPARADO = 0 AND EFETIVADO = 0 AND BLOQUEADO = 0 THEN 'ABERTO'
 				WHEN FECHADO = 0 AND ABERTO = 1 AND PREPARADO = 0 AND EFETIVADO = 0 AND BLOQUEADO = 0 THEN 'ABERTO'
 				WHEN FECHADO = 1 AND ABERTO = 0 AND PREPARADO = 0 AND EFETIVADO = 0 AND BLOQUEADO = 0 THEN 'FECHADO'
@@ -609,14 +589,14 @@ If _cTab $ "TRBS/TRBL/TRBP"
 				WHEN FECHADO = 0 AND ABERTO = 0 AND PREPARADO = 0 AND EFETIVADO = 0 AND BLOQUEADO = 1 THEN 'BLOQUEADO'
 				WHEN FECHADO = 0 AND ABERTO = 0 AND PREPARADO = 1 AND EFETIVADO = 0 AND BLOQUEADO = 0 THEN 'APROVADO'
 				WHEN FECHADO = 1 AND (ABERTO = 1 OR PREPARADO = 1 OR EFETIVADO = 1 OR BLOQUEADO = 1) THEN 'PARC.FECHADO' 
-				ELSE 'PARCIAL' END STATUS 
+				Else 'PARCIAL' END STATUS 
 			FROM (SELECT ZLF_STATUS FROM %Table:ZLF%
 			WHERE D_E_L_E_T_ = ' '
 			AND ZLF_FILIAL = FILIAL
 			%exp:_cFilZLF%
 			AND ZLF_CODZLE = %exp:ZLE->ZLE_COD%
 			GROUP BY ZLF_STATUS)
-			PIVOT (COUNT(ZLF_STATUS) FOR ZLF_STATUS IN('A' ABERTO,'P' PREPARADO,'E' EFETIVADO,'F' FECHADO,'B' BLOQUEADO))) STATUS
+			PIVOT (COUNT(ZLF_STATUS) For ZLF_STATUS IN('A' ABERTO,'P' PREPARADO,'E' EFETIVADO,'F' FECHADO,'B' BLOQUEADO))) STATUS
 		FROM (SELECT ZLD_FILIAL FILIAL, ZLD_SETOR %exp:_cCampZLD% SUM(ZLD_QTDBOM) VOLUME
 				FROM %Table:ZLD% ZLD %exp:_cTable%
 				WHERE ZLD.D_E_L_E_T_ = ' '
@@ -633,7 +613,7 @@ If _cTab $ "TRBS/TRBL/TRBP"
 		GROUP BY FILIAL, %exp:_cGroup%
 		UNION
 		SELECT ZLF_FILIAL FILIAL, ZLF_SETOR %exp:_cCampos3% 0 VOLUME, 0 VOLTOT, 0 TOT_CRE, 0 TOT_DEB, 0 QTD_PRD, %exp:_cCampos% EVENTO,
-		 NVL(SUM(CASE WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL ELSE ZLF.ZLF_TOTAL * -1 END), 0) VALOR, 0 IMP, ' ' STATUS
+		 NVL(SUM(Case WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL Else ZLF.ZLF_TOTAL * -1 END), 0) VALOR, 0 IMP, ' ' STATUS
 		FROM %Table:ZLF% ZLF %exp:_cTable%, %Table:ZL8% ZL8, %Table:ZL7% ZL7
 		WHERE ZLF.D_E_L_E_T_ = ' '
 		AND ZL7.D_E_L_E_T_ = ' '
@@ -656,7 +636,7 @@ ElseIf _cTab == "TRBF"//Fretista
 			AND ZLD_FILIAL = FILIAL
 			AND ZLD_SETOR = SETOR
 			AND ZLD_DTCOLE BETWEEN %exp:ZLE->ZLE_DTINI% AND %exp:ZLE->ZLE_DTFIM%) VOLTOT,
-			(SELECT NVL(SUM(CASE WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL ELSE ZLF.ZLF_TOTAL * -1 END), 0)
+			(SELECT NVL(SUM(Case WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL Else ZLF.ZLF_TOTAL * -1 END), 0)
 			FROM %Table:ZLF% ZLF
 			WHERE ZLF.D_E_L_E_T_ = ' '
 			AND ZLF_FILIAL = FILIAL
@@ -666,7 +646,7 @@ ElseIf _cTab == "TRBF"//Fretista
 			AND ZLF_CODZLE = %exp:ZLE->ZLE_COD%
 			AND ZLF_ENTMIX = 'S'
 			AND ZLF_DEBCRE = 'C') TOT_CRED,
-			(SELECT NVL(SUM(CASE WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL ELSE ZLF.ZLF_TOTAL * -1 END), 0)
+			(SELECT NVL(SUM(Case WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL Else ZLF.ZLF_TOTAL * -1 END), 0)
 			FROM %Table:ZLF% ZLF
 			WHERE ZLF.D_E_L_E_T_ = ' '
 			AND ZLF_FILIAL = FILIAL
@@ -675,7 +655,7 @@ ElseIf _cTab == "TRBF"//Fretista
 			AND ZLF_A2LOJA = LOJA
 			AND ZLF_CODZLE = %exp:ZLE->ZLE_COD%
 			AND ZLF_DEBCRE = 'D') TOT_DEB,  ' ' EVENTO, 0 VALOR,
-			(SELECT NVL(SUM(CASE WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL ELSE ZLF.ZLF_TOTAL * -1 END), 0)
+			(SELECT NVL(SUM(Case WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL Else ZLF.ZLF_TOTAL * -1 END), 0)
 			FROM %Table:ZLF% ZLF, %Table:ZL8% ZL8
 			WHERE ZLF.D_E_L_E_T_ = ' '
 			AND ZL8.D_E_L_E_T_ = ' '
@@ -687,7 +667,7 @@ ElseIf _cTab == "TRBF"//Fretista
 			AND ZLF_A2LOJA = LOJA
 			AND ZLF_CODZLE = %exp:ZLE->ZLE_COD%
 			AND ZL8_GRUPO = '000007') IMP,
-			(SELECT CASE
+			(SELECT Case
 				WHEN FECHADO = 0 AND ABERTO = 0 AND PREPARADO = 0 AND EFETIVADO = 0 AND BLOQUEADO = 0 THEN 'ABERTO'
 				WHEN FECHADO = 0 AND ABERTO = 1 AND PREPARADO = 0 AND EFETIVADO = 0 AND BLOQUEADO = 0 THEN 'ABERTO'
 				WHEN FECHADO = 1 AND ABERTO = 0 AND PREPARADO = 0 AND EFETIVADO = 0 AND BLOQUEADO = 0 THEN 'FECHADO'
@@ -695,7 +675,7 @@ ElseIf _cTab == "TRBF"//Fretista
 				WHEN FECHADO = 0 AND ABERTO = 0 AND PREPARADO = 0 AND EFETIVADO = 0 AND BLOQUEADO = 1 THEN 'BLOQUEADO'
 				WHEN FECHADO = 0 AND ABERTO = 0 AND PREPARADO = 1 AND EFETIVADO = 0 AND BLOQUEADO = 0 THEN 'APROVADO'
 				WHEN FECHADO = 1 AND (ABERTO = 1 OR PREPARADO = 1 OR EFETIVADO = 1 OR BLOQUEADO = 1) THEN 'PARC.FECHADO'
-				ELSE 'PARCIAL' END STATUS
+				Else 'PARCIAL' END STATUS
 			FROM (SELECT ZLF_STATUS FROM %Table:ZLF%
 			WHERE D_E_L_E_T_ = ' '
 			AND ZLF_FILIAL = FILIAL
@@ -704,7 +684,7 @@ ElseIf _cTab == "TRBF"//Fretista
 			AND ZLF_A2LOJA = LOJA
 			AND ZLF_CODZLE = %exp:ZLE->ZLE_COD%
 			GROUP BY ZLF_STATUS)
-			PIVOT (COUNT(ZLF_STATUS) FOR ZLF_STATUS IN('A' ABERTO,'P' PREPARADO,'E' EFETIVADO,'F' FECHADO,'B' BLOQUEADO))) STATUS
+			PIVOT (COUNT(ZLF_STATUS) For ZLF_STATUS IN('A' ABERTO,'P' PREPARADO,'E' EFETIVADO,'F' FECHADO,'B' BLOQUEADO))) STATUS
 			FROM (SELECT ZLD_FILIAL FILIAL, ZLD_SETOR SETOR, ZLD_FRETIS COD, ZLD_LJFRET LOJA, A2_NOME DESCRI, SUM(ZLD_QTDBOM) VOLUME
 			FROM %Table:ZLD% ZLD, %Table:SA2% SA2
 			WHERE ZLD.D_E_L_E_T_ = ' '
@@ -730,7 +710,7 @@ ElseIf _cTab == "TRBF"//Fretista
 			GROUP BY FILIAL, SETOR, COD, LOJA, DESCRI
 			UNION
 			SELECT ZLF_FILIAL FILIAL, ZLF_A2COD COD, ZLF_A2LOJA LOJA, A2_NOME DESCRI, 0 VOLUME, 0 VOLTOT, 0 TOT_CRE, 0 TOT_DEB, %exp:_cCampos% EVENTO,
-			NVL(SUM(CASE WHEN ZL8.ZL8_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL ELSE ZLF.ZLF_TOTAL * -1 END), 0) VALOR, 0 IMP, ' ' STATUS
+			NVL(SUM(Case WHEN ZL8.ZL8_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL Else ZLF.ZLF_TOTAL * -1 END), 0) VALOR, 0 IMP, ' ' STATUS
 			FROM %Table:ZLF% ZLF, %Table:SA2% SA2, %Table:ZL8% ZL8, %Table:ZL7% ZL7
 			WHERE SA2.D_E_L_E_T_ = ' '
 			AND ZLF.D_E_L_E_T_ = ' '
@@ -764,7 +744,7 @@ ElseIf _cTab == "TRBG"//Detalhe Fretista
 			AND ZLD_FRETIS = COD
             AND ZLD_LJFRET = LOJA
 			AND ZLD_DTCOLE BETWEEN %exp:ZLE->ZLE_DTINI% AND %exp:ZLE->ZLE_DTFIM%) VOLTOT,
-			(SELECT NVL(SUM(CASE WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL ELSE ZLF.ZLF_TOTAL * -1 END), 0)
+			(SELECT NVL(SUM(Case WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL Else ZLF.ZLF_TOTAL * -1 END), 0)
 			FROM %Table:ZLF% ZLF
 			WHERE ZLF.D_E_L_E_T_ = ' '
 			AND ZLF_FILIAL = FILIAL
@@ -774,7 +754,7 @@ ElseIf _cTab == "TRBG"//Detalhe Fretista
 			AND ZLF_A2LOJA = LOJA
 			AND ZLF_CODZLE = %exp:ZLE->ZLE_COD%
 			AND ZLF_DEBCRE = 'C') TOT_CRED,
-			(SELECT NVL(SUM(CASE WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL ELSE ZLF.ZLF_TOTAL * -1 END), 0)
+			(SELECT NVL(SUM(Case WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL Else ZLF.ZLF_TOTAL * -1 END), 0)
 			FROM %Table:ZLF% ZLF
 			WHERE ZLF.D_E_L_E_T_ = ' '
 			AND ZLF_FILIAL = FILIAL
@@ -784,7 +764,7 @@ ElseIf _cTab == "TRBG"//Detalhe Fretista
 			AND ZLF_A2LOJA = LOJA
 			AND ZLF_CODZLE = %exp:ZLE->ZLE_COD%
 			AND ZLF_DEBCRE = 'D') TOT_DEB,  ' ' EVENTO, 0 VALOR, 
-			(SELECT NVL(SUM(CASE WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL ELSE ZLF.ZLF_TOTAL * -1 END), 0)
+			(SELECT NVL(SUM(Case WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL Else ZLF.ZLF_TOTAL * -1 END), 0)
 			FROM %Table:ZLF% ZLF, %Table:ZL8% ZL8
 			WHERE ZLF.D_E_L_E_T_ = ' '
 			AND ZL8.D_E_L_E_T_ = ' '
@@ -819,7 +799,7 @@ ElseIf _cTab == "TRBG"//Detalhe Fretista
 			AND ZLD_LINROT = LINHA
 			AND ZLD_DTCOLE BETWEEN %exp:ZLE->ZLE_DTINI% AND %exp:ZLE->ZLE_DTFIM%
 			GROUP BY ZLD_DTCOLE)) DIASV,
-			(SELECT CASE
+			(SELECT Case
 				WHEN FECHADO = 0 AND ABERTO = 0 AND PREPARADO = 0 AND EFETIVADO = 0 AND BLOQUEADO = 0 THEN 'ABERTO'
 				WHEN FECHADO = 0 AND ABERTO = 1 AND PREPARADO = 0 AND EFETIVADO = 0 AND BLOQUEADO = 0 THEN 'ABERTO'
 				WHEN FECHADO = 1 AND ABERTO = 0 AND PREPARADO = 0 AND EFETIVADO = 0 AND BLOQUEADO = 0 THEN 'FECHADO'
@@ -827,7 +807,7 @@ ElseIf _cTab == "TRBG"//Detalhe Fretista
 				WHEN FECHADO = 0 AND ABERTO = 0 AND PREPARADO = 0 AND EFETIVADO = 0 AND BLOQUEADO = 1 THEN 'BLOQUEADO'
 				WHEN FECHADO = 0 AND ABERTO = 0 AND PREPARADO = 1 AND EFETIVADO = 0 AND BLOQUEADO = 0 THEN 'APROVADO'
 				WHEN FECHADO = 1 AND (ABERTO = 1 OR PREPARADO = 1 OR EFETIVADO = 1 OR BLOQUEADO = 1) THEN 'PARC.FECHADO' 
-				ELSE 'PARCIAL' END STATUS
+				Else 'PARCIAL' END STATUS
 			FROM (SELECT ZLF_STATUS FROM %Table:ZLF%
 			WHERE D_E_L_E_T_ = ' '
 			AND ZLF_FILIAL = FILIAL
@@ -837,7 +817,7 @@ ElseIf _cTab == "TRBG"//Detalhe Fretista
 			AND ZLF_A2LOJA = LOJA
 			AND ZLF_CODZLE = %exp:ZLE->ZLE_COD%
 			GROUP BY ZLF_STATUS)
-			PIVOT (COUNT(ZLF_STATUS) FOR ZLF_STATUS IN('A' ABERTO,'P' PREPARADO,'E' EFETIVADO,'F' FECHADO,'B' BLOQUEADO))) STATUS
+			PIVOT (COUNT(ZLF_STATUS) For ZLF_STATUS IN('A' ABERTO,'P' PREPARADO,'E' EFETIVADO,'F' FECHADO,'B' BLOQUEADO))) STATUS
 			FROM (SELECT ZLD_FILIAL FILIAL, ZLD_SETOR SETOR, ZLD_LINROT LINHA, ZLD_FRETIS COD, ZLD_LJFRET LOJA, A2_NOME DESCRI, SUM(ZLD_QTDBOM) VOLUME, ZL3_KM, ZL3_FRMPG, ZL3_VLRFRT
 			FROM %Table:ZLD% ZLD, %Table:SA2% SA2, %Table:ZL3% ZL3
 			WHERE ZLD.D_E_L_E_T_ = ' '
@@ -874,7 +854,7 @@ ElseIf _cTab == "TRBG"//Detalhe Fretista
 			GROUP BY FILIAL, SETOR, LINHA, COD, LOJA, DESCRI, ZL3_KM, ZL3_FRMPG, ZL3_VLRFRT
 			UNION
 			SELECT ZLF_FILIAL FILIAL, ZLF_LINROT LINHA, ZLF_A2COD COD, ZLF_A2LOJA LOJA, A2_NOME DESCRI, 0 VOLUME, ZL3_KM, ZL3_FRMPG, ZL3_VLRFRT, 0 VOLTOT, 0 TOT_CRE, 0 TOT_DEB, %exp:_cCampos% EVENTO,
-			NVL(SUM(CASE WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL ELSE ZLF.ZLF_TOTAL * -1 END), 0) VALOR, 0 IMP, 0 KMROD, 0 DIASV, ' ' STATUS
+			NVL(SUM(Case WHEN ZLF.ZLF_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL Else ZLF.ZLF_TOTAL * -1 END), 0) VALOR, 0 IMP, 0 KMROD, 0 DIASV, ' ' STATUS
 			FROM %Table:ZLF% ZLF, %Table:SA2% SA2, %Table:ZL8% ZL8, %Table:ZL7% ZL7, %Table:ZL3% ZL3
 			WHERE SA2.D_E_L_E_T_ = ' '
 			AND ZLF.D_E_L_E_T_ = ' '
@@ -920,12 +900,12 @@ While (_cAlias)->( !Eof() )
 			(_cTab)->DIASV := (_cAlias)->DIASV
 			(_cTab)->KMPAD :=(_cAlias)->ZL3_KM
 			(_cTab)->VLRKM := IIf((_cAlias)->ZL3_FRMPG == "K",(_cAlias)->ZL3_VLRFRT,0)
-			(_cTab)->KMDIA := ROUND((_cAlias)->KMROD/(_cAlias)->DIASV,2) //kmRodado divido por Dias/Viagens
+			(_cTab)->KMDIA := Round((_cAlias)->KMROD/(_cAlias)->DIASV,2) //kmRodado divido por Dias/Viagens
 		EndIf
 		(_cTab)->MEDVDI	:= (_cAlias)->VOLUME / _nDiasMix // Volume diaria por Setor
 		If _cTab$"TRBS/TRBL/TRBP"
-			(_cTab)->VLIQFR := (_cALias)->VALOR
-			(_cTab)->LLIQFR := (_cALias)->VALOR/(_cAlias)->VOLUME
+			(_cTab)->VLIQFR := (_cAlias)->VALOR
+			(_cTab)->LLIQFR := (_cAlias)->VALOR/(_cAlias)->VOLUME
 		EndIf
 		(_cTab)->VBRUTO	:= (_cAlias)->TOT_CRED
 		(_cTab)->VLIQCI	:= (_cAlias)->(TOT_CRED+TOT_DEB+IMP)
@@ -936,7 +916,7 @@ While (_cAlias)->( !Eof() )
 		(_cTab)->LLIQSI	:= (_cAlias)->(TOT_CRED+TOT_DEB)/(_cAlias)->VOLUME
 		(_cTab)->STATUS := Capital((_cAlias)->STATUS)
 	Else
-		(_cTab)->(Reclock(_cTab,.F.))
+		(_cTab)->(RecLock(_cTab,.F.))
 	EndIf
 
 	If Empty((_cAlias)->EVENTO)// Grava Volume e Num Pro
@@ -947,7 +927,7 @@ While (_cAlias)->( !Eof() )
 		(_cTab)->&("T"+(_cAlias)->EVENTO) := (_cAlias)->VALOR
 	EndIf		
 	
-	(_cTab)->(MsUnLock())
+	(_cTab)->(MSUnLock())
 	(_cAlias)->( DBSkip() )
 EndDo
 (_cAlias)->(DBCloseArea())
@@ -956,26 +936,26 @@ EndDo
 _cCampos := ""
 //Trato todas as divisões por volume para dividir por 1 caso não tenha volume. Passou a existir transportadores que a viagem fica sem volume.
 For _nX:= 1 To Len(_aStruct1)
-	If _aStruct1[_nX][1] $ "VOL/NUMPRO/MEDVDI/VLIQFR/VBRUTO/VLIQCI/VLIQSI/VIMP" .Or. Substr(_aStruct1[_nX][1],1,1) == "T"
+	If _aStruct1[_nX][1] $ "VOL/NUMPRO/MEDVDI/VLIQFR/VBRUTO/VLIQCI/VLIQSI/VIMP" .Or. SubStr(_aStruct1[_nX][1],1,1) == "T"
 		_cCampos += ", SUM("+_aStruct1[_nX][1]+") "+ _aStruct1[_nX][1]
 	ElseIf _aStruct1[_nX][1] $ "LLIQFR/LBRUTO/LLIQCI/LLIQSI"
-		_cCampos += ", SUM(V"+Substr(_aStruct1[_nX][1],2,5)+") /DECODE(SUM(VOL),0,1,SUM(VOL)) "+ _aStruct1[_nX][1]
+		_cCampos += ", SUM(V"+SubStr(_aStruct1[_nX][1],2,5)+") /DECODE(SUM(VOL),0,1,SUM(VOL)) "+ _aStruct1[_nX][1]
 	ElseIf _aStruct1[_nX][1] $ "POR"
 		_cCampos += ", SUM(VOL)*100/DECODE(SUM(VOL),0,1,SUM(VOL)) "+ _aStruct1[_nX][1]//Sim, conta idiota e sempre será 100%, mas se somar o valor da coluna, geralmente tem erro de arredondamento gerando 99,9999
-	ElseIf Substr(_aStruct1[_nX][1],1,1) == "E" //No Detalhe do Fretista o valor não é por litro, logo, devo somar ao invés de fazer média
-		_cCampos += ", SUM(T"+Substr(_aStruct1[_nX][1],2,6)+") "+"/DECODE(SUM(VOL),0,1,SUM(VOL)) "+ _aStruct1[_nX][1]
+	ElseIf SubStr(_aStruct1[_nX][1],1,1) == "E" //No Detalhe do Fretista o valor não é por litro, logo, devo somar ao invés de fazer média
+		_cCampos += ", SUM(T"+SubStr(_aStruct1[_nX][1],2,6)+") "+"/DECODE(SUM(VOL),0,1,SUM(VOL)) "+ _aStruct1[_nX][1]
 	ElseIf _aStruct1[_nX][2] == "N"
 		_cCampos += ", SUM("+_aStruct1[_nX][1]+") "+ _aStruct1[_nX][1]
 	EndIf
 Next _nX
-_cCampos := "% "+ Substr(_cCampos,2,Len(_cCampos)) + " %"
+_cCampos := "% "+ SubStr(_cCampos,2,Len(_cCampos)) + " %"
 _cFiltro := "% " +&("_oTemp"+_cTab):GetRealName() + " %"
 
 _cAlias := GetNextAlias()
 BeginSql Alias _cAlias
 	SELECT %exp:_cCampos% FROM %exp:_cFiltro%
 EndSql
-Reclock(_cTab,.T.)
+RecLock(_cTab,.T.)
 
 For _nX:= 1 to Len(_aStruct1)
 	If _aStruct1[_nX][1] == "DESCRI"
@@ -985,7 +965,7 @@ For _nX:= 1 to Len(_aStruct1)
 	EndIf
 Next _nX
 
-MsUnLock()
+MSUnLock()
 (_cAlias)->(DBCloseArea())
 
 Return
@@ -995,22 +975,26 @@ Return
 Programa----------: UpdateTab
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Atualiza os valores da tabela temporária, normalmente após algum processo que altera seus valores
-===============================================================================================================================
 Parametros--------: _cTab,_nTipo,_lAgrupa,_cFilSet,_aStruct1,_cFilial,_cSetor,_cLinha,_cFornece,_cLoja
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function UpdateTab(_cTab,_nTipo,_lAgrupa,_cFilSet,_aStruct1,_cFilial,_cSetor,_cLinha,_cFornece,_cLoja)
 
 Local _aArea := {}
-DbSelectArea(_cTab)
-_aArea := GetArea()//Salvo posicionamento da tela para manter o foco no mesmo registro após o refresh dos dados
-ZAP
-Processa ({||CriaTmp(_cTab,_nTipo,_lAgrupa,_cFilSet,_aStruct1,_cFilial,_cSetor,_cLinha,_cFornece,_cLoja),GravaTmp(_cTab,_nTipo,_lAgrupa,_cFilSet,_aStruct1,_cFilial,_cSetor,_cLinha,_cFornece,_cLoja)},"Gravando "+_cTab)
-RestArea(_aArea)
+Local _lExistTMP := (Select (_cTab) > 0)
+
+If _lExistTMP
+	DBSelectArea(_cTab)
+	_aArea := GetArea()//Salvo posicionamento da tela para manter o foco no mesmo registro após o refresh dos dados
+	ZAP
+	Processa ({||CriaTmp(_cTab,_nTipo,_lAgrupa,_cFilSet,_aStruct1,_cFilial,_cSetor,_cLinha,_cFornece,_cLoja),GravaTmp(_cTab,_nTipo,_lAgrupa,_cFilSet,_aStruct1,_cFilial,_cSetor,_cLinha,_cFornece,_cLoja)},"Gravando "+_cTab)
+	FWRestArea(_aArea)
+Else
+	Processa ({||CriaTmp(_cTab,_nTipo,_lAgrupa,_cFilSet,_aStruct1,_cFilial,_cSetor,_cLinha,_cFornece,_cLoja),GravaTmp(_cTab,_nTipo,_lAgrupa,_cFilSet,_aStruct1,_cFilial,_cSetor,_cLinha,_cFornece,_cLoja)},"Gravando "+_cTab)
+EndIf 
+
 If _cTab=="TRBS"
 	oBrowse1:Refresh()
 ElseIf _cTab=="TRBL"
@@ -1030,11 +1014,8 @@ Return
 Programa----------: AGLT020
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Monta tela com dados dos Setores
-===============================================================================================================================
 Parametros--------: _cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1055,7 +1036,7 @@ DEFINE MSDIALOG _oDlg1 FROM 00,00 TO _aSize[6],_aSize[5] TITLE _cTitulo+_cTitOpc
 	oBrowse1 := oBrowse1:GetBrowse()
 	oBrowse1:lLineDrag	:= .T.
 	For _nX:=1 To Len(_aStruct1)
-		If (.T./*_lAgrupa*/ .And. Substr(_aStruct1[_nX][1],1,1) == "T") .Or. !Substr(_aStruct1[_nX][1],1,1)=="T" //Só exibir a coluna de total quando for agrupar
+		If (.T./*_lAgrupa*/ .And. SubStr(_aStruct1[_nX][1],1,1) == "T") .Or. !SubStr(_aStruct1[_nX][1],1,1)=="T" //Só exibir a coluna de total quando For agrupar
 			oBrowse1:AddColumn(TCColumn():New(_aStruct1[_nX][6],&("{||"+_aStruct1[_nX][1]+"}"),_aStruct1[_nX][5],,,IIf(_aStruct1[_nX][2]=="N","RIGHT","LEFT"),_aStruct1[_nX][7],.F.,.F.,,,,.F.,,))
 		EndIf
 	Next _nX
@@ -1065,12 +1046,12 @@ DEFINE MSDIALOG _oDlg1 FROM 00,00 TO _aSize[6],_aSize[5] TITLE _cTitulo+_cTitOpc
 	@aPosObj1[1,4]+22,005 Button "Abrir Setor"	Size 50,10 Action Processa({||ShowLinhas("TRBL",_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,(_cTab)->FILIAL,(_cTab)->COD,(_cTab)->DESCRI)})		OF _oDlg1 PIXEL
 	@aPosObj1[1,4]+22,060 Button "Aprovar" 	    Size 50,10 Action Processa({||AprEfet(_cTab,_nTipo,_cFilSet,(_cTab)->COD,1/*_nAcao*/),UpdateTab(_cTab,_nTipo,.T./*_lAgrupa*/,_cFilSet,_aStruct1)})	OF _oDlg1 PIXEL
 	@aPosObj1[1,4]+22,115 Button "Efetivar"		Size 50,10 Action Processa({||AprEfet(_cTab,_nTipo,_cFilSet,(_cTab)->COD,2/*_nAcao*/),UpdateTab(_cTab,_nTipo,.T./*_lAgrupa*/,_cFilSet,_aStruct1)})	OF _oDlg1 PIXEL
-	@aPosObj1[1,4]+22,170 Button "Gerar Eventos"Size 50,10 Action Processa({||GerEvts(_cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,(_cTab)->FILIAL)})  										OF _oDlg1 PIXEL
+	@aPosObj1[1,4]+22,170 Button "Gerar Eventos"Size 50,10 Action Processa({||GerEvts(_cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,(_cTab)->FILIAL)})  OF _oDlg1 PIXEL
 	@aPosObj1[1,4]+22,225 Button "Transportador"Size 50,10 Action Processa({||ShowFrt("TRBF",_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,(_cTab)->FILIAL,(_cTab)->COD,(_cTab)->DESCRI)})			OF _oDlg1 PIXEL
 	@aPosObj1[1,4]+22,280 Button "Totais Setor"	Size 50,10 Action Processa({||ShowTotal(_cTab,_nTipo,.T./*_lAgrupa*/,_cFilSet,_cTitOpcao,_aStruct1,.F./*_lEdita*/,(_cTab)->FILIAL,(_cTab)->COD)})	OF _oDlg1 PIXEL
-	@aPosObj1[1,4]+22,335 Button "Classif.Produtor"Size 50,10 Action Processa({||U_RGLT043()})																										OF _oDlg1 PIXEL
-	@aPosObj1[1,4]+22,390 Button "Imprimir"	 	Size 50,10 Action Processa({||U_RGLT027(&("_oTemp"+_cTab):GetRealName(),_aStruct1,_cTitulo)})														OF _oDlg1 PIXEL
-	@aPosObj1[1,4]+22,445 Button "Fechar"	 	Size 50,10 Action Close(_oDlg1)																														OF _oDlg1 PIXEL
+	@aPosObj1[1,4]+22,335 Button "Classif.Produtor"Size 50,10 Action Processa({||U_RGLT043()})						OF _oDlg1 PIXEL
+	@aPosObj1[1,4]+22,390 Button "Imprimir"	 	Size 50,10 Action Processa({||U_RGLT027(&("_oTemp"+_cTab):GetRealName(),_aStruct1,_cTitulo)})				OF _oDlg1 PIXEL
+	@aPosObj1[1,4]+22,445 Button "Fechar"	 	Size 50,10 Action _oDlg1:End()OF _oDlg1 PIXEL
 	
 ACTIVATE MSDIALOG _oDlg1 Centered
 
@@ -1083,11 +1064,8 @@ Return
 Programa----------: ShowLinhas
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Monta tela com dados das Linhas
-===============================================================================================================================
 Parametros--------: _cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,_cFilial,_cSetor,_cDescri
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1112,7 +1090,7 @@ DEFINE MSDIALOG _oDlg2 FROM 00,00 TO _aSize[6],_aSize[5] TITLE _cTitulo+_cTitOpc
 	oBrowse2 := oBrowse2:GetBrowse()
 	oBrowse2:lLineDrag	:= .T.
 	For _nX:=1 To Len(_aStruct1)
-		If (_lAgrupa .And. Substr(_aStruct1[_nX][1],1,1) == "T") .Or. !Substr(_aStruct1[_nX][1],1,1)=="T" //Só exibir a coluna de total quando for agrupar
+		If (_lAgrupa .And. SubStr(_aStruct1[_nX][1],1,1) == "T") .Or. !SubStr(_aStruct1[_nX][1],1,1)=="T" //Só exibir a coluna de total quando For agrupar
 			oBrowse2:AddColumn(TCColumn():New(_aStruct1[_nX][6],&("{||"+_aStruct1[_nX][1]+"}"),_aStruct1[_nX][5],,,IIf(_aStruct1[_nX][2]=="N","RIGHT","LEFT"),_aStruct1[_nX][7],.F.,.F.,,,,.F.,,))
 		EndIf
 	Next _nX
@@ -1122,10 +1100,10 @@ DEFINE MSDIALOG _oDlg2 FROM 00,00 TO _aSize[6],_aSize[5] TITLE _cTitulo+_cTitOpc
 	@aPosObj1[1,4]+22,005 Button "Abrir Linha"	Size 50,10 Action Processa({||ShowProdutor("TRBP",_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,(_cTab)->FILIAL,_cSetor,(_cTab)->COD,(_cTab)->DESCRI)})			OF _oDlg2 PIXEL
 	@aPosObj1[1,4]+22,060 Button "Aprovar"		Size 50,10 Action Processa({||AprEfet(_cTab,_nTipo,_cFilSet,_cSetor,1/*_nAcao*/),UpdateTab(_cTab,_nTipo,_lAgrupa,_cFilSet,_aStruct1,(_cTab)->FILIAL,_cSetor)})	OF _oDlg2 PIXEL
 	@aPosObj1[1,4]+22,115 Button "Efetivar"		Size 50,10 Action Processa({||AprEfet(_cTab,_nTipo,_cFilSet,_cSetor,2/*_nAcao*/),UpdateTab(_cTab,_nTipo,_lAgrupa,_cFilSet,_aStruct1,(_cTab)->FILIAL,_cSetor)})	OF _oDlg2 PIXEL
-	@aPosObj1[1,4]+22,170 Button "Gerar Eventos"Size 50,10 Action Processa({||GerEvts(_cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,(_cTab)->FILIAL,_cSetor)})											OF _oDlg2 PIXEL
+	@aPosObj1[1,4]+22,170 Button "Gerar Eventos"Size 50,10 Action Processa({||GerEvts(_cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,(_cTab)->FILIAL,_cSetor)})	OF _oDlg2 PIXEL
 	@aPosObj1[1,4]+22,225 Button "Totais Linha"	Size 50,10 Action Processa({||ShowTotal(_cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,.F./*_lEdita*/,_cFilial,_cSetor,(_cTab)->COD)})						OF _oDlg2 PIXEL
-	@aPosObj1[1,4]+22,280 Button "Imprimir"		Size 50,10 Action Processa({||U_RGLT027(&("_oTemp"+_cTab):GetRealName(),_aStruct1,_cTitulo)}) 																	OF _oDlg2 PIXEL
-	@aPosObj1[1,4]+22,335 Button "Fechar"		Size 50,10 Action Close(_oDlg2)	 																																OF _oDlg2 PIXEL
+	@aPosObj1[1,4]+22,280 Button "Imprimir"		Size 50,10 Action Processa({||U_RGLT027(&("_oTemp"+_cTab):GetRealName(),_aStruct1,_cTitulo)}) 							OF _oDlg2 PIXEL
+	@aPosObj1[1,4]+22,335 Button "Fechar"		Size 50,10 Action _oDlg2:End()	 		OF _oDlg2 PIXEL
 
 ACTIVATE MSDIALOG _oDlg2 Centered
 
@@ -1140,11 +1118,8 @@ Return
 Programa----------: ShowProdutor
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Monta tela com dados dos Produtores
-===============================================================================================================================
 Parametros--------: _cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,_cFilial,_cSetor,_cLinha,_cDescri
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1169,7 +1144,7 @@ DEFINE MSDIALOG _oDlg3 FROM  00,00 TO _aSize[6],_aSize[5] TITLE _cTitulo+_cTitOp
 	oBrowse3:= oBrowse3:GetBrowse()
 	oBrowse3:lLineDrag	:= .T.
 	For _nX:=1 To Len(_aStruct1)
-		If (_lAgrupa .And. Substr(_aStruct1[_nX][1],1,1) == "T") .Or. !Substr(_aStruct1[_nX][1],1,1)=="T" //Só exibir a coluna de total quando for agrupar
+		If (_lAgrupa .And. SubStr(_aStruct1[_nX][1],1,1) == "T") .Or. !SubStr(_aStruct1[_nX][1],1,1)=="T" //Só exibir a coluna de total quando For agrupar
 			oBrowse3:AddColumn(TCColumn():New(_aStruct1[_nX][6],&("{||"+_aStruct1[_nX][1]+"}"),_aStruct1[_nX][5],,,IIf(_aStruct1[_nX][2]=="N","RIGHT","LEFT"),_aStruct1[_nX][7],.F.,.F.,,,,.F.,,))
 		EndIf
 	Next _nX
@@ -1179,11 +1154,11 @@ DEFINE MSDIALOG _oDlg3 FROM  00,00 TO _aSize[6],_aSize[5] TITLE _cTitulo+_cTitOp
 	@aPosObj1[1,4]+22,005 Button "Editar"		Size 50,10 Action Processa({||ShowTotal(_cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,.T./*_lEdita*/,(_cTab)->FILIAL,_cSetor,_cLinha,(_cTab)->COD,(_cTab)->LOJA)})OF _oDlg3 PIXEL
 	@aPosObj1[1,4]+22,060 Button "Aprovar" 	    Size 50,10 Action Processa({||AprEfet(_cTab,_nTipo,_cFilSet,_cSetor,1/*_nAcao*/),UpdateTab(_cTab,_nTipo,_lAgrupa,_cFilSet,_aStruct1,(_cTab)->FILIAL,_cSetor,_cLinha)})	OF _oDlg3 PIXEL
 	@aPosObj1[1,4]+22,115 Button "Efetivar"		Size 50,10 Action Processa({||AprEfet(_cTab,_nTipo,_cFilSet,_cSetor,2/*_nAcao*/),UpdateTab(_cTab,_nTipo,_lAgrupa,_cFilSet,_aStruct1,(_cTab)->FILIAL,_cSetor,_cLinha)})	OF _oDlg3 PIXEL
-	@aPosObj1[1,4]+22,170 Button "Gerar Eventos"Size 50,10 Action Processa({||GerEvts(_cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,(_cTab)->FILIAL,_cSetor,_cLinha)})											OF _oDlg3 PIXEL
+	@aPosObj1[1,4]+22,170 Button "Gerar Eventos"Size 50,10 Action Processa({||GerEvts(_cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,(_cTab)->FILIAL,_cSetor,_cLinha)})	OF _oDlg3 PIXEL
 	@aPosObj1[1,4]+22,225 Button "Totais Produtor"Size 50,10 Action Processa({||ShowTotal(_cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,.F./*_lEdita*/,_cFilial,_cSetor,_cLinha,(_cTab)->COD,(_cTab)->LOJA)})		OF _oDlg3 PIXEL
-	@aPosObj1[1,4]+22,280 Button "Pesquisar"	Size 50,10 Action PesqProd(oBrowse3,_cTab)																																OF _oDlg3 PIXEL
-	@aPosObj1[1,4]+22,335 Button "Imprimir"		Size 50,10 Action Processa({|| U_RGLT027(&("_oTemp"+_cTab):GetRealName(),_aStruct1,_cTitulo)})																			OF _oDlg3 PIXEL
-	@aPosObj1[1,4]+22,390 Button "Fechar"		Size 50,10 Action Close(_oDlg3)																																			OF _oDlg3 PIXEL
+	@aPosObj1[1,4]+22,280 Button "Pesquisar"	Size 50,10 Action PesqProd(oBrowse3,_cTab)		OF _oDlg3 PIXEL
+	@aPosObj1[1,4]+22,335 Button "Imprimir"		Size 50,10 Action Processa({|| U_RGLT027(&("_oTemp"+_cTab):GetRealName(),_aStruct1,_cTitulo)})									OF _oDlg3 PIXEL
+	@aPosObj1[1,4]+22,390 Button "Fechar"		Size 50,10 Action _oDlg3:End()					OF _oDlg3 PIXEL
 
 ACTIVATE MSDIALOG _oDlg3 Centered
 
@@ -1198,11 +1173,8 @@ Return
 Programa----------: ShowFrt
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Monta tela com dados dos Fretistas
-===============================================================================================================================
 Parametros--------: _cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,_cFilial,_cSetor,_cDescri
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1226,7 +1198,7 @@ DEFINE MSDIALOG _oDlg4 FROM  00,00 TO _aSize[6],_aSize[5] TITLE _cTitulo+_cTitOp
 	oBrowse4 := oBrowse4:GetBrowse()
 	oBrowse4:lLineDrag	:= .T.
 	For _nX:=1 To Len(_aStruct1)
-		If (_lAgrupa .And. Substr(_aStruct1[_nX][1],1,1) == "T") .Or. !Substr(_aStruct1[_nX][1],1,1)=="T" //Só exibir a coluna de total quando for agrupar
+		If (_lAgrupa .And. SubStr(_aStruct1[_nX][1],1,1) == "T") .Or. !SubStr(_aStruct1[_nX][1],1,1)=="T" //Só exibir a coluna de total quando For agrupar
 			oBrowse4:AddColumn(TCColumn():New(_aStruct1[_nX][6],&("{||"+_aStruct1[_nX][1]+"}"),_aStruct1[_nX][5],,,IIf(_aStruct1[_nX][2]=="N","RIGHT","LEFT"),_aStruct1[_nX][7],.F.,.F.,,,,.F.,,))
 		EndIf
 	Next _nX
@@ -1236,10 +1208,10 @@ DEFINE MSDIALOG _oDlg4 FROM  00,00 TO _aSize[6],_aSize[5] TITLE _cTitulo+_cTitOp
 	@aPosObj1[1,4]+22,005 Button "Detalhar"		Size 50,10 Action Processa({||ShowFDet("TRBG",_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,(_cTab)->FILIAL,_cSetor,(_cTab)->COD,(_cTab)->LOJA)}) 				OF _oDlg4 PIXEL
 	@aPosObj1[1,4]+22,060 Button "Aprovar" 	    Size 50,10 Action Processa({||AprEfet(_cTab,_nTipo,_cFilSet,_cSetor,1/*_nAcao*/),UpdateTab(_cTab,_nTipo,_lAgrupa,_cFilSet,_aStruct1,(_cTab)->FILIAL,_cSetor)})	OF _oDlg4 PIXEL
 	@aPosObj1[1,4]+22,115 Button "Efetivar"		Size 50,10 Action Processa({||AprEfet(_cTab,_nTipo,_cFilSet,_cSetor,2/*_nAcao*/),UpdateTab(_cTab,_nTipo,_lAgrupa,_cFilSet,_aStruct1,(_cTab)->FILIAL,_cSetor)})	OF _oDlg4 PIXEL
-	@aPosObj1[1,4]+22,170 Button "Gerar Eventos"Size 50,10 Action Processa({||GerEvts(_cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,(_cTab)->FILIAL,_cSetor)})  											OF _oDlg4 PIXEL
+	@aPosObj1[1,4]+22,170 Button "Gerar Eventos"Size 50,10 Action Processa({||GerEvts(_cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,(_cTab)->FILIAL,_cSetor)})  	OF _oDlg4 PIXEL
 	@aPosObj1[1,4]+22,225 Button "Totais Fretista"Size 50,10 Action Processa({||ShowTotal(_cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,.F./*_lEdita*/,(_cTab)->FILIAL,_cSetor)}) 						OF _oDlg4 PIXEL
-	@aPosObj1[1,4]+22,280 Button "Imprimir"		Size 50,10 Action Processa({||U_RGLT027(&("_oTemp"+_cTab):GetRealName(),_aStruct1,_cTitulo)} ) 																	OF _oDlg4 PIXEL
-	@aPosObj1[1,4]+22,335 Button "Fechar"		Size 50,10 Action Close(_oDlg4)																																	OF _oDlg4 PIXEL
+	@aPosObj1[1,4]+22,280 Button "Imprimir"		Size 50,10 Action Processa({||U_RGLT027(&("_oTemp"+_cTab):GetRealName(),_aStruct1,_cTitulo)} ) 							OF _oDlg4 PIXEL
+	@aPosObj1[1,4]+22,335 Button "Fechar"		Size 50,10 Action _oDlg4:End()			OF _oDlg4 PIXEL
 
 ACTIVATE MSDIALOG _oDlg4 Centered
 
@@ -1254,11 +1226,8 @@ Return
 Programa----------: ShowFDet
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Monta tela com dados Detalhados dos Fretistas
-===============================================================================================================================
 Parametros--------: _cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,_cFilial,_cSetor,_cFornece,_cLoja
-===============================================================================================================================
 Retorno-----------: _lRet
 ===============================================================================================================================
 */
@@ -1282,7 +1251,7 @@ DEFINE MSDIALOG _oDlg5 FROM  00,00 TO _aSize[6],_aSize[5] TITLE _cTitulo+_cTitOp
 	oBrowse5 := oBrowse5:GetBrowse()
 	oBrowse5:lLineDrag	:= .T.
 	For _nX:=1 To Len(_aStruct1)
-		If (_lAgrupa .And. Substr(_aStruct1[_nX][1],1,1) == "E") .Or. !Substr(_aStruct1[_nX][1],1,1)=="E" //Só exibir a coluna de valor por litro quando for agrupar. É o inverso das outras telas
+		If (_lAgrupa .And. SubStr(_aStruct1[_nX][1],1,1) == "E") .Or. !SubStr(_aStruct1[_nX][1],1,1)=="E" //Só exibir a coluna de valor por litro quando For agrupar. É o inverso das outras telas
 			oBrowse5:AddColumn(TCColumn():New(_aStruct1[_nX][6],&("{||"+_aStruct1[_nX][1]+"}"),_aStruct1[_nX][5],,,IIf(_aStruct1[_nX][2]=="N","RIGHT","LEFT"),_aStruct1[_nX][7],.F.,.F.,,,,.F.,,))
 		EndIf
 	Next _nX
@@ -1292,11 +1261,11 @@ DEFINE MSDIALOG _oDlg5 FROM  00,00 TO _aSize[6],_aSize[5] TITLE _cTitulo+_cTitOp
 	@aPosObj1[1,4]+22,005 Button "Editar"		Size 50,10 Action Processa({||ShowTotal(_cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,.T./*_lEdita*/,(_cTab)->FILIAL,_cSetor,(_cTab)->LINHA,(_cTab)->COD,(_cTab)->LOJA)})				OF _oDlg5 PIXEL
 	@aPosObj1[1,4]+22,060 Button "Aprovar" 	    Size 50,10 Action Processa({||AprEfet(_cTab,_nTipo,_cFilSet,_cSetor,1/*_nAcao*/),UpdateTab(_cTab,_nTipo,_lAgrupa,_cFilSet,_aStruct1,(_cTab)->FILIAL,_cSetor,/*_Linha*/,_cFornece,_cLoja)})	OF _oDlg5 PIXEL
 	@aPosObj1[1,4]+22,115 Button "Efetivar"		Size 50,10 Action Processa({||AprEfet(_cTab,_nTipo,_cFilSet,_cSetor,2/*_nAcao*/),UpdateTab(_cTab,_nTipo,_lAgrupa,_cFilSet,_aStruct1,(_cTab)->FILIAL,_cSetor,/*_Linha*/,_cFornece,_cLoja)})	OF _oDlg5 PIXEL
-	@aPosObj1[1,4]+22,170 Button "Gerar Eventos"Size 50,10 Action Processa({||GerEvts(_cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,(_cTab)->FILIAL,_cSetor,/*_Linha*/,_cFornece,_cLoja)})											OF _oDlg5 PIXEL
+	@aPosObj1[1,4]+22,170 Button "Gerar Eventos"Size 50,10 Action Processa({||GerEvts(_cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,(_cTab)->FILIAL,_cSetor,/*_Linha*/,_cFornece,_cLoja)})	OF _oDlg5 PIXEL
 	@aPosObj1[1,4]+22,225 Button "Totais Fret.Linha"Size 50,10 Action Processa({||ShowTotal(_cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,.F./*_lEdita*/,(_cTab)->FILIAL,_cSetor,(_cTab)->LINHA)})									OF _oDlg5 PIXEL
-	@aPosObj1[1,4]+22,280 Button "Cad. Linha"	Size 50,10 Action Processa({||OpenCad("ZL3",(_cTab)->FILIAL,(_cTab)->LINHA)})  																												OF _oDlg5 PIXEL
-	@aPosObj1[1,4]+22,335 Button "Imprimir"		Size 50,10 Action Processa({||U_RGLT027(&("_oTemp"+_cTab):GetRealName(),_aStruct1,_cTitulo)} ) 																								OF _oDlg5 PIXEL
-	@aPosObj1[1,4]+22,390 Button "Fechar"		Size 50,10 Action Close(_oDlg5)																																								OF _oDlg5 PIXEL
+	@aPosObj1[1,4]+22,280 Button "Cad. Linha"	Size 50,10 Action Processa({||OpenCad("ZL3",(_cTab)->FILIAL,(_cTab)->LINHA)})  								OF _oDlg5 PIXEL
+	@aPosObj1[1,4]+22,335 Button "Imprimir"		Size 50,10 Action Processa({||U_RGLT027(&("_oTemp"+_cTab):GetRealName(),_aStruct1,_cTitulo)} ) 				OF _oDlg5 PIXEL
+	@aPosObj1[1,4]+22,390 Button "Fechar"		Size 50,10 Action _oDlg5:End()OF _oDlg5 PIXEL
 
 ACTIVATE MSDIALOG _oDlg5 Centered
 
@@ -1311,17 +1280,14 @@ Return
 Programa----------: ShowTotal
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Exibe Browse com os totais dos eventos no registro posicionado ou possibilita a geração de novos eventos
-===============================================================================================================================
 Parametros--------: _cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_lEdita,_cFilial,_cSetor,_cLinha,_cFornece,_cLoja
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function ShowTotal(_cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,_lEdita,_cFilial,_cSetor,_cLinha,_cFornece,_cLoja)
 
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
 Local _cFiltro		:= "%"
 Local _cCampos		:= ""
 Local _cGroup		:= ""
@@ -1356,7 +1322,7 @@ If _lEdita .And. cFilAnt != _cFilial
 	Return
 EndIf
 If _lEdita .And. !AllTrim((_cTab)->STATUS) == "Aberto"
-	MsgStop("Não é permitido editar quando o status for diferente de Aberto!","AGLT02018")
+	MsgStop("Não é permitido editar quando o status For diferente de Aberto!","AGLT02018")
 	Return
 EndIf
 
@@ -1410,7 +1376,7 @@ If _lEdita
 	_cAlias := GetNextAlias()
 	BeginSql alias _cAlias
 		SELECT ZL8_COD EVENTO, ZL8_DESCRI DESCRI, ZL8_ALTERA, ZL8_DEBCRE, ZL8_PERTEN, ZL8_MIX, ZL8_QTDUNI, ZL8_LIMFRT, ZL8_FORMUL, ZL8_MODEDI,
-		NVL(SUM(CASE WHEN ZL8.ZL8_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL ELSE ZLF.ZLF_TOTAL * -1 END), 0) VALOR
+		NVL(SUM(Case WHEN ZL8.ZL8_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL Else ZLF.ZLF_TOTAL * -1 END), 0) VALOR
 			FROM %Table:ZLF% ZLF, %Table:ZL8% ZL8
 			WHERE ZLF.D_E_L_E_T_ (+)= ' '
 			AND ZL8.D_E_L_E_T_ = ' '
@@ -1441,9 +1407,9 @@ Else
 	_cFiltro += IIf(!Empty(_cFornece)," AND ZLF_A2COD = '"+ _cFornece + "' AND ZLF_A2LOJA = '"+ _cLoja + "'","")
 	_cFiltro += "%"
 	_cAlias	:= GetNextAlias()
-	BeginSql alias _cALias
+	BeginSql alias _cAlias
 		SELECT %exp:_cCampos%,
-		NVL(SUM(CASE WHEN ZL8.ZL8_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL ELSE ZLF.ZLF_TOTAL * -1 END), 0) VALOR
+		NVL(SUM(Case WHEN ZL8.ZL8_DEBCRE = 'C' THEN ZLF.ZLF_TOTAL Else ZLF.ZLF_TOTAL * -1 END), 0) VALOR
 		FROM %Table:ZLF% ZLF, %Table:ZL8% ZL8, %Table:ZL7% ZL7
 		WHERE ZLF.D_E_L_E_T_ = ' '
 		AND ZL7.D_E_L_E_T_ = ' '
@@ -1531,7 +1497,7 @@ If Len(_aDados) > 0
 Else
 	MsgInfo("Não existem eventos lançados!","AGLT02020")
 EndIf
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -1540,17 +1506,14 @@ Return
 Programa----------: SaveRec
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Processa os eventos a serem gerados pela tela de Edição
-===============================================================================================================================
 Parametros--------: _oBrowse,_cTab,_cSetor,_cLinha
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function SaveRec(_oBrowse,_cTab,_cSetor,_cLinha)
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _nX		:= 0
 Local _lRet		:= .T.
 
@@ -1561,7 +1524,7 @@ For _nX:=1 To Len(_oBrowse:aArray)
 		//O evento que tem CALCVOLKM na fórmula é uma exceção. Nele o valor total é descosiderado e substituído pelo valor da bonificação conforme configuração da linha (KM ou Litro)
 		//Para esse evento considero o valor unitário informado pelo usuário
 		If AllTrim(_oBrowse:aArray[_nX][12]) == "'CALCVOLKM'" .And. _oBrowse:aArray[_nX][05] > 0 .And. ZL3->ZL3_FRMPG == 'K'
-			//Verifica o tipo de pagamento da linha do Fretista. Se for por KM, atualiza o valor que será gravado.
+			//Verifica o tipo de pagamento da linha do Fretista. Se For por KM, atualiza o valor que será gravado.
 			_oBrowse:aArray[_nX][06] := _oBrowse:aArray[_nX][05]* U_GetKm((_cTab)->FILIAL,_cSetor,_cLinha,(_cTab)->COD,(_cTab)->LOJA,ZLE->ZLE_DTINI,ZLE->ZLE_DTFIM)
 		EndIf
 		//Grava ZLF caso o valor seja diferente do atual. No detalhe do fretista, sem agrupar (que é onde é possível editar), o valor é gravado na coluna de total "T" e não no Evento "E"
@@ -1587,7 +1550,7 @@ For _nX:=1 To Len(_oBrowse:aArray)
 Next _nX
 End Transaction
 End Sequence
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -1596,17 +1559,14 @@ Return
 Programa----------: CalcTot
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Processa validações na tela de Edição
-===============================================================================================================================
 Parametros--------: _cTab,_cSetor,_cLinha,_cFundesa,_oVlrLiq,_oBrowse,_nVlrLiq
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function CalcTot(_cTab,_cSetor,_cLinha,_cFundesa,_oVlrLiq,_oBrowse,_nVlrLiq)
 
-Local _aArea 	:= GetArea()
+Local _aArea 	:= FWGetArea()
 Local _npos 	:= _oBrowse:nAt
 Local _nTotVlr	:= 0
 Local _nFPec	:= 0
@@ -1663,7 +1623,7 @@ BEGIN TRANSACTION
 			_nTotVlr += _oBrowse:aArray[_nX][06]
 			If _oBrowse:aArray[_nX][04] == "C" .And. _oBrowse:aArray[_nX][09] $ "S" 
 				_nTotCred+=_oBrowse:aArray[_nX][06]
-			    Aadd(_aBase,_oBrowse:aArray[_nX][06])
+			    aAdd(_aBase,_oBrowse:aArray[_nX][06])
 			ElseIf _oBrowse:aArray[_nX][04] == "D" .And. _oBrowse:aArray[_nX][09] $ "S"
 				_nTotDeb+=_oBrowse:aArray[_nX][06]
 			EndIf
@@ -1672,7 +1632,7 @@ BEGIN TRANSACTION
 
 	BeginSql alias _cAlias
 		SELECT R_E_C_N_O_ RECZL8
-		FROM %table:ZL8% ZL8
+		FROM %Table:ZL8% ZL8
 		WHERE ZL8.D_E_L_E_T_ = ' '
 		AND ZL8.ZL8_FILIAL = %xFilial:ZL8%
 		AND ZL8.ZL8_PERTEN = 'P'
@@ -1681,7 +1641,7 @@ BEGIN TRANSACTION
 	EndSql
 
 	While (_cAlias)->( !Eof() )
-		ZL8->(dBGoTo((_cAlias)->RECZL8))
+		ZL8->(DBGoTo((_cAlias)->RECZL8))
 		If &( AllTrim( ZL8->ZL8_CONDIC ) )
 			//Calcula Fundesa/Fundepec. Evento tratado como exceção até padronização de todos os impostos na NF-e
 			If ZL8->ZL8_COD == _cFundesa
@@ -1722,7 +1682,7 @@ END TRANSACTION
 _oBrowse:GoPosition(_npos)
 _oVlrLiq:Refresh()
 _oBrowse:DrawSelect()
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -1731,17 +1691,14 @@ Return
 Programa----------: OpenCad
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Abre tela de cadastro solicitada
-===============================================================================================================================
 Parametros--------: _cTabela,_cFilial,_cChave
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function OpenCad(_cTabela,_cFilial,_cChave)
 
-Local _aArea := GetArea()
+Local _aArea := FWGetArea()
 
 DBSelectArea(_cTabela)
 (_cTabela)->(DBSetOrder(1))
@@ -1749,7 +1706,7 @@ DBSelectArea(_cTabela)
 
 AxVisual(_cTabela,(_cTabela)->(Recno()),5)
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 Return
 
 /*
@@ -1757,11 +1714,8 @@ Return
 Programa----------: PesqProd
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Pesquisa o Produtor no Browse
-===============================================================================================================================
 Parametros--------: oBrowse3,_cTab
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1777,9 +1731,9 @@ Local _oSay2	:= Nil
 Local _oDlg		:= Nil
 
 DEFINE MSDIALOG _oDlg TITLE "Pesquisa Produtor" FROM 000, 000  TO 110, 380 Colors 0, 16777215 Pixel
-	@ 008, 013 SAY _oSay1 PROMPT "Código" SIZE 031, 006 OF _oDlg Colors 0, 16777215 Pixel
+	@ 008, 013 Say _oSay1 PROMPT "Código" SIZE 031, 006 OF _oDlg Colors 0, 16777215 Pixel
 	@ 015, 013 MSGET _oFornece VAR _cFornece SIZE 060, 010 OF _oDlg Picture "X99999" Colors 0, 16777215 F3 GetSX3Cache("ZLB_RETIRO","X3_F3") Pixel
-	@ 008, 118 SAY _oSay2 PROMPT "Loja" SIZE 025, 007 OF _oDlg Colors 0, 16777215 Pixel
+	@ 008, 118 Say _oSay2 PROMPT "Loja" SIZE 025, 007 OF _oDlg Colors 0, 16777215 Pixel
 	@ 015, 118 MSGET _oLoja VAR _cLoja SIZE 060, 010 OF _oDlg Picture "9999" Colors 0, 16777215 Pixel
 	@ 035, 141 BUTTON _oButton1 PROMPT "Pesquisar" SIZE 037, 012 OF _oDlg ACTION FindProd(oBrowse3,_oDlg,_cTab,_cFornece,_cLoja) Pixel
 ACTIVATE MSDIALOG _oDlg CENTERED
@@ -1791,11 +1745,8 @@ Return
 Programa----------: FindProd
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Pesquisa o Produtor no Browse
-===============================================================================================================================
 Parametros--------: oBrowse3,_oDlg,_cAlias,_cFornece,_cLoja
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1815,11 +1766,8 @@ Return
 Programa----------: getUltMix
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 10/09/2021
-===============================================================================================================================
 Descrição---------: Obtem numero do Mix anterior
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Código do Mix anterior ao mix corrente
 ===============================================================================================================================
 */
@@ -1827,7 +1775,7 @@ Static Function getUltMix()
 
 Local _cAlias	:= GetNextAlias()
 Local _cUlt		:= ""
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 
 BeginSql alias _cAlias
 	SELECT MAX(ZLE_COD) COD
@@ -1839,7 +1787,7 @@ EndSql
 _cUlt := (_cAlias)->COD
 (_cAlias)->(DBCloseArea())
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return _cUlt
 
@@ -1848,17 +1796,14 @@ Return _cUlt
 Programa----------: gEvtFrtRat
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Grava Evento do Fretista rateando por Produtor
-===============================================================================================================================
 Parametros--------: _cFilial,_cSetor,_cLinha,_cEvento,_cDebCred,_cEveMix,_cFornece,_cLoja,_nValor
-===============================================================================================================================
 Retorno-----------: _lRet -> .T. - Operações realizadas com sucesso / .F. - Erro/não processamneto na execução de alguma etapa
 ===============================================================================================================================
 */
 Static Function gEvtFrtRat(_cFilial,_cSetor,_cLinha,_cEvento,_cDebCred,_cEveMix,_cFornece,_cLoja,_nValor)
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cAlias	:= GetNextAlias()
 Local _lRet		:= .F.
 Local _nCalc	:= 0
@@ -1891,13 +1836,13 @@ If _lRet
 	EndSql
 
 	// Calcula valor total do volume dos produtores
-	While (_cAlias)->(!EOf())
+	While (_cAlias)->(!Eof())
 		_nQtdPrd++
 		_nVolume += (_cAlias)->VOLUME
 		(_cAlias)->(DBSkip())
 	EndDo
 
-	(_cAlias)->(DbGoTop())
+	(_cAlias)->(DBGoTop())
 
 	If _nValor > 0 .And. _nQtdPrd == 0
 		MsgStop("O Transportador ["+ _cFornece +"/"+ _cLoja +"] não possui recepção de Leite na Linha ["+ _cLinha +"] para  realizar o rateio!"+;
@@ -1909,25 +1854,25 @@ If _lRet
 
 		_nCalc++
 
-		DbSelectArea("ZLF")
+		DBSelectArea("ZLF")
 		ZLF->(DBSetOrder(5)) //ZLF_FILIAL+ZLF_CODZLE+ZLF_VERSAO+ZLF_SETOR+ZLF_LINROT+ZLF_EVENTO+ZLF_A2COD+ZLF_A2LOJA+ZLF_RETIRO+ZLF_RETILJ
 		If ZLF->(DBSeek(_cFilial+ZLE->ZLE_COD+"1"+_cSetor+_cLinha+_cEvento+_cFornece+_cLoja+(_cAlias)->(COD+LOJA) ) )
 			If ZLF->ZLF_STATUS == "A"//Garanto que ninguém estava na tela de edição esperando para mudar algum valor após a aprovação
-				Reclock( "ZLF",.F.)
+				RecLock( "ZLF",.F.)
 				If _nValor == 0
 					ZLF->(DBDelete())
 				Else
 					ZLF->ZLF_QTDBOM	:= (_cAlias)->VOLUME
 					ZLF->ZLF_TOTAL  := IIf(_nQtdPrd==_nCalc,_nValor-_nTotParc,Round(_nValor*((_cAlias)->VOLUME/_nVolume ),2))// rateia
 					ZLF->ZLF_VLRLTR := (ZLF->ZLF_TOTAL/ZLF->ZLF_QTDBOM)
-					ZLF->ZLF_DTCALC := DATE()
-					ZLF->( MsUnlock() )			
+					ZLF->ZLF_DTCALC := Date()
+					ZLF->( MSUnLock() )			
 					_nTotParc += Round(_nValor*((_cAlias)->VOLUME/_nVolume),2)
 				EndIf
 				_lRet := .T.
 			EndIf
 		ElseIf _nValor <> 0
-			Reclock("ZLF", .T.)
+			RecLock("ZLF", .T.)
 				ZLF->ZLF_FILIAL		:= _cFilial
 				ZLF->ZLF_CODZLE		:= ZLE->ZLE_COD
 				ZLF->ZLF_VERSAO		:= "1"
@@ -1951,8 +1896,8 @@ If _lRet
 				ZLF->ZLF_TP_MIX		:= "F"
 				ZLF->ZLF_TIPO		:= "F"
 				ZLF->ZLF_STATUS		:= "A"
-				ZLF->ZLF_DTCALC 	:= DATE()
-			MsUnlock()
+				ZLF->ZLF_DTCALC 	:= Date()
+			MSUnLock()
 			
 			_nTotParc	+= Round(_nValor*((_cAlias)->VOLUME/_nVolume),2)
 			_lRet := .T.
@@ -1968,7 +1913,7 @@ If _lRet .And. _nQtdPrd > 0 .And. _cDebCred == "C"
 	_lRet := AtuZLD(_cFilial,"('"+_cSetor+"')",_cLinha,_cLinha,_cFornece,_cFornece,_cLoja,_cLoja)
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return(_lRet)
 
@@ -1977,11 +1922,8 @@ Return(_lRet)
 Programa----------: AtuZLD
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Grava custo do frete na ZLD
-===============================================================================================================================
 Parametros--------: _cFilial,_cSetor,_cLinha,_cEvento,_cDebCred,_cEveMix,_cFornece,_cLoja,_nValor
-===============================================================================================================================
 Retorno-----------: _lRet -> .T. - Operações realizadas com sucesso / .F. - Erro/não processamneto na execução de alguma etapa
 ===============================================================================================================================
 */
@@ -1991,7 +1933,7 @@ Local _lRet		:= .T.
 Local _cUpdate	:= ""
 //O Update deve ser executado tanto na geração de eventos quanto na exclusão. Na exclusão, como não irá encontrar valores na ZLF, 
 //gravará o valor igual a 0. Localiza o total do crédito e a base do frete
-_cUpdate:=" UPDATE "+RetSqlName("ZLD")+" ZLD SET ZLD_CREDFR = CASE WHEN ZLD_KM = 0 THEN 0 ELSE "
+_cUpdate:=" UPDATE "+RetSqlName("ZLD")+" ZLD SET ZLD_CREDFR = Case WHEN ZLD_KM = 0 THEN 0 Else "
 _cUpdate+="                        ((SELECT NVL(SUM(ZLF_TOTAL), 0) FROM "+RetSqlName("ZLF")+" ZLF, "+RetSqlName("ZL8")+" ZL8 "
 _cUpdate+="                          WHERE ZLF.D_E_L_E_T_ = ' ' "
 _cUpdate+="                            AND ZL8.D_E_L_E_T_ = ' ' "
@@ -2015,7 +1957,7 @@ _cUpdate+="                                      AND ZLD2.ZLD_KM > 0 "
 _cUpdate+="                                      AND ZLD2.ZLD_FRETIS = ZLD.ZLD_FRETIS "
 _cUpdate+="                                      AND ZLD2.ZLD_LJFRET = ZLD.ZLD_LJFRET "
 _cUpdate+="                                    GROUP BY ZLD2.ZLD_TICKET, ZLD2.ZLD_CODREC, ZLD2.ZLD_KM)) /*KM*/) * ZLD_KM END, "
-_cUpdate+="       ZLD_VLRFRE = CASE WHEN (SELECT NVL(SUM(ZLF_TOTAL), 0) FROM "+RetSqlName("ZLF")+" ZLF, "+RetSqlName("ZL8")+" ZL8 "
+_cUpdate+="       ZLD_VLRFRE = Case WHEN (SELECT NVL(SUM(ZLF_TOTAL), 0) FROM "+RetSqlName("ZLF")+" ZLF, "+RetSqlName("ZL8")+" ZL8 "
 _cUpdate+="                             WHERE ZLF.D_E_L_E_T_ = ' ' "
 _cUpdate+="                               AND ZL8.D_E_L_E_T_ = ' ' "
 _cUpdate+="                               AND ZLF_FILIAL = ZL8_FILIAL "
@@ -2027,8 +1969,8 @@ _cUpdate+="                               AND ZLF_SETOR = ZLD_SETOR "
 _cUpdate+="                               AND ZLF_LINROT = ZLD_LINROT "
 _cUpdate+="                               AND ZLF_A2COD = ZLD_FRETIS "
 _cUpdate+="                               AND ZLF_A2LOJA = ZLD_LJFRET "
-_cUpdate+="                               AND ZL8_FORMUL LIKE 'U_CALFRETE%') /*FRETE*/ = 0 THEN 0 ELSE ZLD_VLRFRE END, "
-_cUpdate+="       ZLD_VTABFR = CASE WHEN (SELECT NVL(SUM(ZLF_TOTAL), 0) "
+_cUpdate+="                               AND ZL8_FORMUL LIKE 'U_CALFRETE%') /*FRETE*/ = 0 THEN 0 Else ZLD_VLRFRE END, "
+_cUpdate+="       ZLD_VTABFR = Case WHEN (SELECT NVL(SUM(ZLF_TOTAL), 0) "
 _cUpdate+="                              FROM "+RetSqlName("ZLF")+" ZLF, "+RetSqlName("ZL8")+" ZL8 "
 _cUpdate+="                             WHERE ZLF.D_E_L_E_T_ = ' ' "
 _cUpdate+="                               AND ZL8.D_E_L_E_T_ = ' ' "
@@ -2041,7 +1983,7 @@ _cUpdate+="                               AND ZLF_SETOR = ZLD_SETOR "
 _cUpdate+="                               AND ZLF_LINROT = ZLD_LINROT "
 _cUpdate+="                               AND ZLF_A2COD = ZLD_FRETIS "
 _cUpdate+="                               AND ZLF_A2LOJA = ZLD_LJFRET "
-_cUpdate+="                               AND ZL8_FORMUL LIKE 'U_CALFRETE%') /*FRETE*/ = 0 THEN 0 ELSE ZLD_VTABFR END "
+_cUpdate+="                               AND ZL8_FORMUL LIKE 'U_CALFRETE%') /*FRETE*/ = 0 THEN 0 Else ZLD_VTABFR END "
 _cUpdate+=" WHERE D_E_L_E_T_ = ' ' "
 _cUpdate+="   AND ZLD_FILIAL = '"+_cFilial+"' "
 _cUpdate+="   AND ZLD_SETOR IN "+Replace(_cSetores,"%","")
@@ -2063,18 +2005,15 @@ Return(_lRet)
 Programa----------: GrvZLF
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Grava Eventos do produtor e fretista
-===============================================================================================================================
 Parametros--------: _cFilial,_cSetor,_cLinha,_cEvento,_cDebCred,_cEveMix,_cFornece,_cLoja,_nValor,_cQtd,_cTipo
-===============================================================================================================================
 Retorno-----------: _lRet
 ===============================================================================================================================
 */
 Static Function GrvZLF(_cFilial,_cSetor,_cLinha,_cEvento,_cDebCred,_cEveMix,_cFornece,_cLoja,_nValor,_cQtd,_cTipo)
 
 Local _lRet := .F.
-Local _aArea := GetArea()
+Local _aArea := FWGetArea()
 
 If _cTipo == 1 .And. _nValor < 0
 	_nValor := 0
@@ -2082,26 +2021,26 @@ EndIf
 
 DBSelectArea("ZLF")
 If _cTipo == 1
-	ZLF->(DbSetOrder(3)) // ZLF_FILIAL+ZLF_CODZLE+ZLF_VERSAO+ZLF_SETOR+ZLF_LINROT+ZLF_EVENTO+ZLF_A2COD+ZLF_A2LOJA
+	ZLF->(DBSetOrder(3)) // ZLF_FILIAL+ZLF_CODZLE+ZLF_VERSAO+ZLF_SETOR+ZLF_LINROT+ZLF_EVENTO+ZLF_A2COD+ZLF_A2LOJA
 Else
-	ZLF->(DbSetOrder(5)) //ZLF_FILIAL+ZLF_CODZLE+ZLF_VERSAO+ZLF_SETOR+ZLF_LINROT+ZLF_EVENTO+ZLF_A2COD+ZLF_A2LOJA+ZLF_RETIRO+ZLF_RETILJ 
+	ZLF->(DBSetOrder(5)) //ZLF_FILIAL+ZLF_CODZLE+ZLF_VERSAO+ZLF_SETOR+ZLF_LINROT+ZLF_EVENTO+ZLF_A2COD+ZLF_A2LOJA+ZLF_RETIRO+ZLF_RETILJ 
 EndIf
-If ZLF->(DbSeek(_cFilial+ZLE->ZLE_COD+"1"+_cSetor+_cLinha+_cEvento+_cFornece+_cLoja))
+If ZLF->(DBSeek(_cFilial+ZLE->ZLE_COD+"1"+_cSetor+_cLinha+_cEvento+_cFornece+_cLoja))
 	If ZLF->ZLF_STATUS == "A"//Garanto que ninguém estava na tela de edição esperando para mudar algum valor após a aprovação
-		Reclock("ZLF", .F.)
+		RecLock("ZLF", .F.)
 		If _nValor == 0
 			DBDelete()
 		Else
 			ZLF->ZLF_QTDBOM	:= IIf(_cQtd <> 'S',U_VolLeite(_cFilial,ZLE->ZLE_DTINI,ZLE->ZLE_DTFIM,_cSetor,_cLinha,_cFornece,_cLoja,""),1) 
 			ZLF->ZLF_TOTAL  := _nValor
 			ZLF->ZLF_VLRLTR := (_nValor/ZLF->ZLF_QTDBOM)
-			ZLF->ZLF_DTCALC := DATE()
+			ZLF->ZLF_DTCALC := Date()
 		EndIf
-		MsUnlock()
+		MSUnLock()
 		_lRet := .T.
 	EndIf
 ElseIf _nValor <> 0 .And. IsOpen(_cFilial,_cSetor,_cLinha,_cFornece,_cLoja)
-	Reclock("ZLF", .T.)
+	RecLock("ZLF", .T.)
 		ZLF->ZLF_FILIAL := _cFilial
 		ZLF->ZLF_CODZLE := ZLE->ZLE_COD
 		ZLF->ZLF_VERSAO := "1"
@@ -2125,12 +2064,12 @@ ElseIf _nValor <> 0 .And. IsOpen(_cFilial,_cSetor,_cLinha,_cFornece,_cLoja)
 		ZLF->ZLF_TIPO   := IIf(_cTipo==1,"L","F")
 		ZLF->ZLF_SEQ	:= U_GetSeqZLF(ZLE->ZLE_COD,_cEvento,_cFornece,_cLoja)
 		ZLF->ZLF_STATUS := "A"
-		ZLF->ZLF_DTCALC := DATE()
-	MsUnlock()
+		ZLF->ZLF_DTCALC := Date()
+	MSUnLock()
 	_lRet := .T.
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return _lRet
 
@@ -2139,11 +2078,8 @@ Return _lRet
 Programa----------: isOpen
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Verifica se existem registros em Aberto de acordo com os parâmetros passados
-===============================================================================================================================
 Parametros--------: _cFilial,_cSetor,_cLinha,_cFornece,_cLoja
-===============================================================================================================================
 Retorno-----------: _lRet -> L -> .T.-tudo em aberto /.F.-registros não abertos
 ===============================================================================================================================
 */
@@ -2182,11 +2118,8 @@ Return _lRet
 Programa----------: AprEfet
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Monta a tela de Aprovação/Efetivação do Mix
-===============================================================================================================================
 Parametros--------: _cTab,_cFilSet,_cSetor,_nAcao
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -2224,10 +2157,10 @@ DEFINE MSDIALOG _oDlg FROM 0,0 TO 190,420 PIXEL TITLE _cTitulo
 
 @003,003 TO 92,210
 
-@010,010 SAY "Essa rotina tem como objetivo "+_cTitulo+" os Setores do MIX. Isso podeser feito para "	PIXEL OF _oDlg
-@020,010 SAY "o Setor posicionado ou para todos os Setores."											PIXEL OF _oDlg
-@030,010 SAY "Após a aprovação e efetivação o Mix estará apto para ser fechado."						PIXEL OF _oDlg
-@040,010 SAY _cDesc																						PIXEL OF _oDlg
+@010,010 Say "Essa rotina tem como objetivo "+_cTitulo+" os Setores do MIX. Isso podeser feito para "	PIXEL OF _oDlg
+@020,010 Say "o Setor posicionado ou para todos os Setores."											PIXEL OF _oDlg
+@030,010 Say "Após a aprovação e efetivação o Mix estará apto para ser fechado."						PIXEL OF _oDlg
+@040,010 Say _cDesc																						PIXEL OF _oDlg
 
 TButton():New(055,005,_cTitulo+" Setor Posicionado",_oDlg,{|| Processa({||SetStatus(_cTab,_cFilSet,_cSetor,IIf(_nAcao==1,"1","5")/*_cAcao*/)}),_oDlg:End()},100,010,,,,.T.) 
 TButton():New(055,107,_cTitulo+" Todos os Setores",_oDlg,{|| Processa({||SetStatus(_cTab,_cFilSet,_cSetor,IIf(_nAcao==1,"2","6")/*_cAcao*/)}),_oDlg:End()},100,010,,,,.T.) 
@@ -2244,11 +2177,8 @@ Return
 Programa----------: SetStatus
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Atualiza o status do Mix
-===============================================================================================================================
 Parametros--------: _cTab,_cFilSet,_cSetor,_cAcao
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -2309,14 +2239,14 @@ Begin Transaction
 	If _cStatus $ "E/P"
 		_cAlias := GetNextAlias()
 		BeginSql alias _cAlias
-			SELECT ZL2.R_E_C_N_O_ RECNO, NVL(SUM(CASE WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL ELSE ZLF_TOTAL * -1 END),0) VALOR,
+			SELECT ZL2.R_E_C_N_O_ RECNO, NVL(SUM(Case WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL Else ZLF_TOTAL * -1 END),0) VALOR,
 				(SELECT NVL(SUM(ZLD_QTDBOM), 0)
 					FROM %Table:ZLD%
 					WHERE D_E_L_E_T_ = ' '
 					AND ZLD_FILIAL = ZL2_FILIAL
 					AND ZLD_SETOR = ZL2_COD
 					AND ZLD_DTCOLE BETWEEN %exp:ZLE->ZLE_DTINI% AND %exp:ZLE->ZLE_DTFIM%) VOLUME,
-				(SELECT NVL(SUM(CASE WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL ELSE ZLF_TOTAL * -1 END), 0)
+				(SELECT NVL(SUM(Case WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL Else ZLF_TOTAL * -1 END), 0)
 					FROM %Table:ZLF% ZLF
 					WHERE ZLF.D_E_L_E_T_ = ' '
 					AND ZLF_FILIAL = ZL2_FILIAL
@@ -2337,14 +2267,14 @@ Begin Transaction
 		//Evita que testes em mix que ainda não tem o mês completo alterem o custo do mês usado pelo Custo
 		If DDataBase <= Date()
 			DBSelectArea('ZL2')
-			Do While (_cAlias)->(!Eof())
+			While (_cAlias)->(!Eof())
 				ZL2->(DBGoTo((_cAlias)->RECNO))
 					RecLock('ZL2',.F.)
 					ZL2->ZL2_ULTMIX	:= Round((_cAlias)->VALOR/(_cAlias)->VOLUME,4)
 					ZL2->ZL2_ULMISF := Round(((_cAlias)->VALOR-(_cAlias)->FRETE)/(_cAlias)->VOLUME,4)
 					ZL2->ZL2_DTUMIX	:= Date()
 					ZL2->ZL2_HRUMIX	:= Time()
-					ZL2->( MsUnLock() )
+					ZL2->( MSUnLock() )
 				(_cAlias)->( DBSkip() )
 			EndDo
 		EndIf
@@ -2358,17 +2288,14 @@ Return
 Programa----------: GerEvts
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Monta tela com eventos para a geração dos dados para o Mix
-===============================================================================================================================
 Parametros--------: _cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,_cFilial,_cSetor,_cLinha,_cFornece,_cLoja
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function GerEvts(_cTab,_nTipo,_lAgrupa,_cFilSet,_cTitOpcao,_aStruct1,_cFilial,_cSetor,_cLinha,_cFornece,_cLoja)
 
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
 Local _cAlias		:= GetNextAlias()
 Local _oDlg			:= Nil
 Local _oOK			:= LoadBitmap(GetResources(),'LBOK')
@@ -2483,7 +2410,7 @@ If _cTab=="TRBS"
 	_cFilial := ""//Limpar conteúdo da variável porque na tela de setor o filtro usado é o _cFilSet, já que na tela são exibidas várias filiais.
 EndIf
 UpdateTab(_cTab,_nTipo,IIf(_cTab=="TRBS",.T.,_lAgrupa),_cFilSet,_aStruct1,_cFilial,_cSetor,_cLinha,_cFornece,_cLoja)
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -2492,11 +2419,8 @@ Return
 Programa----------: AGLT020EVE
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Executa as formulas dos eventos para todos os eventos e setores marcado, de acordo com o pergunte
-===============================================================================================================================
 Parametros--------: _aSetOri,_aEveOri,_cModo
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -2547,10 +2471,10 @@ For _nX:=1 To Len(_aEveOri)
 	If _aEveOri[_nX,1] == .T. // marcado
 		aAdd(_aEventos,_aEveOri[_nX,3])
 		// Grava valor digitado pelo usuario na tabela
-		ZL8->(DbSeek(cFilAnt+_aEveOri[_nX,3]))
+		ZL8->(DBSeek(cFilAnt+_aEveOri[_nX,3]))
 		ZL8->(RecLock("ZL8",.F.))
 		ZL8->ZL8_VALOR:=_aEveOri[_nX,6]
-		ZL8->(MSUNLOCK())
+		ZL8->(MSUnLock())
 	EndIf
 Next _nX
 
@@ -2560,7 +2484,7 @@ If Len(_aSetores) == 0 .Or. Len(_aEventos) == 0
 EndIf
 
 //Busca lista de Linhas que serão processadas
-_cSetores := "% "+ FormatIn(Substr(_cSetores,2,Len(_cSetores)),';') + " %"
+_cSetores := "% "+ FormatIn(SubStr(_cSetores,2,Len(_cSetores)),';') + " %"
 
 If MV_PAR13 == 1 //1-Produtores 2-Fretistas
 	_cFiltro := "% ('P','T') %"
@@ -2568,8 +2492,8 @@ Else
 	_cFiltro := "% ('F','T') %"
 EndIf
 //Busco qual o último evento a ser processado. Quando executado, ele precisa ser sempre o último, logo, sempre
-//que algum evento for excluído ele também deve ser, assim, forçamos o usuário a rodá-lo novamente.
-//Aproveito e retorno se ele já foi executado para os parâmetros informados, pois se for geração, não deixo continuar.
+//que algum evento For excluído ele também deve ser, assim, forçamos o usuário a rodá-lo novamente.
+//Aproveito e retorno se ele já foi executado para os parâmetros informados, pois se For geração, não deixo continuar.
 _cAlias := GetNextAlias()
 BeginSql alias _cAlias
 	SELECT ZL8_COD, ZL8_DESCRI,
@@ -2599,7 +2523,7 @@ If _lApagar
 		EndIf
 	Next _nX
 
-	If !MsgYesNo("Confirma a EXCLUSÃO dos eventos selecionados? "+ IIf(!Empty((_cAlias)->ZL8_COD),"Para garantir a integridade do cálculo o evento " +;
+If !MsgYesNo("Confirma a EXCLUSÃO dos eventos selecionados? "+ IIf(!Empty((_cAlias)->ZL8_COD),"Para garantir a integridade do cálculo o evento " +;
 				(_cAlias)->ZL8_COD + " - " + AllTrim((_cAlias)->ZL8_DESCRI) + " também foi incluído na lista dos eventos a "+;
 				"serem excluídos e, se necessário, deverá ser recalculado.",""),"AGLT02034")
 		(_cAlias)->(DBCloseArea())
@@ -2672,7 +2596,7 @@ If !_lApagar
 			ORDER BY FILIAL, SETOR, LINHA, FORNEC, LOJA
 	EndSql
 	Count To _nTotReg
-	(_cAlias)->( DbGotop() )
+	(_cAlias)->( DBGoTop() )
 
 	PutGlbValue("_nQtdProc","0")
 	GlbUnLock()
@@ -2719,11 +2643,11 @@ If !_lApagar
 			PutGlbValue(_cJobAux,"0")
 			GlbUnLock()
 			//Dispara Thread
-			StartJob("U_AGLT020J",GetEnvServer(),.F.,cEmpAnt,cFilAnt,_aDados,_aThreads[_nX,1],_aThreads[_nX,2],_cJobFile,StrZero(_nX,2),_aEventos,_lApagar,ZLE->ZLE_COD,MV_PAR13,_cThreadP,__cUserId)
+			StartJob("U_AGLT020J",GetEnvServer(),.F.,cEmpAnt,cFilAnt,_aDados,_aThreads[_nX,1],_aThreads[_nX,2],_cJobFile,StrZero(_nX,2),_aEventos,_lApagar,ZLE->ZLE_COD,MV_PAR13,_cThreadP,totvs.framework.users.rpc.getAuthToken())
 		Next _nX
 		//Controle de Seguranca para MULTI-THREAD
 		For _nX :=1 to _nThreads
-			_nPos := ASCAN(_aJobAux,{|x|x[1]==StrZero(_nX,2)})
+			_nPos := aScan(_aJobAux,{|x|x[1]==StrZero(_nX,2)})
 			// Informacoes do semaforo
 			_cJobFile:= _aJobAux[_nPos,2]
 			// Inicializa variavel global de controle de thread
@@ -2750,7 +2674,7 @@ If !_lApagar
 								PutGlbValue(_cJobAux, "0" )
 								GlbUnLock()
 								// Dispara thread novamente
-								StartJob("U_AGLT020J",GetEnvServer(),.F.,cEmpAnt,cFilAnt,_aDados,_aThreads[_nX,1],_aThreads[_nX,2],_cJobFile,StrZero(_nX,2),_aEventos,_lApagar,ZLE->ZLE_COD,MV_PAR13,_cThreadP,__cUserId)
+								StartJob("U_AGLT020J",GetEnvServer(),.F.,cEmpAnt,cFilAnt,_aDados,_aThreads[_nX,1],_aThreads[_nX,2],_cJobFile,StrZero(_nX,2),_aEventos,_lApagar,ZLE->ZLE_COD,MV_PAR13,_cThreadP,totvs.framework.users.rpc.getAuthToken())
 							EndIf
 							_nRetry_1 ++
 						EndIf
@@ -2777,11 +2701,11 @@ If !_lApagar
 			@ 1,001 LISTBOX _oOcorr Fields HEADER Space(63) SIZE 190,70
 			_oOcorr:SetArray(_aProcsOk)
 			_oOcorr:bLine := { || {_aProcsOk[_oOcorr:nAT]} }
-			DEFINE SBUTTON FROM 18,202 TYPE 1 ACTION _oDlgOcorr:End() ENABLE OF _oDlgOcorr
+			DEFINE SBUTTON FROM 18,202 Type 1 ACTION _oDlgOcorr:End() ENABLE OF _oDlgOcorr
 			ACTIVATE MSDIALOG _oDlgOcorr
 		EndIf
 	Else
-		U_AGLT020J(cEmpAnt,cFilAnt,_aDados,_aThreads[1,1],_aThreads[1,2],_cJobFile,StrZero(1,2),_aEventos,_lApagar,ZLE->ZLE_COD,MV_PAR13,_cThreadP,__cUserId)
+		U_AGLT020J(cEmpAnt,cFilAnt,_aDados,_aThreads[1,1],_aThreads[1,2],_cJobFile,StrZero(1,2),_aEventos,_lApagar,ZLE->ZLE_COD,MV_PAR13,_cThreadP,totvs.framework.users.rpc.getAuthToken())
 		MsgInfo("Eventos gerados com sucesso!","AGLT02041")
 	EndIf
 Else//Apagar eventos apenas de produtores
@@ -2831,15 +2755,12 @@ Return
 Programa----------: AGLT020J
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 03/11/2021
-===============================================================================================================================
 Descrição---------: Executa as threads gravando os eventos
-===============================================================================================================================
-Parametros--------: _cEmpAnt,_cFilAnt,_aDados,_nRegIni,_nRegFim,_cJobFile,_cThread,_aEventos,_cMix,_nTipo,_cThreadP,_cUserId
-===============================================================================================================================
+Parametros--------: _cEmpAnt,_cFilAnt,_aDados,_nRegIni,_nRegFim,_cJobFile,_cThread,_aEventos,_cMix,_nTipo,_cThreadP,_cToken
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function AGLT020J(_cEmpAnt,_cFilAnt,_aDados,_nRegIni,_nRegFim,_cJobFile,_cThread,_aEventos,_lApagar,_cMix,_nTipo,_cThreadP,_cUserId)
+User Function AGLT020J(_cEmpAnt,_cFilAnt,_aDados,_nRegIni,_nRegFim,_cJobFile,_cThread,_aEventos,_lApagar,_cMix,_nTipo,_cThreadP,_cToken)
 
 Local _nX 		:= 0
 Local _nI		:= 0
@@ -2847,8 +2768,6 @@ Local _nValor	:= 0
 Local _nHd1		:=0
 Local _lJob		:= IsBlind()
 If _lJob
-	//Atualizo o usuário que subiu a thread para efeitos de logs
-	__cUserId := _cUserId
 	// Apaga arquivo ja existente
 	If File(_cJobFile)
 		fErase(_cJobFile)
@@ -2866,6 +2785,7 @@ If _lJob
 	RpcSetType(3)
 	// Seta job para empresa filial desejada
 	RpcSetEnv(_cEmpAnt,_cFilAnt,,,'COM')
+	totvs.framework.users.rpc.authByToken(_cToken)
 EndIf
 
 // STATUS 2 - Conexao efetuada com sucesso
@@ -2895,10 +2815,10 @@ For _nI := _nRegIni To _nRegFim
 				_nValor	:=	0
 			EndIf
 			// Se For Debito converte para positivo na gravacao
-			If ZL8->ZL8_DEBCRE == "D" .and. _nValor < 0
+			If ZL8->ZL8_DEBCRE == "D" .And. _nValor < 0
 				_nValor := _nValor*-1
 			EndIf
-			//Grava o evento na ZLF. Se o valor for zero, apaga da ZLF
+			//Grava o evento na ZLF. Se o valor For zero, apaga da ZLF
 			If _nTipo == 1 //1-Produtores 2-Fretistas
 				GrvZLF(_cFilAnt,ZL2->ZL2_COD,ZL3->ZL3_COD,ZL8->ZL8_COD,ZL8->ZL8_DEBCRE,ZL8->ZL8_MIX,SA2->A2_COD,SA2->A2_LOJA,_nValor,ZL8->ZL8_QTDUNI,_nTipo)
 			Else
@@ -2917,5 +2837,8 @@ Next _nI
 // STATUS 3 - Processamento efetuado com sucesso
 PutGlbValue("AGLT020J"+_cThreadP+_cEmpAnt+_cFilAnt+_cThread,"3")
 GlbUnLock()
+If _lJob
+	RpcClearEnv()
+EndIf
 
 Return

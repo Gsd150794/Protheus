@@ -2,15 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 01/02/2022 | Chamado 39073. Incluídas novas colunas solicitadas
-Lucas Borges  | 06/11/2023 | Chamado 45404. Corrigida informação sobre inclusão
-Lucas Borges  | 22/04/2025 | Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
+Lucas Borges  |01/02/2022| Chamado 39073. Incluídas novas colunas solicitadas
+Lucas Borges  |06/11/2023| Chamado 45404. Corrigida informação sobre inclusão
+Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
 ===============================================================================================================================
 */
 
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -108,10 +108,10 @@ Local _lPlanilha 	:= oReport:nDevice == 4
 If MV_PAR01 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZL2")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -143,7 +143,7 @@ EndIf
 //====================================================================================================
 // Monta filtro de acordo com a tabela de origem
 //====================================================================================================
-_cFiltro += " AND SUBSTR(A2_L_LI_RO, 1, 2) "+ GetRngFil( _aSelFil, "ZL2", .T.,)
+_cFiltro += " AND SubStr(A2_L_LI_RO, 1, 2) "+ GetRngFil( _aSelFil, "ZL2", .T.,)
 //Se preencheu os setores, já fiz a validação de acesso no SX1
 //Se não preencheu e não tem acesso a todos, filtra de forma que não retorme registros
 If !Empty(MV_PAR02) .Or. Empty(MV_PAR02) .And. Posicione("ZLU",1,xFilial("ZLU")+RetCodUsr(),"ZLU_SETALL") <> 'S'
@@ -170,7 +170,7 @@ BeginSql alias _cAlias
      column DT_INC as Date
      SELECT USR_NOME USR_INC,TO_CHAR(CAST(SA2.I_N_S_D_T_ AT TIME ZONE '-06:00' AS DATE),'YYYYMMDD') DT_INC,
           A2_COD, A2_LOJA, A2_NOME, A2_CGC, A2_L_TIPPR, A2_L_CLASS, ZL3_COD, ZL3_DESCRI, ZL2_COD, ZL2_DESCRI,
-          SUBSTR(A2_L_LI_RO, 1, 2) A2_FILIAL, A2_L_LATIT, A2_L_LONGI, A2_L_MARTQ, A2_L_CAPAC, A2_L_CAPTQ, A2_L_NROOR
+          SubStr(A2_L_LI_RO, 1, 2) A2_FILIAL, A2_L_LATIT, A2_L_LONGI, A2_L_MARTQ, A2_L_CAPAC, A2_L_CAPTQ, A2_L_NROOR
      FROM %Table:SA2% SA2, SYS_USR U,
           (SELECT ZL3_FILIAL, ZL3_COD, ZL3_DESCRI, ZL2_COD, ZL2_DESCRI
                FROM %Table:ZL3% ZL3, %Table:ZL2% ZL2
@@ -179,15 +179,15 @@ BeginSql alias _cAlias
                AND ZL2.D_E_L_E_T_ = ' '
                AND ZL3.D_E_L_E_T_ = ' ')
      WHERE ZL3_COD(+) = A2_L_LI_RO
-     AND ZL3_FILIAL(+) = SUBSTR(A2_L_LI_RO, 1, 2)
-     AND U.USR_ID(+) = SUBSTR(A2_USERLGI,11,1)||SUBSTR(A2_USERLGI,15,1)||SUBSTR(A2_USERLGI,2,1)||SUBSTR(A2_USERLGI,6,1)||SUBSTR(A2_USERLGI,10,1)||SUBSTR(A2_USERLGI,14,1)
+     AND ZL3_FILIAL(+) = SubStr(A2_L_LI_RO, 1, 2)
+     AND U.USR_ID(+) = SubStr(A2_USERLGI,11,1)||SubStr(A2_USERLGI,15,1)||SubStr(A2_USERLGI,2,1)||SubStr(A2_USERLGI,6,1)||SubStr(A2_USERLGI,10,1)||SubStr(A2_USERLGI,14,1)
      %exp:_cFiltro%
      AND A2_COD BETWEEN %exp:MV_PAR04% AND %exp:MV_PAR05%
      AND A2_LOJA BETWEEN %exp:MV_PAR06% AND %exp:MV_PAR07%
      AND TO_CHAR(CAST(SA2.I_N_S_D_T_ AT TIME ZONE '-06:00' AS DATE),'YYYYMMDD') BETWEEN %exp:MV_PAR08% AND %exp:MV_PAR09%
      AND SA2.D_E_L_E_T_ = ' '
      AND U.D_E_L_E_T_(+) = ' '
-     ORDER BY SUBSTR(A2_L_LI_RO, 1, 2), USR_INC, DT_INC, A2_COD, A2_LOJA
+     ORDER BY SubStr(A2_L_LI_RO, 1, 2), USR_INC, DT_INC, A2_COD, A2_LOJA
 EndSql
 //==========================================================================
 // Metodo EndQuery ( Classe TRSection )                                     
@@ -206,7 +206,7 @@ oReport:Section(1):Init()
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(0)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	//Mascara para impressao - CNPJ/CPF
 	If RetPessoa((_cAlias)->A2_CGC) == "J"
 		oReport:Section(1):Cell("A2_CGC"):SetPicture("@R! NN.NNN.NNN/NNNN-99")
@@ -217,7 +217,7 @@ While !oReport:Cancel() .And. (_cAlias)->(!EOF())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->A2_FILIAL
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()

@@ -13,9 +13,9 @@
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#include "RwMake.ch"
-#include "TopConn.ch" 
-#INCLUDE "PROTHEUS.CH"
+#Include "RwMake.ch"
+#Include "TopConn.ch" 
+#Include "TOTVS.ch"
 #Include 'fileio.ch'
 
 #define CRLF		Chr(13) + Chr(10)
@@ -37,7 +37,7 @@ User Function MA180TOK()
 Local _lRet := .T.
 Local _cB5_CEME := ""
 
-If !Empty(Alltrim(M->B5_CEME))
+If !Empty(AllTrim(M->B5_CEME))
        _cB5_CEME := M->B5_CEME 
        _lRet := U_CRMA980VCP(@_cB5_CEME  ,"B5_CEME")
        M->B5_CEME := _cB5_CEME

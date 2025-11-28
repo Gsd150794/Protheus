@@ -11,7 +11,7 @@ Lucas Borges      | 14/10/2019 | Removidos os Warning na compilação da release 1
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 #Include 'FWMVCDef.ch'
 
 /*
@@ -39,12 +39,12 @@ Local _xAces02	:= U_ITAcsUsr( 'ZZL_CADFRT' , '2' )
 If ValType( _xAces01 ) == 'N' .And. _xAces01 == 0
 
 	MessageBox( 'Usuário não está cadastrado na Gestão de Usuários do Configurador Italac!' , 'Atenção!' , 16 )
-	Return()
+	Return
 
 ElseIf !_xAces01 .And. !_xAces02
 
 	MessageBox( 'Usuário sem acesso às rotinas de cadastros da tabela de Frete!'			, 'Atenção!' , 16 )
-	Return()
+	Return
 
 EndIf
 
@@ -65,7 +65,7 @@ _oBrowse:AddLegend( "ZF0_STATUS == 'E'" , 'ORANGE'	, 'Tabela Em Processo de Apro
 
 _oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -371,7 +371,7 @@ Retorno-----------: Nenhum
 User Function AOMS033M()
 
 Local _aInfHlp	:= {}
-Local _aParam	:= PARAMIXB
+Local _aParam	:= ParamIXB
 Local _oObj		:= NIL
 Local _cIdPonto	:= ''
 Local _cIdModel	:= ''
@@ -430,7 +430,7 @@ Local _xAcesso	:= U_ITAcsUsr( 'ZZL_CADFRT' )
 
 If ZF0->ZF0_STATUS $ 'P/E'
 	
-	If VaLType( _xAcesso ) == 'C'
+	If ValType( _xAcesso ) == 'C'
 	
 		If _xAcesso == '1'
 			
@@ -477,7 +477,7 @@ If ZF0->ZF0_STATUS $ 'P/E'
 			DBUseArea( .T. , "TOPCONN" , TcGenQry(,, _cQuery ) , _cAlias , .T. , .F. )
 			
 			DBSelectArea(_cAlias)
-			(_cAlias)->( DBGotop() )
+			(_cAlias)->( DBGoTop() )
 			If (_cAlias)->( !Eof() ) .And. !Empty( (_cAlias)->REGZF0 )
 				
 				If MsgYesNo( 'A ativação da tabela atual vai desativar a tabela que está sendo usada nesse momento para esse mesmo transportador! Deseja confirmar a ativação da nova versão da tabela?' , 'Atenção!' )
@@ -545,13 +545,13 @@ Else
 	ShowHelpDlg( 'Atenção!' ,	{	'Não é possível ativar uma tabela que '		,;
 									' está com status: '+ U_ITRETBOX(ZF0->ZF0_STATUS,'ZF0_STATUS') +'!' } , 2 ,;
 								{	'Somente tabelas pendentes podem ser '		,;
-									' ativadas para uso, se for o caso crie '	,;
+									' ativadas para uso, se For o caso crie '	,;
 									' uma nova versão ou desbloqueie a tabela '	,;
 									' selecionada.'								} , 4 )
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -606,7 +606,7 @@ Else
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -625,11 +625,11 @@ User Function AOMS033V( _nOpc )
 
 If MsgYesNo( 'Confirma a criação de uma nova versão de acordo com os dados da tabela selecionada?' , 'Atenção!' )
 	
-	Processa( {|| AOMS033CNV( _nOpc ) } , 'Gerando nova '+ IIF( _nOpc == 1 , 'versão da tabela...' , 'cópia da tabela...' ) , 'Aguarde!' )
+	Processa( {|| AOMS033CNV( _nOpc ) } , 'Gerando nova '+ IIf( _nOpc == 1 , 'versão da tabela...' , 'cópia da tabela...' ) , 'Aguarde!' )
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -769,7 +769,7 @@ RecLock( 'ZF0' , .T. )
 	ZF0->ZF0_USRALT	:= RetCodUsr()
 	ZF0->ZF0_STATUS	:= 'P'
 	
-ZF0->( MsUnLock() )
+ZF0->( MSUnLock() )
 
 For _nI := 1 To Len( _aDadZF6 )
 	
@@ -782,7 +782,7 @@ For _nI := 1 To Len( _aDadZF6 )
 		ZF6->ZF6_CODREG	:= _aDadZF6[_nI][03]
 		ZF6->ZF6_BASEKM	:= _aDadZF6[_nI][04]
 	
-	ZF6->( MsUnLock() )
+	ZF6->( MSUnLock() )
 	
 Next _nI
 
@@ -803,13 +803,13 @@ For _nI := 1 To Len( _aDadZF3 )
 		ZF3->ZF3_VLRBAS	:= _aDadZF3[_nI][09]
 		ZF3->ZF3_TIPCAL	:= _aDadZF3[_nI][10]
 	
-	ZF3->( MsUnLock() )
+	ZF3->( MSUnLock() )
 	
 Next _nI
 
 MessageBox( 'Gerada a tabela: '+ _cCodTab +'/'+ _cNewVer +' com sucesso!' , 'Concluído!' , 64 )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================

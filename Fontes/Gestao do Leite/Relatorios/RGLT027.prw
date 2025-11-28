@@ -2,45 +2,37 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 13/08/2020 | Migração para tReport. Chamado 33667
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 01/09/2020 | Limitada as colunas impressas. Chamado 33998
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 12/12/2021 | Ajustes necessários pela reformulação da tela do MIX. Chamado 38596
+Lucas Borges  |13/08/2020| Chamado 33667. Migração para tReport.
+Lucas Borges  |01/09/2020| Chamado 33998. Limitada as colunas impressas.
+Lucas Borges  |12/12/2021| Chamado 38596. Ajustes necessários pela reformulação da tela do MIX.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT027
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 30/07/2020
-===============================================================================================================================
 Descrição---------: Relatório Composição de Preços do Mix - Chamado 33479 - Executado à partir do Mix (AGLT020)
-===============================================================================================================================
 Parametros--------: _cTabela -> Tabela temporária gerada no Mix
 					_aStruct -> Estrutura dos campos que serão impressos
 					_cTitulo -> Título do relatório de acordo com a tela do Mix posicionada
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function RGLT027(_cTabela, _aStruct,_cTitulo)
 
-Local _aArea := GetArea()
+Local _aArea := FWGetArea()
 Local oReport
 
 //Inferface de Impressão
 oReport := ReportDef(_cTabela, _aStruct,_cTitulo)
 oReport:PrintDialog()
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -49,13 +41,10 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 30/07/2020
-===============================================================================================================================
 Descrição---------: Processa a montagem do relatório
-===============================================================================================================================
 Parametros--------: _cTabela -> Tabela temporária gerada no Mix
 					_aStruct -> Estrutura dos campos que serão impressos
 					_cTitulo -> Título do relatório de acordo com a tela do Mix posicionada
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -91,13 +80,10 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 30/07/2020
-===============================================================================================================================
 Descrição---------: Processa a impressão do relatório
-===============================================================================================================================
 Parametros--------: _cTabela -> Tabela temporária gerada no Mix
 					_aStruct -> Estrutura dos campos que serão impressos
 					_cTitulo -> Título do relatório de acordo com a tela do Mix posicionada
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -149,17 +135,17 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

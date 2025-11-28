@@ -1,4 +1,4 @@
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*/
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
@@ -44,8 +44,8 @@ Local cVldExc 	  := "U_VLDDELZZO()" // Validacao para permitir a exclusao. Pode-
 Private cCadastro := "Cadastro de Motivos de Divergencia - Frete"
 Private cAlias    := "ZZO"   
 
-dbSelectArea(cAlias)    
-(cAlias)->(dbSetOrder(1))                     
+DBSelectArea(cAlias)    
+(cAlias)->(DBSetOrder(1))                     
 
 AxCadastro(cAlias,cCadastro,cVldExc,cVldAlt)
 
@@ -98,8 +98,8 @@ Local _lRet  := .T.
 */
 querys(1,_cAlias) 
 
-dbSelectArea(_cAlias)
-(_cAlias)->(dbGotop()) 
+DBSelectArea(_cAlias)
+(_cAlias)->(DBGoTop()) 
 
 If (_cAlias)->NUMREG > 0   
 
@@ -116,8 +116,8 @@ EndIf
 //³Finaliza a area criada anteriormente.³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 */
-dbSelectArea(_cAlias)
-(_cAlias)->(dbCloseArea()) 
+DBSelectArea(_cAlias)
+(_cAlias)->(DBCloseArea()) 
 
 Return _lRet
 
@@ -178,7 +178,7 @@ Do Case
 				SELECT
 				      COUNT(*) NUMREG
 				FROM
-				      %table:ZZN%
+				      %Table:ZZN%
 				WHERE
 				      D_E_L_E_T_ = ' '  
 				      %exp:_cFiltro%						

@@ -10,7 +10,7 @@ Lucas Borges  |27/06/2025| Chamado 50617. Revisões diversas visando padronizar o
 ===============================================================================================================================
 */
 
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 #Define TITULO	"Ponto Eletrônico - Marcações Manuais de Ponto"
 
@@ -76,28 +76,28 @@ Local _aColAjs	:= { 0010 , 0000 , 0000 , 0000 , 0000 , 0010 , 0010 , 0015 , 0000
 Local _aCabec	:= { "Matrícula" , "Funcionário" , "Dt. Apont." , "Dt. Marca" , "Hora" , "Ord." , "Ap." , "Turno" , "Período Aponta" , "Usuário" , "Data Inc." , "Hora Inc." , "Motivo" } As Array
 Local _aCabecx	:= { "Filial", "Setor", "Matrícula" , "Funcionário" , "Dt. Apont." , "Dt. Marca" , "Hora" , "Ord." , "Ap." , "Turno" , "Período Aponta" , "Usuário" , "Data Inc." , "Hora Inc." , "Motivo" } As Array
 Local _aDados	:= {} As Array
-Local _aFiliais	:= StrToKArr( AllTrim( MV_PAR01 ) , ";" ) As Array
+Local _aFiliais	:= StrTokArr( AllTrim( MV_PAR01 ) , ";" ) As Array
 Local _cAlias	:= '' As Character
 Local _cQuery	:= "" As Character
-Local _dDtAux	:= StoD("") As Character
+Local _dDtAux	:= SToD("") As Character
 Local _nTotReg	:= 0 As Numeric
 Local _nAtuReg	:= 0 As Numeric
 Local _nOpcao	:= 0 As Numeric
 Local _nI		:= 0 As Numeric
 
-IF Empty(_aFiliais)
+If Empty(_aFiliais)
 	FWAlertInfo("Não foram informadas Filiais válidas para o processamento!","RPON00502")
-	Return()
+	Return
 EndIf
 
 For _nI := 1 To Len(_aFiliais)
 	_cAlias	:= GetNextAlias()
-	BeginSQL alias _cAlias
+	BeginSql alias _cAlias
 		SELECT MAX( PO_DATAFIM ) AS DTFECHA
-		FROM %Table:SPO
+		FROM %Table:SPO%
 		WHERE PO_FILIAL = %exp:_aFiliais[_nI]%
 		AND D_E_L_E_T_	= ' '
-	EndSQL
+	EndSql
 	
 	_dDtAux := SToD((_cAlias)->DTFECHA)
 	(_cAlias)->(DBCloseArea())
@@ -110,7 +110,7 @@ For _nI := 1 To Len(_aFiliais)
 		_nOpcao := 3
 	EndIf
 	
-	IF _nOpcao == 1 .Or. _nOpcao == 2
+	If _nOpcao == 1 .Or. _nOpcao == 2
 		_cAlias	:= GetNextAlias()
 		_cQuery += " SELECT "
 		_cQuery += "     SPG.PG_FILIAL   AS FILIAL, "
@@ -135,29 +135,29 @@ For _nI := 1 To Len(_aFiliais)
 		_cQuery += " WHERE SPG.D_E_L_E_T_  = ' ' "
 		_cQuery += " AND SRA.D_E_L_E_T_  = ' ' "
 		
-		IF !Empty( MV_PAR09 )
+		If !Empty( MV_PAR09 )
 			_cQuery += " AND	SRA.RA_I_SETOR	IN "+ FormatIn( AllTrim( MV_PAR09 ) , ";" )
-		EndIF
+		EndIf
 	
 		_cQuery += " AND SPG.PG_TIPOREG  = 'I' "
 		_cQuery += " AND SPG.PG_FILIAL   = '"+ _aFiliais[_nI] +"' "
 		_cQuery += " AND SPG.PG_MAT      BETWEEN '"+ MV_PAR04 +"' AND '"+ MV_PAR05 +"' "
 	
-		IF _nOpcao == 1
-			_cQuery += " AND SPG.PG_DATAAPO	BETWEEN '"+ DTOS( MV_PAR02 ) +"' AND '"+ DTOS( _dDtAux ) +"' "
-		ElseIF _nOpcao == 2
-			_cQuery += " AND SPG.PG_DATAAPO	BETWEEN '"+ DTOS( MV_PAR02 ) +"' AND '"+ DTOS( MV_PAR03 ) +"' "
-		EndIF
+		If _nOpcao == 1
+			_cQuery += " AND SPG.PG_DATAAPO	BETWEEN '"+ DToS( MV_PAR02 ) +"' AND '"+ DToS( _dDtAux ) +"' "
+		ElseIf _nOpcao == 2
+			_cQuery += " AND SPG.PG_DATAAPO	BETWEEN '"+ DToS( MV_PAR02 ) +"' AND '"+ DToS( MV_PAR03 ) +"' "
+		EndIf
 		
 		_cQuery += " AND SRA.RA_CATFUNC	IN "+ FormatIn( RTrim( MV_PAR06 ) , ";" )
 		_cQuery += " AND SRA.RA_SITFOLH  IN "+ FormatIn( RTrim( MV_PAR07 ) , ";" )
-	EndIF
+	EndIf
 	
-	IF _nOpcao == 1
+	If _nOpcao == 1
 		_cQuery += " UNION ALL "
-	EndIF
+	EndIf
 	
-	IF _nOpcao == 1 .Or. _nOpcao == 3
+	If _nOpcao == 1 .Or. _nOpcao == 3
 	
 		_cQuery += " SELECT "
 		_cQuery += "     SP8.P8_FILIAL   AS FILIAL, "
@@ -182,23 +182,23 @@ For _nI := 1 To Len(_aFiliais)
 		_cQuery += " WHERE SP8.D_E_L_E_T_  = ' ' "
 		_cQuery += " AND SRA.D_E_L_E_T_  = ' ' "
 	
-		IF !Empty( MV_PAR09 )
+		If !Empty( MV_PAR09 )
 			_cQuery += " AND	SRA.RA_I_SETOR	IN "+ FormatIn( AllTrim( MV_PAR09 ) , ";" )
-		EndIF
+		EndIf
 	
 		_cQuery += " AND SP8.P8_TIPOREG  = 'I' "
 		_cQuery += " AND SP8.P8_FILIAL   = '"+ _aFiliais[_nI] +"' "
 		_cQuery += " AND SP8.P8_MAT      BETWEEN '"+ MV_PAR04 +"' AND '"+ MV_PAR05 +"' "
 		
-		IF _nOpcao == 1
-			_cQuery += " AND SP8.P8_DATAAPO	> '"+ DTOS( _dDtAux ) +"' "
-			_cQuery += " AND SP8.P8_DATAAPO	<= '"+ DTOS( MV_PAR03 ) +"' "
-		ElseIF _nOpcao == 3
-			_cQuery += " AND SP8.P8_DATAAPO	BETWEEN '"+ DTOS( MV_PAR02 ) +"' AND '"+ DTOS( MV_PAR03 ) +"' "
-		EndIF
+		If _nOpcao == 1
+			_cQuery += " AND SP8.P8_DATAAPO	> '"+ DToS( _dDtAux ) +"' "
+			_cQuery += " AND SP8.P8_DATAAPO	<= '"+ DToS( MV_PAR03 ) +"' "
+		ElseIf _nOpcao == 3
+			_cQuery += " AND SP8.P8_DATAAPO	BETWEEN '"+ DToS( MV_PAR02 ) +"' AND '"+ DToS( MV_PAR03 ) +"' "
+		EndIf
 		_cQuery += " AND SRA.RA_CATFUNC	IN "+ FormatIn( RTrim( MV_PAR06 ) , ";" )
 		_cQuery += " AND SRA.RA_SITFOLH	IN "+ FormatIn( RTrim( MV_PAR07 ) , ";" )
-	EndIF
+	EndIf
 	
 	_cQuery += " ORDER BY FILIAL, SETOR, MAT, DATA_APO, DATA_REG, HORA "
 	_cQuery := ChangeQuery(_cQuery)
@@ -222,21 +222,21 @@ For _nI := 1 To Len(_aFiliais)
 							(_cAlias)->SETOR			,;
 							(_cAlias)->MAT			,;
 							(_cAlias)->NOME			,;
-							DTOC( STOD(	(_cAlias)->DATA_APO ) )	,;
-							DTOC( STOD(	(_cAlias)->DATA_REG ) )	,;
+							DToC( SToD(	(_cAlias)->DATA_APO ) )	,;
+							DToC( SToD(	(_cAlias)->DATA_REG ) )	,;
 							(_cAlias)->HORA			,;
 							(_cAlias)->ORDEM			,;
 							(_cAlias)->APONTADA		,;
 							(_cAlias)->TURNO			,;
-							DTOC( STOD(	SUBSTR( (_cAlias)->PER_APONTA , 1 , 8 ) ) ) +" - "+ DTOC( STOD( SUBSTR( (_cAlias)->PER_APONTA , 9 , 8 ) ) ) ,;
+							DToC( SToD(	SubStr( (_cAlias)->PER_APONTA , 1 , 8 ) ) ) +" - "+ DToC( SToD( SubStr( (_cAlias)->PER_APONTA , 9 , 8 ) ) ) ,;
 							UsrRetName(	(_cAlias)->USUARIO )		,;
-							DTOC( STOD(	(_cAlias)->DATA_INC ) )	,;
-							SUBSTR( (_cAlias)->HORA_INC , 1 , 2 ) +":"+ SUBSTR( (_cAlias)->HORA_INC , 3 , 2 ) ,;
+							DToC( SToD(	(_cAlias)->DATA_INC ) )	,;
+							SubStr( (_cAlias)->HORA_INC , 1 , 2 ) +":"+ SubStr( (_cAlias)->HORA_INC , 3 , 2 ) ,;
 							(_cAlias)->MOTIVO		})
 		
 		(_cAlias)->( DBSkip() )
 	EndDo
-	(_cAlias)->(DBCloseArea)
+	(_cAlias)->(DBCloseArea())
 Next _nI
 
 If Empty(_aDados)
@@ -320,8 +320,8 @@ For _nI := 1 To Len(_aDados)
 				_oPrint:SayBitmap( 070 , _aColPos[01] , "LGRL01.BMP" , 300 , 130 ) // Imagem tem que estar abaixo do RootPath
 			EndIf
 			
-			_oPrint:Say( 080 , 1000 , TITULO +" ( "+ DtoC(Date()) +" - "+ Time() +")" , _oFont01 )   //Nome
-			_oPrint:Say( 140 , 0500 , "[Filtros] Período: "+ DTOC( MV_PAR02 ) +" - "+ DTOC( MV_PAR03 ) +" | Filiais: "+ AllTrim( MV_PAR01 ) +" | Categorias: "+ AllTrim( MV_PAR06 ) +" | Sit. Folha: "+ AllTrim( MV_PAR07 ) , _oFont02 )
+			_oPrint:Say( 080 , 1000 , TITULO +" ( "+ DToC(Date()) +" - "+ Time() +")" , _oFont01 )   //Nome
+			_oPrint:Say( 140 , 0500 , "[Filtros] Período: "+ DToC( MV_PAR02 ) +" - "+ DToC( MV_PAR03 ) +" | Filiais: "+ AllTrim( MV_PAR01 ) +" | Categorias: "+ AllTrim( MV_PAR06 ) +" | Sit. Folha: "+ AllTrim( MV_PAR07 ) , _oFont02 )
 			_oPrint:Say( 180 , 0500 , "[Filial/Setor] "+ _aDados[_nI][01] +"/"+ _aDados[_nI][02] +" - "+ AllTrim( Posicione("ZZM",1,xFilial("ZZM")+_aDados[_nI][01],"ZZM_DESCRI") ) +" / "+ AllTrim( Posicione("ZAK",1,xFilial("ZAK")+_aDados[_nI][02],"ZAK_DESCRI") ) , _oFont02 )
 			_oPrint:Line( 260 , 0 , 260 , 5000 )
 			
@@ -341,7 +341,7 @@ For _nI := 1 To Len(_aDados)
 			_cTotMat := _aDados[_nI][03]
 			_nTotMat++
 			_nConFun++
-		EndIF
+		EndIf
 		
 		_nLinha += 030
 		
@@ -371,8 +371,8 @@ For _nI := 1 To Len(_aDados)
 			_oPrint:SayBitmap( 070 , _aColPos[01] , "LGRL01.BMP" , 300 , 130 ) // Imagem tem que estar abaixo do RootPath
 		EndIf
 		
-		_oPrint:Say( 080 , 1000 , TITULO +" ( "+ DtoC(Date()) +" - "+ Time() +")" , _oFont01 )
-		_oPrint:Say( 140 , 0500 , "[Filtros] Período: "+ DTOC( MV_PAR02 ) +" - "+ DTOC( MV_PAR03 ) +" | Filiais: "+ AllTrim( MV_PAR01 ) +" | Categorias: "+ AllTrim( MV_PAR06 ) +" | Sit. Folha: "+ AllTrim( MV_PAR07 ) , _oFont02 )
+		_oPrint:Say( 080 , 1000 , TITULO +" ( "+ DToC(Date()) +" - "+ Time() +")" , _oFont01 )
+		_oPrint:Say( 140 , 0500 , "[Filtros] Período: "+ DToC( MV_PAR02 ) +" - "+ DToC( MV_PAR03 ) +" | Filiais: "+ AllTrim( MV_PAR01 ) +" | Categorias: "+ AllTrim( MV_PAR06 ) +" | Sit. Folha: "+ AllTrim( MV_PAR07 ) , _oFont02 )
 		_oPrint:Say( 180 , 0500 , "[Filial/Setor] "+ _aDados[_nI][01] +"/"+ _aDados[_nI][02] +" - "+ AllTrim( Posicione("ZZM",1,xFilial("ZZM")+_aDados[_nI][01],"ZZM_DESCRI") ) +" / "+ AllTrim( Posicione("ZAK",1,xFilial("ZAK")+_aDados[_nI][02],"ZAK_DESCRI") ) , _oFont02 )
 		_oPrint:Line( 260 , 0 , 260 , 5000 )
 	EndIf
@@ -400,9 +400,9 @@ For _nI := 1 To Len(_aDados)
 	_nCont	:= 0
 	_nTotMat	:= 0
 	
-	IF _nI < Len(_aDados)
+	If _nI < Len(_aDados)
 		_nLinha += 3000
-	EndIF
+	EndIf
 Next _nI
 
 _oPrint:EndPage()
@@ -415,8 +415,8 @@ If File( "LGRL01.BMP" )
 	_oPrint:SayBitmap( 070 , _aColPos[01] , "LGRL01.BMP" , 300 , 130 ) // Imagem tem que estar abaixo do RootPath
 EndIf
 
-_oPrint:Say( 080 , 1000 , TITULO +" ( "+ DtoC(Date()) +" - "+ Time() +")" , _oFont01 )   //Nome
-_oPrint:Say( 140 , 0500 , "[Filtros] Período: "+ DTOC( MV_PAR02 ) +" - "+ DTOC( MV_PAR03 ) +" | Filiais: "+ AllTrim( MV_PAR01 ) +" | Categorias: "+ AllTrim( MV_PAR06 ) +" | Sit. Folha: "+ AllTrim( MV_PAR07 ) , _oFont02 )
+_oPrint:Say( 080 , 1000 , TITULO +" ( "+ DToC(Date()) +" - "+ Time() +")" , _oFont01 )   //Nome
+_oPrint:Say( 140 , 0500 , "[Filtros] Período: "+ DToC( MV_PAR02 ) +" - "+ DToC( MV_PAR03 ) +" | Filiais: "+ AllTrim( MV_PAR01 ) +" | Categorias: "+ AllTrim( MV_PAR06 ) +" | Sit. Folha: "+ AllTrim( MV_PAR07 ) , _oFont02 )
 _oPrint:Say( 180 , 0500 , "[Resumo geral do Relatório] Todos os Setores"  , _oFont02 )
 _oPrint:Line( 260 , 0 , 260 , 5000 )
 
@@ -437,8 +437,8 @@ For _nI := 1 To Len( _aDadTot )
 			_oPrint:SayBitmap( 070 , _aColPos[01] , "LGRL01.BMP" , 300 , 130 ) // Imagem tem que estar abaixo do RootPath
 		EndIf
 		
-		_oPrint:Say( 080 , 1000 , TITULO +" ( "+ DtoC(Date()) +" - "+ Time() +")" , _oFont01 )
-		_oPrint:Say( 140 , 0500 , "[Filtros] Período: "+ DTOC( MV_PAR02 ) +" - "+ DTOC( MV_PAR03 ) +" | Filiais: "+ AllTrim( MV_PAR01 ) +" | Categorias: "+ AllTrim( MV_PAR06 ) +" | Sit. Folha: "+ AllTrim( MV_PAR07 ) , _oFont02 )
+		_oPrint:Say( 080 , 1000 , TITULO +" ( "+ DToC(Date()) +" - "+ Time() +")" , _oFont01 )
+		_oPrint:Say( 140 , 0500 , "[Filtros] Período: "+ DToC( MV_PAR02 ) +" - "+ DToC( MV_PAR03 ) +" | Filiais: "+ AllTrim( MV_PAR01 ) +" | Categorias: "+ AllTrim( MV_PAR06 ) +" | Sit. Folha: "+ AllTrim( MV_PAR07 ) , _oFont02 )
 		_oPrint:Say( 180 , 0500 , "[Resumo geral do Relatório] Todos os Setores"  , _oFont02 )
 		_oPrint:Line( 260 , 0 , 260 , 5000 )
 	EndIf
@@ -468,8 +468,8 @@ If _lIniPag
 		_oPrint:SayBitmap( 070 , _aColPos[01] , "LGRL01.BMP" , 300 , 130 ) // Imagem tem que estar abaixo do RootPath
 	EndIf
 	
-	_oPrint:Say( 080 , 1000 , TITULO +" ( "+ DtoC(Date()) +" - "+ Time() +")" , _oFont01 )
-	_oPrint:Say( 140 , 0500 , "[Filtros] Período: "+ DTOC( MV_PAR02 ) +" - "+ DTOC( MV_PAR03 ) +" | Filiais: "+ AllTrim( MV_PAR01 ) +" | Categorias: "+ AllTrim( MV_PAR06 ) +" | Sit. Folha: "+ AllTrim( MV_PAR07 ) , _oFont02 )
+	_oPrint:Say( 080 , 1000 , TITULO +" ( "+ DToC(Date()) +" - "+ Time() +")" , _oFont01 )
+	_oPrint:Say( 140 , 0500 , "[Filtros] Período: "+ DToC( MV_PAR02 ) +" - "+ DToC( MV_PAR03 ) +" | Filiais: "+ AllTrim( MV_PAR01 ) +" | Categorias: "+ AllTrim( MV_PAR06 ) +" | Sit. Folha: "+ AllTrim( MV_PAR07 ) , _oFont02 )
 	_oPrint:Say( 180 , 0500 , "[Resumo geral do Relatório] Todos os Setores"  , _oFont02 )
 	_oPrint:Line( 260 , 0 , 260 , 5000 )
 EndIf
@@ -545,7 +545,7 @@ Do Case
 				SM0->( DBGoTop() )
 
 				While SM0->(!Eof())
-					If SM0->M0_CODIGO == _cEmpAux .And. ALLTRIM(SM0->M0_CODFIL) == _aDadAux[_nI]
+					If SM0->M0_CODIGO == _cEmpAux .And. AllTrim(SM0->M0_CODFIL) == _aDadAux[_nI]
 						_lRet := .T.
 						Exit
 					EndIf
@@ -584,7 +584,7 @@ Do Case
 		EndIf
 	
 	Case _nOpc == 3 //"Situações ?"
-		If EMPTY(_xVarAux)
+		If Empty(_xVarAux)
 			&(_cNomeVar) := " "
 		Else
 			_aDadAux := U_ITLinDel( _xVarAux ,, 1 )
@@ -599,16 +599,16 @@ Do Case
 					SX5->( DBGoTop() )
 					SX5->( DBSeek( xFilial("SX5") + "31" ) )
 					
-					While SX5->(!EOF()) .And. SX5->( X5_FILIAL + X5_TABELA ) == xFilial("SX5") + "31"
+					While SX5->(!Eof()) .And. SX5->( X5_FILIAL + X5_TABELA ) == xFilial("SX5") + "31"
 						//Posiciona por query para não conflitar com sonarcube
 						_nrec := SX5->(Recno())
 						_cAlias := GetNextAlias()
-						BeginSQL alias _cAlias
+						BeginSql alias _cAlias
 							SELECT X5_CHAVE CHAVE
 							FROM %Table:SX5%
 							WHERE D_E_L_E_T_ = ' '
 							AND   R_E_C_N_O_ = %exp:_nrec%
-						EndSQL
+						EndSql
 
 						_cchave := (_cAlias)->CHAVE
 
@@ -622,10 +622,10 @@ Do Case
 					EndDo
 				EndIf
 				
-				IF !_lRet
+				If !_lRet
 					FWAlertInfo("As 'Situações na Folha' informadas não são válidas! Verifique os dados digitados.","RPON00509")
 					Exit
-				EndIF
+				EndIf
 			Next _nI
 		EndIf
 EndCase

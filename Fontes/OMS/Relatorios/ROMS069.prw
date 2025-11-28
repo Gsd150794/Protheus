@@ -10,7 +10,7 @@
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
-#Include "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -49,9 +49,9 @@ Private _aItalac_F3 := {}
 Private _cSelectSA3, _bCondSA3
 
 Begin Sequence
-   _cSelectSA3 := "SELECT DISTINCT A3_COD, A3_NOME FROM "+RETSQLNAME("SA3")+" SA3 WHERE SA3.D_E_L_E_T_ <> '*' AND A3_I_TIPV = 'V' ORDER BY A3_COD " 
+   _cSelectSA3 := "SELECT DISTINCT A3_COD, A3_NOME FROM "+RETSQLNAME("SA3")+" SA3 WHERE SA3.D_E_L_E_T_ = ' ' AND A3_I_TIPV = 'V' ORDER BY A3_COD " 
    _bCondSA3   := NIL
-   Aadd(_aItalac_F3,{"_cCodVen",_cSelectSA3,{|Tab| (Tab)->A3_COD}, {|Tab| (Tab)->A3_NOME } ,_bCondSA3 ,"Vendedores",,,1,.F.        ,       , } )
+   aAdd(_aItalac_F3,{"_cCodVen",_cSelectSA3,{|Tab| (Tab)->A3_COD}, {|Tab| (Tab)->A3_NOME } ,_bCondSA3 ,"Vendedores",,,1,.F.        ,       , } )
 
    //============================================================================
    //Montagem do aheader                                                        
@@ -60,27 +60,27 @@ Begin Sequence
    FillGetDados(1,"ZBK",1,,,{||.T.},,,,,,.T.)
    
    //                          1                    2               3              4               5                6             7        8              9                 10 
-   // AADD(aHeader, {Alltrim(SX3->X3_TITULO), SX3->X3_CAMPO, SX3->X3_PICTURE, SX3->X3_TAMANHO, SX3->X3_DECIMAL,"AllwaysTrue()", USADO, SX3->X3_TIPO, SX3->X3_ARQUIVO, SX3->X3_CONTEXT})
+   // aAdd(aHeader, {AllTrim(SX3->X3_TITULO), SX3->X3_CAMPO, SX3->X3_PICTURE, SX3->X3_TAMANHO, SX3->X3_DECIMAL,"AllwaysTrue()", USADO, SX3->X3_TIPO, SX3->X3_ARQUIVO, SX3->X3_CONTEXT})
    
    //================================================================================
    // Monta as colunas do MSSELECT para a tabela temporária TRBZBK 
    //================================================================================
-   //Aadd( _aCmpZBK , { "WK_OK"		,    , "Marca"                                          ,"@!"})
-   Aadd( _aCmpZBK , { "ZBK_VEND"		,    , "Código"          ,"@!"})
-   Aadd( _aCmpZBK , { "ZBK_NOMVEN"	,    , "Nome"            ,"@!"})
-   Aadd( _aCmpZBK , { "ZBK_COMVEN"	,    , "Valor Comissão"  ,"@E 999,999,999.99"})
+   //aAdd( _aCmpZBK , { "WK_OK"		,    , "Marca"                                          ,"@!"})
+   aAdd( _aCmpZBK , { "ZBK_VEND"		,    , "Código"          ,"@!"})
+   aAdd( _aCmpZBK , { "ZBK_NOMVEN"	,    , "Nome"            ,"@!"})
+   aAdd( _aCmpZBK , { "ZBK_COMVEN"	,    , "Valor Comissão"  ,"@E 999,999,999.99"})
 
    //================================================================================
    // Cria as estruturas das tabelas temporárias
    //================================================================================
    _aStrucZBK := {}
-   Aadd( _aStrucZBK , { "ZBK_VEND"		, "C"   , 6   ,0})
-   Aadd( _aStrucZBK , { "ZBK_NOMVEN"	, "C"   , 60  ,0})
-   Aadd( _aStrucZBK , { "ZBK_COMVEN"	, "N"   , 16  ,2})
-   Aadd( _aStrucZBK , { "ZBK_SUPERV"	, "C"   , 6   ,0})
-   Aadd( _aStrucZBK , { "ZBK_COORDE"	, "C"   , 6   ,0})
-   Aadd( _aStrucZBK , { "ZBK_GERENT"	, "C"   , 6   ,0})
-   Aadd( _aStrucZBK , { "ZBK_GERNAC"	, "C"   , 6   ,0})
+   aAdd( _aStrucZBK , { "ZBK_VEND"		, "C"   , 6   ,0})
+   aAdd( _aStrucZBK , { "ZBK_NOMVEN"	, "C"   , 60  ,0})
+   aAdd( _aStrucZBK , { "ZBK_COMVEN"	, "N"   , 16  ,2})
+   aAdd( _aStrucZBK , { "ZBK_SUPERV"	, "C"   , 6   ,0})
+   aAdd( _aStrucZBK , { "ZBK_COORDE"	, "C"   , 6   ,0})
+   aAdd( _aStrucZBK , { "ZBK_GERENT"	, "C"   , 6   ,0})
+   aAdd( _aStrucZBK , { "ZBK_GERNAC"	, "C"   , 6   ,0})
 
    //================================================================================
    // Verifica se ja existe um arquivo com mesmo nome, se sim fecha.
@@ -281,26 +281,26 @@ End Sequence
 // Fecha e exclui as tabelas temporárias
 //================================================================================                    
 If Select("TRBZBK1") > 0
-   TRBZBK1->(DbCloseArea())
+   TRBZBK1->(DBCloseArea())
 EndIf
 
 If Select("TRBZBK2") > 0
-   TRBZBK2->(DbCloseArea())
+   TRBZBK2->(DBCloseArea())
 EndIf
 
 If Select("TRBZBK3") > 0
-   TRBZBK3->(DbCloseArea())
+   TRBZBK3->(DBCloseArea())
 EndIf
 
 If Select("TRBZBK4") > 0
-   TRBZBK4->(DbCloseArea())
+   TRBZBK4->(DBCloseArea())
 EndIf
 
 If Select("TRBZBK5") > 0
-   TRBZBK5->(DbCloseArea())
+   TRBZBK5->(DBCloseArea())
 EndIf
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -330,9 +330,9 @@ Begin Sequence
       _cDtPer := "01/" + SubStr(_cPeriodo,1,2)+"/"+ SubStr(_cPeriodo,3,4)
       _dDtPer := Ctod(_cDtPer)
       
-      ZBK->(DbSetOrder(1))
-      If ! ZBK->(MsSeek(xFilial("ZBK")+Dtos(_dDtPer)))
-         U_Itmsg("Não foi localizado nenhum fechamento de comissão processado para o período informado.","Atenção","Por favor, informe um período que possua fechamento de comissão processado.",1)
+      ZBK->(DBSetOrder(1))
+      If ! ZBK->(MsSeek(xFilial("ZBK")+DToS(_dDtPer)))
+         U_ITMsg("Não foi localizado nenhum fechamento de comissão processado para o período informado.","Atenção","Por favor, informe um período que possua fechamento de comissão processado.",1)
          _lRet := .F.
          Break  
       EndIf 
@@ -342,9 +342,9 @@ Begin Sequence
          Break 
       EndIf 
 
-      SA3->(DbSetOrder(1))
+      SA3->(DBSetOrder(1))
       If ! SA3->(MsSeek(xFilial("SA3")+_cCodGNac))
-         U_Itmsg("Não foi localizado nenhum Gerente Nacional com o código informado.","Atenção", ,1)
+         U_ITMsg("Não foi localizado nenhum Gerente Nacional com o código informado.","Atenção", ,1)
          _lRet := .F.
          Break  
       Else 
@@ -360,9 +360,9 @@ Begin Sequence
          Break 
       EndIf 
 
-      SA3->(DbSetOrder(1))
+      SA3->(DBSetOrder(1))
       If ! SA3->(MsSeek(xFilial("SA3")+_cCodGer))
-         U_Itmsg("Não foi localizado nenhum Gerente com o código informado.","Atenção", ,1)
+         U_ITMsg("Não foi localizado nenhum Gerente com o código informado.","Atenção", ,1)
          _lRet := .F.
          Break  
       Else 
@@ -379,9 +379,9 @@ Begin Sequence
          Break 
       EndIf 
 
-      SA3->(DbSetOrder(1))
+      SA3->(DBSetOrder(1))
       If ! SA3->(MsSeek(xFilial("SA3")+_cCodCoord))
-         U_Itmsg("Não foi localizado nenhum Coordenador com o código informado.","Atenção", ,1)
+         U_ITMsg("Não foi localizado nenhum Coordenador com o código informado.","Atenção", ,1)
          _lRet := .F.
          Break  
       Else 
@@ -397,9 +397,9 @@ Begin Sequence
          Break 
       EndIf 
 
-      SA3->(DbSetOrder(1))
+      SA3->(DBSetOrder(1))
       If ! SA3->(MsSeek(xFilial("SA3")+_cCodSup))
-         U_Itmsg("Não foi localizado nenhum Supervisor com o código informado.","Atenção", ,1)
+         U_ITMsg("Não foi localizado nenhum Supervisor com o código informado.","Atenção", ,1)
          _lRet := .F.
          Break  
       Else 
@@ -415,9 +415,9 @@ Begin Sequence
          Break 
       EndIf 
 
-      SA3->(DbSetOrder(1))
+      SA3->(DBSetOrder(1))
       If ! SA3->(MsSeek(xFilial("SA3")+_cCodVen))
-         U_Itmsg("Não foi localizado nenhum Vendedor com o código informado.","Atenção", ,1)
+         U_ITMsg("Não foi localizado nenhum Vendedor com o código informado.","Atenção", ,1)
          _lRet := .F.
          Break  
       Else 
@@ -430,7 +430,7 @@ Begin Sequence
    ElseIf _cCampo == "PROCESSAR"
 
       If Empty(_cPeriodo)
-         U_Itmsg("É obrigatório o preenchimento do perído para rodar esta rotina.","Atenção",,1)
+         U_ITMsg("É obrigatório o preenchimento do perído para rodar esta rotina.","Atenção",,1)
          _lRet := .F.
          Break 
       EndIf 
@@ -438,17 +438,17 @@ Begin Sequence
       _cDtPer := "01/" + SubStr(_cPeriodo,1,2)+"/"+ SubStr(_cPeriodo,3,4)
       _dDtPer := Ctod(_cDtPer)
       
-      ZBK->(DbSetOrder(1))
-      If ! ZBK->(MsSeek(xFilial("ZBK")+Dtos(_dDtPer)))
-         U_Itmsg("Não foi localizado nenhum fechamento de comissão processado para o período informado.","Atenção","Por favor, informe um período que possua fechamento de comissão processado.",1)
+      ZBK->(DBSetOrder(1))
+      If ! ZBK->(MsSeek(xFilial("ZBK")+DToS(_dDtPer)))
+         U_ITMsg("Não foi localizado nenhum fechamento de comissão processado para o período informado.","Atenção","Por favor, informe um período que possua fechamento de comissão processado.",1)
          _lRet := .F.
          Break  
       EndIf 
       
-      SA3->(DbSetOrder(1))
+      SA3->(DBSetOrder(1))
       If ! Empty(_cCodGNac)
          If ! SA3->(MsSeek(xFilial("SA3")+_cCodGNac))
-            U_Itmsg("Não foi localizado nenhum Gerente Nacional com o código informado.","Atenção", ,1)
+            U_ITMsg("Não foi localizado nenhum Gerente Nacional com o código informado.","Atenção", ,1)
             _lRet := .F.
             Break  
          EndIf 
@@ -456,7 +456,7 @@ Begin Sequence
 
       If ! Empty(_cCodGer)
          If ! SA3->(MsSeek(xFilial("SA3")+_cCodGer))
-            U_Itmsg("Não foi localizado nenhum Gerente com o código informado.","Atenção", ,1)
+            U_ITMsg("Não foi localizado nenhum Gerente com o código informado.","Atenção", ,1)
             _lRet := .F.
             Break  
          EndIf  
@@ -464,7 +464,7 @@ Begin Sequence
       
       If ! Empty(_cCodCoord)
          If ! SA3->(MsSeek(xFilial("SA3")+_cCodCoord))
-            U_Itmsg("Não foi localizado nenhum Coordenador com o código informado.","Atenção", ,1)
+            U_ITMsg("Não foi localizado nenhum Coordenador com o código informado.","Atenção", ,1)
             _lRet := .F.
             Break  
          EndIf 
@@ -472,7 +472,7 @@ Begin Sequence
 
       If ! Empty(_cCodSup)
          If ! SA3->(MsSeek(xFilial("SA3")+_cCodSup))
-            U_Itmsg("Não foi localizado nenhum Supervisor com o código informado.","Atenção", ,1)
+            U_ITMsg("Não foi localizado nenhum Supervisor com o código informado.","Atenção", ,1)
             _lRet := .F.
             Break  
          EndIf   
@@ -480,14 +480,14 @@ Begin Sequence
 
       If ! Empty(_cCodVen)
          If ! SA3->(MsSeek(xFilial("SA3")+_cCodVen))
-            U_Itmsg("Não foi localizado nenhum Vendedor com o código informado.","Atenção", ,1)
+            U_ITMsg("Não foi localizado nenhum Vendedor com o código informado.","Atenção", ,1)
             _lRet := .F.
             Break  
          EndIf   
       EndIf 
 
       If Empty(_cCodGNac) .And. Empty(_cCodGer) .And. Empty(_cCodCoord) .And. Empty(_cCodSup) .And. Empty(_cCodVen)
-         U_Itmsg("Para rodar esta rotina é obrigatório informar um código para um dos campos: Gerente Nacional ou Gerente ou Coordenador ou Supervisor ou Vendedor.","Atenção", ,1)
+         U_ITMsg("Para rodar esta rotina é obrigatório informar um código para um dos campos: Gerente Nacional ou Gerente ou Coordenador ou Supervisor ou Vendedor.","Atenção", ,1)
          _lRet := .F.
          Break  
       EndIf 
@@ -495,53 +495,53 @@ Begin Sequence
    ElseIf _cCampo == "GERA_EXCEL"
       
       If Empty(_cPeriodo)
-         U_Itmsg("É obrigatório o preenchimento do perído para Gerar os dados em Excel.","Atenção",,1)
+         U_ITMsg("É obrigatório o preenchimento do perído para Gerar os dados em Excel.","Atenção",,1)
          _lRet := .F.
          Break 
       EndIf 
 
       If Empty(_cCodGNac) .And. Empty(_cCodGer) .And. Empty(_cCodCoord) .And. Empty(_cCodSup) .And. Empty(_cCodVen)
-         U_Itmsg("Para gerar os dados em Excel é obrigatório informar um código para um dos campos: Gerente Nacional ou Gerente ou Coordenador ou Supervisor ou Vendedor.","Atenção", ,1)
+         U_ITMsg("Para gerar os dados em Excel é obrigatório informar um código para um dos campos: Gerente Nacional ou Gerente ou Coordenador ou Supervisor ou Vendedor.","Atenção", ,1)
          _lRet := .F.
          Break  
       EndIf   
    
       If ! Empty(_cCodGNac)
-         TRBZBK1->(DbGoTop())
+         TRBZBK1->(DBGoTop())
          If TRBZBK1->(Eof()) .Or. TRBZBK1->(Bof()) 
-            U_Itmsg("Não há dados para emissão do relatório em excel.","Atenção",,1)
+            U_ITMsg("Não há dados para emissão do relatório em excel.","Atenção",,1)
             _lRet := .F.
             Break 
          EndIf
 
       ElseIf ! Empty(_cCodGer)
-         TRBZBK2->(DbGoTop())
+         TRBZBK2->(DBGoTop())
          If TRBZBK2->(Eof()) .Or. TRBZBK2->(Bof()) 
-            U_Itmsg("Não há dados para emissão do relatório em excel.","Atenção",,1)
+            U_ITMsg("Não há dados para emissão do relatório em excel.","Atenção",,1)
             _lRet := .F.
             Break 
          EndIf
 
       ElseIf ! Empty(_cCodCoord)
-         TRBZBK3->(DbGoTop())
+         TRBZBK3->(DBGoTop())
          If TRBZBK3->(Eof()) .Or. TRBZBK3->(Bof()) 
-            U_Itmsg("Não há dados para emissão do relatório em excel.","Atenção",,1)
+            U_ITMsg("Não há dados para emissão do relatório em excel.","Atenção",,1)
             _lRet := .F.
             Break 
          EndIf
 
       ElseIf ! Empty(_cCodSup)
-         TRBZBK4->(DbGoTop())
+         TRBZBK4->(DBGoTop())
          If TRBZBK4->(Eof()) .Or. TRBZBK4->(Bof()) 
-            U_Itmsg("Não há dados para emissão do relatório em excel.","Atenção",,1)
+            U_ITMsg("Não há dados para emissão do relatório em excel.","Atenção",,1)
             _lRet := .F.
             Break 
          EndIf
 
       ElseIf ! Empty(_cCodVen)
-         TRBZBK5->(DbGoTop())
+         TRBZBK5->(DBGoTop())
          If TRBZBK5->(Eof()) .Or. TRBZBK5->(Bof()) 
-            U_Itmsg("Não há dados para emissão do relatório em excel.","Atenção",,1)
+            U_ITMsg("Não há dados para emissão do relatório em excel.","Atenção",,1)
             _lRet := .F.
             Break 
          EndIf
@@ -576,27 +576,27 @@ User Function ROMS069P()
 Begin Sequence  
    
    If ! Empty(_cCodGNac)
-      If U_ItMsg("Confirma a geração dos dados do Painel Gerencial de Comissões, tendo como base o código do Gerente Nacional? ", "Atenção", "",2,2,2) 
+      If U_ITMsg("Confirma a geração dos dados do Painel Gerencial de Comissões, tendo como base o código do Gerente Nacional? ", "Atenção", "",2,2,2) 
          Processa( {|| U_ROMS069N() }, "Aguarde...", "Gerando dados do painel... ",.F.) 
       EndIf 
 
    ElseIf ! Empty(_cCodGer)
-      If U_ItMsg("Confirma a geração dos dados do Painel Gerencial de Comissões, tendo como base o código do Gerente? ", "Atenção", "",2,2,2) 
+      If U_ITMsg("Confirma a geração dos dados do Painel Gerencial de Comissões, tendo como base o código do Gerente? ", "Atenção", "",2,2,2) 
          Processa( {|| U_ROMS069G() }, "Aguarde...", "Gerando dados do painel... ",.F.) 
       EndIf 
 
    ElseIf ! Empty(_cCodCoord )
-      If U_ItMsg("Confirma a geração dos dados do Painel Gerencial de Comissões, tendo como base o código do Coordenador? ", "Atenção", "",2,2,2) 
+      If U_ITMsg("Confirma a geração dos dados do Painel Gerencial de Comissões, tendo como base o código do Coordenador? ", "Atenção", "",2,2,2) 
          Processa( {|| U_ROMS069C() }, "Aguarde...", "Gerando dados do painel... ",.F.) 
       EndIf 
 
    ElseIf ! Empty(_cCodSup)
-      If U_ItMsg("Confirma a geração dos dados do Painel Gerencial de Comissões, tendo como base o código do Supervisor? ", "Atenção", "",2,2,2) 
+      If U_ITMsg("Confirma a geração dos dados do Painel Gerencial de Comissões, tendo como base o código do Supervisor? ", "Atenção", "",2,2,2) 
          Processa( {|| U_ROMS069S() }, "Aguarde...", "Gerando dados do painel... ",.F.) 
       EndIf 
 
    ElseIf ! Empty(_cCodVen)
-      If U_ItMsg("Confirma a geração dos dados do Painel Gerencial de Comissões, tendo como base o código do Vendedor? ", "Atenção", "",2,2,2) 
+      If U_ITMsg("Confirma a geração dos dados do Painel Gerencial de Comissões, tendo como base o código do Vendedor? ", "Atenção", "",2,2,2) 
          Processa( {|| U_ROMS069R() }, "Aguarde...", "Gerando dados do painel... ",.F.) 
       EndIf 
 
@@ -604,7 +604,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -647,14 +647,14 @@ Begin Sequence
 
    _cPeriodoQry := SubStr(_cPeriodo,3,4) + SubStr(_cPeriodo,1,2)
    
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_VEND, ZBK_NOMVEN, "
    _cQry += " SUM(ZBK_COMVEN) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') +" ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    _cQry += " GROUP BY ZBK_VEND, ZBK_NOMVEN "
    _cQry += " ORDER BY ZBK_VEND "
@@ -665,7 +665,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
       
       IncProc("Gravando dados Representante: " + TRBQRY->ZBK_VEND + "-" + AllTrim(TRBQRY->ZBK_NOMVEN))
 
@@ -680,11 +680,11 @@ Begin Sequence
          TRBZBK5->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK5->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK5->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK5->(MsUnLock())
+         TRBZBK5->(MSUnLock())
 
       EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
@@ -696,14 +696,14 @@ Begin Sequence
    //============================================================================
    IncProc("Lendo dados das comissões dos Supervisores...")
 
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_SUPERV, "
    _cQry += " SUM(ZBK_COMSUP) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') +" ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    _cQry += " GROUP BY ZBK_SUPERV "
    _cQry += " ORDER BY ZBK_SUPERV "
@@ -714,7 +714,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
       
       SA3->(MsSeek(xFilial("SA3")+TRBQRY->ZBK_SUPERV))
 
@@ -729,10 +729,10 @@ Begin Sequence
          TRBZBK4->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK4->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK4->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK4->(MsUnLock())
+         TRBZBK4->(MSUnLock())
       EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
@@ -744,14 +744,14 @@ Begin Sequence
    //============================================================================
    IncProc("Lendo dados das comissões dos Coordenadores...")
    
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_COORDE, "
    _cQry += " SUM(ZBK_COMCOO) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') +" ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    _cQry += " GROUP BY ZBK_COORDE "
    _cQry += " ORDER BY ZBK_COORDE "
@@ -762,7 +762,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
       
       SA3->(MsSeek(xFilial("SA3")+TRBQRY->ZBK_COORDE))
       
@@ -777,10 +777,10 @@ Begin Sequence
          TRBZBK3->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK3->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK3->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK3->(MsUnLock())
+         TRBZBK3->(MSUnLock())
       EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
@@ -792,14 +792,14 @@ Begin Sequence
    //============================================================================
    IncProc("Lendo dados das comissões dos Gerentes...")
 
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_GERENT, "
    _cQry += " SUM(ZBK_COMGER) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') +" ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    _cQry += " GROUP BY ZBK_GERENT "
    _cQry += " ORDER BY ZBK_GERENT "
@@ -810,7 +810,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
 
       SA3->(MsSeek(xFilial("SA3")+TRBQRY->ZBK_GERENT))
       
@@ -825,10 +825,10 @@ Begin Sequence
          TRBZBK2->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK2->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK2->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK2->(MsUnLock())
+         TRBZBK2->(MSUnLock())
 //      EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
@@ -840,14 +840,14 @@ Begin Sequence
    //============================================================================
    IncProc("Lendo dados das comissões do Gerente Nacional...")
    
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_GERNAC, "
    _cQry += " SUM(ZBK_COMGNC) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') + " ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    _cQry += " GROUP BY ZBK_GERNAC "
    _cQry += " ORDER BY ZBK_GERNAC "
@@ -858,7 +858,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
 
       SA3->(MsSeek(xFilial("SA3")+TRBQRY->ZBK_GERNAC))
 
@@ -873,25 +873,25 @@ Begin Sequence
          TRBZBK1->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK1->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK1->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK1->(MsUnLock())
+         TRBZBK1->(MSUnLock())
       EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
       TRBQRY->( DBCloseArea() )
    EndIf
 
-   TRBZBK1->(DbGoTop())
-   TRBZBK2->(DbGoTop())
-   TRBZBK3->(DbGoTop())
-   TRBZBK4->(DbGoTop())
-   TRBZBK5->(DbGoTop())
+   TRBZBK1->(DBGoTop())
+   TRBZBK2->(DBGoTop())
+   TRBZBK3->(DBGoTop())
+   TRBZBK4->(DBGoTop())
+   TRBZBK5->(DBGoTop())
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -915,8 +915,8 @@ Begin Sequence
    _cQry := " SELECT Max(ZBK_VERSAO) VERSAO "
    _cQry += " FROM "+ RetSqlName('ZBK') +" ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += "   AND ZBK_DTFECH = '" + Dtos(_dDtFecham) +"' "   
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += "   AND ZBK_DTFECH = '" + DToS(_dDtFecham) +"' "   
    
    If Select("TRBZBK") > 0
       TRBZBK->( DBCloseArea() )
@@ -973,14 +973,14 @@ Begin Sequence
 
    _cPeriodoQry := SubStr(_cPeriodo,3,4) + SubStr(_cPeriodo,1,2)
    
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_VEND, ZBK_NOMVEN, "
    _cQry += " SUM(ZBK_COMVEN) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') +" ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    _cQry += " AND ZBK_GERENT = '" + _cCodGer + "' "
    _cQry += " GROUP BY ZBK_VEND, ZBK_NOMVEN "
@@ -992,7 +992,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
       
       IncProc("Gravando dados Representante: " + TRBQRY->ZBK_VEND + "-" + AllTrim(TRBQRY->ZBK_NOMVEN))
 
@@ -1007,11 +1007,11 @@ Begin Sequence
          TRBZBK5->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK5->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK5->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK5->(MsUnLock())
+         TRBZBK5->(MSUnLock())
 
       EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
@@ -1023,14 +1023,14 @@ Begin Sequence
    //============================================================================
    IncProc("Lendo dados das comissões dos Supervisores...")
    
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_SUPERV, "
    _cQry += " SUM(ZBK_COMSUP) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') +" ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    _cQry += " AND ZBK_GERENT = '" + _cCodGer + "' "   
    _cQry += " GROUP BY ZBK_SUPERV "
@@ -1042,7 +1042,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
       
       SA3->(MsSeek(xFilial("SA3")+TRBQRY->ZBK_SUPERV))
 
@@ -1057,10 +1057,10 @@ Begin Sequence
          TRBZBK4->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK4->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK4->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK4->(MsUnLock())
+         TRBZBK4->(MSUnLock())
       EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
@@ -1072,14 +1072,14 @@ Begin Sequence
    //============================================================================
    IncProc("Lendo dados das comissões dos Coordenadores...")
    
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_COORDE, "
    _cQry += " SUM(ZBK_COMCOO) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') +" ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    _cQry += " AND ZBK_GERENT = '" + _cCodGer + "' "   
    _cQry += " GROUP BY ZBK_COORDE "
@@ -1091,7 +1091,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
       
       SA3->(MsSeek(xFilial("SA3")+TRBQRY->ZBK_COORDE))
       
@@ -1106,10 +1106,10 @@ Begin Sequence
          TRBZBK3->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK3->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK3->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK3->(MsUnLock())
+         TRBZBK3->(MSUnLock())
       EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
@@ -1121,14 +1121,14 @@ Begin Sequence
    //============================================================================
    IncProc("Lendo dados das comissões dos Gerentes...")
 
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_GERENT, "
    _cQry += " SUM(ZBK_COMGER) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') +" ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    _cQry += " AND ZBK_GERENT = '" + _cCodGer + "' "   
    _cQry += " GROUP BY ZBK_GERENT "
@@ -1140,7 +1140,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
 
       SA3->(MsSeek(xFilial("SA3")+TRBQRY->ZBK_GERENT))
       
@@ -1155,10 +1155,10 @@ Begin Sequence
          TRBZBK2->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK2->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK2->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK2->(MsUnLock())
+         TRBZBK2->(MSUnLock())
 //      EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
@@ -1171,14 +1171,14 @@ Begin Sequence
    //ProcRegua(0)
    IncProc("Lendo dados das comissões do Gerente Nacional...")
 
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_GERNAC, "
    _cQry += " SUM(ZBK_COMGNC) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') + " ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    _cQry += " AND ZBK_GERENT = '" + _cCodGer + "' "
    _cQry += " GROUP BY ZBK_GERNAC "
@@ -1190,7 +1190,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
 
       SA3->(MsSeek(xFilial("SA3")+TRBQRY->ZBK_GERNAC))
 
@@ -1205,25 +1205,25 @@ Begin Sequence
          TRBZBK1->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK1->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK1->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK1->(MsUnLock())
+         TRBZBK1->(MSUnLock())
       EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
       TRBQRY->( DBCloseArea() )
    EndIf
 
-   TRBZBK1->(DbGoTop())
-   TRBZBK2->(DbGoTop())
-   TRBZBK3->(DbGoTop())
-   TRBZBK4->(DbGoTop())
-   TRBZBK5->(DbGoTop())
+   TRBZBK1->(DBGoTop())
+   TRBZBK2->(DBGoTop())
+   TRBZBK3->(DBGoTop())
+   TRBZBK4->(DBGoTop())
+   TRBZBK5->(DBGoTop())
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -1266,14 +1266,14 @@ Begin Sequence
 
    _cPeriodoQry := SubStr(_cPeriodo,3,4) + SubStr(_cPeriodo,1,2)
    
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_VEND, ZBK_NOMVEN, "
    _cQry += " SUM(ZBK_COMVEN) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') +" ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    _cQry += " AND ZBK_COORDE = '" + _cCodCoord + "' "
    _cQry += " GROUP BY ZBK_VEND, ZBK_NOMVEN "
@@ -1285,7 +1285,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
       
       IncProc("Gravando dados Representante: " + TRBQRY->ZBK_VEND + "-" + AllTrim(TRBQRY->ZBK_NOMVEN))
 
@@ -1300,11 +1300,11 @@ Begin Sequence
          TRBZBK5->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK5->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK5->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK5->(MsUnLock())
+         TRBZBK5->(MSUnLock())
 
       EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
@@ -1317,14 +1317,14 @@ Begin Sequence
    //ProcRegua(0)
    IncProc("Lendo dados das comissões dos Supervisores...")
 
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_SUPERV, "
    _cQry += " SUM(ZBK_COMSUP) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') +" ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    _cQry += " AND ZBK_COORDE = '" + _cCodCoord + "' " 
    _cQry += " GROUP BY ZBK_SUPERV "
@@ -1336,7 +1336,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
       
       SA3->(MsSeek(xFilial("SA3")+TRBQRY->ZBK_SUPERV))
 
@@ -1351,10 +1351,10 @@ Begin Sequence
          TRBZBK4->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK4->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK4->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK4->(MsUnLock())
+         TRBZBK4->(MSUnLock())
       EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
@@ -1367,14 +1367,14 @@ Begin Sequence
    //ProcRegua(0)
    IncProc("Lendo dados das comissões dos Coordenadores...")
 
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_COORDE, "
    _cQry += " SUM(ZBK_COMCOO) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') +" ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    _cQry += " AND ZBK_COORDE = '" + _cCodCoord + "' "
    _cQry += " GROUP BY ZBK_COORDE "
@@ -1386,7 +1386,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
       
       SA3->(MsSeek(xFilial("SA3")+TRBQRY->ZBK_COORDE))
       
@@ -1401,10 +1401,10 @@ Begin Sequence
          TRBZBK3->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK3->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK3->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK3->(MsUnLock())
+         TRBZBK3->(MSUnLock())
       EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
@@ -1417,14 +1417,14 @@ Begin Sequence
    //ProcRegua(0)
    IncProc("Lendo dados das comissões dos Gerentes...")
 
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_GERENT, "
    _cQry += " SUM(ZBK_COMGER) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') +" ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    _cQry += " AND ZBK_COORDE = '" + _cCodCoord + "' "
    _cQry += " GROUP BY ZBK_GERENT "
@@ -1436,7 +1436,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
 
       SA3->(MsSeek(xFilial("SA3")+TRBQRY->ZBK_GERENT))
       
@@ -1451,10 +1451,10 @@ Begin Sequence
          TRBZBK2->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK2->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK2->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK2->(MsUnLock())
+         TRBZBK2->(MSUnLock())
 //      EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
@@ -1467,14 +1467,14 @@ Begin Sequence
    //ProcRegua(0)
    IncProc("Lendo dados das comissões do Gerente Nacional...")
    
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_GERNAC, "
    _cQry += " SUM(ZBK_COMGNC) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') + " ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    _cQry += " AND ZBK_COORDE = '" + _cCodCoord + "' "
    _cQry += " GROUP BY ZBK_GERNAC "
@@ -1486,7 +1486,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
 
       SA3->(MsSeek(xFilial("SA3")+TRBQRY->ZBK_GERNAC))
 
@@ -1501,25 +1501,25 @@ Begin Sequence
          TRBZBK1->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK1->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK1->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK1->(MsUnLock())
+         TRBZBK1->(MSUnLock())
       EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
       TRBQRY->( DBCloseArea() )
    EndIf
 
-   TRBZBK1->(DbGoTop())
-   TRBZBK2->(DbGoTop())
-   TRBZBK3->(DbGoTop())
-   TRBZBK4->(DbGoTop())
-   TRBZBK5->(DbGoTop())
+   TRBZBK1->(DBGoTop())
+   TRBZBK2->(DBGoTop())
+   TRBZBK3->(DBGoTop())
+   TRBZBK4->(DBGoTop())
+   TRBZBK5->(DBGoTop())
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -1562,14 +1562,14 @@ Begin Sequence
 
    _cPeriodoQry := SubStr(_cPeriodo,3,4) + SubStr(_cPeriodo,1,2)
    
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_VEND, ZBK_NOMVEN, "
    _cQry += " SUM(ZBK_COMVEN) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') +" ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    _cQry += " AND ZBK_SUPERV = '" + _cCodSup + "' "
    _cQry += " GROUP BY ZBK_VEND, ZBK_NOMVEN "
@@ -1581,7 +1581,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
       
       IncProc("Gravando dados Representante: " + TRBQRY->ZBK_VEND + "-" + AllTrim(TRBQRY->ZBK_NOMVEN))
 
@@ -1596,11 +1596,11 @@ Begin Sequence
          TRBZBK5->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK5->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK5->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK5->(MsUnLock())
+         TRBZBK5->(MSUnLock())
 
       EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
@@ -1613,14 +1613,14 @@ Begin Sequence
    //ProcRegua(0)
    IncProc("Lendo dados das comissões dos Supervisores...")
    
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_SUPERV, "
    _cQry += " SUM(ZBK_COMSUP) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') +" ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    _cQry += " AND ZBK_SUPERV = '" + _cCodSup + "' "
    _cQry += " GROUP BY ZBK_SUPERV "
@@ -1632,7 +1632,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
       
       SA3->(MsSeek(xFilial("SA3")+TRBQRY->ZBK_SUPERV))
 
@@ -1647,10 +1647,10 @@ Begin Sequence
          TRBZBK4->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK4->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK4->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK4->(MsUnLock())
+         TRBZBK4->(MSUnLock())
       EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
@@ -1663,14 +1663,14 @@ Begin Sequence
    //ProcRegua(0)
    IncProc("Lendo dados das comissões dos Coordenadores...")
    
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_COORDE, "
    _cQry += " SUM(ZBK_COMCOO) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') +" ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    _cQry += " AND ZBK_SUPERV = '" + _cCodSup + "' "
    _cQry += " GROUP BY ZBK_COORDE "
@@ -1682,7 +1682,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
       
       SA3->(MsSeek(xFilial("SA3")+TRBQRY->ZBK_COORDE))
       
@@ -1697,10 +1697,10 @@ Begin Sequence
          TRBZBK3->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK3->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK3->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK3->(MsUnLock())
+         TRBZBK3->(MSUnLock())
       EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
@@ -1713,14 +1713,14 @@ Begin Sequence
    //ProcRegua(0)
    IncProc("Lendo dados das comissões dos Gerentes...")
 
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_GERENT, "
    _cQry += " SUM(ZBK_COMGER) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') +" ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    _cQry += " AND ZBK_SUPERV = '" + _cCodSup + "' "
    _cQry += " GROUP BY ZBK_GERENT "
@@ -1732,7 +1732,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
 
       SA3->(MsSeek(xFilial("SA3")+TRBQRY->ZBK_GERENT))
       
@@ -1747,10 +1747,10 @@ Begin Sequence
          TRBZBK2->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK2->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK2->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK2->(MsUnLock())
+         TRBZBK2->(MSUnLock())
 //      EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
@@ -1763,14 +1763,14 @@ Begin Sequence
    //ProcRegua(0)
    IncProc("Lendo dados das comissões do Gerente Nacional...")
    
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_GERNAC, "
    _cQry += " SUM(ZBK_COMGNC) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') + " ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    _cQry += " AND ZBK_SUPERV = '" + _cCodSup + "' "
    _cQry += " GROUP BY ZBK_GERNAC "
@@ -1782,7 +1782,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
 
       SA3->(MsSeek(xFilial("SA3")+TRBQRY->ZBK_GERNAC))
 
@@ -1797,25 +1797,25 @@ Begin Sequence
          TRBZBK1->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK1->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK1->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK1->(MsUnLock())
+         TRBZBK1->(MSUnLock())
       EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
       TRBQRY->( DBCloseArea() )
    EndIf
 
-   TRBZBK1->(DbGoTop())
-   TRBZBK2->(DbGoTop())
-   TRBZBK3->(DbGoTop())
-   TRBZBK4->(DbGoTop())
-   TRBZBK5->(DbGoTop())
+   TRBZBK1->(DBGoTop())
+   TRBZBK2->(DBGoTop())
+   TRBZBK3->(DBGoTop())
+   TRBZBK4->(DBGoTop())
+   TRBZBK5->(DBGoTop())
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -1844,112 +1844,112 @@ Local _aCabVen   := {}
 
 Begin Sequence 
 
-   If ! U_ItMsg("Confirma a exportação dos dados da tela para planilha Excel? ", "Atenção", "",2,2,2) 
+   If ! U_ITMsg("Confirma a exportação dos dados da tela para planilha Excel? ", "Atenção", "",2,2,2) 
       Break 
    EndIf 
 
    _aCabGNC   := {}
    //           Titulo das Colunas ,Alinhamento ,Formatação, Totaliza?
-	Aadd(_aCabGNC,{"Codigo"         ,1           ,1         ,.F.})  // 1
-   Aadd(_aCabGNC,{"Nome"           ,1           ,1         ,.F.})  // 2
-   Aadd(_aCabGNC,{"Valor Comissão" ,3           ,3         ,.F.})  // 3
+	aAdd(_aCabGNC,{"Codigo"         ,1           ,1         ,.F.})  // 1
+   aAdd(_aCabGNC,{"Nome"           ,1           ,1         ,.F.})  // 2
+   aAdd(_aCabGNC,{"Valor Comissão" ,3           ,3         ,.F.})  // 3
    
    _aCabGer   := {}
-   Aadd(_aCabGer,{"Codigo"         ,1           ,1         ,.F.})  // 1
-   Aadd(_aCabGer,{"Nome"           ,1           ,1         ,.F.})  // 2
-   Aadd(_aCabGer,{"Valor Comissão" ,3           ,3         ,.F.})  // 3
+   aAdd(_aCabGer,{"Codigo"         ,1           ,1         ,.F.})  // 1
+   aAdd(_aCabGer,{"Nome"           ,1           ,1         ,.F.})  // 2
+   aAdd(_aCabGer,{"Valor Comissão" ,3           ,3         ,.F.})  // 3
 
    _aCabCoo   := {}
-   Aadd(_aCabCoo,{"Codigo"         ,1           ,1         ,.F.})  // 1
-   Aadd(_aCabCoo,{"Nome"           ,1           ,1         ,.F.})  // 2
-   Aadd(_aCabCoo,{"Valor Comissão" ,3           ,3         ,.F.})  // 3
-   Aadd(_aCabCoo,{"Codigo Gerente" ,1           ,1         ,.F.})  // 4
-   Aadd(_aCabCoo,{"Nome Gerente"   ,1           ,1         ,.F.})  // 5
+   aAdd(_aCabCoo,{"Codigo"         ,1           ,1         ,.F.})  // 1
+   aAdd(_aCabCoo,{"Nome"           ,1           ,1         ,.F.})  // 2
+   aAdd(_aCabCoo,{"Valor Comissão" ,3           ,3         ,.F.})  // 3
+   aAdd(_aCabCoo,{"Codigo Gerente" ,1           ,1         ,.F.})  // 4
+   aAdd(_aCabCoo,{"Nome Gerente"   ,1           ,1         ,.F.})  // 5
 
    _aCabSup   := {}
-   Aadd(_aCabSup,{"Codigo"             ,1           ,1         ,.F.}) // 1
-   Aadd(_aCabSup,{"Nome"               ,1           ,1         ,.F.}) // 2
-   Aadd(_aCabSup,{"Valor Comissão"     ,3           ,3         ,.F.}) // 3
-   Aadd(_aCabSup,{"Codigo Gerente"     ,1           ,1         ,.F.}) // 4
-   Aadd(_aCabSup,{"Nome Gerente"       ,1           ,1         ,.F.}) // 5
-   Aadd(_aCabSup,{"Codigo Coordenador" ,1           ,1         ,.F.}) // 6 
-   Aadd(_aCabSup,{"Nome Coordenador"   ,1           ,1         ,.F.}) // 7
+   aAdd(_aCabSup,{"Codigo"             ,1           ,1         ,.F.}) // 1
+   aAdd(_aCabSup,{"Nome"               ,1           ,1         ,.F.}) // 2
+   aAdd(_aCabSup,{"Valor Comissão"     ,3           ,3         ,.F.}) // 3
+   aAdd(_aCabSup,{"Codigo Gerente"     ,1           ,1         ,.F.}) // 4
+   aAdd(_aCabSup,{"Nome Gerente"       ,1           ,1         ,.F.}) // 5
+   aAdd(_aCabSup,{"Codigo Coordenador" ,1           ,1         ,.F.}) // 6 
+   aAdd(_aCabSup,{"Nome Coordenador"   ,1           ,1         ,.F.}) // 7
 
    _aCabVen   := {}
-   Aadd(_aCabVen,{"Codigo"             ,1           ,1         ,.F.}) // 1
-   Aadd(_aCabVen,{"Nome"               ,1           ,1         ,.F.}) // 2
-   Aadd(_aCabVen,{"Valor Comissão"     ,3           ,3         ,.F.}) // 3
-   Aadd(_aCabVen,{"Codigo Gerente"     ,1           ,1         ,.F.}) // 4
-   Aadd(_aCabVen,{"Nome Gerente"       ,1           ,1         ,.F.}) // 5
-   Aadd(_aCabVen,{"Codigo Coordenador" ,1           ,1         ,.F.}) // 6
-   Aadd(_aCabVen,{"Nome Coordenador"   ,1           ,1         ,.F.}) // 7
-   Aadd(_aCabVen,{"Codigo Supervisor"  ,1           ,1         ,.F.}) // 8
-   Aadd(_aCabVen,{"Nome Supervisor"    ,1           ,1         ,.F.}) // 9
+   aAdd(_aCabVen,{"Codigo"             ,1           ,1         ,.F.}) // 1
+   aAdd(_aCabVen,{"Nome"               ,1           ,1         ,.F.}) // 2
+   aAdd(_aCabVen,{"Valor Comissão"     ,3           ,3         ,.F.}) // 3
+   aAdd(_aCabVen,{"Codigo Gerente"     ,1           ,1         ,.F.}) // 4
+   aAdd(_aCabVen,{"Nome Gerente"       ,1           ,1         ,.F.}) // 5
+   aAdd(_aCabVen,{"Codigo Coordenador" ,1           ,1         ,.F.}) // 6
+   aAdd(_aCabVen,{"Nome Coordenador"   ,1           ,1         ,.F.}) // 7
+   aAdd(_aCabVen,{"Codigo Supervisor"  ,1           ,1         ,.F.}) // 8
+   aAdd(_aCabVen,{"Nome Supervisor"    ,1           ,1         ,.F.}) // 9
 
    //=================================================================
    // Grava dados do gerente nacional
    //=================================================================
    _aDadosGNC := {}
-   TRBZBK1->(DbGoTop())
-   Do While ! TRBZBK1->(Eof())
+   TRBZBK1->(DBGoTop())
+   While ! TRBZBK1->(Eof())
                        //         1              2                  3
-      Aadd(_aDadosGNC,{TRBZBK1->ZBK_VEND, TRBZBK1->ZBK_NOMVEN,TRBZBK1->ZBK_COMVEN}) 
+      aAdd(_aDadosGNC,{TRBZBK1->ZBK_VEND, TRBZBK1->ZBK_NOMVEN,TRBZBK1->ZBK_COMVEN}) 
       
-      TRBZBK1->(DbSkip())
+      TRBZBK1->(DBSkip())
    EndDo 
 
    If Empty(_aDadosGNC)
                 //    1   2  3
       //_aDadosGNC := {"" ,"" ,0}
-      Aadd(_aDadosGNC,{"" ,"" ,0})
+      aAdd(_aDadosGNC,{"" ,"" ,0})
    EndIf 
 
    //=================================================================
    // Grava dados do gerente
    //=================================================================
    _aDadosGer := {}
-   TRBZBK2->(DbGoTop())
-   Do While ! TRBZBK2->(Eof())
+   TRBZBK2->(DBGoTop())
+   While ! TRBZBK2->(Eof())
                        //     1                   2                    3
-      Aadd(_aDadosGer,{TRBZBK2->ZBK_VEND, TRBZBK2->ZBK_NOMVEN,TRBZBK2->ZBK_COMVEN}) 
+      aAdd(_aDadosGer,{TRBZBK2->ZBK_VEND, TRBZBK2->ZBK_NOMVEN,TRBZBK2->ZBK_COMVEN}) 
 
-      TRBZBK2->(DbSkip())
+      TRBZBK2->(DBSkip())
    EndDo 
    
    If Empty(_aDadosGer)
                   // 1   2   3
       //_aDadosGer := {"", "" ,0}
-      Aadd(_aDadosGer, {"", "" ,0})
+      aAdd(_aDadosGer, {"", "" ,0})
    EndIf 
 
    //=================================================================
    // Grava dados do coordenador
    //=================================================================
    _aDadosCoo := {}
-   TRBZBK3->(DbGoTop())
-   Do While ! TRBZBK3->(Eof())
+   TRBZBK3->(DBGoTop())
+   While ! TRBZBK3->(Eof())
       _cNomeGer := ""
       If ! Empty(TRBZBK3->ZBK_GERENT)
          _cNomeGer := Posicione( "SA3" , 1 , xFilial("SA3")+TRBZBK3->ZBK_GERENT, "A3_NOME" )
       EndIf 
                        //        1               2                     3                 4                 5
-      Aadd(_aDadosCoo,{TRBZBK3->ZBK_VEND, TRBZBK3->ZBK_NOMVEN,TRBZBK3->ZBK_COMVEN, TRBZBK3->ZBK_GERENT,_cNomeGer}) 
+      aAdd(_aDadosCoo,{TRBZBK3->ZBK_VEND, TRBZBK3->ZBK_NOMVEN,TRBZBK3->ZBK_COMVEN, TRBZBK3->ZBK_GERENT,_cNomeGer}) 
 
-      TRBZBK3->(DbSkip())
+      TRBZBK3->(DBSkip())
    EndDo 
    
    If Empty(_aDadosCoo)
                 //    1  2   3   4   5
       //_aDadosCoo := {"" ,"" ,0 ,"" ,""}
-      Aadd(_aDadosCoo, {"" ,"" ,0 ,"" ,""})
+      aAdd(_aDadosCoo, {"" ,"" ,0 ,"" ,""})
    EndIf 
     
    //=================================================================
    // Grava dados do supervisor
    //=================================================================
    _aDadosSup := {}
-   TRBZBK4->(DbGoTop())
-   Do While ! TRBZBK4->(Eof())
+   TRBZBK4->(DBGoTop())
+   While ! TRBZBK4->(Eof())
       _cNomeGer := ""
       If ! Empty(TRBZBK4->ZBK_GERENT)
          _cNomeGer := Posicione( "SA3" , 1 , xFilial("SA3")+TRBZBK4->ZBK_GERENT, "A3_NOME" )
@@ -1960,16 +1960,16 @@ Begin Sequence
          _cNomeCoo := Posicione( "SA3" , 1 , xFilial("SA3")+TRBZBK4->ZBK_COORDE, "A3_NOME" )
       EndIf 
                            //      1                  2                  3                   4            5                 6              7
-      Aadd(_aDadosSup,{TRBZBK4->ZBK_VEND, TRBZBK4->ZBK_NOMVEN,TRBZBK4->ZBK_COMVEN, TRBZBK4->ZBK_GERENT,_cNomeGer, TRBZBK4->ZBK_COORDE,_cNomeCoo}) 
+      aAdd(_aDadosSup,{TRBZBK4->ZBK_VEND, TRBZBK4->ZBK_NOMVEN,TRBZBK4->ZBK_COMVEN, TRBZBK4->ZBK_GERENT,_cNomeGer, TRBZBK4->ZBK_COORDE,_cNomeCoo}) 
 
 
-      TRBZBK4->(DbSkip())
+      TRBZBK4->(DBSkip())
    EndDo 
 
    If Empty(_aDadosSup)
                 //   1    2  3  4   5   6   7 
       //_aDadosSup := {"", "", 0, "","" ,"" ,""}
-      Aadd(_aDadosSup, {"", "", 0, "","" ,"" ,""})
+      aAdd(_aDadosSup, {"", "", 0, "","" ,"" ,""})
    EndIf 
 
    
@@ -1977,8 +1977,8 @@ Begin Sequence
    // Grava dados do vendedor
    //=================================================================
    _aDadosVen := {}
-   TRBZBK5->(DbGoTop())
-   Do While ! TRBZBK5->(Eof())
+   TRBZBK5->(DBGoTop())
+   While ! TRBZBK5->(Eof())
       _cNomeGer := ""
       If ! Empty(TRBZBK5->ZBK_GERENT)
          _cNomeGer := Posicione( "SA3" , 1 , xFilial("SA3")+TRBZBK5->ZBK_GERENT, "A3_NOME" )
@@ -1994,23 +1994,23 @@ Begin Sequence
          _cNomeSup := Posicione( "SA3" , 1 , xFilial("SA3")+TRBZBK5->ZBK_SUPERV, "A3_NOME" )
       EndIf 
                   //             1                 2                   3                    4             5              6                7           8                 9   
-      Aadd(_aDadosVen,{TRBZBK5->ZBK_VEND, TRBZBK5->ZBK_NOMVEN,TRBZBK5->ZBK_COMVEN, TRBZBK5->ZBK_GERENT,_cNomeGer, TRBZBK5->ZBK_COORDE,_cNomeCoo,TRBZBK5->ZBK_SUPERV,_cNomeSup}) 
+      aAdd(_aDadosVen,{TRBZBK5->ZBK_VEND, TRBZBK5->ZBK_NOMVEN,TRBZBK5->ZBK_COMVEN, TRBZBK5->ZBK_GERENT,_cNomeGer, TRBZBK5->ZBK_COORDE,_cNomeCoo,TRBZBK5->ZBK_SUPERV,_cNomeSup}) 
 
-      TRBZBK5->(DbSkip())
+      TRBZBK5->(DBSkip())
    EndDo 
    
    If Empty(_aDadosVen)
               //      1  2   3  4   5   6  7  8   9
       //_aDadosVen := {"", "", 0 ,"" ,"" ,"","","",""} 
-      Aadd(_aDadosVen, {"", "", 0 ,"" ,"" ,"","","",""})
+      aAdd(_aDadosVen, {"", "", 0 ,"" ,"" ,"","","",""})
    EndIf 
 
    _aCabec:={}
-	Aadd(_aCabec,{"Gerente Nacional" ,_aCabGNC})
-	Aadd(_aCabec,{"Gerente"          ,_aCabGer}) 
-   Aadd(_aCabec,{"Coordenador"      ,_aCabCoo}) 
-   Aadd(_aCabec,{"Supervisor"       ,_aCabSup}) 
-   Aadd(_aCabec,{"Representante"    ,_aCabVen}) 
+	aAdd(_aCabec,{"Gerente Nacional" ,_aCabGNC})
+	aAdd(_aCabec,{"Gerente"          ,_aCabGer}) 
+   aAdd(_aCabec,{"Coordenador"      ,_aCabCoo}) 
+   aAdd(_aCabec,{"Supervisor"       ,_aCabSup}) 
+   aAdd(_aCabec,{"Representante"    ,_aCabVen}) 
 
    _aDetalhe := {_aDadosGNC,_aDadosGer,_aDadosCoo,_aDadosSup,_aDadosVen}
 
@@ -2019,15 +2019,15 @@ Begin Sequence
 
 End Sequence 
 
-TRBZBK1->(DbGoTop())
-TRBZBK2->(DbGoTop())
-TRBZBK3->(DbGoTop())
-TRBZBK4->(DbGoTop())
-TRBZBK5->(DbGoTop())
+TRBZBK1->(DBGoTop())
+TRBZBK2->(DBGoTop())
+TRBZBK3->(DBGoTop())
+TRBZBK4->(DBGoTop())
+TRBZBK5->(DBGoTop())
 
-U_Itmsg("Exportação dos dados para Excel concluido.","Atenção", ,2)
+U_ITMsg("Exportação dos dados para Excel concluido.","Atenção", ,2)
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -2070,14 +2070,14 @@ Begin Sequence
 
    _cPeriodoQry := SubStr(_cPeriodo,3,4) + SubStr(_cPeriodo,1,2)
    
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_VEND, ZBK_NOMVEN, "
    _cQry += " SUM(ZBK_COMVEN) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') +" ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    _cQry += " AND ZBK_VEND = '" + _cCodVen + "' "
    _cQry += " GROUP BY ZBK_VEND, ZBK_NOMVEN "
@@ -2089,7 +2089,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
       
       IncProc("Gravando dados Representante: " + TRBQRY->ZBK_VEND + "-" + AllTrim(TRBQRY->ZBK_NOMVEN))
 
@@ -2104,11 +2104,11 @@ Begin Sequence
          TRBZBK5->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK5->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK5->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK5->(MsUnLock())
+         TRBZBK5->(MSUnLock())
 
       EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
@@ -2121,14 +2121,14 @@ Begin Sequence
    //ProcRegua(0)
    IncProc("Lendo dados das comissões dos Supervisores...")
    
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_SUPERV, "
    _cQry += " SUM(ZBK_COMSUP) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') +" ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    //_cQry += " AND ZBK_SUPERV = '" + _cCodSup + "' "
    _cQry += " AND ZBK_VEND = '" + _cCodVen + "' "
@@ -2141,7 +2141,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
       
       SA3->(MsSeek(xFilial("SA3")+TRBQRY->ZBK_SUPERV))
 
@@ -2156,10 +2156,10 @@ Begin Sequence
          TRBZBK4->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK4->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK4->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK4->(MsUnLock())
+         TRBZBK4->(MSUnLock())
       EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
@@ -2172,14 +2172,14 @@ Begin Sequence
    //ProcRegua(0)
    IncProc("Lendo dados das comissões dos Coordenadores...")
    
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_COORDE, "
    _cQry += " SUM(ZBK_COMCOO) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') +" ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    //_cQry += " AND ZBK_SUPERV = '" + _cCodSup + "' "
    _cQry += " AND ZBK_VEND = '" + _cCodVen + "' "
@@ -2192,7 +2192,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
       
       SA3->(MsSeek(xFilial("SA3")+TRBQRY->ZBK_COORDE))
       
@@ -2207,10 +2207,10 @@ Begin Sequence
          TRBZBK3->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK3->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK3->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK3->(MsUnLock())
+         TRBZBK3->(MSUnLock())
       EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
@@ -2223,14 +2223,14 @@ Begin Sequence
    //ProcRegua(0)
    IncProc("Lendo dados das comissões dos Gerentes...")
 
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_GERENT, "
    _cQry += " SUM(ZBK_COMGER) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') +" ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    //_cQry += " AND ZBK_SUPERV = '" + _cCodSup + "' "
    _cQry += " AND ZBK_VEND = '" + _cCodVen + "' "
@@ -2243,7 +2243,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
 
       SA3->(MsSeek(xFilial("SA3")+TRBQRY->ZBK_GERENT))
       
@@ -2258,10 +2258,10 @@ Begin Sequence
          TRBZBK2->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK2->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK2->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK2->(MsUnLock())
+         TRBZBK2->(MSUnLock())
 //      EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
@@ -2274,14 +2274,14 @@ Begin Sequence
    //ProcRegua(0)
    IncProc("Lendo dados das comissões do Gerente Nacional...")
    
-   SA3->(DbSetOrder(1))
+   SA3->(DBSetOrder(1))
        
    _cQry := " SELECT ZBK_GERNAC, "
    _cQry += " SUM(ZBK_COMGNC) AS TOTCOM"
    _cQry += " FROM "+ RetSqlName('ZBK') + " ZBK "
    _cQry += " WHERE "
-   _cQry += "     ZBK.D_E_L_E_T_ <> '*' "
-   _cQry += " AND SUBSTR( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
+   _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
+   _cQry += " AND SubStr( ZBK_DTFECH, 1 , 6 )  = '"+_cPeriodoQry+"' "
    _cQry += " AND ZBK_VERSAO = '" + _cVersao + "' "
    //_cQry += " AND ZBK_SUPERV = '" + _cCodSup + "' "
    _cQry += " AND ZBK_VEND = '" + _cCodVen + "' "   
@@ -2294,7 +2294,7 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBQRY" , .T. , .F. )
 
-   Do While ! TRBQRY->(Eof()) 
+   While ! TRBQRY->(Eof()) 
 
       SA3->(MsSeek(xFilial("SA3")+TRBQRY->ZBK_GERNAC))
 
@@ -2309,23 +2309,23 @@ Begin Sequence
          TRBZBK1->ZBK_COORDE := SA3->A3_SUPER  
          TRBZBK1->ZBK_GERENT := SA3->A3_GEREN  
          TRBZBK1->ZBK_GERNAC := SA3->A3_I_GERNC
-         TRBZBK1->(MsUnLock())
+         TRBZBK1->(MSUnLock())
       EndIf 
       
-      TRBQRY->(DbSkip())
+      TRBQRY->(DBSkip())
    EndDo 
 
    If Select("TRBQRY") > 0
       TRBQRY->( DBCloseArea() )
    EndIf
 
-   TRBZBK1->(DbGoTop())
-   TRBZBK2->(DbGoTop())
-   TRBZBK3->(DbGoTop())
-   TRBZBK4->(DbGoTop())
-   TRBZBK5->(DbGoTop())
+   TRBZBK1->(DBGoTop())
+   TRBZBK2->(DBGoTop())
+   TRBZBK3->(DBGoTop())
+   TRBZBK4->(DBGoTop())
+   TRBZBK5->(DBGoTop())
 
 End Sequence 
 
-Return Nil 
+Return 
 

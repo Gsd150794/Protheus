@@ -1,6 +1,6 @@
-#INCLUDE "Protheus.Ch"
-#INCLUDE "RwMake.ch"
-#INCLUDE "TopConn.CH"
+#Include "TOTVS.ch"
+#Include "RwMake.ch"
+#Include "TopConn.CH"
 /*/
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -40,19 +40,19 @@
 /*/
 User Function OM200GRV()
 
-Local aArea    := GetArea()
+Local aArea    := FWGetArea()
 Local aAreaPED := TRBPED->(GetArea())
 Local aAreaSC5 := SC5->(GetArea())
 Local aCpos    := {} //{"C5_I_EST  ","C5_I_CMUN ","C5_I_GRPVE","C5_I_OBPED","C5_VEND1  ","C5_VEND2  ","A1_NATUREZ","C6_I_QPALT","C6_PEDCLI ","C6_ENTREG "}
 Local nX       := 0
 
-IF TRBPED->(EOF()) .AND. TRBPED->(BOF())
+If TRBPED->(Eof()) .And. TRBPED->(Bof())
    Return 
-ENDIF
+EndIf
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³Arrays de controle dos campos que deverao ser mostrados no Grid da rotina de Montagem de Carga.   ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-aCpos := ALLTRIM(GetMv("IT_CMPCARG"))
+aCpos := AllTrim(GetMv("IT_CMPCARG"))
 aCpos := If(Empty(aCpos),{},&aCpos)
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -63,15 +63,15 @@ For nX := 1 To Len(aCpos)
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Verifica se o campo vem da tabela SC5, caso contrario a gravacao tem que ser fora do laco. ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	If Substr(aCpos[nX],1,2) == "C5"
+	If SubStr(aCpos[nX],1,2) == "C5"
 		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 		//³ Tratamento para que o nome do campo nao exceda 10 digitos. ³
 		//³ Caso exceda, trunca a ultima posicao.                      ³
 		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-		If Len("PED"+Substr(aCpos[nX],3,Len(ALLTRIM(aCpos[nX]))-2)) > 10
-			TRBPED->&("PED"+Substr(aCpos[nX],3,7)) := SC5->&("C5"+Substr(aCpos[nX],3,Len(ALLTRIM(aCpos[nX]))-2))
+		If Len("PED"+SubStr(aCpos[nX],3,Len(AllTrim(aCpos[nX]))-2)) > 10
+			TRBPED->&("PED"+SubStr(aCpos[nX],3,7)) := SC5->&("C5"+SubStr(aCpos[nX],3,Len(AllTrim(aCpos[nX]))-2))
 		Else
-			TRBPED->&("PED"+Substr(aCpos[nX],3,Len(ALLTRIM(aCpos[nX]))-2)) := SC5->&("C5"+Substr(aCpos[nX],3,Len(ALLTRIM(aCpos[nX]))-2))
+			TRBPED->&("PED"+SubStr(aCpos[nX],3,Len(AllTrim(aCpos[nX]))-2)) := SC5->&("C5"+SubStr(aCpos[nX],3,Len(AllTrim(aCpos[nX]))-2))
 		EndIf
 	Else
 		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -96,10 +96,10 @@ For nX := 1 To Len(aCpos)
 		*/
 	EndIf
 Next nX
-MsUnlock()
+MSUnLock()
 
-RestArea(aArea)
-RestArea(aAreaSC5)
-RestArea(aAreaPED)
+FWRestArea(aArea)
+FWRestArea(aAreaSC5)
+FWRestArea(aAreaPED)
 
 Return

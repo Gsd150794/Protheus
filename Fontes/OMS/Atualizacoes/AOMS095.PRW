@@ -13,8 +13,8 @@ Lucas Borges      | 14/10/2019 | Removidos os Warning na compilação da release 1
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#Include 'Protheus.ch'
-#INCLUDE "APWEBSRV.CH"
+#Include "TOTVS.ch"
+#Include "APWEBSRV.CH"
 
 /*
 ===============================================================================================================================
@@ -37,22 +37,22 @@ Private cCadastro
 
 Begin Sequence
    cCadastro := "Consulta dos dados de Integração de Liberação Financeiro CTE Via Webservice: Italac <---> RDC"
-   Aadd(aRotina,{"Pesquisar"              ,"AxPesqui"   ,0,1})
-   Aadd(aRotina,{"Visualizar"             ,"U_AOMS095V" ,0,2})   
-   Aadd(aRotina,{"Legenda"                ,"U_AOMS095L" ,0,6})
+   aAdd(aRotina,{"Pesquisar"              ,"AxPesqui"   ,0,1})
+   aAdd(aRotina,{"Visualizar"             ,"U_AOMS095V" ,0,2})   
+   aAdd(aRotina,{"Legenda"                ,"U_AOMS095L" ,0,6})
    
-   Aadd(_aCores,{"ZG7_SITUAC == 'N'" ,"BR_VERDE" })
-   Aadd(_aCores,{"ZG7_SITUAC == 'P'" ,"BR_VERMELHO" })
-   Aadd(_aCores,{"ZG7_SITUAC == 'R'" ,"BR_AMARELO" })
+   aAdd(_aCores,{"ZG7_SITUAC == 'N'" ,"BR_VERDE" })
+   aAdd(_aCores,{"ZG7_SITUAC == 'P'" ,"BR_VERMELHO" })
+   aAdd(_aCores,{"ZG7_SITUAC == 'R'" ,"BR_AMARELO" })
 
-   DbSelectArea("ZG7")
-   ZG7->(DbSetOrder(1)) 
-   ZG7->(DbGoTop())
+   DBSelectArea("ZG7")
+   ZG7->(DBSetOrder(1)) 
+   ZG7->(DBGoTop())
    MBrowse(6,1,22,75,"ZG7", , , , , , _aCores)
    
 End Sequence
 
-Return Nil    
+Return    
 
 /*
 ===============================================================================================================================
@@ -71,15 +71,15 @@ User Function AOMS095L()
 Local _aLegenda := {}
 
 Begin Sequence                                                                           
-   Aadd(_aLegenda,{"BR_VERDE"    ,"Não Processado" })
-   Aadd(_aLegenda,{"BR_AMARELO"  ,"Rejeitada" })
-   Aadd(_aLegenda,{"BR_VERMELHO" ,"Processado" })
+   aAdd(_aLegenda,{"BR_VERDE"    ,"Não Processado" })
+   aAdd(_aLegenda,{"BR_AMARELO"  ,"Rejeitada" })
+   aAdd(_aLegenda,{"BR_VERMELHO" ,"Processado" })
 
    BrwLegenda(cCadastro, "Legenda", _aLegenda)
 
 End Sequence
 
-Return Nil
+Return
 
 /*
 =================================================================================================================================
@@ -129,14 +129,14 @@ Begin Sequence     
    // Monta as colunas do MSSELECT para a tabela temporária TRBZG8 
    //================================================================================
    _astruct := ZG8->(Dbstruct())
-   For _nni := 1 to len(_astruct)
-      If alltrim(_astruc[_nni][1])=="ZG8_FILIAL"
+   For _nni := 1 to Len(_astruct)
+      If AllTrim(_astruc[_nni][1])=="ZG8_FILIAL"
           Loop
       EndIf
-      Aadd( _aCmpZG8 , { alltrim(_astruc[_nni][1]),;
+      aAdd( _aCmpZG8 , { AllTrim(_astruc[_nni][1]),;
                          "" ,;
-                         Getsx3cache(alltrim(_astruc[_nni][1]),"X3_TITULO"),;
-                         Getsx3cache(alltrim(_astruc[_nni][1]),"SX3->X3_PICTURE") } )
+                         Getsx3cache(AllTrim(_astruc[_nni][1]),"X3_TITULO"),;
+                         Getsx3cache(AllTrim(_astruc[_nni][1]),"SX3->X3_PICTURE") } )
    Next                                                                                  
    //================================================================================
    // Carrega os dados da tabela ZG7
@@ -148,11 +148,11 @@ Begin Sequence     
    //================================================================================
    // Carrega os dados da tabela ZG8
    //================================================================================
-   ZG8->(DbSetOrder(4))  // ZG8_FILIAL+ZG8_FATURA+ZG8_CNPJTR+ZG8_SITUAC
-   ZG8->(DbSeek(ZG7->(ZG7_FILIAL+ZG7_FATURA+ZG7_CNPJTR+ZG7_SITUAC)))
-   Do While ! ZG8->(Eof()) .And. ZG8->(ZG8_FILIAL+ZG8_FATURA+ZG8_CNPJTR+ZG8_SITUAC) == ZG7->(ZG7_FILIAL+ZG7_FATURA+ZG7_CNPJTR+ZG7_SITUAC)
+   ZG8->(DBSetOrder(4))  // ZG8_FILIAL+ZG8_FATURA+ZG8_CNPJTR+ZG8_SITUAC
+   ZG8->(DBSeek(ZG7->(ZG7_FILIAL+ZG7_FATURA+ZG7_CNPJTR+ZG7_SITUAC)))
+   While ! ZG8->(Eof()) .And. ZG8->(ZG8_FILIAL+ZG8_FATURA+ZG8_CNPJTR+ZG8_SITUAC) == ZG7->(ZG7_FILIAL+ZG7_FATURA+ZG7_CNPJTR+ZG7_SITUAC)
       If ZG8->ZG8_REGCAP <> ZG7->ZG7_REGCAP
-         ZG8->(DbSkip())
+         ZG8->(DBSkip())
          Loop
       EndIf
       
@@ -160,18 +160,18 @@ Begin Sequence     
       For _nI := 1 To TRBZG8->(FCount())
           &("TRBZG8->"+TRBZG8->(FieldName(_nI))) :=  &("ZG8->"+ZG8->(FieldName(_nI)))
       Next
-      TRBZG8->(MsUnlock())
+      TRBZG8->(MSUnLock())
       
-      ZG8->(DbSkip())
+      ZG8->(DBSkip())
    EndDo
-   TRBZG8->(DbGoTop())
+   TRBZG8->(DBGoTop())
                                        
    //================================================================================
    // Monta a tela Enchoice ZG7  x MsSelect ZG8
    //================================================================================    
    _aObjects := {} 
-   AAdd( _aObjects, { 315,  50, .T., .T. } )
-   AAdd( _aObjects, { 100, 100, .T., .T. } )
+   aAdd( _aObjects, { 315,  50, .T., .T. } )
+   aAdd( _aObjects, { 100, 100, .T., .T. } )
 
    _aInfo := { _aSizeAut[ 1 ], _aSizeAut[ 2 ], _aSizeAut[ 3 ], _aSizeAut[ 4 ], 3, 3 } 
 
@@ -196,7 +196,7 @@ End Sequence
 // Fecha e exclui as tabelas temporárias
 //================================================================================                    
 If Select("TRBZG8") > 0
-   (TRBZG8)->(DbCloseArea())
+   (TRBZG8)->(DBCloseArea())
 EndIf
 
-Return Nil
+Return

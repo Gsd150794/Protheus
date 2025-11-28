@@ -2,27 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor            |    Data    |                              Motivo                      										 
-------------------------------------------------------------------------------------------------------------------------------- 
- Lucas B. Fereira | 17/09/2019 | Retirada chamada da função itputx1. Chamado 28346
- Lucas B. Fereira | 24/09/2019 | Corrigido filtro de Categoria. Chamado 30651
- Lucas Borges     | 02/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
- Alex Wallauer    | 30/08/2021 | Trazer o conteúdo do campo RA_NSOCIAL, quando preenchido no lugar do RA_NOME. Chamado 37601
- Alex Wallauer    | 16/09/2021 | Reorganizacao das colunas e inclusao de BANCO/AGENCIA/CONTA e Nome Completo. Chamado 36205
- Alex Wallauer    | 08/03/2022 | Inclusao da coluna "APRENDIZ?". Chamado 39413
- Julio Paz        | 18/03/2024 | Inclusão colunas: Categ SEFIP/Deficiente/Tipo Defic/Categ Def ESocial/Obs Defic. Chamado 46563
-===============================================================================================================================
- Analista     - Programador  - Inicio   - Envio    - Chamado - Motivo da Alteração
-===============================================================================================================================
-Bruno         - Igor Melgaço - 28/05/25 - 29/05/25 - 50776   - Ajuste na query para filtro de Filiais
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
+Alex Wallauer |08/03/2022| Chamado 39413. Inclusao da coluna "APRENDIZ?".
+Julio Paz     |18/03/2024| Chamado 46563. Inclusão colunas: Categ SEFIP/Deficiente/Tipo Defic/Categ Def ESocial/Obs Defic.
+Igor Melgaço  |29/05/2025| Chamado 50776. Ajuste na query para filtro de Filiais
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-
-#Include "protheus.ch"
+#Include "TOTVS.ch"
 #Include "topconn.ch"
 
 /*
@@ -30,15 +18,11 @@ Bruno         - Igor Melgaço - 28/05/25 - 29/05/25 - 50776   - Ajuste na query p
 Programa----------: RGPE007
 Autor-------------: Erich Buttner
 Data da Criacao---: 19/07/2013
-===============================================================================================================================
 Descrição---------: Relatório do Quadro de Funcionários 
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-
 User Function RGPE007()
 
 Local _oReport	:= Nil
@@ -48,22 +32,18 @@ Private _cCodTurno := "", _cDescTurno := "", _dDataSPF := Ctod("  /  /  ")
 _oReport := RGPE007PRC()
 _oReport:PrintDialog()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: RGPE007PRC
 Autor-------------: Erich Buttner
 Data da Criacao---: 19/07/2013
-===============================================================================================================================
 Descrição---------: Processa a impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
-/*/
-
+*/
 Static Function RGPE007PRC()
 
 Local _oReport	:= Nil
@@ -73,7 +53,7 @@ Local _oSec003	:= Nil
 Local _cAliaSRA	:= "SRA"
 Local _cAliaQRY	:= GetNextAlias()
 Local _cPerg	:= "RGPE007"
-PRIVATE _cTitulo:="Relatório de Quadro de Funcionários"
+Private _cTitulo:="Relatório de Quadro de Funcionários"
 
 Pergunte(  _cPerg ,,_cTitulo )
 
@@ -104,7 +84,7 @@ If MV_PAR16 == 1 // Totais somente quando usa ordem por setor
 	TRFunction():New( _oSec002:Cell("TOTSET") ,, "COUNT" ,, "TOTAL GERAL DE SETORES " ,,, .F. , .T. )
 	_oSec002:SetTotalText( "TOTAL DE SETORES" )
 
-Endif
+EndIf
 
 //====================================================================================================
 //SECAO 3
@@ -114,7 +94,7 @@ _oSec003:SetTotalInLine(.F.)
 
 TRCell():New( _oSec003 , "FILIAL"	,, "Fil"			,						, 02 ,, )//{|| FILIAL	} )
 TRCell():New( _oSec003 , "MATR"	    ,, "Matricula"      , "999999"	            , 10 ,, )//{|| MATR	} )
-TRCell():New( _oSec003 , "NOME"		,, "Nome"			,                       , 30 ,, {|| IF(!EMPTY((_cAliaQRY)->NSOCIAL),(_cAliaQRY)->NSOCIAL,(_cAliaQRY)->NOME)	} )
+TRCell():New( _oSec003 , "NOME"		,, "Nome"			,                       , 30 ,, {|| If(!Empty((_cAliaQRY)->NSOCIAL),(_cAliaQRY)->NSOCIAL,(_cAliaQRY)->NOME)	} )
 TRCell():New( _oSec003 , "SEXO"		,, "SEXO"			,						, 30 ,, )//{|| SEXO	} )
 TRCell():New( _oSec003 , "DTNASC"	,, "Dt. Nasc."		,						, 10 ,, )//{|| DTNASC	} )
 TRCell():New( _oSec003 , "RG"		,, "RG"				,						, 12 ,, )//{|| RG		} )
@@ -131,7 +111,7 @@ TRCell():New( _oSec003 , "DSETOR"	,, "Desc Setor"		,						, 24 ,, )//{|| DSETOR 
 TRCell():New( _oSec003 , "CFUNCAO"	,, "Função"			,						, 06 ,, )//{|| CFUNCAO	} )
 TRCell():New( _oSec003 , "FUNCAO"	,, "Desc Função"	,						, 19 ,, )//{|| FUNCAO	} )
 TRCell():New( _oSec003 , "NCBO"		,, "N. CBO"			,						, 15 ,, )//{|| NCBO	} )
-TRCell():New( _oSec003 , "APREN"	,, "Aprendiz?"		,						, 15 ,, {|| IF((_cAliaQRY)->APREN='1',"Sim","Nao")} )
+TRCell():New( _oSec003 , "APREN"	,, "Aprendiz?"		,						, 15 ,, {|| If((_cAliaQRY)->APREN='1',"Sim","Nao")} )
 If MV_PAR14 == 1
    TRCell():New( _oSec003 , "SALARIO"	,,"Salario"			, "@E 9,999,999.99"		, 12 ,, )//{|| SALARIO	} )
 EndIf
@@ -162,11 +142,8 @@ Return( _oReport )
 Programa----------: RGPE007PRT
 Autor-------------: Erich Buttner
 Data da Criacao---: 19/07/2013
-===============================================================================================================================
 Descrição---------: Consulta e Impressão dos dados do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -195,21 +172,21 @@ Next _nI
 
 If !Empty( _cFilIn )
 	_cFilIn := SubStr( _cFilIn , 1 , Len(_cFilIn) - 1 )
-	_cQuery += " AND SRA.RA_SITFOLH IN "+ FormatIN( _cFilIn , ',' )
+	_cQuery += " AND SRA.RA_SITFOLH IN "+ FormatIn( _cFilIn , ',' )
 EndIf
 	
 //====================================================================================================
 // Trata o filtro da Data de Demissão
 //====================================================================================================
 If !Empty(MV_PAR17) .And. !Empty(MV_PAR18)
-	_cQuery += " AND SRA.RA_DEMISSA BETWEEN '"+ dToS(MV_PAR17) +"' AND '"+ dToS(MV_PAR18) +"' "
+	_cQuery += " AND SRA.RA_DEMISSA BETWEEN '"+ DToS(MV_PAR17) +"' AND '"+ DToS(MV_PAR18) +"' "
 EndIf
 
 //====================================================================================================
 // Trata o filtro da Data de Admissao
 //====================================================================================================
 If !Empty(MV_PAR19) .And. !Empty(MV_PAR20)
-	_cQuery += " AND SRA.RA_ADMISSA BETWEEN '"+ dToS(MV_PAR19) +"' AND '"+ dToS(MV_PAR20) +"' "
+	_cQuery += " AND SRA.RA_ADMISSA BETWEEN '"+ DToS(MV_PAR19) +"' AND '"+ DToS(MV_PAR20) +"' "
 EndIf
 
 //====================================================================================================
@@ -225,7 +202,7 @@ Next _nI
 
 If !Empty( _cFilIn )
 	_cFilIn := SubStr( _cFilIn , 1 , Len(_cFilIn) - 1 )
-	_cQuery += " AND SRA.RA_CATFUNC IN "+ FormatIN( _cFilIn , ',' )
+	_cQuery += " AND SRA.RA_CATFUNC IN "+ FormatIn( _cFilIn , ',' )
 EndIf
 
 If ( MV_PAR13 <> 3 )
@@ -244,11 +221,11 @@ EndIf
 
 _cQuery += " %"
 
-If Dtos(MV_PAR20) > Dtos(Date()) 
-   _cdat := Dtos(MV_PAR20)
+If DToS(MV_PAR20) > DToS(Date()) 
+   _cdat := DToS(MV_PAR20)
    _dDataSPF := MV_PAR20
 Else
-   _cdat := Dtos(date())
+   _cdat := DToS(date())
    _dDataSPF := Date()
 EndIf
 
@@ -271,12 +248,12 @@ _oSec003:BeginQuery()
 			SRA.RA_CTDEPSA CONTA,
 			SRA.RA_CODFUNC CFUNCAO,
 			RJ.RJ_DESC FUNCAO,
-			SUBSTR(SRA.RA_ADMISSA,7,2) || '/' || SUBSTR(SRA.RA_ADMISSA,5,2) || '/' || SUBSTR(SRA.RA_ADMISSA,1,4) DTADMI, 
-			SUBSTR(SRA.RA_DEMISSA,7,2) || '/' || SUBSTR(SRA.RA_DEMISSA,5,2) || '/' || SUBSTR(SRA.RA_DEMISSA,1,4) DTDEMI,
+			SubStr(SRA.RA_ADMISSA,7,2) || '/' || SubStr(SRA.RA_ADMISSA,5,2) || '/' || SubStr(SRA.RA_ADMISSA,1,4) DTADMI, 
+			SubStr(SRA.RA_DEMISSA,7,2) || '/' || SubStr(SRA.RA_DEMISSA,5,2) || '/' || SubStr(SRA.RA_DEMISSA,1,4) DTDEMI,
 			SRA.RA_SALARIO SALARIO,
 			SRA.RA_SITFOLH SITFOL,
 			SRA.RA_CATFUNC,
-			SUBSTR(SRA.RA_NASC,7,2) || '/' || SUBSTR(SRA.RA_NASC,5,2) || '/' || SUBSTR(SRA.RA_NASC,1,4) DTNASC,
+			SubStr(SRA.RA_NASC,7,2) || '/' || SubStr(SRA.RA_NASC,5,2) || '/' || SubStr(SRA.RA_NASC,1,4) DTNASC,
 			RJ_CODCBO NCBO,
 			RJ_I_MENOR APREN,
 			SRA.RA_NUMCP || '-' || SRA.RA_SERCP  || '/' || SRA.RA_UFCP NCTPS,
@@ -322,7 +299,7 @@ nTot:=0
 COUNT TO nTot
 _oReport:OMETER:NTOTAL:=nTot 
 
-(_cAliaQRY)->(DBGOTOP() )
+(_cAliaQRY)->(DBGoTop() )
 
 While !_oReport:Cancel() .And. (_cAliaQRY)->( !Eof() )
     
@@ -339,7 +316,7 @@ While !_oReport:Cancel() .And. (_cAliaQRY)->( !Eof() )
        _dAfastamento := U_RGPE007D((_cAliaQRY)->FILIAL,(_cAliaQRY)->MATR)
        
        If !Empty(_dAfastamento) .And. ValType(_dAfastamento) == "D"
-          _cAfastamento  := Dtoc(_dAfastamento) 
+          _cAfastamento  := DToC(_dAfastamento) 
        Else
           _cAfastamento  := "  /  /    "      
        EndIf
@@ -351,7 +328,7 @@ While !_oReport:Cancel() .And. (_cAliaQRY)->( !Eof() )
        _dFerias := U_RGPE007D((_cAliaQRY)->FILIAL,(_cAliaQRY)->MATR)
        
        If !Empty(_dFerias) .And. ValType(_dFerias) == "D"
-          _cFerias  := Dtoc(_dFerias) 
+          _cFerias  := DToC(_dFerias) 
        Else
           _cFerias  := "  /  /    "      
        EndIf
@@ -366,7 +343,7 @@ While !_oReport:Cancel() .And. (_cAliaQRY)->( !Eof() )
 
 	If MV_PAR16 == 1
 	
-		If SubStr( Alltrim(_cSetor) , 1 , 6 ) <> SubStr( Alltrim( (_cAliaQRY)->SETOR ) , 1 , 6 )
+		If SubStr( AllTrim(_cSetor) , 1 , 6 ) <> SubStr( AllTrim( (_cAliaQRY)->SETOR ) , 1 , 6 )
 		
 			_oReport:Section(1):Section(1):Finish()
 			_oReport:Section(1):Section(2):Finish()
@@ -408,26 +385,23 @@ Return
 Função------------: RGPE007D
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 05/02/2017
-===============================================================================================================================
 Descrição---------: Retornar a ultima data de afastamento do funcionário.
-===============================================================================================================================
 Parametros--------: _cFilial    = Filial do funcionário
                     _cMatricula = Código de matricula
-===============================================================================================================================
 Retorno-----------: _DataAfast  = Data de afastamento do funcionário.
 ===============================================================================================================================
 */
-User function RGPE007D(_cFilial, _cMatricula)
+User Function RGPE007D(_cFilial, _cMatricula)
 Local _dRet := Ctod("  /  /  ")
 Local _cQry, _cAlias
-Local _aSaveArea := GetArea()
+Local _aSaveArea := FWGetArea()
 
 Begin Sequence
    _cQry := " SELECT R8_DATAINI FROM "+RetSqlName("SR8")+ " SR8 "
-   _cQry += " WHERE SR8.R8_FILIAL = '" + _cFilial + "' AND SR8.D_E_L_E_T_ <> '*' "
+   _cQry += " WHERE SR8.R8_FILIAL = '" + _cFilial + "' AND SR8.D_E_L_E_T_ = ' ' "
    _cQry += " AND SR8.R8_MAT = '" + _cMatricula + "' "
-   _cQry += " AND SR8.R8_DATAINI <= '"+Dtos(Date())+"' "
-   _cQry += " AND (SR8.R8_DATAFIM = '        ' OR SR8.R8_DATAFIM >= '"+Dtos(Date())+"' ) "
+   _cQry += " AND SR8.R8_DATAINI <= '"+DToS(Date())+"' "
+   _cQry += " AND (SR8.R8_DATAFIM = '        ' OR SR8.R8_DATAFIM >= '"+DToS(Date())+"' ) "
    
    _cAlias := GetNextAlias()
 		
@@ -436,13 +410,13 @@ Begin Sequence
    EndIf
 		
    DBUseArea( .T. , "TOPCONN" , TCGenQry(,,_cQry) , _cAlias , .F. , .T. )
-   TcSetField(_cAlias,"R8_DATAINI","D",8,0)
+   TCSetField(_cAlias,"R8_DATAINI","D",8,0)
 		
    (_cAlias)->( DBGoTop() )
    
-   Do While (_cAlias)->( !Eof() )
+   While (_cAlias)->( !Eof() )
 	  If ! Empty((_cAlias)->R8_DATAINI)
-	     If Dtos(_dRet) < Dtos((_cAlias)->R8_DATAINI)
+	     If DToS(_dRet) < DToS((_cAlias)->R8_DATAINI)
 	        _dRet := (_cAlias)->R8_DATAINI
 	     EndIf
 	  EndIf
@@ -454,7 +428,7 @@ Begin Sequence
 
 End Sequence
 
-RestArea(_aSaveArea)
+FWRestArea(_aSaveArea)
 
 Return _dRet
 
@@ -463,17 +437,14 @@ Return _dRet
 Função------------: RGPE007T
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 04/09/2019
-===============================================================================================================================
 Descrição---------: Retornar o código e a descrição do turno.
-===============================================================================================================================
 Parametros--------: _cCampo = Campo que chamou a função.
                     _cCodFilial = Codigo da Filial
 					_cMatricula = Codigo da Matricula
-===============================================================================================================================
 Retorno-----------: _cRet = Retorna o código ou a descrição do turno.
 ===============================================================================================================================
 */
-User function RGPE007T(_cCampo, _cCodFilial, _cMatricula)
+User Function RGPE007T(_cCampo, _cCodFilial, _cMatricula)
 Local _cRet := ""
 Local _cQry 
 
@@ -483,11 +454,11 @@ Begin Sequence
       _cQry := " SELECT MAX(R_E_C_N_O_) NRRECNO FROM "+ RetSqlName("SPF") + " SPF " 
 	  _cQry += " WHERE SPF.PF_FILIAL = '" + _cCodFilial + "' "
 	  _cQry += " AND SPF.PF_MAT = '" + _cMatricula + "' "
-	  _cQry += " AND SPF.PF_DATA <= '" + Dtos(_dDataSPF) + "' "
-	  _cQry += " AND SPF.D_E_L_E_T_ <> '*' "
+	  _cQry += " AND SPF.PF_DATA <= '" + DToS(_dDataSPF) + "' "
+	  _cQry += " AND SPF.D_E_L_E_T_ = ' ' "
      
       If Select("TRBSPF") > 0
-	     TRBSPF->(DbCloseArea())
+	     TRBSPF->(DBCloseArea())
       EndIf
       
 	  TCQUERY _cQry NEW ALIAS "TRBSPF"	
@@ -500,13 +471,13 @@ Begin Sequence
          Break
       EndIf
     
-      SPF->(DbGoTo(TRBSPF->NRRECNO))
-	  SR6->(DbSetOrder(1)) // R6_FILIAL+R6_TURNO 
+      SPF->(DBGoTo(TRBSPF->NRRECNO))
+	  SR6->(DBSetOrder(1)) // R6_FILIAL+R6_TURNO 
 
 	  _cCodTurno  := SPF->PF_TURNOPA
 	  _cDescTurno := "SEM DESCRICAO PARA O TURNO"
 
-	  If SR6->(DbSeek(SPF->PF_FILIAL+SPF->PF_TURNOPA))
+	  If SR6->(DBSeek(SPF->PF_FILIAL+SPF->PF_TURNOPA))
 	     _cDescTurno := SR6->R6_DESC
 	  EndIf
       _cRet := _cCodTurno
@@ -523,15 +494,12 @@ Return _cRet
 Função------------: RGPE007E
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 04/09/2019
-===============================================================================================================================
 Descrição---------: Retornar o código e a descrição do tipo de deficiência.
-===============================================================================================================================
 Parametros--------: _cCodDefic = Codigo da Deficiência
-===============================================================================================================================
 Retorno-----------: _cRet = Retorna o código ou a descrição da deficiência
 ===============================================================================================================================
 */
-User function RGPE007E(_cCodDef)
+User Function RGPE007E(_cCodDef)
 _cRet := ""
 
 Begin Sequence
@@ -561,15 +529,12 @@ Return _cRet
 Função------------: RGPE007F
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 04/09/2019
-===============================================================================================================================
 Descrição---------: Retornar as descrições das deficiências atribuidas ao funcionário.
-===============================================================================================================================
 Parametros--------: _cDefFunc = Deficiências do Funcionário.
-===============================================================================================================================
 Retorno-----------: _cRet = Retorna as descrições das deficiências do Funcionário.
 ===============================================================================================================================
 */
-User function RGPE007F(_cDefFunc)
+User Function RGPE007F(_cDefFunc)
 Local _cRet := ""
 
 Begin Sequence 

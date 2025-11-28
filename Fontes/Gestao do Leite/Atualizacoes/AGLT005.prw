@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 28/09/2018 | Trocado campo ZLU_ALLSET para ZLU_SETALL - Chamado 26404
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 07/08/2019 | Modificada validação de acesso aos setores. Chamado 30185
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 15/08/2019 | Modificada validação para deleção de registros. Chamado 28346
+Lucas Borges  |28/09/2018| Chamado 26404. Trocado campo ZLU_ALLSET para ZLU_SETALL
+Lucas Borges  |07/08/2019| Chamado 30185. Modificada validação de acesso aos setores.
+Lucas Borges  |15/08/2019| Chamado 28346. Modificada validação para deleção de registros.
 ===============================================================================================================================
 */
 
-//===========================================================================
-//| Definições de Includes                                                  |
-//===========================================================================
-#INCLUDE 'Protheus.ch' 
+#Include "TOTVS.ch" 
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT005
 Autor-------------: Jeovane
 Data da Criacao---: 16/09/2008
-===============================================================================================================================
 Descrição---------: Rotina de manutenção do cadastro de Linhas/Rotas
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -44,7 +36,7 @@ Private cAlias		:= "ZL3"
 //ário, filtro só a filial corrente
 //=====================================================================================
 If Posicione("ZLU",1,xFilial("ZLU")+RetCodUsr(),"ZLU_SETALL") <> 'S'
-	_cFilter :="ZL3_SETOR IN "+FormatIn(U_LisSetor(IIf(Substr(cAcesso,114,1)=='S',.F.,.T.)),";")
+	_cFilter :="ZL3_SETOR IN "+FormatIn(U_LisSetor(IIf(SubStr(cAcesso,114,1)=='S',.F.,.T.)),";")
 EndIf
 
 MBrowse(,,,,cAlias,,,,,,,,,,,,,,_cFilter)
@@ -57,9 +49,7 @@ Return
 Programa----------: MenuDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 02/08/2018
-===============================================================================================================================
 Descrição---------: Utilizacao de Menu Funcional
-===============================================================================================================================
 Parametros--------: aRotina
 					1. Nome a aparecer no cabecalho
 					2. Nome da Rotina associada
@@ -72,7 +62,6 @@ Parametros--------: aRotina
 						5 - Remove o registro corrente do Banco de Dados
 					5. Nivel de acesso
 					6. Habilita Menu Funcional
-===============================================================================================================================
 Retorno-----------: Array com opcoes da rotina
 ===============================================================================================================================
 */
@@ -91,15 +80,13 @@ Return( aRotina )
 Programa----------: AGLT003E
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 02/08/2018
-===============================================================================================================================
 Descrição---------: Funcao usada para apagar registro da ZL3
-===============================================================================================================================
 Parametros--------: cAlias,nReg,nOpc
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AGLT003E(cAlias,nReg,nOpc)
+
 Local bAxParam 	:= {|| .T.}
 Local bVldExc	:= {|| U_ChkReg("ZLD","ZLD_LINROT = '"+ZL3->ZL3_COD+"' AND ZLD_FILIAL = '"+xFilial("ZLD")+"'")}
 
@@ -112,17 +99,14 @@ Return
 Programa--------: AGLT005V
 Autor-----------: Jeovane
 Data da Criacao-: 11/09/2008
-===============================================================================================================================
 Descrição-------: Verifica integridade com tabela ZLD - Recepacao de Leite (X3_VLDUSER)
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
 User Function AGLT005V()
 
-Local _aArea:= GetArea()
+Local _aArea:= FWGetArea()
 Local _lRet	:= .F.
 Local _cMot	:= ""
 
@@ -142,13 +126,13 @@ DBSelectArea("ZL0")
 ZL0->( DBSetOrder(1) )
 
 If ZL0->( DBSeek( xFilial("ZL0") + _cMot ) )
-	If ZL0->ZL0_FRETIS == M->ZL3_FRETIS .AND. ZL0->ZL0_FRETLJ == M->ZL3_FRETLJ
+	If ZL0->ZL0_FRETIS == M->ZL3_FRETIS .And. ZL0->ZL0_FRETLJ == M->ZL3_FRETLJ
 		_lRet := .T.
 	Else
 		MsgAlert("O Motorista do Veiculo selecionado nao pertence ao Transportador desta linha. Selecione outro Veiculo ou outro Transportador!" , "AGLT00501" )
 	EndIf
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return(_lRet)

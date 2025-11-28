@@ -6,21 +6,14 @@
 -------------------------------------------------------------------------------------------------------------------------------
 Alex Wallauer |30/08/2021| Chamado 37601. Trazer o conteúdo do campo RA_NSOCIAL, quando preenchido no lugar do RA_NOME.
 Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
-=================================================================================================================================================================================================
-Analista       - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
-=================================================================================================================================================================================================
-Bruno          - Julio Paz     - 26/02/25 - 27/02/25 - 49946   - Desenvolvimento de uma nova versão deste relatório para período fechado.
-=================================================================================================================================================================================================
+Julio Paz     |27/02/2025| Chamado 49946. Desenvolvimento de uma nova versão deste relatório para período fechado.
+===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.Ch"
-#INCLUDE 'TOPCONN.CH'
+#Include "TOTVS.ch"
+#Include 'TOPCONN.CH'
 
 #Define TITULO	"Ponto Eletrônico - Marcações Diarias"
-#Define CRLF	Chr(13)+Chr(10)
 
 /*
 ===============================================================================================================================
@@ -65,9 +58,9 @@ Begin Sequence
    EndIf 
 
    If MV_PAR08 == "1" // Período Aberto
-	  FWMSGRUN(,{|oProc| _aDados := RPON015ABE(oProc) } , "Aguarde!" , "Verificando as marcações (Periodo Aberto)...")
+	  FWMsgRun(,{|oProc| _aDados := RPON015ABE(oProc) } , "Aguarde!" , "Verificando as marcações (Periodo Aberto)...")
    Else // Período Fechado 
-      FWMSGRUN(,{|oProc| _aDados := RPON015FEC(oProc) } , "Aguarde!" , "Verificando as marcações (Período Fechado)...")
+      FWMsgRun(,{|oProc| _aDados := RPON015FEC(oProc) } , "Aguarde!" , "Verificando as marcações (Período Fechado)...")
    EndIf
 
 End Sequence 
@@ -90,7 +83,7 @@ Static Function RPON015ABE(oProc)
 //Local _aColPos	:= { 0050 , 0210 , 0750 , 0940 , 1100 , 1195 , 1280 , 1360 , 1465 , 1795 , 1975 , 2130 , 2275 }
 //Local _aColAjs	:= { 0010 , 0000 , 0000 , 0000 , 0000 , 0010 , 0010 , 0015 , 0000 , 0000 , 0000 , 0015 , 0000 }
 Local _aDados	:= {}
-Local _aFiliais	:= {cFilAnt}//StrToKArr( AllTrim( MV_PAR01 ) , ";" )
+Local _aFiliais	:= {cFilAnt}//StrTokArr( AllTrim( MV_PAR01 ) , ";" )
 Local _cAlias	:= GetNextAlias()
 Local _cQuery	:= ""
 Local _nTotReg	:= 0
@@ -102,9 +95,9 @@ Local _cPC_PD
 Local _cPK_CODABO
 Local _cMarcacao
 
-IF Empty( _aFiliais )
+If Empty( _aFiliais )
 	Aviso( "Atenção!" , "Não foram informadas Filiais válidas para o processamento!" , {"Ok"} )
-	Return()
+	Return
 EndIf
 For _nI := 1 To Len( _aFiliais )
 
@@ -127,17 +120,17 @@ For _nI := 1 To Len( _aFiliais )
 	_cQuery += "     SP8.D_E_L_E_T_  = ' ' "+ CRLF
 	_cQuery += " AND SRA.D_E_L_E_T_  = ' ' "+ CRLF
 	
-	IF !Empty( MV_PAR07 )	
+	If !Empty( MV_PAR07 )	
 		_cQuery += " AND SRA.RA_I_SETOR	IN "+ FormatIn( AllTrim( MV_PAR07 ) , ";" ) + CRLF	
-	EndIF
+	EndIf
 
-	IF !Empty( MV_PAR06 )	
+	If !Empty( MV_PAR06 )	
 	   _cQuery += " AND SP8.P8_TURNO BETWEEN '"+ MV_PAR05 +"' AND '"+ MV_PAR06 +"' "+ CRLF
-	EndIF
+	EndIf
 
  	_cQuery += " AND SP8.P8_APONTA  = 'S' "+ CRLF
 	_cQuery += " AND SP8.P8_FILIAL  = '"+ _aFiliais[_nI] +"' " + CRLF
-	_cQuery += " AND SP8.P8_DATAAPO	BETWEEN '"+ DTOS( MV_PAR01 ) +"' AND '"+ DTOS( MV_PAR02 ) +"' "+ CRLF
+	_cQuery += " AND SP8.P8_DATAAPO	BETWEEN '"+ DToS( MV_PAR01 ) +"' AND '"+ DToS( MV_PAR02 ) +"' "+ CRLF
 	_cQuery += " AND SP8.P8_MAT     BETWEEN '"+ MV_PAR03 +"' AND '"+ MV_PAR04 +"' "+ CRLF
 	
 	_cQuery += " ORDER BY FILIAL, SETOR, MAT, DATA_APO, HORA "+ CRLF
@@ -153,14 +146,14 @@ For _nI := 1 To Len( _aFiliais )
 	Count To _nTotReg // (_cAlias)->( DBEval( {|| _nTotReg++ } ) )
 	(_cAlias)->( DBGoTop() )
 	
-	SPC->(DBSETORDER(2))
-	SPK->(DBSETORDER(1))
-	SP6->(DBSETORDER(1))
-	SP9->(DBSETORDER(1))
+	SPC->(DBSetOrder(2))
+	SPK->(DBSetOrder(1))
+	SP6->(DBSetOrder(1))
+	SP9->(DBSetOrder(1))
 	
 	ProcRegua(_nTotReg)
 	
-	DO While (_cAlias)->(!Eof())
+	While (_cAlias)->(!Eof())
 		
 		_nAtuReg++
 		oProc:cCaption := ( "Lendo Marcacoes ["+ StrZero( _nAtuReg , 9 ) +"] de ["+ StrZero( _nTotReg , 9 ) +"]" )
@@ -170,60 +163,60 @@ For _nI := 1 To Len( _aFiliais )
         aAdd( aItens ,   (_cAlias)->FILIAL	)
         aAdd( aItens ,   (_cAlias)->MAT	    )
 		_cNomeFunc := Posicione("SRA",1,(_cAlias)->FILIAL+(_cAlias)->MAT,"RA_NOME")
-		IF !EMPTY(SRA->RA_NSOCIAL)
+		If !Empty(SRA->RA_NSOCIAL)
 		   _cNomeFunc:=SRA->RA_NSOCIAL
-		ENDIF
+		EndIf
         aAdd( aItens ,   _cNomeFunc )
         aAdd( aItens ,   (_cAlias)->SETOR	)
         aAdd( aItens ,   Posicione("ZAK",1,xFilial("ZAK")+(_cAlias)->SETOR,"ZAK_DESCRI") )
         aAdd( aItens ,   (_cAlias)->TURNO )
         aAdd( aItens ,   Posicione("SR6",1,(_cAlias)->FILIAL+(_cAlias)->TURNO,"R6_DESC") )
-        aAdd( aItens ,   DTOC( STOD((_cAlias)->DATA_APO ) ) )
+        aAdd( aItens ,   DToC( SToD((_cAlias)->DATA_APO ) ) )
 		
 	    _cPC_PD:=""
-		IF SPC->(DBSEEK((_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO)) 
-		   DO WHILE SPC->(!EOF()) .AND. (_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO == SPC->PC_FILIAL+SPC->PC_MAT+DTOS(SPC->PC_DATA)
-		      IF !SPC->PC_PD+"-" $ _cPC_PD
+		If SPC->(DBSeek((_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO)) 
+		   While SPC->(!Eof()) .And. (_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO == SPC->PC_FILIAL+SPC->PC_MAT+DToS(SPC->PC_DATA)
+		      If !SPC->PC_PD+"-" $ _cPC_PD
 		         _cPC_PD+=SPC->PC_PD+"-"+Posicione("SP9",1,(_cAlias)->FILIAL+SPC->PC_PD ,"P9_DESC")+CRLF		      
-			  ENDIF
+			  EndIf
 			  SPC->(DBSkip())
-           ENDDO
-		EndIF
+           EndDo
+		EndIf
 
 	    _cPK_CODABO:=""
-		IF SPK->(DBSEEK((_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO ))
-		   DO WHILE SPK->(!EOF()) .AND. (_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO == SPK->PK_FILIAL+SPK->PK_MAT+DTOS(SPK->PK_DATA)
-		      IF !SPK->PK_CODABO+"-" $ _cPK_CODABO
+		If SPK->(DBSeek((_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO ))
+		   While SPK->(!Eof()) .And. (_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO == SPK->PK_FILIAL+SPK->PK_MAT+DToS(SPK->PK_DATA)
+		      If !SPK->PK_CODABO+"-" $ _cPK_CODABO
 		         _cPK_CODABO+=SPK->PK_CODABO+"-"+Posicione("SP6",1,SPK->PK_FILIAL+SPK->PK_CODABO ,"P6_DESC")+CRLF		      
-			  ENDIF
+			  EndIf
 			  SPK->(DBSkip())
-           ENDDO
-		EndIF
-		_cPK_CODABO:=LEFT(_cPK_CODABO,LEN(_cPK_CODABO)-2)
+           EndDo
+		EndIf
+		_cPK_CODABO:=LEFT(_cPK_CODABO,Len(_cPK_CODABO)-2)
         
 		_cChave:=(_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO 
 		_cMarcacao:=""
-	    DO While (_cAlias)->(!Eof()) .AND. _cChave == (_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO 
+	    While (_cAlias)->(!Eof()) .And. _cChave == (_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO 
             _cMarcacao+= (_cAlias)->HORA+" - "
 			(_cAlias)->(DBSkip())
-        ENDDO
-		_cMarcacao:=LEFT(_cMarcacao,LEN(_cMarcacao)-3)
+        EndDo
+		_cMarcacao:=LEFT(_cMarcacao,Len(_cMarcacao)-3)
         
 		aAdd( aItens ,  _cMarcacao )
 	    aAdd( aItens ,  _cPC_PD    )
 	    aAdd( aItens ,  _cPK_CODABO)
 
         aAdd( _aDados , aItens )
-		IF EMPTY(_cMarcacao)
+		If Empty(_cMarcacao)
 		   (_cAlias)->( DBSkip() )
-		ENDIF
+		EndIf
 	
 	EndDo
 
 	oProc:cCaption := ( "Lendo Faltas da Filial [ "+_aFiliais[_nI]+" ]" )
     ProcessMessages()
 
-	(_cAlias)->( Dbclosearea() )
+	(_cAlias)->( DBCloseArea() )
 
     _cQuery := ""
 	_cQuery += " SELECT "+ CRLF
@@ -241,17 +234,17 @@ For _nI := 1 To Len( _aFiliais )
 	_cQuery += "     SPC.D_E_L_E_T_  = ' ' "+ CRLF
 	_cQuery += " AND SRA.D_E_L_E_T_  = ' ' "+ CRLF
 	
-	IF !Empty( MV_PAR07 )	
+	If !Empty( MV_PAR07 )	
 		_cQuery += " AND SRA.RA_I_SETOR	IN "+ FormatIn( AllTrim( MV_PAR07 ) , ";" ) + CRLF	
-	EndIF
+	EndIf
 
-	IF !Empty( MV_PAR06 )	
+	If !Empty( MV_PAR06 )	
 	   _cQuery += " AND SPC.PC_TURNO BETWEEN '"+ MV_PAR05 +"' AND '"+ MV_PAR06 +"' "+ CRLF
-	EndIF
+	EndIf
 
  	_cQuery += " AND SPC.PC_PD  = '413' "+ CRLF
 	_cQuery += " AND SPC.PC_FILIAL  = '"+ _aFiliais[_nI] +"' " + CRLF
-	_cQuery += " AND SPC.PC_DATA BETWEEN '"+ DTOS( MV_PAR01 ) +"' AND '"+ DTOS( MV_PAR02 ) +"' "+ CRLF
+	_cQuery += " AND SPC.PC_DATA BETWEEN '"+ DToS( MV_PAR01 ) +"' AND '"+ DToS( MV_PAR02 ) +"' "+ CRLF
 	_cQuery += " AND SPC.PC_MAT  BETWEEN '"+ MV_PAR03 +"' AND '"+ MV_PAR04 +"' "+ CRLF
 	
 	_cQuery += " ORDER BY FILIAL, SETOR, MAT, DATA_APO"+ CRLF
@@ -269,7 +262,7 @@ For _nI := 1 To Len( _aFiliais )
 	
 	ProcRegua(_nTotReg)
 	
-	DO While (_cAlias)->(!Eof())
+	While (_cAlias)->(!Eof())
 		
 		_nAtuReg++
 		oProc:cCaption := ( "Lendo Faltas ["+ StrZero( _nAtuReg , 9 ) +"] de ["+ StrZero( _nTotReg , 9 ) +"]" )
@@ -279,28 +272,28 @@ For _nI := 1 To Len( _aFiliais )
         aAdd( aItens ,   (_cAlias)->FILIAL	)
         aAdd( aItens ,   (_cAlias)->MAT	    )
 		_cNomeFunc := Posicione("SRA",1,(_cAlias)->FILIAL+(_cAlias)->MAT,"RA_NOME")
-		IF !EMPTY(SRA->RA_NSOCIAL)
+		If !Empty(SRA->RA_NSOCIAL)
 		   _cNomeFunc:=SRA->RA_NSOCIAL
-		ENDIF
+		EndIf
         aAdd( aItens ,   _cNomeFunc )
         aAdd( aItens ,   (_cAlias)->SETOR	)
         aAdd( aItens ,   Posicione("ZAK",1,xFilial("ZAK")+(_cAlias)->SETOR,"ZAK_DESCRI") )
         aAdd( aItens ,   (_cAlias)->TURNO )
         aAdd( aItens ,   Posicione("SR6",1,(_cAlias)->FILIAL+(_cAlias)->TURNO,"R6_DESC") )
-        aAdd( aItens ,   DTOC( STOD((_cAlias)->DATA_APO ) ) )
+        aAdd( aItens ,   DToC( SToD((_cAlias)->DATA_APO ) ) )
 		
         _cPC_PD:=(_cAlias)->PC_PD+"-"+Posicione("SP9",1,(_cAlias)->FILIAL+(_cAlias)->PC_PD ,"P9_DESC")      
 
 	    _cPK_CODABO:=""
-		IF SPK->(DBSEEK((_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO ))
-		   DO WHILE SPK->(!EOF()) .AND. (_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO == SPK->PK_FILIAL+SPK->PK_MAT+DTOS(SPK->PK_DATA)
-		      IF !SPK->PK_CODABO+"-" $ _cPK_CODABO
+		If SPK->(DBSeek((_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO ))
+		   While SPK->(!Eof()) .And. (_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO == SPK->PK_FILIAL+SPK->PK_MAT+DToS(SPK->PK_DATA)
+		      If !SPK->PK_CODABO+"-" $ _cPK_CODABO
 		         _cPK_CODABO+=SPK->PK_CODABO+"-"+Posicione("SP6",1,SPK->PK_FILIAL+SPK->PK_CODABO ,"P6_DESC")+CRLF		      
-			  ENDIF
+			  EndIf
 			  SPK->(DBSkip())
-           ENDDO
-		EndIF
-		_cPK_CODABO:=LEFT(_cPK_CODABO,LEN(_cPK_CODABO)-2)
+           EndDo
+		EndIf
+		_cPK_CODABO:=LEFT(_cPK_CODABO,Len(_cPK_CODABO)-2)
         
 		_cMarcacao:="SEM MARCAOES"
         
@@ -313,28 +306,28 @@ For _nI := 1 To Len( _aFiliais )
 	
 	EndDo
 
-    (_cAlias)->( Dbclosearea() )
+    (_cAlias)->( DBCloseArea() )
 
 Next _nI
 
-IF Empty( _aDados )
+If Empty( _aDados )
 
-	U_ITMSG(  "Não foram encontrados registros para exibir! Verifique os parâmetros e tente novamente." , "Atenção!" ,,1 )
-	Return()
+	U_ITMsg(  "Não foram encontrados registros para exibir! Verifique os parâmetros e tente novamente." , "Atenção!" ,,1 )
+	Return
 	
 Else
     _aCabec	:= {}
-    AADD(_aCabec,"Filial"    )
-    AADD(_aCabec,"Matricula" )
-    AADD(_aCabec,"Nome do Funcionario"      )
-    AADD(_aCabec,"Cod. Setor")
-    AADD(_aCabec,"Descricoes dos Setor")
-    AADD(_aCabec,"Cod Turno" )
-    AADD(_aCabec,"Turno"     )
-    AADD(_aCabec,"Data Apontamento")
-    AADD(_aCabec,"Marcacoes")
-    AADD(_aCabec,"Descricoes dos Eventos")
-    AADD(_aCabec,"Descricoes dos Abono"  )
+    aAdd(_aCabec,"Filial"    )
+    aAdd(_aCabec,"Matricula" )
+    aAdd(_aCabec,"Nome do Funcionario"      )
+    aAdd(_aCabec,"Cod. Setor")
+    aAdd(_aCabec,"Descricoes dos Setor")
+    aAdd(_aCabec,"Cod Turno" )
+    aAdd(_aCabec,"Turno"     )
+    aAdd(_aCabec,"Data Apontamento")
+    aAdd(_aCabec,"Marcacoes")
+    aAdd(_aCabec,"Descricoes dos Eventos")
+    aAdd(_aCabec,"Descricoes dos Abono"  )
     _aCabecx := ACLONE(_aCabec)
 
 	U_ITListBox( TITULO + "(Período Aberto)" , _aCabecx , _aDados , .T. )
@@ -394,17 +387,17 @@ Begin Sequence
 	   _cQry += "     SPG.D_E_L_E_T_  = ' ' "+ CRLF
 	   _cQry += " AND SRA.D_E_L_E_T_  = ' ' "+ CRLF
 	
-	   IF !Empty( MV_PAR07 )	
+	   If !Empty( MV_PAR07 )	
 		  _cQry += " AND SRA.RA_I_SETOR	IN "+ FormatIn( AllTrim( MV_PAR07 ) , ";" ) + CRLF	
-	   EndIF
+	   EndIf
 
-	   IF !Empty( MV_PAR06 )	
+	   If !Empty( MV_PAR06 )	
 	      _cQry += " AND SPG.PG_TURNO BETWEEN '"+ MV_PAR05 +"' AND '"+ MV_PAR06 +"' "+ CRLF
-	   EndIF
+	   EndIf
 
  	   _cQry += " AND SPG.PG_APONTA  = 'S' "+ CRLF
 	   _cQry += " AND SPG.PG_FILIAL  = '"+ _aFiliais[_nI] +"' " + CRLF
-	   _cQry += " AND SPG.PG_DATAAPO	BETWEEN '"+ DTOS( MV_PAR01 ) +"' AND '"+ DTOS( MV_PAR02 ) +"' "+ CRLF
+	   _cQry += " AND SPG.PG_DATAAPO	BETWEEN '"+ DToS( MV_PAR01 ) +"' AND '"+ DToS( MV_PAR02 ) +"' "+ CRLF
 	   _cQry += " AND SPG.PG_MAT     BETWEEN '"+ MV_PAR03 +"' AND '"+ MV_PAR04 +"' "+ CRLF
 	
 	   _cQry += " ORDER BY FILIAL, SETOR, MAT, DATA_APO, HORA "+ CRLF
@@ -420,14 +413,14 @@ Begin Sequence
 	   Count To _nTotReg // (_cAlias)->( DBEval( {|| _nTotReg++ } ) )
 	   (_cAlias)->( DBGoTop() )
 	
-	   SPC->(DBSETORDER(2))
-	   SPK->(DBSETORDER(1))
-	   SP6->(DBSETORDER(1))
-	   SP9->(DBSETORDER(1))
+	   SPC->(DBSetOrder(2))
+	   SPK->(DBSetOrder(1))
+	   SP6->(DBSetOrder(1))
+	   SP9->(DBSetOrder(1))
 	
 	   ProcRegua(_nTotReg)
 	
-	   Do While (_cAlias)->(!Eof())
+	   While (_cAlias)->(!Eof())
 		
 		  _nAtuReg++
 		  oProc:cCaption := ( "Lendo Marcacoes ["+ StrZero( _nAtuReg , 9 ) +"] de ["+ StrZero( _nTotReg , 9 ) +"]" )
@@ -445,37 +438,37 @@ Begin Sequence
           aAdd( _aItens ,   Posicione("ZAK",1,xFilial("ZAK")+(_cAlias)->SETOR,"ZAK_DESCRI") )
           aAdd( _aItens ,   (_cAlias)->TURNO )
           aAdd( _aItens ,   Posicione("SR6",1,(_cAlias)->FILIAL+(_cAlias)->TURNO,"R6_DESC") )
-          aAdd( _aItens ,   DTOC( STOD((_cAlias)->DATA_APO ) ) )
+          aAdd( _aItens ,   DToC( SToD((_cAlias)->DATA_APO ) ) )
 		
 	      _cPC_PD:=""
-		  If SPC->(DBSEEK((_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO)) 
-		     Do While SPC->(!EOF()) .AND. (_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO == SPC->PC_FILIAL+SPC->PC_MAT+DTOS(SPC->PC_DATA)
+		  If SPC->(DBSeek((_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO)) 
+		     While SPC->(!Eof()) .And. (_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO == SPC->PC_FILIAL+SPC->PC_MAT+DToS(SPC->PC_DATA)
 		        If ! SPC->PC_PD+"-" $ _cPC_PD
 		           _cPC_PD+=SPC->PC_PD+"-"+Posicione("SP9",1,(_cAlias)->FILIAL+SPC->PC_PD ,"P9_DESC")+CRLF		      
 			    EndIf
 			    SPC->(DBSkip())
              EndDo
-		  EndIF
+		  EndIf
 
 	      _cPK_CODABO:=""
-		  If SPK->(DBSEEK((_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO ))
-		     Do While SPK->(!EOF()) .AND. (_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO == SPK->PK_FILIAL+SPK->PK_MAT+DTOS(SPK->PK_DATA)
+		  If SPK->(DBSeek((_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO ))
+		     While SPK->(!Eof()) .And. (_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO == SPK->PK_FILIAL+SPK->PK_MAT+DToS(SPK->PK_DATA)
 		        If !SPK->PK_CODABO+"-" $ _cPK_CODABO
 		           _cPK_CODABO += SPK->PK_CODABO + "-" + Posicione("SP6",1,SPK->PK_FILIAL+SPK->PK_CODABO ,"P6_DESC") + CRLF		      
 			    EndIf
 			    SPK->(DBSkip())
              EndDo
-		  EndIF
-		  _cPK_CODABO:=LEFT(_cPK_CODABO,LEN(_cPK_CODABO)-2)
+		  EndIf
+		  _cPK_CODABO:=LEFT(_cPK_CODABO,Len(_cPK_CODABO)-2)
         
 		  _cChave := (_cAlias)->FILIAL + (_cAlias)->MAT + (_cAlias)->DATA_APO 
 		  _cMarcacao:=""
-	      Do While (_cAlias)->(!Eof()) .AND. _cChave == (_cAlias)->FILIAL+(_cAlias)->MAT + (_cAlias)->DATA_APO 
+	      While (_cAlias)->(!Eof()) .And. _cChave == (_cAlias)->FILIAL+(_cAlias)->MAT + (_cAlias)->DATA_APO 
              _cMarcacao+= (_cAlias)->HORA+" - "
 			 (_cAlias)->(DBSkip())
           EndDo
 		  
-		  _cMarcacao:=LEFT(_cMarcacao,LEN(_cMarcacao)-3)
+		  _cMarcacao:=LEFT(_cMarcacao,Len(_cMarcacao)-3)
         
 		  aAdd( _aItens ,  _cMarcacao )
 	      aAdd( _aItens ,  _cPC_PD    )
@@ -491,7 +484,7 @@ Begin Sequence
 	   oProc:cCaption := ( "Lendo Faltas da Filial [ "+_aFiliais[_nI]+" ]" )
        ProcessMessages()
 
-	   (_cAlias)->( Dbclosearea() )
+	   (_cAlias)->( DBCloseArea() )
 
        _cQry := ""
 	   _cQry += " SELECT "+ CRLF
@@ -511,15 +504,15 @@ Begin Sequence
 	
 	   If ! Empty( MV_PAR07 )	
 		  _cQry += " AND SRA.RA_I_SETOR	IN "+ FormatIn( AllTrim( MV_PAR07 ) , ";" ) + CRLF	
-	   EndIF
+	   EndIf
 
 	   If ! Empty( MV_PAR06 )	
 	      _cQry += " AND SPC.PC_TURNO BETWEEN '"+ MV_PAR05 +"' AND '"+ MV_PAR06 +"' "+ CRLF
-	   EndIF
+	   EndIf
 
  	   _cQry += " AND SPC.PC_PD  = '413' "+ CRLF
 	   _cQry += " AND SPC.PC_FILIAL  = '"+ _aFiliais[_nI] +"' " + CRLF
-	   _cQry += " AND SPC.PC_DATA BETWEEN '"+ DTOS( MV_PAR01 ) +"' AND '"+ DTOS( MV_PAR02 ) +"' "+ CRLF
+	   _cQry += " AND SPC.PC_DATA BETWEEN '"+ DToS( MV_PAR01 ) +"' AND '"+ DToS( MV_PAR02 ) +"' "+ CRLF
 	   _cQry += " AND SPC.PC_MAT  BETWEEN '"+ MV_PAR03 +"' AND '"+ MV_PAR04 +"' "+ CRLF
 	
 	   _cQry += " ORDER BY FILIAL, SETOR, MAT, DATA_APO"+ CRLF
@@ -537,7 +530,7 @@ Begin Sequence
 	
 	   ProcRegua(_nTotReg)
 	
-	   Do While (_cAlias)->(!Eof())
+	   While (_cAlias)->(!Eof())
 		
 		  _nAtuReg++
 		  oProc:cCaption := ( "Lendo Faltas ["+ StrZero( _nAtuReg , 9 ) +"] de ["+ StrZero( _nTotReg , 9 ) +"]" )
@@ -548,7 +541,7 @@ Begin Sequence
           aAdd( _aItens ,   (_cAlias)->MAT	    )
 		  _cNomeFunc := Posicione("SRA",1,(_cAlias)->FILIAL+(_cAlias)->MAT,"RA_NOME")
 		  
-		  If !EMPTY(SRA->RA_NSOCIAL)
+		  If !Empty(SRA->RA_NSOCIAL)
 		     _cNomeFunc:=SRA->RA_NSOCIAL
 		  EndIf 
            
@@ -557,13 +550,13 @@ Begin Sequence
           aAdd( _aItens ,   Posicione("ZAK",1,xFilial("ZAK")+(_cAlias)->SETOR,"ZAK_DESCRI") )
           aAdd( _aItens ,   (_cAlias)->TURNO )
           aAdd( _aItens ,   Posicione("SR6",1,(_cAlias)->FILIAL+(_cAlias)->TURNO,"R6_DESC") )
-          aAdd( _aItens ,   DTOC( STOD((_cAlias)->DATA_APO ) ) )
+          aAdd( _aItens ,   DToC( SToD((_cAlias)->DATA_APO ) ) )
 		
           _cPC_PD:=(_cAlias)->PC_PD+"-"+Posicione("SP9",1,(_cAlias)->FILIAL+(_cAlias)->PC_PD ,"P9_DESC")      
 
 	      _cPK_CODABO:=""
-		  If SPK->(DBSEEK((_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO ))
-		     Do While SPK->(!EOF()) .AND. (_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO == SPK->PK_FILIAL+SPK->PK_MAT+DTOS(SPK->PK_DATA)
+		  If SPK->(DBSeek((_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO ))
+		     While SPK->(!Eof()) .And. (_cAlias)->FILIAL+(_cAlias)->MAT+(_cAlias)->DATA_APO == SPK->PK_FILIAL+SPK->PK_MAT+DToS(SPK->PK_DATA)
 		        If ! SPK->PK_CODABO + "-" $ _cPK_CODABO
 		           _cPK_CODABO += SPK->PK_CODABO + "-" + Posicione("SP6",1,SPK->PK_FILIAL+SPK->PK_CODABO ,"P6_DESC") + CRLF		      
 			    EndIf
@@ -572,7 +565,7 @@ Begin Sequence
              EndDo 
 		  EndIf
 		  
-		  _cPK_CODABO := Left(_cPK_CODABO,LEN(_cPK_CODABO)-2)
+		  _cPK_CODABO := Left(_cPK_CODABO,Len(_cPK_CODABO)-2)
         
 		  _cMarcacao:="SEM MARCAOES"
         
@@ -585,26 +578,26 @@ Begin Sequence
 		  (_cAlias)->( DBSkip() )
 	   EndDo
 
-       (_cAlias)->( Dbclosearea() )
+       (_cAlias)->( DBCloseArea() )
 
    Next _nI
 
    If Empty( _aDados )
-	  U_ITMSG(  "Não foram encontrados registros para exibir! Verifique os parâmetros e tente novamente." , "Atenção!" ,,1 )
+	  U_ITMsg(  "Não foram encontrados registros para exibir! Verifique os parâmetros e tente novamente." , "Atenção!" ,,1 )
 	  Break 
    Else
       _aCabec	:= {}
-      Aadd(_aCabec,"Filial"    )
-      Aadd(_aCabec,"Matricula" )
-      Aadd(_aCabec,"Nome do Funcionario"      )
-      Aadd(_aCabec,"Cod. Setor")
-      Aadd(_aCabec,"Descricoes dos Setor")
-      Aadd(_aCabec,"Cod Turno" )
-      Aadd(_aCabec,"Turno"     )
-      Aadd(_aCabec,"Data Apontamento")
-      Aadd(_aCabec,"Marcacoes")
-      Aadd(_aCabec,"Descricoes dos Eventos")
-      Aadd(_aCabec,"Descricoes dos Abono"  )
+      aAdd(_aCabec,"Filial"    )
+      aAdd(_aCabec,"Matricula" )
+      aAdd(_aCabec,"Nome do Funcionario"      )
+      aAdd(_aCabec,"Cod. Setor")
+      aAdd(_aCabec,"Descricoes dos Setor")
+      aAdd(_aCabec,"Cod Turno" )
+      aAdd(_aCabec,"Turno"     )
+      aAdd(_aCabec,"Data Apontamento")
+      aAdd(_aCabec,"Marcacoes")
+      aAdd(_aCabec,"Descricoes dos Eventos")
+      aAdd(_aCabec,"Descricoes dos Abono"  )
       
 	  _aCabecx := ACLONE(_aCabec)
 
@@ -614,4 +607,3 @@ Begin Sequence
 End Sequence 
 
 Return .T.
-

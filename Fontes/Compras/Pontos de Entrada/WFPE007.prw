@@ -10,10 +10,7 @@ Lucas Borges  |13/10/2024| Chamado 48465. Retirada da função de conout
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -27,9 +24,9 @@ Parametros--------: ParamIXB[1] -> L -> Indica se o processamento foi executado 
 Retorno-----------: cHTML -> Conteúdo HTML que será exibido em substituição à página processamento padrão do Workflow por link
 ===============================================================================================================================
 */
-User Function WFPE007()
+User Function WFPE007
 
-Local _aArea		:= GetArea()
+Local _aArea		:= FWGetArea()
 Local _cHTML		:= ""
 Local _lSuccess		:= ParamIXB[1]
 
@@ -42,7 +39,7 @@ If ( _lSuccess )
 	_cHTML += '<head> '
 	_cHTML += '</head> '
 
-	_cHTML += '<style type="text/css"><!-- '
+	_cHTML += '<style Type="text/css"><!-- '
 	_cHTML += 'table.bordasimples { border-collapse: collapse; } '
 	_cHTML += 'table.bordasimples tr td { border:1px solid #777777; } '
 	_cHTML += 'td.grupos	{ font-family:VERDANA; font-size:20px; V-align:middle; background-color: #C6E2FF; color:#000080; } '
@@ -79,7 +76,7 @@ Else
 	_cHTML += '<head> '
 	_cHTML += '</head> '
 
-	_cHTML += '<style type="text/css"><!-- '
+	_cHTML += '<style Type="text/css"><!-- '
 	_cHTML += 'table.bordasimples { border-collapse: collapse; } '
 	_cHTML += 'table.bordasimples tr td { border:1px solid #777777; } '
 	_cHTML += 'td.grupos	{ font-family:VERDANA; font-size:20px; V-align:middle; background-color: #CC0000; color:#FFFFFF; } '
@@ -100,18 +97,16 @@ Else
 	_cHTML += '  <tr> '
 	_cHTML += '	<td class="totais" colspan="2"><center> '
 
-    chtmlfile  := "\workflow\emp01\" + ALLTRIM(ParamIXB[3]) + ".Erro"
+    chtmlfile  := "\workflow\emp01\" + AllTrim(ParamIXB[3]) + ".Erro"
 	_cConteudo:=""
    If File(chtmlfile)
 	  FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "WFPE007"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "WFPE00703"/*cMsgId*/, "WFPE00703 - WF-Arq do Erro.........: " + chtmlfile/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
       _cConteudo := MemoRead( chtmlfile)+"<br>"
 	  FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "WFPE007"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "WFPE00704"/*cMsgId*/, "WFPE00704 - Obs do WF-Arq do Erro..: " + _cConteudo/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
-   ELSE
+   Else
 	  FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "WFPE007"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "WFPE00705"/*cMsgId*/, "WFPE00705 - Nao tem WF-Arq do Erro.: " + chtmlfile/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
-   ENDIF
-	//IF UPPER("Processo IGNORADO. Recebido anteriormente") $ UPPER(ParamIXB[2])
-	   _cConteudo +=ParamIXB[2]
-	//ENDIF
+   EndIf
+   _cConteudo +=ParamIXB[2]
 
 	_cHTML += '	<b>Falha no processamento !!!</b><br>'+_cConteudo
 	_cHTML += '	</center></td> '
@@ -127,6 +122,6 @@ EndIf
 FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "WFPE007"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "WFPE00706"/*cMsgId*/, "WFPE00706 - ParamIXB[2]: "+ParamIXB[2]/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "WFPE007"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "WFPE00707"/*cMsgId*/, "WFPE00707 - ParamIXB[3]: "+ParamIXB[3]/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return(_cHTML)

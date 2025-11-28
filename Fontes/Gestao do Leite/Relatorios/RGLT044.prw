@@ -2,18 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alexandre V.  | 22/12/2015 | Chamado 13062. Tratativa na cláusula "ORDER BY" para remover a referência numérica
-Lucas Borges  | 23/08/2019 | Chamado 30185. Modificada validação de acesso aos setores
-Lucas Borges  | 11/02/2025 | Chamado 49877. Removido tratamento sobre a versão do Mix
+Alexandre V.  |22/12/2015| Chamado 13062. Tratativa na cláusula "ORDER BY" para remover a referência numérica
+Lucas Borges  |23/08/2019| Chamado 30185. Modificada validação de acesso aos setores
+Lucas Borges  |11/02/2025| Chamado 49877. Removido tratamento sobre a versão do Mix
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 #Include "Report.ch"
 
 /*
@@ -48,7 +45,7 @@ oReport:cFontBody	:= "Courier New"
 oReport:nLineHeight	:= 50 // Define a altura da linha.
 oReport:SetMsgPrint('AGUARDE OS DADOS DO RELATORIO ESTAO SENDO PROCESSADOS')//mensagem exibida no momento da impressao
 
-DEFINE SECTION oSecFilial OF oReport TITLE "Dados_Filial" TABLES "SE2" 
+DEFINE Section oSecFilial OF oReport TITLE "Dados_Filial" TABLES "SE2" 
 
 DEFINE CELL NAME "E2_FILIAL"    OF oSecFilial ALIAS "SE2" TITLE "Filial"    
 DEFINE CELL NAME "NOMFIL"	    OF oSecFilial ALIAS ""    TITLE "Filial"    SIZE 40 BLOCK{|| QRY1->E2_FILIAL + ' - ' + FWFilialName(cEmpAnt,QRY1->E2_FILIAL,1)}
@@ -57,7 +54,7 @@ oSecFilial:SetLinesBefore(2)
 oSecFilial:SetLineStyle(.T.) 
 oSecFilial:Cell("E2_FILIAL"):Disable()                                                                               
 
-DEFINE SECTION oSecDtMix  OF oSecFilial TITLE "Dados_Data" TABLES "SE2"
+DEFINE Section oSecDtMix  OF oSecFilial TITLE "Dados_Data" TABLES "SE2"
 
 DEFINE CELL NAME "MESANO"	   	OF oSecDtMix ALIAS ""    TITLE "Mês/Ano"              SIZE 40 BLOCK{|| MesExtenso( Val( SubStr( QRY1->DTMIX , 5 , 2 ) ) ) + '/' + SubStr(QRY1->DTMIX,1,4)}               
 DEFINE CELL NAME "QBRMESANO"  	OF oSecDtMix ALIAS ""    TITLE ""                     SIZE 40 BLOCK{|| QRY1->E2_FILIAL + SubStr(QRY1->DTMIX,5,2) + '/' + SubStr(QRY1->DTMIX,1,4)}               
@@ -67,15 +64,15 @@ oSecDtMix:Cell("QBRMESANO"):Disable()
 oSecDtMix:SetLineStyle(.T.)                                                                             
 oSecDtMix:OnPrintLine({|| cNomeFil := QRY1->E2_FILIAL + '-' + FWFilialName(cEmpAnt,QRY1->E2_FILIAL,1)}) 
 
-DEFINE SECTION oSecDados OF oSecDtMix TITLE "Dados_Produtor" TABLES "SE2","SA2"
+DEFINE Section oSecDados OF oSecDtMix TITLE "Dados_Produtor" TABLES "SE2","SA2"
 
 DEFINE CELL NAME "CODPRODUTOR"	  OF oSecDados ALIAS "SA2" TITLE "Cod.Produtor"      	SIZE 20 BLOCK{|| QRY1->E2_FORNECE + '/' + QRY1->E2_LOJA}
 DEFINE CELL NAME "A2_NOME"        OF oSecDados ALIAS "SA2" TITLE "Descrição Produtor" 	SIZE 60   
-DEFINE CELL NAME "CPF/CGC"        OF oSecDados ALIAS "SA2" TITLE "CPF/CNPJ"             SIZE 25 BLOCK{|| IIF(Len(AllTrim(QRY1->A2_CGC)) == 11,Transform(QRY1->A2_CGC,"@R 999.999.999-99"),Transform(QRY1->A2_CGC,"@R 99.999.999/99999-99"))}
+DEFINE CELL NAME "CPF/CGC"        OF oSecDados ALIAS "SA2" TITLE "CPF/CNPJ"             SIZE 25 BLOCK{|| IIf(Len(AllTrim(QRY1->A2_CGC)) == 11,Transform(QRY1->A2_CGC,"@R 999.999.999-99"),Transform(QRY1->A2_CGC,"@R 99.999.999/99999-99"))}
 DEFINE CELL NAME "VOLLEITE"       OF oSecDados ALIAS ""    TITLE "Litragem"             SIZE 25 PICTURE "@E 999,999,999,999"
 DEFINE CELL NAME "VLRPAGO"        OF oSecDados ALIAS ""    TITLE "Valor Pago"           SIZE 25 PICTURE "@E 999,999,999,999.99"
 DEFINE CELL NAME "E2_NUM"         OF oSecDados ALIAS "SE2" TITLE "Nota Fiscal"          SIZE 25 
-DEFINE CELL NAME "EMISSAO"        OF oSecDados ALIAS "SE2" TITLE "Emissão"              SIZE 16 BLOCK{|| DtoC(QRY1->E2_EMISSAO)}
+DEFINE CELL NAME "EMISSAO"        OF oSecDados ALIAS "SE2" TITLE "Emissão"              SIZE 16 BLOCK{|| DToC(QRY1->E2_EMISSAO)}
 
 //Alinhamento de cabecalho
 oSecDados:Cell("VOLLEITE"):SetHeaderAlign("RIGHT")  
@@ -109,10 +106,10 @@ Local _aSelFil	:= {}
 If MV_PAR01 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZLD")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //====================================================================================================
 // Define o filtro de acordo com os parametros digitados - Filtra Filial da SF2,SE1,SA1,ZAZ,SA3,ACY
@@ -153,12 +150,12 @@ BEGIN REPORT QUERY oSecFilial
 	BeginSql alias "QRY1"
 		SELECT E2.E2_FILIAL, E2.E2_FORNECE, A2.A2_NOME, A2.A2_CGC, E2.E2_LOJA, E2.E2_NUM, E2.E2_EMISSAO, E2.E2_L_MIX,
 		       E2.E2_L_SETOR, SUM(E2_VALOR) VLRPAGO,
-		       SUBSTR((SELECT ZLE.ZLE_DTINI
+		       SubStr((SELECT ZLE.ZLE_DTINI
 		                FROM %Table:ZLE% ZLE
 		               WHERE ZLE.D_E_L_E_T_ = ' '
 		                 AND ZLE.ZLE_COD = E2.E2_L_MIX),1, 6) DTMIX,
 		       (SELECT SUM(ZLD.ZLD_QTDBOM)
-		          FROM %table:ZLD% ZLD
+		          FROM %Table:ZLD% ZLD
 		         WHERE ZLD.D_E_L_E_T_ = ' '
 		           AND ZLD.ZLD_RETIRO = E2.E2_FORNECE
 		           AND ZLD.ZLD_RETILJ = E2.E2_LOJA

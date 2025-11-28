@@ -17,9 +17,9 @@ Lucas    - Igor Melgaço  - 16/07/25 - 18/07/25 -  51490  - Ajustes para correção
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
-#include "Protheus.ch" 
-#INCLUDE "TBICONN.CH"
-#INCLUDE "PARMTYPE.CH" 
+#Include "TOTVS.ch" 
+#Include "TBICONN.CH"
+#Include "PARMTYPE.CH" 
 //#Include "FwMVCDef.ch"
 
 /*
@@ -36,7 +36,7 @@ Retorno------------: Nenhum
 ===============================================================================================================================
 */  
 User Function AOMS151()
-Local _aArea   := GetArea() As Array
+Local _aArea   := FWGetArea() As Array
 Local _oBrowse As Object
 Private _cTitulo  As Character
 Private _cArqSB1 As Character
@@ -62,16 +62,16 @@ Begin Sequence
 End Sequence       
 
 If Select(_cArqSB1) > 0
-   (_cArqSB1)->(DbCloseArea())
+   (_cArqSB1)->(DBCloseArea())
 EndIf
 
 If Select(_cArqFil) > 0
-   (_cArqFil)->(DbCloseArea())
+   (_cArqFil)->(DBCloseArea())
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
-Return Nil
+Return
 
 
 
@@ -88,10 +88,10 @@ Retorno---------: Nenhum
 Static Function MenuDef() As Array
 Local _aRotina := {} As Array
 
-   Aadd(_aRotina,{"Pesquisar"                                ,"AxPesqui"   ,0,1, 0, .F.})
-   Aadd(_aRotina,{"Bloquear/Desbloquear Produto Posicionado" ,"U_AOMS151P" ,0,2, 0, nil})   
-   Aadd(_aRotina,{"Bloquear/Desbloquear Produto x Filial"    ,"U_AOMS151F" ,0,3, 0, nil})
-   Aadd(_aRotina,{"Histórico de Bloqueio/Desbloqueio"        ,"U_AOMS151H" ,0,2, 0, nil})
+   aAdd(_aRotina,{"Pesquisar"                                ,"AxPesqui"   ,0,1, 0, .F.})
+   aAdd(_aRotina,{"Bloquear/Desbloquear Produto Posicionado" ,"U_AOMS151P" ,0,2, 0, nil})   
+   aAdd(_aRotina,{"Bloquear/Desbloquear Produto x Filial"    ,"U_AOMS151F" ,0,3, 0, nil})
+   aAdd(_aRotina,{"Histórico de Bloqueio/Desbloqueio"        ,"U_AOMS151H" ,0,2, 0, nil})
 
 Return( _aRotina )
 
@@ -131,16 +131,16 @@ Begin Sequence
       _cMsgCanc  := "Bloqueio do  produto: " + AllTrim(ZBS->ZBS_CODPRO) + ", na filial: " + ZBS->ZBS_CODFIL + " cancelado pelo usuário."
    EndIf 
 
-   If U_ITMSG(_cMsg,"Atenção" , , ,2, 2)
+   If U_ITMsg(_cMsg,"Atenção" , , ,2, 2)
       Begin Transaction
 
          ZBS->(RecLock("ZBS",.F.))
          ZBS->ZBS_SITUAC := _cSituacao
          ZBS->ZBS_DTALT  := Date()
          ZBS->ZBS_HRALT  := Time()
-         ZBS->ZBS_USRALT := __cUserID
-         ZBS->ZBS_NOMUSR := UsrFullName(__cUserID)    
-         ZBS->(MsUnlock())
+         ZBS->ZBS_USRALT := __cUserId
+         ZBS->ZBS_NOMUSR := UsrFullName(__cUserId)    
+         ZBS->(MSUnLock())
    
          ZBT->(RecLock("ZBT",.T.))
          ZBT->ZBT_FILIAL	:= ZBS->ZBS_FILIAL //	Filial
@@ -151,22 +151,22 @@ Begin Sequence
          ZBT->ZBT_SITATU	:= _cSituacao      //	Sit.Atual
          ZBT->ZBT_DTALT	   := Date()          //	Dt.Alteracao
          ZBT->ZBT_HRALT	   := Time()          //	Hr.Alteracao
-         ZBT->ZBT_USRALT	:= __cUserID       //	Usuario Alt.
-         ZBT->ZBT_NOMUSR	:= UsrFullName(__cUserID) //	Nome Usuar.
-         ZBT->(MsUnlock()) 
+         ZBT->ZBT_USRALT	:= __cUserId       //	Usuario Alt.
+         ZBT->ZBT_NOMUSR	:= UsrFullName(__cUserId) //	Nome Usuar.
+         ZBT->(MSUnLock()) 
 
       End Transaction
 
       ZBS->( DBCommit() ) // Força a atualização do Banco de dados.
 
-      U_ItMsg(_cMsgOk,"Atenção",,2) 
+      U_ITMsg(_cMsgOk,"Atenção",,2) 
    Else 
-      U_ItMsg(_cMsgCanc,"Atenção",,2) 
+      U_ITMsg(_cMsgCanc,"Atenção",,2) 
    EndIf 
 
 End Sequence
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -191,9 +191,9 @@ Begin Sequence
    //==========================================================================
    // Cria Tabela Temporária de Produtos e gravas os dados.
    //==========================================================================
-   Aadd(_aStruct,{"WK_MARCA"  ,"C",2  ,0})
-   Aadd(_aStruct,{"B1_COD"    ,"C",15 ,0})  // Cod.Produto
-   Aadd(_aStruct,{"B1_DESC"   ,"C",100,0})  // Desc.Produto
+   aAdd(_aStruct,{"WK_MARCA"  ,"C",2  ,0})
+   aAdd(_aStruct,{"B1_COD"    ,"C",15 ,0})  // Cod.Produto
+   aAdd(_aStruct,{"B1_DESC"   ,"C",100,0})  // Desc.Produto
    
    _cArqSB1 := GetNextAlias() 
  
@@ -223,31 +223,31 @@ Begin Sequence
 
    ProcRegua(_nTotRegs)
 
-   (_cQrySB1)->(DbGoTop())
+   (_cQrySB1)->(DBGoTop())
 
-   Do While ! (_cQrySB1)->(Eof()) 
+   While ! (_cQrySB1)->(Eof()) 
       IncProc("Lendo dados dos Produtos...")
 
       (_cArqSB1)->(DbAppend())
       (_cArqSB1)->B1_COD  := (_cQrySB1)->B1_COD
       (_cArqSB1)->B1_DESC := (_cQrySB1)->B1_DESC
 
-      (_cQrySB1)->(DbSkip())
+      (_cQrySB1)->(DBSkip())
    EndDo 
 
    If Select(_cQrySB1) > 0
-      (_cQrySB1)->(DbCloseArea())
+      (_cQrySB1)->(DBCloseArea())
    EndIf
 
-   (_cArqSB1)->(DbGoTop())
+   (_cArqSB1)->(DBGoTop())
 
    //==========================================================================
    // Cria Tabela Temporária de Filiais e gravas os dados.
    //==========================================================================
    _aStruct := {}
-   Aadd(_aStruct,{"WK_MARCA"  ,"C",2  ,0})
-   Aadd(_aStruct,{"WK_CODFIL" ,"C",2 ,0})  // Cod.Produto
-   Aadd(_aStruct,{"WK_DESCFIL","C",40,0})  // Desc.Produto
+   aAdd(_aStruct,{"WK_MARCA"  ,"C",2  ,0})
+   aAdd(_aStruct,{"WK_CODFIL" ,"C",2 ,0})  // Cod.Produto
+   aAdd(_aStruct,{"WK_DESCFIL","C",40,0})  // Desc.Produto
    
    _cArqFil := GetNextAlias() 
  
@@ -264,24 +264,24 @@ Begin Sequence
    
    DBSelectArea(_cArqFil) 
 
-   ZZM->(DbGoTop())
+   ZZM->(DBGoTop())
    ProcRegua(0)
 
-   Do While ! ZZM->(Eof()) 
+   While ! ZZM->(Eof()) 
       IncProc("Lendo dados das filiais...")
 
       (_cArqFil)->(DbAppend())
       (_cArqFil)->WK_CODFIL  := ZZM->ZZM_CODIGO
       (_cArqFil)->WK_DESCFIL := ZZM->ZZM_DESCRI
 
-      ZZM->(DbSkip())
+      ZZM->(DBSkip())
    EndDo 
 
-   (_cArqFil)->(DbGoTop())
+   (_cArqFil)->(DBGoTop())
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -361,8 +361,8 @@ Begin Sequence
       aAdd( _aFieldPrd , { "Produto"	, {|| (_cArqSB1)->B1_COD }  		 , "C" , "@!" , 0 , Getsx3cache("B1_COD","X3_TAMANHO")  , 0 } )
       aAdd( _aFieldPrd , { "Descricao"	, {|| (_cArqSB1)->B1_DESC }		 , "C" , "@!" , 0 , Getsx3cache("B1_DESC","X3_TAMANHO") , 0 } )
 
-      Aadd(_aPesqPrd,{"Produto"  ,{{"","C",15 ,0,"Produto"  ,"@!"}}}) 
-      //Aadd(_aPesqPrd,{"Descricao",{{"","c",100,0,"Descricao","@!"}}})
+      aAdd(_aPesqPrd,{"Produto"  ,{{"","C",15 ,0,"Produto"  ,"@!"}}}) 
+      //aAdd(_aPesqPrd,{"Descricao",{{"","c",100,0,"Descricao","@!"}}})
 
       _oBrwPrd := FWMarkBrowse():New()		   												// Inicializa o Browse
       _oBrwPrd:SetOwner( _oTelaPrd )
@@ -398,7 +398,7 @@ Begin Sequence
 
 End Sequence 
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -417,29 +417,29 @@ User Function AOMS151A()
 
 Begin Sequence 
 
-   If ! U_ITMSG("Confirma a desmarcação de todos os Produtos?","Atenção" , , ,2, 2)
+   If ! U_ITMsg("Confirma a desmarcação de todos os Produtos?","Atenção" , , ,2, 2)
       Break 
    EndIf 
 
    ProcRegua(0)
 
-   (_cArqSB1)->(DbGoTop())
+   (_cArqSB1)->(DBGoTop())
 
-   Do While ! (_cArqSB1)->(Eof()) 
+   While ! (_cArqSB1)->(Eof()) 
       IncProc("Desmarcando Produtos...")
       
       (_cArqSB1)->WK_MARCA := Space(2)
       
-      (_cArqSB1)->(DbSkip())
+      (_cArqSB1)->(DBSkip())
    EndDo 
    
-   (_cArqSB1)->(DbGoTop())
+   (_cArqSB1)->(DBGoTop())
 
 End Sequence 
 
 _oBrwPrd:Refresh()
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -458,29 +458,29 @@ User Function AOMS151B()
 
 Begin Sequence 
 
-   If ! U_ITMSG("Confirma a desmarcação de todas as Filiais?","Atenção" , , ,2, 2)
+   If ! U_ITMsg("Confirma a desmarcação de todas as Filiais?","Atenção" , , ,2, 2)
       Break 
    EndIf 
 
    ProcRegua(0)
 
-   (_cArqFil)->(DbGoTop())
+   (_cArqFil)->(DBGoTop())
 
-   Do While ! (_cArqFil)->(Eof()) 
+   While ! (_cArqFil)->(Eof()) 
       IncProc("Desmarcando Filiais...")
 
       (_cArqFil)->WK_MARCA := Space(2)
 
-      (_cArqFil)->(DbSkip())
+      (_cArqFil)->(DBSkip())
    EndDo 
 
-   (_cArqFil)->(DbGoTop())
+   (_cArqFil)->(DBGoTop())
 
 End Sequence 
 
 _oBrwFil:Refresh()
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -539,33 +539,33 @@ Begin Sequence
    If _lRet
       If _nRadio == 1
          If Empty(_cCodigo)
-            U_ItMsg("Código do Produto não informado.","Atenção",,1)
+            U_ITMsg("Código do Produto não informado.","Atenção",,1)
             Break 
          EndIf 
          
-         (_cArqSB1)->(DbSetOrder(1))
+         (_cArqSB1)->(DBSetOrder(1))
 
          If ! (_cArqSB1)->(MsSeek(_cCodigo))
-            (_cArqSB1)->(DbGoTo(_nRegAtu))
+            (_cArqSB1)->(DBGoTo(_nRegAtu))
             Break
          EndIf 
       Else
          If Empty(_cDescri)
-            U_ItMsg("Descrição do Produto não informado.","Atenção",,1)
+            U_ITMsg("Descrição do Produto não informado.","Atenção",,1)
             Break 
          EndIf 
 
-         (_cArqSB1)->(DbSetOrder(2))
+         (_cArqSB1)->(DBSetOrder(2))
          _oBrwPrd:Refresh()
 
          If ! (_cArqSB1)->(MsSeek(AllTrim(_cDescri)))
-            (_cArqSB1)->(DbGoTo(_nRegAtu))
+            (_cArqSB1)->(DBGoTo(_nRegAtu))
             Break
          Else 
             _nRegPesq := (_cArqSB1)->(Recno())
-            (_cArqSB1)->(DbSetOrder(1))
+            (_cArqSB1)->(DBSetOrder(1))
             _oBrwPrd:Refresh()
-            (_cArqSB1)->(DbGoto(_nRegPesq))
+            (_cArqSB1)->(DBGoTo(_nRegPesq))
          EndIf
       EndIf
    EndIf
@@ -574,7 +574,7 @@ End Sequence
 
 _oBrwPrd:Refresh()
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
@@ -605,7 +605,7 @@ Begin Sequence
       _cMsg := "Confirma o desbloqueio dos produtos selecionados, em todas as filiais selecionadas?" 
    EndIf 
 
-   If ! U_ITMSG(_cMsg,"Atenção" , , ,2, 2)
+   If ! U_ITMsg(_cMsg,"Atenção" , , ,2, 2)
       Break 
    EndIf 
 
@@ -614,17 +614,17 @@ Begin Sequence
    //=================================================================
    ProcRegua(0)
 
-   (_cArqFil)->(DbGoTop())
+   (_cArqFil)->(DBGoTop())
 
-   Do While ! (_cArqFil)->(Eof()) 
+   While ! (_cArqFil)->(Eof()) 
       IncProc("Lendo as filiais selecionadas...")
 
       If ! Empty((_cArqFil)->WK_MARCA) 
-         Aadd(_aFilSelec, {(_cArqFil)->WK_CODFIL,(_cArqFil)->(Recno())})
+         aAdd(_aFilSelec, {(_cArqFil)->WK_CODFIL,(_cArqFil)->(Recno())})
          //(_cArqFil)->WK_MARCA := Space(2)
       EndIf 
 
-      (_cArqFil)->(DbSkip())
+      (_cArqFil)->(DBSkip())
    EndDo 
 
    If Len(_aFilSelec) == 0
@@ -633,24 +633,24 @@ Begin Sequence
       Else 
          _cMsg := "Nenhuma filial foi selecionada. Não será possível desbloquear os produtos."
       EndIf
-      U_ItMsg(_cMsg,"Atenção",,1)
+      U_ITMsg(_cMsg,"Atenção",,1)
       Break 
    EndIf 
 
    //=================================================================
    // Lendo os produtos selecionados.
    //=================================================================
-   (_cArqSB1)->(DbGoTop())
+   (_cArqSB1)->(DBGoTop())
 
-   Do While ! (_cArqSB1)->(Eof()) 
+   While ! (_cArqSB1)->(Eof()) 
       IncProc("Lendo os produtos selecionados...")
       
       If ! Empty((_cArqSB1)->WK_MARCA) 
-         Aadd(_aPrdSelec, {(_cArqSB1)->B1_COD,(_cArqSB1)->B1_DESC,(_cArqSB1)->(Recno())})
+         aAdd(_aPrdSelec, {(_cArqSB1)->B1_COD,(_cArqSB1)->B1_DESC,(_cArqSB1)->(Recno())})
          //(_cArqSB1)->WK_MARCA := Space(2)
       EndIf
       
-      (_cArqSB1)->(DbSkip())
+      (_cArqSB1)->(DBSkip())
    EndDo 
    
    If Len(_aPrdSelec) == 0
@@ -660,11 +660,11 @@ Begin Sequence
          _cMsg := "Nenhum produto foi selecionado. Não será possível desbloquear os produtos."
       EndIf
 
-      U_ItMsg(_cMsg,"Atenção",,1)
+      U_ITMsg(_cMsg,"Atenção",,1)
       Break 
    EndIf
 
-   ZBS->(DbSetOrder(1))
+   ZBS->(DBSetOrder(1))
    For _nI := 1 To Len(_aFilSelec)
        IncProc("Gravando cadastro de produtos bloqueados...")
 
@@ -681,9 +681,9 @@ Begin Sequence
                  ZBS->ZBS_SITUAC := _cBotao
                  ZBS->ZBS_DTALT  := Date()
                  ZBS->ZBS_HRALT  := Time()
-                 ZBS->ZBS_USRALT := __cUserID
-                 ZBS->ZBS_NOMUSR := UsrFullName(__cUserID)  
-                 ZBS->(MsUnlock())
+                 ZBS->ZBS_USRALT := __cUserId
+                 ZBS->ZBS_NOMUSR := UsrFullName(__cUserId)  
+                 ZBS->(MSUnLock())
               End Transaction
            Else
               _cSitAnt := " "
@@ -697,9 +697,9 @@ Begin Sequence
                  ZBS->ZBS_SITUAC := _cBotao
                  ZBS->ZBS_DTALT  := Date()
                  ZBS->ZBS_HRALT  := Time()
-                 ZBS->ZBS_USRALT := __cUserID
-                 ZBS->ZBS_NOMUSR := UsrFullName(__cUserID)    
-                 ZBS->(MsUnlock())
+                 ZBS->ZBS_USRALT := __cUserId
+                 ZBS->ZBS_NOMUSR := UsrFullName(__cUserId)    
+                 ZBS->(MSUnLock())
               End Transaction 
            EndIf 
 
@@ -718,9 +718,9 @@ Begin Sequence
               ZBT->ZBT_SITATU	:= _cBotao         //	Sit.Atual
               ZBT->ZBT_DTALT	:= Date()          //	Dt.Alteracao
               ZBT->ZBT_HRALT	:= Time()          //	Hr.Alteracao
-              ZBT->ZBT_USRALT	:= __cUserID       //	Usuario Alt.
-              ZBT->ZBT_NOMUSR	:= UsrFullName(__cUserID) //	Nome Usuar.
-              ZBT->(MsUnlock()) 
+              ZBT->ZBT_USRALT	:= __cUserId       //	Usuario Alt.
+              ZBT->ZBT_NOMUSR	:= UsrFullName(__cUserId) //	Nome Usuar.
+              ZBT->(MSUnLock()) 
            End Transaction
        Next _nJ
    Next _nI 
@@ -731,7 +731,7 @@ Begin Sequence
    //=================================================================  
    For _nI := 1 To Len(_aFilSelec)
        IncProc("Desmarcando filiais seleciondas...")
-       (_cArqFil)->(DbGoTo(_aFilSelec[_nI,2]))
+       (_cArqFil)->(DBGoTo(_aFilSelec[_nI,2]))
 
        (_cArqFil)->WK_MARCA := Space(2)
    Next 
@@ -739,7 +739,7 @@ Begin Sequence
 
    For _nI := 1 To Len(_aPrdSelec)
        IncProc("Desmarcando produtos seleciondas...")
-       (_cArqSB1)->(DbGoTo(_aPrdSelec[_nI,3]))
+       (_cArqSB1)->(DBGoTo(_aPrdSelec[_nI,3]))
 
        (_cArqSB1)->WK_MARCA := Space(2)
     Next 
@@ -751,11 +751,11 @@ Begin Sequence
       _cMsg := "Desbloqueio de produtos x filiais concluido." 
    EndIf
    
-   U_ItMsg(_cMsg,"Atenção",,2)
+   U_ITMsg(_cMsg,"Atenção",,2)
 
 End Sequence
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -786,16 +786,16 @@ Begin Sequence
    MV_PAR02 := Ctod("  /  /  ")
    MV_PAR03 := Space(120)
 
-   Aadd( _aParAux , { 1 , "Data Inicial", MV_PAR01, "@D", ""	, ""	    , ""          ,050      , .F. } )
-   Aadd( _aParAux , { 1 , "Data Final"  , MV_PAR02, "@D", ""	, ""	    , ""          ,050      , .F. } )
-   Aadd( _aParAux , { 1 , "Produtos"    , MV_PAR03, "@!", ""   , "SB1_05", ""          ,120      , .F. } )
+   aAdd( _aParAux , { 1 , "Data Inicial", MV_PAR01, "@D", ""	, ""	    , ""          ,050      , .F. } )
+   aAdd( _aParAux , { 1 , "Data Final"  , MV_PAR02, "@D", ""	, ""	    , ""          ,050      , .F. } )
+   aAdd( _aParAux , { 1 , "Produtos"    , MV_PAR03, "@!", ""   , "SB1_05", ""          ,120      , .F. } )
    
-   Aadd(_aParRet,"MV_PAR01")
-   Aadd(_aParRet,"MV_PAR02")
-   Aadd(_aParRet,"MV_PAR03")
+   aAdd(_aParRet,"MV_PAR01")
+   aAdd(_aParRet,"MV_PAR02")
+   aAdd(_aParRet,"MV_PAR03")
 
-   IF !ParamBox( _aParAux , "Listagem do Histórico do Bloqueio e Desbloqueio de Produtos" , @_aParRet,,, .T. , , , , , .T. , .T. )
-      U_ItMsg( "Operação cancelada pelo usuário!" , "Atenção!",,1 )
+   If !ParamBox( _aParAux , "Listagem do Histórico do Bloqueio e Desbloqueio de Produtos" , @_aParRet,,, .T. , , , , , .T. , .T. )
+      U_ITMsg( "Operação cancelada pelo usuário!" , "Atenção!",,1 )
       Break
    EndIf
 
@@ -805,11 +805,11 @@ Begin Sequence
    _cQry += " FROM " + RetSqlName("ZBT") + " ZBT "
    _cQry += " WHERE ZBT.D_E_L_E_T_ = ' ' "
    If ! Empty(MV_PAR01)
-      _cQry += " AND ZBT_DTALT >= '" + Dtos(MV_PAR01) + "' "
+      _cQry += " AND ZBT_DTALT >= '" + DToS(MV_PAR01) + "' "
    EndIf 
    
    If ! Empty(MV_PAR02)
-      _cQry += " AND ZBT_DTALT <= '" + Dtos(MV_PAR02) + "' "
+      _cQry += " AND ZBT_DTALT <= '" + DToS(MV_PAR02) + "' "
    EndIf 
 
    If ! Empty(MV_PAR03)
@@ -823,15 +823,15 @@ Begin Sequence
    Count To _nTotRegs
 
    If _nTotRegs == 0
-      U_ItMsg( "Não há dados que satisfaça as condições de filtro para a emissão da listagem!" , "Atenção!",,1 )
+      U_ITMsg( "Não há dados que satisfaça as condições de filtro para a emissão da listagem!" , "Atenção!",,1 )
       Break
    EndIf 
 
    ProcRegua(_nTotRegs)
 
-   (_cQryZBT)->(DbGoTop())
+   (_cQryZBT)->(DBGoTop())
 
-   Do While ! (_cQryZBT)->(Eof()) 
+   While ! (_cQryZBT)->(Eof()) 
       IncProc("Lendo histórico de Bloqueios/Desbloqueios...")
       
 
@@ -849,17 +849,17 @@ Begin Sequence
          _cSitAtu := "Desbloqueado"
       EndIf 
 
-      Aadd(_aDados,{ (_cQryZBT)->ZBT_CODFIL,;      // Filial
+      aAdd(_aDados,{ (_cQryZBT)->ZBT_CODFIL,;      // Filial
                      (_cQryZBT)->ZBT_CODPRO,;      // Produto
                      (_cQryZBT)->ZBT_DSCPRO,;      // Descrição Produto
-                     Stod((_cQryZBT)->ZBT_DTALT),; // Data
+                     SToD((_cQryZBT)->ZBT_DTALT),; // Data
                      (_cQryZBT)->ZBT_HRALT,;       // Hora
                      (_cQryZBT)->ZBT_USRALT,;      // Código Usuário
                      (_cQryZBT)->ZBT_NOMUSR,;      // Nome Usuário 
                      _cSitAnt,;                    // Status antes 
                      _cSitAtu})                    // Status Gravado
       
-      (_cQryZBT)->(DbSkip())
+      (_cQryZBT)->(DBSkip())
    EndDo 
 
    _aCab:={"Filial", "Produto", "Descrição Produto","Data Alteração","Hora", "Código Usuário","Nome Usuário", "Status anterior","Status Atual"}
@@ -869,7 +869,7 @@ Begin Sequence
 End Sequence
 
 If Select(_cQryZBT) > 0
-   (_cQryZBT)->(DbCloseArea())
+   (_cQryZBT)->(DBCloseArea())
 EndIf
 
-Return Nil
+Return

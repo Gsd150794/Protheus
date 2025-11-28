@@ -1,24 +1,16 @@
 /*
 ===============================================================================================================================
-                                    ATUALIZACOES SOFRIDAS DESDE A CONSTRUÇAO INICIAL
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                            
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Josué Danich      | 27/10/2015 | Incluido campo D4_I_P_GOR na acols da tela de empenho - Chamado 12006                         
-André Lisboa      | 06/04/2016 | Alterada picture do campo D4_QUANT - Chamado 15016                        		       
-Alex Wallauer     | 03/01/2019 | Inserido o campo de Estoque e validação do Local - Chamado 27300
-Alex Wallauer     | 16/07/2019 | Ajuste para não dar mais ERROR.LOG na funcao MTA650AC - Chamado 29966
-Alex Wallauer     | 05/09/2019 | Ajustes na gravação dos campos D4_I_QTORI e D4_I_QORSG - Chamado 27300
-============================================================================================================================================================
-Analista         - Programador     - Inicio     - Envio    - Chamado - Motivo da Alteração
-------------------------------------------------------------------------------------------------------------------------------------------------------------
-Andre Carvalho   - Igor Melgaço    - 10/06/25   -          - 50977   - Ajustes nas pictures dos campos D4_QUANT e D4_I_PGOR 
-============================================================================================================================================================
+Alex Wallauer |16/07/2019| Chamado 29966. Ajuste para não dar mais ERROR.LOG na funcao MTA650AC
+Alex Wallauer |05/09/2019| Chamado 27300. Ajustes na gravação dos campos D4_I_QTORI e D4_I_QORSG
+Igor Melgaço  |10/06/2025| Chamado 50977. Ajustes nas pictures dos campos D4_QUANT e D4_I_PGOR 
+===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+
+#Include "TOTVS.ch"
 
 #DEFINE USADO CHR(0)+CHR(0)+CHR(1) 
                      
@@ -27,11 +19,8 @@ Andre Carvalho   - Igor Melgaço    - 10/06/25   -          - 50977   - Ajustes n
 Programa----------: MTA650AC
 Autor-------------: Carlos Cleber A.Silva
 Data da Criacao---: 13/11/2013
-===============================================================================================================================
 Descrição---------: Ponto de entrada para incluir campo na tela de empenhos - Chamado 04605
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Uma array com os dados de um campo novo no aHearder
 ===============================================================================================================================
 */ 
@@ -39,15 +28,15 @@ User Function MTA650AC() As Array
 
 Local _aArray  := {} As Array
 Local _atam    := "" As Character
-LOCAL nPosLocal:= 0 As Numeric
+Local nPosLocal:= 0 As Numeric
 
-IF IsInCallStack("A650REPLD4")
-   RETURN _aArray
-ENDIF
+If IsInCallStack("A650REPLD4")
+   Return _aArray
+EndIf
 
-IF (nPosLocal:=aScan(aHeader,{|x| AllTrim(x[2])=="D4_LOCAL"})) > 0
-   aHeader[nPosLocal,6] := aHeader[nPosLocal,6]+" .AND. U_A650ADCOL(.T.) "
-ENDIF   
+If (nPosLocal:=aScan(aHeader,{|x| AllTrim(x[2])=="D4_LOCAL"})) > 0
+   aHeader[nPosLocal,6] := aHeader[nPosLocal,6]+" .And. U_A650ADCOL(.T.) "
+EndIf   
 
 _atam:=TamSX3("B1_DESC") //Posicao original 14 mudado para visualizacao na posicao 02
  
@@ -90,14 +79,14 @@ _atam:=TamSX3("G1_TRT") //Posicao original 04 mudado para visualizacao na posica
 
 _atam:=TamSX3("D4_I_PGOR")
 
-aadd(_aArray,{"Porc Gord", "D4_I_PGOR", PesqPict("SD4","D4_I_PGOR",_atam[1]) , _atam[1], _atam[2],"", .T.  , "N" , "SD4", " "})
+aAdd(_aArray,{"Porc Gord", "D4_I_PGOR", PesqPict("SD4","D4_I_PGOR",_atam[1]) , _atam[1], _atam[2],"", .T.  , "N" , "SD4", " "})
 
-aadd(_aArray,"SD4->D4_I_PGOR")
+aAdd(_aArray,"SD4->D4_I_PGOR")
 
 _atam:=TamSX3("B2_QATU")
 
-aadd(aHeader,{"Estoque"     , "B2_QATU"   , PesqPict("SB2","B2_QATU")   , _atam[1], _atam[2],"", .F.  , "N" , "SB2", "V"})
-aadd(aHeader,{"Qtde Ori"    , "D4_I_QTORI", PesqPict("SD4","D4_I_QTORI"), _atam[1], _atam[2],"", .F.  , "N" , "SD4", "V"})
-aadd(aHeader,{"Qtde Seg Ori", "D4_I_QORSG", PesqPict("SD4","D4_I_QORSG"), _atam[1], _atam[2],"", .F.  , "N" , "SD4", "V"})
+aAdd(aHeader,{"Estoque"     , "B2_QATU"   , PesqPict("SB2","B2_QATU")   , _atam[1], _atam[2],"", .F.  , "N" , "SB2", "V"})
+aAdd(aHeader,{"Qtde Ori"    , "D4_I_QTORI", PesqPict("SD4","D4_I_QTORI"), _atam[1], _atam[2],"", .F.  , "N" , "SD4", "V"})
+aAdd(aHeader,{"Qtde Seg Ori", "D4_I_QORSG", PesqPict("SD4","D4_I_QORSG"), _atam[1], _atam[2],"", .F.  , "N" , "SD4", "V"})
  
 Return(_aArray) 

@@ -9,8 +9,8 @@ Lucas Borges  |13/10/2024| Chamado 48465. Retirada da função de conout
 ===============================================================================================================================
 */
 
-#INCLUDE 'PROTHEUS.CH'
-#INCLUDE 'FWMVCDEF.CH'
+#Include "TOTVS.ch"
+#Include "FWMVCDef.ch"
 
 Static _cInICIRRF, _cInICPis, _cIniCConf, _cIniCCSLL, _cIniCINSS, _cIniCond, _cIniNatRen
 
@@ -27,7 +27,7 @@ Retorno---------: Nenhum
 ===============================================================================================================================
 */
 User Function FINA010() 
-Local _aParam  := PARAMIXB
+Local _aParam  := ParamIXB
 Local _xRet    := .T.
 Local _oObjForm
 Local _cIdExec
@@ -71,7 +71,7 @@ Begin Sequence
          //-----------------------------------------------------------------------------------------------------
          // Para validação de exclusão, utilizar a constante MODEL_OPERATION_INSERT e o método GetOperation()
          //-----------------------------------------------------------------------------------------------------
-         If _oObjForm:GetOperation() == 3 .OR. _oObjForm:GetOperation() == 4 
+         If _oObjForm:GetOperation() == 3 .Or. _oObjForm:GetOperation() == 4 
             _oModel   := _oObjForm:GetModel()
 
             // incluir aqui o envio de e-mail na alteração de dados. 
@@ -154,8 +154,8 @@ Begin Sequence
                (!Empty(_cInICPis)  .And.  _cInICPis  == "S") .Or. ;
                (!Empty(_cIniCConf) .And.  _cIniCConf == "S") .Or. ;
                (!Empty(_cIniCCSLL) .And.  _cIniCCSLL == "S") .Or. ;
-               (!Empty(_cIniCINSS) .And.  _cIniCINSS == "S") .OR. ;
-               (!Empty(_cIniCond) ) .OR. ;
+               (!Empty(_cIniCINSS) .And.  _cIniCINSS == "S") .Or. ;
+               (!Empty(_cIniCond) ) .Or. ;
                (!Empty(_cIniNatRen) ) 
 
                If Empty(_cInICIRRF) 
@@ -309,4 +309,4 @@ Begin Sequence
 
 End Sequence
 
-Return Nil
+Return

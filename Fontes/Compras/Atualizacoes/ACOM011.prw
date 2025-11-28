@@ -5,16 +5,12 @@
    Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
 Lucas Borges  |27/05/2025| Chamado 50617. Revisões diversas visando padronizar os fontes
+Alex Wallauer |05/06/2025| Chamado 50929. Ajustes para salvar a área do SC7 e restaurar ela e o recno.
 Lucas Borges  |19/06/2025| Chamado 50617. Revisões diversas visando padronizar os fontes
 ===============================================================================================================================
-========================================================================================================================================================================
-Analista    - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
-========================================================================================================================================================================
-Andre       - Alex Wallauer - 05/06/25 -          - 50929   - Ajustes para salvar a área do SC7 e restaurar ela e o recno.
-==============================================================================================================================================================================================
 */
 
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -30,7 +26,7 @@ User Function ACOM011
 
 Local aArea		:= FWGetArea() As Array
 Local cFilPC	:= SuperGetMV("IT_FILWFPC",.F.,"01") As Character
-Local lFilPC	:= Iif(cFilAnt $ cFilPC,.T.,.F.) As Logical
+Local lFilPC	:= IIf(cFilAnt $ cFilPC,.T.,.F.) As Logical
 Local nUsado 	:= 0 As Numeric
 Local cPedido	:= SC7->C7_NUM As Character
 Local oGetGrpA 	:= Nil As Object
@@ -58,27 +54,27 @@ Private cGetGrpA	:= Space(TamSX3("AL_COD")[1]) As Character
 Begin Sequence
 
 	If lFilPC
-		ZZL->(dbSetOrder(3))
-	  	If ZZL->(dbSeek(xFilial("ZZL") + __cUserID))
+		ZZL->(DBSetOrder(3))
+	  	If ZZL->(DBSeek(xFilial("ZZL") + __cUserId))
 			//===============================================================
 			// Grava log da rotina liberação Gestor de Compras 
 			//=============================================================== 
 			U_ITLOGACS('ACOM011')
 		
 			If ZZL->ZZL_GCOM == "S"
-				SC7->(dbSetOrder(1))
-				If SC7->(dbSeek(xFilial("SC7") + cPedido))
+				SC7->(DBSetOrder(1))
+				If SC7->(DBSeek(xFilial("SC7") + cPedido))
 					lContinua := U_ACOM011V(xFilial("SC7"), cPedido, .T.)
 					If lContinua
-						SC7->(dbSeek(xFilial("SC7") + cPedido))
-						DO WHILE SC7->(!EOF()) .And. cPedido == SC7->C7_NUM .AND. SC7->C7_FILIAL == xFilial("SC7")
-			         		If SC7->C7_CONAPRO == "B" .And. SC7->C7_QUJE < SC7->C7_QUANT .And. SC7->C7_APROV == "PENLIB" .AND. SC7->C7_RESIDUO != 'S'
+						SC7->(DBSeek(xFilial("SC7") + cPedido))
+						While SC7->(!Eof()) .And. cPedido == SC7->C7_NUM .And. SC7->C7_FILIAL == xFilial("SC7")
+			         		If SC7->C7_CONAPRO == "B" .And. SC7->C7_QUJE < SC7->C7_QUANT .And. SC7->C7_APROV == "PENLIB" .And. SC7->C7_RESIDUO != 'S'
 								//                     1            2         3           4          5        6        7       8       9       10          11      12        13       14         15        16   17
 								// aAdd(aHeader,{trim(x3_titulo),x3_campo,x3_picture,x3_tamanho,x3_decimal,x3_valid,x3_usado,x3_tipo, x3_f3,x3_context,	x3_cbox,x3_relacao,x3_when,X3_TRIGGER,	X3_PICTVAR,.F.,.F.})
 								aHeader := {}
 
 								aCols   := {}
-								For nUsado := 1 to len(aFields)
+								For nUsado := 1 to Len(aFields)
 									_cCampo:=aFields[nUsado]
 									_cUsado:=Getsx3cache(_cCampo,"X3_USADO")
 									If X3USO(_cUsado)
@@ -92,62 +88,62 @@ Begin Sequence
 														Getsx3cache(_cCampo,"X3_TIPO") ,;
 														Getsx3cache(_cCampo,"X3_F3") ,;
 														Getsx3cache(_cCampo,"X3_CONTEXT") })
-									Endif
+									EndIf
 								Next nUsado
 								aColsAux:= {}
       
 								For nX := 1 To Len(aHeader)
-									If Ascan(aFields, AllTrim(aHeader[nX,2])) > 0
-										Aadd(_aHeaderSAL,aHeader[nX])
+									If aScan(aFields, AllTrim(aHeader[nX,2])) > 0
+										aAdd(_aHeaderSAL,aHeader[nX])
 										If aHeader[nX,8] == "C"      // SX3->X3_TIPO == "C"
-											Aadd(aColsAux, "")
+											aAdd(aColsAux, "")
 										ElseIf aHeader[nX,8] == "N"  // SX3->X3_TIPO == "N"
-											Aadd(aColsAux, 0)
+											aAdd(aColsAux, 0)
 										ElseIf aHeader[nX,8] == "D"  // SX3->X3_TIPO == "D"
-											Aadd(aColsAux, StoD(""))
+											aAdd(aColsAux, SToD(""))
 										EndIf
 									EndIf
 								Next nX
 			
-								Aadd(aColsAux, .F.)
-								Aadd(aCols, aColsAux)
+								aAdd(aColsAux, .F.)
+								aAdd(aCols, aColsAux)
 								aHeader := AClone(_aHeaderSAL)
 								_cF3:="SAL"
 
-								SY1->(dbSetOrder(3))
-								IF SY1->(dbSeek(xFilial("SY1") + SC7->C7_USER))
+								SY1->(DBSetOrder(3))
+								If SY1->(DBSeek(xFilial("SY1") + SC7->C7_USER))
 									_cGrpLeite:= ACOM11_ZP1("IT_GRPLEIT")
-									IF SY1->Y1_GRUPCOM $ _cGrpLeite
-										_cGrpALeite:= ALLTRIM(SuperGetMV("IT_GRPALEI",.F.,""))							  
-										IF !EMPTY(_cGrpALeite)
+									If SY1->Y1_GRUPCOM $ _cGrpLeite
+										_cGrpALeite:= AllTrim(SuperGetMV("IT_GRPALEI",.F.,""))							  
+										If !Empty(_cGrpALeite)
 											_cF3:="F3ITLC"
 											_cSelecSAL:="SELECT DISTINCT AL_COD , AL_DESC  , AL_USER , AL_NIVEL  FROM "+RETSQLNAME("SAL")+" SAL WHERE D_E_L_E_T_ = ' ' AND AL_MSBLQL <> '1'  AND  AL_COD IN " + FormatIn(_cGrpALeite,";") +" ORDER BY AL_COD , AL_NIVEL " 
 											_aItalac_F3:={}//       1           2         3                      4                      5                                          6                   7         8          9         10         11        12
 											//  (_aItalac_F3,{"1CPO_CAMPO1",_cTabela,_nCpoChave            , _nCpoDesc              ,_bCondTab                               , _cTitAux           , _nTamChv , _aDados  , _nMaxSel , _lFilAtual,_cMVRET,_bValida})
-											AADD(_aItalac_F3,{"cGetGrpA" ,_cSelecSAL,{|Tab| (Tab)->AL_COD }, {|Tab| UsrRetName((Tab)->AL_USER)  +" // "+ALLTRIM((Tab)->AL_DESC)+" // "+(Tab)->AL_NIVEL}  , ,"Grupo Aprovadores" ,          ,          , 1        ,.F.        ,       , } )
-										ENDIF
-									ENDIF						   
-								ENDIF
-								SAJ->(DBSETORDER(1))
+											aAdd(_aItalac_F3,{"cGetGrpA" ,_cSelecSAL,{|Tab| (Tab)->AL_COD }, {|Tab| UsrRetName((Tab)->AL_USER)  +" // "+AllTrim((Tab)->AL_DESC)+" // "+(Tab)->AL_NIVEL}  , ,"Grupo Aprovadores" ,          ,          , 1        ,.F.        ,       , } )
+										EndIf
+									EndIf						   
+								EndIf
+								SAJ->(DBSetOrder(1))
 		
 								DEFINE MSDIALOG oDlgApr TITLE "Grupos de Aprovação" FROM 000, 000  TO 205, 500 COLORS 0, 16777215 PIXEL
 
-									@ 005, 006 SAY oSayGrpA PROMPT "Grupo Aprovador" SIZE 044, 007 OF oDlgApr COLORS 0, 16777215 PIXEL
+									@ 005, 006 Say oSayGrpA PROMPT "Grupo Aprovador" SIZE 044, 007 OF oDlgApr COLORS 0, 16777215 PIXEL
 									@ 005, 054 MSGET oGetGrpA VAR cGetGrpA SIZE 032, 010 OF oDlgApr COLORS 0, 16777215 F3 _cF3 VALID {|| ACOM011F(cGetGrpA, @cGetGrpN)} PIXEL
 									@ 017, 054 MSGET oGetGrpN VAR cGetGrpN SIZE 158, 010 OF oDlgApr COLORS 0, 16777215 PIXEL
 									@ 031, 003 GROUP oGroupA TO 086, 246 PROMPT "Aprovadores" OF oDlgApr COLOR 0, 16777215 PIXEL
 									oMSNewApr := MsNewGetDados():New( 038, 007, 083, 242, 0, "AllwaysTrue", "AllwaysTrue", "", aAlterFields,, 999, "AllwaysTrue", "", "AllwaysTrue", oDlgApr, aHeader, aCols)
-									DEFINE SBUTTON oSButtonOk FROM 089, 091 TYPE 01 OF oDlgApr ENABLE Action (nOpca := 1, oDlgApr:End())
-									DEFINE SBUTTON oSButton1 FROM 089, 120 TYPE 02 OF oDlgApr ENABLE Action oDlgApr:End()
+									DEFINE SBUTTON oSButtonOk FROM 089, 091 Type 01 OF oDlgApr ENABLE Action (nOpca := 1, oDlgApr:End())
+									DEFINE SBUTTON oSButton1 FROM 089, 120 Type 02 OF oDlgApr ENABLE Action oDlgApr:End()
 			
 								ACTIVATE MSDIALOG oDlgApr CENTERED
 									
 								If nOpca == 1
 									Begin Transaction
-										dbSelectArea("SC7")
-										SC7->(dbSetOrder(1))
+										DBSelectArea("SC7")
+										SC7->(DBSetOrder(1))
 				
-										If SC7->(dbSeek(xFilial("SC7") + cPedido))
+										If SC7->(DBSeek(xFilial("SC7") + cPedido))
 											//Grava aprovador no Sc7
 											_nTotPed:=0
 											_nItem:=0
@@ -155,7 +151,7 @@ Begin Sequence
 											aRefImp	:= MaFisRelImp('MT100',{"SC7"})
 											aStru		:= FWFormStruct(3,"SC7")[1]
 
-											DO While SC7->(!EOF()) .And. cPedido == SC7->C7_NUM .AND. SC7->C7_FILIAL == xFilial("SC7")
+											While SC7->(!Eof()) .And. cPedido == SC7->C7_NUM .And. SC7->C7_FILIAL == xFilial("SC7")
 												MaFisIni(SC7->C7_FORNECE,SC7->C7_LOJA,"F","N","R",aRefImp)						
 												MaFisIniLoad(1)
 												_nItem++
@@ -163,7 +159,7 @@ Begin Sequence
 													nPos := aScan(aStru,{|x| AllTrim(x[3]) == AllTrim(aRefImp[nA][2])})
 													If nPos > 0 .And. !aStru[nPos,14]
 														MaFisLoad(aRefImp[nA][3],SC7->(&(aRefImp[nA][2])),1)
-													Endif
+													EndIf
 												Next nA
 												MaFisRecal("",1)
 												MaFisEndLoad(1)
@@ -177,41 +173,41 @@ Begin Sequence
 												dEmissao := SC7->C7_EMISSAO
 												SC7->(RecLock("SC7",.F.))
 												SC7->C7_APROV   := cGetGrpA
-												SC7->C7_I_GCOM  := __cUserID
+												SC7->C7_I_GCOM  := __cUserId
 												SC7->C7_I_DTLIB := Date()
 												SC7->C7_I_HRLIB := Time()
-												SC7->(MsUnLock())
-												SC7->(dbSkip())
-											Enddo
+												SC7->(MSUnLock())
+												SC7->(DBSkip())
+											EndDo
 
 											//Inclui linhas de aprovador no SCR
-											SAL->(Dbsetorder(2))//AL_FILIAL+AL_COD+AL_NIVEL
-											If SAL->(Dbseek(xfilial("SAL")+cGetGrpA))
+											SAL->(DBSetOrder(2))//AL_FILIAL+AL_COD+AL_NIVEL
+											If SAL->(DBSeek(xFilial("SAL")+cGetGrpA))
 												nConta:=0
-												Do while !(SAL->(Eof())) .and. alltrim(cGetGrpA) == SAL->AL_COD
-													IF SAL->AL_MSBLQL = '1' 
-														SAL->(Dbskip())  
-														LOOP									   
-													ENDIF										     
+												While !(SAL->(Eof())) .And. AllTrim(cGetGrpA) == SAL->AL_COD
+													If SAL->AL_MSBLQL = '1' 
+														SAL->(DBSkip())  
+														Loop									   
+													EndIf										     
 													nConta++
-													SCR->(Reclock("SCR",.T.))
-													SCR->CR_FILIAL := xfilial("SCR")
+													SCR->(RecLock("SCR",.T.))
+													SCR->CR_FILIAL := xFilial("SCR")
 													SCR->CR_num 	:= cPedido
 													SCR->CR_TIPO 	:= "PC"
 													SCR->CR_USER	:= SAL->AL_USER
 													SCR->CR_APROV	:= SAL->AL_APROV
 													SCR->CR_NIVEL	:= SAL->AL_NIVEL
-													SCR->CR_STATUS	:= IF(nConta > 1 ,'01','02')//Não olhamos o nivel mais pq o aprovador anterior pode esta bloqueado
+													SCR->CR_STATUS	:= If(nConta > 1 ,'01','02')//Não olhamos o nivel mais pq o aprovador anterior pode esta bloqueado
 													SCR->CR_EMISSAO:= DDATABASE
 													SCR->CR_MOEDA	:= 1
 													SCR->CR_TXMOEDA:= 1
 													SCR->CR_GRUPO 	:= cGetGrpA
 													SCR->CR_TOTAL 	:= _nTotPed
-													SCR->(Msunlock())
+													SCR->(MSUnLock())
 														
-													SAL->(Dbskip())
-												Enddo
-											Endif
+													SAL->(DBSkip())
+												EndDo
+											EndIf
 										EndIf
 										FWAlertSuccess('Processo concluído com sucesso.',"ACOM01101")
 									End Transaction
@@ -219,28 +215,28 @@ Begin Sequence
 									FwRestArea(aArea)
 									Break 
 								EndIf
-							ElseIF SC7->C7_RESIDUO == 'S'
+							ElseIf SC7->C7_RESIDUO == 'S'
 								FWAlertInfo("Pedido de Compras eliminado por residuo. Verifique a Situação atual do Pedido de Compras.","Liberação PC - Gestor de Compras - ACOM01102")
 								FwRestArea(aArea)
 								Break 
 							Else
 								FWAlertInfo("Pedido de Compras já liberado pelo Gestor de Compras. Verifique a Situação atual do Pedido de Compras.","Liberação PC - Gestor de Compras - ACOM01103")
-								RestArea(aArea)
+								FWRestArea(aArea)
 								break
 							EndIf
 				
-							SC7->(Dbskip())
+							SC7->(DBSkip())
 						EndDo
 					EndIf
 			 	EndIf
 		  Else
-			 FWAlertWarning( __cUserID + " - " + cUserName + ", sem permissão para utilizar esta funcionalidade. "+;
+			 FWAlertWarning( __cUserId + " - " + cUserName + ", sem permissão para utilizar esta funcionalidade. "+;
 					"Por favor comunicar a área de Compras que é responsável por solicitar para TI a liberação desta funcionalidade.","Liberação PC - Gestor de Compras - ACOM01104")
-			 RestArea(aArea)
+			 FWRestArea(aArea)
 			 Break
 		  EndIf
 	   Else
-		  FWAlertWarning( __cUserID + " - " + cUserName + ", sem permissão para utilizar esta funcionalidade. "+;
+		  FWAlertWarning( __cUserId + " - " + cUserName + ", sem permissão para utilizar esta funcionalidade. "+;
 			       "Por favor comunicar a área de Compras que é responsável por solicitar para TI a liberação desta funcionalidade.","Liberação PC - Gestor de Compras - ACOM01105")
 		  FwRestArea(aArea)
 	  	  Break // Return
@@ -278,7 +274,7 @@ Local lRet		:= .T. As Logical
 Local _cNome	:= "" As Character
 Local _cObs		:= "" As Character
 Local _cAlias   := GetNextAlias() As Character
-LOCAL _cPV      := SC7->C7_NUM As Character
+Local _cPV      := SC7->C7_NUM As Character
 Local _bGetMv   := {|x| GETMV("MV_SIMB"+x )} As Codeblock
 
 cQuery := "SELECT R_E_C_N_O_ SALREC "
@@ -291,84 +287,84 @@ cQuery += "  ORDER BY AL_COD, AL_NIVEL  "
 cQuery := ChangeQuery(cQuery)
 MPSysOpenQuery(cQuery,cAlias)
 
-(cAlias)->( dbGotop() )
+(cAlias)->( DBGoTop() )
 
 If (cAlias)->( !Eof() )
 	oMSNewApr:aCols := {}
 	
-	BeginSQL Alias _cAlias
+	BeginSql Alias _cAlias
 		SELECT SUM(SC7.C7_TOTAL) C7TOTAL
 		FROM %Table:SC7% SC7
 		WHERE SC7.C7_FILIAL=%xFilial:SC7% AND	SC7.C7_NUM = %Exp:_cPV% AND
 		SC7.%NotDel%
-	EndSQL
+	EndSql
 	_nTotal:=(_cAlias)->C7TOTAL
-	(_cAlias)->(dbCloseArea())
-	DHL->(dbSetOrder(1))
+	(_cAlias)->(DBCloseArea())
+	DHL->(DBSetOrder(1))
 	
-	DO WHILE (cAlias)->( !Eof() )
+	While (cAlias)->( !Eof() )
 		
-		SAL->(DBGOTO( (cAlias)->SALREC) )
+		SAL->(DBGoTo( (cAlias)->SALREC) )
 		cGetGrpN := SAL->AL_DESC
 		_cNome:=Posicione("SAK",2,xFilial("SAK")+SAL->AL_USER,"AK_NOME")
 
 		_nLimPerfil:=0
-		_cMoePV :=ALLTRIM(Eval(_bGetMV, STR(SC7->C7_MOEDA,1)))
+		_cMoePV :=AllTrim(Eval(_bGetMV, Str(SC7->C7_MOEDA,1)))
 		_cMoeDHL:=""
-		IF DHL->(MsSeek(xFilial("DHL")+SAL->AL_PERFIL))//Perfil
+		If DHL->(MsSeek(xFilial("DHL")+SAL->AL_PERFIL))//Perfil
 			_nLimPerfil:=DHL->DHL_LIMMAX
-			_cMoeDHL:=ALLTRIM(Eval(_bGetMv,STR(DHL->DHL_MOEDA,1)))
+			_cMoeDHL:=AllTrim(Eval(_bGetMv,Str(DHL->DHL_MOEDA,1)))
 			_cObs:=""
-			IF _nTotal > _nLimPerfil
+			If _nTotal > _nLimPerfil
 				_cObs:=" - Acima do Limite"
-			ENDIF
-			IF SC7->C7_MOEDA <> DHL->DHL_MOEDA
+			EndIf
+			If SC7->C7_MOEDA <> DHL->DHL_MOEDA
 				_cObs+=" - Moeda diferente"
-			ENDIF
-	    ELSE
+			EndIf
+	    Else
 	       _cObs:=" - Perfil não encontrado nessa filial: "+xFilial("DHL")+" "+SAL->AL_PERFIL
-	    ENDIF
-		IF !EMPTY(_cObs)
-			AADD(aForaLim,{.F. , _cNome , _cMoeDHL+" "+STR(_nLimPerfil,15,2) , _cMoePV+" "+STR(_nTotal,15,2), _cObs})
+	    EndIf
+		If !Empty(_cObs)
+			aAdd(aForaLim,{.F. , _cNome , _cMoeDHL+" "+Str(_nLimPerfil,15,2) , _cMoePV+" "+Str(_nTotal,15,2), _cObs})
 			lRet := .F.
-		ELSE
-			AADD(aForaLim,{.T. , _cNome , _cMoeDHL+" "+STR(_nLimPerfil,15,2) , _cMoePV+" "+STR(_nTotal,15,2), "OK" })
-		ENDIF
+		Else
+			aAdd(aForaLim,{.T. , _cNome , _cMoeDHL+" "+Str(_nLimPerfil,15,2) , _cMoePV+" "+Str(_nTotal,15,2), "OK" })
+		EndIf
 		
 		aColsAux := {}
 		For nX := 1 To Len(aHeader)
 			If AllTrim(aHeader[nX,2]) == "AL_NOME"
 				aAdd(aColsAux, _cNome)
 			ElseIf aHeader[nX,8] == "D" 
-				aAdd(aColsAux, StoD(SAL->&(aHeader[nX,2])))
+				aAdd(aColsAux, SToD(SAL->&(aHeader[nX,2])))
 			Else
 				aAdd(aColsAux, SAL->&(aHeader[nX,2]) )
 			EndIf
 		Next nX
-		Aadd(aColsAux, .F.)
-		Aadd(oMSNewApr:aCols, aColsAux)
+		aAdd(aColsAux, .F.)
+		aAdd(oMSNewApr:aCols, aColsAux)
 		
-		(cAlias)->(dbSkip())
-	ENDDO
+		(cAlias)->(DBSkip())
+	EndDo
 Else
 	FWAlertWarning("Grupo informado não existe, favor informar um código de grupo existente.","Liberação PC - Gestor de Compras - ACOM01107")
 	lRet := .F.
 EndIf
 
-IF LEN(aForaLim) > 0 .AND. !lRet
+If Len(aForaLim) > 0 .And. !lRet
 	
 	bBloco:={|| U_ITListBox('Lista de aprovadores com limite de aprovação',;
 	        {" ",'Aprovador','Limite','Total PV',"Observação"},aForaLim,.F.,4,,,;
 	        { 10,         90,      50,        50,         90}) }
 	
-	U_ITMSG("A indicação não poderá ser feita para este grupo de aprovação...",'Atenção!',;
+	U_ITMsg("A indicação não poderá ser feita para este grupo de aprovação...",'Atenção!',;
 	        "Pois existe aprovador que não tem limite suficiente para aprovar o valor do pedido ou a moeda do perfil é diferente: VER Mais Detalhes",1,,,,,,bBloco)
 	
 	lRet := .F.
 	
-ENDIF
+EndIf
 
-(cAlias)->( dbCloseArea() )
+(cAlias)->( DBCloseArea() )
 
 oMSNewApr:oBrowse:Refresh()
 oMSNewApr:Refresh()
@@ -423,25 +419,25 @@ Local nCont		:= 1 As Numeric
 Local _cGrupoItem  := '' as Character
 Local _cGrpNaoObrigat :=SuperGetMV("IT_GRPNOBR",.F.,"1000") As Character
 
-dbSelectArea('SC7')
-SC7->(dbSetOrder(1))
-SC7->(dbSeek(_cFilial + _cPedido))
+DBSelectArea('SC7')
+SC7->(DBSetOrder(1))
+SC7->(DBSeek(_cFilial + _cPedido))
 
 While !SC7->(Eof()) .And. SC7->C7_FILIAL == _cFilial .And. SC7->C7_NUM == _cPedido
 
-	dbSelectArea("SBZ")
-	SBZ->(dbSetOrder(1))
-	SBZ->(dbSeek(xFilial("SBZ") + SC7->C7_PRODUTO))
+	DBSelectArea("SBZ")
+	SBZ->(DBSetOrder(1))
+	SBZ->(DBSeek(xFilial("SBZ") + SC7->C7_PRODUTO))
 	
 	_cGrupoItem := Posicione("SB1",1,xFilial("SB1")+SC7->C7_PRODUTO,"B1_GRUPO") 
 
 	If SBZ->BZ_UPRC > 0  .And. !(_cGrupoItem $ _cGrpNaoObrigat) 
         _nPrecoRS:=SC7->C7_PRECO
-        IF SC7->C7_MOEDA <> 1
+        If SC7->C7_MOEDA <> 1
            _nPrecoRS:=SC7->C7_PRECO*SC7->C7_TXMOEDA
-        ENDIF
+        EndIf
 
-		If Iif( SBZ->BZ_UPRC > _nPrecoRS, ( ( SBZ->BZ_UPRC * 100 ) / _nPrecoRS ) - 100 > nPtol, ( ( SBZ->BZ_UPRC * 100 ) / _nPrecoRS ) - 100 < ( - nPtol ) )
+		If IIf( SBZ->BZ_UPRC > _nPrecoRS, ( ( SBZ->BZ_UPRC * 100 ) / _nPrecoRS ) - 100 > nPtol, ( ( SBZ->BZ_UPRC * 100 ) / _nPrecoRS ) - 100 < ( - nPtol ) )
 			aAdd( aLogPla , {	StrZero(nCont++,4),;																						//[1]Índice
 								SC7->C7_FILIAL + " - " + AllTrim(FWFilialName(cEmpAnt,SC7->C7_FILIAL,1)),;									//[2]Filial
 								SC7->C7_NUM,;																								//[3]Num PC
@@ -451,22 +447,22 @@ While !SC7->(Eof()) .And. SC7->C7_FILIAL == _cFilial .And. SC7->C7_NUM == _cPedi
 								AllTrim(Transform(SC7->C7_TOTAL,PesqPict("SC7","C7_TOTAL"))),;												//[7]Valor Total
 								AllTrim(Transform(SBZ->BZ_UPRC,PesqPict("SBZ","BZ_UPRC"))),;												//[8]Último Preço
 								AllTrim(Transform((((_nPrecoRS - SBZ->BZ_UPRC) / SBZ->BZ_UPRC) * 100), PesqPict("SBZ","BZ_UPRC"))),;	//[9]Diferença
-								DtoC(SC7->C7_EMISSAO),;																						//[10]Emissão
+								DToC(SC7->C7_EMISSAO),;																						//[10]Emissão
 								SC7->C7_I_URGEN,;												  											//[11]Urgente
 								SC7->C7_I_APLIC,;												  											//[12]Aplicação
 								SC7->C7_PRODUTO,;																							//[13]Produto
 								SC7->C7_DESCRI,;																							//[14]Descrição
 								SC7->C7_UM,;																								//[15]Unidade
-								DtoC(SBZ->BZ_UCOM),;																						//[16]Data Última Compra
+								DToC(SBZ->BZ_UCOM),;																						//[16]Data Última Compra
 								SC7->C7_FORNECE,;										   													//[17]Fornecedor
 								Posicione("SA2",1,xFilial("SA2")+SC7->C7_FORNECE+SC7->C7_LOJA,"A2_NREDUZ"),;								//[18]Nome Reduzido
-								DtoC(SC7->C7_I_DTFAT),;											 											//[19]Dt Faturado
+								DToC(SC7->C7_I_DTFAT),;											 											//[19]Dt Faturado
 								SC7->C7_I_CDINV,;												 											//[20]Código Investimento
 								Posicione("ZZI",1,xFilial("ZZI")+SC7->C7_I_CDINV,"ZZI_DESINV"),;											//[21]Descrição Investimento
 								SC7->C7_OBS})														   										//[22]Observação
 		EndIf
 	EndIf
-	SC7->(dbSkip())
+	SC7->(DBSkip())
 EndDo
 
 If Len(aLogPla) > 0
@@ -508,8 +504,8 @@ _cQuery := ChangeQuery(_cQuery)
 MPSysOpenQuery(_cQuery,_cAlias)
 
 (_cAlias)->( DBGoTop() )
-DO While (_cAlias)->( !Eof() ) 
-   _cLista+=ALLTRIM((_cAlias)->X6_CONTEUD)+";"
+While (_cAlias)->( !Eof() ) 
+   _cLista+=AllTrim((_cAlias)->X6_CONTEUD)+";"
    (_cAlias)->( DBSkip() )
 EndDo
 (_cAlias)->( DBCloseArea() )
@@ -532,81 +528,81 @@ Local nA 		:= 0 As Numeric
 Local _aParRet	:= {} As Array
 Local _aParAux	:= {} As Array
 Local _bOK		:= {|| .T. } As Codeblock
-Local _cTimeIni	:= TIME() As Character
+Local _cTimeIni	:= Time() As Character
 Local _cTitAux	:= "QBG de Aprovações" As Character
 Local _aStatus	:= {"1-Todos     ","2-Abertos   ","3-Encerrados"} As Array
 
 MV_PAR01:=CTOD("01/01/2020")
 MV_PAR02:=DDATABASE
-MV_PAR03:=SPACE(100)
+MV_PAR03:=Space(100)
 MV_PAR04:=_aStatus[1]
 
-AADD( _aParAux , { 1 , "Data Inicial", MV_PAR01, "@D", "", ""	, "" , 050 , .F.  })
-AADD( _aParAux , { 1 , "Data Final"	 , MV_PAR02, "@D", "", ""	, "" , 050 , .F.  })
-AADD( _aParAux , { 1 , "Filial"      , MV_PAR03, "@!"  , ""  ,"LSTFIL", "" , 100 , .F. } ) 
-AADD( _aParAux , { 2 , "Status PC"   , MV_PAR04, _aStatus, 060   ,".T.",.T. ,".T."}) 
+aAdd( _aParAux , { 1 , "Data Inicial", MV_PAR01, "@D", "", ""	, "" , 050 , .F.  })
+aAdd( _aParAux , { 1 , "Data Final"	 , MV_PAR02, "@D", "", ""	, "" , 050 , .F.  })
+aAdd( _aParAux , { 1 , "Filial"      , MV_PAR03, "@!"  , ""  ,"LSTFIL", "" , 100 , .F. } ) 
+aAdd( _aParAux , { 2 , "Status PC"   , MV_PAR04, _aStatus, 060   ,".T.",.T. ,".T."}) 
 
 For nA := 1 To Len( _aParAux )
     aAdd( _aParRet , _aParAux[nA][03] )
 Next nA
 
-DO WHILE .T.
+While .T.
 							//aParametros, cTitle                                , @aRet    ,[bOk], [ aButtons ] [ lCentered ] [ nPosX ] [ nPosy ] [ oDlgWizard ] [ cLoad ] [ lCanSave ] [ lUserSave ] 
 	If !ParamBox( _aParAux , _cTitAux, @_aParRet, _bOK, /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
-		RETURN .F.
+		Return .F.
 	EndIf
 
 	_aDados:={}
 
-	FWMSGRUN( ,{|oproc| _aDados := ACOM11QBG(oproc) } , "Aguarde!" , "Hor Inicial: "+_cTimeIni+" / Executando a SELECT Andre..." )
+	FWMsgRun( ,{|oproc| _aDados := ACOM11QBG(oproc) } , "Aguarde!" , "Hor Inicial: "+_cTimeIni+" / Executando a SELECT Andre..." )
 
-	If len(_aDados) > 0
+	If Len(_aDados) > 0
 		aCab:={}
-		AADD(aCab," ")
-		AADD(aCab,"Filial")
-		AADD(aCab,"Pedido")
-		AADD(aCab,"Dt Emissao")
-		AADD(aCab,"Status")
-		AADD(aCab,"Dt Liberacao")
-		AADD(aCab,"Cod. User")
-		AADD(aCab,"Cod. Aprov")
-		AADD(aCab,"Valor SCR")
-		AADD(aCab,"Valor PC")
-		AADD(aCab,"Reg SCR")
+		aAdd(aCab," ")
+		aAdd(aCab,"Filial")
+		aAdd(aCab,"Pedido")
+		aAdd(aCab,"Dt Emissao")
+		aAdd(aCab,"Status")
+		aAdd(aCab,"Dt Liberacao")
+		aAdd(aCab,"Cod. User")
+		aAdd(aCab,"Cod. Aprov")
+		aAdd(aCab,"Valor SCR")
+		aAdd(aCab,"Valor PC")
+		aAdd(aCab,"Reg SCR")
 		
-		_cTitulo2:=_cTitAux+' - Data: ' + DtoC(Date()) 
-		_cMsgTop:="Par. 1: "+ALLTRIM(AllToChar(MV_PAR01))+"; Par. 2: "+ALLTRIM(AllToChar(MV_PAR02))+" -  H.I.: "+_cTimeIni+" H.F.: "+TIME()
+		_cTitulo2:=_cTitAux+' - Data: ' + DToC(Date()) 
+		_cMsgTop:="Par. 1: "+AllTrim(AllToChar(MV_PAR01))+"; Par. 2: "+AllTrim(AllToChar(MV_PAR02))+" -  H.I.: "+_cTimeIni+" H.F.: "+Time()
 
 		If U_ITListBox( _cTitulo2 , aCab , _aDados , .T. , 2 , _cMsgTop)
 			_nConta:=0
 			For nA := 1 To Len( _aDados )
 				
-				IF _aDados[nA,1] .AND. !EMPTY(_aDados[nA,LEN(_aDados[nA] )-1])
-					SCR->(DBGOTO( _aDados[nA,LEN(_aDados[nA] )]) )
-					IF MV_PAR04 = "3" // ENCERRADOS
-						IF SCR->CR_STATUS  = "03" .AND. !EMPTY(_aDados[nA,LEN(_aDados[nA] )-1])// APROVADO - "Nível Aprovado"
-							SCR->(Reclock("SCR",.F.))
-							SCR->CR_TOTAL   := _aDados[nA,LEN(_aDados[nA] )-1]
+				If _aDados[nA,1] .And. !Empty(_aDados[nA,Len(_aDados[nA] )-1])
+					SCR->(DBGoTo( _aDados[nA,Len(_aDados[nA] )]) )
+					If MV_PAR04 = "3" // ENCERRADOS
+						If SCR->CR_STATUS  = "03" .And. !Empty(_aDados[nA,Len(_aDados[nA] )-1])// APROVADO - "Nível Aprovado"
+							SCR->(RecLock("SCR",.F.))
+							SCR->CR_TOTAL   := _aDados[nA,Len(_aDados[nA] )-1]
 							SCR->CR_TIPOLIM := Posicione("SAK",1,xFilial("SAK")+SCR->CR_LIBAPRO,"AK_TIPO")
-							SCR->(Msunlock())
+							SCR->(MSUnLock())
 							_nConta++
-						ENDIF
-					ELSE
-						SCR->(Reclock("SCR",.F.))
-						SCR->CR_TOTAL:=_aDados[nA,LEN(_aDados[nA] )-1]
-						SCR->(Msunlock())
+						EndIf
+					Else
+						SCR->(RecLock("SCR",.F.))
+						SCR->CR_TOTAL:=_aDados[nA,Len(_aDados[nA] )-1]
+						SCR->(MSUnLock())
 						_nConta++
-					ENDIF
-				ENDIF
+					EndIf
+				EndIf
 			Next nA
 			FWAlertSuccess('Processo concluído com sucesso. Registros atualizados: '+CValToChar(_nConta),"ACOM01110")
-		Endif
+		EndIf
 	Else
 		FWAlertInfo('Não há registros.',"ACOM01111")
-	Endif
-ENDDO
+	EndIf
+EndDo
 
-RETURN
+Return
 
 /*
 ===============================================================================================================================
@@ -618,68 +614,68 @@ Parametros--------: Nenhum
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-STATIC Function ACOM11QBG(oproc As Object)
+Static Function ACOM11QBG(oproc As Object)
 
 Local _cQuery	:= "" As Character
 Local _cAlias	:= GetNextAlias() As Character
-LOCAL nA 		:= 0 As Numeric
-LOCAL _cPict 	:= PesqPict("SCR","CR_TOTAL") As Character
+Local nA 		:= 0 As Numeric
+Local _cPict 	:= PesqPict("SCR","CR_TOTAL") As Character
 
 _cQuery := " SELECT "
 _cQuery += " DISTINCT CR_FILIAL, CR_NUM  "	  
 _cQuery += " FROM "+ RetSqlName("SCR") +" SCR "+ CRLF
 _cQuery += " WHERE D_E_L_E_T_ = ' ' "
-IF MV_PAR04 = "2"     // ABERTOS
+If MV_PAR04 = "2"     // ABERTOS
    _cQuery += " AND CR_DATALIB = '  ' "
-ELSEIF MV_PAR04 = "3"     // ENCERRADOS
+ElseIf MV_PAR04 = "3"     // ENCERRADOS
    _cQuery += " AND CR_DATALIB <> '  ' "
-ENDIF
+EndIf
 _cQuery += "    AND CR_TIPO = 'PC' "
 _cQuery += "    AND CR_TOTAL <= 0 "
-IF !EMPTY(MV_PAR01)
-   _cQuery += "   AND CR_EMISSAO >= '" + DTOS(MV_PAR01) + "' "
-ENDIF
-IF !EMPTY(MV_PAR02)
-   _cQuery += "   AND CR_EMISSAO <= '" + DTOS(MV_PAR02) + "' "
-ENDIF
-IF !EMPTY(MV_PAR03)
-   _cQuery += "   AND CR_FILIAL IN "+FormatIn(ALLTRIM(MV_PAR03),";")"
-ENDIF
+If !Empty(MV_PAR01)
+   _cQuery += "   AND CR_EMISSAO >= '" + DToS(MV_PAR01) + "' "
+EndIf
+If !Empty(MV_PAR02)
+   _cQuery += "   AND CR_EMISSAO <= '" + DToS(MV_PAR02) + "' "
+EndIf
+If !Empty(MV_PAR03)
+   _cQuery += "   AND CR_FILIAL IN "+FormatIn(AllTrim(MV_PAR03),";")"
+EndIf
 
 _cQuery += "   ORDER BY CR_FILIAL, CR_NUM  "
 _cQuery := ChangeQuery(_cQuery)
 
 MPSysOpenQuery( _cQuery,_cAlias )
 
-DbSelectArea(_cAlias)
+DBSelectArea(_cAlias)
 _nTot:=nConta:=0
 COUNT TO _nTot
-_cTot:=ALLTRIM(STR(_nTot))
-_cAlias->(DBGOTOP())
+_cTot:=AllTrim(Str(_nTot))
+_cAlias->(DBGoTop())
 
-SC7->(dbSetOrder(1))
-SCR->(Dbsetorder(1)) //CR_FILIAL+CR_TIPO+CR_NUM+CR_NIVEL
+SC7->(DBSetOrder(1))
+SCR->(DBSetOrder(1)) //CR_FILIAL+CR_TIPO+CR_NUM+CR_NIVEL
 _aDados:={}
-DO WHILE (_cAlias)->(!EOF())
+While (_cAlias)->(!Eof())
 	_cFilial:=(_cAlias)->CR_FILIAL
 	cPedido:=AllTrim((_cAlias)->CR_NUM )
 	nConta++
-	oproc:cCaption := ("Lendo PC: "+_cFilial+" "+cPedido+" - "+STRZERO(nConta,5) +" de "+ _cTot )
+	oproc:cCaption := ("Lendo PC: "+_cFilial+" "+cPedido+" - "+StrZero(nConta,5) +" de "+ _cTot )
 	ProcessMessages()
 
-	If SC7->(dbSeek(_cFilial + cPedido))
-		IF MV_PAR04 = "3" // ENCERRADOS
-			IF !SC7->C7_ENCER = 'E'//IGNORA ABERTOS
-				(_cAlias)->(DBSKIP())
-				LOOP	
-			ENDIF
-		Endif
+	If SC7->(DBSeek(_cFilial + cPedido))
+		If MV_PAR04 = "3" // ENCERRADOS
+			If !SC7->C7_ENCER = 'E'//IGNORA ABERTOS
+				(_cAlias)->(DBSkip())
+				Loop	
+			EndIf
+		EndIf
 
 		_nTotPed:=0
 		MaFisEnd()
 		aRefImp	:= MaFisRelImp('MT100',{"SC7"})
 		aStru		:= FWFormStruct(3,"SC7")[1]
-		DO While (!EOF()) .And. cPedido == SC7->C7_NUM .AND. SC7->C7_FILIAL == _cFilial
+		While (!Eof()) .And. cPedido == SC7->C7_NUM .And. SC7->C7_FILIAL == _cFilial
 		
 			MaFisIni(SC7->C7_FORNECE,SC7->C7_LOJA,"F","N","R",aRefImp)						
 			MaFisIniLoad(1)
@@ -687,7 +683,7 @@ DO WHILE (_cAlias)->(!EOF())
 				nPos := aScan(aStru,{|x| AllTrim(x[3]) == AllTrim(aRefImp[nA][2])})
 				If nPos > 0 .And. !aStru[nPos,14]
 					MaFisLoad(aRefImp[nA][3],SC7->(&(aRefImp[nA][2])),1)
-				Endif
+				EndIf
 			Next nA
 			
 			MaFisRecal("",1)
@@ -699,39 +695,39 @@ DO WHILE (_cAlias)->(!EOF())
 			_nTotPed += MaFisRet(1,"IT_TOTAL")
 			MaFisEnd()
 
-			SC7->(dbSkip())
-		ENDDO
+			SC7->(DBSkip())
+		EndDo
 		
-		SC7->(dbSeek(_cFilial + cPedido))
-		If SCR->(Dbseek(SC7->C7_FILIAL+"PC"+alltrim(SC7->C7_NUM)))
-			Do while !(SCR->(Eof())) .and. SC7->C7_FILIAL == SCR->CR_FILIAL .AND. SCR->CR_TIPO == 'PC' .AND. ALLTRIM(SCR->CR_NUM) == alltrim(SC7->C7_NUM)
+		SC7->(DBSeek(_cFilial + cPedido))
+		If SCR->(DBSeek(SC7->C7_FILIAL+"PC"+AllTrim(SC7->C7_NUM)))
+			While !(SCR->(Eof())) .And. SC7->C7_FILIAL == SCR->CR_FILIAL .And. SCR->CR_TIPO == 'PC' .And. AllTrim(SCR->CR_NUM) == AllTrim(SC7->C7_NUM)
 
 				_aItem:={}
-				AADD(_aItem,.T.)                             //01
-				AADD(_aItem,SCR->CR_FILIAL)                  //02
-				AADD(_aItem,ALLTRIM(SCR->CR_NUM))            //03
-				AADD(_aItem,DTOC(SCR->CR_EMISSAO))           //04
-				AADD(_aItem,SCR->CR_STATUS)                  //04
-				AADD(_aItem,DTOC(SC7->C7_I_DTLIB))           //05
-				AADD(_aItem,SCR->CR_USER)                    //06
-				AADD(_aItem,SCR->CR_APROV)                   //07
-				AADD(_aItem,Transform(SCR->CR_TOTAL,_cPict) )//08 
-				AADD(_aItem,0 )                              //09
-				AADD(_aItem,SCR->(RECNO()))                  //10      
+				aAdd(_aItem,.T.)                             //01
+				aAdd(_aItem,SCR->CR_FILIAL)                  //02
+				aAdd(_aItem,AllTrim(SCR->CR_NUM))            //03
+				aAdd(_aItem,DToC(SCR->CR_EMISSAO))           //04
+				aAdd(_aItem,SCR->CR_STATUS)                  //04
+				aAdd(_aItem,DToC(SC7->C7_I_DTLIB))           //05
+				aAdd(_aItem,SCR->CR_USER)                    //06
+				aAdd(_aItem,SCR->CR_APROV)                   //07
+				aAdd(_aItem,Transform(SCR->CR_TOTAL,_cPict) )//08 
+				aAdd(_aItem,0 )                              //09
+				aAdd(_aItem,SCR->(RECNO()))                  //10      
 				
-				AADD(_aDados,_aItem)
+				aAdd(_aDados,_aItem)
 
-				SCR->(Dbskip())
-			Enddo
-		Endif
+				SCR->(DBSkip())
+			EndDo
+		EndIf
 
-		IF MV_PAR04 = "3" // ENCERRADOS
-			IF _aDados[ LEN(_aDados) , 04 ] = "03"// CR_STATUS -> APROVADO - "Nível Aprovado"
-				_aDados[ LEN(_aDados) , 09 ] := _nTotPed
-			ENDIF
-		Endif
-	ENDIF
-	(_cAlias)->(DBSKIP())
-ENDDO
+		If MV_PAR04 = "3" // ENCERRADOS
+			If _aDados[ Len(_aDados) , 04 ] = "03"// CR_STATUS -> APROVADO - "Nível Aprovado"
+				_aDados[ Len(_aDados) , 09 ] := _nTotPed
+			EndIf
+		EndIf
+	EndIf
+	(_cAlias)->(DBSkip())
+EndDo
 
-RETURN _aDados
+Return _aDados

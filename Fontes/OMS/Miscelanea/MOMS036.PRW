@@ -15,14 +15,14 @@
 Analista     - Programador  - Inicio   - Envio    - Chamado - Motivo da Alteração
 ===============================================================================================================================
 Jerry        - Julio Paz    - 24/01/25 - 13/05/25 - 48792   - Realização de ajustes na gravação da data e hora na importação Chep e criação de uma rotina para visualizar o resultado da importação.
-Alex         - Igor Melgaço - 02/05/25 - 13/05/25 - 50525   - Ajuste para remoção de diretório local C:\SMARTCLIENT\.
+Alex         - Igor Melgaço - 02/05/25 - 13/05/25 - 50525   - Ajuste para remoção de diretório Local C:\SMARTCLIENT\.
 Jerry        - Julio Paz    - 07/05/25 - 13/05/25 - 48792   - Inclusão do campo ZGM_STATUS na listagem de pedidos processados.
 ===============================================================================================================================
 */
-#include "rwmake.ch"
-#include "APWEBSRV.CH"
-#Include "Protheus.ch"
-#INCLUDE "TBICONN.CH"   
+#Include "rwmake.ch"
+#Include "APWEBSRV.CH"
+#Include "TOTVS.ch"
+#Include "TBICONN.CH"   
 #Include "FWMVCDef.Ch"
 #Include "topconn.Ch" 
 
@@ -47,12 +47,12 @@ Private cCadastro	:= "Importação arquivo Chep"
 Private aRotina		:= {}                
 
 
-AADD(aRotina,{"Visualizar"	,"AxVisual",0,2})
-AADD(aRotina,{"Importar"	,"fwmsgrun( ,{|oproc| U_MOMS036P(oproc) } , 'Processando...' , 'Iniciando o processamento...' )",0,2})
+aAdd(aRotina,{"Visualizar"	,"AxVisual",0,2})
+aAdd(aRotina,{"Importar"	,"FWMsgRun( ,{|oproc| U_MOMS036P(oproc) } , 'Processando...' , 'Iniciando o processamento...' )",0,2})
 
 	
-dbSelectArea(_cAlias)
-dbSetOrder(1)
+DBSelectArea(_cAlias)
+DBSetOrder(1)
 mBrowse(6,1,22,75,_cAlias)
 
 Return
@@ -93,9 +93,9 @@ For nI := 1 To Len( _aParAux )
 	aAdd( _aParRet , _aParAux[nI][03] )
 Next nI
           //aParametros, cTitle            , @aRet     ,[bOk]  , [ aButtons ] [ lCentered ] [ nPosX ] [ nPosy ] [ oDlgWizard ] [ cLoad ] [ lCanSave ] [ lUserSave ] 
-IF !ParamBox( _aParAux , "Importação Chep" , @_aParRet ,/*bOK*/, /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
+If !ParamBox( _aParAux , "Importação Chep" , @_aParRet ,/*bOK*/, /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
 
-	u_itmsg( "Operação cancelada pelo usuário!" , "Atenção!",,1 )
+	U_ITMsg( "Operação cancelada pelo usuário!" , "Atenção!",,1 )
 	Return
 	
 EndIf
@@ -104,15 +104,15 @@ oproc2:cCaption := ( "Abrindo arquivo..." )
 ferase(_cPathTemp+"csvtemp.csv")
 ferase(_cPathTemp+"xlstemp.xls")
 
-//Se for arquivo excel vai converte primeiro para csv para poder trabalhar
-If upper(right(alltrim(MV_PAR01),3)) == "XLS" .OR. upper(right(alltrim(MV_PAR01),4)) == "XLSX" 
+//Se For arquivo excel vai converte primeiro para csv para poder trabalhar
+If Upper(right(AllTrim(MV_PAR01),3)) == "XLS" .Or. Upper(right(AllTrim(MV_PAR01),4)) == "XLSX" 
 	
-     IF valtype(oproc2) = "O"
+     If ValType(oproc2) = "O"
 
       	oproc2:cCaption := ("Detectado arquivo XLS convertendo para CSV...")
    		ProcessMessages()
  
-    ENDIF
+    EndIf
     
     _copyfile(MV_PAR01,_cPathTemp+"xlstemp.xls")
 		
@@ -120,12 +120,12 @@ If upper(right(alltrim(MV_PAR01),3)) == "XLS" .OR. upper(right(alltrim(MV_PAR01)
 	//If !file("c:\Program Files\LibreOffice\program\scalc.exe")  //Não tem libreoffice tenta com excel
 	
 		
-		IF valtype(oproc2) = "O"
+		If ValType(oproc2) = "O"
 
       	  oproc2:cCaption := ("Usando Excel para converter para CSV...")
    		  ProcessMessages()
  
-        ENDIF
+        EndIf
 		
 		_nHandle := FCreate(_cPathTemp+"converzz.vbs")
 		FWrite(_nHandle, "Dim oExcel" + CHR(13))
@@ -142,50 +142,50 @@ If upper(right(alltrim(MV_PAR01),3)) == "XLS" .OR. upper(right(alltrim(MV_PAR01)
 	
 	/*Else //Tem Libreoffice
 	
-		IF valtype(oproc2) = "O"
+		If ValType(oproc2) = "O"
 
       	  oproc2:cCaption := ("Usando Libreoffice  para converter para CSV...")
    		  ProcessMessages()
  
-        ENDIF
+        EndIf
 		
 		_llibof := .T.
 		//_copyfile("c:\smartclient\xlstemp.xls","c:\smartclient\csvtemp.xls")
 		//ShellExecute("open", "c:\Program Files\LibreOffice\program\scalc.exe", "--headless --convert-to csv  c:\smartclient\csvtemp.xls", "c:\smartclient", 0)
 		
 				
-	Endif*/
+	EndIf*/
 		
 	//tempo de espera para garantir que arquivo foi finalizado
 	Sleep(9000) 
 
 	If FT_FUSE(_cPathTemp+"csvtemp.csv") == -1
 	
-		u_itmsg("Falha ao converter o arquivo excel","Erro",,1)
+		U_ITMsg("Falha ao converter o arquivo excel","Erro",,1)
 		
 		Return
 		
-	Endif 
+	EndIf 
 
 
-Elseif upper(right(alltrim(MV_PAR01),3)) == "CSV"
+ElseIf Upper(right(AllTrim(MV_PAR01),3)) == "CSV"
 
 	If FT_FUSE(MV_PAR01) == -1
 	
-		u_itmsg("Falha ao abrir arquivo csv","Erro",,1)
+		U_ITMsg("Falha ao abrir arquivo csv","Erro",,1)
 		
 		Return
 		
-	Endif 
+	EndIf 
 
 Else
 
-	u_itmsg("Arquivo selecionado precisa ser XLS ou CSV","Atenção",,1)
+	U_ITMsg("Arquivo selecionado precisa ser XLS ou CSV","Atenção",,1)
 	
 	Return
 
 
-Endif
+EndIf
 	
 _nReg:= (FT_FLASTREC()-1)
 			
@@ -193,36 +193,36 @@ _nReg:= (FT_FLASTREC()-1)
 FT_FGOTOP() //POSICIONA NO TOPO DO ARQUIVO
 _cDados := FT_FREADLN()
 
-If ",,,,,,"  $ Alltrim(_cDados)
+If ",,,,,,"  $ AllTrim(_cDados)
 	FT_FSKIP()
 	_cDados := FT_FREADLN()
-ENDIF 
+EndIf 
 
-//IF alltrim(_cDados) != ",Partner,RAZÃO SOCIAL,ENDEREÇO,CIDADE,ESTADO,CEP,CNPJ,STATUS,Service Type,Date Joined Pool,AFF,New AFF?,Contract?,ABPA Channel"
-IF !"Partner,RAZÃO SOCIAL,ENDEREÇO,CIDADE,ESTADO,CEP,CNPJ" $ _cDados//,STATUS,Service Type,Date Joined Pool,AFF,New AFF?,Contract?,ABPA Channel
+//If AllTrim(_cDados) != ",Partner,RAZÃO SOCIAL,ENDEREÇO,CIDADE,ESTADO,CEP,CNPJ,STATUS,Service Type,Date Joined Pool,AFF,New AFF?,Contract?,ABPA Channel"
+If !"Partner,RAZÃO SOCIAL,ENDEREÇO,CIDADE,ESTADO,CEP,CNPJ" $ _cDados//,STATUS,Service Type,Date Joined Pool,AFF,New AFF?,Contract?,ABPA Channel
 
-	u_itmsg("Arquivo não está no layout da Chep","Atenção","Titulos corretos: Partner, RAZÃO SOCIAL, ENDEREÇO, CIDADE, ESTADO, CEP, CNPJ",1)//,STATUS,Service Type,Date Joined Pool,AFF,New AFF?,Contract?,ABPA Channel
+	U_ITMsg("Arquivo não está no layout da Chep","Atenção","Titulos corretos: Partner, RAZÃO SOCIAL, ENDEREÇO, CIDADE, ESTADO, CEP, CNPJ",1)//,STATUS,Service Type,Date Joined Pool,AFF,New AFF?,Contract?,ABPA Channel
 	
 Else
 
 	oproc2:cCaption := ("Processando arquivo CSV...")
     ProcessMessages()
 
-    _ni := 1
-	SA1->(Dbsetorder(3))
+    _nI := 1
+	SA1->(DBSetOrder(3))
 	FT_FSKIP()//pula o cabecalho
-	Do  while !(FT_FEOF())
+	Do  While !(FT_FEOF())
 
-		oproc2:cCaption := ("Processando arquivo CSV, lendo registro: " + STRZERO(_ni,6)+" de "+STRZERO(_nReg,6) )
+		oproc2:cCaption := ("Processando arquivo CSV, lendo registro: " + StrZero(_nI,6)+" de "+StrZero(_nReg,6) )
 		ProcessMessages()
 		
 		_cDados := FT_FREADLN()
      
-		If ",,,,,,,"  $ Alltrim(_cDados)     
+		If ",,,,,,,"  $ AllTrim(_cDados)     
 		                                                  
 			Exit
 			
-		Endif
+		EndIf
 		                                             
 		_nn := 1
 		_ldentro := .F.
@@ -230,79 +230,79 @@ Else
 		
 		
 		//Retira aspas e virgulas que não sejam separadoras de campos
-		Do while _nn <= len (_cDados)
+		While _nn <= Len (_cDados)
 		
 			If _ldentro
 			
-				If substr(_cDados,_nn,1) == '"'
+				If SubStr(_cDados,_nn,1) == '"'
 			
 					_ldentro := .F.
 					
-				Elseif substr(_cDados,_nn,1) != ','
+				ElseIf SubStr(_cDados,_nn,1) != ','
 				
-					_ctexto := _ctexto + substr(_cDados,_nn,1)
+					_ctexto := _ctexto + SubStr(_cDados,_nn,1)
 					
-				Endif
+				EndIf
 			
 			
 			Else
 			
-				If substr(_cDados,_nn,1) == '"'
+				If SubStr(_cDados,_nn,1) == '"'
 			
 					_ldentro := .T.
 					
 				Else
 				
-					_ctexto := _ctexto + substr(_cDados,_nn,1)
+					_ctexto := _ctexto + SubStr(_cDados,_nn,1)
 					
-				Endif
+				EndIf
 				
-			Endif
+			EndIf
 			
 			_nn++
 
-		Enddo
+		EndDo
 		
 		_alinha := StrTokArr(_ctexto,",")
 		
 		//Localiza clientes não chep existentes na lista para ativar
-		If len(_alinha) >= 7 .AND. ascan(_aDados,{|_vAux|_vAux[7]== strzero(val(alltrim(_alinha[7])),14)}) == 0
-			AADD(_aDados, _alinha )
+		If Len(_alinha) >= 7 .And. aScan(_aDados,{|_vAux|_vAux[7]== StrZero(Val(AllTrim(_alinha[7])),14)}) == 0
+			aAdd(_aDados, _alinha )
 					
-			//SA1->(Dbsetorder(3))
-			If SA1->(Dbseek(xfilial("SA1")+PADL(STRTRAN(STRTRAN(STRTRAN(alltrim(_alinha[7]),".",""),"/",""),"-",""),14,"0"))) 
-			   IF ALLTRIM(SA1->A1_I_CCHEP) != ALLTRIM(_alinha[1]) 
-			      IF ASCAN(_aMuda,{|_vAux|_vAux[2]== ALLTRIM(SA1->A1_CGC)}) == 0
-			 	     AADD(_aMuda,{.T.,ALLTRIM(SA1->A1_CGC),SA1->A1_COD,SA1->A1_LOJA,substr(alltrim(SA1->A1_NOME),1,20),substr(alltrim(SA1->A1_NREDUZ),1,15),"Atualizar como cliente CHEP", alltrim(_alinha[1]) })
-				  ELSE
-			 	     AADD(_aMuda,{.F.,ALLTRIM(SA1->A1_CGC),SA1->A1_COD,SA1->A1_LOJA,substr(alltrim(SA1->A1_NOME),1,20),substr(alltrim(SA1->A1_NREDUZ),1,15),"-CNPJ repetido na planilha",""})
-				  ENDIF
-			   ELSE 
-		 	      AADD(_aMuda,{.F.,ALLTRIM(SA1->A1_CGC),SA1->A1_COD,SA1->A1_LOJA,substr(alltrim(SA1->A1_NOME),1,20),substr(alltrim(SA1->A1_NREDUZ),1,15),"-Sem alteracao",""})
-			   ENDIF
-			ELSE 	
-			 	AADD(_aMuda,{.F.,alltrim(_alinha[7]),"","",_alinha[2],_alinha[3],"-CNPJ nao encontrado",""})
-			Endif
+			//SA1->(DBSetOrder(3))
+			If SA1->(DBSeek(xFilial("SA1")+PadL(StrTran(StrTran(StrTran(AllTrim(_alinha[7]),".",""),"/",""),"-",""),14,"0"))) 
+			   If AllTrim(SA1->A1_I_CCHEP) != AllTrim(_alinha[1]) 
+			      If aScan(_aMuda,{|_vAux|_vAux[2]== AllTrim(SA1->A1_CGC)}) == 0
+			 	     aAdd(_aMuda,{.T.,AllTrim(SA1->A1_CGC),SA1->A1_COD,SA1->A1_LOJA,SubStr(AllTrim(SA1->A1_NOME),1,20),SubStr(AllTrim(SA1->A1_NREDUZ),1,15),"Atualizar como cliente CHEP", AllTrim(_alinha[1]) })
+				  Else
+			 	     aAdd(_aMuda,{.F.,AllTrim(SA1->A1_CGC),SA1->A1_COD,SA1->A1_LOJA,SubStr(AllTrim(SA1->A1_NOME),1,20),SubStr(AllTrim(SA1->A1_NREDUZ),1,15),"-CNPJ repetido na planilha",""})
+				  EndIf
+			   Else 
+		 	      aAdd(_aMuda,{.F.,AllTrim(SA1->A1_CGC),SA1->A1_COD,SA1->A1_LOJA,SubStr(AllTrim(SA1->A1_NOME),1,20),SubStr(AllTrim(SA1->A1_NREDUZ),1,15),"-Sem alteracao",""})
+			   EndIf
+			Else 	
+			 	aAdd(_aMuda,{.F.,AllTrim(_alinha[7]),"","",_alinha[2],_alinha[3],"-CNPJ nao encontrado",""})
+			EndIf
 		
-        ELSEIF 	LEN(_alinha) < 7
+        ElseIf 	Len(_alinha) < 7
 
-			//SA1->(Dbsetorder(3))
-			SA1->(Dbseek(xfilial("SA1")+PADL(STRTRAN(STRTRAN(STRTRAN(alltrim(_alinha[7]),".",""),"/",""),"-",""),14,"0"))) 
+			//SA1->(DBSetOrder(3))
+			SA1->(DBSeek(xFilial("SA1")+PadL(StrTran(StrTran(StrTran(AllTrim(_alinha[7]),".",""),"/",""),"-",""),14,"0"))) 
 
-			AADD(_aDados, _alinha )
-		 	AADD(_aMuda,{.F.,ALLTRIM(SA1->A1_CGC),SA1->A1_COD,SA1->A1_LOJA,substr(alltrim(SA1->A1_NOME),1,20),substr(alltrim(SA1->A1_NREDUZ),1,15),"-Essa linha ("+STRZERO(_ni,6)+") nao tem o minimo de 7 colunas ("+ALLTRIM(STR(LEN(_alinha)))+") : ["+_ctexto+"]","" })
+			aAdd(_aDados, _alinha )
+		 	aAdd(_aMuda,{.F.,AllTrim(SA1->A1_CGC),SA1->A1_COD,SA1->A1_LOJA,SubStr(AllTrim(SA1->A1_NOME),1,20),SubStr(AllTrim(SA1->A1_NREDUZ),1,15),"-Essa linha ("+StrZero(_nI,6)+") nao tem o minimo de 7 colunas ("+AllTrim(Str(Len(_alinha)))+") : ["+_ctexto+"]","" })
 
-		Endif
+		EndIf
 		
 		FT_FSKIP()
 		
-		_ni++
+		_nI++
 
-	Enddo
+	EndDo
 	
-	If len(_aDados) = 0
+	If Len(_aDados) = 0
 	
-		u_itmsg("Arquivo não está no layout da Chep","Atenção",,1)
+		U_ITMsg("Arquivo não está no layout da Chep","Atenção",,1)
 		
 	Else
 	
@@ -322,7 +322,7 @@ Else
 
 		_ntot2 := SA1T->CONTA
 		
-		SA1T->(Dbclosearea())
+		SA1T->(DBCloseArea())
 		
 		_cQuery2 	:= " 			SELECT  A1_CGC,A1_LOJA,A1_COD,A1_NOME,A1_NREDUZ FROM 	" + RetSqlName("SA1")+ " SA1 WHERE "
  	 	_cQuery2 	+= "							         	       SA1.D_E_L_E_T_ = ' '  AND "
@@ -332,70 +332,70 @@ Else
 	
  		TcQuery _cQuery2 New Alias "SA1T"
 		
-		SA1T->(Dbgotop())
+		SA1T->(DBGoTop())
 		_ncc := 1
 
-		Do while !(SA1T->(Eof()))
+		While !(SA1T->(Eof()))
 		
-			oproc2:cCaption := ("Processando cadastro de clientes, registro " + strzero(_ncc,6) + " de " + strzero(_ntot2,6) + "...")
+			oproc2:cCaption := ("Processando cadastro de clientes, registro " + StrZero(_ncc,6) + " de " + StrZero(_ntot2,6) + "...")
 			ProcessMessages()
 			
 			//"GLID,Razão Social,Endereço,CEP,Estado,Cidade,CNPJ,Account Status, Date ,AFFILIATION"
-			_nposi := ascan(_aDados,{|_vAux|PADL(STRTRAN(STRTRAN(STRTRAN(alltrim(_vAux[7]),".",""),"/",""),"-",""),14,"0")== padl(ALLTRIM(SA1T->A1_CGC),14,'0') }) 
+			_nposi := aScan(_aDados,{|_vAux|PadL(StrTran(StrTran(StrTran(AllTrim(_vAux[7]),".",""),"/",""),"-",""),14,"0")== PadL(AllTrim(SA1T->A1_CGC),14,'0') }) 
 			
 			If _nposi == 0
 			
-			 	aadd(_aMuda,{.T.,ALLTRIM(SA1T->A1_CGC),;
+			 	aAdd(_aMuda,{.T.,AllTrim(SA1T->A1_CGC),;
 				             SA1T->A1_COD,;
 							 SA1T->A1_LOJA,;
-							 substr(alltrim(SA1T->A1_NOME),1,20),;
-							 substr(alltrim(SA1T->A1_NREDUZ),1,15),;
+							 SubStr(AllTrim(SA1T->A1_NOME),1,20),;
+							 SubStr(AllTrim(SA1T->A1_NREDUZ),1,15),;
 							 "Desativar como cliente CHEP",;
 							 " "})
 			 	
-			Endif
+			EndIf
 			
 		
-			SA1T->(Dbskip())
+			SA1T->(DBSkip())
 			_ncc++
 			
-		Enddo
+		EndDo
 		
-		SA1T->(Dbclosearea())	
+		SA1T->(DBCloseArea())	
 	
-		If len(_aMuda) > 0 .and. U_ITListBox( 'Ajustes a serem realizados no cadastro:' , {" ",'CNPJ','Código','Loja','Razão Social','Nome Fantasia','Ajuste a realizar',"Atualizar com:"} , _aMuda , .T. , 4 , 'Os seguintes ajustes serão efetivados: ' )
+		If Len(_aMuda) > 0 .And. U_ITListBox( 'Ajustes a serem realizados no cadastro:' , {" ",'CNPJ','Código','Loja','Razão Social','Nome Fantasia','Ajuste a realizar',"Atualizar com:"} , _aMuda , .T. , 4 , 'Os seguintes ajustes serão efetivados: ' )
 
 		   _aMudAux:=ACLONE(_aMuda)
 		   _aMuda:={}
-		   FOR nI := 1 TO LEN(_aMudAux)
+		   For nI := 1 TO Len(_aMudAux)
 		       _aLinhaM:={}
-			   IF _aMudAux[nI,1]//SÓ LEVA OS .T.
-			      FOR _nip := 2 to LEN(_aMudAux[nI])//TIRA A PRIMIERA COLUNA LOGICA
-				      Aadd(_aLinhaM,_aMudAux[nI,_nip])
-			      NEXT
-			      Aadd(_aMuda, _aLinhaM)//TIRA A PRIMIERA COLUNA LOGICA
-			   ENDIF
-		   NEXT
+			   If _aMudAux[nI,1]//SÓ LEVA OS .T.
+			      For _nip := 2 to Len(_aMudAux[nI])//TIRA A PRIMIERA COLUNA LOGICA
+				      aAdd(_aLinhaM,_aMudAux[nI,_nip])
+			      Next
+			      aAdd(_aMuda, _aLinhaM)//TIRA A PRIMIERA COLUNA LOGICA
+			   EndIf
+		   Next
 		
 			_nip := 1
 			
 			_dDataImp := Date()
             _cHoraImp := Time()
 
-			Do while _nip <= len(_aMuda)
+			While _nip <= Len(_aMuda)
 			
-				oproc2:cCaption := ("Atualizando cadastro de clientes, registro " + strzero(_nip,6) + " de " + strzero(len(_aMuda),6) + "...")
+				oproc2:cCaption := ("Atualizando cadastro de clientes, registro " + StrZero(_nip,6) + " de " + StrZero(Len(_aMuda),6) + "...")
 				ProcessMessages()
 				
 				If LEFT(_aMuda[_nip][6],1) == "-"// POR GARANTIA
 				   _nip++
-				   LOOP
-				ENDIF
+				   Loop
+				EndIf
 
-				SA1->(Dbsetorder(3))
-				If SA1->(Dbseek(xfilial("SA1")+alltrim(_aMuda[_nip][1])))				
+				SA1->(DBSetOrder(3))
+				If SA1->(DBSeek(xFilial("SA1")+AllTrim(_aMuda[_nip][1])))				
 				
-					Do while alltrim(SA1->A1_CGC) == alltrim(_aMuda[_nip][1])
+					While AllTrim(SA1->A1_CGC) == AllTrim(_aMuda[_nip][1])
 					
 	 					_cstatus := " "
 						_aITASA1 := U_ITIniLog( 'SA1')	                   
@@ -403,53 +403,53 @@ Else
 						If _aMuda[_nip][6] == "Desativar como cliente CHEP"
 						
 							_cstatus := "DESATIVADO"
-							Reclock("SA1",.F.)
+							RecLock("SA1",.F.)
 							SA1->A1_I_CCHEP := " "
 							SA1->A1_I_CHEP := "P"
 							SA1->A1_I_PALET := "N"
-							SA1->(Msunlock())
+							SA1->(MSUnLock())
 							U_AOMS076G()
-					        U_ITGrvLog( _aITASA1 , "SA1" , 1 , SA1->( A1_FILIAL + A1_COD + A1_LOJA ) , "A" , _cCodUsr, date() , time() )           
+					        U_ITGrvLog( _aITASA1 , "SA1" , 1 , SA1->( A1_FILIAL + A1_COD + A1_LOJA ) , "A" , _cCodUsr, Date() , Time() )           
 				 
-						Endif
+						EndIf
 				
-						If substr(alltrim(_aMuda[_nip][6]),1,9) == "Atualizar"
+						If SubStr(AllTrim(_aMuda[_nip][6]),1,9) == "Atualizar"
 
 							_cstatus := "ATIVADO"
-							Reclock("SA1",.F.)
-							SA1->A1_I_CCHEP := ALLTRIM(_aMuda[_nip][7])
+							RecLock("SA1",.F.)
+							SA1->A1_I_CCHEP := AllTrim(_aMuda[_nip][7])
 							SA1->A1_I_CHEP := "C"
 							SA1->A1_I_PALET := "S"
-							SA1->(Msunlock())
+							SA1->(MSUnLock())
 							U_AOMS076G()
-							U_ITGrvLog( _aITASA1 , "SA1" , 1 , SA1->( A1_FILIAL + A1_COD + A1_LOJA ) , "A" , _cCodUsr, date() , time() )           
+							U_ITGrvLog( _aITASA1 , "SA1" , 1 , SA1->( A1_FILIAL + A1_COD + A1_LOJA ) , "A" , _cCodUsr, Date() , Time() )           
 				
-						Endif
+						EndIf
 						
-						Reclock("ZGM",.T.)
+						RecLock("ZGM",.T.)
 						ZGM->ZGM_CGC    := SA1->A1_CGC
-						ZGM->ZGM_DATA   := _dDataImp //DATE()
-						ZGM->ZGM_HORA   := _cHoraImp //TIME()
+						ZGM->ZGM_DATA   := _dDataImp //Date()
+						ZGM->ZGM_HORA   := _cHoraImp //Time()
 						ZGM->ZGM_ARQUIV := MV_PAR01
-						ZGM->ZGM_USER   := CUSERNAME
+						ZGM->ZGM_USER   := cUserName
 						ZGM->ZGM_CLIENT := SA1->A1_COD
 						ZGM->ZGM_LOJA   := SA1->A1_LOJA
-						ZGM->ZGM_IDCHEP := ALLTRIM(_aMuda[_nip][7])
+						ZGM->ZGM_IDCHEP := AllTrim(_aMuda[_nip][7])
 						ZGM->ZGM_STATUS := _cstatus
-						ZGM->(Msunlock())
+						ZGM->(MSUnLock())
 				
-						SA1->(Dbskip())
+						SA1->(DBSkip())
 						
-					Enddo
+					EndDo
 				
 						
-				Endif
+				EndIf
 
 				_nip++
 			
-			Enddo
+			EndDo
             
-			If valtype(oproc2) = "O"
+			If ValType(oproc2) = "O"
 			   oproc2:cCaption := ("Gerando Relatório de Processamento...")
 			   ProcessMessages()
 			EndIf 
@@ -473,7 +473,7 @@ Else
             _cQry += " AND A1_LOJA = ZGM_LOJA "
             _cQry += " AND C5_NOTA = ' ' "
             _cQry += " AND C5_TIPO = 'N' "
-			_cQry += " AND ZGM_DATA = '" + Dtos(_dDataImp) + "' " 
+			_cQry += " AND ZGM_DATA = '" + DToS(_dDataImp) + "' " 
 			_cQry += " AND ZGM_HORA = '" + _cHoraImp + "' "       
 			_cQry += " AND (ZGM_STATUS = 'ATIVADO' OR ZGM_STATUS = 'DESATIVADO') "
 
@@ -485,56 +485,56 @@ Else
             
 			If _nTotRegs > 0
 			   _aDadosRel := {}
-			   (_cAliasQry)->(DbGotop())
-			   DAI->(DbSetOrder(4)) // DAI_FILIAL+DAI_PEDIDO+DAI_COD+DAI_SEQCAR
+			   (_cAliasQry)->(DBGoTop())
+			   DAI->(DBSetOrder(4)) // DAI_FILIAL+DAI_PEDIDO+DAI_COD+DAI_SEQCAR
                
 			   _nip := 1
 
-			   Do While ! (_cAliasQry)->(Eof())
-                  If valtype(oproc2) = "O"
+			   While ! (_cAliasQry)->(Eof())
+                  If ValType(oproc2) = "O"
 				     oproc2:cCaption := ("Gerando Relatório de Processamento, registro " + StrZero(_nip,6) + " de " + StrZero(_nTotRegs,6) + "...")
 				     ProcessMessages()
 				  EndIf 
 
                	  _aLinha := {}
-                  Aadd(_aLinha, (_cAliasQry)->C5_FILIAL)   // Filial
-				  Aadd(_aLinha, (_cAliasQry)->C5_NUM)      // Código do Pedido  
-				  Aadd(_aLinha, (_cAliasQry)->C5_EMISSAO)  // Dt. Emissão do Pedido
-				  Aadd(_aLinha, (_cAliasQry)->C5_I_OPER)   // Operação
-				  Aadd(_aLinha, (_cAliasQry)->C5_I_NOME)   // Razão Social
-				  Aadd(_aLinha, (_cAliasQry)->A1_I_CCHEP) // Código Chep
+                  aAdd(_aLinha, (_cAliasQry)->C5_FILIAL)   // Filial
+				  aAdd(_aLinha, (_cAliasQry)->C5_NUM)      // Código do Pedido  
+				  aAdd(_aLinha, (_cAliasQry)->C5_EMISSAO)  // Dt. Emissão do Pedido
+				  aAdd(_aLinha, (_cAliasQry)->C5_I_OPER)   // Operação
+				  aAdd(_aLinha, (_cAliasQry)->C5_I_NOME)   // Razão Social
+				  aAdd(_aLinha, (_cAliasQry)->A1_I_CCHEP) // Código Chep
 				  
 				  If (_cAliasQry)->C5_I_TIPCA == "1"
-				     Aadd(_aLinha, "Paletizada") // Tipo de Carga (Mostrar a Descrição) 1=Paletizada;2=Batida
+				     aAdd(_aLinha, "Paletizada") // Tipo de Carga (Mostrar a Descrição) 1=Paletizada;2=Batida
 				  ElseIf (_cAliasQry)->C5_I_TIPCA == "2"
-				     Aadd(_aLinha, "Batida")
+				     aAdd(_aLinha, "Batida")
 				  Else 
-                     Aadd(_aLinha, " ")
+                     aAdd(_aLinha, " ")
 				  EndIf 
 				  
-				  Aadd(_aLinha, (_cAliasQry)->C5_I_PEDGE)  // Ped. Ger. Pal
+				  aAdd(_aLinha, (_cAliasQry)->C5_I_PEDGE)  // Ped. Ger. Pal
 				  
 				  If (_cAliasQry)->C5_I_PEDPA == "S"
-				     Aadd(_aLinha, "Sim" ) // Gera Palete ? 
+				     aAdd(_aLinha, "Sim" ) // Gera Palete ? 
 				  Else 
-                     Aadd(_aLinha, "Não" ) // Gera Palete ? 
+                     aAdd(_aLinha, "Não" ) // Gera Palete ? 
 				  EndIf 
 
-				  Aadd(_aLinha, (_cAliasQry)->C5_I_NPALE ) // Nr.Ped Palete
+				  aAdd(_aLinha, (_cAliasQry)->C5_I_NPALE ) // Nr.Ped Palete
 
                   If DAI->(MsSeek((_cAliasQry)->C5_FILIAL + (_cAliasQry)->C5_NUM))
-                     Aadd(_aLinha, DAI->DAI_COD)  // Ordem de Carga
-                     Aadd(_aLinha, DAI->DAI_DATA) // Dt. Ordem de Carga
+                     aAdd(_aLinha, DAI->DAI_COD)  // Ordem de Carga
+                     aAdd(_aLinha, DAI->DAI_DATA) // Dt. Ordem de Carga
                   Else 
-                     Aadd(_aLinha, Ctod("  /  /  "))  // Ordem de Carga
-                     Aadd(_aLinha, Ctod("  /  /  "))  // Dt. Ordem de Carga
+                     aAdd(_aLinha, Ctod("  /  /  "))  // Ordem de Carga
+                     aAdd(_aLinha, Ctod("  /  /  "))  // Dt. Ordem de Carga
 				  EndIf 
                   
-				  Aadd(_aLinha, (_cAliasQry)->ZGM_STATUS)
+				  aAdd(_aLinha, (_cAliasQry)->ZGM_STATUS)
 
-                  Aadd(_aDadosRel,_aLinha)
+                  aAdd(_aDadosRel,_aLinha)
 
-                  (_cAliasQry)->(DbSkip())
+                  (_cAliasQry)->(DBSkip())
 				  
 				  _nip += 1
 
@@ -552,28 +552,28 @@ Else
                U_ITListBox(_cTitulo,_aCab,_aDadosRel, .T.    , 1    ,_cMsgTop ,          ,_aSize  ,         ,     ,        ,          ,       ,        ,          ,           ,         ,       ,         )
             
 			Else 
-               U_ItMsg("Nenhum dado foi atualizado.","Atenção",,1)
+               U_ITMsg("Nenhum dado foi atualizado.","Atenção",,1)
 			EndIf 
 
 			If Select(_cAliasQry) > 0
-               (_cAliasQry)->(DbCloseArea())
+               (_cAliasQry)->(DBCloseArea())
             EndIf
 
-			u_itmsg("Processamento concluído com sucesso","Atenção",,2)
+			U_ITMsg("Processamento concluído com sucesso","Atenção",,2)
 			
-		Elseif len(_aMuda) == 0
+		ElseIf Len(_aMuda) == 0
 		
-			u_itmsg("Não há registros para atualizar","Atenção",,3)
+			U_ITMsg("Não há registros para atualizar","Atenção",,3)
 		
 		Else
 		
-			u_itmsg("Processamento cancelado pelo usuario", "Atenção",,1)
+			U_ITMsg("Processamento cancelado pelo usuario", "Atenção",,1)
 		
-		Endif
+		EndIf
 		
-	Endif	
+	EndIf	
 	
-Endif
+EndIf
 
 FT_FUSE()
 

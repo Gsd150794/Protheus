@@ -2,22 +2,16 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo                                           
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer     | 29/12/2019 | Nova controle da inclusão em fases do produto - Chamado 31466
-===============================================================================================================================
-
-
-===============================================================================================================================
-Analista         - Programador       - Inicio    - Envio      - Chamado  - Motivo da Alteração
-===============================================================================================================================
-Bremmer Henrique   Igor Melgaço       24/09/2024 - 02/10/2024 - 48586    - Exclusão de registros da SBZ ao excluir o produto.
-Bremmer Henrique   Igor Melgaço       03/10/2024 - 03/10/2024 - 48586    - Exclusão das modificações feitas para o Chamado 31466
+Alex Wallauer |29/12/2019| Chamado 31466. Nova controle da inclusão em fases do produto
+Igor Melgaço  |02/10/2024| Chamado 48586. Exclusão de registros da SBZ ao excluir o produto.
+Igor Melgaço  |03/10/2024| Chamado 48586. Exclusão das modificações feitas para o Chamado 31466
 ===============================================================================================================================
 */
-#include 'protheus.ch'
-#include 'parmtype.ch'
-#INCLUDE "FWMVCDEF.CH"
+
+#Include "TOTVS.ch"
+#Include "FWMVCDef.ch"
 
 //*****************************************************************************************************
 //******************* USE ESSE PONTO PARA GRAVAÇÕES E O A010TOK.PRW PARA VALIDAÇÕES *******************
@@ -31,12 +25,12 @@ Data da Criacao---: 11/02/2019
 Descrição---------: Ponto de entrada no padrão MVC chamado pela rotina de manutenção de Produtos (Fonte: MATA010.PRX) 
                     Chamado 27996.
   					     USE ESSE PONTO PARA GRAVAÇÕES E O A010TOK.PRW PARA VALIDAÇÕES 
-Parametros--------: PARAMIXB = parametros padrões de pontos de entrada Totvs.
+Parametros--------: ParamIXB = parametros padrões de pontos de entrada Totvs.
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function ITEM() 
-Local _aParam := PARAMIXB
+Local _aParam := ParamIXB
 Local _xRet := .T.
 Local _oObj := ''
 Local _cIdPonto   := ''  
@@ -127,74 +121,65 @@ Return _xRet
 Programa----------: AEST045E 
 Autor-------------: Igor Melgaço
 Data da Criacao---: 24/09/2024  
-===============================================================================================================================
 Descrição---------: Ponto de entrada excluir indicadores relativos a ele	
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-
 User Function AEST045E()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cEmpCor	:= cEmpAnt  
 
 //====================================================================================================
 // Percorrer todas as filiais
 //====================================================================================================
 DBSelectArea("SM0")
-SM0->( DBGotop() )
+SM0->( DBGoTop() )
 While ( SM0->( !Eof() ) .And. _cEmpCor == SM0->M0_CODIGO )
 
 	DBSelectArea("SBZ")
 	SBZ->( DBSetOrder(1) )
-	If SBZ->( DBSeek( alltrim(SM0->M0_CODFIL) + SB1->B1_COD ) )
+	If SBZ->( DBSeek( AllTrim(SM0->M0_CODFIL) + SB1->B1_COD ) )
 	
 		RecLock("SBZ",.F.)
       DbDelete()
-		MsUnlock()
+		MSUnLock()
 
 	EndIf
 
 SM0->( DBSkip() )
 EndDo
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
-Return()
-
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AEST045M
 Autor-------------: Frederico O. C. Jr 
 Data da Criacao---: 28/08/2008  
-===============================================================================================================================
 Descrição---------: Ponto de entrada para validar alteracao do produto e atualizar indicadores relativos a ele	(Substituição do MT010ALT)
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
+User Function AEST045M
 
-User Function AEST045M()
-
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cEmpCor	:= cEmpAnt  
 
 //====================================================================================================
 // Percorrer todas as filiais
 //====================================================================================================
 DBSelectArea("SM0")
-SM0->( DBGotop() )
+SM0->( DBGoTop() )
 While ( SM0->( !Eof() ) .And. _cEmpCor == SM0->M0_CODIGO )
 
 	DBSelectArea("SBZ")
 	SBZ->( DBSetOrder(1) )
-	If SBZ->( DBSeek( alltrim(SM0->M0_CODFIL) + SB1->B1_COD ) )
+	If SBZ->( DBSeek( AllTrim(SM0->M0_CODFIL) + SB1->B1_COD ) )
 	
 		RecLock("SBZ",.F.)
 			SBZ->BZ_ORIGEM  := SB1->B1_ORIGEM	//07/02/13 - Talita - Incluido validação para preencher as informações do campo BZ_ORIGEM
@@ -210,7 +195,7 @@ While ( SM0->( !Eof() ) .And. _cEmpCor == SM0->M0_CODIGO )
 			SBZ->BZ_CODISS	:= SB1->B1_CODISS	//11/03/14 - Lucas - Incluido a gravação do campo BZ_ALIQISS e BZ_CODISS de acordo com a informação do B1_ALIQISS e B1_CODISS. Chamado: 5690
 		    SBZ->BZ_PCOFINS := SB1->B1_PCOFINS	//15/07/15 - Josué - Incluida a gravação conforme chamado 10903
 		    SBZ->BZ_PPIS    := SB1->B1_PPIS		//15/07/15 - Josué - Incluida a gravação conforme chamado 10903
-		MsUnlock()
+		MSUnLock()
 
 	EndIf
 
@@ -222,28 +207,24 @@ EndDo
 //====================================================================================================
 U_AOMS078G("SB1")
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
-Return()
-
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AEST045I
 Autor-------------: Frederico O. C. Jr 
 Data da Criacao---: 28/08/2008  
-===============================================================================================================================
 Descrição---------: Ponto de entrada para, na inclusao de produto, gerar indicadores de produto	(Substituição do MT010INC)	 
-===============================================================================================================================
 Parametros--------: nOpcao - não utilizado
 					     _oProcess - não utilizado
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AEST045I(nOpcao,_oProcess)
 
-Local aArea		:= GetArea()
+Local aArea		:= FWGetArea()
 Local cEmpCor	:= cEmpAnt  , _nk
 
 Local aHeader := {}
@@ -256,25 +237,25 @@ Private cProduto:= SB1->B1_COD
 	//Inicio da validação para preenchimento de campos na tabela SBZ conforme rotina padrão. Chamado: 2518
 	_acamps := SBZ->(Dbstruct()) 
 
-	For _nk := 1 to len(_acamps)
+	For _nk := 1 to Len(_acamps)
 	   
 	  If Getsx3cache(_acamps[_nk][1],"X3_RELACAO") <> ' ' 
 		nCont++
-   		AADD(aHeader,{_acamps[_nk][1]})
-   	   	AADD(aStruct,{Getsx3cache(_acamps[_nk][1],"X3_RELACAO")}) 
+   		aAdd(aHeader,{_acamps[_nk][1]})
+   	   	aAdd(aStruct,{Getsx3cache(_acamps[_nk][1],"X3_RELACAO")}) 
    	  EndIf
    
 	Next  
 	
-	SM0->( DBGotop() )
+	SM0->( DBGoTop() )
 
- 	While SM0->(!Eof()) .and. cEmpCor == SM0->M0_CODIGO   
+ 	While SM0->(!Eof()) .And. cEmpCor == SM0->M0_CODIGO   
 
 	  // Incluir Indicador de Produto (SBZ)
-	  dbSelectArea("SBZ")
+	  DBSelectArea("SBZ")
 
    	  RecLock("SBZ",.T.)
-	  SBZ->BZ_FILIAL	:= alltrim(SM0->M0_CODFIL)
+	  SBZ->BZ_FILIAL	:= AllTrim(SM0->M0_CODFIL)
 	  SBZ->BZ_COD		:= SB1->B1_COD
 	  SBZ->BZ_TIPO   	:= SB1->B1_TIPO
 	  SBZ->BZ_LOCPAD	:= SB1->B1_LOCPAD
@@ -293,24 +274,24 @@ Private cProduto:= SB1->B1_COD
 	
 	  For nI:= 1 to nCont 
 			  
-  	    If aHeader[nI][1] <> 'BZ_COD' .AND. aHeader[nI][1] <> 'BZ_LOCPAD' .AND. aHeader[nI][1] <> 'BZ_ORIGEM' 
-		  if aHeader[nI][1] <> 'BZ_I_DESCR' .AND. aHeader[nI][1] <> 'BZ_PIS' .AND. aHeader[nI][1] <> 'BZ_COFINS' 
-		    if aHeader[nI][1] <> 'BZ_CSLL' .AND. aHeader[nI][1] <> 'BZ_IRRF' .AND. aHeader[nI][1] <> 'BZ_PCOFINS' .and. aHeader[nI][1] <> 'BZ_PPIS' 
+  	    If aHeader[nI][1] <> 'BZ_COD' .And. aHeader[nI][1] <> 'BZ_LOCPAD' .And. aHeader[nI][1] <> 'BZ_ORIGEM' 
+		  If aHeader[nI][1] <> 'BZ_I_DESCR' .And. aHeader[nI][1] <> 'BZ_PIS' .And. aHeader[nI][1] <> 'BZ_COFINS' 
+		    If aHeader[nI][1] <> 'BZ_CSLL' .And. aHeader[nI][1] <> 'BZ_IRRF' .And. aHeader[nI][1] <> 'BZ_PCOFINS' .And. aHeader[nI][1] <> 'BZ_PPIS' 
 			     
 		      SBZ->&(aHeader[nI][1]) := M->&(aStruct[nI][1]) 
 			    
-		    Endif
-		  Endif
+		    EndIf
+		  EndIf
 		EndIf
  		 	
  	  Next nI  
 		   
-	  SBZ->( MsUnlock() )
-   	  SM0->( dbSkip() )
+	  SBZ->( MSUnLock() )
+   	  SM0->( DBSkip() )
 		
- 	Enddo		
+ 	EndDo		
    
-	RestArea(aArea)                                                            
+	FWRestArea(aArea)                                                            
 	
     //====================================================================================
     // Grava os dados dos produtos nas tabelas de muro para integração com o sistema RDC.

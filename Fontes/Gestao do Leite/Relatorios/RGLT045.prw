@@ -2,39 +2,31 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alexandre V.  | 11/11/2014 | Ajuste na rotina de impressão na chamada do BOX para não dar erro por conta do envio de parâmetro 
-              |            | desnecessário na última posição. Chamado 8024
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 25/06/2019 | Revisão de fontes. Chamado 28346 e 29752
+Alexandre V.  |11/11/2014| Chamado 8024. Ajuste na rotina de impressão na chamada do BOX para não dar erro por conta do envio 
+              |          | de parâmetro desnecessário na última posição. 
+Lucas Borges  |25/06/2019| Chamado 28346 e 29752. Revisão de fontes.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Report.ch"
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT045
 Autor-------------: Fabiano Dias
 Data da Criacao---: 08/11/2010
-===============================================================================================================================
 Descrição---------: Relatório que demonstra os valores em débito(NDF) do produtor ou fretista no momento da efetivação ou
 ------------------: aprovação de um empréstimo/antecipação/adiantamento.
-===============================================================================================================================
 Parametros--------: cCodProd	:= Código do Produtor
 ------------------: cLjProd		:= Loja do Produtor
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */  
 User Function RGLT045( cCodProd , cLjProd )
 
-Local   _aAreaGer   := GetArea() 
+Local   _aAreaGer   := FWGetArea() 
     
 Private oFont10
 Private oFont10b
@@ -66,20 +58,17 @@ Define Font oFont16b   Name "Helvetica"         Size 0,-14 Bold  // Tamanho 16 N
 
 Processa( {|| DadosRelat() } )
 
-RestArea( _aAreaGer )
+FWRestArea( _aAreaGer )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: Cabecalho
 Autor-------------: Fabiano Dias
 Data da Criacao---: 08/11/2010
-===============================================================================================================================
 Descrição---------: Função para impressão do cabeçalho do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -94,7 +83,7 @@ oPrint:SayBitmap( nLinha , nColInic , cRaizServer + "system/lgrl01.bmp" , 250 , 
 
 oPrint:Say( nlinha			, ( nColInic + 2750 ) , "PÁGINA: "+ AllTrim( Str( nPagina ) )									, oFont12b )
 oPrint:Say( nlinha + 100	, ( nColInic + 2750 ) , "EMPRESA: "+ AllTrim( SM0->M0_NOME ) +'/'+ AllTrim( SM0->M0_FILIAL )	, oFont12b )
-oPrint:Say( nlinha + 050	, ( nColInic + 2750 ) , "DATA DE EMISSÃO:" + DtoC( DATE() )										, oFont12b )
+oPrint:Say( nlinha + 050	, ( nColInic + 2750 ) , "DATA DE EMISSÃO:" + DToC( Date() )										, oFont12b )
 
 nlinha += ( nSaltoLinha * 3 )
 
@@ -106,18 +95,15 @@ oPrint:Line( nLinha , nColInic , nLinha , nColFinal )
 
 nlinha += nSaltoLinha
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: cabecDados
 Autor-------------: Fabiano Dias
 Data da Criacao---: 08/11/2010
-===============================================================================================================================
 Descrição---------: Função para impressão do cabeçalho dos dados do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -144,11 +130,8 @@ Return
 Programa----------: printTotal
 Autor-------------: Fabiano Dias
 Data da Criacao---: 08/11/2010
-===============================================================================================================================
 Descrição---------: Função para impressão dos dados Totais do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -157,18 +140,15 @@ Static Function printTotal( cDescric , nVltTotal )
 oPrint:Say( nlinha + nAjuAltLi1 , nColInic + 0010 , cDescric											, oFont12b )
 oPrint:Say( nlinha + nAjuAltLi1 , nColInic + 2900 , Transform( nVltTotal , "@E 999,999,999,999.99" )	, oFont12b )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: boxDivisor
 Autor-------------: Fabiano Dias
 Data da Criacao---: 08/11/2010
-===============================================================================================================================
 Descrição---------: Função para impressão do Box
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -183,18 +163,15 @@ oPrint:Line( nLinInBox , nColInic + 2800 , nLinha , nColInic + 2800 )
 
 oPrint:Box( nLinInBox , nColInic , nLinha , nColFinal )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: qbrPag
 Autor-------------: Fabiano Dias
 Data da Criacao---: 08/11/2010
-===============================================================================================================================
 Descrição---------: Função para processar as quebras de página para o relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -227,18 +204,15 @@ If nLinha > nqbrPagina
 
 EndIf  
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: DadosRelat
 Autor-------------: Fabiano Dias
 Data da Criacao---: 08/11/2010
-===============================================================================================================================
 Descrição---------: Função para processar a estrutura de dados e a impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -265,7 +239,7 @@ BeginSql alias _cAlias
 EndSql
 
 COUNT TO nCountRec //Contabiliza o numero de registros encontrados pela query 
-(_cAlias)->( DBGotop() )
+(_cAlias)->( DBGoTop() )
 
 If nCountRec > 0
 
@@ -293,7 +267,7 @@ If nCountRec > 0
 		oPrint:Say( nlinha + nAjuAltLi1 , nColInic + 1410 , (_cAlias)->E2_NUM +'/'+ (_cAlias)->E2_PARCELA		    	, oFont12 )
 		oPrint:Say( nlinha + nAjuAltLi1 , nColInic + 1687 , (_cAlias)->E2_PREFIXO			  						    , oFont12 )
 		oPrint:Say( nlinha + nAjuAltLi1 , nColInic + 1864 , (_cAlias)->E2_TIPO  		          						, oFont12 )
-		oPrint:Say( nlinha + nAjuAltLi1 , nColInic + 2000 , DtoC( StoD( (_cAlias)->E2_VENCREA ) )     				    , oFont12 )
+		oPrint:Say( nlinha + nAjuAltLi1 , nColInic + 2000 , DToC( SToD( (_cAlias)->E2_VENCREA ) )     				    , oFont12 )
 		oPrint:Say( nlinha + nAjuAltLi1 , nColInic + 2268 , SubStr( (_cAlias)->E2_HIST , 1 , 23 )					    , oFont12 )
 		oPrint:Say( nlinha + nAjuAltLi1 , nColInic + 2900 , Transform( (_cAlias)->E2_SALDO , "@E 999,999,999,999.99" )	, oFont12 )
 		
@@ -327,7 +301,7 @@ If nCountRec > 0
 	oPrint:Preview()	// Visualiza antes de Imprimir.
 
 Else
-	Msginfo( "Não foi econtrado saldo em aberto no financeiro para o Fornecedor: "+ _cCodProd +'/'+ _cLjProd,"RGLT04501")
+	MsgInfo( "Não foi econtrado saldo em aberto no financeiro para o Fornecedor: "+ _cCodProd +'/'+ _cLjProd,"RGLT04501")
 EndIf
 
 (_cAlias)->( DBCloseArea() )

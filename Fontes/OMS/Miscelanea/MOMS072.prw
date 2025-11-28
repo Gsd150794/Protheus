@@ -3,20 +3,21 @@
                           ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
 Analista    - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
-==============================================================================================================================================================
+==================================================================================================================================================================================
 Jerry       - Igor Melgaço  - 25/02/24 - 20/03/25 -  39201  - Ajustes para contabilizar a quantidade de alterações efetuadas no pedido de vendas.
 Jerry       - Igor Melgaço  - 23/05/25 - 06/06/25 -  39201  - Ajustes para execução através de execauto na alteração do pedido de vendas.
 Jerry       - Igor Melgaço  - 10/06/25 - 20/06/25 -  39201  - Ajustes para validações nos Campos C5_I_ENVRD e C5_I_OPER. 
 Jerry       - Igor Melgaço  - 15/07/25 - 17/07/25 -  51224  - Ajustes para gravação do log de alteração do registro e validação do _DtValida. 
 Lucas       - Lucas Borges  - 23/07/25 - 23/07/25 -  51340  - Ajustar função para validação de ambiente de teste
-==============================================================================================================================================================
+Jerry       - Julio         - 08/09/25 - 18/09/25 -  51806  - Ao gravar as alterações no tipo de agendamento, atualizar campos específicos de integração com o sistema RDC.
+==================================================================================================================================================================================
 */
 
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#include "Protheus.ch"
-#INCLUDE "apwebsrv.ch"
+#Include "TOTVS.ch"
+#Include "apwebsrv.ch"
 
 /*
 ===============================================================================================================================
@@ -47,17 +48,17 @@ If _lSchedule
    RPCSetType(3)
    RpcSetEnv("01","01",,,,,aTables)     
 
-    u_itconout('Iniciando rotina de reagendamento de pedidos' + Dtoc(DATE()) + ' - ' + Time())
+    u_itconout('Iniciando rotina de reagendamento de pedidos' + DToC(DATE()) + ' - ' + Time())
 
     U_MOMS072P()
 
-ELSE
+Else
 
-   fwmsgrun( ,{|_oProc| U_MOMS072P(_oProc) } , 'Aguarde!' , 'Verificando os registros...' )
+   FWMsgRun( ,{|_oProc| U_MOMS072P(_oProc) } , 'Aguarde!' , 'Verificando os registros...' )
    
 EndIf
 
-RETURN .F.
+Return .F.
 
 /*
 ===============================================================================================================================
@@ -95,7 +96,7 @@ _cQuery := "SELECT SC5.R_E_C_N_O_ RECNO_SC5 "
 _cQuery += " FROM " + RetSqlName("SC5") + " SC5 "
 _cQuery += "WHERE SC5.C5_NOTA = ' ' "
 _cQuery += "	AND SC5.C5_TIPO = 'N' "
-_cQuery += "	AND SC5.C5_EMISSAO >= '"+DTOS(_dData)+"' "
+_cQuery += "	AND SC5.C5_EMISSAO >= '"+DToS(_dData)+"' "
 _cQuery += "	AND (SC5.C5_I_AGEND = 'A' OR SC5.C5_I_AGEND = 'M') "
 _cQuery += "	AND NOT EXISTS (SELECT 'X' "
 _cQuery += "					FROM " + RetSqlName("SC9") + " SC9 "
@@ -113,21 +114,21 @@ _cQuery := ChangeQuery(_cQuery)
 
 MPSysOpenQuery( _cQuery , _cAliasSC5)
 
-DbSelectArea(_cAliasSC5)
+DBSelectArea(_cAliasSC5)
 Count to _nTot
 
-(_cAliasSC5)->(DbGoTop())
+(_cAliasSC5)->(DBGoTop())
 
-Do While (_cAliasSC5)->(!EOF())
+While (_cAliasSC5)->(!Eof())
    _nReg++
 
    If !_lSchedule
-      _oProc:cCaption := ("Procesando registro " + Alltrim(Str(_nReg)) + " de " + Alltrim(Str(_nTot)) + " ...")
+      _oProc:cCaption := ("Procesando registro " + AllTrim(Str(_nReg)) + " de " + AllTrim(Str(_nTot)) + " ...")
       ProcessMessages()
-   Endif
+   EndIf
 
-   DbselectArea("SC5")
-   SC5->(DbGoTo((_cAliasSC5)->(RECNO_SC5)))
+   DBSelectArea("SC5")
+   SC5->(DBGoTo((_cAliasSC5)->(RECNO_SC5)))
 
    cFilAnt := SC5->C5_FILIAL
 
@@ -149,38 +150,42 @@ Do While (_cAliasSC5)->(!EOF())
             If RecLock("SC5",.F.)
                _aDadAlt := {}
                _cContAnt := SC5->C5_I_AGEND
-               _cContPost := Iif(SC5->C5_I_AGEND='A','R','N')
+               _cContPost := IIf(SC5->C5_I_AGEND='A','R','N')
 
                SC5->C5_I_AGEND := _cContPost
 
-               SC5->(MsUnlock())
+               SC5->C5_I_ENVRD := "R"
+               SC5->C5_I_DTRET := Date()
+               SC5->C5_I_HRRET := Time()
 
-               AADD( _aDadAlt , { "C5_I_AGEND"   ,_cContAnt  ,_cContPost  } )
+               SC5->(MSUnLock())
 
-               U_ITGrvLog( _aDadAlt , 'SC5' , 1 , SC5->(C5_FILIAL+C5_NUM) , "A" , Iif(_lSchedule,"000000",RetCodUsr()),Date(),Time() )
+               aAdd( _aDadAlt , { "C5_I_AGEND"   ,_cContAnt  ,_cContPost  } )
+
+               U_ITGrvLog( _aDadAlt , 'SC5' , 1 , SC5->(C5_FILIAL+C5_NUM) , "A" , IIf(_lSchedule,"000000",RetCodUsr()),Date(),Time() )
             EndIf
          End Transaction		
       EndIf
       
    EndIf
 
-   (_cAliasSC5)->(DbSkip()) 
+   (_cAliasSC5)->(DBSkip()) 
 EndDo
 
 (_cAliasSC5)->(DBCloseArea())
 
 If !_lSchedule
 
-   If len(_alog) > 0
+   If Len(_alog) > 0
 
       _aHead := {"Filial","Pedido","Erro"}
       U_ITListBox( 'Erros na alteração de pedidos de venda' , _aHead , _aLog , .T. , 1 )
       
-   Endif
+   EndIf
     
    _oProc:cCaption := ("Iniciando a Exclusão dos Pedidos...")
    ProcessMessages()
-Endif
+EndIf
 
 MOMS072C(_oProc)
 
@@ -241,8 +246,8 @@ _cQuery += " FROM " + RetSqlName("SC5") + " SC5 "
 _cQuery += "WHERE SC5.C5_NOTA = ' ' "
 _cQuery += "	AND SC5.C5_I_PEVIN = ' ' "
 _cQuery += "	AND SC5.C5_TIPO = 'N' "
-_cQuery += "	AND ( SC5.C5_I_OPER IN "+FormatIn(ALLTRIM(_cTpOper),";")+ " OR SC5.C5_I_OPER IN ('50','51') )  "
-_cQuery += "	AND SC5.C5_EMISSAO < '"+DTOS(_dData)+"' "
+_cQuery += "	AND ( SC5.C5_I_OPER IN "+FormatIn(AllTrim(_cTpOper),";")+ " OR SC5.C5_I_OPER IN ('50','51') )  "
+_cQuery += "	AND SC5.C5_EMISSAO < '"+DToS(_dData)+"' "
 _cQuery += "	AND NOT EXISTS (SELECT 'Y' "
 _cQuery += "	                FROM " + RetSqlName("SC6") + " SC6, " + RetSqlName("SB1") + " SB1 "
 _cQuery += "	                WHERE SC6.D_E_L_E_T_ = ' ' "
@@ -250,7 +255,7 @@ _cQuery += "                     AND SC6.C6_FILIAL = SC5.C5_FILIAL "
 _cQuery += "	                  AND SC6.C6_NUM = SC5.C5_NUM "
 _cQuery += "	                  AND B1_FILIAL = ' ' "
 _cQuery += "	                  AND B1_COD = C6_PRODUTO "
-_cQuery += "	                  AND ( SC6.C6_PRODUTO IN "+FormatIn(ALLTRIM(_cProds),";")+" OR B1_TIPCAR = '000002' ) )"
+_cQuery += "	                  AND ( SC6.C6_PRODUTO IN "+FormatIn(AllTrim(_cProds),";")+" OR B1_TIPCAR = '000002' ) )"
 _cQuery += "	AND NOT EXISTS (SELECT 'X' "
 _cQuery += "					FROM " + RetSqlName("SC9") + " SC9 "
 _cQuery += "					WHERE SC9.D_E_L_E_T_ = ' ' "
@@ -267,21 +272,21 @@ _cQuery := ChangeQuery(_cQuery)
 
 MPSysOpenQuery( _cQuery , _cAliasSC5)
 
-DbSelectArea(_cAliasSC5)
+DBSelectArea(_cAliasSC5)
 Count to _nTot
 
-(_cAliasSC5)->(DbGoTop())
+(_cAliasSC5)->(DBGoTop())
 
-Do While (_cAliasSC5)->(!EOF())
+While (_cAliasSC5)->(!Eof())
    _nReg++
 
    If !_lSchedule
-      _oProc:cCaption := ("Excluindo registro " + Alltrim(Str(_nReg)) + " de " + Alltrim(Str(_nTot)) + " ...")
+      _oProc:cCaption := ("Excluindo registro " + AllTrim(Str(_nReg)) + " de " + AllTrim(Str(_nTot)) + " ...")
       ProcessMessages()
-   Endif
+   EndIf
 
-   DbselectArea("SC5")
-   SC5->(DbGoTo((_cAliasSC5)->(RECNO_SC5)))
+   DBSelectArea("SC5")
+   SC5->(DBGoTo((_cAliasSC5)->(RECNO_SC5)))
    
    If SC5->C5_I_ENVRD == "S" 
       lContinua := U_AOMS094E(,.F.) //Retira o Pedido do RDC
@@ -294,25 +299,25 @@ Do While (_cAliasSC5)->(!EOF())
       _lExc  := MOMS072D(@_cErro) //Excluir o pedido de venda
 
       If _lExc
-         If !Empty(Alltrim(SC5->C5_VEND1))
-            AADD(_aEmail,{SC5->C5_VEND1 ,"VENDEDOR"    ,SC5->C5_CLIENTE,SC5->C5_LOJACLI,SC5->C5_I_FANTA,SC5->C5_FILIAL,SC5->C5_NUM,DTOC(SC5->C5_EMISSAO),DTOC(SC5->C5_I_DTENT)})
+         If !Empty(AllTrim(SC5->C5_VEND1))
+            aAdd(_aEmail,{SC5->C5_VEND1 ,"VENDEDOR"    ,SC5->C5_CLIENTE,SC5->C5_LOJACLI,SC5->C5_I_FANTA,SC5->C5_FILIAL,SC5->C5_NUM,DToC(SC5->C5_EMISSAO),DToC(SC5->C5_I_DTENT)})
          EndIf
-         If !Empty(Alltrim(SC5->C5_VEND2))
-            AADD(_aEmail,{SC5->C5_VEND2 ,"COORDENADOR" ,SC5->C5_CLIENTE,SC5->C5_LOJACLI,SC5->C5_I_FANTA,SC5->C5_FILIAL,SC5->C5_NUM,DTOC(SC5->C5_EMISSAO),DTOC(SC5->C5_I_DTENT)})
+         If !Empty(AllTrim(SC5->C5_VEND2))
+            aAdd(_aEmail,{SC5->C5_VEND2 ,"COORDENADOR" ,SC5->C5_CLIENTE,SC5->C5_LOJACLI,SC5->C5_I_FANTA,SC5->C5_FILIAL,SC5->C5_NUM,DToC(SC5->C5_EMISSAO),DToC(SC5->C5_I_DTENT)})
          EndIf
-         If !Empty(Alltrim(SC5->C5_VEND3))
-            AADD(_aEmail,{SC5->C5_VEND3 ,"GERENTE"     ,SC5->C5_CLIENTE,SC5->C5_LOJACLI,SC5->C5_I_FANTA,SC5->C5_FILIAL,SC5->C5_NUM,DTOC(SC5->C5_EMISSAO),DTOC(SC5->C5_I_DTENT)})
+         If !Empty(AllTrim(SC5->C5_VEND3))
+            aAdd(_aEmail,{SC5->C5_VEND3 ,"GERENTE"     ,SC5->C5_CLIENTE,SC5->C5_LOJACLI,SC5->C5_I_FANTA,SC5->C5_FILIAL,SC5->C5_NUM,DToC(SC5->C5_EMISSAO),DToC(SC5->C5_I_DTENT)})
          EndIf
-         If !Empty(Alltrim(SC5->C5_ASSCOD))
-            AADD(_aEmail,{SC5->C5_ASSCOD,"ASSISTENTE"  ,SC5->C5_CLIENTE,SC5->C5_LOJACLI,SC5->C5_I_FANTA,SC5->C5_FILIAL,SC5->C5_NUM,DTOC(SC5->C5_EMISSAO),DTOC(SC5->C5_I_DTENT)})
+         If !Empty(AllTrim(SC5->C5_ASSCOD))
+            aAdd(_aEmail,{SC5->C5_ASSCOD,"ASSISTENTE"  ,SC5->C5_CLIENTE,SC5->C5_LOJACLI,SC5->C5_I_FANTA,SC5->C5_FILIAL,SC5->C5_NUM,DToC(SC5->C5_EMISSAO),DToC(SC5->C5_I_DTENT)})
          EndIf
 
-         AADD(_aEmail,{_cEmailCom    ,"COMERCIAL"   ,SC5->C5_CLIENTE,SC5->C5_LOJACLI,SC5->C5_I_FANTA,SC5->C5_FILIAL,SC5->C5_NUM,DTOC(SC5->C5_EMISSAO),DTOC(SC5->C5_I_DTENT)})
+         aAdd(_aEmail,{_cEmailCom    ,"COMERCIAL"   ,SC5->C5_CLIENTE,SC5->C5_LOJACLI,SC5->C5_I_FANTA,SC5->C5_FILIAL,SC5->C5_NUM,DToC(SC5->C5_EMISSAO),DToC(SC5->C5_I_DTENT)})
       Else
-         AADD(_aErro,{"" ,"RESPONSAVEL"    ,SC5->C5_CLIENTE,SC5->C5_LOJACLI,SC5->C5_I_FANTA,SC5->C5_FILIAL,SC5->C5_NUM,DTOC(SC5->C5_EMISSAO),DTOC(SC5->C5_I_DTENT),_cErro})
-      Endif
-   Endif
-   (_cAliasSC5)->(DbSkip())
+         aAdd(_aErro,{"" ,"RESPONSAVEL"    ,SC5->C5_CLIENTE,SC5->C5_LOJACLI,SC5->C5_I_FANTA,SC5->C5_FILIAL,SC5->C5_NUM,DToC(SC5->C5_EMISSAO),DToC(SC5->C5_I_DTENT),_cErro})
+      EndIf
+   EndIf
+   (_cAliasSC5)->(DBSkip())
 EndDo
 
 (_cAliasSC5)->(DBCloseArea())
@@ -330,7 +335,7 @@ If Len(_aEmail) > 0
 Else
 
    If !_lSchedule 
-      U_ItMsg("Não há dados para processamento dos e-mails!","Atenção","",1)
+      U_ITMsg("Não há dados para processamento dos e-mails!","Atenção","",1)
     EndIf	
 
 EndIf
@@ -348,7 +353,7 @@ If Len(_aErro) > 0
 Else
 
    If !_lSchedule 
-      U_ItMsg("Não há erros para processamento de e-mails!","Atenção","",1)
+      U_ITMsg("Não há erros para processamento de e-mails!","Atenção","",1)
     EndIf	
 
 EndIf
@@ -384,12 +389,12 @@ Begin Transaction
     _cAOMS074      := "MOMS072"//DesAtiva o _lMsgEmTela := .F. no MT410TOK.PRW
     _cAOMS074Vld   := ""//Pega as mensagens de erro
 
-    aadd(aCabec, {"C5_NUM"    , SC5->C5_NUM     , Nil})
-    aadd(aCabec, {"C5_TIPO"   , SC5->C5_TIPO    , Nil})
-    aadd(aCabec, {"C5_CLIENTE", SC5->C5_CLIENTE , Nil})
-    aadd(aCabec, {"C5_LOJACLI", SC5->C5_LOJACLI , Nil})
-    aadd(aCabec, {"C5_LOJAENT", SC5->C5_LOJAENT , Nil})
-    aadd(aCabec, {"C5_CONDPAG", SC5->C5_CONDPAG , Nil})                
+    aAdd(aCabec, {"C5_NUM"    , SC5->C5_NUM     , Nil})
+    aAdd(aCabec, {"C5_TIPO"   , SC5->C5_TIPO    , Nil})
+    aAdd(aCabec, {"C5_CLIENTE", SC5->C5_CLIENTE , Nil})
+    aAdd(aCabec, {"C5_LOJACLI", SC5->C5_LOJACLI , Nil})
+    aAdd(aCabec, {"C5_LOJAENT", SC5->C5_LOJAENT , Nil})
+    aAdd(aCabec, {"C5_CONDPAG", SC5->C5_CONDPAG , Nil})                
                           
     MSExecAuto({|a, b, c| MATA410(a, b, c)}, aCabec, aItens, 5)                
 
@@ -436,15 +441,15 @@ If lErro
        _aLinha := {}
        
        For _nJ := 3 to Len(_aEmail[_nI])
-          AADD(_aLinha,_aEmail[_nI,_nJ])
+          aAdd(_aLinha,_aEmail[_nI,_nJ])
        Next
        
-       AADD(_aPedidos,_aLinha)
+       aAdd(_aPedidos,_aLinha)
     Next
 
     MOMS072F("",_cEmailErr,"Falha na Exclusão de Pedidos",_aPedidos,_aCabec,_aAling,_aSizes)
 
-ELSE
+Else
     _cUsrAnt := _aEmail[1,1]
     For _nI := 1 to Len(_aEmail)
 
@@ -467,12 +472,12 @@ ELSE
              _cEmail := AllTrim(Posicione("SA3",1,xFilial("SA3") + _cUsrAnt,"A3_EMAIL"))
              _cNome := AllTrim(Posicione("SA3",1,xFilial("SA3") + _cUsrAnt,"A3_NOME"))
 
-          Endif
+          EndIf
 
           If !_lSchedule
              _oProc:cCaption := ("Enviando Email para " + _cUsrAnt + " ...")
              ProcessMessages()
-          Endif
+          EndIf
 
           MOMS072F(_cNome,_cEmail,_cTit,_aPedidos,_aCabec,_aAling,_aSizes)
             
@@ -483,10 +488,10 @@ ELSE
        _aLinha := {}
        
        For _nJ := 3 to Len(_aEmail[_nI])
-          AADD(_aLinha,_aEmail[_nI,_nJ])
+          aAdd(_aLinha,_aEmail[_nI,_nJ])
        Next
        
-       AADD(_aPedidos,_aLinha)
+       aAdd(_aPedidos,_aLinha)
 
        _cUsrAnt := _aEmail[_nI,1]
         _cTipo := _aEmail[_nI,2]
@@ -507,12 +512,12 @@ ELSE
       _cEmail := AllTrim(Posicione("SA3",1,xFilial("SA3") + _cUsrAnt,"A3_EMAIL"))
       _cNome := AllTrim(Posicione("SA3",1,xFilial("SA3") + _cUsrAnt,"A3_NOME"))
 
-   Endif
+   EndIf
 
    If !_lSchedule
       _oProc:cCaption := ("Enviando Email para " + _cUsrAnt + " ...")
       ProcessMessages()
-   Endif
+   EndIf
 
     MOMS072F(_cNome,_cEmail,_cTit,_aPedidos,_aCabec,_aAling,_aSizes)
 
@@ -551,7 +556,7 @@ Local _cNomeArq := "" As Character
     _cMsgEml := '<html>'
     _cMsgEml += '<head><title>' + _cTit + '</title></head>'
     _cMsgEml += '<body>'
-    _cMsgEml += '<style type="text/css"><!--'
+    _cMsgEml += '<style Type="text/css"><!--'
     _cMsgEml += 'table.bordasimples { border-collapse: collapse; }'
     _cMsgEml += 'table.bordasimples tr td { border:1px solid #777777; }'
     _cMsgEml += 'td.titulos	{ font-family:VERDANA; font-size:12px; V-align:middle; margin-right: 15px; margin-left: 15px; background-color: #C6E2FF; }'
@@ -574,7 +579,7 @@ Local _cNomeArq := "" As Character
     _cMsgEml += '<br>'
     _cMsgEml += '<br>'
     _cMsgEml += '    <tr>'
-    _cMsgEml += '      <td class="itens" align="left" > Prezado(a) ' + Alltrim(_cNome) + ', <b></b></td>'
+    _cMsgEml += '      <td class="itens" align="left" > Prezado(a) ' + AllTrim(_cNome) + ', <b></b></td>'
     _cMsgEml += '    </tr>'
     _cMsgEml += '<br>'
 
@@ -590,12 +595,12 @@ Local _cNomeArq := "" As Character
         _cMsgEml += '<br>'
         _cMsgEml += '<table class="bordasimples" width="800">'
         _cMsgEml += '    <tr>'
-        //_cMsgEml += '		<td align="center" colspan="'+ALLTRIM(STR(LEN(_aSizes)))+'" class="grupos"><b>'+_cGetAssun+'</b></td>'
+        //_cMsgEml += '		<td align="center" colspan="'+AllTrim(Str(Len(_aSizes)))+'" class="grupos"><b>'+_cGetAssun+'</b></td>'
         _cMsgEml += '    </tr>'
         _cMsgEml += '    <tr>'
 
         For _nCol :=  1 To Len(_aCabec)
-            _cMsgEml += '      <td class="itens" align='+_aAling[_nCol]+' width="'+Alltrim(Str(_aSizes[_nCol]))+'%"><b>'+_aCabec[_nCol]+'</b></td>'
+            _cMsgEml += '      <td class="itens" align='+_aAling[_nCol]+' width="'+AllTrim(Str(_aSizes[_nCol]))+'%"><b>'+_aCabec[_nCol]+'</b></td>'
         Next
         
         _cMsgEml += '    </tr>'
@@ -606,13 +611,13 @@ Local _cNomeArq := "" As Character
             
             _cGetLista += '    <tr>'
             For _nCol :=  1 To Len(_aCabec)
-                _cGetLista += ' <td class="itens" align='+_aAling[_nCol]+' width="'+Alltrim(Str(_aSizes[_nCol]))+'%">'+ _aPedidos[_nLin][_nCol] +'</td>' 
+                _cGetLista += ' <td class="itens" align='+_aAling[_nCol]+' width="'+AllTrim(Str(_aSizes[_nCol]))+'%">'+ _aPedidos[_nLin][_nCol] +'</td>' 
             Next
             _cGetLista += '    </tr>'
             
         Next
         
-        _cMsgEml := STRTRAN(_cMsgEml,"#LISTA#",_cGetLista)
+        _cMsgEml := StrTran(_cMsgEml,"#LISTA#",_cGetLista)
 
     EndIf
 

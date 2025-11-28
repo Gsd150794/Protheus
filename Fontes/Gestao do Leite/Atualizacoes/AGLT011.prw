@@ -2,20 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 17/01/2020 | Corrigido totalizador do convênio. Chamado 31761
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 06/02/2020 | Corrigido nome do objeto. Chamado 31941
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 20/10/2020 | Corrigida a exclusão de títulos. Chamado 34436
+Lucas Borges  |17/01/2020| Chamado 31761. Corrigido totalizador do convênio.
+Lucas Borges  |06/02/2020| Chamado 31941. Corrigido nome do objeto.
+Lucas Borges  |20/10/2020| Chamado 34436. Corrigida a exclusão de títulos.
 ===============================================================================================================================
 */
 
-//===========================================================================
-//| Definições de Includes                                                  |
-//===========================================================================
-#INCLUDE 'Protheus.ch' 
+#Include "TOTVS.ch" 
 #Include "FWMVCDEF.ch"
 
 /*
@@ -23,11 +18,8 @@ Lucas Borges  | 20/10/2020 | Corrigida a exclusão de títulos. Chamado 34436
 Programa----------: AGLT011
 Autor-------------: Lucas Borges
 Data da Criacao---: 21/03/2019
-===============================================================================================================================
 Descrição---------: Rotina para lançamentos dos convênios de terceiros, cópia do AGLT010 - Chamado 11132
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -45,18 +37,15 @@ _oBrowse:AddLegend( "ZLI_STATUS == 'S'" , 'BLUE'	, 'Convênio Suspenso'	)
 
 _oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MenuDef
 Autor-------------: Lucas Borges
 Data da Criacao---: 21/03/2019
-===============================================================================================================================
 Descrição---------: Retorna o menu funcional para a rotina principal
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -77,11 +66,8 @@ Return( _aRotina )
 Programa----------: ModelDef
 Autor-------------: Lucas Borges
 Data da Criacao---: 21/03/2019
-===============================================================================================================================
 Descrição---------: Monta o Modelo de dados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -101,7 +87,7 @@ _oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] 
 _aGatAux := FwStruTrigger( 'ZLI_CONVEN'	, 'ZLI_DESCRI'	, 'SA2->A2_NOME'	, .T. , 'SA2' , 1 , 'xFilial("SA2")+M->ZLI_CONVEN+AllTrim(M->ZLI_LJCONV)' )
 _oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
-_aGatAux := FwStruTrigger( 'ZLI_CONVEN'	, 'ZLI_LJCONV'	, 'IIF( Empty(M->ZLI_LJCONV) , "0001" , M->ZLI_LJCONV )'	, .F. )
+_aGatAux := FwStruTrigger( 'ZLI_CONVEN'	, 'ZLI_LJCONV'	, 'IIf( Empty(M->ZLI_LJCONV) , "0001" , M->ZLI_LJCONV )'	, .F. )
 _oStruCAB:AddTrigger( _aGatAux[01] , _aGatAux[02] , _aGatAux[03] , _aGatAux[04] )
 
 _aGatAux := FwStruTrigger( 'ZLI_LJCONV'	, 'ZLI_DESCRI'	, 'SA2->A2_NOME'	, .T. , 'SA2' , 1 , 'xFilial("SA2")+M->ZLI_CONVEN+AllTrim(M->ZLI_LJCONV)' )
@@ -163,11 +149,8 @@ Return( _oModel )
 Programa----------: ViewDef
 Autor-------------: Lucas Borges
 Data da Criacao---: 21/03/2019
-===============================================================================================================================
 Descrição---------: Define a View de dados para a rotina de cadastro
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -220,11 +203,8 @@ Return( _oView )
 Programa----------: AGLT011CPO
 Autor-------------: Lucas Borges
 Data da Criacao---: 21/03/2019
-===============================================================================================================================
 Descrição---------: Define a organização dos campos para exibição na tela
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -243,11 +223,8 @@ Return( _lRet )
 Programa----------: GL010LOK
 Autor-------------: Lucas Borges
 Data da Criacao---: 21/03/2019
-===============================================================================================================================
 Descrição---------: Rotina para Atualização dos valores conforme preenchimento dos campos das linhas
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -291,11 +268,8 @@ Return( _nValRet )
 Programa----------: AGLT011LOK
 Autor-------------: Lucas Borges
 Data da Criacao---: 21/03/2019
-===============================================================================================================================
 Descrição---------: Rotina para validação das operações de alteração/delete das linhas de lançamentos
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -346,11 +320,8 @@ Return( _lRet )
 Programa----------: GL010RET
 Autor-------------: Lucas Borges
 Data da Criacao---: 21/03/2019
-===============================================================================================================================
 Descrição---------: Rotina auxiliar para processamento dos gatilhos
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -373,7 +344,7 @@ If _nOpcao == 1
 	    _oModel:LoadValue( 'ZLIDETAIL' , 'ZLI_RETIRO' , '' )
 	EndIf
 
-Elseif _nOpcao == 2
+ElseIf _nOpcao == 2
 	
 	DBSelectArea('SA2')
 	SA2->( DBSetOrder(1) )
@@ -387,7 +358,7 @@ Elseif _nOpcao == 2
 	    _oModel:LoadValue( 'ZLIDETAIL' , 'ZLI_RETILJ' , '' )
 	EndIf 
 	
-Elseif _nOpcao == 3
+ElseIf _nOpcao == 3
 
 	DBSelectArea('ZT1')
 	ZT1->( DBSetOrder(1) )
@@ -401,7 +372,7 @@ ElseIf _nOpcao == 4
 
   _cret := ZT1->ZT1_DESCRI  
   
-	If Len(_omodel:AALLSUBMODELS[2]:ACOLS) > 0 .and. Len(alltrim(_omodel:AALLSUBMODELS[2]:ACOLS[1][2])) == 6
+	If Len(_omodel:AALLSUBMODELS[2]:ACOLS) > 0 .And. Len(AllTrim(_omodel:AALLSUBMODELS[2]:ACOLS[1][2])) == 6
 		_oModel:LoadValue( 'ZLIMASTER' , 'ZLI_NATURE' , ZT1->ZT1_NATURE )
 	EndIf
 
@@ -414,11 +385,8 @@ Return( _cRet )
 Programa----------: AGLT011TOK
 Autor-------------: Lucas Borges
 Data da Criacao---: 21/03/2019
-===============================================================================================================================
 Descrição---------: Rotina para Validação Total do modelo de dados e gravações auxiliares
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -547,7 +515,7 @@ If _lRet .And. !Empty( _aMovPer ) .And. _oModel:GetOperation() <> MODEL_OPERATIO
 EndIf
 
 //================================================================
-// Se passar pelas validações processa as gravações complementares
+// Se passar pelas validações Processa as gravações complementares
 //================================================================
 If _lRet
 	
@@ -555,7 +523,7 @@ If _lRet
 	_cNumTit	:= _oModel:GetValue( 'ZLIMASTER' , 'ZLI_COD'    )
 	_cNatNDF	:= _oModel:GetValue( 'ZLIMASTER' , 'ZLI_NATURE' )
 	
-	_cNatAux	:= POSICIONE( "ZT1" , 1 , XFILIAL("ZT1") + _cEvento , "ZT1_NATURE" ) ; IIF( Empty(_cNatAux) , _cNatAux := _cNatNDF , Nil )
+	_cNatAux	:= Posicione( "ZT1" , 1 , xFilial("ZT1") + _cEvento , "ZT1_NATURE" ) ; IIf( Empty(_cNatAux) , _cNatAux := _cNatNDF , Nil )
 	_cPrefix	:= ZT1->ZT1_PREFIX
 	
 	If _nOper == MODEL_OPERATION_INSERT
@@ -581,11 +549,11 @@ If _lRet
 	Begin Transaction
 	
 	//==============================================================
-	// Se for Alteração ou Exclusão exclui o título Financeiro da NF
+	// Se For Alteração ou Exclusão exclui o título Financeiro da NF
 	//==============================================================
 	If _nOper == MODEL_OPERATION_UPDATE .Or. _nOper == MODEL_OPERATION_DELETE
 		//Faço a exclusão com base no dados gravados na tabela e não nos novos
-	    ZT1->(Dbseek(ZLI->(ZLI_FILIAL+ZLI_EVENTO)))
+	    ZT1->(DBSeek(ZLI->(ZLI_FILIAL+ZLI_EVENTO)))
 		_lRet := AGLT011DE2( ZT1->ZT1_PREFIX , _cNumTit + '000' , '1 ' , 'NF ' , ZLI->ZLI_CONVEN , ZLI->ZLI_LJCONV , ZLI->ZLI_NATURE, _oModel )
 		
 		If _lRet
@@ -619,15 +587,15 @@ If _lRet
 			//===============================================
 			// Posiciona ZLI para saber o que alterou na tela
 			//===============================================
-			ZLI->(Dbsetorder(1))
-			ZLI->(Dbseek(xFilial("ZLI") + _cCodigo + _cSeq))
+			ZLI->(DBSetOrder(1))
+			ZLI->(DBSeek(xFilial("ZLI") + _cCodigo + _cSeq))
 			
 			//================================================
 			// Tratativa para os lançamentos deletados no Grid
 			//================================================
 			If _oGrid:IsDeleted() .And. _nOper == MODEL_OPERATION_UPDATE
 				_lRet := AGLT011DE2( ZT1->ZT1_PREFIX , _cNumTit + _cSeq , '1 ' , 'NDF' , ZLI->ZLI_RETIRO , ZLI->ZLI_RETILJ , ZLI->ZLI_NATURE, _oModel )
-			Elseif  !(_oGrid:IsDeleted())
+			ElseIf  !(_oGrid:IsDeleted())
 			
 				//==========================================
 				// Na Inclusão gera os títulos no Financeiro
@@ -642,14 +610,14 @@ If _lRet
 				If _nOper == MODEL_OPERATION_UPDATE
 					
 					//========================================================
-					// Se a linha for "Suspensa" deleta o título no Financeiro
+					// Se a linha For "Suspensa" deleta o título no Financeiro
 					//========================================================
 					If _oGrid:GetValue('ZLI_STATUS') == 'S'
 					
 						_lRet := AGLT011DE2( ZT1->ZT1_PREFIX , _cNumTit + _cSeq , '1 ' , 'NDF' , ZLI->ZLI_RETIRO , ZLI->ZLI_RETILJ , ZLI->ZLI_NATURE, _oModel )
 					
 					//=================================================================================================
-					// Se a linha for "Alterada" e o Status estiver Em Aberto deverá excluir e gerar o Título novamente
+					// Se a linha For "Alterada" e o Status estiver Em Aberto deverá excluir e gerar o Título novamente
 					//=================================================================================================
 					ElseIf _oGrid:GetValue('ZLI_STATUS') == 'A'
 					
@@ -693,7 +661,7 @@ If _lRet
 		//================================
 		// Retorna posição e índice da ZLI
 		//================================
-		ZLI->(Restarea(_aareaZLI))
+		ZLI->(FWRestArea(_aareaZLI))
 			
 		If _lRet
 			
@@ -704,7 +672,7 @@ If _lRet
 				
 				//==================================================================================================
 				// Adicionado por Fabiano Dias da Silva no dia 29/04/10, solicitacao feita por Monis ao Tiago Correa
-				// para que quando a Loja conveniada for a F00001 nao sera gerado o titulo de NF somente as NDF dos 
+				// para que quando a Loja conveniada For a F00001 nao sera gerado o titulo de NF somente as NDF dos 
 				// produtores os valores das NDF serao abatidos de suas movimentacoes Financeiras na ITALAC
 				//==================================================================================================
 				If _cConven <> 'F00001'
@@ -784,14 +752,14 @@ If _lRet
 				ZLI->ZLI_STATUS		:= _aDados[_nX][07]
 				ZLI->ZLI_OBSERV		:= _aDados[_nX][08]
 				
-				ZLI->( MsUnLock() )
+				ZLI->( MSUnLock() )
 				
 				//=====================================
 				// Inclui nova NDF para a parcela atual
 				//=====================================
 				If !AGLT011IE2( _cPrefix , ZLI->( ZLI_COD + ZLI_SEQ ) , '1 ' , 'NDF' , ZLI->ZLI_RETIRO , ZLI->ZLI_RETILJ , ZLI->ZLI_NATURE , ZLI->ZLI_DATA , ZLI->ZLI_VENCTO , ZLI->ZLI_VALOR , 0 , 0 , _oModel )
 					DisarmTransaction()
-					_lret := .F.
+					_lRet := .F.
 					_lsai := .T.
 					Break
 				EndIf
@@ -803,14 +771,14 @@ If _lRet
 			//====================================
 			//==================================================================================================
 			// Adicionado por Fabiano Dias da Silva no dia 29/04/10, solicitacao feita por Monis ao Tiago Correa
-			// para que quando a Loja conveniada for a F00001 nao sera gerado o titulo de NF somente as NDF dos
+			// para que quando a Loja conveniada For a F00001 nao sera gerado o titulo de NF somente as NDF dos
 			// produtores os valores das NDF serao abatidos de suas movimentacoes Financeiras na ITALAC
 			//==================================================================================================
 			If _cConven <> 'F00001'
 			
 				If !AGLT011IE2( _cPrefix , _cCodZLI + '000' , '1 ' , 'NF ' , _cConven , _cLjConv , _cNatAux , _dEmissa , _aParAux[_nI] , _nVlrTot , _nAcresc , _nTxAdm , _oModel )
 					DisarmTransaction()
-					_lret := .F.
+					_lRet := .F.
 					_lsai := .T.
 					Break
 				EndIf
@@ -827,7 +795,7 @@ If _lRet
 	
 	If _lsai
 	
-		Return(_lret)
+		Return(_lRet)
 		
 	EndIf
 
@@ -839,9 +807,9 @@ EndIf
 //===========================================================================================
 _aAreaZLI := ZLI->(GetArea())
 If _lRet .And. _oModel:GetOperation() == MODEL_OPERATION_UPDATE
-	dbSelectArea("ZLI")
-	dbSetOrder(1)
-	If dbSeek(xFilial("ZLI") + _cCodigo)
+	DBSelectArea("ZLI")
+	DBSetOrder(1)
+	If DBSeek(xFilial("ZLI") + _cCodigo)
 		While !ZLI->(Eof()) .And. ZLI->ZLI_FILIAL == xFilial("ZLI") .And. ZLI->ZLI_COD == _cCodigo
 			RecLock("ZLI", .F.)
 				ZLI->ZLI_EVENTO	:= _cEvento
@@ -849,12 +817,12 @@ If _lRet .And. _oModel:GetOperation() == MODEL_OPERATION_UPDATE
 				ZLI->ZLI_LJCONV	:= _cLjConv
 				ZLI->ZLI_VENCTO	:= _dVencto
 				ZLI->ZLI_ACRESC	:= _nAcresc
-			MsUnLock()
-			ZLI->(dbSkip())
+			MSUnLock()
+			ZLI->(DBSkip())
 		End
 	EndIf
 EndIf
-RestArea(_aAreaZLI)
+FWRestArea(_aAreaZLI)
 Return( _lRet )
 
 /*
@@ -862,17 +830,14 @@ Return( _lRet )
 Programa----------: AGLT011DE2
 Autor-------------: Lucas Borges
 Data da Criacao---: 21/03/2019
-===============================================================================================================================
 Descrição---------: Rotina para exclusão de Títulos do Financeiro
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static function AGLT011DE2( _cPrefix , _cNumTit , _cParcel , _cTipo , _cForn , _cLoja , _cNature, _oModel )
+Static Function AGLT011DE2( _cPrefix , _cNumTit , _cParcel , _cTipo , _cForn , _cLoja , _cNature, _oModel )
 
-Local aArea := GetArea()
+Local aArea := FWGetArea()
 Local _aAutSE2	:= {}
 Local _lOk		:= .T.
 Local _nModAux	:= nModulo
@@ -915,7 +880,7 @@ EndIf
 nModulo := _nModAux
 cModulo := _cModAux
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return( _lOk )
 
@@ -924,11 +889,8 @@ Return( _lOk )
 Programa----------: AGLT011IE2
 Autor-------------: Lucas Borges
 Data da Criacao---: 21/03/2019
-===============================================================================================================================
 Descrição---------: Rotina para inclusão de Títulos no Financeiro
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -941,23 +903,23 @@ Local _cModAux	:= cModulo
 
 Private lMsErroAuto := .F.
 
-AAdd( _aAutSE2 , { "E2_PREFIXO"	, _cPrefix		, Nil } )
-AAdd( _aAutSE2 , { "E2_NUM"		, _cNumTit		, nil } )
-AAdd( _aAutSE2 , { "E2_PARCELA"	, _cParcel		, nil } )
-AAdd( _aAutSE2 , { "E2_TIPO"	, _cTipo		, nil } )
-AAdd( _aAutSE2 , { "E2_NATUREZ"	, _cNature		, nil } )
-AAdd( _aAutSE2 , { "E2_FORNECE"	, _cForn		, nil } )
-AAdd( _aAutSE2 , { "E2_LOJA"	, _cLoja		, nil } )
-AAdd( _aAutSE2 , { "E2_EMISSAO"	, _dEmissa		, nil } )
-AAdd( _aAutSE2 , { "E2_EMIS1"	, _dEmissa		, nil } )
-AAdd( _aAutSE2 , { "E2_VENCTO"	, DataValida(_dVencto), nil } )
-AAdd( _aAutSE2 , { "E2_VALOR"	, _nValor		, nil } )
-AAdd( _aAutSE2 , { "E2_ACRESC"	, _nAcres		, nil } )
-AAdd( _aAutSE2 , { "E2_DECRESC"	, _nDesc		, nil } )
-AAdd( _aAutSE2 , { "E2_HIST"	, "GLT CONVENIO DE TERCEIROS", nil } )
-AAdd( _aAutSE2 , { "E2_DATALIB"	, _dEmissa		, nil } )	
-AAdd( _aAutSE2 , { "E2_USUALIB"	, cUserName		, nil } )	
-AAdd( _aAutSE2 , { "E2_ORIGEM"	, "AGLT011"		, nil } )
+aAdd( _aAutSE2 , { "E2_PREFIXO"	, _cPrefix		, Nil } )
+aAdd( _aAutSE2 , { "E2_NUM"		, _cNumTit		, nil } )
+aAdd( _aAutSE2 , { "E2_PARCELA"	, _cParcel		, nil } )
+aAdd( _aAutSE2 , { "E2_TIPO"	, _cTipo		, nil } )
+aAdd( _aAutSE2 , { "E2_NATUREZ"	, _cNature		, nil } )
+aAdd( _aAutSE2 , { "E2_FORNECE"	, _cForn		, nil } )
+aAdd( _aAutSE2 , { "E2_LOJA"	, _cLoja		, nil } )
+aAdd( _aAutSE2 , { "E2_EMISSAO"	, _dEmissa		, nil } )
+aAdd( _aAutSE2 , { "E2_EMIS1"	, _dEmissa		, nil } )
+aAdd( _aAutSE2 , { "E2_VENCTO"	, DataValida(_dVencto), nil } )
+aAdd( _aAutSE2 , { "E2_VALOR"	, _nValor		, nil } )
+aAdd( _aAutSE2 , { "E2_ACRESC"	, _nAcres		, nil } )
+aAdd( _aAutSE2 , { "E2_DECRESC"	, _nDesc		, nil } )
+aAdd( _aAutSE2 , { "E2_HIST"	, "GLT CONVENIO DE TERCEIROS", nil } )
+aAdd( _aAutSE2 , { "E2_DATALIB"	, _dEmissa		, nil } )	
+aAdd( _aAutSE2 , { "E2_USUALIB"	, cUserName		, nil } )	
+aAdd( _aAutSE2 , { "E2_ORIGEM"	, "AGLT011"		, nil } )
 
 nModulo := 6
 cModulo := "FIN"
@@ -988,17 +950,14 @@ Return( _lOk )
 Programa----------: AGLT011V
 Autor-------------: Lucas Borges
 Data da Criacao---: 21/03/2019
-===============================================================================================================================
 Descrição---------: Rotina para inicialização de valores para os campos virtuais da tela
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AGLT011V( _nOpc )
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cAlias	:= ''
 Local _nValRet	:= 0
 
@@ -1009,16 +968,16 @@ If !Inclui .And. _nOpc > 0
 	_cAlias	:= GetNextAlias()
 	BeginSql alias _cAlias
 	  SELECT SUM(ZLI.ZLI_VALOR) VALOR,
-	         SUM(CASE
+	         SUM(Case
 	               WHEN ZLI.ZLI_STATUS = 'A' THEN
 	                ZLI.ZLI_VALOR
-	               ELSE
+	               Else
 	                0
 	             END) VALABR,
-	         ROUND(SUM(ZLI.ZLI_VALOR) * (SA2.A2_L_TXADM/100),2) VALADM,
+	         Round(SUM(ZLI.ZLI_VALOR) * (SA2.A2_L_TXADM/100),2) VALADM,
 	         SA2.A2_L_TXADM TXADM
-	    FROM %table:ZLI% ZLI
-	    JOIN %table:SA2% SA2
+	    FROM %Table:ZLI% ZLI
+	    JOIN %Table:SA2% SA2
 	      ON SA2.D_E_L_E_T_ = ' '
 	     AND SA2.A2_COD = ZLI.ZLI_CONVEN
 	     AND SA2.A2_LOJA = ZLI.ZLI_LJCONV
@@ -1041,10 +1000,10 @@ If !Inclui .And. _nOpc > 0
 		EndCase
 	EndIf
 
-	(_cAlias)->(DbCloseArea())
+	(_cAlias)->(DBCloseArea())
 EndIf
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return( _nValRet )
 
@@ -1053,11 +1012,8 @@ Return( _nValRet )
 Programa----------: AGLT011R
 Autor-------------: Lucas Borges
 Data da Criacao---: 21/03/2019
-===============================================================================================================================
 Descrição---------: Rotina para inicialização do campo nome do produtor
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1087,11 +1043,8 @@ Return( _cRet )
 Programa----------: AGLT011CPA
 Autor-------------: Lucas Borges
 Data da Criacao---: 21/03/2019
-===============================================================================================================================
 Descrição---------: Monta a tela para digitação das datas de parcelas adicionais para o convênio
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1117,10 +1070,10 @@ Private _oDlg		:= NIL
 Private _oGetD		:= NIL
 
 // Busca a estrutura de campos para montagem da GetDados
-AADD( aAlterGDa  , 'ZLI_VENCTO' )
+aAdd( aAlterGDa  , 'ZLI_VENCTO' )
 
 // Monta a estrutura do cabeçalho
-AADD( aHeader , { trim(getsx3cache(aAlterGDa[1],"X3_TITULO") ),;
+aAdd( aHeader , { trim(getsx3cache(aAlterGDa[1],"X3_TITULO") ),;
 							getsx3cache(aAlterGDa[1],"X3_CAMPO")		,;
 							getsx3cache(aAlterGDa[1],"X3_PICTURE")		,;
 							getsx3cache(aAlterGDa[1],"X3_TAMANHO")		,;
@@ -1132,13 +1085,13 @@ AADD( aHeader , { trim(getsx3cache(aAlterGDa[1],"X3_TITULO") ),;
 							getsx3cache(aAlterGDa[1],"X3_CONTEXT")	})
 aCols := { Array( 2 ) }
 aCols[ 1 ][ 2 ] := .F.
-aCols[ 1 ][ 1 ] := StoD('')
+aCols[ 1 ][ 1 ] := SToD('')
 
 _oDlg := MSDIALOG():New( 000 , 000 , 400 , 300 , 'Parcelamento de convênio:' ,,,,,,,,, .T. )
 
 // Constrói a tela e exibe
 _oGetD			:= MsNewGetDados():New(035,001,188,152,3,cLinOk,cTudoOk,cIniCpos,aAlterGDa,nFreeze,nMax,cFieldOk,cSuperDel,cDelOk,_oDLG,aHeader,aCols)
-_oGetD:bLinhaOk	:= {|| IIF( _oGetD:aCols[_oGetD:nAt][01] < _dVencto , ( Aviso('Atenção!','A data das parcelas devem ser maiores que o primeiro vencimento do convênio ('+DTOC(_dVencto)+")",{'Voltar'}) , .F. ) , .T. ) }
+_oGetD:bLinhaOk	:= {|| IIf( _oGetD:aCols[_oGetD:nAt][01] < _dVencto , ( Aviso('Atenção!','A data das parcelas devem ser maiores que o primeiro vencimento do convênio ('+DToC(_dVencto)+")",{'Voltar'}) , .F. ) , .T. ) }
 
 _oDlg:bInit := {|| EnchoiceBar(_oDlg, {|| _lOk := .T. , _oDlg:End() } , {|| _lOk := .F. , _oDlg:End() } ,, aButtons ) , _oGetD:oBrowse:Align:=CONTROL_ALIGN_ALLCLIENT }
 _oDlg:lCentered := .T.
@@ -1161,12 +1114,9 @@ Return( _aRet )
 Programa----------: AGLT011VLD
 Autor-------------: Lucas Borges
 Data da Criacao---: 21/03/2019
-===============================================================================================================================
 Descrição---------: Validação inicial da DataBase do Sistema para não permitir manutenção de dados em períodos bloqueados pelo
 ------------------: parâmetro Fiscal ou Financeiro
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -1182,7 +1132,7 @@ If _oModel:GetOperation() == MODEL_OPERATION_INSERT .Or. _oModel:GetOperation() 
 	EndIf
 	
 	If _lRet .And. dDataBase <> LastDay( dDataBase )
-		_oModel:SetErrorMessage('ZLIMASTER', 'ZLI_DATA' , 'ZLIMASTER' , 'ZLI_DATA' , "AGLT01120", "A DataBase do Sistema não é válida pois não está posicionada no último dia do mês selecionado ("+DTOC(LastDay(dDataBase))+")", "Para realizar a manutenção no convênio configure a DataBase no último dia do mês que estiver sendo utilizado.")
+		_oModel:SetErrorMessage('ZLIMASTER', 'ZLI_DATA' , 'ZLIMASTER' , 'ZLI_DATA' , "AGLT01120", "A DataBase do Sistema não é válida pois não está posicionada no último dia do mês selecionado ("+DToC(LastDay(dDataBase))+")", "Para realizar a manutenção no convênio configure a DataBase no último dia do mês que estiver sendo utilizado.")
 		_lRet := .F.
 	EndIf
 	

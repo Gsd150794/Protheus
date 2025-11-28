@@ -10,9 +10,9 @@ Lucas Borges  	  | 17/10/2019 | Removidos os Warning na compilação da release 12
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "rwmake.ch"
-#INCLUDE "topconn.ch"      
+#Include "TOTVS.ch"
+#Include "rwmake.ch"
+#Include "topconn.ch"      
 
 /*
 ===============================================================================================================================
@@ -94,7 +94,7 @@ nLinha:=0100
 
 	oPrint:SayBitmap(nLinha,nColInic,cRaizServer + "system/lgrl01.bmp",250,100)        
 	oPrint:Say (nlinha,nColInic + 2500,"PÁGINA: " + Str(nPagina,2),oFont12)
-	oPrint:Say (nlinha + 50,nColInic + 2500,"DATA DE EMISSÃO: " + DtoC(DATE()),oFont12)
+	oPrint:Say (nlinha + 50,nColInic + 2500,"DATA DE EMISSÃO: " + DToC(DATE()),oFont12)
 	If nPagina == 1   
 		oPrint:Say (nlinha - 50 ,nColInic + 2500,"FONTE: ROMS012",oFont12)
 		oPrint:Say (nlinha + 100,nColInic + 2500,"EMPRESA: " + AllTrim(SM0->M0_NOME) + '/'+ AllTrim(SM0->M0_FILIAL),oFont12)
@@ -120,7 +120,7 @@ nLinha:=0100
 	                                
 	cRede:=AllTrim(ZAZ->ZAZ_GRPVEN) + '-' + AllTrim(Posicione("ACY",1,xFilial("ACY") + ZAZ->ZAZ_GRPVEN,"ACY->ACY_DESCRI"))
 	oPrint:Say (nlinha,nColInic,"Rede....:",oFont14)
-	oPrint:Say (nlinha,0300,IIF(Len(cRede) > 1,cRede," "),oFont14b)
+	oPrint:Say (nlinha,0300,IIf(Len(cRede) > 1,cRede," "),oFont14b)
 	
 	nlinha+=nSaltoLinha                                         
 	If Len(AllTrim(ZAZ->ZAZ_LOJA)) > 1
@@ -129,11 +129,11 @@ nLinha:=0100
 			cCliente:=AllTrim(ZAZ->ZAZ_CLIENT) + '-' + AllTrim(Posicione("SA1",1,xFilial("SA1") + ZAZ->ZAZ_CLIENT,"A1_NOME"))
 	EndIf
 	oPrint:Say (nlinha,nColInic,"Cliente.:",oFont14)
-	oPrint:Say (nlinha,0300,IIF(Len(cCliente) > 2,cCliente," "),oFont14b)
+	oPrint:Say (nlinha,0300,IIf(Len(cCliente) > 2,cCliente," "),oFont14b)
 	
 	nlinha+=nSaltoLinha 
 	oPrint:Say (nlinha,nColInic,"Vigência:",oFont14)
-	oPrint:Say (nlinha,0300,DtoC(ZAZ->ZAZ_DTINI) +' À ' + DtoC(ZAZ->ZAZ_DTFIM),oFont14b)
+	oPrint:Say (nlinha,0300,DToC(ZAZ->ZAZ_DTINI) +' À ' + DToC(ZAZ->ZAZ_DTFIM),oFont14b)
 		
 	nlinha+=nSaltoLinha 
 	nlinha+=nSaltoLinha        
@@ -180,19 +180,19 @@ cQuery += "FROM "
 cQuery += RetSqlName("ZB0") + " "         
 cQuery += "WHERE"               
 cQuery += " D_E_L_E_T_ = ' ' "
-cQuery += " AND ZB0_FILIAL = '" + xfilial("ZB0") + "'"          
+cQuery += " AND ZB0_FILIAL = '" + xFilial("ZB0") + "'"          
 cQuery += " AND ZB0_COD = '" + cCodContr + "' "    
 cQuery += "ORDER BY ZB0_ITEM"
 
 //Para que nao ocorra erro, quando duas pessoas acessarem o relatorio simultaneamente
-if Select("TMPCONT") > 0 
- 	TMPCONT->(dbCloseArea())
- endif                   
+If Select("TMPCONT") > 0 
+ 	TMPCONT->(DBCloseArea())
+ EndIf                   
     
-dbUseArea(.T.,"TOPCONN",TCGenQry(,,ALLTRIM(Upper(cQuery))),'TMPCONT',.F.,.T.)   
+dbUseArea(.T.,"TOPCONN",TCGenQry(,,AllTrim(Upper(cQuery))),'TMPCONT',.F.,.T.)   
 COUNT TO nCountRec
 	
-TMPCONT->(DbGotop())     
+TMPCONT->(DBGoTop())     
 	
 ProcRegua(nCountRec)
 	
@@ -230,7 +230,7 @@ If nCountRec > 0
 		oPrint:Say (nlinha,nColInic + 1355,Transform(TMPCONT->ZB0_DESCTO,"@R 99.99") + "%",oFont12b)
 		oPrint:Say (nlinha,nColInic + 1500,SubStr(AllTrim(TMPCONT->ZB0_CONTR),1,12),oFont12b)
 		cCliLoja  := TMPCONT->ZB0_CLIENT + '/' + TMPCONT->ZB0_LOJA
-		oPrint:Say (nlinha,nColInic + 1771,IIF(Len(AllTrim(cCliLoja)) > 1,cCliLoja," "),oFont12b)
+		oPrint:Say (nlinha,nColInic + 1771,IIf(Len(AllTrim(cCliLoja)) > 1,cCliLoja," "),oFont12b)
 		
 		If Len(AllTrim(TMPCONT->ZB0_LOJA)) > 1
 			cCliRazSoc:= SubStr(AllTrim(Posicione("SA1",1,xFilial("SA1") + TMPCONT->ZB0_CLIENT + TMPCONT->ZB0_LOJA,"A1_NOME")),1,30) + '-'+ SubStr(AllTrim(Posicione("SA1",1,xFilial("SA1") + TMPCONT->ZB0_CLIENT + TMPCONT->ZB0_LOJA,"A1_NREDUZ")),1,18)  
@@ -238,13 +238,13 @@ If nCountRec > 0
 				cCliRazSoc:= SubStr(AllTrim(Posicione("SA1",1,xFilial("SA1") + TMPCONT->ZB0_CLIENT,"A1_NOME")),1,30)
 		EndIf	
 		
-		oPrint:Say (nlinha,nColInic + 2046,IIF(Len(AllTrim(cCliRazSoc)) > 1,cCliRazSoc," "),oFont12b)
+		oPrint:Say (nlinha,nColInic + 2046,IIf(Len(AllTrim(cCliRazSoc)) > 1,cCliRazSoc," "),oFont12b)
 		oPrint:Say (nlinha,nColInic + 3200,TMPCONT->ZB0_EST,oFont12b)
 
 		nlinha+=nSaltoLinha
 		oPrint:Line(nLinha,nColInic,nLinha,nColFinal)
          
-	TMPCONT->(DbSkip())
+	TMPCONT->(DBSkip())
 	EndDo    
 
 EndIf  
@@ -262,7 +262,7 @@ EndIf
 						
 			oPrint:SayBitmap(nLinha,nColInic,cRaizServer + "system/lgrl01.bmp",250,100)   
 			oPrint:Say (nlinha,nColInic + 2700,"PÁGINA: " + Str(nPagina,2),oFont12)
-			oPrint:Say (nlinha + 50,nColInic + 2700,"DATA DE EMISSÃO: " + DtoC(DATE()),oFont12)
+			oPrint:Say (nlinha + 50,nColInic + 2700,"DATA DE EMISSÃO: " + DToC(DATE()),oFont12)
 			nlinha+=(nSaltoLinha * 3) 
 			oPrint:Line(nLinha,nColInic,nLinha,nColFinal)    
 						
@@ -273,7 +273,7 @@ EndIf
 		//Desenha assinatura do diretor comercial e do analista comercial
 		desenAss()
 	
-TMPCONT->(dbCloseArea())
+TMPCONT->(DBCloseArea())
 
 Return
 

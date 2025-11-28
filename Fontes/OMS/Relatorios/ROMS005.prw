@@ -1,37 +1,33 @@
 /*
-===============================================================================================================================
+=================================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
--------------------------------------------------------------------------------------------------------------------------------
+=================================================================================================================================
+ Autor        |    Data    |                              Motivo
+=================================================================================================================================
 Alex Wallauer | 03/05/2019 | Chamado 29042. Inclusão da coluna Pedido por ordem de Carga. 
--------------------------------------------------------------------------------------------------------------------------------
 Alex Wallauer | 07/05/2019 | Chamado 29104. Retirada as opções de ordem 8 e 9. 
--------------------------------------------------------------------------------------------------------------------------------
 Lucas Borges  | 17/10/2019 | Chamado 28346. Removidos os Warning na compilação da release 12.1.25. .
--------------------------------------------------------------------------------------------------------------------------------
 Julio Paz     | 18/09/2020 | Chamado 34103. Inclusão de coluna p/exibir tipo de frete p/algumas ordens de impressão do relatorio.
--------------------------------------------------------------------------------------------------------------------------------
 Igor Melgaço  | 27/04/2021 | Chamado 36203. Ajuste para visual. de regsitros qdo F2_TIPO = D ou B visualizando os dados do For. 
--------------------------------------------------------------------------------------------------------------------------------
 Igor Melgaço  | 04/06/2021 | Chamado 36726. Ajuste conceitualmente igual ao anterior para demais ordens do relatório. 
--------------------------------------------------------------------------------------------------------------------------------
 Alex Wallauer | 24/03/2022 | Chamado 40019. Novas Colunas de valor de Frete e Armazém na Ordem AT&M. 
--------------------------------------------------------------------------------------------------------------------------------
 Jerry         | 05/07/2022 | Chamado 40677. Adicionar Desc. do Produto na Ordem Produto x UF. 
--------------------------------------------------------------------------------------------------------------------------------
 Alex Wallauer | 09/01/2023 | Chamado 41604. Novo tratamento para Pedidos de Operacao Triangular. Cancelado
--------------------------------------------------------------------------------------------------------------------------------
 Alex Wallauer | 23/01/2024 | Chamado 45841. Jerry. Adicionar a Colunas de Observações da Ordem de Carga (DAK_I_OBS+DAK_I_OBS2).
--------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 13/08/2024 | Chamado 47782. Jerry. Incluir nova coluna para exibir o novo campo Tipo Averb. Carga (A2_I_TPAVE)..
-===============================================================================================================================
+Julio Paz     | 13/08/2024 | Chamado 47782. Jerry. Incluir nova coluna para exibir o novo campo Tipo Averb. Carga (A2_I_TPAVE).
+=================================================================================================================================
+==============================================================================================================================================================
+Analista - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
+==============================================================================================================================================================
+Lucas    - Alex Wallauer - 13/08/25 - 14/08/25 -  51786  - Correção do error.log: Error : 1704 - ORA-01704: string literal too long
+Jerry    - Julio Paz     - 29/09/25 -          -  52177  - Correções nos filtros do relatório. 
+==============================================================================================================================================================
 */
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
 #Include "Report.ch" 
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 
 /*
@@ -40,14 +36,14 @@ Programa--------: ROMS005
 Autor-----------: Jeovane
 Data da Criacao-: 12/03/2009
 ===============================================================================================================================
-Descrição-------: Relatório de Fretes de Transportadoras
+Descrição-------: Relatório de Fretes por Transportadoras
 ===============================================================================================================================
 Parametros------: Nenhum
 ===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-User function ROMS005()
+User Function ROMS005()
 
 Private oBrkTransp
 Private oReport   
@@ -87,7 +83,7 @@ oReport:SetTotalInLine(.F.)
 //====================================================================================================
 // Secao Filial
 //====================================================================================================
-DEFINE SECTION oSF2FIL_1 OF oReport TITLE "O1-Filial" TABLES "SD2"  ORDERS aOrd
+DEFINE Section oSF2FIL_1 OF oReport TITLE "O1-Filial" TABLES "SD2"  ORDERS aOrd
 
 DEFINE CELL NAME "D2_FILIAL"	OF oSF2FIL_1 ALIAS "SD2"  TITLE "Cod "
 DEFINE CELL NAME "NOMFIL"	    OF oSF2FIL_1 ALIAS "" BLOCK{|| FWFilialName(,QRY1->D2_FILIAL)} TITLE "Filial" SIZE 20
@@ -99,7 +95,7 @@ oSF2FIL_1:Disable()
 //====================================================================================================
 // Secao Transportadora
 //====================================================================================================
-DEFINE SECTION oSF2_1 OF oSF2FIL_1 TITLE "O1-Transportadora" TABLES "SA2"  ORDERS aOrd
+DEFINE Section oSF2_1 OF oSF2FIL_1 TITLE "O1-Transportadora" TABLES "SA2"  ORDERS aOrd
 
 DEFINE CELL NAME "A2_COD"	    OF oSF2_1 ALIAS "SA2"  TITLE "Cod." 
 DEFINE CELL NAME "A2_NREDUZ"	OF oSF2_1 ALIAS "SA2"  TITLE "Transportadora" SIZE 40
@@ -115,7 +111,7 @@ DEFINE BREAK oBrkTransp OF oSF2_1 WHEN oSF2_1:Cell("A2_COD") TITLE {|| "SUBTOTAL
 //====================================================================================================
 // Secao Carga - SubSecao da Secao Transportadora
 //====================================================================================================
-DEFINE SECTION oSF2_1A OF oSF2_1 TITLE "O1-Carga" TABLES "DAK","DA3","DA4"  ORDERS aOrd
+DEFINE Section oSF2_1A OF oSF2_1 TITLE "O1-Carga" TABLES "DAK","DA3","DA4"  ORDERS aOrd
 
 DEFINE CELL NAME "DAK_COD"  	OF oSF2_1A ALIAS "DAK" TITLE "Carga"
 DEFINE CELL NAME "DAK_DATA"		OF oSF2_1A ALIAS "DAK" TITLE "Data"
@@ -136,7 +132,7 @@ oSF2_1A:Disable()
 //====================================================================================================
 // Secao Cabecalho Nota - SubSecao da Secao Transportadora
 //====================================================================================================
-DEFINE SECTION oSF2_1B OF oSF2_1A TITLE "01-Nota Fiscal" TABLES "SF2","DA3"  ORDERS aOrd
+DEFINE Section oSF2_1B OF oSF2_1A TITLE "01-Nota Fiscal" TABLES "SF2","DA3"  ORDERS aOrd
 
 DEFINE CELL NAME "F2_DOC"    	OF oSF2_1B ALIAS "SF2" TITLE "Doc. Fiscal"
 DEFINE CELL NAME "F2_EMISSAO" 	OF oSF2_1B ALIAS "SF2"
@@ -150,8 +146,8 @@ DEFINE CELL NAME "F2_VALBRUT" 	OF oSF2_1B ALIAS "SF2"
 DEFINE CELL NAME "F2_PLIQUI"   	OF oSF2_1B ALIAS "SF2" TITLE "Peso Total" PICTURE "@E 999,999,999,999.99"  SIZE 17
 DEFINE CELL NAME "D2_I_FRET" 	OF oSF2_1B ALIAS "SD2" TITLE "Frete N.F." PICTURE "@E 999,999,999,999.99"  SIZE 20
 DEFINE CELL NAME "DAI_PEDIDO"  	OF oSF2_1B ALIAS "DAI" TITLE "Pedido"
-DEFINE CELL NAME "DAK_I_OBS"	OF oSF2_1B ALIAS "DAK" TITLE "Observacao" SIZE LEN(DAK->DAK_I_OBS+DAK->DAK_I_OBS2) BLOCK{|| ALLTRIM(QRY1->DAK_I_OBS) + ' ' + ALLTRIM(QRY1->DAK_I_OBS2)}
-//DEFINE CELL NAME "DAK_I_OBS2"	OF oSF2_1B ALIAS "DAK" TITLE "Observacao2" SIZE LEN(DAK->DAK_I_OBS2) //PARA TESTES
+DEFINE CELL NAME "DAK_I_OBS"	OF oSF2_1B ALIAS "DAK" TITLE "Observacao" SIZE Len(DAK->DAK_I_OBS+DAK->DAK_I_OBS2) BLOCK{|| AllTrim(QRY1->DAK_I_OBS) + ' ' + AllTrim(QRY1->DAK_I_OBS2)}
+//DEFINE CELL NAME "DAK_I_OBS2"	OF oSF2_1B ALIAS "DAK" TITLE "Observacao2" SIZE Len(DAK->DAK_I_OBS2) //PARA TESTES
 
 oSF2_1B:SetTotalInLine(.F.)
 oSF2_1B:SetTotalText({||"SUBTOTAL NOTA: " + cCarga  })
@@ -161,7 +157,7 @@ oSF2_1B:Disable()
 //====================================================================================================
 // Secao Detalhes Analitico - SubSecao da Secao SF2_1B
 //====================================================================================================
-DEFINE SECTION oSF2A_1         OF oSF2_1B TITLE "01-Carga" TABLES "SD2","SB1" ORDERS aOrd
+DEFINE Section oSF2A_1         OF oSF2_1B TITLE "01-Carga" TABLES "SD2","SB1" ORDERS aOrd
 
 DEFINE CELL NAME "D2_COD"	    OF oSF2A_1 ALIAS "SD2" TITLE "Produto"
 DEFINE CELL NAME "B1_I_DESCD" 	OF oSF2A_1 ALIAS "SB1" TITLE "Descricao" SIZE 40
@@ -186,7 +182,7 @@ oSF2A_1:Disable()
 //====================================================================================================
 // Secao Filial
 //====================================================================================================
-DEFINE SECTION oSF2FIL_2 OF oReport TITLE "O2-Filial" TABLES "SD2"  ORDERS aOrd
+DEFINE Section oSF2FIL_2 OF oReport TITLE "O2-Filial" TABLES "SD2"  ORDERS aOrd
 
 DEFINE CELL NAME "D2_FILIAL"	OF oSF2FIL_2 ALIAS "SD2"  TITLE "Cod "
 DEFINE CELL NAME "NOMFIL"	    OF oSF2FIL_2 ALIAS "" BLOCK{|| FWFilialName(,QRY2->D2_FILIAL)} TITLE "Filial" SIZE 20
@@ -198,7 +194,7 @@ oSF2FIL_2:Disable()
 //====================================================================================================
 // Secao Transportadora
 //====================================================================================================
-DEFINE SECTION oSF2_2 OF oSF2FIL_2 TITLE "O2-Transportadora" TABLES "SA2" ORDERS aOrd
+DEFINE Section oSF2_2 OF oSF2FIL_2 TITLE "O2-Transportadora" TABLES "SA2" ORDERS aOrd
 
 DEFINE CELL NAME "A2_COD"	    OF oSF2_2 ALIAS "SA2"  TITLE "Cod." 
 DEFINE CELL NAME "A2_NREDUZ"	OF oSF2_2 ALIAS "SA2"  TITLE "Transportadora" SIZE 40
@@ -209,7 +205,7 @@ oSF2_2:Disable()
 //====================================================================================================
 // Secao Carga - SubSecao da Secao Transportadora
 //====================================================================================================
-DEFINE SECTION oSF2A_2 OF oSF2_2 TITLE "O2-Produtos" TABLES "SB1"
+DEFINE Section oSF2A_2 OF oSF2_2 TITLE "O2-Produtos" TABLES "SB1"
 
 DEFINE CELL NAME "D2_COD"	    OF oSF2A_2 ALIAS "SD2" TITLE "Produto"
 DEFINE CELL NAME "B1_I_DESCD" 	OF oSF2A_2 ALIAS "SB1" TITLE "Descricao" SIZE 40 PICTURE "@S40"
@@ -236,7 +232,7 @@ oSF2A_2:Cell("MEDIA"):SetHeaderAlign("RIGHT")
 //====================================================================================================
 // Secao Filial
 //====================================================================================================
-DEFINE SECTION oSF2FIL_3 OF oReport TITLE "O3-Filial" TABLES "SD2"  ORDERS aOrd
+DEFINE Section oSF2FIL_3 OF oReport TITLE "O3-Filial" TABLES "SD2"  ORDERS aOrd
 
 DEFINE CELL NAME "D2_FILIAL"	OF oSF2FIL_3 ALIAS "SD2"  TITLE "Cod "
 DEFINE CELL NAME "NOMFIL"	    OF oSF2FIL_3 ALIAS "" BLOCK{|| FWFilialName(,QRY3->D2_FILIAL)} TITLE "Filial" SIZE 20
@@ -248,7 +244,7 @@ oSF2FIL_3:Disable()
 //====================================================================================================
 // Secao Transportadora
 //====================================================================================================
-DEFINE SECTION oSF2_3 OF oSF2FIL_3 TITLE "O3-Transportadora" TABLES "SA2" ORDERS aOrd
+DEFINE Section oSF2_3 OF oSF2FIL_3 TITLE "O3-Transportadora" TABLES "SA2" ORDERS aOrd
 
 DEFINE CELL NAME "A2_COD"	    OF oSF2_3 ALIAS "SA2"  TITLE "Cod." 
 DEFINE CELL NAME "A2_NREDUZ"	OF oSF2_3 ALIAS "SA2"  TITLE "Transportadora" SIZE 40
@@ -259,7 +255,7 @@ oSF2_3:Disable()
 //====================================================================================================
 // Secao Carga - SubSecao da Secao Transportadora
 //====================================================================================================
-DEFINE SECTION oSF2A_3 OF oSF2_3 TITLE "O3-Grupos Produtos" TABLES "SB1"
+DEFINE Section oSF2A_3 OF oSF2_3 TITLE "O3-Grupos Produtos" TABLES "SB1"
 
 DEFINE CELL NAME "B1_GRUPO"	    OF oSF2A_3 ALIAS "SB1" TITLE "Grupo"
 DEFINE CELL NAME "DESCGRUPO"   	OF oSF2A_3 ALIAS ""    TITLE "Descricao" SIZE 40  BLOCK{|| Posicione( "SBM" , 1 , xFilial("SBM") + QRY3->B1_GRUPO , "BM_DESC" ) }
@@ -283,7 +279,7 @@ oSF2A_3:SetTotalText( {|| "SUBTOTAL TRANSPORTADORA: "+ cTransp } )
 //====================================================================================================
 // Secao Filial
 //====================================================================================================
-DEFINE SECTION oSF2FIL_4 OF oReport TITLE "O4-Filial" TABLES "SD2"  ORDERS aOrd
+DEFINE Section oSF2FIL_4 OF oReport TITLE "O4-Filial" TABLES "SD2"  ORDERS aOrd
 
 DEFINE CELL NAME "D2_FILIAL"	OF oSF2FIL_4 ALIAS "SD2"  TITLE "Cod "
 DEFINE CELL NAME "NOMFIL"	    OF oSF2FIL_4 ALIAS "" BLOCK{|| FWFilialName(,QRY4->D2_FILIAL) } TITLE "Filial" SIZE 20
@@ -295,7 +291,7 @@ oSF2FIL_4:Disable()
 //====================================================================================================
 // Secao Transportadora
 //====================================================================================================
-DEFINE SECTION oSF2_4 OF oSF2FIL_4 TITLE "O4-Resumido" TABLES "SA2" ORDERS aOrd
+DEFINE Section oSF2_4 OF oSF2FIL_4 TITLE "O4-Resumido" TABLES "SA2" ORDERS aOrd
 
 DEFINE CELL NAME "A2_COD"	    OF oSF2_4 ALIAS "SA2"  TITLE "Cod."
 DEFINE CELL NAME "A2_NREDUZ"	OF oSF2_4 ALIAS "SA2"  TITLE "Transportadora" SIZE 40
@@ -318,7 +314,7 @@ oSF2_4:Cell("PERCPART"):SetHeaderAlign("RIGHT")
 //====================================================================================================
 // Secao Filial
 //====================================================================================================
-DEFINE SECTION oSF2FIL_5 OF oReport TITLE "O5-Filial" TABLES "SD2"  ORDERS aOrd
+DEFINE Section oSF2FIL_5 OF oReport TITLE "O5-Filial" TABLES "SD2"  ORDERS aOrd
 
 DEFINE CELL NAME "D2_FILIAL"	OF oSF2FIL_5 ALIAS "SD2"  TITLE "Cod "
 DEFINE CELL NAME "NOMFIL"	    OF oSF2FIL_5 ALIAS "" BLOCK{|| FWFilialName(,QRY5->D2_FILIAL) } TITLE "Filial" SIZE 40
@@ -330,7 +326,7 @@ oSF2FIL_5:Disable()
 //====================================================================================================
 // Secao Dados transportados por uma determinada Transportadora
 //====================================================================================================
-DEFINE SECTION oSF2_5 OF oSF2FIL_5 TITLE "O5-Transportador" TABLES "SD2","SA2"
+DEFINE Section oSF2_5 OF oSF2FIL_5 TITLE "O5-Transportador" TABLES "SD2","SA2"
 
 DEFINE CELL NAME "A2_COD"	    OF oSF2_5 ALIAS "SA2" TITLE "Cod." 
 DEFINE CELL NAME "A2_NREDUZ"	OF oSF2_5 ALIAS "SA2" TITLE "Transportadora"	SIZE 35
@@ -352,7 +348,7 @@ oSF2FIL_5:SetTotalInLine(.F.)
 
 oReport:PrintDialog()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -375,14 +371,14 @@ nOrdem	:= oSF2FIL_1:GetOrder() // Busca ordem selecionada pelo usuario
 //====================================================================================================
 // Muda titulo do relatorio de acordo com ordem escolhida pelo usuario
 //====================================================================================================
-oReport:SetTitle( oReport:Title() +" - "+ If( nOrdem <> 5 , IIf( MV_PAR19 == 1 , "Sintetico." , "Analitico." ) , "" ) +" Ordem "+ aOrd[nOrdem] +". De "+  dtoc(MV_PAR02) +" até "+ DtoC(MV_PAR03) )
+oReport:SetTitle( oReport:Title() +" - "+ If( nOrdem <> 5 , IIf( MV_PAR19 == 1 , "Sintetico." , "Analitico." ) , "" ) +" Ordem "+ aOrd[nOrdem] +". De "+  DToC(MV_PAR02) +" até "+ DToC(MV_PAR03) )
 
 //====================================================================================================
 // Define o filtro de acordo com os parametros digitados
 // Filtra Filial das tabelas SF2,SD2,SA1,SA2,SB1,DAK,DAI,DA3,DA4
 //====================================================================================================
 If !Empty( MV_PAR01 )
-
+    MV_PAR01:=AllTrim(MV_PAR01)
 	If !Empty( xFilial("SF2") )
 		cFiltro += " AND SF2.F2_FILIAL IN "+ FormatIn( MV_PAR01 , ";" )
 	EndIf
@@ -404,125 +400,125 @@ EndIf
 //====================================================================================================
 // Filtra Emissao da SF2
 //====================================================================================================
-If !Empty(MV_PAR02) .and. !empty(MV_PAR03)
-	cFiltro += " AND SF2.F2_EMISSAO BETWEEN '" + dtos(MV_PAR02) + "' AND '" + dtos(MV_PAR03) + "'"
+If !Empty(MV_PAR02) .And. !Empty(MV_PAR03)
+	cFiltro += " AND SF2.F2_EMISSAO BETWEEN '" + DToS(MV_PAR02) + "' AND '" + DToS(MV_PAR03) + "'"
 EndIf
 
 //====================================================================================================
 // Filtra Produto
 //====================================================================================================
-if !empty(MV_PAR04) .and. !empty(MV_PAR05)
+If !Empty(MV_PAR04) .And. !Empty(MV_PAR05)
 	cFiltro += " AND SD2.D2_COD BETWEEN '" + MV_PAR04 + "' AND '" + MV_PAR05 + "'"
-endif
+EndIf
 
 //====================================================================================================
 // Filtra Armazém
 //====================================================================================================
-if !empty(MV_PAR27) 
-	cFiltro += " AND SD2.D2_LOCAL IN " + FormatIn(MV_PAR27,";")
-endif
+If !Empty(MV_PAR27) 
+	cFiltro += " AND SD2.D2_LOCAL IN " + FormatIn(AllTrim( MV_PAR27 ),";")
+EndIf
 
 //====================================================================================================
 // Filtra Cliente
 //====================================================================================================
-if !empty(MV_PAR06) .and. !empty(MV_PAR08)
+If !Empty(MV_PAR06) .And. !Empty(MV_PAR08)
 	cFiltro += " AND SD2.D2_CLIENTE BETWEEN '" + MV_PAR06 + "' AND '" + MV_PAR08 + "'"
-endif
+EndIf
 
 //====================================================================================================
 // Filtra Loja Cliente
 //====================================================================================================
-if !empty(MV_PAR07) .and. !empty(MV_PAR09)
+If !Empty(MV_PAR07) .And. !Empty(MV_PAR09)
 	cFiltro += " AND SD2.D2_LOJA BETWEEN '" + MV_PAR07 + "' AND '" + MV_PAR09 + "'"
-endif
+EndIf
 
 //====================================================================================================
 // Filtra Rede Cliente
 //====================================================================================================
-if !empty(MV_PAR10)
-	cFiltro += " AND SA1.A1_GRPVEN IN " + FormatIn(MV_PAR10,";")
-endif
+If !Empty(MV_PAR10)
+	cFiltro += " AND SA1.A1_GRPVEN IN " + FormatIn(AllTrim( MV_PAR10),";")
+EndIf
 
 //====================================================================================================
 // Filtra Estado Cliente
 //====================================================================================================
-if !empty(MV_PAR11) 
-	cFiltro += " AND SA1.A1_EST IN " + FormatIn(MV_PAR11,";")
-endif
+If !Empty(MV_PAR11) 
+	cFiltro += " AND SA1.A1_EST IN " + FormatIn(AllTrim( MV_PAR11),";")
+EndIf
 
 //====================================================================================================
 // Filtra Cod Municipio Cliente
 //====================================================================================================
-if !empty(MV_PAR12) 
-	cFiltro += " AND SA1.A1_COD_MUN IN " + FormatIn(MV_PAR12,";")
-endif
+If !Empty(MV_PAR12) 
+	cFiltro += " AND SA1.A1_COD_MUN IN " + FormatIn(AllTrim( MV_PAR12),";")
+EndIf
 
 //====================================================================================================
 // Filtra Vendedor
 //====================================================================================================
-if !empty(MV_PAR13) 
-	cFiltro += " AND SA3.A3_COD IN " + FormatIn(MV_PAR13,";")
-endif
+If !Empty(MV_PAR13) 
+	cFiltro += " AND SA3.A3_COD IN " + FormatIn(AllTrim( MV_PAR13),";")
+EndIf
 
 //====================================================================================================
 // Filtra Supervisor
 //====================================================================================================
-if !empty(MV_PAR14)
-	cFiltro += " AND SA3.A3_SUPER IN " + FormatIn(MV_PAR14,";")
-endif
+If !Empty(MV_PAR14)
+	cFiltro += " AND SA3.A3_SUPER IN " + FormatIn(AllTrim( MV_PAR14),";")
+EndIf
 
 //====================================================================================================
 // Filtra Grupo de Produtos
 //====================================================================================================
-if !empty(MV_PAR15)
-	cFiltro += " AND SB1.B1_GRUPO IN " + FormatIn(MV_PAR15,";")
-endif
+If !Empty(MV_PAR15)
+	cFiltro += " AND SB1.B1_GRUPO IN " + FormatIn(AllTrim( MV_PAR15),";")
+EndIf
 
 //====================================================================================================
 // Filtra Produto Nivel 2
 //====================================================================================================
-if !empty(MV_PAR16)
-	cFiltro += " AND SB1.B1_I_NIV2 IN " + FormatIn(MV_PAR16,";")
-endif
+If !Empty(MV_PAR16)
+	cFiltro += " AND SB1.B1_I_NIV2 IN " + FormatIn(AllTrim( MV_PAR16),";")
+EndIf
 
 //====================================================================================================
 // Filtra Produto Nivel 3
 //====================================================================================================
-if !empty(MV_PAR17)
-	cFiltro += " AND SB1.B1_I_NIV3 IN " + FormatIn(MV_PAR17,";")
-endif
+If !Empty(MV_PAR17)
+	cFiltro += " AND SB1.B1_I_NIV3 IN " + FormatIn(AllTrim( MV_PAR17),";")
+EndIf
 
 //====================================================================================================
 // Filtra Produto Nivel 4
 //====================================================================================================
-if !empty(MV_PAR18)
-	cFiltro += " AND SB1.B1_I_NIV4 IN " + FormatIn(MV_PAR18,";")
-endif 
+If !Empty(MV_PAR18)
+	cFiltro += " AND SB1.B1_I_NIV4 IN " + FormatIn(AllTrim( MV_PAR18),";")
+EndIf 
 
 //====================================================================================================
 // Filtra Transportadoras
 //====================================================================================================
-if !empty(MV_PAR20)
-	cFiltro += " AND SA2.A2_COD IN " + FormatIn(MV_PAR20,";")
-endif 
+If !Empty(MV_PAR20)
+	cFiltro += " AND SA2.A2_COD IN " + FormatIn(AllTrim( MV_PAR20),";")
+EndIf 
 
 //====================================================================================================
 // Filtra tipo do Fornecedor
 //====================================================================================================
-if !empty(MV_PAR25)
-	cFiltro    += " AND SA2.A2_I_CLASS IN " + FormatIn(MV_PAR25,";")
-endif
+If !Empty(MV_PAR25)
+	cFiltro    += " AND SA2.A2_I_CLASS IN " + FormatIn(AllTrim( MV_PAR25),";")
+EndIf
 
 //====================================================================================================
 // Filtra Transportadoras por averbacao
 //====================================================================================================
 /* Por solicitação da usuária fixar a opção de filtro Transportadoras por averbação em abas.
-if MV_PAR28 == 1
+If MV_PAR28 == 1
 	cFiltro += " AND SA2.A2_I_AVERB = '1'"
-endif 
-if MV_PAR28 == 2
+EndIf 
+If MV_PAR28 == 2
 	cFiltro += " AND SA2.A2_I_AVERB = '2'"
-endif
+EndIf
 */
 //====================================================================================================
 // busca CFOPS de acordo com parametro definido por usuario
@@ -535,13 +531,13 @@ If !Empty(MV_PAR21)
 		cFiltro	+= " AND SD2.D2_CF IN "+ FormatIn( cCfops , ";" )
 
 /*        cFiltro += " AND SC5.C5_I_OPER <> '05' "
-	    IF ("V" $ MV_PAR21 ) .AND. !("R" $ MV_PAR21 )
-		   cFiltro += " AND ( SD2.D2_CF IN " + FormatIn(ALLTRIM(cCfops),";")
+	    If ("V" $ MV_PAR21 ) .And. !("R" $ MV_PAR21 )
+		   cFiltro += " AND ( SD2.D2_CF IN " + FormatIn(AllTrim(cCfops),";")
 		   cCfopsR := U_ITCFOPS("R")
-		   cFiltro += " OR ( SD2.D2_CF IN " + FormatIn(ALLTRIM(cCfopsR),";") + " AND SC5.C5_I_OPER = '42' ) ) "
-	    ELSE//IF !("V" $ MV_PAR21 ) 
-		   cFiltro += " AND SD2.D2_CF IN " + FormatIn(ALLTRIM(cCfops),";")
-		ENDIF*/
+		   cFiltro += " OR ( SD2.D2_CF IN " + FormatIn(AllTrim(cCfopsR),";") + " AND SC5.C5_I_OPER = '42' ) ) "
+	    Else//If !("V" $ MV_PAR21 ) 
+		   cFiltro += " AND SD2.D2_CF IN " + FormatIn(AllTrim(cCfops),";")
+		EndIf*/
 		
 	EndIf
 	
@@ -555,7 +551,7 @@ If MV_PAR22 == 1
 
 	cFiltro += " AND SF2.F2_I_FRET > 0 "
 
-Elseif MV_PAR22 == 2
+ElseIf MV_PAR22 == 2
 
 	cFiltro += " AND SF2.F2_I_FRET = 0 "
 
@@ -565,37 +561,37 @@ EndIf
 //====================================================================================================
 // Sub Grupo de Produtos
 //====================================================================================================
-if !empty(MV_PAR23)
-	cFiltro += " AND SB1.B1_I_SUBGR IN " + FormatIn(MV_PAR23,";")
-endif 
+If !Empty(MV_PAR23)
+	cFiltro += " AND SB1.B1_I_SUBGR IN " + FormatIn(AllTrim( MV_PAR23),";")
+EndIf 
 
 //====================================================================================================
 // Filtra Tipo da carga
 //====================================================================================================
-if !empty(MV_PAR24)
-	cFiltro += " AND DAK.DAK_I_TPCA IN " + FormatIn(MV_PAR24,";")
-endif           
+If !Empty(MV_PAR24)
+	cFiltro += " AND DAK.DAK_I_TPCA IN " + FormatIn(AllTrim( MV_PAR24),";")
+EndIf           
 
 //====================================================================================================
 // Filtra Transportadoras por averbacao
 //====================================================================================================
-if !empty(MV_PAR29)
-	cFiltro += " AND SC5.C5_TPFRETE IN"+ FormatIn( MV_PAR29 , ";" )
-endif 
+If !Empty(MV_PAR29)
+	cFiltro += " AND SC5.C5_TPFRETE IN"+ FormatIn(AllTrim(  MV_PAR29) , ";" )
+EndIf 
 
 //====================================================================================================================================
 //"6-Grupo de Produto x UF","7-Produto x UF","8-Fechamento x Produto","9-Fechamento x Sub-Grupo","10-Veiculo","11-AT&M"
 //====================================================================================================================================
-If nOrdem == 6 .Or. nOrdem == 7 .Or. nOrdem == 8 .Or. nOrdem == 9 .Or. nOrdem == 10 .or. nordem == 11
+If nOrdem == 6 .Or. nOrdem == 7 .Or. nOrdem == 8 .Or. nOrdem == 9 .Or. nOrdem == 10 .Or. nordem == 11
 
 	oReport:Disable()
     If MV_PAR26 == 2 // Relatório em Excel  
        oReport:CancelPrint()
     EndIf
     
-	IF ROMS05Val(nOrdem)    
+	If ROMS05Val(nOrdem)    
 	   ROMS005GRP()
-	ENDIF
+	EndIf
 
     If MV_PAR26 == 1 // Impressão
        oReport:CancelPrint()
@@ -627,24 +623,24 @@ If nOrdem == 1 //ORDEM POR CARGA
 		// Secao Detalhes Analitico - SubSecao da Secao SF2_1B
 		//====================================================================================================
 		   
-		DEFINE FUNCTION FROM oSF2A_1:Cell("D2_QUANT")   FUNCTION SUM NO END SECTION BREAK oBrkTransp
-		DEFINE FUNCTION FROM oSF2A_1:Cell("D2_QTSEGUM") FUNCTION SUM NO END SECTION BREAK oBrkTransp
-		DEFINE FUNCTION FROM oSF2A_1:Cell("D2_TOTAL")   FUNCTION SUM NO END SECTION BREAK oBrkTransp 
-		DEFINE FUNCTION FROM oSF2A_1:Cell("D2_VALBRUT") FUNCTION SUM NO END SECTION BREAK oBrkTransp  
-		DEFINE FUNCTION FROM oSF2A_1:Cell("VLRITEM")    FUNCTION SUM NO END SECTION BREAK oBrkTransp 	                                            
+		DEFINE FUNCTION FROM oSF2A_1:Cell("D2_QUANT")   FUNCTION SUM NO END Section BREAK oBrkTransp
+		DEFINE FUNCTION FROM oSF2A_1:Cell("D2_QTSEGUM") FUNCTION SUM NO END Section BREAK oBrkTransp
+		DEFINE FUNCTION FROM oSF2A_1:Cell("D2_TOTAL")   FUNCTION SUM NO END Section BREAK oBrkTransp 
+		DEFINE FUNCTION FROM oSF2A_1:Cell("D2_VALBRUT") FUNCTION SUM NO END Section BREAK oBrkTransp  
+		DEFINE FUNCTION FROM oSF2A_1:Cell("VLRITEM")    FUNCTION SUM NO END Section BREAK oBrkTransp 	                                            
 		
-		DEFINE FUNCTION FROM oSF2A_1:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END SECTION NO END REPORT
-		DEFINE FUNCTION FROM oSF2A_1:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END SECTION NO END REPORT                                                                                                       
-		DEFINE FUNCTION FROM oSF2A_1:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END SECTION NO END REPORT
-		DEFINE FUNCTION FROM oSF2A_1:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkFil NO END SECTION NO END REPORT
-		DEFINE FUNCTION FROM oSF2A_1:Cell("VLRITEM")    FUNCTION SUM BREAK oBrkFil NO END SECTION NO END REPORT
+		DEFINE FUNCTION FROM oSF2A_1:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT
+		DEFINE FUNCTION FROM oSF2A_1:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT                                                                                                       
+		DEFINE FUNCTION FROM oSF2A_1:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT
+		DEFINE FUNCTION FROM oSF2A_1:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT
+		DEFINE FUNCTION FROM oSF2A_1:Cell("VLRITEM")    FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT
 		
 	Else
 	
-		DEFINE FUNCTION FROM oSF2_1B:Cell("F2_VALBRUT") FUNCTION SUM BREAK oBrkFil NO END SECTION NO END REPORT
-		DEFINE FUNCTION FROM oSF2_1B:Cell("F2_VALMERC") FUNCTION SUM BREAK oBrkFil NO END SECTION NO END REPORT
-		DEFINE FUNCTION FROM oSF2_1B:Cell("F2_PLIQUI")  FUNCTION SUM BREAK oBrkFil NO END SECTION NO END REPORT
-		DEFINE FUNCTION FROM oSF2_1B:Cell("D2_I_FRET")  FUNCTION SUM BREAK oBrkFil NO END SECTION NO END REPORT
+		DEFINE FUNCTION FROM oSF2_1B:Cell("F2_VALBRUT") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT
+		DEFINE FUNCTION FROM oSF2_1B:Cell("F2_VALMERC") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT
+		DEFINE FUNCTION FROM oSF2_1B:Cell("F2_PLIQUI")  FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT
+		DEFINE FUNCTION FROM oSF2_1B:Cell("D2_I_FRET")  FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT
 	
 	EndIf
 	
@@ -665,8 +661,8 @@ If nOrdem == 1 //ORDEM POR CARGA
 				    SUM(SD2.D2_VALBRUT)					AS D2_VALBRUT,
 				    SUM(SD2.D2_PESO * SD2.D2_QUANT)		AS D2_PESO,
 				    SUM(SD2.D2_I_FRET)					AS VLRITEM,
-					CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END AS A2_COD,
-					CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END AS A2_NREDUZ,
+					Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END AS A2_COD,
+					Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END AS A2_NREDUZ,
 					DAK.DAK_COD,
 					DAK.DAK_DATA,
 					DAK_I_OBS,
@@ -706,23 +702,23 @@ If nOrdem == 1 //ORDEM POR CARGA
 					DA4.DA4_COD,
 					DA4.DA4_NOME,
 					DAI_PEDIDO
-				FROM %table:DAK% DAK
-				JOIN %table:DAI% DAI ON DAI.DAI_COD    = DAK.DAK_COD	AND DAI.DAI_FILIAL = DAK.DAK_FILIAL
-				JOIN %table:DA3% DA3 ON DAK.DAK_CAMINH = DA3.DA3_COD
-				JOIN %table:SF2% SF2 ON SF2.F2_DOC     = DAI.DAI_NFISCA	AND SF2.F2_SERIE   = DAI.DAI_SERIE	AND SF2.F2_FILIAL = DAI.DAI_FILIAL
-				JOIN %table:SD2% SD2 ON SD2.D2_DOC     = SF2.F2_DOC		AND SD2.D2_SERIE   = SF2.F2_SERIE	AND SD2.D2_FILIAL = SF2.F2_FILIAL
-				JOIN (SELECT A1_FILIAL, A1_COD, A1_LOJA, A1_NREDUZ, A1_MUN, A1_EST, A1_GRPVEN
-						FROM %table:SA1% SA1
+				FROM %Table:DAK% DAK
+				JOIN %Table:DAI% DAI ON DAI.DAI_COD    = DAK.DAK_COD	AND DAI.DAI_FILIAL = DAK.DAK_FILIAL
+				JOIN %Table:DA3% DA3 ON DAK.DAK_CAMINH = DA3.DA3_COD
+				JOIN %Table:SF2% SF2 ON SF2.F2_DOC     = DAI.DAI_NFISCA	AND SF2.F2_SERIE   = DAI.DAI_SERIE	AND SF2.F2_FILIAL = DAI.DAI_FILIAL
+				JOIN %Table:SD2% SD2 ON SD2.D2_DOC     = SF2.F2_DOC		AND SD2.D2_SERIE   = SF2.F2_SERIE	AND SD2.D2_FILIAL = SF2.F2_FILIAL
+				JOIN (SELECT A1_FILIAL, A1_COD, A1_LOJA, A1_NREDUZ, A1_MUN, A1_EST, A1_GRPVEN, A1_COD_MUN   
+						FROM %Table:SA1% SA1
 						WHERE SA1.%notDel% 
 						UNION
-						SELECT A2_FILIAL, A2_COD, A2_LOJA, A2_NREDUZ, A2_MUN, A2_EST, '' As A1_GRPVEN
-						FROM %table:SA2% SA2
+						SELECT A2_FILIAL, A2_COD, A2_LOJA, A2_NREDUZ, A2_MUN, A2_EST, '' As A1_GRPVEN , A2_COD_MUN A1_COD_MUN 
+						FROM %Table:SA2% SA2
 						WHERE SA2.%notDel% ) SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA  = SA1.A1_LOJA
-				JOIN %table:SA3% SA3 ON SF2.F2_VEND1   = SA3.A3_COD
-				JOIN %table:SB1% SB1 ON SD2.D2_COD     = SB1.B1_COD
-				JOIN %table:DA4% DA4 ON DAK.DAK_MOTORI = DA4.DA4_COD
-				JOIN %table:SA2% SA2 ON SF2.F2_I_CTRA  = SA2.A2_COD		AND SF2.F2_I_LTRA  = SA2.A2_LOJA
-				JOIN %table:SC5% SC5 ON SC5.C5_FILIAL  = SD2.D2_FILIAL  AND SC5.C5_NUM     = SD2.D2_PEDIDO
+				JOIN %Table:SA3% SA3 ON SF2.F2_VEND1   = SA3.A3_COD
+				JOIN %Table:SB1% SB1 ON SD2.D2_COD     = SB1.B1_COD
+				JOIN %Table:DA4% DA4 ON DAK.DAK_MOTORI = DA4.DA4_COD
+				JOIN %Table:SA2% SA2 ON SF2.F2_I_CTRA  = SA2.A2_COD		AND SF2.F2_I_LTRA  = SA2.A2_LOJA
+				JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL  = SD2.D2_FILIAL  AND SC5.C5_NUM     = SD2.D2_PEDIDO
 				WHERE
 		        	DAK.%notDel%
 		        AND DAI.%notDel%
@@ -737,8 +733,8 @@ If nOrdem == 1 //ORDEM POR CARGA
 				AND SA2.A2_I_CLASS IN ('T','A','G')
 				AND SD2.D2_CF <> '5927'
 				%exp:cFiltro%
-				GROUP BY	CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END,
-							CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END,
+				GROUP BY	Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END,
+							Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END,
 							DAK.DAK_COD,DAK.DAK_DATA,SF2.F2_EMISSAO,SD2.D2_CLIENTE,SD2.D2_LOJA,SA1.A1_NREDUZ,SA1.A1_MUN,SA1.A1_EST,SF2.F2_DOC,SF2.F2_SERIE,SF2.F2_VALBRUT,SF2.F2_I_FRET,SD2.D2_COD,
 							SB1.B1_I_DESCD,SD2.D2_QUANT,SD2.D2_UM,SD2.D2_SEGUM,SD2.D2_QTSEGUM,SF2.F2_PBRUTO,SF2.F2_PLIQUI,DA3.DA3_PLACA,DA3.DA3_I_PLCV,DA3.DA3_I_PLVG,DAK.DAK_I_FRET,
 							SD2.D2_I_FRET,DAK.DAK_PESO,SD2.D2_TOTAL,SD2.D2_FILIAL,SD2.D2_PRCVEN,SF2.F2_VALMERC,SA2.A2_I_CLASS,SA2.A2_EST,SA2.A2_I_TPAVE,DA3.DA3_DESC,DA4.DA4_COD,DA4.DA4_NOME, 
@@ -748,10 +744,10 @@ If nOrdem == 1 //ORDEM POR CARGA
 			EndSql
 			
 		END REPORT QUERY oSF2FIL_1
-	
-	//====================================================================================================
-	// Query para relatorio sintetico
-	//====================================================================================================
+
+    	//====================================================================================================
+	    // Query para relatorio sintetico
+	    //====================================================================================================
 	Else
 	
 		BEGIN REPORT QUERY oSF2FIL_1
@@ -763,8 +759,8 @@ If nOrdem == 1 //ORDEM POR CARGA
 				    SUM(SD2.D2_VALBRUT)				AS D2_VALBRUT,
 				    SUM(SD2.D2_PESO * SD2.D2_QUANT)	AS D2_PESO,
 				    SUM(SD2.D2_I_FRET)				AS D2_I_FRET,
-					CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END AS A2_COD,
-					CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END AS A2_NREDUZ,
+					Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END AS A2_COD,
+					Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END AS A2_NREDUZ,
 					DAK.DAK_COD,
 					DAK.DAK_DATA,
 					DAK_I_OBS,
@@ -795,23 +791,23 @@ If nOrdem == 1 //ORDEM POR CARGA
 					DA4.DA4_COD,
 					DA4.DA4_NOME,
 					DAI_PEDIDO
-				FROM %table:DAK% DAK
-				JOIN %table:DAI% DAI ON DAI.DAI_COD    = DAK.DAK_COD	AND DAI.DAI_FILIAL = DAK.DAK_FILIAL
-				JOIN %table:DA3% DA3 ON DAK.DAK_CAMINH = DA3.DA3_COD
-				JOIN %table:SF2% SF2 ON SF2.F2_DOC     = DAI.DAI_NFISCA AND SF2.F2_SERIE   = DAI.DAI_SERIE	AND SF2.F2_FILIAL = DAI.DAI_FILIAL
-				JOIN %table:SD2% SD2 ON SD2.D2_DOC     = SF2.F2_DOC		AND SD2.D2_SERIE   = SF2.F2_SERIE	AND SD2.D2_FILIAL = SF2.F2_FILIAL
-				JOIN %table:SA3% SA3 ON SF2.F2_VEND1   = SA3.A3_COD
-				JOIN (SELECT A1_FILIAL, A1_COD, A1_LOJA, A1_NREDUZ, A1_MUN, A1_EST, A1_GRPVEN
-						FROM %table:SA1% SA1
+				FROM %Table:DAK% DAK
+				JOIN %Table:DAI% DAI ON DAI.DAI_COD    = DAK.DAK_COD	AND DAI.DAI_FILIAL = DAK.DAK_FILIAL
+				JOIN %Table:DA3% DA3 ON DAK.DAK_CAMINH = DA3.DA3_COD
+				JOIN %Table:SF2% SF2 ON SF2.F2_DOC     = DAI.DAI_NFISCA AND SF2.F2_SERIE   = DAI.DAI_SERIE	AND SF2.F2_FILIAL = DAI.DAI_FILIAL
+				JOIN %Table:SD2% SD2 ON SD2.D2_DOC     = SF2.F2_DOC		AND SD2.D2_SERIE   = SF2.F2_SERIE	AND SD2.D2_FILIAL = SF2.F2_FILIAL
+				JOIN %Table:SA3% SA3 ON SF2.F2_VEND1   = SA3.A3_COD
+				JOIN (SELECT A1_FILIAL, A1_COD, A1_LOJA, A1_NREDUZ, A1_MUN, A1_EST, A1_GRPVEN, A1_COD_MUN  
+						FROM %Table:SA1% SA1
 						WHERE SA1.%notDel% 
 						UNION
-						SELECT A2_FILIAL, A2_COD, A2_LOJA, A2_NREDUZ, A2_MUN, A2_EST, '' As A1_GRPVEN
-						FROM %table:SA2% SA2
+						SELECT A2_FILIAL, A2_COD, A2_LOJA, A2_NREDUZ, A2_MUN, A2_EST, '' As A1_GRPVEN, A2_COD_MUN A1_COD_MUN 
+						FROM %Table:SA2% SA2
 						WHERE SA2.%notDel% ) SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA  = SA1.A1_LOJA
-				JOIN %table:SB1% SB1 ON SD2.D2_COD     = SB1.B1_COD
-				JOIN %table:DA4% DA4 ON DAK.DAK_MOTORI = DA4.DA4_COD
-				JOIN %table:SA2% SA2 ON SF2.F2_I_CTRA  = SA2.A2_COD		AND SF2.F2_I_LTRA  = SA2.A2_LOJA
-				JOIN %table:SC5% SC5 ON SC5.C5_FILIAL  = SD2.D2_FILIAL  AND SC5.C5_NUM     = SD2.D2_PEDIDO
+				JOIN %Table:SB1% SB1 ON SD2.D2_COD     = SB1.B1_COD
+				JOIN %Table:DA4% DA4 ON DAK.DAK_MOTORI = DA4.DA4_COD
+				JOIN %Table:SA2% SA2 ON SF2.F2_I_CTRA  = SA2.A2_COD		AND SF2.F2_I_LTRA  = SA2.A2_LOJA
+				JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL  = SD2.D2_FILIAL  AND SC5.C5_NUM     = SD2.D2_PEDIDO
 				WHERE
 		        	DAK.%notDel%
 	        	AND SA3.%notDel%
@@ -826,8 +822,8 @@ If nOrdem == 1 //ORDEM POR CARGA
 			 	AND SA2.A2_I_CLASS IN ('T','A','G')			
 				AND SD2.D2_CF <> '5927'
 				%exp:cFiltro%
-				GROUP BY	CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END,
-							CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END,
+				GROUP BY	Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END,
+							Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END,
 							DAK.DAK_COD,DAK.DAK_DATA,SF2.F2_EMISSAO,SD2.D2_CLIENTE,SD2.D2_LOJA,SA1.A1_NREDUZ,SA1.A1_MUN,SA1.A1_EST,SF2.F2_DOC,SF2.F2_SERIE,
 							SF2.F2_VALBRUT,SF2.F2_I_FRET,SF2.F2_PBRUTO,DA3.DA3_PLACA,DA3.DA3_I_PLCV,DA3.DA3_I_PLVG,DAK.DAK_I_FRET,DAK.DAK_PESO,
 							SD2.D2_FILIAL,SF2.F2_VALMERC,F2_PLIQUI,SA2.A2_I_CLASS,SA2.A2_EST,SA2.A2_I_TPAVE,DA3.DA3_DESC,DA4.DA4_COD,DA4.DA4_NOME,  
@@ -863,8 +859,8 @@ ElseIf nOrdem == 2 //ORDEM POR PRODUTO
 	BeginSql alias "QRY2"
 	
 		SELECT
-			CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END AS A2_COD,
-			CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END AS A2_NREDUZ,
+			Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END AS A2_COD,
+			Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END AS A2_NREDUZ,
 			SUM(SD2.D2_QUANT)	AS D2_QUANT,
 			SUM(SD2.D2_QTSEGUM)	AS D2_QTSEGUM,
 			AVG(SD2.D2_PRCVEN)	AS D2_PRCVEN,
@@ -879,23 +875,23 @@ ElseIf nOrdem == 2 //ORDEM POR PRODUTO
 			SD2.D2_FILIAL,
 			SF2.F2_CARGA,
 			SD2.D2_DOC
-		FROM %table:DAK% DAK
-		JOIN %table:DAI% DAI ON DAI.DAI_COD    = DAK.DAK_COD	AND DAI.DAI_FILIAL = DAK.DAK_FILIAL 
-		JOIN %table:DA3% DA3 ON DAK.DAK_CAMINH = DA3.DA3_COD
-		JOIN %table:SF2% SF2 ON SF2.F2_DOC     = DAI.DAI_NFISCA	AND SF2.F2_SERIE   = DAI.DAI_SERIE	AND DAI.DAI_FILIAL = SF2.F2_FILIAL
-		JOIN %table:SD2% SD2 ON SD2.D2_DOC     = SF2.F2_DOC		AND SD2.D2_SERIE   = SF2.F2_SERIE	AND SD2.D2_FILIAL  = SF2.F2_FILIAL
-		JOIN (SELECT A1_FILIAL, A1_COD, A1_LOJA, A1_NREDUZ, A1_MUN, A1_EST, A1_GRPVEN
-				FROM %table:SA1% SA1
+		FROM %Table:DAK% DAK
+		JOIN %Table:DAI% DAI ON DAI.DAI_COD    = DAK.DAK_COD	AND DAI.DAI_FILIAL = DAK.DAK_FILIAL 
+		JOIN %Table:DA3% DA3 ON DAK.DAK_CAMINH = DA3.DA3_COD
+		JOIN %Table:SF2% SF2 ON SF2.F2_DOC     = DAI.DAI_NFISCA	AND SF2.F2_SERIE   = DAI.DAI_SERIE	AND DAI.DAI_FILIAL = SF2.F2_FILIAL
+		JOIN %Table:SD2% SD2 ON SD2.D2_DOC     = SF2.F2_DOC		AND SD2.D2_SERIE   = SF2.F2_SERIE	AND SD2.D2_FILIAL  = SF2.F2_FILIAL
+		JOIN (SELECT A1_FILIAL, A1_COD, A1_LOJA, A1_NREDUZ, A1_MUN, A1_EST, A1_GRPVEN, A1_COD_MUN  
+				FROM %Table:SA1% SA1
 				WHERE SA1.%notDel% 
 				UNION
-				SELECT A2_FILIAL, A2_COD, A2_LOJA, A2_NREDUZ, A2_MUN, A2_EST, '' As A1_GRPVEN
-				FROM %table:SA2% SA2
+				SELECT A2_FILIAL, A2_COD, A2_LOJA, A2_NREDUZ, A2_MUN, A2_EST, '' As A1_GRPVEN, A2_COD_MUN A1_COD_MUN   
+				FROM %Table:SA2% SA2
 				WHERE SA2.%notDel% ) SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA  = SA1.A1_LOJA
-		JOIN %table:SA3% SA3 ON SF2.F2_VEND1   = SA3.A3_COD
-		JOIN %table:SB1% SB1 ON SD2.D2_COD     = SB1.B1_COD
-		JOIN %table:DA4% DA4 ON DAK.DAK_MOTORI = DA4.DA4_COD
-		JOIN %table:SA2% SA2 ON SF2.F2_I_CTRA  = SA2.A2_COD		AND SF2.F2_I_LTRA  = SA2.A2_LOJA
-		JOIN %table:SC5% SC5 ON SC5.C5_FILIAL  = SD2.D2_FILIAL  AND SC5.C5_NUM     = SD2.D2_PEDIDO
+		JOIN %Table:SA3% SA3 ON SF2.F2_VEND1   = SA3.A3_COD
+		JOIN %Table:SB1% SB1 ON SD2.D2_COD     = SB1.B1_COD
+		JOIN %Table:DA4% DA4 ON DAK.DAK_MOTORI = DA4.DA4_COD
+		JOIN %Table:SA2% SA2 ON SF2.F2_I_CTRA  = SA2.A2_COD		AND SF2.F2_I_LTRA  = SA2.A2_LOJA
+		JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL  = SD2.D2_FILIAL  AND SC5.C5_NUM     = SD2.D2_PEDIDO
 		WHERE
         	DAK.%notDel%
        	AND SA3.%notDel%
@@ -910,8 +906,8 @@ ElseIf nOrdem == 2 //ORDEM POR PRODUTO
 		AND SA2.A2_I_CLASS IN ('T','A','G')
 		AND SD2.D2_CF <> '5927'
 		%exp:cFiltro%
-		GROUP BY	CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END,
-					CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END,SA2.A2_EST,
+		GROUP BY	Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END,
+					Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END,SA2.A2_EST,
 					SD2.D2_COD,SB1.B1_I_DESCD,SD2.D2_UM,SD2.D2_SEGUM,SD2.D2_FILIAL,SF2.F2_CARGA,SD2.D2_DOC
 		ORDER BY	SD2.D2_FILIAL,A2_COD,A2_NREDUZ
 		
@@ -942,8 +938,8 @@ ElseIf nOrdem == 3 //ORDEM POR GRUPO DE PRODUTO
 	BeginSql alias "QRY3"
 	
 		SELECT
-			CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END AS A2_COD,
-			CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END AS A2_NREDUZ,
+			Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END AS A2_COD,
+			Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END AS A2_NREDUZ,
 			SUM(SD2.D2_QUANT)	AS D2_QUANT,
 			SUM(SD2.D2_QTSEGUM)	AS D2_QTSEGUM,
 			AVG(SD2.D2_PRCVEN)	AS D2_PRCVEN,
@@ -951,23 +947,23 @@ ElseIf nOrdem == 3 //ORDEM POR GRUPO DE PRODUTO
 			SUM(SD2.D2_VALBRUT)	AS D2_VALBRUT,
 			SUM(SD2.D2_I_FRET)	AS D2_I_FRET,
 			SB1.B1_GRUPO,SD2.D2_UM,SD2.D2_SEGUM,SD2.D2_FILIAL,SA2.A2_EST
-		FROM %table:DAK% DAK
-		JOIN %table:DAI% DAI ON DAI.DAI_COD    = DAK.DAK_COD	AND DAI.DAI_FILIAL = DAK.DAK_FILIAL
-		JOIN %table:DA3% DA3 ON DAK.DAK_CAMINH = DA3.DA3_COD
-		JOIN %table:SF2% SF2 ON SF2.F2_DOC     = DAI.DAI_NFISCA AND SF2.F2_SERIE   = DAI.DAI_SERIE	AND DAI.DAI_FILIAL = SF2.F2_FILIAL
-		JOIN %table:SD2% SD2 ON SD2.D2_DOC     = SF2.F2_DOC		AND SD2.D2_SERIE   = SF2.F2_SERIE	AND SD2.D2_FILIAL  = SF2.F2_FILIAL
-		JOIN (SELECT A1_FILIAL, A1_COD, A1_LOJA, A1_NREDUZ, A1_MUN, A1_EST, A1_GRPVEN
-				FROM %table:SA1% SA1
+		FROM %Table:DAK% DAK
+		JOIN %Table:DAI% DAI ON DAI.DAI_COD    = DAK.DAK_COD	AND DAI.DAI_FILIAL = DAK.DAK_FILIAL
+		JOIN %Table:DA3% DA3 ON DAK.DAK_CAMINH = DA3.DA3_COD
+		JOIN %Table:SF2% SF2 ON SF2.F2_DOC     = DAI.DAI_NFISCA AND SF2.F2_SERIE   = DAI.DAI_SERIE	AND DAI.DAI_FILIAL = SF2.F2_FILIAL
+		JOIN %Table:SD2% SD2 ON SD2.D2_DOC     = SF2.F2_DOC		AND SD2.D2_SERIE   = SF2.F2_SERIE	AND SD2.D2_FILIAL  = SF2.F2_FILIAL
+		JOIN (SELECT A1_FILIAL, A1_COD, A1_LOJA, A1_NREDUZ, A1_MUN, A1_EST, A1_GRPVEN, A1_COD_MUN  
+				FROM %Table:SA1% SA1
 				WHERE SA1.%notDel% 
 				UNION
-				SELECT A2_FILIAL, A2_COD, A2_LOJA, A2_NREDUZ, A2_MUN, A2_EST, '' As A1_GRPVEN
-				FROM %table:SA2% SA2
+				SELECT A2_FILIAL, A2_COD, A2_LOJA, A2_NREDUZ, A2_MUN, A2_EST, '' As A1_GRPVEN, A2_COD_MUN A1_COD_MUN 
+				FROM %Table:SA2% SA2
 				WHERE SA2.%notDel% ) SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA  = SA1.A1_LOJA
-		JOIN %table:SA3% SA3 ON SF2.F2_VEND1   = SA3.A3_COD
-		JOIN %table:SB1% SB1 ON SD2.D2_COD     = SB1.B1_COD
-		JOIN %table:DA4% DA4 ON DAK.DAK_MOTORI = DA4.DA4_COD
-		JOIN %table:SA2% SA2 ON SF2.F2_I_CTRA  = SA2.A2_COD		AND SF2.F2_I_LTRA  = SA2.A2_LOJA
-		JOIN %table:SC5% SC5 ON SC5.C5_FILIAL  = SD2.D2_FILIAL  AND SC5.C5_NUM     = SD2.D2_PEDIDO
+		JOIN %Table:SA3% SA3 ON SF2.F2_VEND1   = SA3.A3_COD
+		JOIN %Table:SB1% SB1 ON SD2.D2_COD     = SB1.B1_COD
+		JOIN %Table:DA4% DA4 ON DAK.DAK_MOTORI = DA4.DA4_COD
+		JOIN %Table:SA2% SA2 ON SF2.F2_I_CTRA  = SA2.A2_COD		AND SF2.F2_I_LTRA  = SA2.A2_LOJA
+		JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL  = SD2.D2_FILIAL  AND SC5.C5_NUM     = SD2.D2_PEDIDO
 		WHERE
         	DAK.%notDel%
 		AND SA3.%notDel%
@@ -982,8 +978,8 @@ ElseIf nOrdem == 3 //ORDEM POR GRUPO DE PRODUTO
 		AND SA2.A2_I_CLASS IN ('T','A','G')
 		AND SD2.D2_CF <> '5927'
 		%exp:cFiltro%
-		GROUP BY	CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END,
-					CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END,
+		GROUP BY	Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END,
+					Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END,
 					SB1.B1_GRUPO,SD2.D2_UM,SD2.D2_SEGUM,SD2.D2_FILIAL,SA2.A2_EST
 		ORDER BY	SD2.D2_FILIAL, A2_COD, A2_NREDUZ
 		
@@ -998,11 +994,11 @@ ElseIf nOrdem == 4 //ORDEM RESUMIDA
 	oSF2FIL_4:Enable()
 	oSF2_4:Enable()
 	
-	DEFINE FUNCTION FROM oSF2_4:Cell("D2_I_FRET")	FUNCTION SUM BREAK oBrkFil  NO END SECTION
-	DEFINE FUNCTION FROM oSF2_4:Cell("D2_TOTAL")	FUNCTION SUM BREAK oBrkFil  NO END SECTION
-	DEFINE FUNCTION FROM oSF2_4:Cell("DAK_COD")		FUNCTION SUM BREAK oBrkFil  NO END SECTION
-	DEFINE FUNCTION FROM oSF2_4:Cell("F2_DOC")		FUNCTION SUM BREAK oBrkFil  NO END SECTION
-	DEFINE FUNCTION FROM oSF2_4:Cell("PERCPART")	FUNCTION SUM BREAK oBrkFil  NO END SECTION
+	DEFINE FUNCTION FROM oSF2_4:Cell("D2_I_FRET")	FUNCTION SUM BREAK oBrkFil  NO END Section
+	DEFINE FUNCTION FROM oSF2_4:Cell("D2_TOTAL")	FUNCTION SUM BREAK oBrkFil  NO END Section
+	DEFINE FUNCTION FROM oSF2_4:Cell("DAK_COD")		FUNCTION SUM BREAK oBrkFil  NO END Section
+	DEFINE FUNCTION FROM oSF2_4:Cell("F2_DOC")		FUNCTION SUM BREAK oBrkFil  NO END Section
+	DEFINE FUNCTION FROM oSF2_4:Cell("PERCPART")	FUNCTION SUM BREAK oBrkFil  NO END Section
 	
 	//====================================================================================================
 	// Define query para quarta ordem
@@ -1012,30 +1008,30 @@ ElseIf nOrdem == 4 //ORDEM RESUMIDA
 	BeginSql alias "QRY4"
 	
 		SELECT 			
-			CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END AS A2_COD,
-			CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END AS A2_NREDUZ,
+			Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END AS A2_COD,
+			Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END AS A2_NREDUZ,
 			SUM(SD2.D2_TOTAL)			AS D2_TOTAL,
 			SUM(SD2.D2_I_FRET)			AS D2_I_FRET,
             COUNT(DISTINCT SF2.F2_DOC)	AS F2_DOC,
             COUNT(DISTINCT DAK.DAK_COD)	AS DAK_COD,
             SD2.D2_FILIAL,SA2.A2_EST
-		FROM %table:DAK% DAK
-		JOIN %table:DAI% DAI ON DAI.DAI_COD    = DAK.DAK_COD	AND DAI.DAI_FILIAL = DAK.DAK_FILIAL
-		JOIN %table:DA3% DA3 ON DAK.DAK_CAMINH = DA3.DA3_COD
-		JOIN %table:SF2% SF2 ON SF2.F2_DOC     = DAI.DAI_NFISCA	AND SF2.F2_SERIE   = DAI.DAI_SERIE	AND SF2.F2_FILIAL = DAI.DAI_FILIAL
-		JOIN %table:SD2% SD2 ON SD2.D2_DOC     = SF2.F2_DOC		AND SD2.D2_SERIE   = SF2.F2_SERIE	AND SD2.D2_FILIAL = SF2.F2_FILIAL
-		JOIN (SELECT A1_FILIAL, A1_COD, A1_LOJA, A1_NREDUZ, A1_MUN, A1_EST, A1_GRPVEN
-				FROM %table:SA1% SA1
+		FROM %Table:DAK% DAK
+		JOIN %Table:DAI% DAI ON DAI.DAI_COD    = DAK.DAK_COD	AND DAI.DAI_FILIAL = DAK.DAK_FILIAL
+		JOIN %Table:DA3% DA3 ON DAK.DAK_CAMINH = DA3.DA3_COD
+		JOIN %Table:SF2% SF2 ON SF2.F2_DOC     = DAI.DAI_NFISCA	AND SF2.F2_SERIE   = DAI.DAI_SERIE	AND SF2.F2_FILIAL = DAI.DAI_FILIAL
+		JOIN %Table:SD2% SD2 ON SD2.D2_DOC     = SF2.F2_DOC		AND SD2.D2_SERIE   = SF2.F2_SERIE	AND SD2.D2_FILIAL = SF2.F2_FILIAL
+		JOIN (SELECT A1_FILIAL, A1_COD, A1_LOJA, A1_NREDUZ, A1_MUN, A1_EST, A1_GRPVEN, A1_COD_MUN 
+				FROM %Table:SA1% SA1
 				WHERE SA1.%notDel% 
 				UNION
-				SELECT A2_FILIAL, A2_COD, A2_LOJA, A2_NREDUZ, A2_MUN, A2_EST, '' As A1_GRPVEN
-				FROM %table:SA2% SA2
+				SELECT A2_FILIAL, A2_COD, A2_LOJA, A2_NREDUZ, A2_MUN, A2_EST, '' As A1_GRPVEN, A2_COD_MUN A1_COD_MUN 
+				FROM %Table:SA2% SA2
 				WHERE SA2.%notDel% ) SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA  = SA1.A1_LOJA
-		JOIN %table:SA3% SA3 ON SF2.F2_VEND1   = SA3.A3_COD
-		JOIN %table:SB1% SB1 ON SD2.D2_COD     = SB1.B1_COD
-		JOIN %table:DA4% DA4 ON DAK.DAK_MOTORI = DA4.DA4_COD
-		JOIN %table:SA2% SA2 ON SF2.F2_I_CTRA  = SA2.A2_COD		AND SF2.F2_I_LTRA  = SA2.A2_LOJA
-		JOIN %table:SC5% SC5 ON SC5.C5_FILIAL  = SD2.D2_FILIAL  AND SC5.C5_NUM     = SD2.D2_PEDIDO
+		JOIN %Table:SA3% SA3 ON SF2.F2_VEND1   = SA3.A3_COD
+		JOIN %Table:SB1% SB1 ON SD2.D2_COD     = SB1.B1_COD
+		JOIN %Table:DA4% DA4 ON DAK.DAK_MOTORI = DA4.DA4_COD
+		JOIN %Table:SA2% SA2 ON SF2.F2_I_CTRA  = SA2.A2_COD		AND SF2.F2_I_LTRA  = SA2.A2_LOJA
+		JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL  = SD2.D2_FILIAL  AND SC5.C5_NUM     = SD2.D2_PEDIDO
 		WHERE						
         	DAK.%notDel%
 		AND SA3.%notDel%
@@ -1050,8 +1046,8 @@ ElseIf nOrdem == 4 //ORDEM RESUMIDA
 		AND SA2.A2_I_CLASS IN ('T','A','G')
 		AND SD2.D2_CF <> '5927'
 		%exp:cFiltro%
-		GROUP BY	CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END,
-					CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END,
+		GROUP BY	Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END,
+					Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END,
 					SD2.D2_FILIAL,SA2.A2_EST
 		ORDER BY	SD2.D2_FILIAL, D2_I_FRET DESC, A2_COD, A2_NREDUZ
 		
@@ -1068,8 +1064,8 @@ ElseIf nOrdem == 5 //ORDEM POR TRANSPORTADOR
 	
 	DEFINE BREAK oBrkFil OF oSF2FIL_5 WHEN oSF2FIL_5:CELL("D2_FILIAL") TITLE {|| "SUBTOTAL FILIAL: " + cNomeFil}
 	
- 	DEFINE FUNCTION FROM oSF2_5:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END SECTION
- 	DEFINE FUNCTION FROM oSF2_5:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkFil NO END SECTION
+ 	DEFINE FUNCTION FROM oSF2_5:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section
+ 	DEFINE FUNCTION FROM oSF2_5:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkFil NO END Section
 	
 	TRFunction():New(oSF2_5:Cell("D2_QUANT") ,"QUANT","SUM"    ,oBrkFil  ,NIL,NIL,NIL								   															,.F.,.T.)
 	TRFunction():New(oSF2_5:Cell("D2_I_FRET"),"FRETE","SUM"    ,oBrkFil  ,NIL,NIL,NIL								   															,.F.,.T.)
@@ -1080,9 +1076,9 @@ ElseIf nOrdem == 5 //ORDEM POR TRANSPORTADOR
 	BeginSql alias "QRY5"
 	
 		SELECT
-			CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END AS A2_COD,
-			CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END AS A2_NREDUZ,
-			CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_CGC    WHEN SA2.A2_I_CLASS = 'A' THEN '-'         END AS A2_CGC,
+			Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END AS A2_COD,
+			Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END AS A2_NREDUZ,
+			Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_CGC    WHEN SA2.A2_I_CLASS = 'A' THEN '-'         END AS A2_CGC,
 			SUM(SD2.D2_QUANT)	AS D2_QUANT,
 			SUM(SD2.D2_TOTAL)	AS D2_TOTAL,
 			SUM(SD2.D2_VALBRUT)	AS D2_VALBRUT,
@@ -1090,7 +1086,7 @@ ElseIf nOrdem == 5 //ORDEM POR TRANSPORTADOR
 			SD2.D2_FILIAL,
 			SA2.A2_EST,
 			SA2.A2_I_TPAVE, 
-            CASE
+            Case
                WHEN SC5.C5_TPFRETE = 'C' THEN 'CIF'
 			   WHEN SC5.C5_TPFRETE = 'F' THEN 'FOB'
 			   WHEN SC5.C5_TPFRETE = 'T' THEN 'POR CONTA DE TERCEIROS'
@@ -1098,23 +1094,23 @@ ElseIf nOrdem == 5 //ORDEM POR TRANSPORTADOR
 			   WHEN SC5.C5_TPFRETE = 'D' THEN 'POR CONTA DO DESTINATARIO'
 			   WHEN SC5.C5_TPFRETE = 'S' THEN 'SEM FRETE'  
 			END AS C5_TPFRETE 			
-		FROM %table:DAK% DAK
-		JOIN %table:DAI% DAI ON DAI.DAI_COD    = DAK.DAK_COD	AND DAI.DAI_FILIAL = DAK.DAK_FILIAL 
-		JOIN %table:DA3% DA3 ON DAK.DAK_CAMINH = DA3.DA3_COD
-		JOIN %table:SF2% SF2 ON SF2.F2_DOC     = DAI.DAI_NFISCA	AND SF2.F2_SERIE   = DAI.DAI_SERIE	AND DAI.DAI_FILIAL = SF2.F2_FILIAL
-		JOIN %table:SD2% SD2 ON SD2.D2_DOC     = SF2.F2_DOC		AND SD2.D2_SERIE   = SF2.F2_SERIE	AND SD2.D2_FILIAL  = SF2.F2_FILIAL
-		JOIN (SELECT A1_FILIAL, A1_COD, A1_LOJA, A1_NREDUZ, A1_MUN, A1_EST, A1_GRPVEN
-				FROM %table:SA1% SA1
+		FROM %Table:DAK% DAK
+		JOIN %Table:DAI% DAI ON DAI.DAI_COD    = DAK.DAK_COD	AND DAI.DAI_FILIAL = DAK.DAK_FILIAL 
+		JOIN %Table:DA3% DA3 ON DAK.DAK_CAMINH = DA3.DA3_COD
+		JOIN %Table:SF2% SF2 ON SF2.F2_DOC     = DAI.DAI_NFISCA	AND SF2.F2_SERIE   = DAI.DAI_SERIE	AND DAI.DAI_FILIAL = SF2.F2_FILIAL
+		JOIN %Table:SD2% SD2 ON SD2.D2_DOC     = SF2.F2_DOC		AND SD2.D2_SERIE   = SF2.F2_SERIE	AND SD2.D2_FILIAL  = SF2.F2_FILIAL
+		JOIN (SELECT A1_FILIAL, A1_COD, A1_LOJA, A1_NREDUZ, A1_MUN, A1_EST, A1_GRPVEN, A1_COD_MUN 
+				FROM %Table:SA1% SA1
 				WHERE SA1.%notDel% 
 				UNION
-				SELECT A2_FILIAL, A2_COD, A2_LOJA, A2_NREDUZ, A2_MUN, A2_EST, '' As A1_GRPVEN
-				FROM %table:SA2% SA2
+				SELECT A2_FILIAL, A2_COD, A2_LOJA, A2_NREDUZ, A2_MUN, A2_EST, '' As A1_GRPVEN,  A2_COD_MUN A1_COD_MUN 
+				FROM %Table:SA2% SA2
 				WHERE SA2.%notDel% ) SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA  = SA1.A1_LOJA
-		JOIN %table:SA3% SA3 ON SF2.F2_VEND1   = SA3.A3_COD
-		JOIN %table:SB1% SB1 ON SD2.D2_COD     = SB1.B1_COD
-		JOIN %table:DA4% DA4 ON DAK.DAK_MOTORI = DA4.DA4_COD
-		JOIN %table:SA2% SA2 ON SF2.F2_I_CTRA  = SA2.A2_COD		AND SF2.F2_I_LTRA  = SA2.A2_LOJA
-		JOIN %table:SC5% SC5 ON SC5.C5_FILIAL  = SD2.D2_FILIAL  AND SC5.C5_NUM     = SD2.D2_PEDIDO
+		JOIN %Table:SA3% SA3 ON SF2.F2_VEND1   = SA3.A3_COD
+		JOIN %Table:SB1% SB1 ON SD2.D2_COD     = SB1.B1_COD
+		JOIN %Table:DA4% DA4 ON DAK.DAK_MOTORI = DA4.DA4_COD
+		JOIN %Table:SA2% SA2 ON SF2.F2_I_CTRA  = SA2.A2_COD		AND SF2.F2_I_LTRA  = SA2.A2_LOJA
+		JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL  = SD2.D2_FILIAL  AND SC5.C5_NUM     = SD2.D2_PEDIDO
 		WHERE
         	DAK.%notDel% 
 		AND SA3.%notDel%
@@ -1129,13 +1125,13 @@ ElseIf nOrdem == 5 //ORDEM POR TRANSPORTADOR
 		AND SA2.A2_I_CLASS IN ('T','A','G')
 		AND SD2.D2_CF <> '5927'
 		%exp:cFiltro%
-		GROUP BY	CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END,
-					CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END,
-					CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_CGC    WHEN SA2.A2_I_CLASS = 'A' THEN '-'         END,
+		GROUP BY	Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END,
+					Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END,
+					Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_CGC    WHEN SA2.A2_I_CLASS = 'A' THEN '-'         END,
 					SD2.D2_FILIAL,
 					SA2.A2_EST,
 					A2_I_TPAVE, 
-				    CASE
+				    Case
                        WHEN SC5.C5_TPFRETE = 'C' THEN 'CIF'
 			           WHEN SC5.C5_TPFRETE = 'F' THEN 'FOB'
 			           WHEN SC5.C5_TPFRETE = 'T' THEN 'POR CONTA DE TERCEIROS'
@@ -1160,7 +1156,7 @@ If nOrdem = 1 //ORDEM POR CARGA
 	oSF2_1A:SetParentFilter({|cParam| QRY1->A2_I_CLASS + QRY1->A2_COD == cParam },{|| QRY1->A2_I_CLASS + QRY1->A2_COD })
 
 	oSF2_1B:SetParentQuery()                                                                                      
-	oSF2_1B:SetParentFilter({|cParam| IIF(VALTYPE(QRY1->DAK_DATA) == 'D',DTOS(QRY1->DAK_DATA),QRY1->DAK_DATA) + QRY1->DAK_COD == cParam },{|| IIF(VALTYPE(QRY1->DAK_DATA) == 'D',DTOS(QRY1->DAK_DATA),QRY1->DAK_DATA) + QRY1->DAK_COD })
+	oSF2_1B:SetParentFilter({|cParam| IIf(ValType(QRY1->DAK_DATA) == 'D',DToS(QRY1->DAK_DATA),QRY1->DAK_DATA) + QRY1->DAK_COD == cParam },{|| IIf(ValType(QRY1->DAK_DATA) == 'D',DToS(QRY1->DAK_DATA),QRY1->DAK_DATA) + QRY1->DAK_COD })
 
 	If MV_PAR19 == 2
 		oSF2A_1:SetParentQuery()           
@@ -1203,7 +1199,7 @@ ElseIf nOrdem == 5 //ORDEM POR TRANSPORTADOR
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1218,10 +1214,10 @@ Parametros------: Nenhum
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
-Static function ROMS005TFR(cQry)
+Static Function ROMS005TFR(cQry)
 
 Local nRet	:= 0 
-Local aArea	:= getArea()
+Local aArea	:= FWGetArea()
 
 &(cQry)->( DBGoTop() )
 While &(cQry)->( !Eof() )
@@ -1233,7 +1229,7 @@ EndDo
 
 &(cQry)->( DBGoTop() )
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return( nRet )
 
@@ -1342,21 +1338,21 @@ If MV_PAR26 == 1  // Impressão
    ROMS005Z(oPrint)
 EndIf
 
-If nOrdem == 6 .Or. nOrdem == 7	//"6-Grupo de Produto x UF","7-Produto x UF"
+If nOrdem == 6 .Or. nOrdem == 7	//"6-Grupo de Produto x UF","7-Produto x UF"  
 
-	Processa( {|| ROMD005O() } )
+	Processa( {|| ROMD005O() } ) 
 	
 ElseIf nOrdem == 8 .Or. nOrdem == 9 //"8-Fechamento x Produto","9-Fechamento x Sub-Grupo"
 
-	Processa( {|| ROMS0058() } )
+	Processa( {|| ROMS0058() } ) 
 	
 ElseIf nOrdem == 10//"10-Veiculo"
 	
-	Processa( {|| ROMS0507() } )
+	Processa( {|| ROMS0507() } )  
 	
 ElseIf nOrdem == 11//"11-AT&M"
 	
-	Processa( {|| ROMS005D() } )
+	Processa( {|| ROMS005D() } )  
 
 EndIf
 
@@ -1366,7 +1362,7 @@ If MV_PAR26 == 1  // Impressão
    oPrint:Preview()	// Visualiza antes de Imprimir.
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1413,14 +1409,14 @@ Local _cTitulo
    cQuery +=     " A2_NOME    ,"
    cQuery +=     " A2_EST     ,"
 
-   cQuery +=     " CASE "
+   cQuery +=     " Case "
    cQuery +=     "    WHEN SA2.A2_I_TPAVE = 'E' THEN 'EMBARCADOR' "
    cQuery +=     " 	  WHEN SA2.A2_I_TPAVE = 'T' THEN 'TRANSPORTADOR' "
    cQuery +=     " 	  WHEN SA2.A2_I_TPAVE = ' ' THEN ' ' "
    cQuery +=    " END AS A2_I_TPAVE, " 
    
    cQuery +=     " SUM(D2_VALBRUT) TOTAL, "
-   cQuery +=     " CASE "
+   cQuery +=     " Case "
    cQuery +=     "    WHEN SC5.C5_TPFRETE = 'C' THEN 'CIF' "
    cQuery +=     " 	  WHEN SC5.C5_TPFRETE = 'F' THEN 'FOB' "
    cQuery +=     " 	  WHEN SC5.C5_TPFRETE = 'T' THEN 'POR CONTA DE TERCEIROS' "
@@ -1436,11 +1432,11 @@ Local _cTitulo
    cQuery += " JOIN "+ RetSqlName("ZZM") +" ZZM ON ZZM.ZZM_CODIGO = SF2.F2_FILIAL "
    cQuery += " JOIN "+ RetSqlName("SD2") +" SD2 ON SD2.D2_DOC     = SF2.F2_DOC     AND SD2.D2_SERIE   = SF2.F2_SERIE  AND SD2.D2_FILIAL  = SF2.F2_FILIAL "
    cQuery += " JOIN "+ RetSqlName("SA3") +" SA3 ON SF2.F2_VEND1   = SA3.A3_COD " 
-	cQuery += " JOIN (SELECT A1_FILIAL, A1_COD, A1_LOJA, A1_NREDUZ, A1_MUN, A1_EST, A1_CGC, A1_GRPVEN "
+	cQuery += " JOIN (SELECT A1_FILIAL, A1_COD, A1_LOJA, A1_NREDUZ, A1_MUN, A1_EST, A1_CGC, A1_GRPVEN, A1_COD_MUN " 
 	cQuery += " 		FROM "+ RetSqlName("SA1") +" SA1 "
 	cQuery += " 		WHERE SA1.D_E_L_E_T_ = ' ' "
 	cQuery += " 		UNION
-	cQuery += " 		SELECT A2_FILIAL, A2_COD, A2_LOJA, A2_NREDUZ, A2_MUN, A2_EST, A2_CGC, '' As A1_GRPVEN "
+	cQuery += " 		SELECT A2_FILIAL, A2_COD, A2_LOJA, A2_NREDUZ, A2_MUN, A2_EST, A2_CGC, '' As A1_GRPVEN, A2_COD_MUN A1_COD_MUN " 
 	cQuery += " 		FROM "+ RetSqlName("SA2") +" SA2 "
 	cQuery += " 		WHERE SA2.D_E_L_E_T_ = ' '  ) SA1 ON  SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA  = SA1.A1_LOJA "
    cQuery += " JOIN "+ RetSqlName("SB1") +" SB1 ON SD2.D2_COD     = SB1.B1_COD "
@@ -1468,7 +1464,7 @@ Local _cTitulo
  
    cQuery += " GROUP BY F2_FILIAL, F2_EMISSAO,F2_DOC, F2_SERIE, ZZM_EST, F2_EST, F2_I_PLACA, F2_DAUTNFE, F2_HAUTNFE, A1_CGC, A1_EST, F2_I_CTRA, F2_I_LTRA,F2_I_FRET, A2_CGC, A2_NOME, A2_EST, A2_I_TPAVE "
 
-   cQuery +=     ", CASE "
+   cQuery +=     ", Case "
    cQuery +=     "    WHEN SC5.C5_TPFRETE = 'C' THEN 'CIF' "
    cQuery +=     " 	  WHEN SC5.C5_TPFRETE = 'F' THEN 'FOB' "
    cQuery +=     " 	  WHEN SC5.C5_TPFRETE = 'T' THEN 'POR CONTA DE TERCEIROS' "
@@ -1494,37 +1490,37 @@ Local _cTitulo
    COUNT TO nCountRec
 
    DBSelectArea("TMPORDEM")
-   TMPORDEM->( DBGotop() )
+   TMPORDEM->( DBGoTop() )
 
    ProcRegua(nCountRec)
-   cTot:=ALLTRIM(STR(nCountRec))
+   cTot:=AllTrim(Str(nCountRec))
    nConta:=0     
       
 // If MV_PAR26 == 2 // Relatório em Excel  //COMO SÓ imprimi em excel tanto faz o parametro MV_PAR26
 
-    SD2->(DbSetOrder(3)) // ITENS DA NOTA FISCAL DE SAÍDA   // D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA+D2_COD+D2_ITEM
+    SD2->(DBSetOrder(3)) // ITENS DA NOTA FISCAL DE SAÍDA   // D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA+D2_COD+D2_ITEM
    
-     	Do while !( TMPORDEM->( Eof() ) )
+     	While !( TMPORDEM->( Eof() ) )
            nConta++
-           IncProc( 'Lendo DOC: '+TMPORDEM->F2_DOC+" - "+ALLTRIM(STR(nConta))+" de "+cTot )
+           IncProc( 'Lendo DOC: '+TMPORDEM->F2_DOC+" - "+AllTrim(Str(nConta))+" de "+cTot )
 		   
 		   _cArmazens:=""
-           SD2->(DbSeek(TMPORDEM->F2_FILIAL+TMPORDEM->F2_DOC+TMPORDEM->F2_SERIE)) // D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA+D2_COD+D2_ITEM 
-           Do While ! SD2->(Eof()) .And. SD2->D2_FILIAL+SD2->D2_DOC+SD2->D2_SERIE == TMPORDEM->F2_FILIAL+TMPORDEM->F2_DOC+TMPORDEM->F2_SERIE
-              IF !SD2->D2_LOCAL $ _cArmazens
-                 _cArmazens+=ALLTRIM(SD2->D2_LOCAL)+", "
-			  ENDIF
-              SD2->(DbSkip())
+           SD2->(DBSeek(TMPORDEM->F2_FILIAL+TMPORDEM->F2_DOC+TMPORDEM->F2_SERIE)) // D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA+D2_COD+D2_ITEM 
+           While ! SD2->(Eof()) .And. SD2->D2_FILIAL+SD2->D2_DOC+SD2->D2_SERIE == TMPORDEM->F2_FILIAL+TMPORDEM->F2_DOC+TMPORDEM->F2_SERIE
+              If !SD2->D2_LOCAL $ _cArmazens
+                 _cArmazens+=AllTrim(SD2->D2_LOCAL)+", "
+			  EndIf
+              SD2->(DBSkip())
            EndDo   
-           _cArmazens:=LEFT(_cArmazens,LEN(_cArmazens)-2)
+           _cArmazens:=LEFT(_cArmazens,Len(_cArmazens)-2)
 
-      		AADD( _aCampos ,{substr(TMPORDEM->F2_EMISSAO,7,2)+"/"+substr(TMPORDEM->F2_EMISSAO,5,2)+"/"+substr(TMPORDEM->F2_EMISSAO,1,4),;
+      		aAdd( _aCampos ,{SubStr(TMPORDEM->F2_EMISSAO,7,2)+"/"+SubStr(TMPORDEM->F2_EMISSAO,5,2)+"/"+SubStr(TMPORDEM->F2_EMISSAO,1,4),;
       				         TMPORDEM->F2_DOC,;
       				         TMPORDEM->F2_SERIE,;
       				         TMPORDEM->ZZM_EST,;
       				         TMPORDEM->F2_EST,;
                              TMPORDEM->F2_I_PLACA,;
-                             SUBSTR(TMPORDEM->F2_DAUTNFE,7,2)+"/"+substr(TMPORDEM->F2_DAUTNFE,5,2)+"/"+substr(TMPORDEM->F2_DAUTNFE,1,4),;
+                             SubStr(TMPORDEM->F2_DAUTNFE,7,2)+"/"+SubStr(TMPORDEM->F2_DAUTNFE,5,2)+"/"+SubStr(TMPORDEM->F2_DAUTNFE,1,4),;
                              TMPORDEM->F2_HAUTNFE,;
                              TMPORDEM->A1_CGC    ,;
                              TMPORDEM->A1_EST    ,;
@@ -1539,46 +1535,46 @@ Local _cTitulo
 							 _cArmazens,;// Array com os campos da tabela temporária.
 							 TMPORDEM->A2_I_TPAVE} )  
 
-      		TMPORDEM->( Dbskip() )
+      		TMPORDEM->( DBSkip() )
       		
-      	Enddo
+      	EndDo
       
       _aCabecalho := {} 
        
-      Aadd(_aCabecalho,"DATA EMISSAO" ) 
-      Aadd(_aCabecalho,"DOCUMENTO") 
-      Aadd(_aCabecalho,"SERIE") 
-      Aadd(_aCabecalho,"UF ORIGEM" ) 
-      Aadd(_aCabecalho,"UF DESTINO" ) 
-      Aadd(_aCabecalho,"PLACA VEICULO") 
-      Aadd(_aCabecalho,"DATA EMBARQUE" ) 
-      Aadd(_aCabecalho,"HORA EMBARQUE") 
-      Aadd(_aCabecalho,"CNPJ CLIENTE" ) 
-      Aadd(_aCabecalho,"UF CLIENTE" ) 
-      Aadd(_aCabecalho,"CODIGO TRANSPORTADOR" )
-      Aadd(_aCabecalho,"LOJA TRANSPORTADOR" ) 
-      Aadd(_aCabecalho,"CNPJ TRANSPORTADOR" ) 
-      Aadd(_aCabecalho,"NOME TRANSPORTADOR" ) 
-      Aadd(_aCabecalho,"UF TRANSPORTADOR" ) 
-      Aadd(_aCabecalho,"VALOR MERCADORIA") 
-	  Aadd(_aCabecalho,"TIPO DE FRETE") 
-	  Aadd(_aCabecalho,"VALOR DO FRETE") 
-	  Aadd(_aCabecalho,"Armazens") 
-	  Aadd(_aCabecalho,"TIPO AVERBACAO CARGA") 
+      aAdd(_aCabecalho,"DATA EMISSAO" ) 
+      aAdd(_aCabecalho,"DOCUMENTO") 
+      aAdd(_aCabecalho,"SERIE") 
+      aAdd(_aCabecalho,"UF ORIGEM" ) 
+      aAdd(_aCabecalho,"UF DESTINO" ) 
+      aAdd(_aCabecalho,"PLACA VEICULO") 
+      aAdd(_aCabecalho,"DATA EMBARQUE" ) 
+      aAdd(_aCabecalho,"HORA EMBARQUE") 
+      aAdd(_aCabecalho,"CNPJ CLIENTE" ) 
+      aAdd(_aCabecalho,"UF CLIENTE" ) 
+      aAdd(_aCabecalho,"CODIGO TRANSPORTADOR" )
+      aAdd(_aCabecalho,"LOJA TRANSPORTADOR" ) 
+      aAdd(_aCabecalho,"CNPJ TRANSPORTADOR" ) 
+      aAdd(_aCabecalho,"NOME TRANSPORTADOR" ) 
+      aAdd(_aCabecalho,"UF TRANSPORTADOR" ) 
+      aAdd(_aCabecalho,"VALOR MERCADORIA") 
+	  aAdd(_aCabecalho,"TIPO DE FRETE") 
+	  aAdd(_aCabecalho,"VALOR DO FRETE") 
+	  aAdd(_aCabecalho,"Armazens") 
+	  aAdd(_aCabecalho,"TIPO AVERBACAO CARGA") 
             
       _cTitulo := "RELATORIO DE FRETE POR TRANSPORTADOR (ATM)"
       
-      If LEN(_aCampos) = 0
+      If Len(_aCampos) = 0
      	 ALERT("Não foram localizados registros!")
       Else          //_cTitAux ,_aHeader    , _aCols  , _lMaxSiz , _nTipo , _cMsgTop
-      	 U_ITLISTBOX( _cTitulo ,_aCabecalho , _aCampos,    .T.   ,        , _cTitulo+" - Ordem de "+ aOrd[nOrdem] +" de: "+ DtoC(MV_PAR02) +" Ate "+ DtoC(MV_PAR03)+" [ROM005]")
-      Endif 
+      	 U_ITLISTBOX( _cTitulo ,_aCabecalho , _aCampos,    .T.   ,        , _cTitulo+" - Ordem de "+ aOrd[nOrdem] +" de: "+ DToC(MV_PAR02) +" Ate "+ DToC(MV_PAR03)+" [ROM005]")
+      EndIf 
     
 //  EndIf  
  
 TMPORDEM->( DBCloseArea() )
 
-Return()
+Return
          
 /*
 ===============================================================================================================================
@@ -1618,7 +1614,7 @@ Local nFTotvlrFr:= 0
 
 Local _aCampos := {} // Array com os campos da tabela temporária.
 Local _cDir := GetTempPath()  // Diretório de Geração das planilhas.
-Local _cArq := "_"+Dtos(Date())+"_"+StrTran(Time(),":","")+".xml"  // Nome da planilha a ser gerada.   
+Local _cArq := "_"+DToS(Date())+"_"+StrTran(Time(),":","")+".xml"  // Nome da planilha a ser gerada.   
 Local _aCabecalho := {} // Array com o cabeçalho das colunas do relatório.
 Local _cTitulo
 
@@ -1632,7 +1628,7 @@ Begin Sequence
    cQuery +=     " SUM(SD2.D2_TOTAL)   AS D2_TOTAL  ,"
    cQuery +=     " SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,"
    cQuery +=     " SUM(SD2.D2_I_FRET)  AS D2_I_FRET ,"
-   cQuery +=     " CASE "
+   cQuery +=     " Case "
    cQuery +=     "    WHEN SC5.C5_TPFRETE = 'C' THEN 'CIF' "
    cQuery +=     " 	  WHEN SC5.C5_TPFRETE = 'F' THEN 'FOB' "
    cQuery +=     " 	  WHEN SC5.C5_TPFRETE = 'T' THEN 'POR CONTA DE TERCEIROS' "
@@ -1668,11 +1664,11 @@ Begin Sequence
    cQuery += " JOIN "+ RetSqlName("DA3") +" DA3 ON DAK.DAK_CAMINH = DA3.DA3_COD "
    cQuery += " JOIN "+ RetSqlName("SF2") +" SF2 ON SF2.F2_DOC     = DAI.DAI_NFISCA AND SF2.F2_SERIE   = DAI.DAI_SERIE AND DAI.DAI_FILIAL = SF2.F2_FILIAL "
    cQuery += " JOIN "+ RetSqlName("SD2") +" SD2 ON SD2.D2_DOC     = SF2.F2_DOC     AND SD2.D2_SERIE   = SF2.F2_SERIE  AND SD2.D2_FILIAL  = SF2.F2_FILIAL "
-   cQuery += " JOIN (SELECT A1_FILIAL, A1_COD, A1_LOJA, A1_NREDUZ, A1_MUN, A1_EST, A1_CGC, A1_GRPVEN "
+   cQuery += " JOIN (SELECT A1_FILIAL, A1_COD, A1_LOJA, A1_NREDUZ, A1_MUN, A1_EST, A1_CGC, A1_GRPVEN, A1_COD_MUN "  
    cQuery += " 		FROM "+ RetSqlName("SA1") +" SA1 "
    cQuery += " 		WHERE SA1.D_E_L_E_T_ = ' ' "
    cQuery += " 		UNION
-   cQuery += " 		SELECT A2_FILIAL, A2_COD, A2_LOJA, A2_NREDUZ, A2_MUN, A2_EST, A2_CGC, '' As A1_GRPVEN "
+   cQuery += " 		SELECT A2_FILIAL, A2_COD, A2_LOJA, A2_NREDUZ, A2_MUN, A2_EST, A2_CGC, '' As A1_GRPVEN, A2_COD_MUN A1_COD_MUN "  
    cQuery += " 		FROM "+ RetSqlName("SA2") +" SA2 "
    cQuery += " 		WHERE SA2.D_E_L_E_T_ = ' '  ) SA1 ON  SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA  = SA1.A1_LOJA "
    cQuery += " JOIN "+ RetSqlName("SA3") +" SA3 ON SF2.F2_VEND1   = SA3.A3_COD "
@@ -1705,7 +1701,7 @@ Begin Sequence
       cQuery += " SD2.D2_FILIAL,SB1.B1_COD,SA1.A1_EST,SB1.B1_I_DESCD,SD2.D2_UM,SD2.D2_SEGUM "	
    EndIf
    
-   cQuery +=     " ,CASE "
+   cQuery +=     " ,Case "
    cQuery +=     "    WHEN SC5.C5_TPFRETE = 'C' THEN 'CIF' "
    cQuery +=     " 	  WHEN SC5.C5_TPFRETE = 'F' THEN 'FOB' "
    cQuery +=     " 	  WHEN SC5.C5_TPFRETE = 'T' THEN 'POR CONTA DE TERCEIROS' "
@@ -1726,7 +1722,7 @@ Begin Sequence
    COUNT TO nCountRec
 
    DBSelectArea("TMPORDEM")
-   TMPORDEM->( DBGotop() )
+   TMPORDEM->( DBGoTop() )
 
    ProcRegua(nCountRec)
  
@@ -1740,19 +1736,19 @@ Begin Sequence
       // Alinhamento( 1-Left,2-Center,3-Right )
       // Formatação( 1-General,2-Number,3-Monetário,4-DateTime )
       //                Titulo das Colunas ,Alinhamento ,Formatação, Totaliza?  
-      Aadd(_aCabecalho,{"FILIAL"           ,1           ,1         ,.F.})    
-      Aadd(_aCabecalho,{"PRODUTO"          ,1           ,1         ,.F.}) 
-  	  Aadd(_aCabecalho,{"DESC PRODUTO"     ,1           ,1         ,.F.}) 	  
-      Aadd(_aCabecalho,{"ESTADO"           ,1           ,1         ,.F.}) 
-      Aadd(_aCabecalho,{"QUANTIDADE"       ,3           ,3         ,.F.}) 
-      Aadd(_aCabecalho,{"1a U.M."          ,2           ,2         ,.F.}) 
-      Aadd(_aCabecalho,{"QUANTIDADE 2 U.M.",3           ,3         ,.F.}) 
-      Aadd(_aCabecalho,{"2a U.M."          ,2           ,2         ,.F.}) 
-      Aadd(_aCabecalho,{"VALOR UNITARIO"   ,3           ,3         ,.F.}) 
-      Aadd(_aCabecalho,{"VALOR TOTAL"      ,3           ,3         ,.F.}) 
-      Aadd(_aCabecalho,{"VALOR BRUTO"      ,3           ,3         ,.F.}) 
-      Aadd(_aCabecalho,{"VALOR FRETE"      ,3           ,3         ,.F.}) 
-      Aadd(_aCabecalho,{"TIPO DE FRETE"    ,1           ,1         ,.F.}) 
+      aAdd(_aCabecalho,{"FILIAL"           ,1           ,1         ,.F.})    
+      aAdd(_aCabecalho,{"PRODUTO"          ,1           ,1         ,.F.}) 
+  	  aAdd(_aCabecalho,{"DESC PRODUTO"     ,1           ,1         ,.F.}) 	  
+      aAdd(_aCabecalho,{"ESTADO"           ,1           ,1         ,.F.}) 
+      aAdd(_aCabecalho,{"QUANTIDADE"       ,3           ,3         ,.F.}) 
+      aAdd(_aCabecalho,{"1a U.M."          ,2           ,2         ,.F.}) 
+      aAdd(_aCabecalho,{"QUANTIDADE 2 U.M.",3           ,3         ,.F.}) 
+      aAdd(_aCabecalho,{"2a U.M."          ,2           ,2         ,.F.}) 
+      aAdd(_aCabecalho,{"VALOR UNITARIO"   ,3           ,3         ,.F.}) 
+      aAdd(_aCabecalho,{"VALOR TOTAL"      ,3           ,3         ,.F.}) 
+      aAdd(_aCabecalho,{"VALOR BRUTO"      ,3           ,3         ,.F.}) 
+      aAdd(_aCabecalho,{"VALOR FRETE"      ,3           ,3         ,.F.}) 
+      aAdd(_aCabecalho,{"TIPO DE FRETE"    ,1           ,1         ,.F.}) 
 
       If nOrdem == 6 //Grupo de Produto X UF
          _cArq := "Grupo_de_Produto_X_UF"+_cArq // Nome da planilha a ser gerada.   
@@ -1765,7 +1761,7 @@ Begin Sequence
       U_ITGEREXCEL(_cArq,_cDir,_cTitulo,"Relatorio",_aCabecalho,,.T.,"TMPORDEM",_aCampos)         
       Break                              
     
-   Elseif MV_PAR26 == 3 // Relatório em Excel  AT&M
+   ElseIf MV_PAR26 == 3 // Relatório em Excel  AT&M
   
       IncProc( "Os dados estão sendo gerados em Excel, favor aguardar..." )
       _aCampos := {'TMPORDEM->D2_FILIAL','TMPORDEM->PRODUTO','TMPORDEM->A1_EST','TMPORDEM->D2_QUANT','TMPORDEM->D2_UM','TMPORDEM->D2_QTSEGUM',;
@@ -1775,22 +1771,22 @@ Begin Sequence
       // Alinhamento( 1-Left,2-Center,3-Right )
       // Formatação( 1-General,2-Number,3-Monetário,4-DateTime )
       //                Titulo das Colunas ,Alinhamento ,Formatação, Totaliza?  
-      Aadd(_aCabecalho,{"FILIAL"           ,1           ,1         ,.F.})    
-      Aadd(_aCabecalho,{"DATA EMISSAO"     ,1           ,4         ,.F.}) 
-      Aadd(_aCabecalho,{"DOCUMENTO"        ,1           ,1         ,.F.}) 
-      Aadd(_aCabecalho,{"SERIE"            ,1           ,1         ,.F.}) 
-      Aadd(_aCabecalho,{"UF ORIGEM"        ,1           ,1         ,.F.}) 
-      Aadd(_aCabecalho,{"UF DESTINO"       ,1           ,1         ,.F.}) 
-      Aadd(_aCabecalho,{"PLACA VEICULO"    ,1           ,1         ,.F.}) 
-      Aadd(_aCabecalho,{"DATA EMBARQUE"    ,1           ,4         ,.F.}) 
-      Aadd(_aCabecalho,{"HORA EMBARQUE"    ,1           ,3         ,.F.}) 
-      Aadd(_aCabecalho,{"CNPJ CLIENTE"     ,1           ,1         ,.F.}) 
-      Aadd(_aCabecalho,{"COD TRANSP"       ,1           ,1         ,.F.}) 
-      Aadd(_aCabecalho,{"LOJA TRANSP"      ,1           ,1         ,.F.}) 
-      Aadd(_aCabecalho,{"CNPJ TRANSP "     ,1           ,1         ,.F.}) 
-      Aadd(_aCabecalho,{"NOME TRANSP "     ,1           ,1         ,.F.}) 
-      Aadd(_aCabecalho,{"VALOR MERCADORIA" ,1           ,2         ,.F.}) 
-      Aadd(_aCabecalho,{"TIPO DE FRETE"    ,1           ,1         ,.F.}) 
+      aAdd(_aCabecalho,{"FILIAL"           ,1           ,1         ,.F.})    
+      aAdd(_aCabecalho,{"DATA EMISSAO"     ,1           ,4         ,.F.}) 
+      aAdd(_aCabecalho,{"DOCUMENTO"        ,1           ,1         ,.F.}) 
+      aAdd(_aCabecalho,{"SERIE"            ,1           ,1         ,.F.}) 
+      aAdd(_aCabecalho,{"UF ORIGEM"        ,1           ,1         ,.F.}) 
+      aAdd(_aCabecalho,{"UF DESTINO"       ,1           ,1         ,.F.}) 
+      aAdd(_aCabecalho,{"PLACA VEICULO"    ,1           ,1         ,.F.}) 
+      aAdd(_aCabecalho,{"DATA EMBARQUE"    ,1           ,4         ,.F.}) 
+      aAdd(_aCabecalho,{"HORA EMBARQUE"    ,1           ,3         ,.F.}) 
+      aAdd(_aCabecalho,{"CNPJ CLIENTE"     ,1           ,1         ,.F.}) 
+      aAdd(_aCabecalho,{"COD TRANSP"       ,1           ,1         ,.F.}) 
+      aAdd(_aCabecalho,{"LOJA TRANSP"      ,1           ,1         ,.F.}) 
+      aAdd(_aCabecalho,{"CNPJ TRANSP "     ,1           ,1         ,.F.}) 
+      aAdd(_aCabecalho,{"NOME TRANSP "     ,1           ,1         ,.F.}) 
+      aAdd(_aCabecalho,{"VALOR MERCADORIA" ,1           ,2         ,.F.}) 
+      aAdd(_aCabecalho,{"TIPO DE FRETE"    ,1           ,1         ,.F.}) 
 
       _cArq := "ATM"+_cArq // Nome da planilha a ser gerada.   
       _cTitulo := "RELATÓRIO DE FRETE POR TRANSPORTADOR (ATM)"
@@ -1983,7 +1979,7 @@ End Sequence
 
 TMPORDEM->( DBCloseArea() )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2001,7 +1997,7 @@ Retorno---------: Nenhum
 Static Function ROMS005C( impNrPag )
 
 Local cRaizServer := If(issrvunix(), "/", "\")    
-Local cTitulo     := "Relação de Fretes por Transportadora - Ordem de "+ aOrd[nOrdem] +" de: "+ DtoC(MV_PAR02) +" Até "+ DtoC(MV_PAR03)
+Local cTitulo     := "Relação de Fretes por Transportadora - Ordem de "+ aOrd[nOrdem] +" de: "+ DToC(MV_PAR02) +" Até "+ DToC(MV_PAR03)
 Local nDiferLay   := 0
 
 nLinha := 0070
@@ -2024,7 +2020,7 @@ Else
 	
 EndIf
 
-oPrint:Say( nlinha + 50			, ( nColInic + 2750 ) - nDiferLay , "DATA DE EMISSÃO: "+ DtoC( DATE() )									, oFont12b )
+oPrint:Say( nlinha + 50			, ( nColInic + 2750 ) - nDiferLay , "DATA DE EMISSÃO: "+ DToC( Date() )									, oFont12b )
 
 nlinha += ( nSaltoLinha * 3 )
 
@@ -2035,7 +2031,7 @@ nlinha += ( nSaltoLinha * 3 )
 	
 	oPrint:Line(nLinha,nColInic,nLinha,nColFinal) 
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2059,7 +2055,7 @@ oPrint:Box( nlinha , nColInic , nLinha + nSaltoLinha , nColFinal - 1270 )
 oPrint:Say( nlinha , nColInic + 025 , "Filial:"											, oFont14Prb )
 oPrint:Say( nlinha , nColInic + 230 , AllTrim(cCodFilial) +'-'+ FWFilialName(,cCodFilial)	, oFont14Prb )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2107,7 +2103,7 @@ oPrint:Say( nlinha , nColInic + 300 + nColuna	, "Vlr.Bruto"		, oFont12b ) ; nCol
 oPrint:Say( nlinha , nColInic + 300 + nColuna	, "Vlr.Frete"		, oFont12b ) ; nColuna += 300
 oPrint:Say( nlinha , nColInic + 300 + nColuna	, "Frete/Unid"		, oFont12b )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2139,7 +2135,7 @@ oPrint:Say( nlinha , nColInic + 215 + nColuna	, Transform(nVlrBruto,"@E 9,999,99
 oPrint:Say( nlinha , nColInic + 225 + nColuna	, Transform(nValFrete,"@E 9,999,999,999.99")			, oFont10 ) ; nColuna+= 300
 oPrint:Say( nlinha , nColInic + 230 + nColuna	, Transform(nValFrete/nqtde1um,"@E 999,999,999.9999")	, oFont10 )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2185,7 +2181,7 @@ oPrint:Say( nlinha , nColInic + 215 + nColuna , Transform(nTotvlrBr,"@E 9,999,99
 oPrint:Say( nlinha , nColInic + 225 + nColuna , Transform(nTotvlrFr,"@E 9,999,999,999.99")				, oFont10 ) ; nColuna+= 300
 oPrint:Say( nlinha , nColInic + 230 + nColuna , Transform(nTotvlrFr/nTotqtde1,"@E 999,999,999.9999")	, oFont10 )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2193,7 +2189,7 @@ Programa--------: ROMS005Q
 Autor-----------: Jeovane
 Data da Criacao-: 12/03/2009
 ===============================================================================================================================
-Descrição-------: Verifica e processa a quebra de páginas
+Descrição-------: Verifica e Processa a quebra de páginas
 ===============================================================================================================================
 Parametros------: Nenhum
 ===============================================================================================================================
@@ -2223,7 +2219,7 @@ If nLinha > nqbrPagina
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2253,7 +2249,7 @@ oPrint:Line( nLinInBox , 3050 , nLinha , 3050 ) // VALOR FRETE
 
 oPrint:Box( nLinInBox , nColInic , nLinha , nColFinal )
 
-Return()
+Return
                         
 /*
 ===============================================================================================================================
@@ -2279,35 +2275,35 @@ nLinha+= 080
 oPrint:Line(nLinha,nColInic,nLinha,nColFinal)
 nLinha+= 60
 
-Aadd(_aDadosPegunte,{"01", "Filial ?"               , "MV_PAR01"})       
-Aadd(_aDadosPegunte,{"02", "De Emissao ? "          , "MV_PAR02"})           
-Aadd(_aDadosPegunte,{"03", "Ate Emissao ?"          , "MV_PAR03"})
-Aadd(_aDadosPegunte,{"04", "De Produto ? "          , "MV_PAR04"})           
-Aadd(_aDadosPegunte,{"05", "Ate Produto ?"          , "MV_PAR05"})
-Aadd(_aDadosPegunte,{"06", "De Cliente ? "          , "MV_PAR06"})
-Aadd(_aDadosPegunte,{"07", "Loja ?   "              , "MV_PAR07"})  
-Aadd(_aDadosPegunte,{"08", "Ate Cliente ? "         , "MV_PAR08"})  
-Aadd(_aDadosPegunte,{"09", "Loja ?"                 , "MV_PAR09"})       
-Aadd(_aDadosPegunte,{"10", "Rede ?"                 , "MV_PAR10"})           
-Aadd(_aDadosPegunte,{"11", "Estado ?"               , "MV_PAR11"})
-Aadd(_aDadosPegunte,{"12", "Municipio ?"            , "MV_PAR12"})           
-Aadd(_aDadosPegunte,{"13", "Vendedor ?  "           , "MV_PAR13"})          
-Aadd(_aDadosPegunte,{"14", "Supervisor ? "          , "MV_PAR14"})
-Aadd(_aDadosPegunte,{"15", "Grupo Produto ? "       , "MV_PAR15"})
-Aadd(_aDadosPegunte,{"16", "Produto Nivel 2 ?"      , "MV_PAR16"})  
-Aadd(_aDadosPegunte,{"17", "Produto Nivel 3 ?"      , "MV_PAR17"})  
-Aadd(_aDadosPegunte,{"18", "Produto Nivel 4 ?"      , "MV_PAR18"})
-Aadd(_aDadosPegunte,{"19", "Relatorio ?"            , "MV_PAR19"})
-Aadd(_aDadosPegunte,{"20", "Transportaodora ?"      , "MV_PAR20"})
-Aadd(_aDadosPegunte,{"21", "CFOP's ? "              , "MV_PAR21"})
-Aadd(_aDadosPegunte,{"22", "Possui Frete ?"         , "MV_PAR22"})
-Aadd(_aDadosPegunte,{"23", "Sub Grupo Produto ? "   , "MV_PAR23"})
-Aadd(_aDadosPegunte,{"24", "Tipo de Carga ?  "      , "MV_PAR24"})
-Aadd(_aDadosPegunte,{"25", "Tipo de Fornecedor ? "  , "MV_PAR25"})
-Aadd(_aDadosPegunte,{"26", "Rel Graf Excel/Impr ? " , "MV_PAR26"})
-Aadd(_aDadosPegunte,{"27", "Armazéns ?"             , "MV_PAR27"})
-Aadd(_aDadosPegunte,{"28", "Averbacao Forn ?"       , "MV_PAR28"})
-Aadd(_aDadosPegunte,{"29", "Tipo de frete ?"        , "MV_PAR29"})
+aAdd(_aDadosPegunte,{"01", "Filial ?"               , "MV_PAR01"})       
+aAdd(_aDadosPegunte,{"02", "De Emissao ? "          , "MV_PAR02"})           
+aAdd(_aDadosPegunte,{"03", "Ate Emissao ?"          , "MV_PAR03"})
+aAdd(_aDadosPegunte,{"04", "De Produto ? "          , "MV_PAR04"})           
+aAdd(_aDadosPegunte,{"05", "Ate Produto ?"          , "MV_PAR05"})
+aAdd(_aDadosPegunte,{"06", "De Cliente ? "          , "MV_PAR06"})
+aAdd(_aDadosPegunte,{"07", "Loja ?   "              , "MV_PAR07"})  
+aAdd(_aDadosPegunte,{"08", "Ate Cliente ? "         , "MV_PAR08"})  
+aAdd(_aDadosPegunte,{"09", "Loja ?"                 , "MV_PAR09"})       
+aAdd(_aDadosPegunte,{"10", "Rede ?"                 , "MV_PAR10"})           
+aAdd(_aDadosPegunte,{"11", "Estado ?"               , "MV_PAR11"})
+aAdd(_aDadosPegunte,{"12", "Municipio ?"            , "MV_PAR12"})           
+aAdd(_aDadosPegunte,{"13", "Vendedor ?  "           , "MV_PAR13"})          
+aAdd(_aDadosPegunte,{"14", "Supervisor ? "          , "MV_PAR14"})
+aAdd(_aDadosPegunte,{"15", "Grupo Produto ? "       , "MV_PAR15"})
+aAdd(_aDadosPegunte,{"16", "Produto Nivel 2 ?"      , "MV_PAR16"})  
+aAdd(_aDadosPegunte,{"17", "Produto Nivel 3 ?"      , "MV_PAR17"})  
+aAdd(_aDadosPegunte,{"18", "Produto Nivel 4 ?"      , "MV_PAR18"})
+aAdd(_aDadosPegunte,{"19", "Relatorio ?"            , "MV_PAR19"})
+aAdd(_aDadosPegunte,{"20", "Transportaodora ?"      , "MV_PAR20"})
+aAdd(_aDadosPegunte,{"21", "CFOP's ? "              , "MV_PAR21"})
+aAdd(_aDadosPegunte,{"22", "Possui Frete ?"         , "MV_PAR22"})
+aAdd(_aDadosPegunte,{"23", "Sub Grupo Produto ? "   , "MV_PAR23"})
+aAdd(_aDadosPegunte,{"24", "Tipo de Carga ?  "      , "MV_PAR24"})
+aAdd(_aDadosPegunte,{"25", "Tipo de Fornecedor ? "  , "MV_PAR25"})
+aAdd(_aDadosPegunte,{"26", "Rel Graf Excel/Impr ? " , "MV_PAR26"})
+aAdd(_aDadosPegunte,{"27", "Armazéns ?"             , "MV_PAR27"})
+aAdd(_aDadosPegunte,{"28", "Averbacao Forn ?"       , "MV_PAR28"})
+aAdd(_aDadosPegunte,{"29", "Tipo de frete ?"        , "MV_PAR29"})
 
 For _nI := 1 To Len(_aDadosPegunte)          
 	nAux:= 1      
@@ -2360,7 +2356,7 @@ For _nI := 1 To Len(_aDadosPegunte)
     Else
        _cTexto := &(_aDadosPegunte[_nI,3])
        If ValType(_cTexto) == "D"
-          _cTexto := Dtoc(_cTexto)
+          _cTexto := DToC(_cTexto)
        EndIf   
        oPrint:Say (nLinha,1200,_cTexto,oFont14Prb)  		
     EndIf	
@@ -2377,7 +2373,7 @@ oPrint:Line(nLinha,nColInic,nLinha,nColFinal)
 	
 oPrint:EndPage()     // Finaliza a página
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2413,7 +2409,7 @@ Local nGrTotvlBr:= 0
 
 Local _aCampos := {} // Array com os campos da tabela temporária.
 Local _cDir := GetTempPath()  // Diretório de Geração das planilhas.
-Local _cArq := "_"+Dtos(Date())+"_"+StrTran(Time(),":","")+".xml"  // Nome da planilha a ser gerada.   
+Local _cArq := "_"+DToS(Date())+"_"+StrTran(Time(),":","")+".xml"  // Nome da planilha a ser gerada.   
 Local _aCabecalho := {} // Array com o cabeçalho das colunas do relatório.
 Local _cTitulo
 
@@ -2424,15 +2420,15 @@ Begin Sequence
    cFiltro := SubStr( cFiltro , 2 , Len(cFiltro) )
 
    cQuery := " SELECT "
-   cQuery += " CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END AS A2_COD,"
-   cQuery += " CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END AS A2_NREDUZ,"
+   cQuery += " Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD    WHEN SA2.A2_I_CLASS = 'A' THEN '999999'    END AS A2_COD,"
+   cQuery += " Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END AS A2_NREDUZ,"
    cQuery += " SA2.A2_EST, "
    cQuery += " SA1.A1_COD,"
    cQuery += " SA1.A1_NREDUZ,"
    cQuery += " SA1.A1_EST,"
-   IF MV_PAR30 = 1
+   If MV_PAR30 = 1
       cQuery += " DAK.DAK_COD,"
-   ENDIF   
+   EndIf   
    cQuery += " SUM(SD2.D2_QUANT)   AS D2_QUANT,"
    cQuery += " SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,"
    cQuery += " SUM(SD2.D2_I_FRET)  AS D2_I_FRET,"        
@@ -2441,7 +2437,7 @@ Begin Sequence
       cQuery += " SB1.B1_COD PRODUTO,SB1.B1_I_DESCD DESCR,SD2.D2_UM,SD2.D2_SEGUM,"		
    ElseIf nOrdem == 9
 	  cQuery += " SB1.B1_I_SUBGR PRODUTO,SD2.D2_UM,SD2.D2_SEGUM,"
-   Endif
+   EndIf
 
    cQuery += " SUM(SD2.D2_VALBRUT) AS VLBRUT " 
    cQuery += " FROM "+ RetSqlName("DAK") +" DAK "
@@ -2449,11 +2445,11 @@ Begin Sequence
    cQuery += " JOIN "+ RetSqlName("DA3") +" DA3 ON DAK.DAK_CAMINH = DA3.DA3_COD "
    cQuery += " JOIN "+ RetSqlName("SF2") +" SF2 ON SF2.F2_DOC = DAI.DAI_NFISCA AND SF2.F2_SERIE = DAI.DAI_SERIE AND DAI.DAI_FILIAL = SF2.F2_FILIAL "
    cQuery += " JOIN "+ RetSqlName("SD2") +" SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL "
-   cQuery += " JOIN (SELECT A1_FILIAL, A1_COD, A1_LOJA, A1_NREDUZ, A1_MUN, A1_EST, A1_CGC, A1_GRPVEN "
+   cQuery += " JOIN (SELECT A1_FILIAL, A1_COD, A1_LOJA, A1_NREDUZ, A1_MUN, A1_EST, A1_CGC, A1_GRPVEN, A1_COD_MUN "  
    cQuery += " 		FROM "+ RetSqlName("SA1") +" SA1 "
    cQuery += " 		WHERE SA1.D_E_L_E_T_ = ' ' "
    cQuery += " 		UNION
-   cQuery += " 		SELECT A2_FILIAL, A2_COD, A2_LOJA, A2_NREDUZ, A2_MUN, A2_EST, A2_CGC, '' As A1_GRPVEN "
+   cQuery += " 		SELECT A2_FILIAL, A2_COD, A2_LOJA, A2_NREDUZ, A2_MUN, A2_EST, A2_CGC, '' As A1_GRPVEN, A2_COD_MUN A1_COD_MUN "  
    cQuery += " 		FROM "+ RetSqlName("SA2") +" SA2 "
    cQuery += " 		WHERE SA2.D_E_L_E_T_ = ' '  ) SA1 ON  SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA  = SA1.A1_LOJA "
    cQuery += " JOIN "+ RetSqlName("SA3") +" SA3 ON SF2.F2_VEND1 = SA3.A3_COD "
@@ -2476,15 +2472,15 @@ Begin Sequence
    cQuery += " AND SD2.D2_CF <> '5927' "
    cQuery +=  cFiltro
    cQuery += "GROUP BY" 
-   cQuery += " CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD WHEN SA2.A2_I_CLASS = 'A' THEN '999999' END,"
-   cQuery += " CASE WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END,"
+   cQuery += " Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_COD WHEN SA2.A2_I_CLASS = 'A' THEN '999999' END,"
+   cQuery += " Case WHEN SA2.A2_I_CLASS IN ('T','G') THEN SA2.A2_NREDUZ WHEN SA2.A2_I_CLASS = 'A' THEN 'AUTONOMOS' END,"
    cQuery += " SA2.A2_EST, "
    cQuery += " SA1.A1_COD,"
    cQuery += " SA1.A1_NREDUZ,"
    cQuery += " SA1.A1_EST,"
-    IF MV_PAR30 = 1
+    If MV_PAR30 = 1
        cQuery += " DAK.DAK_COD,"
-	ENDIF   
+	EndIf   
    If nOrdem == 8
       cQuery += " SB1.B1_COD,SB1.B1_I_DESCD,SD2.D2_UM,SD2.D2_SEGUM "
    ElseIf nOrdem == 9
@@ -2534,29 +2530,29 @@ Begin Sequence
                       '(_cAlias)->A1_COD +"-"+ (_cAlias)->A1_NREDUZ',;                                       // CLIENTE
                       '(_cAlias)->A1_EST'}                                                                   // "UF CLIENTE
       EndIf
-      IF MV_PAR30 = 1
-         AADD(_aCampos,'(_cAlias)->DAK_COD')								                                     // CARGA
-      ENDIF
+      If MV_PAR30 = 1
+         aAdd(_aCampos,'(_cAlias)->DAK_COD')								                                     // CARGA
+      EndIf
       _aCabecalho := {} // Array com o cabeçalho das colunas do relatório. 
       // Alinhamento( 1-Left,2-Center,3-Right )
       // Formatação( 1-General,2-Number,3-Monetário,4-DateTime )
       //                Titulo das Colunas ,Alinhamento ,Formatação, Totaliza?  
-      Aadd(_aCabecalho,{"COD.PRODUTO"      ,1           ,1         ,.F.}) 
-      Aadd(_aCabecalho,{"DESCR.PRODUTO"    ,1           ,1         ,.F.})    
-      Aadd(_aCabecalho,{"TRANSPORTADORA"   ,1           ,1         ,.F.}) 
-      Aadd(_aCabecalho,{"UF"               ,1           ,1         ,.F.}) 
-      Aadd(_aCabecalho,{"QUANTIDADE"       ,3           ,1         ,.F.}) 
-      Aadd(_aCabecalho,{"U.M."             ,2           ,1         ,.F.}) 
-      Aadd(_aCabecalho,{"QUANT.2a U.M."    ,3           ,1         ,.F.}) 
-      Aadd(_aCabecalho,{"2a U.M."          ,2           ,1         ,.F.}) 
-      Aadd(_aCabecalho,{"FRETE"            ,3           ,3         ,.F.}) 
-      Aadd(_aCabecalho,{"MÉDIA"            ,3           ,3         ,.F.}) 
-      Aadd(_aCabecalho,{"VALOR BRUTO"      ,3           ,3         ,.F.}) 
-      Aadd(_aCabecalho,{"CLIENTE"          ,1           ,1         ,.F.}) 
-      Aadd(_aCabecalho,{"UF"               ,1           ,1         ,.F.}) 
-      IF MV_PAR30 = 1
-         Aadd(_aCabecalho,{"CARGA"            ,1           ,1         ,.F.}) 
-      ENDIF
+      aAdd(_aCabecalho,{"COD.PRODUTO"      ,1           ,1         ,.F.}) 
+      aAdd(_aCabecalho,{"DESCR.PRODUTO"    ,1           ,1         ,.F.})    
+      aAdd(_aCabecalho,{"TRANSPORTADORA"   ,1           ,1         ,.F.}) 
+      aAdd(_aCabecalho,{"UF"               ,1           ,1         ,.F.}) 
+      aAdd(_aCabecalho,{"QUANTIDADE"       ,3           ,1         ,.F.}) 
+      aAdd(_aCabecalho,{"U.M."             ,2           ,1         ,.F.}) 
+      aAdd(_aCabecalho,{"QUANT.2a U.M."    ,3           ,1         ,.F.}) 
+      aAdd(_aCabecalho,{"2a U.M."          ,2           ,1         ,.F.}) 
+      aAdd(_aCabecalho,{"FRETE"            ,3           ,3         ,.F.}) 
+      aAdd(_aCabecalho,{"MÉDIA"            ,3           ,3         ,.F.}) 
+      aAdd(_aCabecalho,{"VALOR BRUTO"      ,3           ,3         ,.F.}) 
+      aAdd(_aCabecalho,{"CLIENTE"          ,1           ,1         ,.F.}) 
+      aAdd(_aCabecalho,{"UF"               ,1           ,1         ,.F.}) 
+      If MV_PAR30 = 1
+         aAdd(_aCabecalho,{"CARGA"            ,1           ,1         ,.F.}) 
+      EndIf
 
       If nOrdem == 8 //Fechamento x Produto
          _cArq := "Fechamento_x_Produto"+_cArq // Nome da planilha a ser gerada.   
@@ -2575,7 +2571,7 @@ Begin Sequence
 	  ROMS005C(1) // Imprime cabecalho
 	
 	  DBSelectArea(_cAlias)
-	  (_cAlias)->( DBGotop() )
+	  (_cAlias)->( DBGoTop() )
 	  While (_cAlias)->( !Eof() )
 	
 		 IncProc( "Os dados estão sendo processados, favor aguardar..." )
@@ -2625,7 +2621,7 @@ Begin Sequence
 				
 			EndIf
 			
-			Aadd( aProduto , { AllTrim( (_cAlias)->PRODUTO ) } )
+			aAdd( aProduto , { AllTrim( (_cAlias)->PRODUTO ) } )
 				
 			nlinha += nSaltoLinha
 			
@@ -2699,7 +2695,7 @@ End Sequence
 
 (_cAlias)->( DBCloseArea() )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2737,7 +2733,7 @@ oPrint:Say( nlinha + 10 , nColInic + 1650 , "FRETE"				, oFont12b )
 oPrint:Say( nlinha + 10 , nColInic + 1850 , "MÉDIA"				, oFont12b )
 oPrint:Say( nlinha + 10 , nColInic + 2105 , "VALOR BRUTO"		, oFont12b )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2772,7 +2768,7 @@ If nLinha > nqbrPagina
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2797,7 +2793,7 @@ oPrint:Line( nLinInBox , 2000 , nLinha , 2000 ) // VALOR BRUTO
 
 oPrint:Box( nLinInBox , nColInic , nLinha , nColFinal )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2815,13 +2811,13 @@ Retorno---------: Nenhum
 Static Function ROMS0053( cTransport , nqtde1 , cum1 , nqtde2 , cum2 , nFrete , nValBrut )
 
 oPrint:Say( nlinha + 10 , nColInic + 0010 , SubStr(cTransport,1,46)											, oFont10 )
-oPrint:Say( nlinha + 10 , nColInic + 0765 , Transform(nqtde1,"@E 9,999,999,999.99") + "-"+ PADR(cum1,2," ")	, oFont10 )
-oPrint:Say( nlinha + 10 , nColInic + 1180 , Transform(nqtde2,"@E 9,999,999,999.99") + "-"+ PADR(cum2,2," ")	, oFont10 )
+oPrint:Say( nlinha + 10 , nColInic + 0765 , Transform(nqtde1,"@E 9,999,999,999.99") + "-"+ PadR(cum1,2," ")	, oFont10 )
+oPrint:Say( nlinha + 10 , nColInic + 1180 , Transform(nqtde2,"@E 9,999,999,999.99") + "-"+ PadR(cum2,2," ")	, oFont10 )
 oPrint:Say( nlinha + 10 , nColInic + 1480 , 'R$ ' + Transform(nFrete,"@E 9,999,999,999.99")					, oFont10 )
 oPrint:Say( nlinha + 10 , nColInic + 1700 , Transform(nFrete / nqtde1 ,"@E 999,999,999.99999")				, oFont10 )
 oPrint:Say( nlinha + 10 , nColInic + 2040 , 'R$ ' + Transform(nValBrut,"@E 9,999,999,999.99")				, oFont10 )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2839,13 +2835,13 @@ Retorno---------: Nenhum
 Static Function ROMS0054( nTotqtde1 , nTotqtde2 , nTotvlrFre , nTotValBr )
 
 oPrint:Say( nlinha + 10 , nColInic + 0010 , 'TOTAL:'															, oFont10b )
-oPrint:Say( nlinha + 10 , nColInic + 0765 , Transform(nTotqtde1,"@E 9,999,999,999.99") + " "+ PADR("",2," ")	, oFont10b )
-oPrint:Say( nlinha + 10 , nColInic + 1180 , Transform(nTotqtde2,"@E 9,999,999,999.99") + " "+ PADR("",2," ")	, oFont10b )
+oPrint:Say( nlinha + 10 , nColInic + 0765 , Transform(nTotqtde1,"@E 9,999,999,999.99") + " "+ PadR("",2," ")	, oFont10b )
+oPrint:Say( nlinha + 10 , nColInic + 1180 , Transform(nTotqtde2,"@E 9,999,999,999.99") + " "+ PadR("",2," ")	, oFont10b )
 oPrint:Say( nlinha + 10 , nColInic + 1480 , 'R$ ' + Transform(nTotvlrFre,"@E 9,999,999,999.99")					, oFont10b )
 oPrint:Say( nlinha + 10 , nColInic + 1700 , Transform(nTotvlrFre / nTotqtde1 ,"@E 999,999,999.99999")			, oFont10b ) 
 oPrint:Say( nlinha + 10 , nColInic + 2040 , 'R$ ' + Transform(nTotValBr,"@E 9,999,999,999.99")					, oFont10  )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2867,13 +2863,13 @@ nLinInBox := nLinha
 oPrint:Box( nlinha,nColInic,nLinha + nSaltoLinha,nColFinal)
 
 oPrint:Say( nlinha + 10 , nColInic + 0010 , 'TOTAL GERAL:'														, oFont10b )
-oPrint:Say( nlinha + 10 , nColInic + 0765 , Transform(nTotqtde1,"@E 9,999,999,999.99") + " "+ PADR("",2," ")	, oFont10b )
-oPrint:Say( nlinha + 10 , nColInic + 1180 , Transform(nTotqtde2,"@E 9,999,999,999.99") + " "+ PADR("",2," ")	, oFont10b )
+oPrint:Say( nlinha + 10 , nColInic + 0765 , Transform(nTotqtde1,"@E 9,999,999,999.99") + " "+ PadR("",2," ")	, oFont10b )
+oPrint:Say( nlinha + 10 , nColInic + 1180 , Transform(nTotqtde2,"@E 9,999,999,999.99") + " "+ PadR("",2," ")	, oFont10b )
 oPrint:Say( nlinha + 10 , nColInic + 1480 , 'R$ ' + Transform(nTotvlrFre,"@E 9,999,999,999.99")					, oFont10b )
 oPrint:Say( nlinha + 10 , nColInic + 1700 , Transform(nTotvlrFre / nTotqtde1 ,"@E 999,999,999.99999")			, oFont10b )
 oPrint:Say( nlinha + 10 , nColInic + 2040 , 'R$ ' + Transform(nTotValBr,"@E 9,999,999,999.99")					, oFont10  )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2897,7 +2893,7 @@ oPrint:Box( nlinha , nColInic , nLinha + nSaltoLinha , nColFinal - 230 )
 oPrint:Say( nlinha + nAjustAlt , nColInic + 025 , "Filial:"											, oFont14Prb )
 oPrint:Say( nlinha + nAjustAlt , nColInic + 230 , AllTrim(cCodFilial) +'-'+ FWFilialName(,cCodFilial)	, oFont14Prb )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2920,7 +2916,7 @@ oPrint:Box( nlinha , nColInic , nLinha + nSaltoLinha , nColFinal - 850 )
 
 oPrint:Say( nlinha + nAjustAlt , nColInic + 10 , "Data de Emissão NF: "+ cDtCarga , oFont12b )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2943,7 +2939,7 @@ oPrint:Box( nlinha , nColInic , nLinha + nSaltoLinha , nColFinal - 850 )
 
 oPrint:Say( nlinha + nAjustAlt , nColInic + 25 , "Total Filial: "+ AllTrim(cCodFilial) +'-'+ FWFilialName(,cCodFilial) , oFont14Prb )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2970,7 +2966,7 @@ oPrint:Say( nlinha + nAjustAlt , nColInic + 1240 , "Perc Cargas"	     , oFont12b
 oPrint:Say( nlinha + nAjustAlt , nColInic + 1570 , "Peso Bruto"		 , oFont12b )
 oPrint:Say( nlinha + nAjustAlt , nColInic + 1880 , "Perc Peso"	     , oFont12b )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -2994,7 +2990,7 @@ oPrint:Say( nlinha + nAjustAlt , nColInic + 1260 , TransForm(nPercent,"@E 999.99
 oPrint:Say( nlinha + nAjustAlt , nColInic + 1510 , TransForm(nPes   ,"@E 999,999,999,999")	, oFont12 )
 oPrint:Say( nlinha + nAjustAlt , nColInic + 1940 , TransForm(nperpeso,"@E 999.999") + ' %'	, oFont12 )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -3023,7 +3019,7 @@ oPrint:Say( nlinha + nAjustAlt , nColInic + 1510 , TransForm(nPeso   ,"@E 999,99
 oPrint:Say( nlinha + nAjustAlt , nColInic + 1940 , TransForm(nperpeso,"@E 999.999") + ' %'	, oFont12 )
 
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -3047,7 +3043,7 @@ oPrint:Line( nLinInBox , 1200 , nLinha , 1200 ) // Quantidade | Percentual
 
 oPrint:Box( nLinInBox , nColInic , nLinha , nColFinal - 230 )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -3084,7 +3080,7 @@ If nLinha > nqbrPagina // Quebra de pagina
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -3092,7 +3088,7 @@ Programa--------: ROMS0507
 Autor-----------: Jeovane
 Data da Criacao-: 12/03/2009
 ===============================================================================================================================
-Descrição-------: Verifica e processa os dados
+Descrição-------: Verifica e Processa os dados
 ===============================================================================================================================
 Parametros------: Nenhum
 ===============================================================================================================================
@@ -3106,7 +3102,7 @@ Local nCountRec    := 0
 Local nPosFilial   := 0  , x
 
 Local _cDir := GetTempPath()  // Diretório de Geração das planilhas.
-Local _cArq := "_"+Dtos(Date())+"_"+StrTran(Time(),":","")+".xml"  // Nome da planilha a ser gerada.   
+Local _cArq := "_"+DToS(Date())+"_"+StrTran(Time(),":","")+".xml"  // Nome da planilha a ser gerada.   
 Local _aCabecalho := {} // Array com o cabeçalho das colunas do relatório.
 Local _cTitulo, _nI
 Local _aDtCarTpVeic := {}  // Array por filial + Data da Carga +  Tipo de Veiculo 
@@ -3143,11 +3139,11 @@ Begin Sequence
    cQuery += " JOIN "+ RetSqlName("DA3") +" DA3 ON DAK.DAK_CAMINH = DA3.DA3_COD "
    cQuery += " JOIN "+ RetSqlName("SF2") +" SF2 ON SF2.F2_DOC     = DAI.DAI_NFISCA AND SF2.F2_SERIE   = DAI.DAI_SERIE AND DAI.DAI_FILIAL = SF2.F2_FILIAL "
    cQuery += " JOIN "+ RetSqlName("SD2") +" SD2 ON SD2.D2_DOC     = SF2.F2_DOC     AND SD2.D2_SERIE   = SF2.F2_SERIE  AND SD2.D2_FILIAL  = SF2.F2_FILIAL "
-   cQuery += " JOIN (SELECT A1_FILIAL, A1_COD, A1_LOJA, A1_NREDUZ, A1_MUN, A1_EST, A1_CGC, A1_GRPVEN "
+   cQuery += " JOIN (SELECT A1_FILIAL, A1_COD, A1_LOJA, A1_NREDUZ, A1_MUN, A1_EST, A1_CGC, A1_GRPVEN, A1_COD_MUN " 
    cQuery += " 		FROM "+ RetSqlName("SA1") +" SA1 "
    cQuery += " 		WHERE SA1.D_E_L_E_T_ = ' ' "
    cQuery += " 		UNION
-   cQuery += " 		SELECT A2_FILIAL, A2_COD, A2_LOJA, A2_NREDUZ, A2_MUN, A2_EST, A2_CGC, '' As A1_GRPVEN "
+   cQuery += " 		SELECT A2_FILIAL, A2_COD, A2_LOJA, A2_NREDUZ, A2_MUN, A2_EST, A2_CGC, '' As A1_GRPVEN, A2_COD_MUN A1_COD_MUN " 
    cQuery += " 		FROM "+ RetSqlName("SA2") +" SA2 "
    cQuery += " 		WHERE SA2.D_E_L_E_T_ = ' '  ) SA1 ON  SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA  = SA1.A1_LOJA "
    cQuery += " JOIN "+ RetSqlName("SA3") +" SA3 ON SF2.F2_VEND1   = SA3.A3_COD "
@@ -3181,7 +3177,7 @@ Begin Sequence
    COUNT TO nCountRec
 
    DBSelectArea(cAliasOr10)
-   (cAliasOr10)->( DBGotop() )
+   (cAliasOr10)->( DBGoTop() )
    
    If nCountRec > 0  
 	
@@ -3230,7 +3226,7 @@ Begin Sequence
        
          For _nI := 1 To Len(_aDadCarGr)
  		                    //   "Tipo do Veículo", "Qtde Cargas"      , "Perc Cargas"                                , "Peso Bruto"        , "Perc Peso" 
-             Aadd(_aTipoVeic, {_aDadCarGr[_nI][3] , _aDadCarGr[_nI][4] , (( _aDadCarGr[_nI][4] / _nTotVeicDt ) * 100 ),  _aDadCarGr[_nI][6] , (( _aDadCarGr[_nI][6] / _nTotpes ) * 100 )})
+             aAdd(_aTipoVeic, {_aDadCarGr[_nI][3] , _aDadCarGr[_nI][4] , (( _aDadCarGr[_nI][4] / _nTotVeicDt ) * 100 ),  _aDadCarGr[_nI][6] , (( _aDadCarGr[_nI][6] / _nTotpes ) * 100 )})
          Next
 
          If Len(_aDadoCarg) > 0  // Pega o primeiro registro do array
@@ -3250,7 +3246,7 @@ Begin Sequence
              EndIf
             
              //                      "Data de Emissão NF",  "Tipo do Veículo", "Qtde Cargas"      , "Perc Cargas"                                , "Peso Bruto"      , "Perc Peso"
-             Aadd(_aDtCarTpVeic,	{Stod(_aDadoCarg[_nI][2])  ,_aDadoCarg[_nI][4] , _aDadoCarg[_nI][5] , (( _aDadoCarg[_nI][5] / _nTotVeicDt ) * 100 ), _aDadoCarg[_nI][6], (( _aDadoCarg[_nI][6] / _npesVeicDt ) * 100 )})
+             aAdd(_aDtCarTpVeic,	{SToD(_aDadoCarg[_nI][2])  ,_aDadoCarg[_nI][4] , _aDadoCarg[_nI][5] , (( _aDadoCarg[_nI][5] / _nTotVeicDt ) * 100 ), _aDadoCarg[_nI][6], (( _aDadoCarg[_nI][6] / _npesVeicDt ) * 100 )})
          Next
         
          _cArq := "Veiculo_Data_e_Tipo"+_cArq // Nome da planilha a ser gerada.   
@@ -3260,12 +3256,12 @@ Begin Sequence
          // Alinhamento( 1-Left,2-Center,3-Right )
          // Formatação( 1-General,2-Number,3-Monetário,4-DateTime )
          //                Titulo das Colunas  ,Alinhamento ,Formatação, Totaliza?
-         Aadd(_aCabecalho,{"Data de Emissão NF",2           ,4         ,.F.})   
-         Aadd(_aCabecalho,{"Tipo do Veículo"   ,1           ,1         ,.F.})    
-         Aadd(_aCabecalho,{"Qtde Cargas"       ,3           ,2         ,.F.}) 
-         Aadd(_aCabecalho,{"Perc Cargas"       ,3           ,2         ,.F.}) 
-         Aadd(_aCabecalho,{"Peso Bruto"        ,3           ,2         ,.F.}) 
-         Aadd(_aCabecalho,{"Perc Peso"         ,3           ,2         ,.F.}) 
+         aAdd(_aCabecalho,{"Data de Emissão NF",2           ,4         ,.F.})   
+         aAdd(_aCabecalho,{"Tipo do Veículo"   ,1           ,1         ,.F.})    
+         aAdd(_aCabecalho,{"Qtde Cargas"       ,3           ,2         ,.F.}) 
+         aAdd(_aCabecalho,{"Perc Cargas"       ,3           ,2         ,.F.}) 
+         aAdd(_aCabecalho,{"Peso Bruto"        ,3           ,2         ,.F.}) 
+         aAdd(_aCabecalho,{"Perc Peso"         ,3           ,2         ,.F.}) 
          U_ITGEREXCEL(_cArq,_cDir,_cTitulo,"Relatorio",_aCabecalho,_aDtCarTpVeic,.F.)
 
          _cArq := "Veiculo_Tipo"+_cArq // Nome da planilha a ser gerada.   
@@ -3276,11 +3272,11 @@ Begin Sequence
          // Formatação( 1-General,2-Number,3-Monetário,4-DateTime )
          //                Titulo das Colunas ,Alinhamento ,Formatação, Totaliza?  
         
-         Aadd(_aCabecalho,{"Tipo do Veículo"  ,1           ,1         ,.F.}) 
-         Aadd(_aCabecalho,{"Qtde Cargas"      ,3           ,2         ,.F.}) 
-         Aadd(_aCabecalho,{"Perc Cargas"      ,3           ,2         ,.F.}) 
-         Aadd(_aCabecalho,{"Peso Bruto"       ,3           ,2         ,.F.}) 
-         Aadd(_aCabecalho,{"Perc Peso"        ,3           ,2         ,.F.}) 
+         aAdd(_aCabecalho,{"Tipo do Veículo"  ,1           ,1         ,.F.}) 
+         aAdd(_aCabecalho,{"Qtde Cargas"      ,3           ,2         ,.F.}) 
+         aAdd(_aCabecalho,{"Perc Cargas"      ,3           ,2         ,.F.}) 
+         aAdd(_aCabecalho,{"Peso Bruto"       ,3           ,2         ,.F.}) 
+         aAdd(_aCabecalho,{"Perc Peso"        ,3           ,2         ,.F.}) 
 
          U_ITGEREXCEL(_cArq,_cDir,_cTitulo,"Relatorio",_aCabecalho,_aTipoVeic,.F.)
          Break                              
@@ -3318,7 +3314,7 @@ Begin Sequence
 
 End Sequence
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -3326,7 +3322,7 @@ Programa--------: ROMS0505
 Autor-----------: Jeovane
 Data da Criacao-: 12/03/2009
 ===============================================================================================================================
-Descrição-------: Verifica e processa os dados
+Descrição-------: Verifica e Processa os dados
 ===============================================================================================================================
 Parametros------: Nenhum
 ===============================================================================================================================
@@ -3386,7 +3382,7 @@ If nPosPeso <> 0 // INSERIDO POR ERICH BUTTNER DIA 02/08/13 - VERIFICA SE A FILI
 	
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -3422,7 +3418,7 @@ For y := 1 To Len( _aDadoCarg )
 			
 			ROMS0508(0,0)
 			
-			ROMS005A( DtoC( StoD( _aDadoCarg[y][2] ) ) )
+			ROMS005A( DToC( SToD( _aDadoCarg[y][2] ) ) )
 			
 			nlinha += ( nSaltoLinha * 2 )
 			
@@ -3452,7 +3448,7 @@ Next y
 //Imprime box da ultima pagina do ultima data da carga
 ROMS0509()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -3567,14 +3563,14 @@ ROMS0508(0,0)
 
 ROMS056( "TOTAL" , nTotalQtde , nTotalPorc, nTotalpes, nTotalPors ) // Imprime totalizador
 
-Return()
+Return
 
 Static Function ROMS05Val(nOrdem)
 
-IF (nOrdem = 8 .OR. nOrdem = 9)
-   U_ITMSG("Essa ordem "+aOrd[nOrdem]+ " não esta mais disponivel nesse menu.",'Atenção!',;
+If (nOrdem = 8 .Or. nOrdem = 9)
+   U_ITMsg("Essa ordem "+aOrd[nOrdem]+ " não esta mais disponivel nesse menu.",'Atenção!',;
            "Acesse OMS --> Relatórios --> Especifico Italac --> Fretes por Produto [ROMS056].",3)
-   RETURN .F.
-ENDIF
+   Return .F.
+EndIf
 
-RETURN .T.
+Return .T.

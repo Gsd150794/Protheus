@@ -2,39 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 07/07/2017 | Correção para ler a SX5 de forma compartilhada. Chamado 14409
--------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 16/08/2019 | Alterar relatório de afastamento para ler o tipo afastam. das tabela SX5 e RCM. Chamado 30279
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 17/09/2019 | Retirada chamada da função itputx1. Chamado 28346 
--------------------------------------------------------------------------------------------------------------------------------
-Alex Walaluer | 30/10/2020 | Inclusão do Campo CID. Chamado 34513
--------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 30/06/2023 | Alterar o relatório para exibir a descrição CID. Chamado 44259.
--------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 08/11/2023 | Incluir no relatório colunas para exibir:Nrdias afastado, nome medico,CRM do Médico.Chamado 45508
+Alex Walaluer |30/10/2020| Chamado 34513. Inclusão do Campo CID.
+Julio Paz     |30/06/2023| Chamado 44259. Alterar o relatório para exibir a descrição CID.
+Julio Paz     |08/11/2023| Chamado 45508. Incluir no relatório colunas para exibir:Nrdias afastado, nome medico,CRM do Médico.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
-
-#DEFINE CRLF Chr(13)+Chr(10)
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa--------: RGPE009
 Autor-----------: Erich Buttner
 Data da Criacao-: 14/10/2013
-===============================================================================================================================
 Descrição-------: Imprimir relatório de funcionarios afastados de um determinado periodo
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -52,21 +36,18 @@ oReport := RGPE009RUN()
 oReport:PrintDialog()
 
 If Select(cAliasQRY) > 0
-   (cAliasQRY)->(DbCloseArea())
+   (cAliasQRY)->(DBCloseArea())
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa--------: RGPE009RUN
 Autor-----------: Erich Buttner
 Data da Criacao-: 14/10/2013
-===============================================================================================================================
 Descrição-------: Processa a impressão do relatório
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -80,7 +61,7 @@ Local cAliasSRA := "SRA"
 //Local cAliasQRY := CriaTrab( Nil , .F. ) 
 
 If Select(cAliasQRY) > 0
-   (cAliasQRY)->(DbCloseArea())
+   (cAliasQRY)->(DBCloseArea())
 EndIf
 
 oReport := TReport():New( "RGPE009" , "Relatório de Afastamento" , "RGPE009" , {|oReport| RGPE009PRT( oReport , cAliasSRA , cAliasSR8 , cAliasQRY ) } , "Relatório de Afastamento" )
@@ -113,11 +94,8 @@ Return( oReport )
 Programa--------: RGPE009PRT
 Autor-----------: Erich Buttner
 Data da Criacao-: 14/10/2013
-===============================================================================================================================
 Descrição-------: Processa a impressão do relatório
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -162,8 +140,8 @@ oSection1:BeginQuery()
 
 BeginSql alias cAliasQRY
 	SELECT RA_FILIAL FILIAL, R8_MAT MATRICULA, RA_NOME NOME, R8_DURACAO DIASAFAST, R8_NMMED NOMEMEDICO, R8_CRMMED CRMMEDICO, 
-	       SUBSTR(R8_DATAINI, 7, 2) || '/' || SUBSTR(R8_DATAINI, 5, 2) || '/' || SUBSTR(R8_DATAINI, 1, 4) DTAFAST,
-	       SUBSTR(R8_DATAFIM, 7, 2) || '/' || SUBSTR(R8_DATAFIM, 5, 2) || '/' || SUBSTR(R8_DATAFIM, 1, 4) DTFIMAFAST,
+	       SubStr(R8_DATAINI, 7, 2) || '/' || SubStr(R8_DATAINI, 5, 2) || '/' || SubStr(R8_DATAINI, 1, 4) DTAFAST,
+	       SubStr(R8_DATAFIM, 7, 2) || '/' || SubStr(R8_DATAFIM, 5, 2) || '/' || SubStr(R8_DATAFIM, 1, 4) DTFIMAFAST,
 	       R8_TIPO TPAFAST, R8_TIPOAFA TIPOAFA, R8_CID AFRAIS
 	  FROM %Table:SRA% A, %Table:SR8% B
 	 WHERE A.D_E_L_E_T_ = ' '
@@ -186,7 +164,7 @@ oReport:Section(1):Init()
 oReport:Section(1):PrintLine() 
 oReport:Section(1):Section(1):Init()
 
-While (cAliasQRY)->(!EoF())
+While (cAliasQRY)->(!Eof())
     
     If _cFilial <> (cAliasQRY)->FILIAL
     	oReport:Section(1):Finish()
@@ -200,7 +178,7 @@ While (cAliasQRY)->(!EoF())
     EndIf
     
     oReport:Section(1):Section(1):PrintLine() 
-	dbSkip()
+	DBSkip()
 EndDo
 
 oReport:Section(1):SetPageBreak(.T.)
@@ -214,12 +192,9 @@ Return
 Programa--------: RGPE009A
 Autor-----------: Julio de Paula Paz
 Data da Criacao-: 16/08/2019
-===============================================================================================================================
 Descrição-------: Retornar o código e a descrição do afastamento.
-===============================================================================================================================
 Parametros------: _cTPAFAST = Código de afastamento lido do campo R8_TIPO, Descrição na tabela SX5. (Campo antigo) 
                   _cTIPOAFA = Código de afastamento lido do campo R8_TIPOAFA, Descrição na tabela RCM. (Campo novo)
-===============================================================================================================================
 Retorno---------: _cRet = Código e descrição do afastamento concatenados.
 ===============================================================================================================================
 */

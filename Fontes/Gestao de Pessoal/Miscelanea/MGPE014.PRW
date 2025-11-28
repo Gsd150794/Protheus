@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer | 18/12/2019 | Chamado 31486 - Correção da geração do arquivo para usar os campos R0_DIASPRO e RG2_DIAPRO. 
--------------------------------------------------------------------------------------------------------------------------------
-Igor Melgaço  | 17/07/2023 | Chamado 44157 - Ajuste para não incluir funcionários demitidos na listagem. 
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 28/08/2024 | Chamado 48256 - Incluído abatimento das faltas. 
+Alex Wallauer |18/12/2019| Chamado 31486. Correção da geração do arquivo para usar os campos R0_DIASPRO e RG2_DIAPRO. 
+Igor Melgaço  |17/07/2023| Chamado 44157. Ajuste para não incluir funcionários demitidos na listagem. 
+Lucas Borges  |28/08/2024| Chamado 48256. Incluído abatimento das faltas. 
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MGPE014
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 16/03/2016
-===============================================================================================================================
 Descrição---------: INTEGRACAO DE BENEFICIOS COM EMPRESA SE SERVICOS - Chamado 10177
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -35,7 +27,7 @@ User Function MGPE014()
 Pergunte('MGPE014',.F.)
 
 TNewProcess():New("MGPE014", "Exportacao dos arquivos de beneficios",;
-					 {|oSelf| MGPE014PB(oSelf)}, "Esta rotina processa e gera arquivo de beneficios para integracao",;
+					 {|oSelf| MGPE014PB(oSelf)}, "Esta rotina Processa e gera arquivo de beneficios para integracao",;
 					  "MGPE014", NIL, NIL, NIL, NIL, .T., .F.) 
 Return
 
@@ -45,31 +37,28 @@ Return
 Programa----------: MGPE014PB
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 22/01/2016
-===============================================================================================================================
 Descrição---------: Processa Beneficios
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 Static Function MGPE014PB(_oProcess)
 
-Local _aArea     := GetArea()
+Local _aArea     := FWGetArea()
 
 Private _nTotal  := 0
 Private _nVlr    := 0
 Private _nHdl    := 0
 Private _nLin    := 0
-Private _lImpLis := Iif(MV_PAR12 == 1,.T.,.F.)   //Impressao Relatorio
+Private _lImpLis := IIf(MV_PAR12 == 1,.T.,.F.)   //Impressao Relatorio
 Private _nOrd    := MV_PAR13                   //Ordem Relatorio
 Private _cArqOut   := ""
 Private _lErrorImp := .F.
 Private nConta:=0
 
 
-dbSelectArea( "RG2" )
-RG2->( dbSetOrder(1) )
+DBSelectArea( "RG2" )
+RG2->( DBSetOrder(1) )
 
 _oProcess:SetRegua1(7) //Total de elementos da regua
 _oProcess:SaveLog("Inicio de processamento")       
@@ -79,7 +68,7 @@ MGPE014PI(_oProcess)
 //Fecha Arquivo
 If _nHdl > 0
 
-	If !fClose(_nHdl)
+	If !FClose(_nHdl)
 
 		MsgAlert('Ocorreram problemas no fechamento do arquivo.',"MGPE01401") 
 
@@ -116,7 +105,7 @@ Else
 
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return .T.
 
@@ -125,11 +114,8 @@ Return .T.
 Programa----------: MGPE014PI
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 22/01/2016
-===============================================================================================================================
 Descrição---------: Inicializa e faz query de Beneficios
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -171,7 +157,7 @@ Private _aSeqEnd := {}
 //Carrega Perguntas
 _cFornecedor := MV_PAR01                     //Fornecedor selecionado
 _cTiposSel   := MV_PAR02                     //Tipos Selecionados
-_cPeriodo    := substr(alltrim(MV_PAR03),4,4) + substr(alltrim(MV_PAR03),1,2)      //Periodo
+_cPeriodo    := SubStr(AllTrim(MV_PAR03),4,4) + SubStr(AllTrim(MV_PAR03),1,2)      //Periodo
 _cFilDe      := MV_PAR04                     //Da Filial
 _cFilAte     := MV_PAR05                     //Ate a Filial
 _cCcDe       := MV_PAR06                     //Do Centro Custo
@@ -179,7 +165,7 @@ _cCcAte      := MV_PAR07                     //Ate Centro de Custo
 _cMatDe      := MV_PAR08                     //Da Matricula
 _cMatAte     := MV_PAR09                     //Ate Matricula
 _dCred       := MV_PAR10                     //Data Credito
-_cAdm        := dToS(MV_PAR11)               //Consid.Admitido Ate
+_cAdm        := DToS(MV_PAR11)               //Consid.Admitido Ate
 
 //====================================================================================================
 // Verifica parametros                                                    
@@ -202,19 +188,19 @@ EndIf
 //====================================================================================================
 // Verifica se foi informado os Arquivos .INI e de Saida                  
 //====================================================================================================
-_nLinha  := FPOSTAB("S018", Alltrim(_cFornecedor), "==", 4)
+_nLinha  := FPOSTAB("S018", AllTrim(_cFornecedor), "==", 4)
 
-If Empty( _cArqIni := Alltrim(FTABELA("S018", _nLinha, 08)) )
+If Empty( _cArqIni := AllTrim(FTABELA("S018", _nLinha, 08)) )
 	MsgAlert("Arquivo .INI não informado na Tabela Auxiliar S018!","MGPE01409")
 	Return
 EndIf
 
-If Empty( _cArqOut := Alltrim(FTABELA("S018", _nLinha, 09)) )
+If Empty( _cArqOut := AllTrim(FTABELA("S018", _nLinha, 09)) )
 	MsgAlert("Arquivo de Saída não informado na Tabela Auxiliar S018","MGPE01410")
 	Return
 EndIf
 
-If Empty( _cFuncVal := Alltrim(FTABELA("S018", _nLinha, 10)) )
+If Empty( _cFuncVal := AllTrim(FTABELA("S018", _nLinha, 10)) )
 	MsgAlert("Função de Validação não informada na Tabela Auxiliar S018","MGPE01411")
 	Return
 Else
@@ -241,41 +227,41 @@ EndIf
 _aStruct := RHProcessaIni(_cArqIni)
 
 //Cria Arquivo de saida
-_nHdl := fCreate(_cArqOut)
+_nHdl := FCreate(_cArqOut)
 
 If _nHdl == -1
 
 	MsgAlert('O arquivo '+_cArqOut+' não pode ser criado! Verifique os parametros.',"MGPE01415") 
 	Return
 
-Endif
+EndIf
 
 //-------------------------------------------------------------------------------------//
 // Codigo 0 - Header do Arquivo					                                         //
 //-------------------------------------------------------------------------------------//
 _nseq++ 
 _oProcess:IncRegua1("Header de arquivo")
-fWrite( _nHdl, RHGeraLinhas( _aStruct[1] ) )
+FWrite( _nHdl, RHGeraLinhas( _aStruct[1] ) )
 
 //-------------------------------------------------------------------------------------//
 // Codigo 1 - Empresas/Enderecos  				                                         //
 //
-// Faz um loop pois o RHGeralinhas só faz a linha do RGC que estiver posicionado     
+// Faz um Loop pois o RHGeralinhas só faz a linha do RGC que estiver posicionado     
 //-------------------------------------------------------------------------------------//
 _nTotRegTP1 := 1
 
 _nseq++ 
 _oProcess:IncRegua1("Empresas/Enderecos")
 
-RGC->( Dbgotop() )
+RGC->( DBGoTop() )
 
-Do while .not. RGC->( Eof() )
+While .not. RGC->( Eof() )
 
-	fWrite( _nHdl, RHGeraLinhas( _aStruct[2], "01" ) )
+	FWrite( _nHdl, RHGeraLinhas( _aStruct[2], "01" ) )
 	
-	RGC->( Dbskip())
+	RGC->( DBSkip())
 	
-Enddo
+EndDo
 	
 //-------------------------------------------------------------------------------------//
 // Prepara Enderecos de Entrega				                                       //
@@ -294,14 +280,14 @@ _cQuery  += " ORDER BY RA_LOCBNF,RA_FILIAL,RA_MAT "
 //Verifica Tabela Aberta
 If Select("QD02VB") > 0
 	
-	DbSelectArea("QD02VB")
-	DbCloseArea()
+	DBSelectArea("QD02VB")
+	DBCloseArea()
 
-Endif
+EndIf
 
 //Abrir Tabela
 DbUseArea( .T., "TOPCONN", TcGenQry( ,, _cQuery), "QD02VB", .T., .F.)
-QD02VB->(DbGoTop())
+QD02VB->(DBGoTop())
 
 _nSeqEnd := 0
 _aSeqEnd := {}
@@ -311,35 +297,35 @@ While QD02VB->(!Eof())
 
 	//-Gera apenas 1 linha por Loc.Entrega
 	If QD02VB->RA_LOCBNF == _cMyChave 
-		QD02VB->(dbSkip())
+		QD02VB->(DBSkip())
 		Loop
 	Else
 		_cMyChave := QD02VB->RA_LOCBNF
 	EndIf
 	
-	dbSelectArea("RGC")
-	dbSetOrder(1)	//-RGC_FILIAL+RGC_KEYLOC
-	dbSeek(xFilial("RGC")+QD02VB->RA_LOCBNF,.F.)
+	DBSelectArea("RGC")
+	DBSetOrder(1)	//-RGC_FILIAL+RGC_KEYLOC
+	DBSeek(xFilial("RGC")+QD02VB->RA_LOCBNF,.F.)
 	
 	//Separa Numero do Endereco
 	_cRGC_End := ''
 	_cRGC_Num := ''
 	If (_nPos := Rat(",",RGC_ENDER)) > 0
-		_cRGC_End := Substr(RGC_ENDER,1,_nPos - 1)
-		_cRGC_Num := Substr(RGC_ENDER,_nPos + 1)
-	Endif
+		_cRGC_End := SubStr(RGC_ENDER,1,_nPos - 1)
+		_cRGC_Num := SubStr(RGC_ENDER,_nPos + 1)
+	EndIf
 	
 	//-Cria sequencia de Enderecos
 	_nSeqEnd += 1
 	aAdd(_aSeqEnd, {QD02VB->RA_LOCBNF, _nSeqEnd})
 	
-	QD02VB->(dbSkip())
+	QD02VB->(DBSkip())
 
 EndDo
 
 //-Ajusta o conteudo da _cTiposSel pra usar na Query
 _cQryAux := ""
-_cTiposSel := Alltrim(_cTiposSel)
+_cTiposSel := AllTrim(_cTiposSel)
 
 For _nTp := 1 to Len(_cTiposSel) Step 2
 
@@ -424,30 +410,30 @@ Else
 
 	_cQuery  += " ORDER BY SRA.RA_FILIAL,SRA.RA_MAT "
 
-Endif
+EndIf
 
 //Verifica Tabela Aberta
 If Select("QD03VB") > 0
-	DbSelectArea("QD03VB")
-	DbCloseArea()
-Endif
+	DBSelectArea("QD03VB")
+	DBCloseArea()
+EndIf
 
 //Abrir Tabela
 DbUseArea( .T., "TOPCONN", TcGenQry( ,, _cQuery), "QD03VB", .T., .F.)
 
-IF QD03VB->(Eof()) .AND. QD03VB->(Bof())
+If QD03VB->(Eof()) .And. QD03VB->(Bof())
 
-	DbSelectArea("QD03VB")
-	DbCloseArea()
+	DBSelectArea("QD03VB")
+	DBCloseArea()
     _cQuery:=RQuerySR0()
 
     //Abrir Tabela
     DbUseArea( .T., "TOPCONN", TcGenQry( ,, _cQuery), "QD03VB", .T., .F.)
     
-ENDIF
+EndIf
 
 //Atualiza regua
-DBGOTOP()
+DBGoTop()
 nConta:=0
 COUNT TO nConta
 _oProcess:SetRegua2(nConta)
@@ -459,13 +445,13 @@ For _nAux := 1 To Len(_aSraStruct)
 
 	If ( _aSraStruct[_nAux][2] <> "C" )
 
-		TcSetField("QD03VB",_aSraStruct[_nAux][1],_aSraStruct[_nAux][2],_aSraStruct[_nAux][3],_aSraStruct[_nAux][4])
+		TCSetField("QD03VB",_aSraStruct[_nAux][1],_aSraStruct[_nAux][2],_aSraStruct[_nAux][3],_aSraStruct[_nAux][4])
 
 	EndIf
 
 Next _nAux
 
-QD03VB->(DbGoTop())
+QD03VB->(DBGoTop())
 
 _cMyChave := ""
 _nCount   := 0
@@ -473,12 +459,12 @@ _nCount   := 0
 While QD03VB->(!Eof())
 
 	//Incrementa Régua
-	_oProcess:IncRegua2("Fase 01 - "+ ALLTRIM(QD03VB->RA_NOME))
+	_oProcess:IncRegua2("Fase 01 - "+ AllTrim(QD03VB->RA_NOME))
 
 	//-Gera apenas 1 linha por funcionario
 	If QD03VB->(RA_FILIAL+RA_MAT) == _cMyChave
 
-		QD03VB->(dbSkip())
+		QD03VB->(DBSkip())
 		Loop
 
 	Else
@@ -496,10 +482,10 @@ While QD03VB->(!Eof())
 
 	If (_nPos := Rat(",",QD03VB->RA_ENDEREC)) > 0
 
-		_cSRA_End := Substr(QD03VB->RA_ENDEREC,1,_nPos - 1)
-		_cSRA_Num := Substr(QD03VB->RA_ENDEREC,_nPos + 1)
+		_cSRA_End := SubStr(QD03VB->RA_ENDEREC,1,_nPos - 1)
+		_cSRA_Num := SubStr(QD03VB->RA_ENDEREC,_nPos + 1)
 
-	Endif
+	EndIf
 	
 	If Empty(_cSRA_End)
     
@@ -515,23 +501,23 @@ While QD03VB->(!Eof())
 	//Grava Detalhes Funcionario
 	_nTotRegTP2++
 	_nseq++
-	fWrite( _nHdl, RHGeraLinhas( _aStruct[2], "02" ) )
+	FWrite( _nHdl, RHGeraLinhas( _aStruct[2], "02" ) )
 	
 	_nLin += 1	//-Indica que pode imprimir o Relatorio Final
 	
 	//Totaliza Registros
 	_nTotal += _nVlr
 	
-	QD03VB->(dbSkip())
+	QD03VB->(DBSkip())
 	
-Enddo
+EndDo
 
 
 _oProcess:SetRegua2(nConta)
 //-------------------------------------------------------------------------------------//
 // Codigo 3 - Beneficios                                                               //
 //-------------------------------------------------------------------------------------//
-QD03VB->(DbGoTop())
+QD03VB->(DBGoTop())
 _oProcess:IncRegua1("Beneficios")
 
 _cMyChave := ""
@@ -541,13 +527,13 @@ _nTotRegTP3 := 0
 While QD03VB->(!Eof())
 
 	//Incrementa Régua
-	_oProcess:IncRegua2("Fase 02 - "+ ALLTRIM(QD03VB->RA_NOME))
+	_oProcess:IncRegua2("Fase 02 - "+ AllTrim(QD03VB->RA_NOME))
 
 	//Grava Beneficios
 	_nTotRegTP3++
 	_nseq++
 	
-	fWrite( _nHdl, RHGeraLinhas( _aStruct[2], "03" ) )
+	FWrite( _nHdl, RHGeraLinhas( _aStruct[2], "03" ) )
 	
 	_nLin += 1	//-Indica que pode imprimir o Relatorio Final
 	
@@ -555,9 +541,9 @@ While QD03VB->(!Eof())
 	_nTotal += _nVlr
 	
 	//IncProc("Processando...")
-	QD03VB->(dbSkip())
+	QD03VB->(DBSkip())
 	
-Enddo	
+EndDo	
 	
 	
 
@@ -568,18 +554,18 @@ _oProcess:SetRegua2(nConta)
 
 _nTotRegTP4 := 0
 _cMyChave := ""
-QD03VB->( Dbgotop())
+QD03VB->( DBGoTop())
 _oProcess:IncRegua1("Enderecos Funcionarios")
 
 While QD03VB->(!Eof())
 
 	
 	//Incrementa Régua
-	_oProcess:IncRegua2("Fase 03 - "+ ALLTRIM(QD03VB->RA_NOME))
+	_oProcess:IncRegua2("Fase 03 - "+ AllTrim(QD03VB->RA_NOME))
 	
 	//-Gera apenas 1 linha por funcionario
 	If QD03VB->(RA_FILIAL+RA_MAT) == _cMyChave
-		QD03VB->(dbSkip())
+		QD03VB->(DBSkip())
 		Loop
 	Else
 		_cMyChave := QD03VB->(RA_FILIAL+RA_MAT)
@@ -589,11 +575,11 @@ While QD03VB->(!Eof())
 	_nTotRegTP4++
 	_nseq++
 	
-	fWrite( _nHdl, RHGeraLinhas( _aStruct[2], "04" ) )
+	FWrite( _nHdl, RHGeraLinhas( _aStruct[2], "04" ) )
 	
-	QD03VB->(dbSkip())
+	QD03VB->(DBSkip())
 	
-Enddo
+EndDo
 
 //-------------------------------------------------------------------------------------//
 // Codigo 5 - Detalhes adicionais dos Funcionarios	                                       //
@@ -604,18 +590,18 @@ _nVlrTotItem := 0
 _cMyChave := ""
 _oProcess:SetRegua2(nConta)
 
-QD03VB->( Dbgotop())
+QD03VB->( DBGoTop())
 _oProcess:IncRegua1("Detalhes adicionais")
 
 While QD03VB->(!Eof())
 
 	//Incrementa Régua
-	_oProcess:IncRegua2("Fase 04 - "+ ALLTRIM(QD03VB->RA_NOME))
+	_oProcess:IncRegua2("Fase 04 - "+ AllTrim(QD03VB->RA_NOME))
 	
 	
 	//-Gera apenas 1 linha por funcionario
 	If QD03VB->(RA_FILIAL+RA_MAT) == _cMyChave
-		QD03VB->(dbSkip())
+		QD03VB->(DBSkip())
 		Loop
 	Else
 		_cMyChave := QD03VB->(RA_FILIAL+RA_MAT)
@@ -625,11 +611,11 @@ While QD03VB->(!Eof())
 	_nTotRegTP5++
 	_nseq++
 
-	fWrite( _nHdl, RHGeraLinhas( _aStruct[2], "05" ) )
+	FWrite( _nHdl, RHGeraLinhas( _aStruct[2], "05" ) )
 	
-	QD03VB->(dbSkip())
+	QD03VB->(DBSkip())
 	
-Enddo
+EndDo
 
 //-------------------------------------------------------------------------------------//
 // Codigo 9 - Trailler do Arquivo				                                       //
@@ -638,23 +624,19 @@ _nTotReg := _nseq + 1
 _oProcess:IncRegua1("Trailer de arquivo")
 
 _nseq    += 1
-fWrite( _nHdl, RHGeraLinhas( _aStruct[3] ) )
+FWrite( _nHdl, RHGeraLinhas( _aStruct[3] ) )
 
 _oProcess:SaveLog("Fim de processamento")    
 
 Return
-
 
 /*
 ===============================================================================================================================
 Programa----------: MGPE014FI
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 22/01/2016
-===============================================================================================================================
 Descrição---------: Funções Diversas de relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -674,13 +656,13 @@ wnrel := SetPrint(_cString,wnrel,"",'LISTAGEM DE BENEFICIOS','Emissao de Relator
 
 If nLastKey == 27
 	Return
-Endif
+EndIf
 
 SetDefault(aReturn,_cString)
 
 If nLastKey == 27
 	Return
-Endif
+EndIf
 
 //Processa Impressao
 RptStatus({|lEnd| MGPE014RB()},'Imprimindo...') 
@@ -691,11 +673,8 @@ Return
 Programa----------: MGPE014RB
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 22/01/2016
-===============================================================================================================================
 Descrição---------: Relatório de beneficios
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -710,53 +689,53 @@ Local _nTBen         := 0
 Local _nTccBen       := 0
 Local _nTFlBen       := 0
 Local cTitulo  :="INTEGRACAO DE BENEFICIOS COM EMPRESA SE SERVICOS"
-Local cCabec1  :="FIL" + Space(1) + "Matric" + Space(2) + "Nome" + Space(LEN(QD03VB->RA_NOME)-4+10) + "TP" + Space(9) +"Valor"
+Local cCabec1  :="FIL" + Space(1) + "Matric" + Space(2) + "Nome" + Space(Len(QD03VB->RA_NOME)-4+10) + "TP" + Space(9) +"Valor"
 Local cCabec2  :=""
 Local cNomeProg:="MGPE014"
 Local cTamanho :="P"
 
 // Posiciona Regitro
-dbSelectArea("QD03VB")
-QD03VB->(DbGoTop())
+DBSelectArea("QD03VB")
+QD03VB->(DBGoTop())
 
 //Set Regua
 SetRegua(nConta)
 
-Cabec(cTitulo,cCabec1,cCabec2,cNomeProg,cTamanho,IF(aReturn[4]==1,15,18)) 
+Cabec(cTitulo,cCabec1,cCabec2,cNomeProg,cTamanho,If(aReturn[4]==1,15,18)) 
 nLin := 7
 
 //Se Ordem Centro de Custo Imprime Nome Centro de Custo
 If _nOrd == 2
 
-	dbSelectArea("CTT")
-	dbSetOrder(1)	//-CTT_FILIAL+CTT_CUSTO
-	dbSeek(xFilial("CTT")+QD03VB->RA_CC,.F.)
+	DBSelectArea("CTT")
+	DBSetOrder(1)	//-CTT_FILIAL+CTT_CUSTO
+	DBSeek(xFilial("CTT")+QD03VB->RA_CC,.F.)
 	
 	cDet := Space(5) + AllTrim(QD03VB->RA_CC) + " - " + CTT->CTT_DESC01
     @nLin,00 PSAY cDet
      nLin++ 
 	//	Impr(cDet)//,'C'
 
-Endif
+EndIf
 
 //Carrega Filial
 _cFilialAnt := QD03VB->RG2_FILIAL
 
 
 
-DO While !QD03VB->(Eof())
+While !QD03VB->(Eof())
 
 	//Abortado Pelo Operador
 	If lAbortPrint
 		cDet := '*** ABORTADO PELO OPERADOR ***' 
 		Impr(cDet,'C')
 		Exit
-	EndIF
+	EndIf
 
     If nLin > 60 
-       Cabec(cTitulo,cCabec1,cCabec2,cNomeProg,cTamanho,IF(aReturn[4]==1,15,18)) 
+       Cabec(cTitulo,cCabec1,cCabec2,cNomeProg,cTamanho,If(aReturn[4]==1,15,18)) 
        nLin := 7
-    Endif    	
+    EndIf    	
 
 	_nVlr:= QD03VB->RG2_VALCAL
 	cDet := QD03VB->RG2_FILIAL + Space(2) + QD03VB->RG2_MAT + Space(2) + QD03VB->RA_NOME + Space(10) + QD03VB->RG2_TPBEN + Space(9) +Transform(_nVlr,'@E 999,999.99')
@@ -764,7 +743,7 @@ DO While !QD03VB->(Eof())
      nLin++ 
 	//	Impr(cDet)//,'C'
 	
-	QD03VB->(dbSkip())
+	QD03VB->(DBSkip())
 	
 	IncRegua("Imprimindo Mat.: "+QD03VB->RG2_MAT)
 	
@@ -795,28 +774,24 @@ DO While !QD03VB->(Eof())
 			
 			If !QD03VB->(Eof()) .And. _cFilialAnt == QD03VB->RG2_FILIAL
 
-				dbSelectArea("CTT")
-				dbSetOrder(1)	//-CTT_FILIAL+CTT_CUSTO
-				dbSeek(xFilial("CTT")+QD03VB->RA_CC,.F.)
+				DBSelectArea("CTT")
+				DBSetOrder(1)	//-CTT_FILIAL+CTT_CUSTO
+				DBSeek(xFilial("CTT")+QD03VB->RA_CC,.F.)
 			
 				cDet := Space(5) + AllTrim(QD03VB->RA_CC) + " - " + CTT->CTT_DESC01
                 @nLin,00 PSAY cDet//				Impr(cDet,'C')
                  nLin++ 
 
-			Endif
+			EndIf
 			
-		Endif
+		EndIf
 
-	Endif
+	EndIf
 	
 	If _cFilialAnt != QD03VB->RG2_FILIAL
 
 		_cFilialAnt := QD03VB->RG2_FILIAL
 		
-		//Imprime Totais
-//        @nLin,00 PSAY cDet//	   Impr('','C')
-//         nLin++ 
-   
 		cDet := 'Valores Totais da Filial: ' + Space(10) + Transform(_nTFlBen,'@E 999,999,999.99') 
         @nLin,00 PSAY cDet//		Impr(cDet,'C')
          nLin++ 
@@ -828,31 +803,29 @@ DO While !QD03VB->(Eof())
 		
 	    If !QD03VB->(Eof())
 		   //Salta Página
-           Cabec(cTitulo,cCabec1,cCabec2,cNomeProg,cTamanho,IF(aReturn[4]==1,15,18)) 
+           Cabec(cTitulo,cCabec1,cCabec2,cNomeProg,cTamanho,If(aReturn[4]==1,15,18)) 
            nLin := 7
-        ENDIF   
+        EndIf   
 		
 		_nTFlFunc := 0
 		_nTFlBen  := 0
 		
-	    If _nOrd == 2 .AND. !QD03VB->(Eof())
+	    If _nOrd == 2 .And. !QD03VB->(Eof())
 
-			dbSelectArea("CTT")
-			dbSetOrder(1)	//-CTT_FILIAL+CTT_CUSTO
-			dbSeek(xFilial("CTT")+QD03VB->RA_CC,.F.)
+			DBSelectArea("CTT")
+			DBSetOrder(1)	//-CTT_FILIAL+CTT_CUSTO
+			DBSeek(xFilial("CTT")+QD03VB->RA_CC,.F.)
 			
 			cDet := Space(5) + AllTrim(QD03VB->RA_CC) + " - " + CTT->CTT_DESC01
             @nLin,00 PSAY cDet//			Impr(cDet,'C')
              nLin++ 
 
-		Endif
+		EndIf
 		
-	Endif
+	EndIf
 	
 EndDo
 
-//Totaliza
-//@nLin,00 PSAY cDet//Impr('','C')
  nLin++ 
  cDet := 'Valores Totais da Empresa: ' + Space(30) + Transform(_nTBen,'@E 999,999,999.99') 
 @nLin,00 PSAY cDet//Impr(cDet,'C')
@@ -867,7 +840,7 @@ Impr(cDet,'F')
 If aReturn[5] == 1
 	Set Printer to
 	Ourspool(wnrel)
-Endif
+EndIf
 
 MS_FLUSH()
 
@@ -878,11 +851,8 @@ Return
 Programa----------: MGPE014CO
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 22/01/2016
-===============================================================================================================================
 Descrição---------: Consulta de tipo de beneficios
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -891,36 +861,36 @@ User Function MGPE014CO()
 Local _MvPar		:= ""
 Local _MvParDef 	:= ""
 Local _aItens   	:= {}
-Local _aArea    	:= GetArea()
+Local _aArea    	:= FWGetArea()
 
-_MvPar := &(Alltrim(ReadVar()))       // Carrega Nome da Variavel do Get em Questao
-_MvRet := Alltrim(ReadVar())          // Iguala Nome da Variavel ao Nome variavel de Retorno
+_MvPar := &(AllTrim(ReadVar()))       // Carrega Nome da Variavel do Get em Questao
+_MvRet := AllTrim(ReadVar())          // Iguala Nome da Variavel ao Nome variavel de Retorno
 
-dbSelectArea("RCC")
-dbSetOrder(1)
-dbSeek(xFilial("RCC")+"S011")
+DBSelectArea("RCC")
+DBSetOrder(1)
+DBSeek(xFilial("RCC")+"S011")
 
 While !Eof() .And. RCC->RCC_FILIAL + RCC->RCC_CODIGO == xFilial("RCC")+"S011"
 	
-	If Substr(RCC->RCC_CONTEU,33,3) == alltrim(MV_PAR01)
+	If SubStr(RCC->RCC_CONTEU,33,3) == AllTrim(MV_PAR01)
 
-		aAdd(_aItens, Substr(RCC->RCC_CONTEU,3,30))
-		_MvParDef += Substr(RCC->RCC_CONTEU,1,2)
+		aAdd(_aItens, SubStr(RCC->RCC_CONTEU,3,30))
+		_MvParDef += SubStr(RCC->RCC_CONTEU,1,2)
 
 	EndIf
 	
-	("RCC")->(dbSkip())
+	("RCC")->(DBSkip())
 
 End
 
 //         Retorno,Titulo,opcoes,Strin Ret,lin,col, Tipo Sel,tam chave , n. ele ret, Botao
-IF f_Opcoes(@_MvPar, "Opções", _aItens, _MvParDef, 12, 49, .F., 2) 
+If f_Opcoes(@_MvPar, "Opções", _aItens, _MvParDef, 12, 49, .F., 2) 
 
 	&_MvRet := _MvPar                                      // Devolve Resultado
 
-EndIF
+EndIf
 
-RestArea(_aArea)                                  // Retorna Alias
+FWRestArea(_aArea)                                  // Retorna Alias
 
 Return .T.
 
@@ -929,16 +899,13 @@ Return .T.
 Programa----------: RQuerySR0()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 23/10/2019
-===============================================================================================================================
 Descrição---------: Consulta de tipo de beneficios
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
-===============================================================================================================================*/
-
-STATIC FUNCTION RQuerySR0()
-LOCAL _cQuery  := "SELECT " 
+===============================================================================================================================
+*/
+Static Function RQuerySR0()
+Local _cQuery  := "SELECT " 
 _cQuery  += " R0_FILIAL  RG2_FILIAL,"
 _cQuery  += " R0_VALCAL  RG2_VALCAL,"  
 _cQuery  += " R0_MAT     RG2_MAT,"  
@@ -988,7 +955,6 @@ _cQuery  += " AND R0_FILIAL >= '" + _cFilDe + "' AND R0_FILIAL <= '" + _cFilAte 
 _cQuery  += " AND R0_TPVALE = '0' AND R0_VALCAL > 0 "
 _cQuery  += " AND RA_DEMISSA = ' ' "
 
-
 If _nOrd == 1
 	_cQuery  += " ORDER BY SRA.RA_FILIAL,SRA.RA_MAT "
 ElseIf _nOrd == 2
@@ -997,7 +963,6 @@ ElseIf _nOrd == 3
 	_cQuery  += " ORDER BY SRA.RA_FILIAL,SRA.RA_NOME "
 Else
 	_cQuery  += " ORDER BY SRA.RA_FILIAL,SRA.RA_MAT "
-Endif
-
+EndIf
 
 Return _cQuery

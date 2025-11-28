@@ -2,20 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 21/05/2021 | Incluída gravação do custo de frete indivdualmente. Chamado 36589
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 12/12/2021 | Migração da classe de impressão para FWMSPrinter. Chamado 38597
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 18/03/2023 | Tramento do diretório de impressão do FWMSPrinter até a TOTVS resolver a questão. Chamado 46654
+Lucas Borges  |21/05/2021| Chamado 36589. Incluída gravação do custo de frete indivdualmente.
+Lucas Borges  |12/12/2021| Chamado 38597. Migração da classe de impressão para FWMSPrinter.
+Lucas Borges  |18/03/2023| Chamado 46654. Tramento do diretório de impressão do FWMSPrinter até a TOTVS resolver a questão.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 #Include "FWPrintSetup.ch" 
 #Include "RPTDEF.CH"
 #DEFINE _oFontT 	TFont():New( "Verdana", 09, 09, , .T., , , , .T., .F. )//Titulo
@@ -31,13 +26,11 @@ Lucas Borges  | 18/03/2023 | Tramento do diretório de impressão do FWMSPrinter a
 Programa----------: RGLT023
 Autor-------------: Abrahao P. Santos
 Data da Criacao---: 29/01/2009
-===============================================================================================================================
 Descrição---------: Relatório de Tickets
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
-===============================================================================================================================*/
+===============================================================================================================================
+*/
 User Function RGLT023
 
 Local _oProfile			:= Nil
@@ -51,7 +44,7 @@ Local _cValueType		:= "c:\"
 Local _cPathInServer	:= __RelDir
 Local _aOrdem			:= {"Por Filial+Ticket+Recepção"} 
 Local _nFlags			:= PD_ISTOTVSPRINTER+PD_DISABLEORIENTATION+PD_DISABLEPAPERSIZE+PD_DISABLEMARGIN//PD_ISTOTVSPRINTER=1,PD_DISABLEDESTINATION=2,PD_DISABLEORIENTATION=4,PD_DISABLEPAPERSIZE=8,PD_DISABLEPREVIEW=16,PD_DISABLEMARGIN=32
-Local _cFilePrint		:= "RGLT023"//+Dtos(MSDate())+StrTran(Time(),":","")
+Local _cFilePrint		:= "RGLT023"//+DToS(MSDate())+StrTran(Time(),":","")
 Local _nOrientation		:= 1 //1-PORTRAIT - 2-LANDSCAPE
 Local _cTitulo			:= "RGLT023 - Relação de Tickets"
 Local _nPaperSize		:= 2//1-"Letter 8 1/2 x 11 in" / 2-"A4 210 x 297 mm" / 3-"A3 297 x 420 mm"/ 4-"Executive 7 1/4 x 10 1/2 in" / 5-"Tabloid 11 x 17 in"
@@ -150,11 +143,8 @@ Return
 Programa----------: RGLT023I
 Autor-------------: Abrahao P. Santos
 Data da Criacao---: 29/01/2009
-===============================================================================================================================
 Descrição---------: Rotina de processamento e impressão do relatório
-===============================================================================================================================
 Parametros--------: _oPrinter,_cPerg,_lPreview
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -173,7 +163,7 @@ Local _cString		:= "ZLD"
 Local _aCol			:= {010,060,190,240,310,340,450,510}
 Local _nSizePage 	:= 0 //Largura da página em cm dividido pelo fator horizontal, retorna tamanho da página em pixels
 
-PRIVATE _aCalcFretes:={}
+Private _aCalcFretes:={}
 
 Static _nSubVol		:= 0
 Static _nSubCol		:= 0
@@ -187,7 +177,7 @@ _cCampos += _cString+"_DTCOLE, " + _cString+"_TOTBOM, " + _cString+"_ATENDI"
 
 _cTabela += RetSqlName(_cString)
 
-_cFiltro += " AND "+ _cString +"_DTCOLE BETWEEN '"+ DTOS(MV_PAR01) +"' AND '"+ DTOS(MV_PAR02) +"' "
+_cFiltro += " AND "+ _cString +"_DTCOLE BETWEEN '"+ DToS(MV_PAR01) +"' AND '"+ DToS(MV_PAR02) +"' "
 _cFiltro += " AND "+ _cString +"_SETOR = '"+ MV_PAR03 + "'"
 _cFiltro += " AND "+ _cString +"_RETIRO BETWEEN '"+ MV_PAR04 +"' AND '"+ MV_PAR05 +"' "
 _cFiltro += " AND "+ _cString +"_TICKET BETWEEN '"+ MV_PAR06 +"' AND '"+ MV_PAR07 +"' " 
@@ -196,8 +186,8 @@ _cFiltro += " AND "+ _cString +"_LJFRET BETWEEN '"+ MV_PAR09 +"' AND '"+ MV_PAR1
 _cFiltro += " AND "+ _cString +"_LINROT BETWEEN '"+ MV_PAR12 +"' AND '"+ MV_PAR13 +"' "      
 _cFiltro += " AND "+ _cString +"_FILIAL = '" + xFilial(_cString) + "'"
 
-If _cString = "ZLD" .AND. (!Empty(MV_PAR15) .OR. !Empty(MV_PAR16))
-   _cFiltro += " AND ZLD_TICKET IN (SELECT ZLJ_VIAGEM FROM "+RetSqlName("ZLJ") +" ZLJ WHERE ZLJ_DTCRIA BETWEEN '"+DTOS(MV_PAR15)+"' AND '"+ DTOS(MV_PAR16)+"')"
+If _cString = "ZLD" .And. (!Empty(MV_PAR15) .Or. !Empty(MV_PAR16))
+   _cFiltro += " AND ZLD_TICKET IN (SELECT ZLJ_VIAGEM FROM "+RetSqlName("ZLJ") +" ZLJ WHERE ZLJ_DTCRIA BETWEEN '"+DToS(MV_PAR15)+"' AND '"+ DToS(MV_PAR16)+"')"
 EndIf
 _cOrder += _cString +"_FILIAL,"+ _cString +"_TICKET,"+ _cString +"_CODREC"
 
@@ -221,10 +211,10 @@ If _nQtdReg > 0
 	_lPreview:= .T.
 EndIf
 
-Do While (_cAlias)->( !Eof() )
+While (_cAlias)->( !Eof() )
 	IncProc()
-	If (_nPos:=ASCAN(_aCalcFretes,{|V| V[1]==(_cAlias)->&(_cString+"_TICKET")+(_cAlias)->&(_cString+"_CODREC") })) = 0
-	   AADD(_aCalcFretes,{ (_cAlias)->&(_cString+"_TICKET")+(_cAlias)->&(_cString+"_CODREC") ,;
+	If (_nPos:=aScan(_aCalcFretes,{|V| V[1]==(_cAlias)->&(_cString+"_TICKET")+(_cAlias)->&(_cString+"_CODREC") })) = 0
+	   aAdd(_aCalcFretes,{ (_cAlias)->&(_cString+"_TICKET")+(_cAlias)->&(_cString+"_CODREC") ,;
 	                       (_cAlias)->&(_cString+"_KM")     ,;
 	                       (_cAlias)->&(_cString+"_QTDBOM") ,;
 	                       (_cAlias)->&(_cString+"_LINROT") })
@@ -254,7 +244,7 @@ U_ImpParam(_oPrinter,_nLin,_cPerg,_aCol,_oFontL)// Imprime página de parâmetros
 _oPrinter:StartPage()
 Cabec(_oPrinter,@_nLin,_aCol,_nSizePage,.T.)
 
-Do While (_cAlias)->( !Eof() )
+While (_cAlias)->( !Eof() )
 
 	IncProc()
 
@@ -262,7 +252,7 @@ Do While (_cAlias)->( !Eof() )
 		_oPrinter:EndPage()
 		_oPrinter:StartPage()
 		Cabec(_oPrinter,@_nLin,_aCol,_nSizePage,.T.)
-	Endif
+	EndIf
 
 	If _cUltTicket != (_cAlias)->&(_cString+"_TICKET")
 		If _nSubCol > 0
@@ -272,28 +262,28 @@ Do While (_cAlias)->( !Eof() )
 			Cabec(_oPrinter,@_nLin,_aCol,_nSizePage,.T.)
 		EndIf
 
-		_oPrinter:SayAlign(_nLin,_aCol[1],"Ticket: "+(_cAlias)->&(_cString+"_TICKET")+ " - Setor: "+MV_PAR03+" - Tipo do Leite: "+IF(_cString="ZLD","Produtores - Data de Entrada do Estoque: "+BuscaDtEstoque(_cAlias,_cString),"Cooperativas"),_oFontL,500,100,ALIGN_H_LEFT)
+		_oPrinter:SayAlign(_nLin,_aCol[1],"Ticket: "+(_cAlias)->&(_cString+"_TICKET")+ " - Setor: "+MV_PAR03+" - Tipo do Leite: "+If(_cString="ZLD","Produtores - Data de Entrada do Estoque: "+BuscaDtEstoque(_cAlias,_cString),"Cooperativas"),_oFontL,500,100,ALIGN_H_LEFT)
 		_nLin += 20
 
 	EndIf
 	
 	_cUltTicket := (_cAlias)->&(_cString+"_TICKET")
 	
-	If _cUltCodRec != alltrim( (_cAlias)->&(_cString+"_CODREC") )
+	If _cUltCodRec != AllTrim( (_cAlias)->&(_cString+"_CODREC") )
 		CalcFrete(_oPrinter,@_nLin,_cAlias,_cString,_aCol,_nSizePage)
 		_oPrinter:SayAlign(_nLin,_aCol[1], (_cAlias)->&(_cString+"_FRETIS") +"-"+ (_cAlias)->&(_cString+"_LJFRET"),_oFontL,500,100,ALIGN_H_LEFT)
-		_oPrinter:SayAlign(_nLin,_aCol[2], LEFT(POSICIONE("SA2",1,XFILIAL("SA2")+(_cAlias)->&(_cString+"_FRETIS")+(_cAlias)->&(_cString+"_LJFRET"),"A2_NOME"),20)+" - "+;
-		"Km Rodado: "+ ALLTRIM(Transform( (_cAlias)->&(_cString+"_KM") , "@E 999,999,999" ))+" - Veiculo: "+(_cAlias)->&(_cString+"_VEICUL")+" - Placa: "+Posicione("ZL1",1,xFilial("ZL1")+(_cAlias)->&(_cString+"_VEICUL"),"ZL1_PLACA"),_oFontL,500,100,ALIGN_H_LEFT)
+		_oPrinter:SayAlign(_nLin,_aCol[2], LEFT(Posicione("SA2",1,xFilial("SA2")+(_cAlias)->&(_cString+"_FRETIS")+(_cAlias)->&(_cString+"_LJFRET"),"A2_NOME"),20)+" - "+;
+		"Km Rodado: "+ AllTrim(Transform( (_cAlias)->&(_cString+"_KM") , "@E 999,999,999" ))+" - Veiculo: "+(_cAlias)->&(_cString+"_VEICUL")+" - Placa: "+Posicione("ZL1",1,xFilial("ZL1")+(_cAlias)->&(_cString+"_VEICUL"),"ZL1_PLACA"),_oFontL,500,100,ALIGN_H_LEFT)
 		_nLin += 20
-	ENDIF
+	EndIf
 	
 	_cUltCodRec := AllTrim( (_cAlias)->&(_cString+"_CODREC") )
 	_oPrinter:SayAlign(_nLin,_aCol[1], (_cAlias)->&(_cString+"_RETIRO") +"-"+ (_cAlias)->&(_cString+"_RETILJ"),_oFontL,500,100,ALIGN_H_LEFT)
-	_oPrinter:SayAlign(_nLin,_aCol[2], LEFT(POSICIONE("SA2",1,XFILIAL("SA2")+(_cAlias)->&(_cString+"_RETIRO")+(_cAlias)->&(_cString+"_RETILJ"),"A2_NOME"),25),_oFontL,500,100,ALIGN_H_LEFT)
-	_oPrinter:SayAlign(_nLin,_aCol[3], DTOC(STOD((_cAlias)->&(_cString+"_DTCOLE"))),_oFontL,500,100,ALIGN_H_LEFT)
+	_oPrinter:SayAlign(_nLin,_aCol[2], LEFT(Posicione("SA2",1,xFilial("SA2")+(_cAlias)->&(_cString+"_RETIRO")+(_cAlias)->&(_cString+"_RETILJ"),"A2_NOME"),25),_oFontL,500,100,ALIGN_H_LEFT)
+	_oPrinter:SayAlign(_nLin,_aCol[3], DToC(SToD((_cAlias)->&(_cString+"_DTCOLE"))),_oFontL,500,100,ALIGN_H_LEFT)
 	_oPrinter:SayAlign(_nLin,_aCol[4], transform((_cAlias)->&(_cString+"_QTDBOM"),"@E 999,999,999"),_oFontL,500,100,ALIGN_H_RIGHT)
 	_oPrinter:SayAlign(_nLin,_aCol[5], (_cAlias)->&(_cString+"_LINROT")+"-",_oFontL,500,100,ALIGN_H_LEFT)
-	_oPrinter:SayAlign(_nLin,_aCol[6], LEFT(POSICIONE("ZL3",1,XFILIAL("ZL3")+(_cAlias)->&(_cString+"_LINROT"),"ZL3_DESCRI"),20),_oFontL,500,100,ALIGN_H_LEFT)
+	_oPrinter:SayAlign(_nLin,_aCol[6], LEFT(Posicione("ZL3",1,xFilial("ZL3")+(_cAlias)->&(_cString+"_LINROT"),"ZL3_DESCRI"),20),_oFontL,500,100,ALIGN_H_LEFT)
 	_oPrinter:SayAlign(_nLin,_aCol[7], (_cAlias)->&(_cString+"_CODREC"),_oFontL,500,100,ALIGN_H_LEFT)
 	_oPrinter:SayAlign(_nLin,_aCol[8], (_cAlias)->&(_cString+"_ATENDI"),_oFontL,500,100,ALIGN_H_LEFT)
 	_nLin+= 10
@@ -315,13 +305,11 @@ Return
 Programa----------: showSubTot
 Autor-------------: Abrahao P. Santos
 Data da Criacao---: 29/01/2009
-===============================================================================================================================
 Descrição---------: Relatório de Tickets
-===============================================================================================================================
 Parametros--------: _oPrinter,_nLin,_aCol,_nSizePage
-===============================================================================================================================
 Retorno-----------: Nenhum
-===============================================================================================================================*/
+===============================================================================================================================
+*/
 Static Function showSubTot(_oPrinter,_nLin,_aCol,_nSizePage)
 
 _nLin += 10
@@ -349,18 +337,16 @@ Return
 Programa----------: BuscaDtEstoque()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 12/01/2018
-===============================================================================================================================
 Descrição---------: Busca a data de entrega do estoque 
-===============================================================================================================================
 Parametros--------: _cAlias
-===============================================================================================================================
 Retorno-----------: Retorna a data de entrega do estoque 
-===============================================================================================================================*/
+===============================================================================================================================
+*/
 Static Function BuscaDtEstoque(_cAlias,_cString)
 
 Local  _cDtEstoqueSD3:=""
 
-_cDtEstoqueSD3:=DTOC( Posicione("ZLJ",2,xFilial("ZLJ")+(_cAlias)->&(_cString+"_TICKET"),"ZLJ_DTCRIA"))
+_cDtEstoqueSD3:=DToC( Posicione("ZLJ",2,xFilial("ZLJ")+(_cAlias)->&(_cString+"_TICKET"),"ZLJ_DTCRIA"))
 
 Return _cDtEstoqueSD3 
 
@@ -369,11 +355,8 @@ Return _cDtEstoqueSD3
 Programa----------: CalcFrete()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 24/07/2018
-===============================================================================================================================
 Descrição---------: Imprimi dados dos frete
-===============================================================================================================================
 Parametros--------: _nLin,_cAlias,_cString
-===============================================================================================================================
 Retorno-----------: .T.
 ===============================================================================================================================
 */
@@ -384,13 +367,13 @@ Local _cPRCEXE   		:= ""
 Local _PRCLTR    		:= ""
 Local _cTabFrete 		:= ""
 Local _lImp      		:= .F.
-Local _nPos       		:=  ASCAN(_aCalcFretes,{|V| V[1]= ( (_cAlias)->&(_cString+"_TICKET")+(_cAlias)->&(_cString+"_CODREC") )  })
+Local _nPos       		:=  aScan(_aCalcFretes,{|V| V[1]= ( (_cAlias)->&(_cString+"_TICKET")+(_cAlias)->&(_cString+"_CODREC") )  })
 Private _cVeiculo		:=  (_cAlias)->&(_cString+"_VEICUL")//Variavel usada NA FUNCAO U_CalFrete()
 Private _nMultiplicador	:= 0//Variavel PREENCHIDA NA FUNCAO U_CalFrete()	
 
-_cTabFrete:=POSICIONE("ZL1",1,XFILIAL("ZL1")+_cVeiculo,"ZL1_TABFRE")
+_cTabFrete:=Posicione("ZL1",1,xFilial("ZL1")+_cVeiculo,"ZL1_TABFRE")
 
-If !Empty(_cTabFrete) .AND. _nPos <> 0 .AND.;
+If !Empty(_cTabFrete) .And. _nPos <> 0 .AND.;
     ZL3->(DBSeek(xFilial("ZL3")+ _aCalcFretes[_nPos,4] )) .AND.;
     ZFF->(DBSeek(xFilial("ZFF")+_cTabFrete))
 
@@ -406,7 +389,7 @@ If !Empty(_cTabFrete) .AND. _nPos <> 0 .AND.;
 	EndIf
 	_nSubFret+=_nValor_Frete
 	_nLin += 10
-	_oPrinter:SayAlign(_nLin,_aCol[1], "Tabela Frete: "+ALLTRIM(ZFF->ZFF_DESCRI)+;
+	_oPrinter:SayAlign(_nLin,_aCol[1], "Tabela Frete: "+AllTrim(ZFF->ZFF_DESCRI)+;
 	               " - Frete p/ Litro: "+If(_PRCLTR ="1","Sim","Nao")+;
 	               " - Frete p/ KM: "   +If(_cPRCEXE="1","Tab. Faixas",If(_cPRCEXE="2","Excecao","Nao"))+;
 	      If(_lImp," - Fator: "      +AllTrim(Transform( _nMultiplicador, "@E 999,999,999,999.99" ))+;
@@ -423,11 +406,8 @@ Return .T.
 Programa----------: Cabec
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 22/09/2021
-===============================================================================================================================
 Descrição---------: Imprimi cabeçalho do relatório
-===============================================================================================================================
 Parametros--------: _oPrinter,_nLin,_aCol,_nSizePage,lCab
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -444,10 +424,10 @@ _nLin += 20
 _oPrinter:SayAlign(_nLin-10,0,RptFolha + cValToChar(_oPrinter:nPageCount),_oFontL,_nSizePage-050,100,,ALIGN_H_RIGHT)
 _oPrinter:SayAlign(_nLin,0,"Relação de Tickets",_oFontT,_nSizePage-050,100,,ALIGN_H_CENTER)
 _oPrinter:SayAlign(_nLin,_aCol[1],GetEnvServer()+"\"+Upper(_oPrinter:cFileName)+"/v."+cVersao,_oFontL,_nSizePage-050,100,,ALIGN_H_LEFT)
-_oPrinter:SayAlign(_nLin,0,RptDtRef + DtoC(dDataBase),_oFontL,_nSizePage-050,100,,ALIGN_H_RIGHT)
+_oPrinter:SayAlign(_nLin,0,RptDtRef + DToC(dDataBase),_oFontL,_nSizePage-050,100,,ALIGN_H_RIGHT)
 _nLin += 10
 _oPrinter:SayAlign(_nLin,_aCol[1],RptHora+ Time(),_oFontL,_nSizePage-050,100,,ALIGN_H_LEFT)
-_oPrinter:SayAlign(_nLin,0,RptEmiss + DtoC(Date()),_oFontL,_nSizePage-050,100,,ALIGN_H_RIGHT)
+_oPrinter:SayAlign(_nLin,0,RptEmiss + DToC(Date()),_oFontL,_nSizePage-050,100,,ALIGN_H_RIGHT)
 _nLin += 10
 _oPrinter:SayAlign(_nLin,_aCol[1],"Grupo de Empresa: "+FWEmpName(cEmpAnt)+"/ Filial: "+FWFilName(cEmpAnt,cFilAnt),_oFontL,_nSizePage-050,100,,ALIGN_H_LEFT)
 _nLin += 10

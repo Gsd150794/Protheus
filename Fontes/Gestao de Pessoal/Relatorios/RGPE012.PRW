@@ -1,39 +1,26 @@
 /*
 ===============================================================================================================================
-                          ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-       Autor      |    Data    |                                             Motivo
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
- Josué Danich     | 19/10/2017 | Chamado 22091 - Relatório atualizado com fonte de 17/10/2017 para versão 12.
- Josué Danich     | 04/12/2017 | Chamado 22756 - Ajuste para sempre chamar como relatório personalizado.
- Josué Danich     | 27/12/2017 | Chamado 23019 - Ajuste de ordem e quebra para beneficiarios.
- Josué Danich     | 04/01/2017 | Chamado 23109 - Ajuste de sintético e cabecalho.
- Alex Wallauer    | 02/10/2019 | Chamado 30614 - Ajustes e campos novos no LayOut.
- Igor Melgaço     | 07/08/2023 | Chamado 44623 - Ajustes para impressão dos campos RQ_BCDEPBE e RQ_CTDEPBE.
+Alex Wallauer |02/10/2019| Chamado 30614. Ajustes e campos novos no LayOut.
+Igor Melgaço  |07/08/2023| Chamado 44623. Ajustes para impressão dos campos RQ_BCDEPBE e RQ_CTDEPBE.
+Alex Wallauer |17/02/2025| Chamado 49915. Correção o Error.log: invalid field name in Alias SRA->RA_TPCONTR on 
+              |          | GP020BUSCALIQ(GPER020.PRX) 22/01/2025 16:47:10
 ===============================================================================================================================
-==============================================================================================================================================================
-Analista - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
-==============================================================================================================================================================
-Bruno    - Alex Wallauer - 17/02/25 - 17/02/25 - 49915   - Correção o Error.log: invalid field name in Alias SRA->RA_TPCONTR on GP020BUSCALIQ(GPER020.PRX) 22/01/2025 16:47:10
-==============================================================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "protheus.ch"
-#INCLUDE "report.ch"
+#Include "TOTVS.ch"
+#Include "report.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGPE012
 Autor-------------: Darcio Ribeiro Sporl
 Data da Criacao---: 07/10/2016
-===============================================================================================================================
 Descrição---------: Relatorio Líquidos Italac
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -45,40 +32,40 @@ User Function RGPE012()
 
 
      // Interface de impressao
- IF !Pergunte("GPE20R3",.T.)
-    RETURN
- ENDIF
+ If !Pergunte("GPE20R3",.T.)
+    Return
+ EndIf
 
- PRIVATE MV_PAR91:="SIM"
- PRIVATE MV_PAR92:="PAGAMENTO  PARA: "
- PRIVATE MV_PAR93:=10
- PRIVATE MVPAR01 :=MV_PAR01//SALVA
- PRIVATE MVPAR02 :=MV_PAR02//SALVA
- PRIVATE MVPAR03 :=MV_PAR03//SALVA
- bOk:={|| IF(MV_PAR03 > 5 .AND. MV_PAR03 < 16 ,.T., (U_ITMSG("Tamanho de fonte invalido ",'Atenção!',;
+ Private MV_PAR91:="SIM"
+ Private MV_PAR92:="PAGAMENTO  PARA: "
+ Private MV_PAR93:=10
+ Private MVPAR01 :=MV_PAR01//SALVA
+ Private MVPAR02 :=MV_PAR02//SALVA
+ Private MVPAR03 :=MV_PAR03//SALVA
+ bOk:={|| If(MV_PAR03 > 5 .And. MV_PAR03 < 16 ,.T., (U_ITMsg("Tamanho de fonte invalido ",'Atenção!',;
                                                              "Tamanho de fonte deve ser maior ou igual a 6 e menor ou igual a 15",1),.F.) ) }
 
  _aParAux:={}
- AADD(_aParAux , { 02, "Mostrar Data de Pagamento"     , MV_PAR91 , {"SIM","NAO"} ,070 , "" , .T. } )
- AADD(_aParAux , { 11, "Comentario Final Rel.-5 linhas", MV_PAR92 , ".T.",".T.",.T.})
+ aAdd(_aParAux , { 02, "Mostrar Data de Pagamento"     , MV_PAR91 , {"SIM","NAO"} ,070 , "" , .T. } )
+ aAdd(_aParAux , { 11, "Comentario Final Rel.-5 linhas", MV_PAR92 , ".T.",".T.",.T.})
  If MV_PAR19 == 2//SINTETICO
     aAdd(_aParAux , { 01, "Tamanho do Fonte Sintetico" , MV_PAR93 ,"99","","","",20,.T.}) // Tipo numérico
- ELSE
+ Else
     bOk:={|| .T. }
- ENDIF
+ EndIf
  _aParRet:={}
  For nI := 1 To Len( _aParAux )
      aAdd( _aParRet , _aParAux[nI][03] )
  Next
  lMostraDTPGTP:=.T.
                  //aParametros, cTitle         , @aRet     ,[bOk]  , [ aButtons ] [ lCentered ] [ nPosX ] [ nPosy ] [ oDlgWizard ] [ cLoad ] [ lCanSave ] [ lUserSave ]
- IF ParamBox( _aParAux , "Relacao de Liquidos" , @_aParRet , bOk   , /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
+ If ParamBox( _aParAux , "Relacao de Liquidos" , @_aParRet , bOk   , /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
     lMostraDTPGTP:=(MV_PAR01="SIM")
     MV_PAR92:=MV_PAR02
     MV_PAR93:=MV_PAR03
- ELSE
-    RETURN .F.
- ENDIF
+ Else
+    Return .F.
+ EndIf
 
  oReport := RGPE012D()
  oReport:PrintDialog()
@@ -90,11 +77,8 @@ Return
 Programa----------: RGPE012
 Autor-------------: Darcio Ribeiro Sporl
 Data da Criacao---: 07/10/2016
-===============================================================================================================================
 Descrição---------: Definicao do relatorio.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -125,11 +109,11 @@ Static Function RGPE012D()
      oReport:nLineHeight:= 50 // Define a altura da linha.
      oReport:lBold      := .T.
      nSize:=30
- ELSE
+ Else
      nSize:=20
  EndIf
 
- DEFINE SECTION oSection OF oReport TABLES "SRA" ORDERS aOrd TOTAL IN COLUMN TITLE "Liquidos"
+ DEFINE Section oSection OF oReport TABLES "SRA" ORDERS aOrd TOTAL IN COLUMN TITLE "Liquidos"
  oSection:SetHeaderBreak(.T.)
 
  DEFINE CELL NAME "RA_FILIAL" 	OF oSection ALIAS "SRA"
@@ -149,12 +133,12 @@ Static Function RGPE012D()
  oSection:Cell("RA_CC"):Disable()
 
  // Total de Pagina
- DEFINE FUNCTION NAME "PAGQUANT" FROM oSection:Cell("RA_CTDEPSA") 	FUNCTION COUNT PRINT WHEN {|| oSection:GetFunction("PAGQUANT"):PageValue() > 0 } NO END SECTION NO END REPORT END PAGE
- DEFINE FUNCTION NAME "PAGVALOR" FROM oSection:Cell("VALOR")			FUNCTION SUM 	PRINT WHEN {|| oSection:GetFunction("PAGVALOR"):PageValue() > 0 } PICTURE "@E  99,999,999,999.99" NO END SECTION NO END REPORT END PAGE
+ DEFINE FUNCTION NAME "PAGQUANT" FROM oSection:Cell("RA_CTDEPSA") 	FUNCTION COUNT PRINT WHEN {|| oSection:GetFunction("PAGQUANT"):PageValue() > 0 } NO END Section NO END REPORT END PAGE
+ DEFINE FUNCTION NAME "PAGVALOR" FROM oSection:Cell("VALOR")			FUNCTION SUM 	PRINT WHEN {|| oSection:GetFunction("PAGVALOR"):PageValue() > 0 } PICTURE "@E  99,999,999,999.99" NO END Section NO END REPORT END PAGE
 
  // Transportado Pagina Anterior
- DEFINE FUNCTION oTransp NAME "TPAGQUANT" FROM oSection:Cell("RA_CTDEPSA")	FUNCTION ONPRINT FORMULA {|| nPgQuant += oSection:GetFunction("PAGQUANT"):PageValue(), nPgQuant - oSection:GetFunction("PAGQUANT"):PageValue()} PRINT WHEN {|| nPgQuant <> oSection:GetFunction("PAGQUANT"):PageValue() .And. oSection:GetFunction("TPAGQUANT"):PageValue() > 0 } NO END SECTION NO END REPORT END PAGE
- DEFINE FUNCTION 		NAME "TPAGVALOR" FROM oSection:Cell("VALOR")		FUNCTION ONPRINT FORMULA {|| nPgValor += oSection:GetFunction("PAGVALOR"):PageValue(), nPgValor - oSection:GetFunction("PAGVALOR"):PageValue()} PRINT WHEN {|| nPgValor <> oSection:GetFunction("PAGVALOR"):PageValue() .And. oSection:GetFunction("TPAGVALOR"):PageValue() > 0 } PICTURE "@E  99,999,999,999.99"  NO END SECTION NO END REPORT END PAGE
+ DEFINE FUNCTION oTransp NAME "TPAGQUANT" FROM oSection:Cell("RA_CTDEPSA")	FUNCTION ONPRINT FORMULA {|| nPgQuant += oSection:GetFunction("PAGQUANT"):PageValue(), nPgQuant - oSection:GetFunction("PAGQUANT"):PageValue()} PRINT WHEN {|| nPgQuant <> oSection:GetFunction("PAGQUANT"):PageValue() .And. oSection:GetFunction("TPAGQUANT"):PageValue() > 0 } NO END Section NO END REPORT END PAGE
+ DEFINE FUNCTION 		NAME "TPAGVALOR" FROM oSection:Cell("VALOR")		FUNCTION ONPRINT FORMULA {|| nPgValor += oSection:GetFunction("PAGVALOR"):PageValue(), nPgValor - oSection:GetFunction("PAGVALOR"):PageValue()} PRINT WHEN {|| nPgValor <> oSection:GetFunction("PAGVALOR"):PageValue() .And. oSection:GetFunction("TPAGVALOR"):PageValue() > 0 } PICTURE "@E  99,999,999,999.99"  NO END Section NO END REPORT END PAGE
 
  oTransp:SetTitle("TRANSPORTADO PAGINA ANTERIOR    ")
  oTransp:ShowHeader()
@@ -166,11 +150,8 @@ Return( oReport )
 Programa----------: RGPE012
 Autor-------------: Darcio Ribeiro Sporl
 Data da Criacao---: 07/10/2016
-===============================================================================================================================
 Descrição---------: Impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -207,7 +188,7 @@ Static Function RGPE012P(oReport)
  Local nValor2    	:= 0
  Local nValBenef		:= 0
  Local nTamCod		:= 0
- Local lFuncTrf    	:= .F. , _ni //, nI
+ Local lFuncTrf    	:= .F. , _nI //, nI
 
  Private nTamBcAg	:= GetSx3Cache( "RA_BCDEPSA" , "X3_TAMANHO" )
  Private cPicBcAg	:= GetSx3Cache( "RA_BCDEPSA" , "X3_PICTURE" )
@@ -231,11 +212,11 @@ Static Function RGPE012P(oReport)
 
  Private lCorpManage	:= fIsCorpManage( FWGrpCompany() )	// Verifica se o cliente possui Gestão Corporativa no Grupo Logado
 
- //lMostraDTPGTP:= U_ITMSG("Mostrar data de Pagamento?",'Atenção!',,2,2,2)
+ //lMostraDTPGTP:= U_ITMsg("Mostrar data de Pagamento?",'Atenção!',,2,2,2)
 
- IF !lMostraDTPGTP
+ If !lMostraDTPGTP
     oSection:Cell("DATAPAGTO"):Disable()
- ENDIF
+ EndIf
 
  MV_PAR01:=MVPAR01//VOLTA
  MV_PAR02:=MVPAR02//VOLTA
@@ -278,11 +259,11 @@ Static Function RGPE012P(oReport)
     aRoteiros:={}
     If Len(MV_PAR01) > 0 .Or. Len(MV_PAR02) > 0 .Or. Len(MV_PAR03) > 0
         SelecRoteiros()
-    ELSE
-       RETURN .F.
+    Else
+       Return .F.
     EndIf
-    IF LEN(aRoteiros) < 1
-       RETURN .F.
+    If Len(aRoteiros) < 1
+       Return .F.
     EndIf
 
     lRescisao   := .F. 	// Definida para utilizacao em fBuscaLiq()
@@ -304,25 +285,25 @@ Static Function RGPE012P(oReport)
 
     // Altera o titulo do relatorio
     cTitulo := "RELACAO DE LIQUIDOS"
-    cTitulo += " ("+StrZero( nOrdem , 2 )+")"+ IF(cTipoRel="A","Analitica","Sintetica")
+    cTitulo += " ("+StrZero( nOrdem , 2 )+")"+ If(cTipoRel="A","Analitica","Sintetica")
 
     //------------------------------------------------------------
     // Total Centro de Custo
     //------------------------------------------------------------
     If (nOrdem == 2 .Or. nOrdem == 5 .Or. nOrdem == 7 .Or. nOrdem == 10)
 
-        If (nOrdem == 2 .Or. nOrdem == 5) .AND. Quebloc
-            DEFINE BREAK oBreakCc OF oSection WHEN {|| oSection:Cell("RA_FILIAL"):GetText() + Iif(Empty(oSection:Cell("RA_BCDEPSA"):GetText()), Space(nTamBcAg), oSection:Cell("RA_BCDEPSA"):GetText()) + oSection:Cell("RA_CC"):GetText()}
-            oBreakCc:OnBreak({|x,y|cTitCc:="Total Centro de Custo"+Substr(x,Len(oSection:Cell("RA_FILIAL"):GetText())+nTamBcAg+1)})
+        If (nOrdem == 2 .Or. nOrdem == 5) .And. Quebloc
+            DEFINE BREAK oBreakCc OF oSection WHEN {|| oSection:Cell("RA_FILIAL"):GetText() + IIf(Empty(oSection:Cell("RA_BCDEPSA"):GetText()), Space(nTamBcAg), oSection:Cell("RA_BCDEPSA"):GetText()) + oSection:Cell("RA_CC"):GetText()}
+            oBreakCc:OnBreak({|x,y|cTitCc:="Total Centro de Custo"+SubStr(x,Len(oSection:Cell("RA_FILIAL"):GetText())+nTamBcAg+1)})
         Else
-            DEFINE BREAK oBreakCc OF oSection WHEN {|| Iif(Empty(oSection:Cell("RA_BCDEPSA"):GetText()), Space(nTamBcAg), oSection:Cell("RA_BCDEPSA"):GetText()) + oSection:Cell("RA_CC"):GetText()}
-            oBreakCc:OnBreak({|x,y|cTitCc:="Total Centro de Custo"+Substr(x,nTamBcAg+1)})
+            DEFINE BREAK oBreakCc OF oSection WHEN {|| IIf(Empty(oSection:Cell("RA_BCDEPSA"):GetText()), Space(nTamBcAg), oSection:Cell("RA_BCDEPSA"):GetText()) + oSection:Cell("RA_CC"):GetText()}
+            oBreakCc:OnBreak({|x,y|cTitCc:="Total Centro de Custo"+SubStr(x,nTamBcAg+1)})
         EndIf
 
-        DEFINE FUNCTION FROM oSection:Cell("RA_CTDEPSA") FUNCTION COUNT BREAK oBreakCc NO END SECTION NO END REPORT
-        DEFINE FUNCTION FROM oSection:Cell("VALOR") 	 FUNCTION SUM   BREAK oBreakCc NO END SECTION NO END REPORT PICTURE "@E  99,999,999,999.99"
-        //DEFINE FUNCTION FROM oSection:Cell("TIPOPAGTO")  FUNCTION MAX   BREAK oBreakCc NO END SECTION NO END REPORT
-        //DEFINE FUNCTION FROM oSection:Cell("DATAPAGTO")  FUNCTION MIN   BREAK oBreakCc NO END SECTION NO END REPORT PICTURE "@D" FORMULA {||  }
+        DEFINE FUNCTION FROM oSection:Cell("RA_CTDEPSA") FUNCTION COUNT BREAK oBreakCc NO END Section NO END REPORT
+        DEFINE FUNCTION FROM oSection:Cell("VALOR") 	 FUNCTION SUM   BREAK oBreakCc NO END Section NO END REPORT PICTURE "@E  99,999,999,999.99"
+        //DEFINE FUNCTION FROM oSection:Cell("TIPOPAGTO")  FUNCTION MAX   BREAK oBreakCc NO END Section NO END REPORT
+        //DEFINE FUNCTION FROM oSection:Cell("DATAPAGTO")  FUNCTION MIN   BREAK oBreakCc NO END Section NO END REPORT PICTURE "@D" FORMULA {||  }
 
         oBreakCc:SetTotalText({||cTitCc})
     EndIf
@@ -331,44 +312,44 @@ Static Function RGPE012P(oReport)
     // Total Agencia
     //------------------------------------------------------------
     // Verifica se deseja totalizar por Agencia
-    If cTotAgen == "S" .and. nOrdem <> 1
-        If (nOrdem >= 2 .AND. nOrdem <= 5) .AND. Quebloc
+    If cTotAgen == "S" .And. nOrdem <> 1
+        If (nOrdem >= 2 .And. nOrdem <= 5) .And. Quebloc
             DEFINE BREAK oBreakAg OF oSection WHEN {|| oSection:Cell("RA_FILIAL"):GetText() + oSection:Cell("RA_BCDEPSA"):GetText()}
-            oBreakAg:OnBreak({|x| cUltAg := substr(x,7,10) , cBcoAg := substr(x,3,3) })
+            oBreakAg:OnBreak({|x| cUltAg := SubStr(x,7,10) , cBcoAg := SubStr(x,3,3) })
         Else
             DEFINE BREAK oBreakAg OF oSection WHEN {|| oSection:Cell("RA_BCDEPSA"):GetText()}
-            oBreakAg:OnBreak({|x| cUltAg := substr(x,7,10) , cBcoAg := substr(x,3,3) })
+            oBreakAg:OnBreak({|x| cUltAg := SubStr(x,7,10) , cBcoAg := SubStr(x,3,3) })
         EndIf
 
-        oBreakAg:SetTotalText({|| "BCO/AG" + cBcoAg + "/" + cUltAg + " - " + posicione("SA6",1,xfilial("SA6")+cBcoAg+cUltAg,"A6_NREDUZ") })
+        oBreakAg:SetTotalText({|| "BCO/AG" + cBcoAg + "/" + cUltAg + " - " + Posicione("SA6",1,xFilial("SA6")+cBcoAg+cUltAg,"A6_NREDUZ") })
         If cSaltaAg == "S"
             oBreakAg:SetPageBreak(.T.)
         EndIf
 
-        DEFINE FUNCTION FROM oSection:Cell("RA_CTDEPSA") FUNCTION COUNT BREAK oBreakAg NO END SECTION NO END REPORT
-        DEFINE FUNCTION FROM oSection:Cell("VALOR") 	 FUNCTION SUM 	BREAK oBreakAg NO END SECTION NO END REPORT PICTURE "@E  99,999,999,999.99"
-        //DEFINE FUNCTION FROM oSection:Cell("TIPOPAGTO")  FUNCTION MAX   BREAK oBreakAg NO END SECTION NO END REPORT
-        //DEFINE FUNCTION FROM oSection:Cell("DATAPAGTO")  FUNCTION MIN   BREAK oBreakAg NO END SECTION NO END REPORT PICTURE "@D"
+        DEFINE FUNCTION FROM oSection:Cell("RA_CTDEPSA") FUNCTION COUNT BREAK oBreakAg NO END Section NO END REPORT
+        DEFINE FUNCTION FROM oSection:Cell("VALOR") 	 FUNCTION SUM 	BREAK oBreakAg NO END Section NO END REPORT PICTURE "@E  99,999,999,999.99"
+        //DEFINE FUNCTION FROM oSection:Cell("TIPOPAGTO")  FUNCTION MAX   BREAK oBreakAg NO END Section NO END REPORT
+        //DEFINE FUNCTION FROM oSection:Cell("DATAPAGTO")  FUNCTION MIN   BREAK oBreakAg NO END Section NO END REPORT PICTURE "@D"
     EndIf
 
     //------------------------------------------------------------
     // Total Ban co
     //------------------------------------------------------------
-    If (nOrdem >= 1 .AND. nOrdem <= 5) .AND. Quebloc
+    If (nOrdem >= 1 .And. nOrdem <= 5) .And. Quebloc
         DEFINE BREAK oBreakbco OF oSection WHEN {|| oSection:Cell("RA_FILIAL"):GetText() + oSection:Cell("BANCO"):GetText()}
-        oBreakbco:OnBreak({|x|  cBanco := substr(x,3,3) })
+        oBreakbco:OnBreak({|x|  cBanco := SubStr(x,3,3) })
     Else
         DEFINE BREAK oBreakbco OF oSection WHEN {|| oSection:Cell("BANCO"):GetText()}
         oBreakbco:OnBreak({|x|  cBanco := x })
     EndIf
 
-    oBreakbco:SetTotalText({|| "Banco " + cBanco + " - " + POSICIONE("SX5",1,xfilial("SX5")+"K6"+cBanco,"X5_DESCRI") })
+    oBreakbco:SetTotalText({|| "Banco " + cBanco + " - " + Posicione("SX5",1,xFilial("SX5")+"K6"+cBanco,"X5_DESCRI") })
     oBreakbco:SetPageBreak(.F.)
 
-    DEFINE FUNCTION FROM oSection:Cell("RA_CTDEPSA") FUNCTION COUNT BREAK oBreakbco NO END SECTION NO END REPORT
-    DEFINE FUNCTION FROM oSection:Cell("VALOR") 	 FUNCTION SUM 	BREAK oBreakbco NO END SECTION NO END REPORT PICTURE "@E 99,999,999,999.99"
-    //	DEFINE FUNCTION FROM oSection:Cell("TIPOPAGTO")  FUNCTION MAX   BREAK oBreakbco NO END SECTION NO END REPORT
-    //	DEFINE FUNCTION FROM oSection:Cell("DATAPAGTO")  FUNCTION MIN   BREAK oBreakbco NO END SECTION NO END REPORT PICTURE "@D"
+    DEFINE FUNCTION FROM oSection:Cell("RA_CTDEPSA") FUNCTION COUNT BREAK oBreakbco NO END Section NO END REPORT
+    DEFINE FUNCTION FROM oSection:Cell("VALOR") 	 FUNCTION SUM 	BREAK oBreakbco NO END Section NO END REPORT PICTURE "@E 99,999,999,999.99"
+    //	DEFINE FUNCTION FROM oSection:Cell("TIPOPAGTO")  FUNCTION MAX   BREAK oBreakbco NO END Section NO END REPORT
+    //	DEFINE FUNCTION FROM oSection:Cell("DATAPAGTO")  FUNCTION MIN   BREAK oBreakbco NO END Section NO END REPORT PICTURE "@D"
 
     //------------------------------------------------------------
     // Total Filial
@@ -383,12 +364,12 @@ Static Function RGPE012P(oReport)
         oBreakFil:OnBreak({|x,y|cTitFil:="Total da Filial"+x})
         oBreakFil:SetTotalText({||cTitFil})
 
-        DEFINE FUNCTION FROM oSection:Cell("RA_CTDEPSA") 	FUNCTION COUNT BREAK oBreakFil NO END SECTION NO END REPORT
-        DEFINE FUNCTION FROM oSection:Cell("VALOR") 		FUNCTION SUM 	BREAK oBreakFil PICTURE "@E  99,999,999,999.99" NO END SECTION NO END REPORT
+        DEFINE FUNCTION FROM oSection:Cell("RA_CTDEPSA") 	FUNCTION COUNT BREAK oBreakFil NO END Section NO END REPORT
+        DEFINE FUNCTION FROM oSection:Cell("VALOR") 		FUNCTION SUM 	BREAK oBreakFil PICTURE "@E  99,999,999,999.99" NO END Section NO END REPORT
 
         If lCorpManage
             If lUniNeg
-                DEFINE BREAK oBreakUnN OF oSection WHEN { || Substr((cAliasX)->RA_FILIAL, nStartUnN, nUnNLength) }
+                DEFINE BREAK oBreakUnN OF oSection WHEN { || SubStr((cAliasX)->RA_FILIAL, nStartUnN, nUnNLength) }
 
                 If cSalta == "S"
                     oBreakUnN:SetPageBreak(.T.)
@@ -398,11 +379,11 @@ Static Function RGPE012P(oReport)
                 oBreakUnN:SetTotalText({ || cTitUnN })
                 oBreakUnN:SetTotalInLine(.F.)
 
-                DEFINE FUNCTION NAME "FUNNCTDESPSA" FROM oSection:Cell("RA_CTDEPSA") FUNCTION COUNT BREAK oBreakUnN NO END SECTION NO END REPORT
-                DEFINE FUNCTION NAME "FUNNVALOR" FROM oSection:Cell("VALOR") 		 FUNCTION SUM 	BREAK oBreakUnN PICTURE "@E  99,999,999,999.99" NO END SECTION NO END REPORT
+                DEFINE FUNCTION NAME "FUNNCTDESPSA" FROM oSection:Cell("RA_CTDEPSA") FUNCTION COUNT BREAK oBreakUnN NO END Section NO END REPORT
+                DEFINE FUNCTION NAME "FUNNVALOR" FROM oSection:Cell("VALOR") 		 FUNCTION SUM 	BREAK oBreakUnN PICTURE "@E  99,999,999,999.99" NO END Section NO END REPORT
             EndIf
             If lEmpFil
-                DEFINE BREAK oBreakEFil OF oSection WHEN { || Substr((cAliasX)->RA_FILIAL, nStartEmp, nEmpLength) }
+                DEFINE BREAK oBreakEFil OF oSection WHEN { || SubStr((cAliasX)->RA_FILIAL, nStartEmp, nEmpLength) }
 
                 If cSalta == "S"
                     oBreakEFil:SetPageBreak(.T.)
@@ -412,8 +393,8 @@ Static Function RGPE012P(oReport)
                 oBreakEFil:SetTotalText({ || cTitEFil })
                 oBreakEFil:SetTotalInLine(.F.)
 
-                DEFINE FUNCTION NAME "FEFCTDESPSA" FROM oSection:Cell("RA_CTDEPSA") FUNCTION COUNT BREAK oBreakEFil NO END SECTION NO END REPORT
-                DEFINE FUNCTION NAME "FEFVALOR" FROM oSection:Cell("VALOR") 		FUNCTION SUM 	BREAK oBreakEFil PICTURE "@E  99,999,999,999.99" NO END SECTION NO END REPORT
+                DEFINE FUNCTION NAME "FEFCTDESPSA" FROM oSection:Cell("RA_CTDEPSA") FUNCTION COUNT BREAK oBreakEFil NO END Section NO END REPORT
+                DEFINE FUNCTION NAME "FEFVALOR" FROM oSection:Cell("VALOR") 		FUNCTION SUM 	BREAK oBreakEFil PICTURE "@E  99,999,999,999.99" NO END Section NO END REPORT
             EndIf
         EndIf
 
@@ -427,8 +408,8 @@ Static Function RGPE012P(oReport)
     If nOrdem == 11
         DEFINE BREAK oBreakFil OF oSection WHEN {||"RA_FILIAL"+"RA_BCDEPSA"} TITLE "Total Filial"
 
-        DEFINE FUNCTION NAME "CTDESPSA" FROM oSection:Cell("RA_CTDEPSA") FUNCTION COUNT BREAK oBreakFil NO END SECTION NO END REPORT
-        DEFINE FUNCTION NAME "VALOR" FROM oSection:Cell("VALOR") FUNCTION SUM BREAK oBreakFil NO END SECTION NO END REPORT
+        DEFINE FUNCTION NAME "CTDESPSA" FROM oSection:Cell("RA_CTDEPSA") FUNCTION COUNT BREAK oBreakFil NO END Section NO END REPORT
+        DEFINE FUNCTION NAME "VALOR" FROM oSection:Cell("VALOR") FUNCTION SUM BREAK oBreakFil NO END Section NO END REPORT
 
         If cSalta == "S"
             oBreakFil:SetPageBreak(.T.)
@@ -436,7 +417,7 @@ Static Function RGPE012P(oReport)
     EndIf
 
     ////Define se devera ser impresso Funcionarios ou Beneficiarios
-    dbSelectArea( "SRQ" )
+    DBSelectArea( "SRQ" )
     lImprFunci  := ( nFunBenAmb # 2 )// variavel usada na Gp020BuscaLiq(@nValor,@aValBenef)
     lImprBenef  := ( nFunBenAmb # 1 )// variavel usada na Gp020BuscaLiq(@nValor,@aValBenef)
 
@@ -444,7 +425,7 @@ Static Function RGPE012P(oReport)
     If nFunBenAmb # 1 .And. !lImprBenef
         fAvisoBC()
         Return .F.
-    Endif
+    EndIf
 
     If lImprBenef
         If nFunBenAmb == 2
@@ -453,11 +434,11 @@ Static Function RGPE012P(oReport)
             cCabec := "                         -------  F U N C I O N A R I O / B E N E F I C I A R I O  -------                       "
         EndIf
     EndIf
-    IF !EMPTY(MV_PAR92)
+    If !Empty(MV_PAR92)
        oReport:OnPageBreak({|| ImpRoda(oReport) })
-    ELSE
+    Else
        oReport:OnPageBreak({|| oReport:SkipLine(),oReport:PrintText(cCabec)})
-    ENDIF
+    EndIf
     //Transforma parametros do tipo Range em expressao ADVPL para ser utilizada no filtro
 
     MakeSqlExpr("GPE20R3")
@@ -517,7 +498,7 @@ Static Function RGPE012P(oReport)
     // Neste caso foi utilizado o alias fixo com o mesmo nome da tabela (e nao GetNextAlias, conforme o
     // padrao de programacao), pois neste relatorio existe chamadas para outras funcoes e essas funcoes
     // utilizam sempre "SRA".
-    cAliasX := GetNextAlias()//Então é so por o recno no select e usar o DBGOTO para prodicionar no SRA
+    cAliasX := GetNextAlias()//Então é so por o recno no select e usar o DBGoTo para prodicionar no SRA
     // Modifica variaveis para a Query
     For nReg:=1 to Len(cSituacao)
         cSitQuery += "'"+Subs(cSituacao,nReg,1)+"'"
@@ -538,57 +519,57 @@ Static Function RGPE012P(oReport)
 
     If nOrdem == 1
         If Quebloc
-            cOrdem += "%RA_FILIAL, SUBSTR(RA_BCDEPSA,1,3), RA_NOME%"
+            cOrdem += "%RA_FILIAL, SubStr(RA_BCDEPSA,1,3), RA_NOME%"
         Else
-            cOrdem += "%SUBSTR(RA_BCDEPSA,1,3), RA_FILIAL, RA_NOME%"
+            cOrdem += "%SubStr(RA_BCDEPSA,1,3), RA_FILIAL, RA_NOME%"
         EndIf
     ElseIf nOrdem == 2
         If Quebloc
-            cOrdem += "%RA_FILIAL, SUBSTR(RA_BCDEPSA,1,3), RA_CC, RA_MAT%"
+            cOrdem += "%RA_FILIAL, SubStr(RA_BCDEPSA,1,3), RA_CC, RA_MAT%"
         Else
-            cOrdem += "%SUBSTR(RA_BCDEPSA,1,3), RA_FILIAL, RA_CC, RA_MAT%"
+            cOrdem += "%SubStr(RA_BCDEPSA,1,3), RA_FILIAL, RA_CC, RA_MAT%"
         EndIf
     ElseIf nOrdem == 3
         If Quebloc
-            cOrdem += "%RA_FILIAL, SUBSTR(RA_BCDEPSA,1,3),RA_MAT%"
+            cOrdem += "%RA_FILIAL, SubStr(RA_BCDEPSA,1,3),RA_MAT%"
         Else
-            cOrdem += "%SUBSTR(RA_BCDEPSA,1,3), RA_FILIAL, RA_MAT%"
+            cOrdem += "%SubStr(RA_BCDEPSA,1,3), RA_FILIAL, RA_MAT%"
         EndIf
-    Elseif nOrdem == 4
+    ElseIf nOrdem == 4
         If Quebloc
-            cOrdem += "%RA_FILIAl, SUBSTR(RA_BCDEPSA,1,3), RA_CTDEPSA%"
+            cOrdem += "%RA_FILIAl, SubStr(RA_BCDEPSA,1,3), RA_CTDEPSA%"
         Else
-            cOrdem += "%SUBSTR(RA_BCDEPSA,1,3), RA_FILIAl, RA_CTDEPSA%"
+            cOrdem += "%SubStr(RA_BCDEPSA,1,3), RA_FILIAl, RA_CTDEPSA%"
         EndIf
     ElseIf nOrdem == 5
         If Quebloc
-            cOrdem += "%RA_FILIAL, SUBSTR(RA_BCDEPSA,1,3), RA_CC, RA_NOME%"
+            cOrdem += "%RA_FILIAL, SubStr(RA_BCDEPSA,1,3), RA_CC, RA_NOME%"
         Else
-            cOrdem += "%SUBSTR(RA_BCDEPSA,1,3), RA_FILIAL, RA_CC, RA_NOME%"
+            cOrdem += "%SubStr(RA_BCDEPSA,1,3), RA_FILIAL, RA_CC, RA_NOME%"
         EndIf
     ElseIf nOrdem == 6
-        cOrdem += "%SUBSTR(RA_BCDEPSA,1,3), RA_FILIAL, RA_NOME%"
+        cOrdem += "%SubStr(RA_BCDEPSA,1,3), RA_FILIAL, RA_NOME%"
     ElseIf nOrdem == 7
-        cOrdem += "%SUBSTR(RA_BCDEPSA,1,3), RA_CC, RA_FILIAL, RA_MAT%"
-    Elseif nOrdem == 8
-        cOrdem += "%SUBSTR(RA_BCDEPSA,1,3), RA_FILIAL, RA_NOME%"
+        cOrdem += "%SubStr(RA_BCDEPSA,1,3), RA_CC, RA_FILIAL, RA_MAT%"
+    ElseIf nOrdem == 8
+        cOrdem += "%SubStr(RA_BCDEPSA,1,3), RA_FILIAL, RA_NOME%"
     ElseIf nOrdem == 9
-        cOrdem += "%SUBSTR(RA_BCDEPSA,1,3), RA_FILIAL, RA_CTDEPSA%"
+        cOrdem += "%SubStr(RA_BCDEPSA,1,3), RA_FILIAL, RA_CTDEPSA%"
     ElseIf nOrdem == 10
-        cOrdem += "%SUBSTR(RA_BCDEPSA,1,3), RA_CC, RA_FILIAL, RA_NOME%"
-    Elseif nOrdem == 11
-        cOrdem += "%RA_FILIAL, SUBSTR(RA_BCDEPSA,1,3)%"
+        cOrdem += "%SubStr(RA_BCDEPSA,1,3), RA_CC, RA_FILIAL, RA_NOME%"
+    ElseIf nOrdem == 11
+        cOrdem += "%RA_FILIAL, SubStr(RA_BCDEPSA,1,3)%"
     EndIf
 
     //NAO RETIRAR ESTA LINHA
     //Este relatorio abre a query abaixo com o nome de "SRA" e
     //como a tabela "SRA" eh utilizada em varios outros programas,
     //foi preciso fechar primeiro a area para depois poder utiliza-la.
-    SRA->( dbCloseArea() )
+    SRA->( DBCloseArea() )
 
     BeginSql alias cAliasX
         SELECT RA_FILIAL,RA_BCDEPSA,RA_CC,RA_MAT,RA_NOME,RA_CIC,RA_CTDEPSA, RA_SITFOLH,RA_AFASFGT,RA_RESCRAI,RA_PROCES, R_E_C_N_O_ RECSRA
-        FROM %table:SRA% SRA
+        FROM %Table:SRA% SRA
         WHERE SRA.RA_SITFOLH IN (%exp:Upper(cSitQuery)%) AND
                SRA.RA_CATFUNC IN (%exp:Upper(cCatQuery)%) AND
                %exp:cFiltro%
@@ -603,28 +584,28 @@ Static Function RGPE012P(oReport)
     FilAnt := Replicate("!", FWGETTAMFILIAL)
 
     // Define o total da regua da tela de processamento do relatorio
-    Dbselectarea(cAliasX)
+    DBSelectArea(cAliasX)
     Count to _nCont
     oReport:SetMeter(_ncont*2)
-    (cAliasX)->(Dbgotop())
+    (cAliasX)->(DBGoTop())
 
     // Incializa impressao
     oSection:Init(.F.)
 
-    //loop de montagem de array de dados
+    //Loop de montagem de array de dados
     _aimprime := {}
 
-    _cTot:=ALLTRIM(STR(_nCont))
-    _nTam:=LEN(_cTot)+1
+    _cTot:=AllTrim(Str(_nCont))
+    _nTam:=Len(_cTot)+1
     _nConta:=0
 
-    Do While (cAliasX)->( !EOF() )
+    While (cAliasX)->( !Eof() )
 
-        SRA->(DBGOTO((cAliasX)->RECSRA))
+        SRA->(DBGoTo((cAliasX)->RECSRA))
 
         oReport:IncMeter()
         _nConta++
-        oReport:SetMsgPrint("1/2-Lendo Mat.: "+ALLTRIM(STR(_nConta,_nTam)) +" de "+ _cTot)
+        oReport:SetMsgPrint("1/2-Lendo Mat.: "+AllTrim(Str(_nConta,_nTam)) +" de "+ _cTot)
 
         // Verifica se o usuario cancelou a impressao do relatorio
         If oReport:Cancel()
@@ -643,13 +624,13 @@ Static Function RGPE012P(oReport)
         EndIf
 
         If !Empty(oSection:aUserFilter) .And. !Empty(oSection:aUserFilter[1,2]) .And. !(cAliasX)->&(oSection:aUserFilter[1,2])
-            (cAliasX)->( dbSkip() )
+            (cAliasX)->( DBSkip() )
             Loop
         EndIf
 
         // Consiste controle de acessos e filiais validas
         If !((cAliasX)->RA_FILIAL $ fValidFil()) .Or. !Eval(cAcessaSRA)
-            (cAliasX)->( dbSkip() )
+            (cAliasX)->( DBSkip() )
             Loop
         EndIf
 
@@ -657,14 +638,14 @@ Static Function RGPE012P(oReport)
         // Verif. se Demitido esta dentro da Data de Pagamento do Parametro
         If (cAliasX)->RA_SITFOLH <> "T" //se estiver como "T", busca os valores. Senão, verifica se na transferência foi gravado como "D".
             If ((cAliasX)->RA_SITFOLH == "D")
-                dbSelectArea("SRG")
-                If dbSeek( (cAliasX)->(RA_FILIAL + RA_MAT )  )
+                DBSelectArea("SRG")
+                If DBSeek( (cAliasX)->(RA_FILIAL + RA_MAT )  )
                     While !( SRG->( Eof() ) )  .And. (cAliasX)->RA_FILIAL + (cAliasX)->RA_MAT ==  SRG->RG_FILIAL + SRG->RG_MAT
                         If SRG->RG_DATAHOM >= dDataDe .And. SRG->RG_DATAHOM <= dDataAte
                             lRescisao := .T.
                         EndIf
-                        SRG->( dbSkip())
-                    Enddo
+                        SRG->( DBSkip())
+                    EndDo
                 Else
                     //Antes de ir para o próximo funcionário, verificar se não é transferência
                     If (cAliasX)->RA_AFASFGT $ "N1/N2/N3"
@@ -673,8 +654,8 @@ Static Function RGPE012P(oReport)
                        lFuncTrf := .T.
                     EndIf
                     If !lFuncTrf
-                        dbSelectArea("SRA")
-                        (cAliasX)->( dbSkip() )
+                        DBSelectArea("SRA")
+                        (cAliasX)->( DBSkip() )
                         Loop
                     EndIf
                 EndIf
@@ -687,7 +668,7 @@ Static Function RGPE012P(oReport)
         // Consiste parametros de ban co e conta do funcionario
         // Se nFunBenAmb=2, apenas sera testado a Bco e conta do Beneficario
 
-        If nFunBenAmb # 2 	.And.  ;	//Se nao for Beneficiario, testa Bco e Conta do Funcionario
+        If nFunBenAmb # 2 	.And.  ;	//Se nao For Beneficiario, testa Bco e Conta do Funcionario
            (( ComConta = "C" .And. (cAliasX)->RA_CTDEPSA == Space(Len((cAliasX)->RA_CTDEPSA)) .And. nFunBenAmb # 2) .Or.;
              ( ComConta = "S" .And. (cAliasX)->RA_CTDEPSA #  Space(Len((cAliasX)->RA_CTDEPSA)) .And. nFunBenAmb # 2))
             nValor := 0
@@ -705,46 +686,46 @@ Static Function RGPE012P(oReport)
                 // array aBenefCop, foi preciso substituir os campos da expressao (pergunte range)
                 // por X[2] ou X[3].
                 // Ex.: Pergunte range tem o seguinte conteudo:
-                //--			(((cAliasX)->RA_CTDEPSA >= '000000000001' .AND. (cAliasX)->RA_CTDEPSA <= '999999999999'))
+                //--			(((cAliasX)->RA_CTDEPSA >= '000000000001' .And. (cAliasX)->RA_CTDEPSA <= '999999999999'))
                 //--      substituindo:
-                //--			((X[3] >= '000000000001' .AND. X[3] <= '999999999999'))
-                mv_par07 := cBanco
-                mv_par10 := cConta
+                //--			((X[3] >= '000000000001' .And. X[3] <= '999999999999'))
+                MV_PAR07 := cBanco
+                MV_PAR10 := cConta
                 MakeAdvplExpr("GPE20R3")
 
                 cParBanco := ""
                 cParConta := ""
 
-                cParBanco := StrTran(mv_par07, "RA_BCDEPSA","X[2]")
-                cParConta := StrTran(mv_par10, "RA_CTDEPSA","X[3]")
+                cParBanco := StrTran(MV_PAR07, "RA_BCDEPSA","X[2]")
+                cParConta := StrTran(MV_PAR10, "RA_CTDEPSA","X[3]")
 
                 If ComConta == "C" 					// Beneficiario e  com Conta, testo a Conta
                     If !Empty(cParBanco) .And. !Empty(cParConta)
-                        &('Aeval(aBenefCop, { |X| If(	( ' + cParBanco + ' ) .And. ( ' + cParConta + ' .And. !Empty(X[3]) ) , AADD(aValBenef,X ), "" ) })')
+                        &('Aeval(aBenefCop, { |X| If(	( ' + cParBanco + ' ) .And. ( ' + cParConta + ' .And. !Empty(X[3]) ) , aAdd(aValBenef,X ), "" ) })')
                     ElseIf !Empty(cParBanco)
-                        &('Aeval(aBenefCop, { |X| If(	( ' + cParBanco + ' ) .And. ( !Empty(X[3]) ) , AADD(aValBenef,X ), "" ) })')
+                        &('Aeval(aBenefCop, { |X| If(	( ' + cParBanco + ' ) .And. ( !Empty(X[3]) ) , aAdd(aValBenef,X ), "" ) })')
                     ElseIf !Empty(cParConta)
-                        &('Aeval(aBenefCop, { |X| If(	( ' + cParConta + ' .And. !Empty(X[3]) ) , AADD(aValBenef,X ), "" ) })')
+                        &('Aeval(aBenefCop, { |X| If(	( ' + cParConta + ' .And. !Empty(X[3]) ) , aAdd(aValBenef,X ), "" ) })')
                     Else
-                        &('Aeval(aBenefCop, { |X| If(	( !Empty(X[3]) ) , AADD(aValBenef,X ), "" ) })')
+                        &('Aeval(aBenefCop, { |X| If(	( !Empty(X[3]) ) , aAdd(aValBenef,X ), "" ) })')
                     EndIf
 
-                ElseIf ComConta == "S"				// Se for beneficiario,  sem  Conta
+                ElseIf ComConta == "S"				// Se For beneficiario,  sem  Conta
                     If !Empty(cParBanco)
-                        &('Aeval(aBenefCop, { |X| If(	( ' + cParBanco + ' ) .And.  ( X[3] = Space( TamSX3("RQ_CTDEPBE")[1] )) , AADD(aValBenef,X ), ""  )  })')
+                        &('Aeval(aBenefCop, { |X| If(	( ' + cParBanco + ' ) .And.  ( X[3] = Space( TamSX3("RQ_CTDEPBE")[1] )) , aAdd(aValBenef,X ), ""  )  })')
                     Else
-                        &('Aeval(aBenefCop, { |X| If(	( X[3] = Space( TamSX3("RQ_CTDEPBE")[1] )) , AADD(aValBenef,X ), ""  )  })')
+                        &('Aeval(aBenefCop, { |X| If(	( X[3] = Space( TamSX3("RQ_CTDEPBE")[1] )) , aAdd(aValBenef,X ), ""  )  })')
                     EndIf
 
                 ElseIf ComConta == "A"
                     If !Empty(cParBanco) .And. !Empty(cParConta)
-                        &('Aeval(aBenefCop, { |X| If(	( 	( ' + cParBanco + ' ) .And. ( ' + cParConta + ' ) ) .Or. ( 	( ' + cParBanco + ' ) .And.  ( X[3] = Space( TamSX3("RQ_CTDEPBE")[1] )) ), AADD(aValBenef,X ), ""  )  })')
+                        &('Aeval(aBenefCop, { |X| If(	( 	( ' + cParBanco + ' ) .And. ( ' + cParConta + ' ) ) .Or. ( 	( ' + cParBanco + ' ) .And.  ( X[3] = Space( TamSX3("RQ_CTDEPBE")[1] )) ), aAdd(aValBenef,X ), ""  )  })')
                     ElseIf !Empty(cParBanco)
-                        &('Aeval(aBenefCop, { |X| If(	( 	( ' + cParBanco + ' ) ) , AADD(aValBenef,X ), ""  )  })')
+                        &('Aeval(aBenefCop, { |X| If(	( 	( ' + cParBanco + ' ) ) , aAdd(aValBenef,X ), ""  )  })')
                     ElseIf !Empty(cParConta)
-                        &('Aeval(aBenefCop, { |X| If(	( 	( ' + cParConta + ' ) ), AADD(aValBenef,X ), ""  )  })')
+                        &('Aeval(aBenefCop, { |X| If(	( 	( ' + cParConta + ' ) ), aAdd(aValBenef,X ), ""  )  })')
                     Else
-                        &('Aeval(aBenefCop, { |X| AADD(aValBenef,X ) })')
+                        &('Aeval(aBenefCop, { |X| aAdd(aValBenef,X ) })')
                     EndIf
                 EndIf
             EndIf
@@ -756,15 +737,15 @@ Static Function RGPE012P(oReport)
         // 4 - Testa se beneficiario
         If	( nValor == 0 .And. Len(aValBenef) == 0 ) .Or. ;
             ( nFunBenAmb == 2 .And. Len(aValBenef) == 0)
-            (cAliasX)->( dbSkip() )
+            (cAliasX)->( DBSkip() )
             Loop
         EndIf
 
         nValBenef := 0
         If nValor > 0
             //Cria posição no array
-            aadd(_aimprime,{SRA->RA_FILIAL,;
-                            SUBSTR(SRA->RA_BCDEPSA,1,3),;
+            aAdd(_aimprime,{SRA->RA_FILIAL,;
+                            SubStr(SRA->RA_BCDEPSA,1,3),;
                             SRA->RA_BCDEPSA,;
                             SRA->RA_CTDEPSA,;
                             SRA->RA_MAT,;
@@ -779,14 +760,14 @@ Static Function RGPE012P(oReport)
             // Verifica o conteudo que sera impresso na coluna nome conforme parametro.
             If LstNome <> "S"
                 // Atualiza campo nome
-                _aimprime[len(_aimprime)][6] := "***  N o m e   Oculto   ***   "
+                _aimprime[Len(_aimprime)][6] := "***  N o m e   Oculto   ***   "
             EndIf
 
             // Atualiza campo Valor
-            _aimprime[len(_aimprime)][9] := nValor
+            _aimprime[Len(_aimprime)][9] := nValor
 
             If Len(aValBenef) > 0
-                _aimprime[len(_aimprime)][10] := "-Func."
+                _aimprime[Len(_aimprime)][10] := "-Func."
             EndIf
 
         EndIf
@@ -796,8 +777,8 @@ Static Function RGPE012P(oReport)
             If !Empty(aValBenef[nReg,1]) .And. aValBenef[nReg,5] > 0
 
                 //Cria posição no array
-                aadd(_aimprime,{SRA->RA_FILIAL,;//01
-                            SUBSTR(SRA->RA_BCDEPSA,1,3),;//02
+                aAdd(_aimprime,{SRA->RA_FILIAL,;//01
+                            SubStr(SRA->RA_BCDEPSA,1,3),;//02
                             SRA->RA_BCDEPSA,;   //03
                             SRA->RA_CTDEPSA,;   //04
                             SRA->RA_MAT,;	    //05
@@ -812,89 +793,89 @@ Static Function RGPE012P(oReport)
                 // Verifica o conteudo que sera impresso na coluna nome conforme parametro.
                 // Atualiza campo nome
                 If LstNome = "S"
-                    _aimprime[len(_aimprime)][6] := Subs(aValBenef[nReg,1],1,30)
+                    _aimprime[Len(_aimprime)][6] := Subs(aValBenef[nReg,1],1,30)
                 Else
-                    _aimprime[len(_aimprime)][6] := "***  N o m e   Oculto   ***   "
+                    _aimprime[Len(_aimprime)][6] := "***  N o m e   Oculto   ***   "
                 EndIf
 
                 // Atualiza campo Ban co
-                _aimprime[len(_aimprime)][3] := aValBenef[nReg,2]
-                _aimprime[len(_aimprime)][2] := SUBSTR(aValBenef[nReg,2],1,3)
+                _aimprime[Len(_aimprime)][3] := aValBenef[nReg,2]
+                _aimprime[Len(_aimprime)][2] := SubStr(aValBenef[nReg,2],1,3)
                 // Atualiza campo nome
-                _aimprime[len(_aimprime)][7] := aValBenef[nReg,6]
+                _aimprime[Len(_aimprime)][7] := aValBenef[nReg,6]
                 // Atualiza campo Conta
-                //_aimprime[len(_aimprime)][8] := aValBenef[nReg,3]
-                _aimprime[len(_aimprime)][4] := aValBenef[nReg,3]
+                //_aimprime[Len(_aimprime)][8] := aValBenef[nReg,3]
+                _aimprime[Len(_aimprime)][4] := aValBenef[nReg,3]
                 // Atualiza campo Valor
-                _aimprime[len(_aimprime)][9] := aValBenef[nReg,5]
+                _aimprime[Len(_aimprime)][9] := aValBenef[nReg,5]
 
-                _aimprime[len(_aimprime)][10] := "-Benef."
+                _aimprime[Len(_aimprime)][10] := "-Benef."
 
             EndIf
         Next nReg
 
-        (cAliasX)->( dbSkip() )
+        (cAliasX)->( DBSkip() )
     EndDo
 
     //Reordena array de acordo com ordem escolhida
     If nOrdem == 1
         If Quebloc
-            _aimprime := asort(_aimprime,,,{|x,y| x[1] + x[2] + x[6] < y[1] + y[2] + y[6] })
+            _aimprime := aSort(_aimprime,,,{|x,y| x[1] + x[2] + x[6] < y[1] + y[2] + y[6] })
         Else
-            _aimprime := asort(_aimprime,,,{|x,y| x[2] + x[1] + x[6] < y[2] + y[1] + y[6] })
+            _aimprime := aSort(_aimprime,,,{|x,y| x[2] + x[1] + x[6] < y[2] + y[1] + y[6] })
         EndIf
     ElseIf nOrdem == 2
         If Quebloc
-            _aimprime := asort(_aimprime,,,{|x,y| x[1] + x[3] + x[5] < y[1] + y[3] + y[5] })
+            _aimprime := aSort(_aimprime,,,{|x,y| x[1] + x[3] + x[5] < y[1] + y[3] + y[5] })
         Else
-            _aimprime := asort(_aimprime,,,{|x,y| x[3] + x[1] + x[5] < y[3] + y[1] + y[5] })
+            _aimprime := aSort(_aimprime,,,{|x,y| x[3] + x[1] + x[5] < y[3] + y[1] + y[5] })
         EndIf
     ElseIf nOrdem == 3
         If Quebloc
-            _aimprime := asort(_aimprime,,,{|x,y| x[1] + x[3] + x[5] < y[1] + y[3] + y[5] })
+            _aimprime := aSort(_aimprime,,,{|x,y| x[1] + x[3] + x[5] < y[1] + y[3] + y[5] })
         Else
-            _aimprime := asort(_aimprime,,,{|x,y| x[3] + x[1] + x[5] < y[3] + y[1] + y[5] })
+            _aimprime := aSort(_aimprime,,,{|x,y| x[3] + x[1] + x[5] < y[3] + y[1] + y[5] })
         EndIf
-    Elseif nOrdem == 4
+    ElseIf nOrdem == 4
         If Quebloc
-            _aimprime := asort(_aimprime,,,{|x,y| x[1] + x[3] + x[8] < y[1] + y[3] + y[8] })
+            _aimprime := aSort(_aimprime,,,{|x,y| x[1] + x[3] + x[8] < y[1] + y[3] + y[8] })
         Else
-            _aimprime := asort(_aimprime,,,{|x,y| x[3] + x[1] + x[6] < y[3] + y[1] + y[8] })
+            _aimprime := aSort(_aimprime,,,{|x,y| x[3] + x[1] + x[6] < y[3] + y[1] + y[8] })
         EndIf
     ElseIf nOrdem == 5
         If Quebloc
-            _aimprime := asort(_aimprime,,,{|x,y| x[1] + x[3] + x[4] + x[6] < y[1] + y[3] + y[4] + y[6] })
+            _aimprime := aSort(_aimprime,,,{|x,y| x[1] + x[3] + x[4] + x[6] < y[1] + y[3] + y[4] + y[6] })
         Else
-            _aimprime := asort(_aimprime,,,{|x,y| x[3] + x[1] + x[4] + x[6] < y[3] + y[1] + y[4] + y[6] })
+            _aimprime := aSort(_aimprime,,,{|x,y| x[3] + x[1] + x[4] + x[6] < y[3] + y[1] + y[4] + y[6] })
         EndIf
     ElseIf nOrdem == 6
-        _aimprime := asort(_aimprime,,,{|x,y| x[3] + x[1] + x[6] < y[3] + y[1] + y[6] })
+        _aimprime := aSort(_aimprime,,,{|x,y| x[3] + x[1] + x[6] < y[3] + y[1] + y[6] })
     ElseIf nOrdem == 7
-        _aimprime := asort(_aimprime,,,{|x,y| x[3] + x[4] + x[1] + x[5] < y[3] + y[4] + y[1] + y[5] })
-    Elseif nOrdem == 8
-        _aimprime := asort(_aimprime,,,{|x,y| x[3] + x[1] + x[6] < y[3] + y[1] + y[6] })
+        _aimprime := aSort(_aimprime,,,{|x,y| x[3] + x[4] + x[1] + x[5] < y[3] + y[4] + y[1] + y[5] })
+    ElseIf nOrdem == 8
+        _aimprime := aSort(_aimprime,,,{|x,y| x[3] + x[1] + x[6] < y[3] + y[1] + y[6] })
     ElseIf nOrdem == 9
-        _aimprime := asort(_aimprime,,,{|x,y| x[3] + x[1] + x[8] < y[3] + y[1] + y[8] })
+        _aimprime := aSort(_aimprime,,,{|x,y| x[3] + x[1] + x[8] < y[3] + y[1] + y[8] })
     ElseIf nOrdem == 10
-        _aimprime := asort(_aimprime,,,{|x,y| x[3] + x[4] + x[1] + x[6] < y[3] + y[4] + y[1] + y[6] })
-    Elseif nOrdem == 11
-        _aimprime := asort(_aimprime,,,{|x,y| x[1] + x[3]  < y[1] + y[3]  })
+        _aimprime := aSort(_aimprime,,,{|x,y| x[3] + x[4] + x[1] + x[6] < y[3] + y[4] + y[1] + y[6] })
+    ElseIf nOrdem == 11
+        _aimprime := aSort(_aimprime,,,{|x,y| x[1] + x[3]  < y[1] + y[3]  })
     EndIf
 
-    _cTot:=ALLTRIM(STR(len(_aimprime)))
-    _nTam:=LEN(_cTot)+1
+    _cTot:=AllTrim(Str(Len(_aimprime)))
+    _nTam:=Len(_cTot)+1
     _nConta:=0
 
-    SRC->(Dbsetorder(8))//SRC->RC_FILIAL + SRC->RC_MAT + SRC->RC_PD + SRC->RC_ROTEIR
-    SRH->(dbSetOrder(3))//SRH->RH_FILIAL + SRH->RH_MAT + SRH->RH_ROTEIR
-    SRG->(dbSetOrder(2))//SRG->RG_FILIAL + SRG->RG_MAT + SRG->RG_ROTEIR
-    SRD->(dbSetOrder(6))//SRD->RD_FILIAL + SRD->RD_MAT + SRD->RD_PD + SRD->RD_ROTEIR
+    SRC->(DBSetOrder(8))//SRC->RC_FILIAL + SRC->RC_MAT + SRC->RC_PD + SRC->RC_ROTEIR
+    SRH->(DBSetOrder(3))//SRH->RH_FILIAL + SRH->RH_MAT + SRH->RH_ROTEIR
+    SRG->(DBSetOrder(2))//SRG->RG_FILIAL + SRG->RG_MAT + SRG->RG_ROTEIR
+    SRD->(DBSetOrder(6))//SRD->RD_FILIAL + SRD->RD_MAT + SRD->RD_PD + SRD->RD_ROTEIR
 
     cRoteiro 	:= aRoteiros[1,1]
     //	cTipoRot 	:= aRoteiros[1,2]
     cVerbaBusca := aRoteiros[1,3]
     //Loop de impressão
-    For _ni := 1 to len(_aimprime)
+    For _nI := 1 to Len(_aimprime)
 
         // Verifica se o usuario cancelou a impressao do relatorio
         If oReport:Cancel()
@@ -904,7 +885,7 @@ Static Function RGPE012P(oReport)
         // Incrementa a regua da tela de processamento do relatorio
           oReport:IncMeter()
           _nConta++
-        oReport:SetMsgPrint("2/2-Imprmindo Mat.: "+ALLTRIM(STR(_nConta,_nTam)) +" de "+ _cTot)
+        oReport:SetMsgPrint("2/2-Imprmindo Mat.: "+AllTrim(Str(_nConta,_nTam)) +" de "+ _cTot)
 
         If cTipoRel == "S"	// So Imprime Dados dos Funcionarios quando Relacao For Analitica.
             // Habilita a impressao das colunas
@@ -912,89 +893,89 @@ Static Function RGPE012P(oReport)
             oSection:Hide()
         EndIf
 
-        oSection:Cell("RA_FILIAL" ):SetValue(_aimprime[_ni][01])
-        oSection:Cell("RA_BCDEPSA"):SetValue(_aimprime[_ni][02])
-        oSection:Cell("RA_BCDEPSA"):SetValue(_aimprime[_ni][03])
-        oSection:Cell("RA_CTDEPSA"):SetValue(_aimprime[_ni][04])
-        oSection:Cell("RA_MAT"    ):SetValue(_aimprime[_ni][05])
-        oSection:Cell("RA_NOME"   ):SetValue(_aimprime[_ni][06])
-        oSection:Cell("RA_CIC"    ):SetValue(_aimprime[_ni][07])
-        oSection:Cell("RA_CC"     ):SetValue(_aimprime[_ni][08])
-        oSection:Cell("VALOR"     ):SetValue(_aimprime[_ni][09])
-        oSection:Cell("FUNCBENEF" ):SetValue(_aimprime[_ni][10])
+        oSection:Cell("RA_FILIAL" ):SetValue(_aimprime[_nI][01])
+        oSection:Cell("RA_BCDEPSA"):SetValue(_aimprime[_nI][02])
+        oSection:Cell("RA_BCDEPSA"):SetValue(_aimprime[_nI][03])
+        oSection:Cell("RA_CTDEPSA"):SetValue(_aimprime[_nI][04])
+        oSection:Cell("RA_MAT"    ):SetValue(_aimprime[_nI][05])
+        oSection:Cell("RA_NOME"   ):SetValue(_aimprime[_nI][06])
+        oSection:Cell("RA_CIC"    ):SetValue(_aimprime[_nI][07])
+        oSection:Cell("RA_CC"     ):SetValue(_aimprime[_nI][08])
+        oSection:Cell("VALOR"     ):SetValue(_aimprime[_nI][09])
+        oSection:Cell("FUNCBENEF" ):SetValue(_aimprime[_nI][10])
 
-        IF LEN(ALLTRIM(MV_PAR01+MV_PAR02+MV_PAR03)) > 3
-            oSection:Cell("TIPOPAGTO"):SetValue(ALLTRIM(MV_PAR01+MV_PAR02+MV_PAR03))
-        ELSE
-            oSection:Cell("TIPOPAGTO"):SetValue(ALLTRIM(POSICIONE("SRY",1,xfilial("SRY")+cRoteiro,"RY_DESC")))
-        ENDIF
+        If Len(AllTrim(MV_PAR01+MV_PAR02+MV_PAR03)) > 3
+            oSection:Cell("TIPOPAGTO"):SetValue(AllTrim(MV_PAR01+MV_PAR02+MV_PAR03))
+        Else
+            oSection:Cell("TIPOPAGTO"):SetValue(AllTrim(Posicione("SRY",1,xFilial("SRY")+cRoteiro,"RY_DESC")))
+        EndIf
 
-        IF lMostraDTPGTP
+        If lMostraDTPGTP
 
-            cFil_Mat:=_aimprime[_ni][1]+_aimprime[_ni][5]
+            cFil_Mat:=_aimprime[_nI][1]+_aimprime[_nI][5]
 
-            If SRH->(dbSeek( cFil_Mat + cRoteiro )) //DATA DAS FERIAS "131","132","FER"
-                DO While SRH->(!Eof()) .And. Alltrim(cFil_Mat + cRoteiro) = Alltrim(SRH->RH_FILIAL + SRH->RH_MAT + SRH->RH_ROTEIR)
+            If SRH->(DBSeek( cFil_Mat + cRoteiro )) //DATA DAS FERIAS "131","132","FER"
+                While SRH->(!Eof()) .And. AllTrim(cFil_Mat + cRoteiro) = AllTrim(SRH->RH_FILIAL + SRH->RH_MAT + SRH->RH_ROTEIR)
                     If (SRH->RH_DTRECIB >= dDataDe .And. SRH->RH_DTRECIB <= dDataAte )
-                        oSection:Cell("DATAPAGTO"):SetValue(DTOC(SRH->RH_DTRECIB))
-                        EXIT
-                    ENDIF
-                    SRH->(DBSKIP())
-                ENDDO
-            ENDIF
+                        oSection:Cell("DATAPAGTO"):SetValue(DToC(SRH->RH_DTRECIB))
+                        Exit
+                    EndIf
+                    SRH->(DBSkip())
+                EndDo
+            EndIf
 
-            If SRC->(dbSeek(cFil_Mat + cVerbaBusca + cRoteiro)) //DATA DAS FOLHA E 131
-                DO While SRC->(!Eof()) .And. ( Alltrim(cFil_Mat+ cVerbaBusca + cRoteiro) = AllTrim(SRC->RC_FILIAL + SRC->RC_MAT + SRC->RC_PD + SRC->RC_ROTEIR) )
+            If SRC->(DBSeek(cFil_Mat + cVerbaBusca + cRoteiro)) //DATA DAS FOLHA E 131
+                While SRC->(!Eof()) .And. ( AllTrim(cFil_Mat+ cVerbaBusca + cRoteiro) = AllTrim(SRC->RC_FILIAL + SRC->RC_MAT + SRC->RC_PD + SRC->RC_ROTEIR) )
                     If SRC->RC_DATA >= dDataDe .And. SRC->RC_DATA <= dDataAte
-                        oSection:Cell("DATAPAGTO"):SetValue(DTOC(SRC->RC_DATA))
-                        EXIT
-                    ENDIF
-                    SRC->(DBSKIP())
-                ENDDO
-            ENDIF
+                        oSection:Cell("DATAPAGTO"):SetValue(DToC(SRC->RC_DATA))
+                        Exit
+                    EndIf
+                    SRC->(DBSkip())
+                EndDo
+            EndIf
 
-            If SRG->(dbSeek( cFil_Mat + cRoteiro))//DATA DA RECISAO
-                DO While SRG->(!Eof()) .And. ( AllTrim(cFil_Mat + cRoteiro) ) == ( AllTrim(SRG->RG_FILIAL + SRG->RG_MAT + SRG->RG_ROTEIR) )
+            If SRG->(DBSeek( cFil_Mat + cRoteiro))//DATA DA RECISAO
+                While SRG->(!Eof()) .And. ( AllTrim(cFil_Mat + cRoteiro) ) == ( AllTrim(SRG->RG_FILIAL + SRG->RG_MAT + SRG->RG_ROTEIR) )
                     If SRG->RG_DATAHOM >= dDataDe .And. SRG->RG_DATAHOM <= dDataAte
-                        oSection:Cell("DATAPAGTO"):SetValue(DTOC(SRG->RG_DATAHOM))
-                        EXIT
-                    ENDIF
-                    SRG->(DBSKIP())
-                ENDDO
-            ENDIF
+                        oSection:Cell("DATAPAGTO"):SetValue(DToC(SRG->RG_DATAHOM))
+                        Exit
+                    EndIf
+                    SRG->(DBSkip())
+                EndDo
+            EndIf
 
-            If SRD->(dbSeek(cFil_Mat+ cVerbaBusca + cRoteiro) )// MOVIMENTO FECHADO
-                DO WHILE !Eof() .And. ( Alltrim(cFil_Mat+ cVerbaBusca + cRoteiro) = Alltrim(SRD->RD_FILIAL + SRD->RD_MAT + SRD->RD_PD + SRD->RD_ROTEIR) )
+            If SRD->(DBSeek(cFil_Mat+ cVerbaBusca + cRoteiro) )// MOVIMENTO FECHADO
+                While !Eof() .And. ( AllTrim(cFil_Mat+ cVerbaBusca + cRoteiro) = AllTrim(SRD->RD_FILIAL + SRD->RD_MAT + SRD->RD_PD + SRD->RD_ROTEIR) )
                     If SRD->RD_DATPGT >= dDataDe .And. SRD->RD_DATPGT <= dDataAte
-                        oSection:Cell("DATAPAGTO"):SetValue(DTOC(SRD->RD_DATPGT))
-                        EXIT
-                    ENDIF
-                    SRD->(DBSKIP())
-                ENDDO
-            ENDIF
-        ENDIF
+                        oSection:Cell("DATAPAGTO"):SetValue(DToC(SRD->RD_DATPGT))
+                        Exit
+                    EndIf
+                    SRD->(DBSkip())
+                EndDo
+            EndIf
+        EndIf
 
         oSection:PrintLine()
 
-    Next _ni
+    Next _nI
 
     // Finaliza impressao inicializada pelo metodo Init
     oSection:Finish()
 
-    SRC->(DBSETORDER(1))
-    SRH->(DBSETORDER(1))
-    SRG->(DBSETORDER(1))
-    SRD->(DBSETORDER(1))
+    SRC->(DBSetOrder(1))
+    SRH->(DBSetOrder(1))
+    SRG->(DBSetOrder(1))
+    SRD->(DBSetOrder(1))
 
-    (cAliasX)->(dbCloseArea())
+    (cAliasX)->(DBCloseArea())
 
 Return( Nil )
 
 Static Function ImpRoda(oReport)
- LOCAL R
+ Local R
 
- FOR R := 1 TO MlCount(MV_PAR92,100)
+ For R := 1 TO MlCount(MV_PAR92,100)
     oReport:PrintText(MEMOLINE(MV_PAR92,100,R))
- NEXT
+ Next
 
 Return

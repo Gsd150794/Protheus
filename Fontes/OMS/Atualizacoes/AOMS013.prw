@@ -20,7 +20,7 @@
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
-#INCLUDE "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -40,9 +40,9 @@ Retorno-----------: Nenhum
 */
 User Function AOMS013(_lcomp,_cvend,_ccliente,_clojacli)
 
-Local aArea	   := GetArea()
+Local aArea	   := FWGetArea()
 Local cQry1    := ""
-Local cProduto := acols[n,aScan( aHeader, { |x| Alltrim(x[2])== "C6_PRODUTO"})]//Codigo do Produto
+Local cProduto := acols[n,aScan( aHeader, { |x| AllTrim(x[2])== "C6_PRODUTO"})]//Codigo do Produto
 Local lItens   := If(!Empty(cProduto),.T.,.F.)
 
 Default _cvend := M->C5_VEND1
@@ -50,11 +50,11 @@ Default _ccliente := M->C5_CLIENTE
 Default _clojacli := M->C5_LOJACLI
 
 Private lAchou := .F.
-Private nPv    := aScan( aHeader, { |x| Alltrim(x[2])== "C6_COMIS1"}) //Comissao Vendedor
-Private nPc    := aScan( aHeader, { |x| Alltrim(x[2])== "C6_COMIS2"}) //Comissao Coordenador
-Private nPg	   := aScan( aHeader, { |x| ALLTRIM(x[2])== "C6_COMIS3"}) //Comissao Gerente
-Private nPs    := aScan( aHeader, { |x| Alltrim(x[2])== "C6_COMIS4"}) //Comissao Supervisor
-Private nPn    := aScan( aHeader, { |x| Alltrim(x[2])== "C6_COMIS5"}) //Comissao Gerente Nacional 
+Private nPv    := aScan( aHeader, { |x| AllTrim(x[2])== "C6_COMIS1"}) //Comissao Vendedor
+Private nPc    := aScan( aHeader, { |x| AllTrim(x[2])== "C6_COMIS2"}) //Comissao Coordenador
+Private nPg	   := aScan( aHeader, { |x| AllTrim(x[2])== "C6_COMIS3"}) //Comissao Gerente
+Private nPs    := aScan( aHeader, { |x| AllTrim(x[2])== "C6_COMIS4"}) //Comissao Supervisor
+Private nPn    := aScan( aHeader, { |x| AllTrim(x[2])== "C6_COMIS5"}) //Comissao Gerente Nacional 
 
 If lItens  
 
@@ -95,38 +95,38 @@ If lItens
 	
 	DBUseArea( .T. , "TOPCONN" , TcGenQry(,, cQry1 ) , "TRBX" , .T., .F. )
 	
-	dbSelectArea("TRBX")
+	DBSelectArea("TRBX")
 	If !TRBX->(Eof())
 		
-		dbSelectArea("SA1")
-		dbSetOrder(1)
-		dbSeek(xFILIAL("SA1")+_ccliente+_clojacli)
+		DBSelectArea("SA1")
+		DBSetOrder(1)
+		DBSeek(xFilial("SA1")+_ccliente+_clojacli)
 		
-		TRBX->(dbGoTop())
+		TRBX->(DBGoTop())
 		While TRBX->(!Eof())
 			
 			//====================================================================================================
 			// 1 - Avalia se o cliente e loja sao iguais
 			//====================================================================================================
-			If ALLTRIM(_ccliente) == ALLTRIM(TRBX->ZAE_CLI) .And. ALLTRIM(_clojacli) == ALLTRIM(TRBX->ZAE_LOJA)
+			If AllTrim(_ccliente) == AllTrim(TRBX->ZAE_CLI) .And. AllTrim(_clojacli) == AllTrim(TRBX->ZAE_LOJA)
 				AOMS013A()
 				
 			//====================================================================================================
 			// 2 - Avalia se o cliente eh igual e a loja esta em branco
 			//====================================================================================================
-			ElseIf ALLTRIM(_ccliente) == ALLTRIM(TRBX->ZAE_CLI) .And. Empty(ALLTRIM(TRBX->ZAE_LOJA))
+			ElseIf AllTrim(_ccliente) == AllTrim(TRBX->ZAE_CLI) .And. Empty(AllTrim(TRBX->ZAE_LOJA))
 				AOMS013A()
 				
 			//====================================================================================================
 			// 3 - Avalia se a Rede do cliente eh igual a rede informada na regra.
 			//====================================================================================================
-			ElseIf ALLTRIM(SA1->A1_GRPVEN) == ALLTRIM(TRBX->ZAE_GRPVEN)
+			ElseIf AllTrim(SA1->A1_GRPVEN) == AllTrim(TRBX->ZAE_GRPVEN)
 				AOMS013A()
 				
 			//====================================================================================================
 			// 4 - Avalia se o Contrato, Cliente e Grupo estao em branco.
 			//====================================================================================================
-			ElseIf Empty(ALLTRIM(TRBX->ZAE_CLI)) .And. Empty(ALLTRIM(TRBX->ZAE_GRPVEN))
+			ElseIf Empty(AllTrim(TRBX->ZAE_CLI)) .And. Empty(AllTrim(TRBX->ZAE_GRPVEN))
 				AOMS013A()
 				
 			EndIf
@@ -138,16 +138,16 @@ If lItens
 				Exit
 			EndIf
 			
-			TRBX->(dbSkip())
+			TRBX->(DBSkip())
 		EndDo
 		
-		TRBX->(dbCloseArea())
+		TRBX->(DBCloseArea())
 
 	EndIf
 	
 EndIf
 
-RestArea(aArea)
+FWRestArea(aArea)
 Return( cProduto )
 
 /*
@@ -168,46 +168,46 @@ Static Function AOMS013A()
 	Local _nPesRef     := U_ITGETMV( "IT_PESOVARE",4000)
 	Local _nPesPed     := 0
 	Local _nX          := 0
-	Local _nPosProduto := Ascan(aHeader,{|x| alltrim(x[2])=="C6_PRODUTO"})
-	Local _nPosQtd1    := Ascan(aHeader,{|x| alltrim(x[2])=="C6_QTDVEN" })
+	Local _nPosProduto := aScan(aHeader,{|x| AllTrim(x[2])=="C6_PRODUTO"})
+	Local _nPosQtd1    := aScan(aHeader,{|x| AllTrim(x[2])=="C6_QTDVEN" })
 
-	//Local _bSeekB1     := {|X| SB1->(DbSeek(xfilial("SB1")+X)) }
+	//Local _bSeekB1     := {|X| SB1->(DBSeek(xFilial("SB1")+X)) }
 
 	//====================================================================================================
 	// Calcula o peso bruto total dos itens do pedido
 	//====================================================================================================
-	IF M->C5_I_PSORI == 0
-		SB1->(DbSetOrder(1))
+	If M->C5_I_PSORI == 0
+		SB1->(DBSetOrder(1))
 		_nPesPed := 0
-		FOR _nX := 1 TO Len(aCols)
-		    if !aTail(aCols[_nX]) 
-			   SB1->(DbSeek(xfilial("SB1")+aCols[_nX][_nPosProduto]))//Eval(_bSeekB1, aCols[_nX][_nPosProduto])
+		For _nX := 1 TO Len(aCols)
+		    If !aTail(aCols[_nX]) 
+			   SB1->(DBSeek(xFilial("SB1")+aCols[_nX][_nPosProduto]))//Eval(_bSeekB1, aCols[_nX][_nPosProduto])
 			   _nPesPed += (SB1->B1_PESBRU * aCols[_nX][_nPosQtd1])
-			ENDIF
-		NEXT
+			EndIf
+		Next
 		M->C5_I_PSORI := _nPesPed
-	ELSE
+	Else
 		_nPesPed := M->C5_I_PSORI
-	ENDIF
+	EndIf
 
-	IF _nPesPed < _nPesRef .AND. !(FunName() $ "AOMS061,MATA140,MATA521B,MATA460B,MATA103,AOMS032");
-	   .AND. !(ISINCALLSTACK("M520_VALID"))
+	If _nPesPed < _nPesRef .And. !(FunName() $ "AOMS061,MATA140,MATA521B,MATA460B,MATA103,AOMS032");
+	   .And. !(ISINCALLSTACK("M520_VALID"))
 
-		Aadd(_aComis, TRBX->ZAE_COMVA1)
-		Aadd(_aComis, TRBX->ZAE_COMVA2)
-		Aadd(_aComis, TRBX->ZAE_COMVA3)
-		Aadd(_aComis, TRBX->ZAE_COMVA4)
-		Aadd(_aComis, TRBX->ZAE_COMVA5) 
+		aAdd(_aComis, TRBX->ZAE_COMVA1)
+		aAdd(_aComis, TRBX->ZAE_COMVA2)
+		aAdd(_aComis, TRBX->ZAE_COMVA3)
+		aAdd(_aComis, TRBX->ZAE_COMVA4)
+		aAdd(_aComis, TRBX->ZAE_COMVA5) 
 		M->C5_I_COMRE := "VV"
 
-	ELSE
-		Aadd(_aComis, TRBX->ZAE_COMIS1)
-		Aadd(_aComis, TRBX->ZAE_COMIS2)
-		Aadd(_aComis, TRBX->ZAE_COMIS3)
-		Aadd(_aComis, TRBX->ZAE_COMIS4)
-		Aadd(_aComis, TRBX->ZAE_COMIS5) 
+	Else
+		aAdd(_aComis, TRBX->ZAE_COMIS1)
+		aAdd(_aComis, TRBX->ZAE_COMIS2)
+		aAdd(_aComis, TRBX->ZAE_COMIS3)
+		aAdd(_aComis, TRBX->ZAE_COMIS4)
+		aAdd(_aComis, TRBX->ZAE_COMIS5) 
 		M->C5_I_COMRE := "VA"
-	ENDIF
+	EndIf
 
 	//====================================================================================================
 	// Atualiza comissao vendedor
@@ -239,4 +239,4 @@ Static Function AOMS013A()
 	//====================================================================================================
 	lAchou := .T.
 
-Return()
+Return

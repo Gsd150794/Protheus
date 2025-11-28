@@ -2,19 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 04/10/2024 | Chamado 47735. Incluídas regras para a filial 33
-Lucas Borges  | 16/12/2024 | Chamado 49384. Ajustada variável de 13
-Lucas Borges  | 16/12/2024 | Chamado 50398. Contas alteradas
+Lucas Borges  |04/10/2024| Chamado 47735. Incluídas regras para a filial 33
+Lucas Borges  |16/12/2024| Chamado 49384. Ajustada variável de 13
+Lucas Borges  |16/12/2024| Chamado 50398. Contas alteradas
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//=========F===========================================================================================
-
-#INCLUDE 'PROTHEUS.CH'
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -28,7 +24,7 @@ Retorno-----------: _cRetorno = Retorna a conta
 */
 User Function LPGPE001(_cCod)
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cRetorno := ""
 Local _nSaldo	:= 0
 Local _lParc13	:= (Month(dDataBase) == 12 .Or. Month(dDataBase) == 11) .And. MV_PAR02 == 2 .And. SRZ->RZ_TIPO == "13"//Apenas segunda parcela do 13o
@@ -409,33 +405,33 @@ ElseIf _cCod $ "A96001HS"
 	Else
 		_cRetorno := "COMPLEMENTO"
 	EndIf
-Endif
+EndIf
 
 //Retorna sempre uma conta genérica quando não identificar a conta correta
 If Empty(_cRetorno)
 	_cRetorno := "1101010020"
 EndIf
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return(_cRetorno)
 
 Static Function SaldoProv
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _nSaldo := 0
 Local _cAlias := GetNextAlias()
 
 BeginSql alias _cAlias
 	SELECT (SELECT NVL(SUM(SRZ1.RZ_VAL), 0) BXPROVISAO
-	          FROM %table:SRZ% SRZ1
+	          FROM %Table:SRZ% SRZ1
 	         WHERE SRZ1.D_E_L_E_T_ = ' '
 	           AND SRZ1.RZ_FILIAL = %exp:SRZ->RZ_FILIAL%
 	           AND SRZ1.RZ_CC = %exp:SRZ->RZ_CC%
 	           AND SRZ1.RZ_MAT = 'zzzzzz'
 	           AND SRZ1.RZ_PD IN ('144', '170')) -
 	       (SELECT NVL(SUM(SRZ2.RZ_VAL), 0) PROVISAO
-	          FROM %table:SRZ% SRZ2
+	          FROM %Table:SRZ% SRZ2
 	         WHERE SRZ2.D_E_L_E_T_ = ' '
 	           AND SRZ2.RZ_FILIAL = %exp:SRZ->RZ_FILIAL%
 	           AND SRZ2.RZ_MAT = 'zzzzzz'
@@ -445,7 +441,7 @@ BeginSql alias _cAlias
 EndSql
 
 _nSaldo:= (_cAlias)->SALDO
-(_cAlias)->(DbCloseArea())
-RestArea(_aArea)
+(_cAlias)->(DBCloseArea())
+FWRestArea(_aArea)
 
 Return(_nSaldo)

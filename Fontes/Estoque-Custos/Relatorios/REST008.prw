@@ -9,21 +9,17 @@ Julio Paz     |08/08/2022| Chamado 40619. Realização de Ajustes no Relatório, Al
 Lucas Borges  |08/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
-#INCLUDE 'TOPCONN.CH'
+
+#Include "TOTVS.ch"
+#Include 'TOPCONN.CH'
+
 /*
 ===============================================================================================================================
 Programa----------: REST008
 Autor-------------: Darcio R Sporl
 Data da Criacao---: 08/07/2016
-===============================================================================================================================
 Descrição---------: Relatório de central de pallets
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -33,7 +29,7 @@ Private _cPerg	:= "REST008"
 Private aOrd	:= {} 
 
 If !Pergunte(_cPerg,.T.)
-     return
+     Return
 EndIf
 
 oReport := REST008R(_cPerg)
@@ -51,11 +47,8 @@ Return
 Programa----------: REST008R
 Autor-------------: Darcio R Sporl
 Data da Criacao---: 08/07/2016
-===============================================================================================================================
 Descrição---------: Função que faz a montagem do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -68,8 +61,8 @@ Local oSection4 := Nil
 Local oSection5 := Nil
 Local oSection6 := Nil
 	
-oReport:= TReport():New("REST008","Relatório Movimentações. - " + alltrim(MV_PAR05) + " - " + POSICIONE("SB1",1,xfilial("SB1")+alltrim(MV_PAR05),"B1_DESC");
-							+ " -> "+ alltrim(MV_PAR06) + " - " + POSICIONE("SB1",1,xfilial("SB1")+alltrim(MV_PAR06),"B1_DESC"),"REST008",;
+oReport:= TReport():New("REST008","Relatório Movimentações. - " + AllTrim(MV_PAR05) + " - " + Posicione("SB1",1,xFilial("SB1")+AllTrim(MV_PAR05),"B1_DESC");
+							+ " -> "+ AllTrim(MV_PAR06) + " - " + Posicione("SB1",1,xFilial("SB1")+AllTrim(MV_PAR06),"B1_DESC"),"REST008",;
 							 {|oReport| REST008P(oReport)},"Emissao da Relacao das movimentações de estoque.")
 oReport:SetLandscape()
 
@@ -212,9 +205,9 @@ Else					//Ambas
 	TRCell():New(oSection6,"DOCENTR"	,"TRBMVS","Tot. Entradas"		,"@E 99,999,999,999.999",22)
 	TRCell():New(oSection6,"DOCSAID"	,"TRBMVS","Tot. Saidas"			,"@E 99,999,999,999.999",22)
 	TRCell():New(oSection6,"ESTATUA"	,"TRBMVS","Saldo Atual"		    ,"@E 99,999,999,999.999",22) // Estoque Atual 
-	If MV_PAR04 >= DATE()
+	If MV_PAR04 >= Date()
 		TRCell():New(oSection6,"SALATUA"	,"TRBMVS","Estoque Atual"   ,"@E 99,999,999,999.999",22) // Saldo Atual 
-	Endif		 
+	EndIf		 
 	TRCell():New(oSection6,"PALCPR"	   ,"TRBMVS","Pallet C/ Prod"		,"@E 99,999,999,999.999",22)
 	TRCell():New(oSection6,"PALCEA"	   ,"TRBMVS","Pallet Emb/Alm"		,"@E 99,999,999,999.999",22)
 	TRCell():New(oSection6,"PALAVA"	   ,"TRBMVS","Pallet Avaria"		,"@E 99,999,999,999.999",22)
@@ -238,11 +231,8 @@ Return(oReport)
 Programa----------: REST008P
 Autor-------------: Darcio R Sporl
 Data da Criacao---: 08/07/2016
-===============================================================================================================================
 Descrição---------: Função que imprime o relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -277,14 +267,14 @@ If MV_PAR08 == 1
 	cQry1 += "  AND D_E_L_E_T_ = ' ' "
 
 	If Select("TRBPRO") <> 0
-		DbSelectArea("TRBPRO")
-		DbCloseArea()
+		DBSelectArea("TRBPRO")
+		DBCloseArea()
 	EndIf
 
 	TCQUERY cQry1 NEW ALIAS "TRBPRO"
 		
-	dbSelectArea("TRBPRO")
-	TRBPRO->(dbGoTop())
+	DBSelectArea("TRBPRO")
+	TRBPRO->(DBGoTop())
 		
 	oReport:SetMeter(TRBPRO->(LastRec()))
 
@@ -298,21 +288,21 @@ If MV_PAR08 == 1
 	
 		oReport:IncMeter()
 	
-		IncProc("Imprimindo Filial " + Alltrim(TRBPRO->B1_COD) + " - " + AllTrim(TRBPRO->B1_DESC))
+		IncProc("Imprimindo Filial " + AllTrim(TRBPRO->B1_COD) + " - " + AllTrim(TRBPRO->B1_DESC))
 
 		oSection1:Cell("PRODUTO")	:SetValue(AllTrim(TRBPRO->B1_COD) + " - " + AllTrim(TRBPRO->B1_DESC))
-		oSection1:Printline()
+		oSection1:PrintLine()
 
 		oSection2:init()
 
 		cQry2 := "SELECT D1.D1_FILIAL FILIAL, D1.D1_COD PRODUTO, D1.D1_DTDIGIT EMISSAO, D1.D1_DOC DOCUMENTO, D1.D1_SERIE SERIE, D1.D1_FORNECE CLIENTE, D1.D1_LOJA LOJA, D1.D1_LOCAL ARMAZEM, "
-		cQry2 += "       CASE "
+		cQry2 += "       Case "
         cQry2 += "		 WHEN D1.D1_TIPO <> 'D' THEN ( SELECT A2.A2_NREDUZ "
         cQry2 += "        		                       FROM " + RetSqlName("SA2") + " A2 "
         cQry2 += "                		               WHERE A2.D_E_L_E_T_ = ' ' "
         cQry2 += "                        		         AND D1.D1_FORNECE = A2.A2_COD "
         cQry2 += "                                		 AND D1.D1_LOJA = A2.A2_LOJA ) "
-		cQry2 += "         ELSE ( SELECT A1.A1_NREDUZ "
+		cQry2 += "         Else ( SELECT A1.A1_NREDUZ "
         cQry2 += "		          FROM " + RetSqlName("SA1") + " A1 "
 		cQry2 += "                WHERE A1.D_E_L_E_T_ = ' ' "
         cQry2 += "		          AND D1.D1_FORNECE = A1.A1_COD "
@@ -320,23 +310,23 @@ If MV_PAR08 == 1
 		cQry2 += "      D1.D1_UM UM, D1.D1_SEGUM SEGUM, "
 		cQry2 += "      SUM(D1.D1_QUANT)	QUANT, "
 		cQry2 += "      SUM(D1.D1_QTSEGUM)	QTSEGUM, "
-		cQry2 += "      CASE "
+		cQry2 += "      Case "
 		cQry2 += "        WHEN SUM(D1.D1_QUANT) > 0 THEN DECODE( SUM(D1.D1_QUANT) , 0 , 0 , SUM(D1.D1_TOTAL) / SUM(D1.D1_QUANT) ) "
-		cQry2 += "        ELSE 0 END PRCVEN, "
+		cQry2 += "        Else 0 END PRCVEN, "
 		cQry2 += "      SUM(D1.D1_TOTAL) TOTAL, "
 		cQry2 += "      TO_CHAR(NULL) TM, "
 		cQry2 += "      'A' TIPO, "
 		cQry2 += "      B1.B1_I_DESCD DESCPROD, "
-		cQry2 += "      CASE "
+		cQry2 += "      Case "
 		cQry2 += "        WHEN D1.D1_TIPO = 'N' And D1.D1_FORNECE = 'F00001' THEN 'Transferencia' "
 		cQry2 += "        WHEN D1.D1_TIPO = 'N' And D1.D1_FORNECE <> 'F00001' THEN 'Outras Entradas' "
 		cQry2 += "        WHEN D1.D1_TIPO = 'D' THEN 'Devolucao' "
-		cQry2 += "        ELSE 'Outras Entradas' END	DESCMOVINT, "
-		cQry2 += "      CASE "
+		cQry2 += "        Else 'Outras Entradas' END	DESCMOVINT, "
+		cQry2 += "      Case "
 		cQry2 += "        WHEN D1.D1_TIPO = 'N' And D1.D1_FORNECE = 'F00001' THEN 'Transferencia' "
 		cQry2 += "        WHEN D1.D1_TIPO = 'N' And D1.D1_FORNECE <> 'F00001' THEN 'Outras Entradas' "
 		cQry2 += "        WHEN D1.D1_TIPO = 'D' THEN 'Devolucao' "
-        cQry2 += "		ELSE 'Outras Entradas' END	TPNOTAENT "
+        cQry2 += "		Else 'Outras Entradas' END	TPNOTAENT "
 		cQry2 += "FROM " + RetSqlName("SD1") + " D1 "
 		cQry2 += "JOIN " + RetSqlName("SF4") + " F4 ON D1.D1_FILIAL = F4.F4_FILIAL AND D1.D1_TES = F4.F4_CODIGO "
 		cQry2 += "JOIN (SELECT B1.B1_FILIAL,B1.B1_COD,B1.B1_I_DESCD,B1.B1_GRUPO,B1.B1_I_SUBGR,B1.B1_I_NIV4,B1.B1_I_NIV3,B1.B1_I_NIV2 "
@@ -355,7 +345,7 @@ If MV_PAR08 == 1
 		If !Empty(MV_PAR02)
 			cQry2 += "  AND D1.D1_LOCAL = '" + MV_PAR02 + "' "
 		EndIf
-		cQry2 += "  AND D1.D1_DTDIGIT BETWEEN '" + DtoS(MV_PAR03) + "' AND '" + DtoS(MV_PAR04) + "' "
+		cQry2 += "  AND D1.D1_DTDIGIT BETWEEN '" + DToS(MV_PAR03) + "' AND '" + DToS(MV_PAR04) + "' "
 		If !Empty(MV_PAR07)
 			cQry2 += "  AND B1.B1_GRUPO IN " + FormatIn( MV_PAR07 , ";" )
 		EndIf
@@ -363,14 +353,14 @@ If MV_PAR08 == 1
 		cQry2 += "ORDER BY FILIAL, PRODUTO, EMISSAO "
 
 		If Select("TRBNFE") <> 0
-			DbSelectArea("TRBNFE")
-			DbCloseArea()
+			DBSelectArea("TRBNFE")
+			DBCloseArea()
 		EndIf
 	
 		TCQUERY cQry2 NEW ALIAS "TRBNFE"
 		
-		dbSelectArea("TRBNFE")
-		TRBNFE->(dbGoTop())
+		DBSelectArea("TRBNFE")
+		TRBNFE->(DBGoTop())
 		
 		oReport:SetMeter(TRBNFE->(LastRec()))
 	
@@ -378,7 +368,7 @@ If MV_PAR08 == 1
 			oReport:IncMeter()
 
 			IncProc("Imprimindo Documento " + AllTrim(TRBNFE->DOCUMENTO) + " - " + AllTrim(TRBNFE->SERIE))
-			oSection2:Cell("DATADOC")		:SetValue(DtoS(StoD(TRBNFE->EMISSAO)))
+			oSection2:Cell("DATADOC")		:SetValue(DToS(SToD(TRBNFE->EMISSAO)))
 			oSection2:Cell("DOCUMENTO")		:SetValue(AllTrim(TRBNFE->DOCUMENTO) + " - " + AllTrim(TRBNFE->SERIE))
 			oSection2:Cell("CLIENTE")		:SetValue(TRBNFE->CLIENTE + "/" + TRBNFE->LOJA + " " + TRBNFE->NOMFANTASIA)
 			oSection2:Cell("QTDE1UM")		:SetValue(TRBNFE->QUANT)
@@ -387,9 +377,9 @@ If MV_PAR08 == 1
 			oSection2:Cell("2UNIDME")		:SetValue(TRBNFE->SEGUM)
 			oSection2:Cell("PRCUNIT")		:SetValue(TRBNFE->PRCVEN)
 			oSection2:Cell("VLRTOTAL")		:SetValue(TRBNFE->TOTAL)
-			oSection2:Printline()
+			oSection2:PrintLine()
 	
-			TRBNFE->(dbSkip())
+			TRBNFE->(DBSkip())
 		End
 		oSection2:Finish()
 
@@ -398,10 +388,10 @@ If MV_PAR08 == 1
 		cQry3 := "SELECT D3.D3_FILIAL FILIAL, D3.D3_COD PRODUTO, D3.D3_EMISSAO EMISSAO, TO_CHAR(NULL) DOCUMENTO, TO_CHAR(NULL) SERIE, TO_CHAR(NULL) CLIENTE, TO_CHAR(NULL) LOJA, D3.D3_LOCAL ARMAZEM, "
 		cQry3 += "       TO_CHAR(NULL) NOMFANTASIA, D3.D3_UM UM, D3.D3_SEGUM SEGUM, SUM(D3.D3_QUANT) QUANT, SUM(D3.D3_QTSEGUM) QTSEGUM, DECODE( SUM(D3.D3_QUANT), 0, 0, "
 		cQry3 += "       ( SUM(D3.D3_CUSTO1) / SUM(D3.D3_QUANT) ) ) PRCVEN, SUM( D3.D3_CUSTO1) TOTAL, D3.D3_TM TM, 'B' TIPO, B1.B1_I_DESCD DESCPROD, "
-		cQry3 += "       CASE "
+		cQry3 += "       Case "
 		cQry3 += "         WHEN D3_TM IN ('001','003','004') THEN ' Producao' "
 		cQry3 += "         WHEN D3_TM = '499' THEN 'Entrada Transf.Perda' "
-		cQry3 += "         ELSE 'Outras Entradas' END DESCMOVINT, "
+		cQry3 += "         Else 'Outras Entradas' END DESCMOVINT, "
 		cQry3 += "       TO_CHAR(NULL) TPNOTAENT "
 		cQry3 += "FROM " + RetSqlName("SD3") + " D3 "
 		cQry3 += "JOIN (SELECT B1.B1_FILIAL,B1.B1_COD,B1.B1_I_DESCD,B1.B1_GRUPO,B1.B1_I_SUBGR,B1.B1_I_NIV4,B1.B1_I_NIV3,B1.B1_I_NIV2 "
@@ -417,7 +407,7 @@ If MV_PAR08 == 1
 		If !Empty(MV_PAR02)
 			cQry3 += "  AND D3.D3_LOCAL = '" + MV_PAR02 + "' "
 		EndIf
-		cQry3 += "  AND D3.D3_EMISSAO BETWEEN '" + DtoS(MV_PAR03) + "' AND '" + DtoS(MV_PAR04) + "' "
+		cQry3 += "  AND D3.D3_EMISSAO BETWEEN '" + DToS(MV_PAR03) + "' AND '" + DToS(MV_PAR04) + "' "
 		If !Empty(MV_PAR07)
 			cQry3 += "  AND B1.B1_GRUPO IN " + FormatIn( MV_PAR07 , ";" )
 		EndIf
@@ -425,14 +415,14 @@ If MV_PAR08 == 1
 		cQry3 += "ORDER BY FILIAL, PRODUTO , TIPO , EMISSAO , TPNOTAENT , DOCUMENTO "
 
 		If Select("TRBMVE") <> 0
-			DbSelectArea("TRBMVE")
-			DbCloseArea()
+			DBSelectArea("TRBMVE")
+			DBCloseArea()
 		EndIf
 	
 		TCQUERY cQry3 NEW ALIAS "TRBMVE"
 		
-		dbSelectArea("TRBMVE")
-		TRBMVE->(dbGoTop())
+		DBSelectArea("TRBMVE")
+		TRBMVE->(DBGoTop())
 		
 		oReport:SetMeter(TRBMVE->(LastRec()))
 	
@@ -440,7 +430,7 @@ If MV_PAR08 == 1
 			oReport:IncMeter()
 
 			IncProc("Imprimindo Movimentação " + AllTrim(TRBMVE->DESCMOVINT))
-			oSection3:Cell("DATADOC")		:SetValue(DtoC(StoD(TRBMVE->EMISSAO)))
+			oSection3:Cell("DATADOC")		:SetValue(DToC(SToD(TRBMVE->EMISSAO)))
 			oSection3:Cell("TPMOVIM")		:SetValue(AllTrim(TRBMVE->DESCMOVINT))
 			oSection3:Cell("QTDE1UM")		:SetValue(TRBMVE->QUANT)
 			oSection3:Cell("1UNIDME")		:SetValue(TRBMVE->UM)
@@ -448,9 +438,9 @@ If MV_PAR08 == 1
 			oSection3:Cell("2UNIDME")		:SetValue(TRBMVE->SEGUM)
 			oSection3:Cell("PRCUNIT")		:SetValue(TRBMVE->PRCVEN)
 			oSection3:Cell("VLRTOTAL")		:SetValue(TRBMVE->TOTAL)
-			oSection3:Printline()
+			oSection3:PrintLine()
 	
-			TRBMVE->(dbSkip())
+			TRBMVE->(DBSkip())
 		End
 
 		oSection3:Finish()
@@ -464,25 +454,25 @@ If MV_PAR08 == 1
 			cQry4 += "  AND ZE2_FILIAL IN " + FormatIn( MV_PAR01 , ";" )
 		EndIf
 		cQry4 += "  AND ZE2_PRODUT = '" + TRBPRO->B1_COD + "' "
-		cQry4 += "  AND ZE2_DTCONT BETWEEN '" + DtoS(MV_PAR03) + "' AND '" + DtoS(MV_PAR04) + "' "
+		cQry4 += "  AND ZE2_DTCONT BETWEEN '" + DToS(MV_PAR03) + "' AND '" + DToS(MV_PAR04) + "' "
 		cQry4 += "ORDER BY ZE2_FILIAL , ZE2_PRODUT , ZE2_DTCONT "
 
 		If Select("TRBPAL") <> 0
-			DbSelectArea("TRBPAL")
-			DbCloseArea()
+			DBSelectArea("TRBPAL")
+			DBCloseArea()
 		EndIf
 	
 		TCQUERY cQry4 NEW ALIAS "TRBPAL"
 		
-		dbSelectArea("TRBPAL")
-		TRBPAL->(dbGoTop())
+		DBSelectArea("TRBPAL")
+		TRBPAL->(DBGoTop())
 		
 		oReport:SetMeter(TRBPAL->(LastRec()))
 	
 		While !TRBPAL->(Eof())
 			oReport:IncMeter()
 
-			oSection4:Cell("DTINCL")		:SetValue(DtoC(StoD(TRBPAL->ZE2_DTCONT)))
+			oSection4:Cell("DTINCL")		:SetValue(DToC(SToD(TRBPAL->ZE2_DTCONT)))
 			oSection4:Cell("PALCPR")		:SetValue(TRBPAL->ZE2_PALCPR)
 			oSection4:Cell("PALCEA")		:SetValue(TRBPAL->ZE2_PALCEA)
 			oSection4:Cell("PALAVA")		:SetValue(TRBPAL->ZE2_PALAVA)
@@ -492,14 +482,14 @@ If MV_PAR08 == 1
 			oSection4:Cell("MEDCON")		:SetValue(TRBPAL->ZE2_MEDCON)
 			oSection4:Cell("AUTEST")		:SetValue(TRBPAL->ZE2_AUTEST)
 
-			oSection4:Printline()
+			oSection4:PrintLine()
 	
-			TRBPAL->(dbSkip())
+			TRBPAL->(DBSkip())
 		End
 
 		oSection4:Finish()
 
-		TRBPRO->(dbSkip())
+		TRBPRO->(DBSkip())
 	End
 	
 	oSection1:Finish()
@@ -521,14 +511,14 @@ ElseIf MV_PAR08 == 2		//Saídas
 	cQry1 += "  AND D_E_L_E_T_ = ' ' "
 
 	If Select("TRBPRO") <> 0
-		DbSelectArea("TRBPRO")
-		DbCloseArea()
+		DBSelectArea("TRBPRO")
+		DBCloseArea()
 	EndIf
 
 	TCQUERY cQry1 NEW ALIAS "TRBPRO"
 		
-	dbSelectArea("TRBPRO")
-	TRBPRO->(dbGoTop())
+	DBSelectArea("TRBPRO")
+	TRBPRO->(DBGoTop())
 		
 	oReport:SetMeter(TRBPRO->(LastRec()))
 
@@ -542,22 +532,22 @@ ElseIf MV_PAR08 == 2		//Saídas
 	
 		oReport:IncMeter()
 	
-		IncProc("Imprimindo Filial " + Alltrim(TRBPRO->B1_COD) + " - " + AllTrim(TRBPRO->B1_DESC))
+		IncProc("Imprimindo Filial " + AllTrim(TRBPRO->B1_COD) + " - " + AllTrim(TRBPRO->B1_DESC))
 
 		oSection1:Cell("PRODUTO")	:SetValue(AllTrim(TRBPRO->B1_COD) + " - " + AllTrim(TRBPRO->B1_DESC))
-		oSection1:Printline()
+		oSection1:PrintLine()
 
 		oSection2:init()
 
 		cQry2 := "SELECT D2.D2_FILIAL FILIAL, D2.D2_COD PRODUTO, D2.D2_EMISSAO	EMISSAO, D2.D2_DOC DOCUMENTO, D2.D2_SERIE SERIE, D2.D2_CLIENTE CLIENTE, D2.D2_LOJA LOJA, D2.D2_LOCAL ARMAZEM, "
-		cQry2 += "       CASE "
+		cQry2 += "       Case "
 		cQry2 += "         WHEN F2.F2_TIPO IN ('D','B') THEN ( SELECT A2.A2_NREDUZ "
 		cQry2 += "                                             FROM " + RetSqlName("SA2") + " A2 "
 		cQry2 += "                                             WHERE A2.A2_FILIAL = '" + xFilial("SA2") + "' "
 		cQry2 += "                                             AND A2.D_E_L_E_T_ = ' ' "
 		cQry2 += "                                             AND D2.D2_CLIENTE = A2.A2_COD "
 		cQry2 += "                                             AND D2.D2_LOJA = A2.A2_LOJA ) "
-		cQry2 += "         ELSE ( SELECT A1.A1_NREDUZ "
+		cQry2 += "         Else ( SELECT A1.A1_NREDUZ "
 		cQry2 += "                FROM " + RetSqlName("SA1") + " A1 "
 		cQry2 += "                WHERE A1.A1_FILIAL = '" + xFilial("SA1") + "' "
 		cQry2 += "                  AND A1.D_E_L_E_T_ = ' ' "
@@ -586,7 +576,7 @@ ElseIf MV_PAR08 == 2		//Saídas
 		If !Empty(MV_PAR02)
 			cQry2 += "  AND D2.D2_LOCAL = '" + MV_PAR02 + "' "
 		EndIf
-		cQry2 += "  AND D2.D2_EMISSAO BETWEEN '" + DtoS(MV_PAR03) + "' AND '" + DtoS(MV_PAR04) + "' "
+		cQry2 += "  AND D2.D2_EMISSAO BETWEEN '" + DToS(MV_PAR03) + "' AND '" + DToS(MV_PAR04) + "' "
 		If !Empty(MV_PAR07)
 			cQry2 += "  AND B1.B1_GRUPO IN " + FormatIn( MV_PAR07 , ";" )
 		EndIf
@@ -594,14 +584,14 @@ ElseIf MV_PAR08 == 2		//Saídas
 		cQry2 += "ORDER BY FILIAL, PRODUTO, EMISSAO "
 
 		If Select("TRBNFS") <> 0
-			DbSelectArea("TRBNFS")
-			DbCloseArea()
+			DBSelectArea("TRBNFS")
+			DBCloseArea()
 		EndIf
 	
 		TCQUERY cQry2 NEW ALIAS "TRBNFS"
 		
-		dbSelectArea("TRBNFS")
-		TRBNFS->(dbGoTop())
+		DBSelectArea("TRBNFS")
+		TRBNFS->(DBGoTop())
 		
 		oReport:SetMeter(TRBNFS->(LastRec()))
 	
@@ -609,7 +599,7 @@ ElseIf MV_PAR08 == 2		//Saídas
 			oReport:IncMeter()
 
 			IncProc("Imprimindo Documento " + AllTrim(TRBNFS->DOCUMENTO) + " - " + AllTrim(TRBNFS->SERIE))
-			oSection2:Cell("DATADOC")		:SetValue(DtoC(StoD(TRBNFS->EMISSAO)))
+			oSection2:Cell("DATADOC")		:SetValue(DToC(SToD(TRBNFS->EMISSAO)))
 			oSection2:Cell("DOCUMENTO")		:SetValue(AllTrim(TRBNFS->DOCUMENTO) + " - " + AllTrim(TRBNFS->SERIE))
 			oSection2:Cell("CLIENTE")		:SetValue(TRBNFS->CLIENTE + "/" + TRBNFS->LOJA + " " + TRBNFS->NOMFANTASIA)
 			oSection2:Cell("QTDE1UM")		:SetValue(TRBNFS->QUANT)
@@ -618,9 +608,9 @@ ElseIf MV_PAR08 == 2		//Saídas
 			oSection2:Cell("2UNIDME")		:SetValue(TRBNFS->SEGUM)
 			oSection2:Cell("PRCUNIT")		:SetValue(TRBNFS->PRCVEN)
 			oSection2:Cell("VLRTOTAL")		:SetValue(TRBNFS->TOTAL)
-			oSection2:Printline()
+			oSection2:PrintLine()
 	
-			TRBNFS->(dbSkip())
+			TRBNFS->(DBSkip())
 		End
 
 		oSection2:Finish()
@@ -631,11 +621,11 @@ ElseIf MV_PAR08 == 2		//Saídas
 		cQry3 += "       TO_CHAR(NULL) NOMFANTASIA, D3.D3_UM UM, D3.D3_SEGUM SEGUM, SUM(D3.D3_QUANT) QUANT, SUM(D3.D3_QTSEGUM) QTSEGUM,	"
 		cQry3 += "       DECODE( SUM(D3.D3_QUANT), 0, 0, ( SUM(D3.D3_CUSTO1) / SUM(D3.D3_QUANT) ) ) PRCVEN, "
 		cQry3 += "       SUM(D3.D3_CUSTO1) TOTAL, D3.D3_TM TM, 'B' TIPO, B1.B1_I_DESCD DESCPROD, "
-		cQry3 += "       CASE "
+		cQry3 += "       Case "
 		cQry3 += "         WHEN D3_TM = '803' THEN 'Consumo Interno' "
 		cQry3 += "         WHEN D3_TM = '804' THEN 'Faltas/Descarte' "
 		cQry3 += "         WHEN D3_TM = '999' THEN 'Transf.Armazem Perda' "
-		cQry3 += "         ELSE 'Outras Saidas' END DESCMOVINT, "
+		cQry3 += "         Else 'Outras Saidas' END DESCMOVINT, "
 		cQry3 += "      TO_CHAR(NULL) TPNOTAENT "
 		cQry3 += "FROM " + RetSqlName("SD3") + " D3 "
 		cQry3 += "JOIN (SELECT B1.B1_FILIAL,B1.B1_COD,B1.B1_I_DESCD,B1.B1_GRUPO,B1.B1_I_SUBGR,B1.B1_I_NIV4,B1.B1_I_NIV3,B1.B1_I_NIV2 "
@@ -651,7 +641,7 @@ ElseIf MV_PAR08 == 2		//Saídas
 		If !Empty(MV_PAR02)
 			cQry3 += "  AND D3.D3_LOCAL = '" + MV_PAR02 + "' "
 		EndIf
-		cQry3 += "  AND D3.D3_EMISSAO BETWEEN '" + DtoS(MV_PAR03) + "' AND '" + DtoS(MV_PAR04) + "' "
+		cQry3 += "  AND D3.D3_EMISSAO BETWEEN '" + DToS(MV_PAR03) + "' AND '" + DToS(MV_PAR04) + "' "
 		If !Empty(MV_PAR07)
 			cQry3 += "  AND B1.B1_GRUPO IN " + FormatIn( MV_PAR07 , ";" )
 		EndIf
@@ -659,14 +649,14 @@ ElseIf MV_PAR08 == 2		//Saídas
 		cQry3 += "ORDER BY FILIAL, PRODUTO , TIPO , EMISSAO , DOCUMENTO , TM "
 
 		If Select("TRBMVS") <> 0
-			DbSelectArea("TRBMVS")
-			DbCloseArea()
+			DBSelectArea("TRBMVS")
+			DBCloseArea()
 		EndIf
 	
 		TCQUERY cQry3 NEW ALIAS "TRBMVS"
 		
-		dbSelectArea("TRBMVS")
-		TRBMVS->(dbGoTop())
+		DBSelectArea("TRBMVS")
+		TRBMVS->(DBGoTop())
 		
 		oReport:SetMeter(TRBMVS->(LastRec()))
 	
@@ -674,7 +664,7 @@ ElseIf MV_PAR08 == 2		//Saídas
 			oReport:IncMeter()
 
 			IncProc("Imprimindo Movimentação " + AllTrim(TRBMVS->DESCMOVINT))
-			oSection3:Cell("DATADOC")		:SetValue(DtoC(StoD(TRBMVS->EMISSAO)))
+			oSection3:Cell("DATADOC")		:SetValue(DToC(SToD(TRBMVS->EMISSAO)))
 			oSection3:Cell("TPMOVIM")		:SetValue(AllTrim(TRBMVS->DESCMOVINT))
 			oSection3:Cell("QTDE1UM")		:SetValue(TRBMVS->QUANT)
 			oSection3:Cell("1UNIDME")		:SetValue(TRBMVS->UM)
@@ -683,9 +673,9 @@ ElseIf MV_PAR08 == 2		//Saídas
 			oSection3:Cell("PRCUNIT")		:SetValue(TRBMVS->PRCVEN)
 			oSection3:Cell("VLRTOTAL")		:SetValue(TRBMVS->TOTAL)
 
-			oSection3:Printline()
+			oSection3:PrintLine()
 	
-			TRBMVS->(dbSkip())
+			TRBMVS->(DBSkip())
 		End
 
 		oSection3:Finish()
@@ -699,25 +689,25 @@ ElseIf MV_PAR08 == 2		//Saídas
 			cQry4 += "  AND ZE2_FILIAL IN " + FormatIn( MV_PAR01 , ";" )
 		EndIf
 		cQry4 += "  AND ZE2_PRODUT = '" + TRBPRO->B1_COD + "' "
-		cQry4 += "  AND ZE2_DTCONT BETWEEN '" + DtoS(MV_PAR03) + "' AND '" + DtoS(MV_PAR04) + "' "
+		cQry4 += "  AND ZE2_DTCONT BETWEEN '" + DToS(MV_PAR03) + "' AND '" + DToS(MV_PAR04) + "' "
 		cQry4 += "ORDER BY ZE2_FILIAL , ZE2_PRODUT , ZE2_DTCONT "
 
 		If Select("TRBPAL") <> 0
-			DbSelectArea("TRBPAL")
-			DbCloseArea()
+			DBSelectArea("TRBPAL")
+			DBCloseArea()
 		EndIf
 	
 		TCQUERY cQry4 NEW ALIAS "TRBPAL"
 		
-		dbSelectArea("TRBPAL")
-		TRBPAL->(dbGoTop())
+		DBSelectArea("TRBPAL")
+		TRBPAL->(DBGoTop())
 		
 		oReport:SetMeter(TRBPAL->(LastRec()))
 	
 		While !TRBPAL->(Eof())
 			oReport:IncMeter()
 
-			oSection4:Cell("DTINCL")		:SetValue(DtoC(StoD(TRBPAL->ZE2_DTCONT)))
+			oSection4:Cell("DTINCL")		:SetValue(DToC(SToD(TRBPAL->ZE2_DTCONT)))
 			oSection4:Cell("PALCPR")		:SetValue(TRBPAL->ZE2_PALCPR)
 			oSection4:Cell("PALCEA")		:SetValue(TRBPAL->ZE2_PALCEA)
 			oSection4:Cell("PALAVA")		:SetValue(TRBPAL->ZE2_PALAVA)
@@ -727,14 +717,14 @@ ElseIf MV_PAR08 == 2		//Saídas
 			oSection4:Cell("MEDCON")		:SetValue(TRBPAL->ZE2_MEDCON)
 			oSection4:Cell("AUTEST")		:SetValue(TRBPAL->ZE2_AUTEST)
 
-			oSection4:Printline()
+			oSection4:PrintLine()
 	
-			TRBPAL->(dbSkip())
+			TRBPAL->(DBSkip())
 		End
 
 		oSection4:Finish()
 
-		TRBPRO->(dbSkip())
+		TRBPRO->(DBSkip())
 	End
 	oSection1:Finish()
 	oSection1:Enable()
@@ -760,14 +750,14 @@ Else			//Ambas
 	cQry1 += "  AND D_E_L_E_T_ = ' ' "
 
 	If Select("TRBPRO") <> 0
-		DbSelectArea("TRBPRO")
-		DbCloseArea()
+		DBSelectArea("TRBPRO")
+		DBCloseArea()
 	EndIf
 
 	TCQUERY cQry1 NEW ALIAS "TRBPRO"
 		
-	dbSelectArea("TRBPRO")
-	TRBPRO->(dbGoTop())
+	DBSelectArea("TRBPRO")
+	TRBPRO->(DBGoTop())
 
 	//aDados                      
 	//[1] Produto                 
@@ -821,21 +811,21 @@ Else			//Ambas
 	
 		oReport:IncMeter()
 	
-		IncProc("Imprimindo Filial " + Alltrim(TRBPRO->B1_COD) + " - " + AllTrim(TRBPRO->B1_DESC))
+		IncProc("Imprimindo Filial " + AllTrim(TRBPRO->B1_COD) + " - " + AllTrim(TRBPRO->B1_DESC))
 
 		oSection1:Cell("PRODUTO")	:SetValue(AllTrim(TRBPRO->B1_COD) + " - " + AllTrim(TRBPRO->B1_DESC))
-		oSection1:Printline()
+		oSection1:PrintLine()
 
 		oSection2:init()
 
 		cQry2 := "SELECT D1.D1_FILIAL FILIAL, D1.D1_COD PRODUTO, D1.D1_DTDIGIT EMISSAO, D1.D1_DOC DOCUMENTO, D1.D1_SERIE SERIE, D1.D1_FORNECE CLIENTE, D1.D1_LOJA LOJA, D1.D1_LOCAL ARMAZEM, "
-		cQry2 += "       CASE "
+		cQry2 += "       Case "
         cQry2 += "		 WHEN D1.D1_TIPO <> 'D' THEN ( SELECT A2.A2_NREDUZ "
         cQry2 += "        		                       FROM " + RetSqlName("SA2") + " A2 "
         cQry2 += "                		               WHERE A2.D_E_L_E_T_ = ' ' "
         cQry2 += "                        		         AND D1.D1_FORNECE = A2.A2_COD "
         cQry2 += "                                		 AND D1.D1_LOJA = A2.A2_LOJA ) "
-		cQry2 += "         ELSE ( SELECT A1.A1_NREDUZ "
+		cQry2 += "         Else ( SELECT A1.A1_NREDUZ "
         cQry2 += "		          FROM " + RetSqlName("SA1") + " A1 "
 		cQry2 += "                WHERE A1.D_E_L_E_T_ = ' ' "
         cQry2 += "		          AND D1.D1_FORNECE = A1.A1_COD "
@@ -843,23 +833,23 @@ Else			//Ambas
 		cQry2 += "      D1.D1_UM UM, D1.D1_SEGUM SEGUM, "
 		cQry2 += "      SUM(D1.D1_QUANT)	QUANT, "
 		cQry2 += "      SUM(D1.D1_QTSEGUM)	QTSEGUM, "
-		cQry2 += "      CASE "
+		cQry2 += "      Case "
 		cQry2 += "        WHEN SUM(D1.D1_QUANT) > 0 THEN DECODE( SUM(D1.D1_QUANT) , 0 , 0 , SUM(D1.D1_TOTAL) / SUM(D1.D1_QUANT) ) "
-		cQry2 += "        ELSE 0 END PRCVEN, "
+		cQry2 += "        Else 0 END PRCVEN, "
 		cQry2 += "      SUM(D1.D1_TOTAL) TOTAL, "
 		cQry2 += "      TO_CHAR(NULL) TM, "
 		cQry2 += "      'A' TIPO, "
 		cQry2 += "      B1.B1_I_DESCD DESCPROD, "
-		cQry2 += "      CASE "
+		cQry2 += "      Case "
 		cQry2 += "        WHEN D1.D1_TIPO = 'N' And D1.D1_FORNECE = 'F00001' THEN 'Transferencia' "
 		cQry2 += "        WHEN D1.D1_TIPO = 'N' And D1.D1_FORNECE <> 'F00001' THEN 'Outras Entradas' "
 		cQry2 += "        WHEN D1.D1_TIPO = 'D' THEN 'Devolucao' "
-		cQry2 += "        ELSE 'Outras Entradas' END	DESCMOVINT, "
-		cQry2 += "      CASE "
+		cQry2 += "        Else 'Outras Entradas' END	DESCMOVINT, "
+		cQry2 += "      Case "
 		cQry2 += "        WHEN D1.D1_TIPO = 'N' And D1.D1_FORNECE = 'F00001' THEN 'Transferencia' "
 		cQry2 += "        WHEN D1.D1_TIPO = 'N' And D1.D1_FORNECE <> 'F00001' THEN 'Outras Entradas' "
 		cQry2 += "        WHEN D1.D1_TIPO = 'D' THEN 'Devolucao' "
-        cQry2 += "		ELSE 'Outras Entradas' END	TPNOTAENT "
+        cQry2 += "		Else 'Outras Entradas' END	TPNOTAENT "
 		cQry2 += "FROM " + RetSqlName("SD1") + " D1 "
 		cQry2 += "JOIN " + RetSqlName("SF4") + " F4 ON D1.D1_FILIAL = F4.F4_FILIAL AND D1.D1_TES = F4.F4_CODIGO "
 		cQry2 += "JOIN (SELECT B1.B1_FILIAL,B1.B1_COD,B1.B1_I_DESCD,B1.B1_GRUPO,B1.B1_I_SUBGR,B1.B1_I_NIV4,B1.B1_I_NIV3,B1.B1_I_NIV2 "
@@ -878,7 +868,7 @@ Else			//Ambas
 		If !Empty(MV_PAR02)
 			cQry2 += "  AND D1.D1_LOCAL = '" + MV_PAR02 + "' "
 		EndIf
-		cQry2 += "  AND D1.D1_DTDIGIT BETWEEN '" + DtoS(MV_PAR03) + "' AND '" + DtoS(MV_PAR04) + "' "
+		cQry2 += "  AND D1.D1_DTDIGIT BETWEEN '" + DToS(MV_PAR03) + "' AND '" + DToS(MV_PAR04) + "' "
 		If !Empty(MV_PAR07)
 			cQry2 += "  AND B1.B1_GRUPO IN " + FormatIn( MV_PAR07 , ";" )
 		EndIf
@@ -886,14 +876,14 @@ Else			//Ambas
 		cQry2 += "ORDER BY FILIAL, PRODUTO, EMISSAO "
 
 		If Select("TRBNFE") <> 0
-			DbSelectArea("TRBNFE")
-			DbCloseArea()
+			DBSelectArea("TRBNFE")
+			DBCloseArea()
 		EndIf
 	
 		TCQUERY cQry2 NEW ALIAS "TRBNFE"
 		
-		dbSelectArea("TRBNFE")
-		TRBNFE->(dbGoTop())
+		DBSelectArea("TRBNFE")
+		TRBNFE->(DBGoTop())
 		
 		oReport:SetMeter(TRBNFE->(LastRec()))
 	
@@ -901,7 +891,7 @@ Else			//Ambas
 			oReport:IncMeter()
 
 			IncProc("Imprimindo Documento " + AllTrim(TRBNFE->DOCUMENTO) + " - " + AllTrim(TRBNFE->SERIE))
-			oSection2:Cell("DATADOC")		:SetValue(DtoC(StoD(TRBNFE->EMISSAO)))
+			oSection2:Cell("DATADOC")		:SetValue(DToC(SToD(TRBNFE->EMISSAO)))
 			oSection2:Cell("DOCUMENTO")		:SetValue(AllTrim(TRBNFE->DOCUMENTO) + " - " + AllTrim(TRBNFE->SERIE))
 			oSection2:Cell("CLIENTE")		:SetValue(TRBNFE->CLIENTE + "/" + TRBNFE->LOJA + " " + TRBNFE->NOMFANTASIA)
 			oSection2:Cell("QTDE1UM")		:SetValue(TRBNFE->QUANT)
@@ -911,23 +901,23 @@ Else			//Ambas
 			oSection2:Cell("PRCUNIT")		:SetValue(TRBNFE->PRCVEN)
 			oSection2:Cell("VLRTOTAL")		:SetValue(TRBNFE->TOTAL)
 
-			oSection2:Printline()
+			oSection2:PrintLine()
 
 			aResum[Len(aResum)][2] += TRBNFE->QUANT
 
-			dbSelectArea("ZE2")
-			dbSetOrder(1)
-			If dbSeek(TRBNFE->FILIAL + TRBNFE->PRODUTO + DtoS(MV_PAR04))
+			DBSelectArea("ZE2")
+			DBSetOrder(1)
+			If DBSeek(TRBNFE->FILIAL + TRBNFE->PRODUTO + DToS(MV_PAR04))
 				aResum[Len(aResum)][6] := ZE2->ZE2_PALTOT
 				aResum[Len(aResum)][7] := ZE2->ZE2_MEDCON
 				aResum[Len(aResum)][8] := ZE2->ZE2_AUTEST
 				aResum[Len(aResum)][9] := ZE2->ZE2_DTCONT
 			EndIf
 
-			aDados[4][aScan(aDados[2],StoD(TRBNFE->EMISSAO))] += TRBNFE->QUANT
-			aDados[1][aScan(aDados[2],StoD(TRBNFE->EMISSAO))] := TRBPRO->B1_COD
+			aDados[4][aScan(aDados[2],SToD(TRBNFE->EMISSAO))] += TRBNFE->QUANT
+			aDados[1][aScan(aDados[2],SToD(TRBNFE->EMISSAO))] := TRBPRO->B1_COD
 
-			TRBNFE->(dbSkip())
+			TRBNFE->(DBSkip())
 		End
 
 		oSection2:Finish()
@@ -937,10 +927,10 @@ Else			//Ambas
 		cQry3 := "SELECT D3.D3_FILIAL FILIAL, D3.D3_COD PRODUTO, D3.D3_EMISSAO EMISSAO, TO_CHAR(NULL) DOCUMENTO, TO_CHAR(NULL) SERIE, TO_CHAR(NULL) CLIENTE, TO_CHAR(NULL) LOJA, D3.D3_LOCAL ARMAZEM, "
 		cQry3 += "       TO_CHAR(NULL) NOMFANTASIA, D3.D3_UM UM, D3.D3_SEGUM SEGUM, SUM(D3.D3_QUANT) QUANT, SUM(D3.D3_QTSEGUM) QTSEGUM, DECODE( SUM(D3.D3_QUANT), 0, 0, "
 		cQry3 += "       ( SUM(D3.D3_CUSTO1) / SUM(D3.D3_QUANT) ) ) PRCVEN, SUM( D3.D3_CUSTO1) TOTAL, D3.D3_TM TM, 'B' TIPO, B1.B1_I_DESCD DESCPROD, "
-		cQry3 += "       CASE "
+		cQry3 += "       Case "
 		cQry3 += "         WHEN D3_TM IN ('001','003','004') THEN ' Producao' "
 		cQry3 += "         WHEN D3_TM = '499' THEN 'Entrada Transf.Perda' "
-		cQry3 += "         ELSE 'Outras Entradas' END DESCMOVINT, "
+		cQry3 += "         Else 'Outras Entradas' END DESCMOVINT, "
 		cQry3 += "       TO_CHAR(NULL) TPNOTAENT "
 		cQry3 += "FROM " + RetSqlName("SD3") + " D3 "
 		cQry3 += "JOIN (SELECT B1.B1_FILIAL,B1.B1_COD,B1.B1_I_DESCD,B1.B1_GRUPO,B1.B1_I_SUBGR,B1.B1_I_NIV4,B1.B1_I_NIV3,B1.B1_I_NIV2 "
@@ -956,7 +946,7 @@ Else			//Ambas
 		If !Empty(MV_PAR02)
 			cQry3 += "  AND D3.D3_LOCAL = '" + MV_PAR02 + "' "
 		EndIf
-		cQry3 += "  AND D3.D3_EMISSAO BETWEEN '" + DtoS(MV_PAR03) + "' AND '" + DtoS(MV_PAR04) + "' "
+		cQry3 += "  AND D3.D3_EMISSAO BETWEEN '" + DToS(MV_PAR03) + "' AND '" + DToS(MV_PAR04) + "' "
 		If !Empty(MV_PAR07)
 			cQry3 += "  AND B1.B1_GRUPO IN " + FormatIn( MV_PAR07 , ";" )
 		EndIf
@@ -964,14 +954,14 @@ Else			//Ambas
 		cQry3 += "ORDER BY FILIAL, PRODUTO , TIPO , EMISSAO , TPNOTAENT , DOCUMENTO "
 
 		If Select("TRBMVE") <> 0
-			DbSelectArea("TRBMVE")
-			DbCloseArea()
+			DBSelectArea("TRBMVE")
+			DBCloseArea()
 		EndIf
 	
 		TCQUERY cQry3 NEW ALIAS "TRBMVE"
 		
-		dbSelectArea("TRBMVE")
-		TRBMVE->(dbGoTop())
+		DBSelectArea("TRBMVE")
+		TRBMVE->(DBGoTop())
 		
 		oReport:SetMeter(TRBMVE->(LastRec()))
 	
@@ -979,7 +969,7 @@ Else			//Ambas
 			oReport:IncMeter()
 
 			IncProc("Imprimindo Movimentação " + AllTrim(TRBMVE->DESCMOVINT))
-			oSection3:Cell("DATADOC")		:SetValue(DtoC(StoD(TRBMVE->EMISSAO)))
+			oSection3:Cell("DATADOC")		:SetValue(DToC(SToD(TRBMVE->EMISSAO)))
 			oSection3:Cell("TPMOVIM")		:SetValue(AllTrim(TRBMVE->DESCMOVINT))
 			oSection3:Cell("QTDE1UM")		:SetValue(TRBMVE->QUANT)
 			oSection3:Cell("1UNIDME")		:SetValue(TRBMVE->UM)
@@ -988,22 +978,22 @@ Else			//Ambas
 			oSection3:Cell("PRCUNIT")		:SetValue(TRBMVE->PRCVEN)
 			oSection3:Cell("VLRTOTAL")		:SetValue(TRBMVE->TOTAL)
 
-			oSection3:Printline()
+			oSection3:PrintLine()
 
 			aResum[Len(aResum)][3] += TRBMVE->QUANT
 
-			dbSelectArea("ZE2")
-			dbSetOrder(1)
-			If dbSeek(TRBMVE->FILIAL + TRBMVE->PRODUTO + DtoS(MV_PAR04))
+			DBSelectArea("ZE2")
+			DBSetOrder(1)
+			If DBSeek(TRBMVE->FILIAL + TRBMVE->PRODUTO + DToS(MV_PAR04))
 				aResum[Len(aResum)][6] := ZE2->ZE2_PALTOT
 				aResum[Len(aResum)][7] := ZE2->ZE2_MEDCON
 				aResum[Len(aResum)][8] := ZE2->ZE2_AUTEST
 				aResum[Len(aResum)][9] := ZE2->ZE2_DTCONT
 			EndIf
 
-			aDados[5][aScan(aDados[2],StoD(TRBMVE->EMISSAO))] += TRBMVE->QUANT
+			aDados[5][aScan(aDados[2],SToD(TRBMVE->EMISSAO))] += TRBMVE->QUANT
 
-			TRBMVE->(dbSkip())
+			TRBMVE->(DBSkip())
 		End
 
 		oSection3:Finish()
@@ -1011,14 +1001,14 @@ Else			//Ambas
 		oSection4:init()
 
 		cQry4 := "SELECT D2.D2_FILIAL FILIAL, D2.D2_COD PRODUTO, D2.D2_EMISSAO	EMISSAO, D2.D2_DOC DOCUMENTO, D2.D2_SERIE SERIE, D2.D2_CLIENTE CLIENTE, D2.D2_LOJA LOJA, D2.D2_LOCAL ARMAZEM, "
-		cQry4 += "       CASE "
+		cQry4 += "       Case "
 		cQry4 += "         WHEN F2.F2_TIPO IN ('D','B') THEN ( SELECT A2.A2_NREDUZ "
 		cQry4 += "                                             FROM " + RetSqlName("SA2") + " A2 "
 		cQry4 += "                                             WHERE A2.A2_FILIAL = '" + xFilial("SA2") + "' "
 		cQry4 += "                                             AND A2.D_E_L_E_T_ = ' ' "
 		cQry4 += "                                             AND D2.D2_CLIENTE = A2.A2_COD "
 		cQry4 += "                                             AND D2.D2_LOJA = A2.A2_LOJA ) "
-		cQry4 += "         ELSE ( SELECT A1.A1_NREDUZ "
+		cQry4 += "         Else ( SELECT A1.A1_NREDUZ "
 		cQry4 += "                FROM " + RetSqlName("SA1") + " A1 "
 		cQry4 += "                WHERE A1.A1_FILIAL = '" + xFilial("SA1") + "' "
 		cQry4 += "                  AND A1.D_E_L_E_T_ = ' ' "
@@ -1047,7 +1037,7 @@ Else			//Ambas
 		If !Empty(MV_PAR02)
 			cQry4 += "  AND D2.D2_LOCAL = '" + MV_PAR02 + "' "
 		EndIf
-		cQry4 += "  AND D2.D2_EMISSAO BETWEEN '" + DtoS(MV_PAR03) + "' AND '" + DtoS(MV_PAR04) + "' "
+		cQry4 += "  AND D2.D2_EMISSAO BETWEEN '" + DToS(MV_PAR03) + "' AND '" + DToS(MV_PAR04) + "' "
 		If !Empty(MV_PAR07)
 			cQry2 += "  AND B1.B1_GRUPO IN " + FormatIn( MV_PAR07 , ";" )
 		EndIf
@@ -1055,14 +1045,14 @@ Else			//Ambas
 		cQry4 += "ORDER BY FILIAL, PRODUTO, EMISSAO "
 
 		If Select("TRBNFS") <> 0
-			DbSelectArea("TRBNFS")
-			DbCloseArea()
+			DBSelectArea("TRBNFS")
+			DBCloseArea()
 		EndIf
 	
 		TCQUERY cQry4 NEW ALIAS "TRBNFS"
 		
-		dbSelectArea("TRBNFS")
-		TRBNFS->(dbGoTop())
+		DBSelectArea("TRBNFS")
+		TRBNFS->(DBGoTop())
 		
 		oReport:SetMeter(TRBNFS->(LastRec()))
 	
@@ -1070,7 +1060,7 @@ Else			//Ambas
 			oReport:IncMeter()
 
 			IncProc("Imprimindo Documento " + AllTrim(TRBNFS->DOCUMENTO) + " - " + AllTrim(TRBNFS->SERIE))
-			oSection4:Cell("DATADOC")		:SetValue(DtoC(StoD(TRBNFS->EMISSAO)))
+			oSection4:Cell("DATADOC")		:SetValue(DToC(SToD(TRBNFS->EMISSAO)))
 			oSection4:Cell("DOCUMENTO")		:SetValue(AllTrim(TRBNFS->DOCUMENTO) + " - " + AllTrim(TRBNFS->SERIE))
 			oSection4:Cell("CLIENTE")		:SetValue(TRBNFS->CLIENTE + "/" + TRBNFS->LOJA + " " + TRBNFS->NOMFANTASIA)
 			oSection4:Cell("QTDE1UM")		:SetValue(TRBNFS->QUANT)
@@ -1080,22 +1070,22 @@ Else			//Ambas
 			oSection4:Cell("PRCUNIT")		:SetValue(TRBNFS->PRCVEN)
 			oSection4:Cell("VLRTOTAL")		:SetValue(TRBNFS->TOTAL)
 
-			oSection4:Printline()
+			oSection4:PrintLine()
 
 			aResum[Len(aResum)][4] += TRBNFS->QUANT
 
-			dbSelectArea("ZE2")
-			dbSetOrder(1)
-			If dbSeek(TRBNFS->FILIAL + TRBNFS->PRODUTO + DtoS(MV_PAR04))
+			DBSelectArea("ZE2")
+			DBSetOrder(1)
+			If DBSeek(TRBNFS->FILIAL + TRBNFS->PRODUTO + DToS(MV_PAR04))
 				aResum[Len(aResum)][6] := ZE2->ZE2_PALTOT
 				aResum[Len(aResum)][7] := ZE2->ZE2_MEDCON
 				aResum[Len(aResum)][8] := ZE2->ZE2_AUTEST
 				aResum[Len(aResum)][9] := ZE2->ZE2_DTCONT
 			EndIf
 
-			aDados[6][aScan(aDados[2],StoD(TRBNFS->EMISSAO))] += TRBNFS->QUANT
+			aDados[6][aScan(aDados[2],SToD(TRBNFS->EMISSAO))] += TRBNFS->QUANT
 
-			TRBNFS->(dbSkip())
+			TRBNFS->(DBSkip())
 		End
 
 		oSection4:Finish()
@@ -1106,11 +1096,11 @@ Else			//Ambas
 		cQry5 += "       TO_CHAR(NULL) NOMFANTASIA, D3.D3_UM UM, D3.D3_SEGUM SEGUM, SUM(D3.D3_QUANT) QUANT, SUM(D3.D3_QTSEGUM) QTSEGUM,	"
 		cQry5 += "       DECODE( SUM(D3.D3_QUANT), 0, 0, ( SUM(D3.D3_CUSTO1) / SUM(D3.D3_QUANT) ) ) PRCVEN, "
 		cQry5 += "       SUM(D3.D3_CUSTO1) TOTAL, D3.D3_TM TM, 'B' TIPO, B1.B1_I_DESCD DESCPROD, "
-		cQry5 += "       CASE "
+		cQry5 += "       Case "
 		cQry5 += "         WHEN D3_TM = '803' THEN 'Consumo Interno' "
 		cQry5 += "         WHEN D3_TM = '804' THEN 'Faltas/Descarte' "
 		cQry5 += "         WHEN D3_TM = '999' THEN 'Transf.Armazem Perda' "
-		cQry5 += "         ELSE 'Outras Saidas' END DESCMOVINT, "
+		cQry5 += "         Else 'Outras Saidas' END DESCMOVINT, "
 		cQry5 += "      TO_CHAR(NULL) TPNOTAENT "
 		cQry5 += "FROM " + RetSqlName("SD3") + " D3 "
 		cQry5 += "JOIN (SELECT B1.B1_FILIAL,B1.B1_COD,B1.B1_I_DESCD,B1.B1_GRUPO,B1.B1_I_SUBGR,B1.B1_I_NIV4,B1.B1_I_NIV3,B1.B1_I_NIV2 "
@@ -1126,7 +1116,7 @@ Else			//Ambas
 		If !Empty(MV_PAR02)
 			cQry5 += "  AND D3.D3_LOCAL = '" + MV_PAR02 + "' "
 		EndIf
-		cQry5 += "  AND D3.D3_EMISSAO BETWEEN '" + DtoS(MV_PAR03) + "' AND '" + DtoS(MV_PAR04) + "' "
+		cQry5 += "  AND D3.D3_EMISSAO BETWEEN '" + DToS(MV_PAR03) + "' AND '" + DToS(MV_PAR04) + "' "
 		If !Empty(MV_PAR07)
 			cQry5 += "  AND B1.B1_GRUPO IN " + FormatIn( MV_PAR07 , ";" )
 		EndIf
@@ -1134,14 +1124,14 @@ Else			//Ambas
 		cQry5 += "ORDER BY FILIAL, PRODUTO , TIPO , EMISSAO , DOCUMENTO , TM "
 
 		If Select("TRBMVS") <> 0
-			DbSelectArea("TRBMVS")
-			DbCloseArea()
+			DBSelectArea("TRBMVS")
+			DBCloseArea()
 		EndIf
 	
 		TCQUERY cQry5 NEW ALIAS "TRBMVS"
 		
-		dbSelectArea("TRBMVS")
-		TRBMVS->(dbGoTop())
+		DBSelectArea("TRBMVS")
+		TRBMVS->(DBGoTop())
 		
 		oReport:SetMeter(TRBMVS->(LastRec()))
 	
@@ -1149,7 +1139,7 @@ Else			//Ambas
 			oReport:IncMeter()
 
 			IncProc("Imprimindo Movimentação " + AllTrim(TRBMVS->DESCMOVINT))
-			oSection5:Cell("DATADOC")		:SetValue(DtoC(StoD(TRBMVS->EMISSAO)))
+			oSection5:Cell("DATADOC")		:SetValue(DToC(SToD(TRBMVS->EMISSAO)))
 			oSection5:Cell("TPMOVIM")		:SetValue(AllTrim(TRBMVS->DESCMOVINT))
 			oSection5:Cell("QTDE1UM")		:SetValue(TRBMVS->QUANT)
 			oSection5:Cell("1UNIDME")		:SetValue(TRBMVS->UM)
@@ -1158,25 +1148,25 @@ Else			//Ambas
 			oSection5:Cell("PRCUNIT")		:SetValue(TRBMVS->PRCVEN)
 			oSection5:Cell("VLRTOTAL")		:SetValue(TRBMVS->TOTAL)
 
-			oSection5:Printline()
+			oSection5:PrintLine()
 
 			//===============================================================================================
 			//Somo as quantidades das movimentações de saídas para apresentar no resumo no final do relatório
 			//===============================================================================================
 			aResum[Len(aResum)][5] += TRBMVS->QUANT
 
-			dbSelectArea("ZE2")
-			dbSetOrder(1)
-			If dbSeek(TRBMVS->FILIAL + TRBMVS->PRODUTO + DtoS(MV_PAR04))
+			DBSelectArea("ZE2")
+			DBSetOrder(1)
+			If DBSeek(TRBMVS->FILIAL + TRBMVS->PRODUTO + DToS(MV_PAR04))
 				aResum[Len(aResum)][6] := ZE2->ZE2_PALTOT
 				aResum[Len(aResum)][7] := ZE2->ZE2_MEDCON
 				aResum[Len(aResum)][8] := ZE2->ZE2_AUTEST
 				aResum[Len(aResum)][9] := ZE2->ZE2_DTCONT
 			EndIf
 
-			aDados[7][aScan(aDados[2],StoD(TRBMVS->EMISSAO))] += TRBMVS->QUANT
+			aDados[7][aScan(aDados[2],SToD(TRBMVS->EMISSAO))] += TRBMVS->QUANT
 
-			TRBMVS->(dbSkip())
+			TRBMVS->(DBSkip())
 		End
 
 		oSection5:Finish()
@@ -1191,53 +1181,53 @@ Else			//Ambas
 			cQry6 += "  AND ZE2_FILIAL IN " + FormatIn( MV_PAR01 , ";" )
 		EndIf
 		cQry6 += "  AND ZE2_PRODUT = '" + TRBPRO->B1_COD + "' "
-		cQry6 += "  AND ZE2_DTCONT BETWEEN '" + DtoS(MV_PAR03) + "' AND '" + DtoS(MV_PAR04) + "' "
+		cQry6 += "  AND ZE2_DTCONT BETWEEN '" + DToS(MV_PAR03) + "' AND '" + DToS(MV_PAR04) + "' "
 		cQry6 += "ORDER BY ZE2_FILIAL , ZE2_PRODUT , ZE2_DTCONT "
 
 		If Select("TRBPAL") <> 0
-			DbSelectArea("TRBPAL")
-			DbCloseArea()
+			DBSelectArea("TRBPAL")
+			DBCloseArea()
 		EndIf
 	
 		TCQUERY cQry6 NEW ALIAS "TRBPAL"
 		
-		dbSelectArea("TRBPAL")
-		TRBPAL->(dbGoTop())
+		DBSelectArea("TRBPAL")
+		TRBPAL->(DBGoTop())
 		
 		oReport:SetMeter(TRBPAL->(LastRec()))
 	
 		While !TRBPAL->(Eof())
 
-			dbSelectArea("ZE2")
-			dbSetOrder(1)
+			DBSelectArea("ZE2")
+			DBSetOrder(1)
 
-			If dbSeek(TRBPAL->ZE2_FILIAL + TRBPAL->ZE2_PRODUT + DtoS(MV_PAR04))
+			If DBSeek(TRBPAL->ZE2_FILIAL + TRBPAL->ZE2_PRODUT + DToS(MV_PAR04))
 				aResum[Len(aResum)][6] := ZE2->ZE2_PALTOT
 				aResum[Len(aResum)][7] := ZE2->ZE2_MEDCON
 				aResum[Len(aResum)][8] := ZE2->ZE2_AUTEST
 				aResum[Len(aResum)][9] := ZE2->ZE2_DTCONT
 			EndIf
 
-			aDados[10][aScan(aDados[2],StoD(TRBPAL->ZE2_DTCONT))] += TRBPAL->ZE2_PALCPR
-			aDados[11][aScan(aDados[2],StoD(TRBPAL->ZE2_DTCONT))] += TRBPAL->ZE2_PALCEA
-			aDados[12][aScan(aDados[2],StoD(TRBPAL->ZE2_DTCONT))] += TRBPAL->ZE2_PALAVA
-			aDados[13][aScan(aDados[2],StoD(TRBPAL->ZE2_DTCONT))] += TRBPAL->ZE2_PALVAZ
-			aDados[14][aScan(aDados[2],StoD(TRBPAL->ZE2_DTCONT))] += TRBPAL->ZE2_PALSUJ
-			aDados[15][aScan(aDados[2],StoD(TRBPAL->ZE2_DTCONT))] += TRBPAL->ZE2_PALTOT
-			aDados[16][aScan(aDados[2],StoD(TRBPAL->ZE2_DTCONT))] += TRBPAL->ZE2_MEDCON
-			aDados[17][aScan(aDados[2],StoD(TRBPAL->ZE2_DTCONT))] += TRBPAL->ZE2_AUTEST
-			aDados[18][aScan(aDados[2],StoD(TRBPAL->ZE2_DTCONT))] += TRBPAL->ZE2_PALDES
-			aDados[19][aScan(aDados[2],StoD(TRBPAL->ZE2_DTCONT))] += TRBPAL->ZE2_QTDPC
+			aDados[10][aScan(aDados[2],SToD(TRBPAL->ZE2_DTCONT))] += TRBPAL->ZE2_PALCPR
+			aDados[11][aScan(aDados[2],SToD(TRBPAL->ZE2_DTCONT))] += TRBPAL->ZE2_PALCEA
+			aDados[12][aScan(aDados[2],SToD(TRBPAL->ZE2_DTCONT))] += TRBPAL->ZE2_PALAVA
+			aDados[13][aScan(aDados[2],SToD(TRBPAL->ZE2_DTCONT))] += TRBPAL->ZE2_PALVAZ
+			aDados[14][aScan(aDados[2],SToD(TRBPAL->ZE2_DTCONT))] += TRBPAL->ZE2_PALSUJ
+			aDados[15][aScan(aDados[2],SToD(TRBPAL->ZE2_DTCONT))] += TRBPAL->ZE2_PALTOT
+			aDados[16][aScan(aDados[2],SToD(TRBPAL->ZE2_DTCONT))] += TRBPAL->ZE2_MEDCON
+			aDados[17][aScan(aDados[2],SToD(TRBPAL->ZE2_DTCONT))] += TRBPAL->ZE2_AUTEST
+			aDados[18][aScan(aDados[2],SToD(TRBPAL->ZE2_DTCONT))] += TRBPAL->ZE2_PALDES
+			aDados[19][aScan(aDados[2],SToD(TRBPAL->ZE2_DTCONT))] += TRBPAL->ZE2_QTDPC
 
-			TRBPAL->(dbSkip())
+			TRBPAL->(DBSkip())
 		End
 
-		TRBPRO->(dbSkip())
+		TRBPRO->(DBSkip())
 	End
 
 	oReport:SetMeter(Len(aDados[1]))
 
-	aFiliais := StrTokArr(ALLTRIM(MV_PAR01),";")
+	aFiliais := StrTokArr(AllTrim(MV_PAR01),";")
 
 	For nX := 1 To Len(aDados[1])
 		
@@ -1248,17 +1238,17 @@ Else			//Ambas
 
 		For nI := 1 To Len(aFiliais)
 
-			dbSelectArea("NNR")
-			NNR->(dbGoTop())
+			DBSelectArea("NNR")
+			NNR->(DBGoTop())
 			
 			While !NNR->(Eof())
 				If NNR->NNR_CODIGO == MV_PAR02 .Or. Empty(MV_PAR02)
 					nEstoque += (aSldAnt := CalcEst( aDados[1][nX],NNR->NNR_CODIGO,aDados[2][nX],aFiliais[nI] ))[1]
-						dbSelectArea("SB2")
-						dbSeek(aFiliais[nI] + aDados[1][nX] + NNR->NNR_CODIGO)						
+						DBSelectArea("SB2")
+						DBSeek(aFiliais[nI] + aDados[1][nX] + NNR->NNR_CODIGO)						
 						nSalSb2 += SB2->B2_QATU
 				EndIf
-				NNR->(dbSkip())
+				NNR->(DBSkip())
 			End
 		Next nI
 
@@ -1267,9 +1257,9 @@ Else			//Ambas
 		oSection6:Cell("DOCSAID")		:SetValue(aDados[6][nX]+aDados[7][nX])	// Saídas
 		oSection6:Cell("ESTATUA")		:SetValue(nEstoque + aDados[4][nX] + aDados[5][nX] - aDados[6][nX] - aDados[7][nX])	// Estoque Atual
 		
-		If MV_PAR04 >= DATE()
+		If MV_PAR04 >= Date()
 			oSection6:Cell("SALATUA")		:SetValue(nSalSb2)		// Saldo Atual
-		Endif
+		EndIf
 		
 		oSection6:Cell("PALCPR")		:SetValue(aDados[10][nX])
 		oSection6:Cell("PALCEA")		:SetValue(aDados[11][nX])
@@ -1290,7 +1280,7 @@ Else			//Ambas
 		
 			oSection6:Cell("DIFEREN")		:LBOLD := .T.
 		
-		Endif
+		EndIf
 				
 		oSection6:Cell("DIFEREN")		:SetValue(_ndif)	// Diferença
 		
@@ -1298,7 +1288,7 @@ Else			//Ambas
 		oSection6:Cell("AUTESTD")		:SetValue(aDados[17][nX])	// Autonomia Estoque em Dias
 		oSection6:Cell("DTINCL")		:SetValue(aDados[2][nX] )	// Data
 
-		oSection6:Printline()
+		oSection6:PrintLine()
 		
 	Next nX
 	oSection6:Finish()

@@ -2,20 +2,21 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Analista      - Programador  - Inicio  - Envio   - Chamado - Motivo da Alteração                                               Motivo                                           
-=============================================================================================================================== 
-               
-=============================================================================================================================== 
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
+Jose Gavetti  |08/10/2025| Chamado 52364. Inserido campo C5_I_CDUSU para ser enviado no cabeçalho do Pedido.
+===============================================================================================================================
 */
 
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
-#include "Protheus.ch" 
-#INCLUDE "TBICONN.CH"
-#INCLUDE "PARMTYPE.CH" 
+#Include "TOTVS.ch" 
+#Include "TBICONN.CH"
+#Include "PARMTYPE.CH" 
 
 Static _cFilOrigem, _cPedOrigem, _cPedPallet
+Static _lJob  := IsBlind()
 
 /*
 ===============================================================================================================================
@@ -47,6 +48,7 @@ Local _cDesc      := ""
 Local _nPreco     := 0
 Local _cUM	      := ""
 Local _dDtEnt     := Ctod("  /  /  ")
+Local _cCodUsu    := "" As Character
 
 Begin Sequence  
 
@@ -54,16 +56,22 @@ Begin Sequence
       _lScheduller := .F.
    EndIf 
 
+   If !_lJob
+	  _cCodUsu	:= FWSFAllUsers({__cUserID},{"USR_FILIAL"})[1][3]+FWSFAllUsers({__cUserID},{"USR_CODFUNC"})[1][3]
+   Else
+	  _cCodUsu	:= "SISTEMA"
+   EndIf
+
    _cFilOrigem  := SC5->C5_FILIAL
    _cPedOrigem  := SC5->C5_NUM 
    cTipoPV		:= SC5->C5_TIPO
    cCliente	    := SC5->C5_CLIENTE
    cLoja		:= SC5->C5_LOJACLI
-   _dDtEnt		:= IF(SC5->C5_I_DTENT < DATE(),DATE(),SC5->C5_I_DTENT)//Para nao travar a criacao do Pedido de Pallet
+   _dDtEnt		:= If(SC5->C5_I_DTENT < DATE(),DATE(),SC5->C5_I_DTENT)//Para nao travar a criacao do Pedido de Pallet
    
-   SC6->(DbSetOrder(1))
+   SC6->(DBSetOrder(1))
    SC6->( DBSeek( SC5->C5_FILIAL + SC5->C5_NUM ) )
-   Do While ! SC6->(Eof()) .And. SC5->C5_FILIAL + SC5->C5_NUM == SC6->C6_FILIAL + SC6->C6_NUM
+   While ! SC6->(Eof()) .And. SC5->C5_FILIAL + SC5->C5_NUM == SC6->C6_FILIAL + SC6->C6_NUM
       
 	  If SC6->C6_LOCAL $ _cArmazens
          _nPallet     := _nPallet + SC6->C6_I_QPALT       
@@ -73,12 +81,12 @@ Begin Sequence
 		 _cLocal      := SC6->C6_LOCAL
 	  EndIf 
 
-      SC6->(DbSkip())
+      SC6->(DBSkip())
    EndDo 
      
-   SA1->(DbSetOrder(1))
+   SA1->(DBSetOrder(1))
    SA1->(MsSeek(xFilial("SA1")+cCliente+cLoja))
-   If SA1->A1_I_CHEP = "C" .AND. SA1->A1_I_CCHEP <> " "
+   If SA1->A1_I_CHEP = "C" .And. SA1->A1_I_CCHEP <> " "
       cTpOper := _cOperCli   // "50"  
 	  M->C5_I_OPER := _cOperCli   // "50"  
    Else 
@@ -107,7 +115,7 @@ Begin Sequence
 				{ "C5_CLIENTE"	, cCliente			, Nil },; // Codigo do cliente
 				{ "C5_LOJAENT"	, cLoja				, Nil },; // Loja para entrada
 				{ "C5_LOJACLI"	, cLoja				, Nil },; // Loja do cliente
-				{ "C5_EMISSAO"	, date()			, Nil },; // Data de emissao
+				{ "C5_EMISSAO"	, Date()			, Nil },; // Data de emissao
 				{ "C5_CONDPAG"	, '001'				, Nil },; // Codigo da condicao de pagamanto*
 				{ "C5_TIPLIB"	, "1"				, Nil },; // Tipo de Liberacao
 	    		{ "C5_MOEDA"	, 1					, Nil },; // Moeda
@@ -116,14 +124,15 @@ Begin Sequence
 				{ "C5_I_NPALE"	, _cPedOrigem		, Nil },; // Numero que originou a pedido de palete
 				{ "C5_I_PEDPA"	, "S"				, Nil },; // Pedido Refere a um pedido de Pallet
 				{ "C5_I_GPADV"	, "N"				, Nil },; // Indica que não é para gerar pedido de Pallet, pois este já é um pedido de Pallet.
-				{ "C5_I_DTENT"	, _dDtEnt			, Nil } } // Dt de Entrega
+				{ "C5_I_DTENT"	, _dDtEnt			, Nil },; // Dt de Entrega
+				{ "C5_I_CDUSU" 	, _cCodUsu	        , Nil }} // Codigo Usuario
 
-				Aadd( _aCabPV, { "C5_I_TRCNF", IF(EMPTY(SC5->C5_I_TRCNF),"N",SC5->C5_I_TRCNF), Nil } )
-			    Aadd( _aCabPV, { "C5_I_FILFT", SC5->C5_I_FILFT, Nil } )
-			    Aadd( _aCabPV, { "C5_I_FLFNC", SC5->C5_I_FLFNC, Nil } )
+				aAdd( _aCabPV, { "C5_I_TRCNF", If(Empty(SC5->C5_I_TRCNF),"N",SC5->C5_I_TRCNF), Nil } )
+			    aAdd( _aCabPV, { "C5_I_FILFT", SC5->C5_I_FILFT, Nil } )
+			    aAdd( _aCabPV, { "C5_I_FLFNC", SC5->C5_I_FLFNC, Nil } )
                 
 				If SC5->(FIELDPOS( "C5_I_CDTMS" )) > 0  
-				   Aadd( _aCabPV, { "C5_I_CDTMS", SC5->C5_I_CDTMS, Nil } )	
+				   aAdd( _aCabPV, { "C5_I_CDTMS", SC5->C5_I_CDTMS, Nil } )	
 				EndIf 
 
    //================================================================================
@@ -131,7 +140,7 @@ Begin Sequence
    //================================================================================
 	SB1->(DBSetOrder(1))
 	If SB1->(DBSeek(xFilial("SB1")+_cProduto))				
-	   _cDesc := ALLTRIM(SB1->B1_DESC)
+	   _cDesc := AllTrim(SB1->B1_DESC)
 	   _nPreco:= SB1->B1_PRV1
 	   _cUM	  := SB1->B1_UM
 	EndIf
@@ -141,7 +150,7 @@ Begin Sequence
 	//====================================================================================================
 	// Monta o item do pedido de Pallet
 	//====================================================================================================
-	AAdd( _aItemPV , {	{ "C6_ITEM"		, StrZero( nItem , 2 )	, Nil },; // Numero do Item no Pedido
+	aAdd( _aItemPV , {	{ "C6_ITEM"		, StrZero( nItem , 2 )	, Nil },; // Numero do Item no Pedido
 						{ "C6_FILIAL"	, _cFilOrigem			, Nil },;
 						{ "C6_PRODUTO"	, _cProduto				, Nil },; // Codigo do Produto
 						{ "C6_QTDVEN"	, _nPallet				, Nil },; // Quantidade Vendida
@@ -177,7 +186,7 @@ Begin Sequence
 	  SC5->C5_I_NPALE := _cPedOrigem
 	  SC5->C5_I_PEDPA := 'S'//É o Pedido de Pallet
       SC5->C5_I_PEDGE := ''
-      SC5->( MsUnlock() )
+      SC5->( MSUnLock() )
 	  //U_ITCONOUT(_cMensagem+": "+SC5->C5_NUM)
 	  //====================================================================================================
 	  // Faz a amarração do pedido de origem no pedido de Pallet
@@ -188,13 +197,13 @@ Begin Sequence
 		 SC5->C5_I_NPALE := _cPedPallet
 		 SC5->C5_I_PEDPA := ''  
 		 SC5->C5_I_PEDGE := 'S' //É o Pedido Gerador de Pallet
-		 SC5->( MsUnlock() )
+		 SC5->( MSUnLock() )
 	  EndIf					
    EndIf
 
 End Sequence 
 
-SC5->(DbGoto(_nRegSC5))
-SC6->(DbGoto(_nRegSC6))
+SC5->(DBGoTo(_nRegSC5))
+SC6->(DBGoTo(_nRegSC6))
 
-Return Nil 
+Return 

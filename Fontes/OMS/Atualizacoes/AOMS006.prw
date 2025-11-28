@@ -19,9 +19,9 @@ Lucas Borges      | 14/10/2019 | Removidos os Warning na compilação da release 1
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#include "protheus.ch"
-#include "topconn.ch"
-#include "rwmake.ch"
+#Include "TOTVS.ch"
+#Include "topconn.ch"
+#Include "rwmake.ch"
 
 /*
 ===============================================================================================================================
@@ -38,7 +38,7 @@ Retorno---------: Codigo do Vendedor responsavel pela venda
 ===============================================================================================================================*/
 User Function AOMS006()
 	
-Local aArea 	:= GetArea()
+Local aArea 	:= FWGetArea()
 Local oDlg
 Local aOpcoes	:= {}
 Local cRet		:= ""
@@ -47,35 +47,35 @@ Local _lAoms112 := .F.
 Private nOpcoes	:= 1
 
 //Se esta sendo chamado via AOMS112/MOMS050 (Central Pedido Portal / Efetivaççao Automatica)
-If IsInCallStack("U_AOMS112") .or. IsInCallStack("U_MOMS050")
+If IsInCallStack("U_AOMS112") .Or. IsInCallStack("U_MOMS050")
 	_lAoms112 := .T.
-Endif 
+EndIf 
  
-SA1->(dbSetOrder(1))
-SA1->(dbSeek(xFilial("SA1")+M->C5_CLIENTE+M->C5_LOJACLI))
+SA1->(DBSetOrder(1))
+SA1->(DBSeek(xFilial("SA1")+M->C5_CLIENTE+M->C5_LOJACLI))
 	
-SA3->(dbSetOrder(1))
-SA3->(dbSeek(xFilial("SA3")+SA1->A1_VEND))
+SA3->(DBSetOrder(1))
+SA3->(DBSeek(xFilial("SA3")+SA1->A1_VEND))
 
 aAdd(aOpcoes, SA3->A3_COD + " - " + AllTrim(SA3->A3_NREDUZ))
 
-if (!Empty(AllTrim(SA1->A1_I_VEND2))) .Or. (!Empty(AllTrim(SA1->A1_I_VEND3))) .Or. (!Empty(AllTrim(SA1->A1_I_VEND4)))
+If (!Empty(AllTrim(SA1->A1_I_VEND2))) .Or. (!Empty(AllTrim(SA1->A1_I_VEND3))) .Or. (!Empty(AllTrim(SA1->A1_I_VEND4)))
 	
-	SA3->(dbSetOrder(1))
-	SA3->(dbSeek(xFilial("SA3")+SA1->A1_I_VEND2))
+	SA3->(DBSetOrder(1))
+	SA3->(DBSeek(xFilial("SA3")+SA1->A1_I_VEND2))
 	
 	aAdd(aOpcoes, SA3->A3_COD + " - " + AllTrim(SA3->A3_NREDUZ))
 	
     If !Empty(AllTrim(SA1->A1_I_VEND3))
-       SA3->(dbSetOrder(1))
-	   SA3->(dbSeek(xFilial("SA3")+SA1->A1_I_VEND3))
+       SA3->(DBSetOrder(1))
+	   SA3->(DBSeek(xFilial("SA3")+SA1->A1_I_VEND3))
 	
 	   aAdd(aOpcoes, SA3->A3_COD + " - " + AllTrim(SA3->A3_NREDUZ))
 	EndIf
 
 	If !Empty(AllTrim(SA1->A1_I_VEND4))
-       SA3->(dbSetOrder(1))
-	   SA3->(dbSeek(xFilial("SA3")+SA1->A1_I_VEND4))
+       SA3->(DBSetOrder(1))
+	   SA3->(DBSeek(xFilial("SA3")+SA1->A1_I_VEND4))
 	
 	   aAdd(aOpcoes, SA3->A3_COD + " - " + AllTrim(SA3->A3_NREDUZ))
     EndIf 
@@ -83,11 +83,11 @@ if (!Empty(AllTrim(SA1->A1_I_VEND2))) .Or. (!Empty(AllTrim(SA1->A1_I_VEND3))) .O
 		@ 100,100 	To 270,450 Dialog oDlg Title OemToAnsi("Vendedores Cadastrados para este Cliente")
 		@ 10,15 	To 65,162 Title OemToAnsi("Selecione um vendedor:")
 		@ 20,25		Radio aOpcoes Var nOpcoes
-		@ 70,80	BMPBUTTON TYPE 01 ACTION Close(oDlg)
+		@ 70,80	BMPBUTTON Type 01 ACTION Close(oDlg)
 		Activate Dialog oDlg  CENTERED
-	endif 
+	EndIf 
 	 
-endif
+EndIf
 
 If nOpcoes == 1
    cRet := SubStr(aOpcoes[1],1,6)
@@ -95,12 +95,12 @@ ElseIf nOpcoes == 2
    cRet := SubStr(aOpcoes[2],1,6)
 ElseIf nOpcoes == 3
    cRet := SubStr(aOpcoes[3],1,6)
-else
+Else
    cRet := SubStr(aOpcoes[4],1,6)
-endif
+EndIf
 
-SA3->(dbSetOrder(1))
-SA3->(dbSeek(xFilial("SA3")+cRet))
+SA3->(DBSetOrder(1))
+SA3->(DBSeek(xFilial("SA3")+cRet))
 M->C5_VEND2	:=	SA3->A3_SUPER
 M->C5_VEND3	:=	SA3->A3_GEREN
 M->C5_VEND4	:=	SA3->A3_I_SUPE
@@ -111,6 +111,6 @@ M->C5_I_V3NOM := Posicione("SA3",1,xFilial("SA3")+M->C5_VEND3,"A3_NOME")
 M->C5_I_V4NOM := Posicione("SA3",1,xFilial("SA3")+M->C5_VEND4,"A3_NOME")    
 M->C5_I_V5NOM := Posicione("SA3",1,xFilial("SA3")+M->C5_VEND5,"A3_NOME")                                  
 
-RestArea(aArea)
+FWRestArea(aArea)
 
-return cRet 
+Return cRet 

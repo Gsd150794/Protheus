@@ -14,7 +14,7 @@ Lucas Borges      | 01/08/2025 | Chamado 51453. Substituir função U_ITEncode por
 ===============================================================================================================================
 */
 
-#Include "Protheus.ch"  
+#Include "TOTVS.ch"  
 
 /*
 ===============================================================================================================================
@@ -59,7 +59,7 @@ If _lCriaAmb
 	
 	Sleep( 5000 ) // aguarda 5 segundos para que as jobs IPC subam.
 	
-    u_itconout( 'Gerando enviou do arquivo HTML de Resumo de vendas desconsiderando devolucoes na data: '+ Dtoc( DATE() ) +' - '+ Time() )
+    u_itconout( 'Gerando enviou do arquivo HTML de Resumo de vendas desconsiderando devolucoes na data: '+ DToC( Date() ) +' - '+ Time() )
 
 EndIf
 
@@ -99,11 +99,11 @@ If _lCriaAmb
     
 	RpcClearEnv() //Limpa o ambiente, liberando a licença e fechando as conexões
 	
-	u_itconout( 'Término de execução normal do envio do HTML de Resumo de vendas na data:'+ Dtoc( DATE() ) +' - '+ Time() )
+	u_itconout( 'Término de execução normal do envio do HTML de Resumo de vendas na data:'+ DToC( Date() ) +' - '+ Time() )
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -125,7 +125,7 @@ Setor-----------: TI
 
 Static Function mntHTMLRes( _cEmailDes , _cDtInic , _cDtFinal )
 
-Local _horario    := STRTRAN( Time() , ":" , "'" ) // Nao se pode gerar um arquivo com o nome que contenha o caracter ":"
+Local _horario    := StrTran( Time() , ":" , "'" ) // Nao se pode gerar um arquivo com o nome que contenha o caracter ":"
 Local _cArqAnexo  := "\spool\resumo_vendas" + _horario +".HTM" // Nome do arquivo anexo a ser enviado ao usuario
 
 Local _aDadosUni  := {}
@@ -156,7 +156,7 @@ Local _cMsgEmail  := ""
 Local _sDtInic 	  := _cDtInic
 Local _dDtFinal   := _cDtFinal
 
-Local _cGeracao   := DtoC( Date() )
+Local _cGeracao   := DToC( Date() )
 
 //====================================================================================================
 // Funcao para trabalhar os dados da secao valor liquido por unidade para montagem do aquivo
@@ -166,7 +166,7 @@ _aDadosUni := DadosUni( _cDtInic , _cDtFinal )
 //====================================================================================================
 // Define o cabecalho do HTML
 //====================================================================================================
-_cTextHTML += '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">'
+_cTextHTML += '<!DOCTYPE HTML Public "-//W3C//DTD HTML 4.0 Transitional//EN">'
 _cTextHTML += '<HTML><HEAD><TITLE>VENDAS GRUPO ITALAC</TITLE>'
 _cTextHTML += '<META content="text/html; charset=windows-1252" http-equiv=Content-Type>'
 _cTextHTML += '<META name=GENERATOR content="MSHTML 8.00.6001.19120"></HEAD>' 
@@ -176,7 +176,7 @@ _cTextHTML += '<META name=GENERATOR content="MSHTML 8.00.6001.19120"></HEAD>'
 //====================================================================================================
 _cTextHTML += '<BODY>'
 _cTextHTML += '<P align=center><FONT color=#388e8e size=5><STRONG>VENDAS GRUPO ITALAC - RELATÓRIO ANUAL<BR></STRONG></FONT></P>'  
-_cTextHTML += '<P align=center><FONT color=#388e8e size=5><STRONG>PERÍODO ANUAL DE: ' + DtoC(StoD(_sDtInic)) + ' À ' + DtoC(StoD(_dDtFinal)) + ' (GERADO EM: ' + _cGeracao + ' AS ' + Transform(Time(),"@R 99:99") + ')<BR></STRONG></FONT></P>' 
+_cTextHTML += '<P align=center><FONT color=#388e8e size=5><STRONG>PERÍODO ANUAL DE: ' + DToC(SToD(_sDtInic)) + ' À ' + DToC(SToD(_dDtFinal)) + ' (GERADO EM: ' + _cGeracao + ' AS ' + Transform(Time(),"@R 99:99") + ')<BR></STRONG></FONT></P>' 
 
 //====================================================================================================
 // Define estrutura da primeira secao RESUMO POR FILIAL
@@ -364,7 +364,7 @@ If (_cAliasUni)->( !Eof() )
 	//====================================================================================================
 	// Pega a descricao e valor liquido total da primeira filial conforme dados da secao RESUMO POR FILIAL
 	//====================================================================================================
-	_nPosFil := AsCan( _aDadosUni , {|W| W[1] == (_cAliasUni)->FILIAL } )
+	_nPosFil := aScan( _aDadosUni , {|W| W[1] == (_cAliasUni)->FILIAL } )
 	
 	If _nPosFil > 0
 	    
@@ -424,7 +424,7 @@ If (_cAliasUni)->( !Eof() )
 				//====================================================================================================
 				// Pega a descricao e valor liquido total da primeira filial conforme dados da secao RESUMO POR FILIAL
 				//====================================================================================================
-				_nPosFil := AsCan( _aDadosUni , {|W| W[1] == (_cAliasUni)->FILIAL } )
+				_nPosFil := aScan( _aDadosUni , {|W| W[1] == (_cAliasUni)->FILIAL } )
 				
 				If _nPosFil > 0
 				
@@ -582,7 +582,7 @@ If _lRet
 		_cMsgEmail += "Segue em anexo relatório com a Relação de Vendas Anual do Grupo ITALAC para acompanhamento.<BR><BR>"
 		_cMsgEmail += "Favor não responder a este e-mail.</B><BR><BR>"+ _cTextHTML
 		
-		SendMail( _cEmailDes , "RESUMO DE VENDAS ITALAC - PERÍODO: "+ DtoC( StoD( _sDtInic ) ) +' À '+ DtoC( StoD( _dDtFinal ) ) +' (GERADO EM: '+ _cGeracao +')' , _cArqAnexo , _cMsgEmail )
+		SendMail( _cEmailDes , "RESUMO DE VENDAS ITALAC - PERÍODO: "+ DToC( SToD( _sDtInic ) ) +' À '+ DToC( SToD( _dDtFinal ) ) +' (GERADO EM: '+ _cGeracao +')' , _cArqAnexo , _cMsgEmail )
 		
 		//====================================================================================================
 		// Remove o arquivo HTML criado posteriormente a finalizacao da tarefa de envio de e-mail
@@ -595,7 +595,7 @@ If _lRet
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -1166,7 +1166,7 @@ Case _nOpcao == 3
 //====================================================================================================
 Case _nOpcao == 4
 
-	BeginSql alias _calias
+	BeginSql alias _cAlias
 	
 		SELECT ZZL_EMAIL
 		FROM %Table:ZZL%
@@ -1177,4 +1177,4 @@ Case _nOpcao == 4
 					
 EndCase
 
-Return()
+Return

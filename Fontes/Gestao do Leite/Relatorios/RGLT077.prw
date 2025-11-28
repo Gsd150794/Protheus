@@ -2,16 +2,13 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 21/02/2025 | Chamado 49932. Ajustado o relatório para contemplar as informações do RGLT015 e RGLT016
+Lucas Borges  |21/02/2025| Chamado 49932. Ajustado o relatório para contemplar as informações do RGLT015 e RGLT016
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -126,10 +123,10 @@ Local _nDebito	:= 0 as Number
 If MV_PAR01 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZLF")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 _cFiltro += " AND ZLF.ZLF_FILIAL "+ GetRngFil( _aSelFil, "ZLF", .T.,)
 //Se preencheu os setores, já fiz a validação de acesso no SX1
@@ -170,7 +167,7 @@ EndIf
 
 //Apenas Negativos
 If MV_PAR14 == 1
-	_cFiltro += " AND (SELECT SUM(CASE WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL ELSE ZLF_TOTAL * -1 END) FROM "+ RetSqlName("ZLF") +" A "
+	_cFiltro += " AND (SELECT SUM(Case WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL Else ZLF_TOTAL * -1 END) FROM "+ RetSqlName("ZLF") +" A "
 	_cFiltro += " WHERE A.D_E_L_E_T_ = ' ' AND A.ZLF_FILIAL = ZLF.ZLF_FILIAL "
 	_cFiltro += " AND A.ZLF_CODZLE = ZLF.ZLF_CODZLE "
 	_cFiltro += " AND A.ZLF_A2COD = ZLF.ZLF_A2COD "
@@ -204,7 +201,7 @@ BeginSql alias _cAliasEve
 	GROUP BY ZL8_NREDUZ, ZLF_DEBCRE)
 EndSql
 
-While (_cAliasEve)->(!EOF())
+While (_cAliasEve)->(!Eof())
 	_cPivot := "%"+AllTrim((_cAliasEve)->PIVO)+"%"
 	//Ajustes para retirar caracter que o SQL Embedded está incluindo
 	_cPivot := Replace(_cPivot,"' ", "'")
@@ -212,7 +209,7 @@ While (_cAliasEve)->(!EOF())
 	_cPivot := Replace(_cPivot,"XXAS", " AS")
 	_cCampos := "%"+AllTrim((_cAliasEve)->CAMPOS)+"%"
 	_aCampos := StrTokArr((_cAliasEve)->ARRAY,';')
-	(_cAliasEve)->(DbSkip())
+	(_cAliasEve)->(DBSkip())
 EndDo
 
 TRCell():New(oReport:Section(1),"DEBITO",/*Table*/,"Debito"/*cTitle*/,"@E 999,999,999.99"/*Picture*/,/*Tamanho*/,/*lPixel*/,/*{||bBlock}*/,"RIGHT"/*cAlign*/,/*lLineBreak*/,"RIGHT"/*cHeaderAlign*/,/*lCellBreak*/,/*nColSpace*/,/*lAutoSize*/,/*nClrBack*/,/*nClrFore*/,/*lBold*/)
@@ -266,7 +263,7 @@ oReport:SetMeter(0)
 BeginSql alias _cAlias
 SELECT ZLF_FILIAL, ZLF_CODZLE, ZLF_SETOR, ZLF_LINROT, ZLF_A2COD, ZLF_A2LOJA, PRODUTOR, A2_L_CLASS, A2_L_TANQ, A2_L_TANLJ, 
 RESPONSAVEL, AVG(ZLF_QTDBOM) ZLF_QTDBOM, SUM(TOTBRUT) TOTBRUT, SUM(DEBITO) DEBITO, SUM(TOTLIQ) TOTLIQ,
-ROUND((SUM(TOTLIQ))/DECODE(MAX(NVL(ZLF_QTDBOM,0)),0,1,MAX(NVL(ZLF_QTDBOM,0))),4)  ZLF_VLRLTR,
+Round((SUM(TOTLIQ))/DECODE(MAX(NVL(ZLF_QTDBOM,0)),0,1,MAX(NVL(ZLF_QTDBOM,0))),4)  ZLF_VLRLTR,
 %exp:_cCampos%
 FROM (
 SELECT ZLF_FILIAL, ZLF_CODZLE, ZLF_SETOR, ZLF_LINROT, ZLF_A2COD, ZLF_A2LOJA, SA2.A2_NOME PRODUTOR, SA2.A2_L_CLASS, SA2.A2_L_TANQ, 
@@ -276,13 +273,13 @@ WHERE D_E_L_E_T_ = ' '
 AND ZLD_FILIAL = ZLF_FILIAL
 AND ZLD_SETOR = ZLF_SETOR
 AND ZLD_LINROT = ZLF_LINROT
-AND ZLF_A2COD = CASE WHEN SUBSTR(ZLF_A2COD,1,1)='G' THEN ZLD_FRETIS ELSE ZLD_RETIRO END
-AND ZLF_A2LOJA = CASE WHEN SUBSTR(ZLF_A2COD,1,1)='G' THEN ZLD_LJFRET ELSE ZLD_RETILJ END
+AND ZLF_A2COD = Case WHEN SubStr(ZLF_A2COD,1,1)='G' THEN ZLD_FRETIS Else ZLD_RETIRO END
+AND ZLF_A2LOJA = Case WHEN SubStr(ZLF_A2COD,1,1)='G' THEN ZLD_LJFRET Else ZLD_RETILJ END
 AND ZLD_DTCOLE BETWEEN ZLF_DTINI AND ZLF_DTFIM)ZLF_QTDBOM,
-SUM(CASE WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL ELSE ZLF_TOTAL * -1 END) ZLF_TOTAL, ZL8_NREDUZ,
-SUM(CASE WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL ELSE ZLF_TOTAL * -1 END) TOTLIQ,
-SUM(CASE WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL END) TOTBRUT,
-SUM(CASE WHEN ZLF_DEBCRE = 'D' THEN ZLF_TOTAL END) DEBITO
+SUM(Case WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL Else ZLF_TOTAL * -1 END) ZLF_TOTAL, ZL8_NREDUZ,
+SUM(Case WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL Else ZLF_TOTAL * -1 END) TOTLIQ,
+SUM(Case WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL END) TOTBRUT,
+SUM(Case WHEN ZLF_DEBCRE = 'D' THEN ZLF_TOTAL END) DEBITO
  FROM %Table:ZLF% ZLF, %Table:SA2% SA2, %Table:ZL8% ZL8, %Table:SA2% RESP
 WHERE ZLF.D_E_L_E_T_ = ' '
 AND SA2.D_E_L_E_T_ = ' '
@@ -300,7 +297,7 @@ AND ZLF_A2COD BETWEEN %exp:MV_PAR05% AND %exp:MV_PAR06%
 AND ZLF_A2LOJA BETWEEN %exp:MV_PAR07% AND %exp:MV_PAR08%
 GROUP BY SA2.A2_L_TANQ, SA2.A2_L_TANLJ, SA2.A2_L_CLASS, SA2.A2_NOME, RESP.A2_NOME, ZLF_FILIAL, ZLF_CODZLE, ZLF_SETOR, ZLF_LINROT, ZLF_A2COD,
 		 ZLF_A2LOJA, ZL8_NREDUZ, ZLF_EVENTO, ZLF_QTDBOM, ZLF_DTINI, ZLF_DTFIM, ZLF_RETIRO, ZLF_RETILJ)
-PIVOT ( SUM(ZLF_TOTAL) FOR ZL8_NREDUZ IN ( 
+PIVOT ( SUM(ZLF_TOTAL) For ZL8_NREDUZ IN ( 
 %exp:_cPivot%
 ))
 GROUP BY ZLF_FILIAL, ZLF_CODZLE, ZLF_SETOR, ZLF_LINROT, ZLF_A2COD, ZLF_A2LOJA, PRODUTOR, A2_L_CLASS, A2_L_TANQ, A2_L_TANLJ, RESPONSAVEL
@@ -324,20 +321,20 @@ oReport:Section(1):Init()
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->ZLF_FILIAL
-	If Substr(MV_PAR05,1,1)=="G" .And. Substr(MV_PAR06,1,1)=="G"
+	If SubStr(MV_PAR05,1,1)=="G" .And. SubStr(MV_PAR06,1,1)=="G"
 		_nVolume += (_cAlias)->ZLF_QTDBOM
-	ElseIf Substr((_cAlias)->ZLF_A2COD,1,1)=="P"
+	ElseIf SubStr((_cAlias)->ZLF_A2COD,1,1)=="P"
 		_nVolume += (_cAlias)->ZLF_QTDBOM
 	EndIf
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 //==========================================================================
 // Query do relatório da secao 2
@@ -350,9 +347,9 @@ oReport:SetMeter(0)
 
 BeginSql alias _cAlias
 SELECT ZL8_COD, ZL8_NREDUZ,
-       SUM(CASE WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL END) CREDITO,
-       SUM(CASE WHEN ZLF_DEBCRE = 'D' THEN ZLF_TOTAL * -1 END) DEBITO,
-	   SUM(CASE WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL ELSE ZLF_TOTAL * -1 END) LIQ
+       SUM(Case WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL END) CREDITO,
+       SUM(Case WHEN ZLF_DEBCRE = 'D' THEN ZLF_TOTAL * -1 END) DEBITO,
+	   SUM(Case WHEN ZLF_DEBCRE = 'C' THEN ZLF_TOTAL Else ZLF_TOTAL * -1 END) LIQ
  FROM %Table:ZLF% ZLF, %Table:SA2% SA2, %Table:ZL8% ZL8
 WHERE ZLF.D_E_L_E_T_ = ' '
 AND SA2.D_E_L_E_T_ = ' '
@@ -386,12 +383,12 @@ oReport:Section(2):Init()
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(2):PrintLine()
 	oReport:IncMeter()
 	_nCredito += (_cAlias)->CREDITO
 	_nDebito += (_cAlias)->DEBITO
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:SkipLine()
@@ -410,6 +407,6 @@ oReport:Section(2):Cell("ZL8_COD"):SetBlock({|| 'Volume Total' })
 oReport:Section(2):Cell("CREDITO"):SetBlock({|| _nVolume })
 oReport:Section(2):PrintLine()
 
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

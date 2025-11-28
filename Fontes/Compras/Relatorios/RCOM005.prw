@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 17/09/2019 | Retirada chamada da função itputx1. Chamado 28346 
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 04/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 25/01/2023 | Retirada referência à tabela ZZM. Chamado 42685
+Lucas Borges  |17/09/2019| Chamado 28346. Retirada chamada da função itputx1.
+Lucas Borges  |04/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
+Lucas Borges  |25/01/2023| Chamado 42685. Retirada referência à tabela ZZM.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
+#Include "TOTVS.ch"
 
-#Include "Protheus.ch"
 /*
 ===============================================================================================================================
 Programa----------: RCOM005
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 10/05/2018
-===============================================================================================================================
 Descrição---------: Documentos de entrada X MD-e. Chamado 24792
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -43,18 +35,15 @@ oReport := RCOM005RUN(_cAlias, _aSelFil)
 
 oReport:PrintDialog()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: RCOM005RUN
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 10/05/2018
-===============================================================================================================================
 Descrição---------: Processa a montagem do relatório
-===============================================================================================================================
 Parametros--------: _cAlias, _aSelFil
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -83,7 +72,7 @@ TRCell():New( oSection1 , "_cRaz"		,, "Nome "		,, 60 ,, {|| _cRaz		})
 oSection2 := TRSection():New( oSection , "Documentos")
 oSection2:SetTotalInLine(.F.)
 
-//TRFUNCTION():New(oCell,cName,cFunction,oBreak,cTitle,cPicture,uFormula,lEndSection,lEndReport,lEndPage,oParent,bCondition,lDisable,bCanPrint) 
+//TRFunction():New(oCell,cName,cFunction,oBreak,cTitle,cPicture,uFormula,lEndSection,lEndReport,lEndPage,oParent,bCondition,lDisable,bCanPrint) 
 //TRCell():New(oParent,cName,cAlias,cTitle,cPicture,nSize,lPixel,bBlock,cAlign,lLineBreak,cHeaderAlign,lCellBreak,nColSpace,lAutoSize,nClrBack,nClrFore,lBold)
 TRCell():New( oSection2 , "F1_FILIAL"			,_cAlias,/*X3Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,{|| (_cAlias)->FILIAL	})
 TRCell():New( oSection2 , "F1_EMISSAO"			,_cAlias,/*X3Titulo*/,/*Picture*/,/*Tamanho*/,/*lPixel*/,{|| (_cAlias)->F1_EMISSAO	})
@@ -105,11 +94,8 @@ Return( oReport )
 Programa----------: RCOM005PRT
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 10/05/2018
-===============================================================================================================================
 Descrição---------: Processa a impressão do relatório
-===============================================================================================================================
 Parametros--------: oReport , _cAlias, _aSelFil
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -128,10 +114,10 @@ Local _nCountRec:= 0
 If MV_PAR01 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"SF1")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 _cQryFil := GetRngFil( _aSelFil, "SF1", .T.,)
 
 //====================================================================================================
@@ -142,10 +128,10 @@ _cFilSF1+=" AND SF1.F1_EMISSAO BETWEEN '"+ DToS(MV_PAR02) + "' AND '" + DToS(MV_
 _cFilSF1+=" AND SF1.F1_DTDIGIT BETWEEN '"+ DToS(MV_PAR04) + "' AND '" + DToS(MV_PAR05) + "'%"
 
 If !Empty(MV_PAR06)
-	_cQuery+=" AND TPEVENTO IN "+StrTran(FormatIn(Alltrim(MV_PAR06),";"),"'","")
+	_cQuery+=" AND TPEVENTO IN "+StrTran(FormatIn(AllTrim(MV_PAR06),";"),"'","")
 EndIf
 If !Empty(MV_PAR07)
-	_cQuery+=" AND STATUS_154 IN "+StrTran(FormatIn(Alltrim(MV_PAR07),";"),"'","")
+	_cQuery+=" AND STATUS_154 IN "+StrTran(FormatIn(AllTrim(MV_PAR07),";"),"'","")
 EndIf
 _cQuery+="%"
 
@@ -163,13 +149,13 @@ BeginSql Alias _cAlias
         F1_EMISSAO,
         F1_DTDIGIT,
         F1_CHVNFE,
-        CASE
+        Case
           WHEN F1_STATUS = 'A' THEN
            'Classificado'
           WHEN F1_STATUS = ' ' THEN
            'Pre-nota'
         END STATUS_ESCRITURACAO,
-        CASE
+        Case
           WHEN C00_STATUS = '0' THEN
            'Sem Manif.'
           WHEN C00_STATUS = '1' THEN
@@ -183,7 +169,7 @@ BeginSql Alias _cAlias
           WHEN C00_STATUS IS NULL THEN
            'NF-e inexistente'
         END MANIFESTACAO,
-        CASE
+        Case
           WHEN C00_CODEVE = '1' THEN
            'Nao Transmit.'
           WHEN C00_CODEVE = '2' THEN
@@ -195,7 +181,7 @@ BeginSql Alias _cAlias
           WHEN C00_CODEVE IS NULL THEN
            'NF-e inexistente'
         END STATUS_TRANS,
-        CASE
+        Case
           WHEN TPEVENTO = 210200 THEN
            'Confirmada'
           WHEN TPEVENTO = 210220 THEN
@@ -208,17 +194,17 @@ BeginSql Alias _cAlias
            'Cancelamento'
           WHEN TPEVENTO = 888888 THEN
            'Nao Transmitido'
-          ELSE
+          Else
            'Acionar TI'
         END TP_TRANS,
-        CASE
+        Case
           WHEN STATUS_154 = 6 THEN
            'OK'
           WHEN STATUS_154 = 5 THEN
            'Erro'
           WHEN STATUS_154 = 8 THEN
            'Nao Transmitido'
-          ELSE
+          Else
            'Acionar TI'
         END STATUS_TRANS_TSS,
         TPEVENTO
@@ -231,8 +217,8 @@ BeginSql Alias _cAlias
                 C00_CODEVE,
                 NVL(TPEVENTO, 888888) TPEVENTO,
                 NVL(STATUS_154, 8) STATUS_154
-           FROM %table:SF1% SF1
-           LEFT JOIN %table:C00% C001
+           FROM %Table:SF1% SF1
+           LEFT JOIN %Table:C00% C001
              ON (C001.D_E_L_E_T_ = ' ' AND C001.C00_FILIAL = SF1.F1_FILIAL AND
                 C001.C00_CHVNFE = SF1.F1_CHVNFE)
            LEFT JOIN (SELECT S.M0_CODFIL   FILIAL,
@@ -285,7 +271,7 @@ oReport:SetMeter(_nCountRec)
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-IF !_lPlanilha
+If !_lPlanilha
    	oSection2:Cell("F1_FILIAL"):Disable()
 EndIf
 

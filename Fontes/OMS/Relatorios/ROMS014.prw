@@ -14,8 +14,8 @@ Lucas Borges  	  | 17/10/2019 | Removidos os Warning na compilação da release 12
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
-#include "report.ch"
-#include "protheus.ch" 
+#Include "report.ch"
+#Include "TOTVS.ch" 
 
 /*
 ===============================================================================================================================
@@ -60,7 +60,7 @@ Private _nVlrDePGr := 0
 Private _nVlrTotGr := 0
 Private _nVlrQtdGr := 0 
 
-pergunte(cPerg,.F.)
+Pergunte(cPerg,.F.)
 
 DEFINE REPORT oReport NAME cPerg TITLE "Relatório de Descontos Contratuais" PARAMETER cPerg ACTION {|oReport| ROMS014PRI(oReport)} Description "Este relatório emitirá os descontos contratuais gerados de acordo com os parâmetros fornecdidos pelo usuário, esta é uma nnálise de faturamento." 
 
@@ -73,13 +73,13 @@ oReport:SetTotalInLine(.F.)
 //====================================================================
 
 //Secao dados da Rede
-DEFINE SECTION oSecRede_1 OF oReport TITLE "Rede_ordem_1" TABLES "SA1","ACY" ORDERS aOrd
+DEFINE Section oSecRede_1 OF oReport TITLE "Rede_ordem_1" TABLES "SA1","ACY" ORDERS aOrd
 
 DEFINE CELL NAME "a1_grpven"	OF oSecRede_1 ALIAS "SA1"  TITLE "Rede"      SIZE 12
 DEFINE CELL NAME "acy_descri"   OF oSecRede_1 ALIAS "ACY"  TITLE "Descrição" SIZE 40
 oSecRede_1:Disable()
 
-DEFINE SECTION oSecDados_1 OF oSecRede_1 TITLE "Dados_ordem_1" TABLES "SB1","SD2","SF2"
+DEFINE Section oSecDados_1 OF oSecRede_1 TITLE "Dados_ordem_1" TABLES "SB1","SD2","SF2"
 
 DEFINE CELL NAME "b1_cod"	    OF oSecDados_1 ALIAS "SB1" TITLE "Produto"        	 SIZE 20
 DEFINE CELL NAME "b1_i_descd"   OF oSecDados_1 ALIAS "SB1" TITLE "Descrição"      	 SIZE 40     
@@ -126,13 +126,13 @@ oSecDados_1:OnPrintLine({|| cNomeRede := QRY1->a1_grpven  + " - " + SubStr(QRY1-
 //====================================================================
 
 //Secao dados da Rede
-DEFINE SECTION oSecRede_4 OF oReport TITLE "Rede_ordem_4" TABLES "SF2" ORDERS aOrd
+DEFINE Section oSecRede_4 OF oReport TITLE "Rede_ordem_4" TABLES "SF2" ORDERS aOrd
 
 DEFINE CELL NAME "f2_filial"	OF oSecRede_4 ALIAS "SF2" TITLE "Filial"    SIZE 12
 DEFINE CELL NAME "NOMFIL"	    OF oSecRede_4 ALIAS ""    TITLE "Descrição" SIZE 40 BLOCK{|| ROMS014NOM(QRY4->f2_filial)}
 oSecRede_4:Disable()
 
-DEFINE SECTION oSecDado_4 OF oSecRede_4 TITLE "Dados_ordem_4" TABLES "SB1","SD2"
+DEFINE Section oSecDado_4 OF oSecRede_4 TITLE "Dados_ordem_4" TABLES "SB1","SD2"
 
 DEFINE CELL NAME "b1_cod"	    OF oSecDado_4 ALIAS "SB1" TITLE "Produto"        	SIZE 20
 DEFINE CELL NAME "b1_i_descd"   OF oSecDado_4 ALIAS "SB1" TITLE "Descrição"      	SIZE 40     
@@ -178,7 +178,7 @@ oSecDado_4:OnPrintLine({|| cNomFilial := QRY4->f2_filial + ' - ' + ROMS014NOM(QR
 //Define secao para terceira ordem - Produto          
 //====================================================================
 
-DEFINE SECTION oSecDado_5 OF oReport TITLE "Dados_ordem_5" TABLES "SB1","SD2"
+DEFINE Section oSecDado_5 OF oReport TITLE "Dados_ordem_5" TABLES "SB1","SD2"
 
 DEFINE CELL NAME "b1_cod"	    OF oSecDado_5 ALIAS "SB1" TITLE "Produto"        	SIZE 20
 DEFINE CELL NAME "b1_i_descd"   OF oSecDado_5 ALIAS "SB1" TITLE "Descrição"      	SIZE 40     
@@ -223,7 +223,7 @@ oSecDado_5:SetTotalInLine(.F.)
 //====================================================
 
 //Secao dados da Rede
-DEFINE SECTION oSecRede_6 OF oReport TITLE "Rede_ordem_4" TABLES "SA1","ACY" ORDERS aOrd
+DEFINE Section oSecRede_6 OF oReport TITLE "Rede_ordem_4" TABLES "SA1","ACY" ORDERS aOrd
 
 DEFINE CELL NAME "a1_grpven"	OF oSecRede_6 ALIAS "SA1"  TITLE "Rede"      SIZE 12
 DEFINE CELL NAME "acy_descri"   OF oSecRede_6 ALIAS "ACY"  TITLE "Descrição" SIZE 40 
@@ -232,7 +232,7 @@ oSecRede_6:Disable()
 oSecRede_6:SetLinesBefore(4)    
 
 //Secao dados do Cliente
-DEFINE SECTION oSecCli OF oSecRede_6 TITLE "Cliente_ordem_4" TABLES "SA1" 
+DEFINE Section oSecCli OF oSecRede_6 TITLE "Cliente_ordem_4" TABLES "SA1" 
 
 DEFINE CELL NAME "A1_COD"    	OF oSecCli ALIAS "SA1"  TITLE "Cliente"   SIZE 09
 DEFINE CELL NAME "A1_LOJA"      OF oSecCli ALIAS "SA1"  TITLE "Loja"      SIZE 07 
@@ -247,7 +247,7 @@ oSecCli:Cell("cliente"):Disable()
 oSecCli:Disable()        
                       
 //Secao dados dos Produtos do Cliente
-DEFINE SECTION oSecDado_6 OF oSecCli TITLE "Dados_ordem_4" TABLES "SB1","SD2","SF2"
+DEFINE Section oSecDado_6 OF oSecCli TITLE "Dados_ordem_4" TABLES "SB1","SD2","SF2"
 
 DEFINE CELL NAME "b1_cod"	    OF oSecDado_6 ALIAS "SB1" TITLE "Produto"        	 SIZE 20
 DEFINE CELL NAME "b1_i_descd"   OF oSecDado_6 ALIAS "SB1" TITLE "Descrição"      	 SIZE 40     
@@ -311,126 +311,126 @@ Static Function ROMS014PRI(oReport)
 Local cFiltro   := "%"    
 Private nOrdem  := oSecRede_1:GetOrder() //Busca ordem selecionada pelo usuario   
 
-oReport:SetTitle("Relação de Descontos Contratuais Orderm  " + aOrd[nOrdem] + " - Emissao de " + dtoc(mv_par02) + " até "  + dtoc(mv_par03))
+oReport:SetTitle("Relação de Descontos Contratuais Orderm  " + aOrd[nOrdem] + " - Emissao de " + DToC(MV_PAR02) + " até "  + DToC(MV_PAR03))
 
 //Define o filtro de acordo com os parametros digitados
 //Filtra Filial da SF2,SD2,SA1,SB1,ZAZ,SA3,ACY
-if !empty(alltrim(mv_par01))	
+If !Empty(AllTrim(MV_PAR01))	
 	
-	if !empty(xFilial("SF2"))
-		cFiltro   += " AND F2.F2_FILIAL IN " + FormatIn(mv_par01,";")
-	endif	                         
-	if !empty(xFilial("SD2"))
-		cFiltro   += " AND D2.D2_FILIAL IN " + FormatIn(mv_par01,";")
-	endif    
-	if !empty(xFilial("ZAZ"))
-		cFiltro   += " AND ZAZ.ZAZ_FILIAL IN " + FormatIn(mv_par01,";")
-	endif                	
-	if !empty(xFilial("SA1"))
-		cFiltro   += " AND A1.A1_FILIAL IN " + FormatIn(mv_par01,";")
-	endif
-	if !empty(xFilial("SB1"))	
-		cFiltro   += " AND B1.B1_FILIAL IN " + FormatIn(mv_par01,";")
-	endif
-	if !empty(xFilial("SA3"))
-		cFiltro  += " AND SA3.A3_FILIAL IN " + FormatIn(mv_par01,";")
-	endif
-	if !empty(xFilial("ACY")) .And. nOrdem == 1
-		cFiltro  += " AND ACY.ACY_FILIAL IN " + FormatIn(mv_par01,";")
-	endif
-endif 
+	If !Empty(xFilial("SF2"))
+		cFiltro   += " AND F2.F2_FILIAL IN " + FormatIn(MV_PAR01,";")
+	EndIf	                         
+	If !Empty(xFilial("SD2"))
+		cFiltro   += " AND D2.D2_FILIAL IN " + FormatIn(MV_PAR01,";")
+	EndIf    
+	If !Empty(xFilial("ZAZ"))
+		cFiltro   += " AND ZAZ.ZAZ_FILIAL IN " + FormatIn(MV_PAR01,";")
+	EndIf                	
+	If !Empty(xFilial("SA1"))
+		cFiltro   += " AND A1.A1_FILIAL IN " + FormatIn(MV_PAR01,";")
+	EndIf
+	If !Empty(xFilial("SB1"))	
+		cFiltro   += " AND B1.B1_FILIAL IN " + FormatIn(MV_PAR01,";")
+	EndIf
+	If !Empty(xFilial("SA3"))
+		cFiltro  += " AND SA3.A3_FILIAL IN " + FormatIn(MV_PAR01,";")
+	EndIf
+	If !Empty(xFilial("ACY")) .And. nOrdem == 1
+		cFiltro  += " AND ACY.ACY_FILIAL IN " + FormatIn(MV_PAR01,";")
+	EndIf
+EndIf 
 
 //Filtra Emissao da SF2
-if !empty(mv_par02) .and. !empty(mv_par03)
-	cFiltro  += " AND F2.F2_EMISSAO BETWEEN '" + dtos(mv_par02) + "' AND '" + dtos(mv_par03) + "'"
-endif
+If !Empty(MV_PAR02) .And. !Empty(MV_PAR03)
+	cFiltro  += " AND F2.F2_EMISSAO BETWEEN '" + DToS(MV_PAR02) + "' AND '" + DToS(MV_PAR03) + "'"
+EndIf
 
 //Filtra Produto
-if !empty(mv_par04) .and. !empty(mv_par05)
-	cFiltro   += " AND D2.D2_COD BETWEEN '" + mv_par04 + "' AND '" + mv_par05 + "'"
-endif
+If !Empty(MV_PAR04) .And. !Empty(MV_PAR05)
+	cFiltro   += " AND D2.D2_COD BETWEEN '" + MV_PAR04 + "' AND '" + MV_PAR05 + "'"
+EndIf
 
 //Filtra Cliente
-if !empty(mv_par06) .and. !empty(mv_par08)
-	cFiltro   += " AND D2.D2_CLIENTE BETWEEN '" + mv_par06 + "' AND '" + mv_par08 + "'"
-endif
+If !Empty(MV_PAR06) .And. !Empty(MV_PAR08)
+	cFiltro   += " AND D2.D2_CLIENTE BETWEEN '" + MV_PAR06 + "' AND '" + MV_PAR08 + "'"
+EndIf
 
 //Filtra Loja Cliente
-if !empty(mv_par07) .and. !empty(mv_par09)
-	cFiltro   += " AND D2.D2_LOJA BETWEEN '" + mv_par07 + "' AND '" + mv_par09 + "'"   
-endif
+If !Empty(MV_PAR07) .And. !Empty(MV_PAR09)
+	cFiltro   += " AND D2.D2_LOJA BETWEEN '" + MV_PAR07 + "' AND '" + MV_PAR09 + "'"   
+EndIf
 
 //Filtra Rede Cliente
-if !empty(mv_par10)
-	cFiltro    += " AND A1.A1_GRPVEN IN " + FormatIn(mv_par10,";")
-endif
+If !Empty(MV_PAR10)
+	cFiltro    += " AND A1.A1_GRPVEN IN " + FormatIn(MV_PAR10,";")
+EndIf
      
 //Filtra Estado Cliente
-if !empty(mv_par11) 
-	cFiltro   += " AND A1.A1_EST IN " + FormatIn(mv_par11,";")    
-endif
+If !Empty(MV_PAR11) 
+	cFiltro   += " AND A1.A1_EST IN " + FormatIn(MV_PAR11,";")    
+EndIf
 
 //Filtra Cod Municipio Cliente
-if !empty(mv_par12) 
-	cFiltro   += " AND A1.A1_COD_MUN IN " + FormatIn(mv_par12,";")
-endif
+If !Empty(MV_PAR12) 
+	cFiltro   += " AND A1.A1_COD_MUN IN " + FormatIn(MV_PAR12,";")
+EndIf
 
 //Filtra Vendedor
-if !empty(mv_par13) 
-	cFiltro   += " AND SA3.A3_COD IN " + FormatIn(mv_par13,";")      
-endif
+If !Empty(MV_PAR13) 
+	cFiltro   += " AND SA3.A3_COD IN " + FormatIn(MV_PAR13,";")      
+EndIf
 
 //Filtra Supervisor
-if !empty(mv_par14)
-	cFiltro   += " AND SA3.A3_SUPER IN " + FormatIn(mv_par14,";")
-endif
+If !Empty(MV_PAR14)
+	cFiltro   += " AND SA3.A3_SUPER IN " + FormatIn(MV_PAR14,";")
+EndIf
 
 //Filtra Grupo de Produtos
-if !empty(mv_par15)
-	cFiltro   += " AND SubStr(D2.D2_COD,1,4) IN " + FormatIn(mv_par15,";")
-endif
+If !Empty(MV_PAR15)
+	cFiltro   += " AND SubStr(D2.D2_COD,1,4) IN " + FormatIn(MV_PAR15,";")
+EndIf
 
 //Filtra Produto Nivel 2
-if !empty(mv_par16)
-	cFiltro   += " AND B1.B1_I_NIV2 IN " + FormatIn(mv_par16,";")
-endif
+If !Empty(MV_PAR16)
+	cFiltro   += " AND B1.B1_I_NIV2 IN " + FormatIn(MV_PAR16,";")
+EndIf
 
 //Filtra Produto Nivel 3
-if !empty(mv_par17)
-	cFiltro   += " AND B1.B1_I_NIV3 IN " + FormatIn(mv_par17,";")
-endif
+If !Empty(MV_PAR17)
+	cFiltro   += " AND B1.B1_I_NIV3 IN " + FormatIn(MV_PAR17,";")
+EndIf
 
 //Filtra Produto Nivel 4
-if !empty(mv_par18)
-	cFiltro   += " AND B1.B1_I_NIV4 IN " + FormatIn(mv_par18,";")
-endif          
+If !Empty(MV_PAR18)
+	cFiltro   += " AND B1.B1_I_NIV4 IN " + FormatIn(MV_PAR18,";")
+EndIf          
 
 //Filtra tipo de abatimento do contrato
-If !Empty(mv_par19)   
-	cFiltro   += " AND D2.D2_I_TPABA IN " + FormatIn(mv_par19,";")  
+If !Empty(MV_PAR19)   
+	cFiltro   += " AND D2.D2_I_TPABA IN " + FormatIn(MV_PAR19,";")  
 EndIf
              
 //Filtra Sub Grupo de Produto
-if !empty(mv_par21)
-	cFiltro   += " AND B1.B1_I_SUBGR IN " + FormatIn(mv_par21,";")
-endif               
+If !Empty(MV_PAR21)
+	cFiltro   += " AND B1.B1_I_SUBGR IN " + FormatIn(MV_PAR21,";")
+EndIf               
 
 cFiltro   += "%"
                
 //Primeira Ordem - Rede_Produto
-if nOrdem == 1    
+If nOrdem == 1    
     
 		oSecRede_1:Enable()
 		oSecDados_1:Enable()      
 		                
 		//Visualiza desconto Integral
-		If mv_par20 == 1    
+		If MV_PAR20 == 1    
 		
 			oSecDados_1:Cell("d2_i_vlrdc"):Enable()
 			oSecDados_1:Cell("PORCINT"):Enable()                                    
 		
 		//Visualiza desconto parcial
-		ElseIf mv_par20 == 2   
+		ElseIf MV_PAR20 == 2   
 		
 			oSecDados_1:Cell("d2_i_vlpar"):Enable()   
 			oSecDados_1:Cell("PORCPAR"):Enable()
@@ -488,16 +488,16 @@ if nOrdem == 1
 					SUM(D2.d2_valbrut) d2_valbrut,
 					SUM(d2.d2_i_vlrdc) d2_i_vlrdc,
 					SUM(d2.d2_i_vlpar) d2_i_vlpar,
-					round(((SUM(d2.d2_i_vlrdc) / SUM(D2.d2_total)) * 100),2) PORCINT,
+					Round(((SUM(d2.d2_i_vlrdc) / SUM(D2.d2_total)) * 100),2) PORCINT,
 					Round(((SUM(d2.d2_i_vlpar) / SUM(D2.d2_total)) * 100),2) PORCPAR
 					
 				FROM 
-					%table:SF2% F2
-					JOIN %table:SD2% D2  ON F2.f2_filial = d2.d2_filial AND F2.f2_doc = D2.d2_doc AND F2.f2_serie = D2.d2_serie AND F2.F2_CLIENTE = D2.D2_CLIENTE AND F2.F2_LOJA = D2.D2_LOJA
-					JOIN %table:SA1% A1  ON F2.f2_cliente = A1.a1_cod AND F2.f2_loja = A1.a1_loja
-					JOIN %table:SA3% SA3 ON F2.F2_VEND1 = SA3.A3_COD
-					JOIN %table:ACY% ACY ON A1.a1_grpven = ACY.acy_grpven
-					JOIN %table:SB1% B1  ON d2.d2_cod = B1.b1_cod
+					%Table:SF2% F2
+					JOIN %Table:SD2% D2  ON F2.f2_filial = d2.d2_filial AND F2.f2_doc = D2.d2_doc AND F2.f2_serie = D2.d2_serie AND F2.F2_CLIENTE = D2.D2_CLIENTE AND F2.F2_LOJA = D2.D2_LOJA
+					JOIN %Table:SA1% A1  ON F2.f2_cliente = A1.a1_cod AND F2.f2_loja = A1.a1_loja
+					JOIN %Table:SA3% SA3 ON F2.F2_VEND1 = SA3.A3_COD
+					JOIN %Table:ACY% ACY ON A1.a1_grpven = ACY.acy_grpven
+					JOIN %Table:SB1% B1  ON d2.d2_cod = B1.b1_cod
 				WHERE 
 					F2.%notDel%  
 					AND D2.%notDel%  
@@ -522,19 +522,19 @@ if nOrdem == 1
 		oSecRede_1:Print(.T.)
         
 		//segunda Ordem - Filial_Produto
-		Elseif nOrdem == 2    
+		ElseIf nOrdem == 2    
     
 		oSecRede_4:Enable()
 		oSecDado_4:Enable()      
 		                
 		//Visualiza desconto Integral
-		If mv_par20 == 1                         
+		If MV_PAR20 == 1                         
 		
 				oSecDado_4:Cell("d2_i_vlrdc"):Enable()
 		        oSecDado_4:Cell("PORCINT"):Enable()                                    
 		
 		//Visualiza desconto parcial
-		ElseIf mv_par20 == 2   
+		ElseIf MV_PAR20 == 2   
 		
 			    oSecDado_4:Cell("d2_i_vlpar"):Enable()   
 			    oSecDado_4:Cell("PORCPAR"):Enable()
@@ -593,16 +593,16 @@ if nOrdem == 1
 					SUM(D2.d2_valbrut) d2_valbrut,
 					SUM(d2.d2_i_vlrdc) d2_i_vlrdc,
 					SUM(d2.d2_i_vlpar) d2_i_vlpar,
-					round(((SUM(d2.d2_i_vlrdc) / SUM(D2.d2_total)) * 100),2) PORCINT,
+					Round(((SUM(d2.d2_i_vlrdc) / SUM(D2.d2_total)) * 100),2) PORCINT,
 					Round(((SUM(d2.d2_i_vlpar) / SUM(D2.d2_total)) * 100),2) PORCPAR
 					
 				FROM 
 				
-					%table:SF2% F2
-					JOIN %table:SD2% D2  ON F2.f2_filial = d2.d2_filial AND F2.f2_doc = D2.d2_doc AND F2.f2_serie = D2.d2_serie 
-					JOIN %table:SA1% A1  ON F2.f2_cliente = A1.a1_cod AND F2.f2_loja = A1.a1_loja
-					JOIN %table:SA3% SA3 ON F2.F2_VEND1 = SA3.A3_COD
-					JOIN %table:SB1% B1  ON d2.d2_cod = B1.b1_cod
+					%Table:SF2% F2
+					JOIN %Table:SD2% D2  ON F2.f2_filial = d2.d2_filial AND F2.f2_doc = D2.d2_doc AND F2.f2_serie = D2.d2_serie 
+					JOIN %Table:SA1% A1  ON F2.f2_cliente = A1.a1_cod AND F2.f2_loja = A1.a1_loja
+					JOIN %Table:SA3% SA3 ON F2.F2_VEND1 = SA3.A3_COD
+					JOIN %Table:SB1% B1  ON d2.d2_cod = B1.b1_cod
 				WHERE 
 					F2.%notDel%  
 					AND D2.%notDel%  
@@ -628,18 +628,18 @@ if nOrdem == 1
 		
 		
 		//terceira Ordem - Produto
-		Elseif nOrdem == 3    
+		ElseIf nOrdem == 3    
     
 		oSecDado_5:Enable()      
 		                
 		//Visualiza desconto Integral
-		If mv_par20 == 1                         
+		If MV_PAR20 == 1                         
 		
 				oSecDado_5:Cell("d2_i_vlrdc"):Enable()
 		        oSecDado_5:Cell("PORCINT"):Enable()                                    
 		
 		//Visualiza desconto parcial
-		ElseIf mv_par20 == 2   
+		ElseIf MV_PAR20 == 2   
 		
 			    oSecDado_5:Cell("d2_i_vlpar"):Enable()   
 			    oSecDado_5:Cell("PORCPAR"):Enable()
@@ -679,14 +679,14 @@ if nOrdem == 1
 					SUM(D2.d2_valbrut) d2_valbrut,
 					SUM(d2.d2_i_vlrdc) d2_i_vlrdc,
 					SUM(d2.d2_i_vlpar) d2_i_vlpar,
-					round(((SUM(d2.d2_i_vlrdc) / SUM(D2.d2_total)) * 100),2) PORCINT,
+					Round(((SUM(d2.d2_i_vlrdc) / SUM(D2.d2_total)) * 100),2) PORCINT,
 					Round(((SUM(d2.d2_i_vlpar) / SUM(D2.d2_total)) * 100),2) PORCPAR
 				FROM 
-					%table:SF2% F2
-					JOIN %table:SD2% D2  ON F2.f2_filial = d2.d2_filial AND F2.f2_doc = D2.d2_doc AND F2.f2_serie = D2.d2_serie 
-					JOIN %table:SA1% A1  ON F2.f2_cliente = A1.a1_cod AND F2.f2_loja = A1.a1_loja
-					JOIN %table:SA3% SA3 ON F2.F2_VEND1 = SA3.A3_COD
-					JOIN %table:SB1% B1  ON d2.d2_cod = B1.b1_cod
+					%Table:SF2% F2
+					JOIN %Table:SD2% D2  ON F2.f2_filial = d2.d2_filial AND F2.f2_doc = D2.d2_doc AND F2.f2_serie = D2.d2_serie 
+					JOIN %Table:SA1% A1  ON F2.f2_cliente = A1.a1_cod AND F2.f2_loja = A1.a1_loja
+					JOIN %Table:SA3% SA3 ON F2.F2_VEND1 = SA3.A3_COD
+					JOIN %Table:SB1% B1  ON d2.d2_cod = B1.b1_cod
 				WHERE 
 					F2.%notDel%  
 					AND D2.%notDel%  
@@ -707,20 +707,20 @@ if nOrdem == 1
 							
 		
 		//Ordem Cliente x Produto
-		Elseif nOrdem == 4    
+		ElseIf nOrdem == 4    
     
 		oSecRede_6:Enable()
 		oSecCli:Enable()
 		oSecDado_6:Enable()      
 		                
 		//Visualiza desconto Integral
-		If mv_par20 == 1    
+		If MV_PAR20 == 1    
 		
 				oSecDado_6:Cell("d2_i_vlrdc"):Enable()
 		        oSecDado_6:Cell("PORCINT"):Enable()                                    
 		
 		//Visualiza desconto parcial
-		ElseIf mv_par20 == 2   
+		ElseIf MV_PAR20 == 2   
 		
 			    oSecDado_6:Cell("d2_i_vlpar"):Enable()   
 			    oSecDado_6:Cell("PORCPAR"):Enable()
@@ -799,16 +799,16 @@ if nOrdem == 1
 					SUM(D2.d2_valbrut) d2_valbrut,
 					SUM(d2.d2_i_vlrdc) d2_i_vlrdc,
 					SUM(d2.d2_i_vlpar) d2_i_vlpar,
-					round(((SUM(d2.d2_i_vlrdc) / SUM(D2.d2_total)) * 100),2) PORCINT,
+					Round(((SUM(d2.d2_i_vlrdc) / SUM(D2.d2_total)) * 100),2) PORCINT,
 					Round(((SUM(d2.d2_i_vlpar) / SUM(D2.d2_total)) * 100),2) PORCPAR
 					
 				FROM 
-					%table:SF2% F2
-					JOIN %table:SD2% D2  ON F2.f2_filial = d2.d2_filial AND F2.f2_doc = D2.d2_doc AND F2.f2_serie = D2.d2_serie AND F2.F2_CLIENTE = D2.D2_CLIENTE AND F2.F2_LOJA = D2.D2_LOJA
-					JOIN %table:SA1% A1  ON F2.f2_cliente = A1.a1_cod AND F2.f2_loja = A1.a1_loja
-					JOIN %table:SA3% SA3 ON F2.F2_VEND1 = SA3.A3_COD
-					JOIN %table:ACY% ACY ON A1.a1_grpven = ACY.acy_grpven
-					JOIN %table:SB1% B1  ON d2.d2_cod = B1.b1_cod
+					%Table:SF2% F2
+					JOIN %Table:SD2% D2  ON F2.f2_filial = d2.d2_filial AND F2.f2_doc = D2.d2_doc AND F2.f2_serie = D2.d2_serie AND F2.F2_CLIENTE = D2.D2_CLIENTE AND F2.F2_LOJA = D2.D2_LOJA
+					JOIN %Table:SA1% A1  ON F2.f2_cliente = A1.a1_cod AND F2.f2_loja = A1.a1_loja
+					JOIN %Table:SA3% SA3 ON F2.F2_VEND1 = SA3.A3_COD
+					JOIN %Table:ACY% ACY ON A1.a1_grpven = ACY.acy_grpven
+					JOIN %Table:SB1% B1  ON d2.d2_cod = B1.b1_cod
 				WHERE 
 					F2.%notDel%  
 					AND D2.%notDel%  
@@ -854,17 +854,17 @@ Parametros--------: cCodFil : Codigo da Filial a ser retornado o nome
 Retorno-----------: _cRet := Nome da filial
 ===============================================================================================================================
 */ 
-Static function ROMS014NOM(cCodFil)
-local _aAreaSM0 := SM0->(getArea())
-local _cRet := " "
+Static Function ROMS014NOM(cCodFil)
+Local _aAreaSM0 := SM0->(getArea())
+Local _cRet := " "
 
-SM0->(dbSelectArea("SM0"))
-SM0->(dbSetOrder(1))
-SM0->(dbSeek(cEmpAnt+ cCodFil))
+SM0->(DBSelectArea("SM0"))
+SM0->(DBSetOrder(1))
+SM0->(DBSeek(cEmpAnt+ cCodFil))
 _cRet := SM0->M0_FILIAL 
 
 //Restaura integridade da SM0
-SM0->(dbSetOrder(_aAreaSM0[2]))
-SM0->(dbGoTo(_aAreaSM0[3]))
+SM0->(DBSetOrder(_aAreaSM0[2]))
+SM0->(DBGoTo(_aAreaSM0[3]))
 
-return _cRet
+Return _cRet

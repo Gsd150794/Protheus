@@ -8,7 +8,7 @@
 ===============================================================================================================================
 */
 
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 #Include "FWMVCDef.ch"
 
 /*
@@ -41,12 +41,12 @@ Local _xAces02	:= U_ITAcsUsr( 'ZZL_CADFRT' , '2' )
 If ValType( _xAces01 ) == 'N' .And. _xAces01 == 0
 
 	Aviso( 'Atenção!' , 'Usuário não está cadastrado na Gestão de Usuários do Configurador Italac!' , {'Fechar'} )
-	Return()
+	Return
 
 ElseIf !_xAces01 .And. !_xAces02
 	
 	Aviso( 'Atenção!' , 'Usuário sem acesso às rotinas de cadastros da tabela de Frete!'			, {'Fechar'} )
-	Return()
+	Return
 	
 EndIf
 
@@ -67,7 +67,7 @@ _oBrowse:SetDescription( "Regiões das tabelas de frete" )
 _oBrowse:DisableDetails()
 _oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================

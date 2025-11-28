@@ -2,18 +2,14 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 28/09/2018 | Revisão do fonte para padronização - Chamado 26404
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 23/01/2019 | Padronização dos campos de placa. Chamado: 27807
+Lucas Borges  |28/09/2018| Chamado 26404. Revisão do fonte para padronização
+Lucas Borges  |23/01/2019| Chamado 27807. Padronização dos campos de placa
 ===============================================================================================================================
 */
 
-//===========================================================================
-//| Definições de Includes                                                  |
-//===========================================================================
-#INCLUDE 'Protheus.ch'
+#Include "TOTVS.ch"
 #Include "FWMVCDef.ch"
 
 /*
@@ -21,11 +17,8 @@ Lucas Borges  | 23/01/2019 | Padronização dos campos de placa. Chamado: 27807
 Programa----------: AGLT028
 Autor-------------: Alexandre Villar
 Data da Criacao---: 18/11/2014
-===============================================================================================================================
 Descrição---------: Cadastro de Veículos referentes ao transporte de Leite de Terceiros
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -44,18 +37,15 @@ _oBrowse:SetDescription( "Cadastro de Veículos para Transporte de Leite de Terce
 _oBrowse:DisableDetails()
 _oBrowse:Activate()
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MenuDef
 Autor-------------: Alexandre Villar
 Data da Criacao---: 18/11/2014
-===============================================================================================================================
 Descrição---------: Rotina de definição automática do menu via MVC
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: aRotina - Definições do menu principal da Rotina.
 ===============================================================================================================================
 */
@@ -67,11 +57,8 @@ Return( FWMVCMenu("AGLT028") )
 Programa----------: ModelDef
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/11/2014
-===============================================================================================================================
 Descrição---------: Rotina de definição do Modelo de Dados do MVC
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: oModel - Objeto do modelo de dados do MVC
 ===============================================================================================================================
 */
@@ -101,11 +88,8 @@ Return( _oModel )
 Programa----------: ViewDef
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/11/2014
-===============================================================================================================================
 Descrição---------: Rotina de definição da View do MVC
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: oView - Objeto de exibição do MVC
 ===============================================================================================================================
 */
@@ -132,11 +116,8 @@ Return( _oView )
 Programa----------: AGLT028VLI
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/11/2014
-===============================================================================================================================
 Descrição---------: Validação inicial do modelo de dados
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: oView - Objeto de exibição do MVC
 ===============================================================================================================================
 */
@@ -147,7 +128,7 @@ Local _lRet		:= .T.
 
 If _oModel:GetOperation() == MODEL_OPERATION_DELETE
 
-	BeginSQL Alias _cAlias
+	BeginSql Alias _cAlias
 		SELECT COUNT(1) QTD
 		FROM %Table:ZZX% ZZX
 		WHERE ZZX.D_E_L_E_T_ =' '
@@ -155,7 +136,7 @@ If _oModel:GetOperation() == MODEL_OPERATION_DELETE
 		AND ZZX_PLACA  = %exp:ZZV->ZZV_PLACA%
 		AND ZZX_TRANSP = %exp:ZZV->ZZV_TRANSP%
 		AND ZZX_LJTRAN = %exp:ZZV->ZZV_LJTRAN%
-	EndSQL
+	EndSql
 
 	If (_cAlias)->QTD > 0
 		_lRet := .F.
@@ -173,18 +154,15 @@ Return( _lRet )
 Programa----------: AGLT028INC
 Autor-------------: Alexandre Villar
 Data da Criacao---: 19/11/2014
-===============================================================================================================================
 Descrição---------: Validação da inclusão de registros
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: oView - Objeto de exibição do MVC
 ===============================================================================================================================
 */
 Static Function AGLT028INC(_oModel)
 
 Local _lRet		:= .T.
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 
 If _oModel:GetOperation() == MODEL_OPERATION_INSERT
 
@@ -197,7 +175,7 @@ If _oModel:GetOperation() == MODEL_OPERATION_INSERT
 	
 		DBSelectArea("ZZV")
 		ZZV->( DBSetOrder(3) )
-		IF ZZV->( DBSeek( xFilial("ZZV") + _oModel:GetValue('ZZVMASTER','ZZV_PLACA') + _oModel:GetValue('ZZVMASTER','ZZV_TRANSP') + _oModel:GetValue('ZZVMASTER','ZZV_LJTRAN') ) )
+		If ZZV->( DBSeek( xFilial("ZZV") + _oModel:GetValue('ZZVMASTER','ZZV_PLACA') + _oModel:GetValue('ZZVMASTER','ZZV_TRANSP') + _oModel:GetValue('ZZVMASTER','ZZV_LJTRAN') ) )
 			_lRet := .F.		
 			_oModel:SetErrorMessage('ZZVMASTER', 'ZZV_PLACA' , 'ZZVMASTER' , 'ZZV_PLACA' , "AGLT02803", "A placa informada já foi cadastrada para o Transportador atual.", "Verifique os dados informados")
 		EndIf
@@ -206,6 +184,6 @@ If _oModel:GetOperation() == MODEL_OPERATION_INSERT
 
 EndIf
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 Return( _lRet )

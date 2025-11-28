@@ -2,28 +2,15 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor      |   Data   |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges| 21/05/21 | Chamado 36589 - Retirada a gravação de campos nunca utilizados. 
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges| 15/06/21 | Chamado 36816 - Incluída validação de movimentação para o transportador. 
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges| 09/08/21 | Chamado 37338 - Corrigida validação do movimento por filial. 
--------------------------------------------------------------------------------------------------------------------------------
-Alex Walluer| 30/03/22 | Chamado 39596 - Linhas transbordo tem KM fixos e o pgto é feito por esse KM, independente KM rodado. 
--------------------------------------------------------------------------------------------------------------------------------
-Alex Walluer| 31/03/22 | Chamado 39596 - Gravação do campo novo ZLD_VFILHA. 
--------------------------------------------------------------------------------------------------------------------------------
-Alex Walluer| 05/08/22 | Chamado 40901 - Nova validacao para não efetivar sem data de estoque. 
--------------------------------------------------------------------------------------------------------------------------------
-Igor Melgaço| 19/04/24 | Chamado 46580 - Inclusão de campo de Observações na tela de Dados da Recepção Tipo Plataforma.
+Alex Walluer  |31/03/2022| Chamado 39596. Gravação do campo novo ZLD_VFILHA. 
+Alex Walluer  |05/08/2022| Chamado 40901. Nova validacao para não efetivar sem data de estoque. 
+Igor Melgaço  |19/04/2024| Chamado 46580. Inclusão de campo de Observações na tela de Dados da Recepção Tipo Plataforma.
 ===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
 
-#INCLUDE "Protheus.ch"
+#Include "TOTVS.ch"
 #Include "RWMAKE.CH"
 #Include "FwMVCDef.ch"
 #Include "ap5mail.ch"
@@ -32,11 +19,8 @@ Igor Melgaço| 19/04/24 | Chamado 46580 - Inclusão de campo de Observações na tel
 Programa--------: AGLT021
 Autor-----------: Josué Danich Prestes
 Data da Criacao-: 29/04/2016
-===============================================================================================================================
 Descrição-------: Tela para efetivação das recepções do leite recebidas via Smartquestion - Chamado 14887
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -73,11 +57,8 @@ Return
 Programa--------: MenuDef
 Autor-----------: Josué Danich Prestes
 Data da Criacao-: 13/04/2016
-===============================================================================================================================
 Descrição-------: Rotina de definição automática do menu via MVC
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: aRotina - Definições do menu principal da Rotina.
 ===============================================================================================================================
 */
@@ -104,11 +85,8 @@ Return _aRot
 Programa--------: ModelDef
 Autor-----------: Josué Danich Prestes
 Data da Criacao-: 13/04/2016
-===============================================================================================================================
 Descrição-------: Rotina de definição do Modelo de Dados do MVC
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: oModel - Objeto do modelo de dados do MVC
 ===============================================================================================================================
 */
@@ -149,11 +127,8 @@ Return( _oModel )
 Programa--------: ViewDef
 Autor-----------: Josué Danich Prestes
 Data da Criacao-: 13/04/2016
-===============================================================================================================================
 Descrição-------: Rotina de definição da View do MVC
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: oView - Objeto de exibição do MVC
 ===============================================================================================================================
 */
@@ -187,11 +162,8 @@ Return( _oView )
 Programa--------: AGLT021CPO
 Autor-----------: Josué Danich Prestes
 Data da Criacao-: 13/04/2016
-===============================================================================================================================
 Descrição-------: Configuração da inicialização de campos na tela
-===============================================================================================================================
 Parametros------: _cCampo: Campo , _nOpc : opcao
-===============================================================================================================================
 Retorno---------: oView - Objeto de exibição do MVC
 ===============================================================================================================================
 */
@@ -239,7 +211,7 @@ If _nOpc == 1//Os campos abaixo aparecem na CAPA E NOS ITENS, mas eles não podem
     _ccampos += 'ZLJ_DINTSQ;'
     _ccampos += 'ZLJ_HINTSQ;'
 EndIf
-_lret := Alltrim(_cCampo) $ _ccampos
+_lRet := AllTrim(_cCampo) $ _ccampos
 
 If _nOpc == 2
 	_lRet := !_lRet
@@ -252,11 +224,8 @@ Return( _lRet )
 Programa--------: AGLT021Y
 Autor-----------: Josué Danich Prestes
 Data da Criacao-: 13/04/2016
-===============================================================================================================================
 Descrição-------: Retorna o nome do motorista para a viagem posicionada
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: _cret - Nome do motorista
 ===============================================================================================================================
 */
@@ -265,23 +234,20 @@ User Function AGLT021Y()
 Local _cmot := ZLJ->ZLJ_MOTORI
       
 If Empty(_cmot)
-   _cmot := Posicione("ZL1",2,XFILIAL("ZL1")+ZLJ->ZLJ_PLACA,"ZL1_MOTORI")     
+   _cmot := Posicione("ZL1",2,xFilial("ZL1")+ZLJ->ZLJ_PLACA,"ZL1_MOTORI")     
 EndIf
 
-Return (Posicione("ZL0",1,XFILIAL("ZL0")+_cmot,"ZL0_NOME"))
+Return (Posicione("ZL0",1,xFilial("ZL0")+_cmot,"ZL0_NOME"))
 
 /*
 ===============================================================================================================================
 Programa--------: AGLT021L
 Autor-----------: Josué Danich Prestes
 Data da Criacao-: 13/04/2015
-===============================================================================================================================
 Descrição-------: Retorna o volumes  do veiculo para a viagem posicionada
-===============================================================================================================================
 Parametros------: _ntipo - 1 (Default) - Retorna volume real do veiculo
 							   2 - Retorna volume declarado nas recepções
 							   3 - Retorna diferença de volume
-===============================================================================================================================
 Retorno---------: _nret - volume retornado
 ===============================================================================================================================
 */
@@ -293,7 +259,7 @@ Local _nVolrec := 0
 Local _cFilial := ZLJ->ZLJ_FILIAL
 Local _cViagem := ZLJ->ZLJ_VIAGEM
 Local _nPosi   := ZLJ->( Recno() )
-Local _aAreaAnt:= ZLJ->( GetArea() )
+Local _aAreaAnt:= ZLJ->( FWGetArea() )
 Local _nVolLeiteProprio:= 0
 Local _nVolCooperativa := 0
 
@@ -303,14 +269,14 @@ Default _cAlias:="ZLJ"//Tratamento para o alias TRB_ZLJ só para o tipo = 1
 If ZLJ->(FIELDPOS("ZLJ_VFILHA")) # 0
    ZLJ->( DBSetOrder(5) )//ZLJ_FILIAL+ZLJ_VIAGEM+ZLJ_TIPPRO
    If !ZLJ->( DBSeek( _cFilial + _cViagem + "F" ) ) //Se não achar a linha da julieta fica onde tava
-      ZLJ->( Dbgoto(_nPosi) )
+      ZLJ->( DBGoTo(_nPosi) )
    EndIf
 EndIf
 
 If (_cAlias)->ZLJ_LITRAG > 0
 	_nvol := (_cAlias)->ZLJ_LITRAG
 Else
-	_nvol :=((_cAlias)->ZLJ_PSIVIA - (_cAlias)->ZLJ_PSFVIA) / POSICIONE("ZA7",1,(_cAlias)->ZLJ_FILIAL+"001","ZA7_DENPAD")
+	_nvol :=((_cAlias)->ZLJ_PSIVIA - (_cAlias)->ZLJ_PSFVIA) / Posicione("ZA7",1,(_cAlias)->ZLJ_FILIAL+"001","ZA7_DENPAD")
 EndIf
 
 //Se o retorno vai ser o volume da viagem já deixa a variável carregada
@@ -322,12 +288,12 @@ If _ntipo == 1
    EndIf
 	
 //Se o retorno vai ser o volume declarado das recepções ou diferença de volumes roda o ZLJ para chegar ao total
-ElseIf  _ntipo == 2 .or. _ntipo == 3 .or. _ntipo == 4 .or. _ntipo == 5
+ElseIf  _ntipo == 2 .Or. _ntipo == 3 .Or. _ntipo == 4 .Or. _ntipo == 5
 
 	ZLJ->( DBSetOrder(2) )
 	ZLJ->( DBSeek( _cfilial + _cviagem ) )
 	
-	Do While ZLJ->(!EOF()) .AND. ZLJ->ZLJ_VIAGEM  == _cviagem .and. ZLJ->ZLJ_FILIAL == _cfilial
+	While ZLJ->(!Eof()) .And. ZLJ->ZLJ_VIAGEM  == _cviagem .And. ZLJ->ZLJ_FILIAL == _cfilial
 	
 		_nVolrec += ZLJ->ZLJ_VOLUME
         
@@ -343,18 +309,18 @@ ElseIf  _ntipo == 2 .or. _ntipo == 3 .or. _ntipo == 4 .or. _ntipo == 5
 	
 	If _ntipo == 2
 		_nret := _nvolrec
-	Elseif _ntipo == 3
+	ElseIf _ntipo == 3
 		_nret :=  _nvol - _nvolrec
-	Elseif _ntipo == 4
+	ElseIf _ntipo == 4
 		_nret := _nVolLeiteProprio 
-	Elseif _ntipo == 5
+	ElseIf _ntipo == 5
 		_nret := _nVolCooperativa
 	EndIf
 	
 EndIf
 
 //Retorna ZLJ à posição original para não matar o processo do fwbrowse
-ZLJ->( Restarea(_aAreaAnt) )
+ZLJ->( FWRestArea(_aAreaAnt) )
 ZLJ->( DBGoTo(_nposi) )
 
 Return Round(_nret,0)
@@ -364,11 +330,8 @@ Return Round(_nret,0)
 Programa--------: AGLT021H
 Autor-----------: Josué Danich Prestes
 Data da Criacao-: 13/04/2016
-===============================================================================================================================
 Descrição-------: Legenda para o fwbrowse principal
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -377,9 +340,9 @@ User Function AGLT021H()
 Local aLegenda := {}
      
 //Monta as cores
-AADD(aLegenda,{"BR_VERDE",      	"Pendente"})
-AADD(aLegenda,{"BR_VERMELHO",   	"Efetivado"})
-AADD(aLegenda,{"BR_CINZA",   		"Recusado"})
+aAdd(aLegenda,{"BR_VERDE",      	"Pendente"})
+aAdd(aLegenda,{"BR_VERMELHO",   	"Efetivado"})
+aAdd(aLegenda,{"BR_CINZA",   		"Recusado"})
      
 BrwLegenda("Integração Smartquestion", "Recepções", aLegenda)
 
@@ -390,11 +353,8 @@ Return
 Programa--------: AGLT021R
 Autor-----------: Josué Danich
 Data da Criacao-: 13/04/2016
-===============================================================================================================================
 Descrição-------: Atualiza dados a partir do Smartquestion
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: .T.  OU .F.
 ===============================================================================================================================
 */
@@ -406,7 +366,7 @@ Local _nX		:= 0
 Local _aFils	:= {}
 Local _lOK		:= .F.
 Private _cFiltroFilial:= ""
-Private _dDtini  := StoD( POSICIONE("SX6",1,cFilant+"MV_ULMES","X6_CONTEUD") )//ddatabase
+Private _dDtini  := SToD( Posicione("SX6",1,cFilant+"MV_ULMES","X6_CONTEUD") )//ddatabase
 Private _dDtfim  := ddatabase
 Private _cTransI := Space(Len(ZLJ->ZLJ_CODPAT))
 Private _cTraLoI := Space(Len(ZLJ->ZLJ_LOJPAT))
@@ -442,42 +402,42 @@ If AGLT21Valid(,"OK")
 	//Já trava as filiais selecionadas
 	If !Empty(_cFiltroFilial)
 		_aFils       := StrTokArr(AllTrim(_cFiltroFilial),';')
-		_cZLJ_UINTSQ := AllTrim(UsrFullName(__cUserID))
+		_cZLJ_UINTSQ := AllTrim(UsrFullName(__cUserId))
 		_lConcorr    := .F.
 		_cTread      := ""
 		_cFilial     := ""
 		_cMens       := ""
 		_nFil        := 0
-		ZLK->(DbSetOrder(1))//Vamos controlar por filial agora
+		ZLK->(DBSetOrder(1))//Vamos controlar por filial agora
 		
 		For _nX := 1 To Len(_aFils)
 			_cFilial :=LEFT(_aFils[_nX],2)
 		    _lConcorr := .F.
-			If ZLK->(Dbseek(_cFilial ))
+			If ZLK->(DBSeek(_cFilial ))
 				If !ZLK->(MsRLock(ZLK->(RECNO())))
 					_lConcorr:= .T.
 					_cTread  := ZLK->ZLK_THREAD
 					_cUser   := Lower(AllTrim(ZLK->ZLK_USUSAR))
 					_cViagem := AllTrim(ZLK->ZLK_VIAGEM)
 				Else
-					ZLK->(Reclock("ZLK",.F.))
-					ZLK->ZLK_VIAGEM := _cFilial+"-"+DTOC(DATE())+"-"+TIME()
+					ZLK->(RecLock("ZLK",.F.))
+					ZLK->ZLK_VIAGEM := _cFilial+"-"+DToC(DATE())+"-"+Time()
 					ZLK->ZLK_THREAD := StrZero(ThreadID(),6)
 					ZLK->ZLK_USUSAR := _cZLJ_UINTSQ
-					ZLK->(Msunlock())
-					ZLK->(Reclock("ZLK",.F.))
+					ZLK->(MSUnLock())
+					ZLK->(RecLock("ZLK",.F.))
 				EndIf
 			Else
-				ZLK->(Reclock("ZLK",.T.))
+				ZLK->(RecLock("ZLK",.T.))
 				ZLK->ZLK_FILIAL := _cFilial  
-				ZLK->ZLK_VIAGEM := _cFilial+"-"+DTOC(DATE())+"-"+TIME()
+				ZLK->ZLK_VIAGEM := _cFilial+"-"+DToC(DATE())+"-"+Time()
 				ZLK->ZLK_THREAD := StrZero(ThreadID(),6)
 				ZLK->ZLK_USUSAR := _cZLJ_UINTSQ
-				ZLK->(Msunlock())
-				ZLK->(Reclock("ZLK",.F.))
+				ZLK->(MSUnLock())
+				ZLK->(RecLock("ZLK",.F.))
 			EndIf
 			If _lConcorr  
-               ZLK->(MSUNLOCKALL())
+               ZLK->(MSUnLockALL())
 			   _cMens+=CHR(13)+CHR(10)+_cUser+", filial: "+_cViagem
 			   _nFil++
 			   _lOK:=.F.
@@ -485,7 +445,7 @@ If AGLT21Valid(,"OK")
 		Next _nX
 	EndIf
 	If _lOK
-	   _cTimeInicial:=TIME()
+	   _cTimeInicial:=Time()
 	   oProcess:=MsNewProcess():New({|lEnd| _lOK:=U_MGLT002( _dDtini, _dDtfim, .F., @oProcess, @lEnd) },'Hora Inicial: '+_cTimeInicial,"Atualizando dados...",.T.)
 	   oProcess:Activate()
 	Else
@@ -504,11 +464,11 @@ If !Empty(_cFiltroFilial)
    ZLK->(DBSetOrder(1))
    For _nX := 1 To Len(_aFils)
 	   _cFilial:=LEFT(_aFils[_nX],2)
-	   If ZLK->(DbSeek(_cFilial))
-          ZLK->(Msunlock())
+	   If ZLK->(DBSeek(_cFilial))
+          ZLK->(MSUnLock())
        EndIf
    Next _nX
-   ZLK->(MsunlockALL())
+   ZLK->(MSUnLockALL())
 EndIf
 
 ZLJ->(DBGoTop())
@@ -521,12 +481,9 @@ Return _lOK
 Programa--------: AGLT21Valid()
 Autor-----------: Alex Walaluer
 Data da Criacao-: 05/07/2016
-===============================================================================================================================
 Descrição-------: Validacoes da Tela
-===============================================================================================================================
 Parametros------: uDado   : Codigo para validar
                   cChamada: Da onde chamou
-===============================================================================================================================
 Retorno---------: Verdadeiro se os valores informados estiverem consistentes
 ===============================================================================================================================
 */
@@ -538,13 +495,13 @@ If cChamada = "OK"
 	  MsgStop("A digitação da filial é obrigatoria. Selecione uma ou mais filiais","AGLT02154")
 	  Return .F.
    EndIf
-   If Empty(_dDtini) .OR. Empty(_dDtfim)
+   If Empty(_dDtini) .Or. Empty(_dDtfim)
 	  MsgStop("As duas datas devem ser preenchidas","AGLT02101")
 	  Return .F.
    EndIf
    _dDtMV_ULMES:= SuperGetMV("MV_ULMES",.F.,Date())
    If _dDtini <= _dDtMV_ULMES
-	  MsgStop("Data inicial menor ou igual que a data do fechamento do estoque: "+DTOC(_dDtMV_ULMES)+"] ","AGLT02102")
+	  MsgStop("Data inicial menor ou igual que a data do fechamento do estoque: "+DToC(_dDtMV_ULMES)+"] ","AGLT02102")
 	  Return .F.
    EndIf
    If _dDtini > _dDtfim
@@ -552,47 +509,47 @@ If cChamada = "OK"
 	  Return .F.
    EndIf
 
-   If !Empty(_cSetorF) .AND. !AGLT21Valid(_cSetorI,"SE")
+   If !Empty(_cSetorF) .And. !AGLT21Valid(_cSetorI,"SE")
 	  Return .F.
    EndIf
-   If !Empty(_cSetorF) .AND. !AGLT21Valid(_cSetorF,"SE")
+   If !Empty(_cSetorF) .And. !AGLT21Valid(_cSetorF,"SE")
 	  Return .F.
    EndIf
-   If !Empty(_cSetorF) .AND. _cSetorI > _cSetorF
+   If !Empty(_cSetorF) .And. _cSetorI > _cSetorF
 	  MsgStop("Setor inicial deve ser menor que o setor final","AGLT02104")
 	  Return .F.
    EndIf
 
-   If !Empty(_cLinhaI) .AND. !AGLT21Valid(_cLinhaI,"LI")
+   If !Empty(_cLinhaI) .And. !AGLT21Valid(_cLinhaI,"LI")
 	  Return .F.
    EndIf
-   If !Empty(_cLinhaF) .AND. !AGLT21Valid(_cLinhaF,"LI")
+   If !Empty(_cLinhaF) .And. !AGLT21Valid(_cLinhaF,"LI")
 	  Return .F.
    EndIf
-   If !Empty(_cLinhaF) .AND. _cLinhaI > _cLinhaF
+   If !Empty(_cLinhaF) .And. _cLinhaI > _cLinhaF
 	  MsgStop("Linha inicial deve ser menor que a linha final","AGLT02105")
 	  Return .F.
    EndIf
 
-   If !Empty(_cTransI+_cTraLoI) .AND. !AGLT21Valid(_cTransI+_cTraLoI,"TRI")
+   If !Empty(_cTransI+_cTraLoI) .And. !AGLT21Valid(_cTransI+_cTraLoI,"TRI")
 	  Return .F.
    EndIf
-   If !Empty(_cTransF+_cTraLoF) .AND. !AGLT21Valid(_cTransF+_cTraLoF,"TRF")
+   If !Empty(_cTransF+_cTraLoF) .And. !AGLT21Valid(_cTransF+_cTraLoF,"TRF")
 	  Return .F.
    EndIf
-   If !Empty(_cTransF+_cTraLoF) .AND. _cTransI+_cTraLoI > _cTransF+_cTraLoF
+   If !Empty(_cTransF+_cTraLoF) .And. _cTransI+_cTraLoI > _cTransF+_cTraLoF
 	  MsgStop("Transportador inicial deve ser menor que o transportador final","AGLT02106")
 	  Return .F.
    EndIf
-   If !Empty(_cHoraI) .AND. VAL(_cHoraI) < 0 .OR. VAL(_cHoraI) > 23
+   If !Empty(_cHoraI) .And. Val(_cHoraI) < 0 .Or. Val(_cHoraI) > 23
 	  MsgStop("A hora Inicial só pode ser de Meia Noite (0) as 23 horas ","AGLT02107")
 	  Return .F.
    EndIf    
-   If !Empty(_cHoraF) .AND. VAL(_cHoraF) < 0 .OR. VAL(_cHoraF) > 23
+   If !Empty(_cHoraF) .And. Val(_cHoraF) < 0 .Or. Val(_cHoraF) > 23
 	  MsgStop("A hora Final só pode ser de Meia Noite (0) as 23 horas ","AGLT02108")
 	  Return .F.
    EndIf    
-   If !Empty(_cHoraI) .AND. !Empty(_cHoraF) .AND. VAL(_cHoraI) >  VAL(_cHoraF) 
+   If !Empty(_cHoraI) .And. !Empty(_cHoraF) .And. Val(_cHoraI) >  Val(_cHoraF) 
 	  MsgStop("A hora Inical é menor que a hora Final ","AGLT02109")
 	  Return .F.
    EndIf    
@@ -603,7 +560,7 @@ ElseIf Empty(uDado)// SE EM BRANCO NAO VALIDA OS CAMPOS ABAIXO, ELES NãO SãO OBR
 ElseIf cChamada = "TR" 
 	SA2->(DBSetOrder(1))
 	If SA2->(DBSeek(xFilial()+uDado))
-		If !SA2->A2_I_CLASS $ "A,T,G,C"  .OR. SA2->A2_MSBLQL # "2" .OR. SA2->A2_L_ATIVO == 'N'
+		If !SA2->A2_I_CLASS $ "A,T,G,C"  .Or. SA2->A2_MSBLQL # "2" .Or. SA2->A2_L_ATIVO == 'N'
 			MsgStop("Código: "+uDado+" não é do tipo Transportador (T,A,G,C) ou esta bloqueado ou inativo","AGLT02110")
 			Return .F.
 		EndIf
@@ -633,7 +590,7 @@ ElseIf cChamada = "PLACA"
 	EndIf
 	_cZLX_TRANSP := ZZV->ZZV_TRANSP
 	_cZLX_LJTRAN := ZZV->ZZV_LJTRAN
-	_cNomeTRAN   := Posicione('SA2',1,XFILIAL('SA2')+_cZLX_TRANSP+_cZLX_LJTRAN,'A2_NREDUZ')
+	_cNomeTRAN   := Posicione('SA2',1,xFilial('SA2')+_cZLX_TRANSP+_cZLX_LJTRAN,'A2_NREDUZ')
 
 EndIf
 
@@ -644,11 +601,8 @@ Return .T.
 Programa--------: AGLT021U
 Autor-----------: Josué Danich
 Data da Criacao-: 13/04/2016
-===============================================================================================================================
 Descrição-------: Recusa recepção posicionada
-===============================================================================================================================
 Parametros------: _cAlias: Tabela , nRecZLJ: Recno , _nOpc: Opcao
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -683,21 +637,18 @@ Return .T.
 Programa--------: AGLT021GRC
 Autor-----------: Josué Danich Prestes
 Data da Criacao-: 13/04/2016
-===============================================================================================================================
 Descrição-------: Grava as informações da recusa da recepção
-===============================================================================================================================
 Parametros------: _cmotivo - Motivo da recusa
 				  _lEstoque - movimenta estoque
 				  _lrefaz - veio do refaz estoque automático
-===============================================================================================================================
 Retorno---------: .T.
 ===============================================================================================================================
 */
 Static Function AGLT021GRC(_cmotivo,_lEstoque,_lRefaz)
 
-Local _ni  := 0
+Local _nI  := 0
 Local _lOK := .T.
-Local _lret:= .T.   
+Local _lRet:= .T.   
 Local _asetores:= {}
 Local _cFilOr  := ZLJ->ZLJ_FILIAL
 Local _cviajori:= ZLJ->ZLJ_VIAGEM  
@@ -717,13 +668,13 @@ BeginSql alias _cAlias
 EndSql	
 	
 If !Empty((_cAlias)->D3_EMISSAO)
-   _dSalvaDT:= STOD((_cAlias)->D3_EMISSAO)
+   _dSalvaDT:= SToD((_cAlias)->D3_EMISSAO)
 EndIf
 
 (_cAlias)->(DBCloseArea())
 
-If _lEstoque .AND. _dSalvaDT = M->ZLJ_DTCRIA
-	If !_lRefaz .AND. !MsgYesNo("A data de Estoque "+DTOC(M->ZLJ_DTCRIA)+" não foi alterada, mas essa data pode ser REPLICADA para todos os atendimentos dessa viagem, CONFIRMA ?","AGLT02116")
+If _lEstoque .And. _dSalvaDT = M->ZLJ_DTCRIA
+	If !_lRefaz .And. !MsgYesNo("A data de Estoque "+DToC(M->ZLJ_DTCRIA)+" não foi alterada, mas essa data pode ser REPLICADA para todos os atendimentos dessa viagem, CONFIRMA ?","AGLT02116")
 	   Return .F.
     EndIf
     _lAltDtEstoque:=.F.
@@ -741,19 +692,19 @@ ProcRegua(0)
 IncProc("Lendo Viagem...")
 IncProc("Lendo Viagem...")
 
-_cusrname := UsrFullName(__cUserID)
+_cusrname := UsrFullName(__cUserId)
 
 ZLJ->( DBSetOrder(2) )
 ZLD->( DBSetOrder(7) )
 If ZLJ->( DBSeek( SubStr( _cFilOr , 1 , 2 ) + _cviajori ) )
 
-   Do While ZLJ->(!EOF()) .AND. ZLJ->ZLJ_FILIAL + ZLJ->ZLJ_VIAGEM == SubStr(_cFilOr,1,2) + _cviajori
+   While ZLJ->(!Eof()) .And. ZLJ->ZLJ_FILIAL + ZLJ->ZLJ_VIAGEM == SubStr(_cFilOr,1,2) + _cviajori
 	
         IncProc("Lendo Atendimento: "+ZLJ->ZLJ_NUMERO) 
 
-		If _lEstoque .AND. _lAltDtEstoque .AND. !Empty(ZLJ->ZLJ_NUMERO) .AND. ZLD->( DBSeek( xFilial("ZLD") + ZLJ->ZLJ_NUMERO) )
+		If _lEstoque .And. _lAltDtEstoque .And. !Empty(ZLJ->ZLJ_NUMERO) .And. ZLD->( DBSeek( xFilial("ZLD") + ZLJ->ZLJ_NUMERO) )
 
-		    If ZLD->ZLD_STATUS = "F"  .OR. AGLT021D( ZLD->ZLD_DTCOLE , ZLD->ZLD_RETIRO , ZLD->ZLD_RETILJ , .T.,ZLJ->ZLJ_TIPPRO )
+		    If ZLD->ZLD_STATUS = "F"  .Or. AGLT021D( ZLD->ZLD_DTCOLE , ZLD->ZLD_RETIRO , ZLD->ZLD_RETILJ , .T.,ZLJ->ZLJ_TIPPRO )
 		       Disarmtransaction()  
 		       If ZLD->ZLD_STATUS = "F"
   		          MsgStop("Registro de recepção já teve fechamento ou eventos: "+xFilial("ZLD") + ZLJ->ZLJ_NUMERO ,"AGLT02117")
@@ -768,23 +719,23 @@ If ZLJ->( DBSeek( SubStr( _cFilOr , 1 , 2 ) + _cviajori ) )
 		
 		If _lEstoque
 		   If _lAltDtEstoque
-              ZLJ->ZLJ_MOTIVO := "Alt Dt Estoq:Usu.:"+ALLTRIM(_cusrname)+",Dt:"+DTOC(ddatabase)+",Hr:"+TIME()
+              ZLJ->ZLJ_MOTIVO := "Alt Dt Estoq:Usu.:"+AllTrim(_cusrname)+",Dt:"+DToC(ddatabase)+",Hr:"+Time()
            ElseIf ZLJ->ZLJ_DTCRIA # M->ZLJ_DTCRIA
               _dSalvaDT:= ZLJ->ZLJ_DTCRIA
-              ZLJ->ZLJ_MOTIVO := "Confirmada Dt Estoq:Usu.:"+ALLTRIM(_cusrname)+",Dt:"+DTOC(ddatabase)+",Hr:"+TIME()
+              ZLJ->ZLJ_MOTIVO := "Confirmada Dt Estoq:Usu.:"+AllTrim(_cusrname)+",Dt:"+DToC(ddatabase)+",Hr:"+Time()
            EndIf
 		Else
            ZLJ->ZLJ_STATUS := "R"
-		   ZLJ->ZLJ_UEFET  := _cusrname//cusername
+		   ZLJ->ZLJ_UEFET  := _cusrname//cUserName
 		   ZLJ->ZLJ_DEFET  := ddatabase
-		   ZLJ->ZLJ_HREFET := TIME()
+		   ZLJ->ZLJ_HREFET := Time()
 		   ZLJ->ZLJ_MOTIVO := _cmotivo
 		EndIf	
-		ZLJ->( MsUnLock() )
+		ZLJ->( MSUnLock() )
 		
-		//Tem que ser dentro do While pq pode ser tudo cooperativa 
-		If _lAltDtEstoque .AND. ASCAN(_asetores, ZLJ->ZLJ_VIAGEM ) == 0 .AND. ZLJ->ZLJ_TIPPRO $ 'P,A' .AND. !ZLJ->ZLJ_DESCAR .AND. U_AGLT021V(1) # 0 //Nao é descarte  Vol. veiulo zerado
-			AADD(_asetores, ZLJ->ZLJ_VIAGEM )
+		//Tem que ser dentro While pq pode ser tudo cooperativa 
+		If _lAltDtEstoque .And. aScan(_asetores, ZLJ->ZLJ_VIAGEM ) == 0 .And. ZLJ->ZLJ_TIPPRO $ 'P,A' .And. !ZLJ->ZLJ_DESCAR .And. U_AGLT021V(1) # 0 //Nao é descarte  Vol. veiulo zerado
+			aAdd(_asetores, ZLJ->ZLJ_VIAGEM )
 		EndIf
 		
 	    ZLJ->( DBSkip() )
@@ -797,48 +748,45 @@ ProcRegua(0)
 
 ZLJ->( DBSeek( SubStr( _cFilOr , 1 , 2 ) + _cviajori ) )
 
-For _ni := 1 To Len(_aSetores)
+For _nI := 1 To Len(_aSetores)
 
-	cSetor := ""//_asetores[_ni]//Variavel usada dentro da funcao U_AGLT003G()
-    IncProc("Estornando Estoque da Data: "+DTOC(_dSalvaDT))
+	cSetor := ""//_asetores[_nI]//Variavel usada dentro da funcao U_AGLT003G()
+    IncProc("Estornando Estoque da Data: "+DToC(_dSalvaDT))
 					
 	If ! U_AGLT003G(ZLJ->ZLJ_VIAGEM,5) //Estorna movimento de estoque igual a rotina da recepção manual
 		Disarmtransaction()
-		MsgStop("Não foi possível estornar a entrada de estoque da data "+DTOC(_dSalvaDT)+" da Viagem: "+ZLJ->ZLJ_VIAGEM +". Entre em contato com a area de PCP / Estoque","AGLT02118")
+		MsgStop("Não foi possível estornar a entrada de estoque da data "+DToC(_dSalvaDT)+" da Viagem: "+ZLJ->ZLJ_VIAGEM +". Entre em contato com a area de PCP / Estoque","AGLT02118")
         _lOK:=.F.
-        _lret := .F.
+        _lRet := .F.
         Break
 	EndIf
 		
 Next
 
-If _lOK .AND. _lEstoque .AND. _lAltDtEstoque .AND. !AGLT021PES(2,_lEstoque)
+If _lOK .And. _lEstoque .And. _lAltDtEstoque .And. !AGLT021PES(2,_lEstoque)
    _lOK:=.F.
-   _lret := .F.
+   _lRet := .F.
    Disarmtransaction()
 EndIf
 
 End Sequence
 End Transaction
 
-If _lOK .AND. _lEstoque .and. !_lRefaz
-   MsgInfo("Data de Estoque ALTERADA DE: "+DTOC(_dSalvaDT)+" PARA: "+DTOC(M->ZLJ_DTCRIA)+" com sucesso!","AGLT02119")
+If _lOK .And. _lEstoque .And. !_lRefaz
+   MsgInfo("Data de Estoque ALTERADA DE: "+DToC(_dSalvaDT)+" PARA: "+DToC(M->ZLJ_DTCRIA)+" com sucesso!","AGLT02119")
 EndIf
 
-Return _lret
+Return _lRet
 
 /*
 ===============================================================================================================================
 Programa--------: AGLT021LO
 Autor-----------: Josué Danich
 Data da Criacao-: 13/04/2016
-===============================================================================================================================
 Descrição-------: Locka registros da viagem
-===============================================================================================================================
 Parametros------: _cfilAux - Filial do pedido
 				  _cnumped - Numero da viagem
-===============================================================================================================================
-Retorno---------: _lret - se conseguiu ou não lockar os registros do pedido
+Retorno---------: _lRet - se conseguiu ou não lockar os registros do pedido
 ===============================================================================================================================
 */
 Static Function AGLT021LO(_cFilAux,_cNumvia)
@@ -853,9 +801,9 @@ DBSelectArea("ZLJ")
 ZLJ->( DBSetOrder(2) )
 
 If ZLJ->( DBSeek( _cFilAux + _cNumvia ) )
-	While ZLJ->(!EOF()) .And. ZLJ->( ZLJ_FILIAL + ZLJ_VIAGEM ) == _cFilAux + _cNumvia .and. _lret
+	While ZLJ->(!Eof()) .And. ZLJ->( ZLJ_FILIAL + ZLJ_VIAGEM ) == _cFilAux + _cNumvia .And. _lRet
 		If ZLJ->( DBRLock() )
-			ZLJ->( MsUnlock())	
+			ZLJ->( MSUnLock())	
 			RecLock("ZLJ",.F.)
 			ZLJ->( DBSkip() )
 		Else
@@ -868,7 +816,7 @@ Else
 	_lRet := .F.
 EndIf
 
-Restarea( _aArea)
+FWRestArea( _aArea)
 
 Return _lRet
 
@@ -877,30 +825,27 @@ Return _lRet
 Programa--------: AGLT021UN
 Autor-----------: Josué Danich
 Data da Criacao-: 13/04/2016
-===============================================================================================================================
 Descrição-------: UnLocka registros da recepção do leite
-===============================================================================================================================
 Parametros------: _cfilAux - Filial do pedido
 					_cnumped - Numero do pedido
-===============================================================================================================================
-Retorno---------: _lret - se conseguiu ou não lockar os registros do pedido
+Retorno---------: _lRet - se conseguiu ou não lockar os registros do pedido
 ===============================================================================================================================
 */
 Static Function AGLT021UN(_cFilAux,_cNumPed)
 
-Local _aArea := GetArea()
+Local _aArea := FWGetArea()
 
 DBSelectArea("ZLJ")
 ZLJ->( DBSetOrder(2) )
 
 If ZLJ->( DBSeek( _cFilAux + _cNumPed ) )
-	While ZLJ->(!EOF()) .And. ZLJ->( ZLJ_FILIAL + ZLJ_VIAGEM ) == _cFilAux + _cNumPed 
-		ZLJ->( MsUnlock())	
+	While ZLJ->(!Eof()) .And. ZLJ->( ZLJ_FILIAL + ZLJ_VIAGEM ) == _cFilAux + _cNumPed 
+		ZLJ->( MSUnLock())	
 		ZLJ->( DBSkip() )
 	EndDo
 EndIf
 
-Restarea( _aArea)
+FWRestArea( _aArea)
 
 Return
 
@@ -909,20 +854,17 @@ Return
 Programa--------: AGLT021VL
 Autor-----------: Josué Danich
 Data da Criacao-: 13/04/2016
-===============================================================================================================================
 Descrição-------: Le motivo de recusa e encaminha para função de processamento da recusa
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
-Retorno---------: _lret - se confirmou a janela de motivo e se preencheu o motivo
+Retorno---------: _lRet - se confirmou a janela de motivo e se preencheu o motivo
 ===============================================================================================================================
 */
-Static function AGLT021VL()
+Static Function AGLT021VL()
 
 Local _lRet := .F.
-Local _cMens1 := space(100)
+Local _cMens1 := Space(100)
 
-Do While .T.
+While .T.
 	_lRet := .F.
 	DEFINE FONT oFont NAME "Tahoma" BOLD
 			
@@ -957,11 +899,8 @@ Return _lRet
 Programa--------: AGLT021Z
 Autor-----------: Alex Wallauer 
 Data da Criacao-: 18/07/2016
-===============================================================================================================================
 Descrição-------: Visualizar Recepcao
-===============================================================================================================================
 Parametros------:  _cAlias: Tabela , nRecZLJ: Recno , _nOpc: Opcao
-===============================================================================================================================
 Retorno---------: .T.
 ===============================================================================================================================
 */
@@ -969,18 +908,15 @@ User Function AGLT021Z(_cAlias , nRecZLJ , _nOpc)
 
 AGLT021Tela("Visualizar Recepcao",{ || .T. },_nOpc,nRecZLJ)
 
-Return .t.
+Return .T.
 
 /*
 ===============================================================================================================================
 Programa--------: AGLT021F
 Autor-----------: Josué Danich
 Data da Criacao-: 13/04/2016
-===============================================================================================================================
 Descrição-------: Apaga recepção posicionada
-===============================================================================================================================
 Parametros------:  _cAlias: Tabela , nRecZLJ: Recno , _nOpc: Opcao
-===============================================================================================================================
 Retorno---------: .T. OU .F.
 ===============================================================================================================================
 */
@@ -1016,11 +952,8 @@ Return .T.
 Programa--------: AGLT021E
 Autor-----------: Josué Danich
 Data da Criacao-: 13/04/2016
-===============================================================================================================================
 Descrição-------: Efetiva recepção posicionada
-===============================================================================================================================
 Parametros------: _cAlias: Tabela , nRecZLJ: Recno , _nOpc: Opcao
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -1046,7 +979,7 @@ If !( AGLT021LO( SubStr( ZLJ->ZLJ_FILIAL , 1 , 2 ), ZLJ->ZLJ_VIAGEM ) )
 	Return
 EndIf
 
-AADD( _aButtons , { "RESPONSA" , {|| _Ret:=.T., Processa(  {|| _Ret:=AGLT021K()  } ) , If(!_Ret,(nOpca:=0,oDlg:End()),) } , "Reprocessar dados", "Reprocessar"} )
+aAdd( _aButtons , { "RESPONSA" , {|| _Ret:=.T., Processa(  {|| _Ret:=AGLT021K()  } ) , If(!_Ret,(nOpca:=0,oDlg:End()),) } , "Reprocessar dados", "Reprocessar"} )
 
 AGLT021Tela("Efetivação de Recepcao",_bok,_nOpc,nRecZLJ,_aButtons,_bMarca)
 
@@ -1060,17 +993,14 @@ Return .T.
 Programa--------: AGLT021EL
 Autor-----------: Josué Danich
 Data da Criacao-: 13/04/2016
-===============================================================================================================================
 Descrição-------: Processa Efetivação da recepção posicionada
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
 Static Function AGLT021EL()
 
-Local _nRecZLJ 	:= ZLJ->( RECNO() )
+Local _nRecZLJ 	:= ZLJ->( Recno() )
 Local _cviagem	:= ZLJ->ZLJ_VIAGEM
 Local _nPosLinha:= 0
 Local _nI		:= 0
@@ -1091,9 +1021,9 @@ Private dDtColeta 	:= ddatabase
 Private cSetor		:= ""
 
 ProcRegua(0)	
-Dbselectarea("ZLD")
-Dbselectarea("ZLW")
-Dbselectarea("ZLJ")
+DBSelectArea("ZLD")
+DBSelectArea("ZLW")
+DBSelectArea("ZLJ")
 
 SA2->( DBSetOrder(1))
 ZLW->( DBSetOrder(7))
@@ -1117,18 +1047,18 @@ lMaeTemAtendimento:= .F.
 _cFilhasIntegradas:= ""
 _cFilhasMae:=""
 
-Procregua(TRB->(LASTREC()))	
+ProcRegua(TRB->(LASTREC()))	
 
 //Pre - Processamentos
-Do While ZLJ->(!EOF()) .AND. ZLJ->ZLJ_FILIAL == xFilial("ZLJ") .AND. ZLJ->ZLJ_VIAGEM == _cviagem
+While ZLJ->(!Eof()) .And. ZLJ->ZLJ_FILIAL == xFilial("ZLJ") .And. ZLJ->ZLJ_VIAGEM == _cviagem
 
-   Incproc("Validando Atendimento: "+ZLJ->ZLJ_NUMERO) 
+   IncProc("Validando Atendimento: "+ZLJ->ZLJ_NUMERO) 
    If AGLT021D( ZLJ->ZLJ_DTIVIA , ZLJ->ZLJ_CODPAT , ZLJ->ZLJ_LOJPAT , .F. ,ZLJ->ZLJ_TIPPRO)
       Return .F.
    EndIf
 
-   If ASCAN(_aDuplicados, ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_NUMERO ) = 0
-	  AADD(_aDuplicados, ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_NUMERO )
+   If aScan(_aDuplicados, ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_NUMERO ) = 0
+	  aAdd(_aDuplicados, ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_NUMERO )
    Else
 	  MsgStop("Essa viagem possui atendimentos duplicados. Recuse e apague essa viagem e integre novamente, e verifique se estoque foi estornado corretamente","AGLT02155")
       Return .F.
@@ -1141,19 +1071,19 @@ Do While ZLJ->(!EOF()) .AND. ZLJ->ZLJ_FILIAL == xFilial("ZLJ") .AND. ZLJ->ZLJ_VI
    EndIf
 
    If !Empty(ZLJ->ZLJ_VFILHS)
-      _cFilhasMae:=ALLTRIM(ZLJ->ZLJ_VFILHS)//Filhas que esta na lista da Mae
+      _cFilhasMae:=AllTrim(ZLJ->ZLJ_VFILHS)//Filhas que esta na lista da Mae
    EndIf
    
-	If (nPos:=ASCAN(_aSetores, {|S| S[1] == ZLJ->ZLJ_SETOR+ZLJ->ZLJ_TIPPRO} )) = 0 //+ZLJ->ZLJ_VFILHA
-	   AADD(_aSetores, {ZLJ->ZLJ_SETOR+ZLJ->ZLJ_TIPPRO, ZLJ->ZLJ_VOLUME,"Posicao desativada",0})//Acumula os totais de leite por setor de todos os tipos //+ZLJ->ZLJ_VFILHA
+	If (nPos:=aScan(_aSetores, {|S| S[1] == ZLJ->ZLJ_SETOR+ZLJ->ZLJ_TIPPRO} )) = 0 //+ZLJ->ZLJ_VFILHA
+	   aAdd(_aSetores, {ZLJ->ZLJ_SETOR+ZLJ->ZLJ_TIPPRO, ZLJ->ZLJ_VOLUME,"Posicao desativada",0})//Acumula os totais de leite por setor de todos os tipos //+ZLJ->ZLJ_VFILHA
 	Else
 	   _aSetores[nPos][2] += ZLJ->ZLJ_VOLUME
 	EndIf
 
     //Atravessadores
-	If SA2->(DBSeek(Xfilial("SA2")+ZLJ->ZLJ_CODPAT+ZLJ->ZLJ_LOJPAT)) .AND. SA2->A2_L_TIPPR = "A" .AND. !Empty(SA2->A2_L_ATRCO)
+	If SA2->(DBSeek(xFilial("SA2")+ZLJ->ZLJ_CODPAT+ZLJ->ZLJ_LOJPAT)) .And. SA2->A2_L_TIPPR = "A" .And. !Empty(SA2->A2_L_ATRCO)
        _cSalvaCod:=SA2->A2_L_ATRCO+" "+SA2->A2_L_ATRLO
-       If !SA2->(DBSeek(Xfilial("SA2")+SA2->A2_L_ATRCO+SA2->A2_L_ATRLO)) .OR. (SA2->A2_L_TIPPR # "P" .OR. SA2->A2_I_CLASS # "P")
+       If !SA2->(DBSeek(xFilial("SA2")+SA2->A2_L_ATRCO+SA2->A2_L_ATRLO)) .Or. (SA2->A2_L_TIPPR # "P" .Or. SA2->A2_I_CLASS # "P")
 		  MsgStop(	 'Os campos de "Cod. Atravessador" e "Loja Atravessador" devem ser da Classificacao: PRODUTOR e do Tipo: PRODUTOR.'+;
 					 "Cadastratamento atual: Cod. Atravessador+Loja: "+_cSalvaCod+" - Classificacao: "+SA2->A2_I_CLASS+" - Tipo: "+SA2->A2_L_TIPPR,;
                      'Problema nos dados do cadastro de fornecedores',;
@@ -1162,8 +1092,8 @@ Do While ZLJ->(!EOF()) .AND. ZLJ->ZLJ_FILIAL == xFilial("ZLJ") .AND. ZLJ->ZLJ_VI
 	   
 	   EndIf
 
-	   If (nPosA:=ASCAN(_aAtraSetores, {|S| S[1] == ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_SETOR} )) = 0//Acumula os totais de leite por setor do tipo atravessador
-	      AADD(_aAtraSetores, {ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_SETOR, ZLJ->ZLJ_VOLUME})
+	   If (nPosA:=aScan(_aAtraSetores, {|S| S[1] == ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_SETOR} )) = 0//Acumula os totais de leite por setor do tipo atravessador
+	      aAdd(_aAtraSetores, {ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_SETOR, ZLJ->ZLJ_VOLUME})
 	   Else
 	      _aAtraSetores[nPosA][2] += ZLJ->ZLJ_VOLUME
 	   EndIf
@@ -1172,15 +1102,15 @@ Do While ZLJ->(!EOF()) .AND. ZLJ->ZLJ_FILIAL == xFilial("ZLJ") .AND. ZLJ->ZLJ_VI
 		lTemSoAtravessador:= .F.
 	EndIf
 
-	If (nPosL:=ASCAN(_aLinhas, {|S| S[1] == ZLJ->ZLJ_TIPPRO+ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_SETOR+ZLJ->ZLJ_LINROT } )) = 0
-	   AADD(_aLinhas, {ZLJ->ZLJ_TIPPRO+ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_SETOR+ZLJ->ZLJ_LINROT, ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_NUMERO})
+	If (nPosL:=aScan(_aLinhas, {|S| S[1] == ZLJ->ZLJ_TIPPRO+ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_SETOR+ZLJ->ZLJ_LINROT } )) = 0
+	   aAdd(_aLinhas, {ZLJ->ZLJ_TIPPRO+ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_SETOR+ZLJ->ZLJ_LINROT, ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_NUMERO})
 	Else
 	   If ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_NUMERO < _aLinhas[nPosL][2]//Acumula as quebras da geracao do numero da recepcao para ordenar por atendimento do menor para o maior
 	      _aLinhas[nPosL][2] :=ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_NUMERO
 	   EndIf   
 	EndIf
 
-	If ZLJ->ZLJ_TIPPRO == "P" .OR. ZLJ->ZLJ_TIPPRO == "A"//Leite proprio //Testa o tipo A para previnir
+	If ZLJ->ZLJ_TIPPRO == "P" .Or. ZLJ->ZLJ_TIPPRO == "A"//Leite proprio //Testa o tipo A para previnir
        nTotLProprio+=ZLJ->ZLJ_VOLUME
 	   lTemLeiteproprio:=.T.
 	ElseIf ZLJ->ZLJ_TIPPRO == "C"
@@ -1189,7 +1119,7 @@ Do While ZLJ->(!EOF()) .AND. ZLJ->ZLJ_FILIAL == xFilial("ZLJ") .AND. ZLJ->ZLJ_VI
 
 	_nTotger += ZLJ->ZLJ_VOLUME//Para DEBUG	
 
-    If ZL2->( DBSeek(xFilial()+ZLJ->ZLJ_SETOR)) .AND. ZL2->ZL2_CRIRT = "1" .AND. lTemLeiteproprio
+    If ZL2->( DBSeek(xFilial()+ZLJ->ZLJ_SETOR)) .And. ZL2->ZL2_CRIRT = "1" .And. lTemLeiteproprio
        _lGera_ZLX:=.T.
     EndIf
     If ZLJ->ZLJ_DTIVIA < M->ZLJ_DTIVIA 
@@ -1200,20 +1130,20 @@ Do While ZLJ->(!EOF()) .AND. ZLJ->ZLJ_FILIAL == xFilial("ZLJ") .AND. ZLJ->ZLJ_VI
 		
 EndDo
 
-IF EMPTY(M->ZLJ_DTCRIA) .AND. lTemLeiteproprio
-   U_ITMSG("Data de estoque em branco, o estoque não foi gerado corretamente.","ATENCAO !",;
+If Empty(M->ZLJ_DTCRIA) .And. lTemLeiteproprio
+   U_ITMsg("Data de estoque em branco, o estoque não foi gerado corretamente.","ATENCAO !",;
             "Recuse, apague essa viagem e integre novamente. Apos a integracao analise o KARDEX para validar o Estoque.",3)//,2,3,,"CONTINUAR","VOLTAR")
    Return .F.
 EndIf
 
 
-If !Empty(_cFilhasIntegradas) .AND. Empty(_cFilhasMae)
+If !Empty(_cFilhasIntegradas) .And. Empty(_cFilhasMae)
     MsgStop("Problema nos dados da Viagem Julieta a viagem Mae não foi integrada"+;
             "Tente integrar novamente e verifique se a Vaigem Mãe não foi recusada ou esta em outro dia.","AGLT02127")
     Return .F.
 EndIf
 
-_aFilhasMae := STRTOKARR(_cFilhasMae,"-")
+_aFilhasMae := StrTokArr(_cFilhasMae,"-")
 _cFilhasNaoIntegradas:=""
 For _nI := 1 To Len(_aFilhasMae)
     If !_aFilhasMae[_nI] $ _cFilhasIntegradas
@@ -1233,7 +1163,7 @@ EndIf
 // Projeto Automação das Recepções Tipo Plataforma
 //================================================================================
 aDados:={}
-If _lGera_ZLX .AND. Empty( (aDados:=U_AGLTTela_ZLX("ORI_ZLJ")) )
+If _lGera_ZLX .And. Empty( (aDados:=U_AGLTTela_ZLX("ORI_ZLJ")) )
    Return .F.
 EndIf
 Private _lGerou_ZLX:=.F. //Alterada na Funcao U_AGLTGrv_ZLX()
@@ -1245,17 +1175,17 @@ _aTemLinhaSQIgual:={}
 _aTemSetorSQIgual:={}
 ZL3->( DBSetOrder(1) )
 
-Do While TRB->(!EOF()) 
+While TRB->(!Eof()) 
 
    IncProc("Lando Atendimento: "+ZLJ->ZLJ_NUMERO) 
 
-   If lMaeTemAtendimento .AND. TRB->ZLJ_TIPPRO = 'F'//Recebimento
+   If lMaeTemAtendimento .And. TRB->ZLJ_TIPPRO = 'F'//Recebimento
       TRB->( DBSkip() )
       Loop
    EndIf
 
    If !lTemSoAtravessador                                                                             //P=Leite Proprio;C=Cooperativa;A=Atravessador
-      If TRB->ZLJ_TIPPRO = "P" .AND. POSICIONE("SA2",1,xFilial("SA2")+TRB->ZLJ_CODPAT+TRB->ZLJ_LOJPAT,"A2_L_TIPPR") # "P"//Para ignorar os atravessadores
+      If TRB->ZLJ_TIPPRO = "P" .And. Posicione("SA2",1,xFilial("SA2")+TRB->ZLJ_CODPAT+TRB->ZLJ_LOJPAT,"A2_L_TIPPR") # "P"//Para ignorar os atravessadores
          TRB->( DBSkip() )
          Loop
       EndIf
@@ -1263,9 +1193,9 @@ Do While TRB->(!EOF())
 
    If TRB->ZLJ_TIPPRO $ "P,R,F" //(P)Leite proprio/Atravessador ou (R)Reboque ou (F)Recebimento
 
-	  If (nPosL:=ASCAN(_aMenorAtenViagem, {|S| S[1] == TRB->ZLJ_VFILHA } )) = 0//             4           5    6    7
-	     AADD(_aMenorAtenViagem, {TRB->ZLJ_VFILHA , TRB->ZLJ_LINROT , TRB->ZLJ_NUMERO , TRB->ZLJ_KMDVIA , "" , "" , ""})
-		 nPosL:=LEN(_aMenorAtenViagem)
+	  If (nPosL:=aScan(_aMenorAtenViagem, {|S| S[1] == TRB->ZLJ_VFILHA } )) = 0//             4           5    6    7
+	     aAdd(_aMenorAtenViagem, {TRB->ZLJ_VFILHA , TRB->ZLJ_LINROT , TRB->ZLJ_NUMERO , TRB->ZLJ_KMDVIA , "" , "" , ""})
+		 nPosL:=Len(_aMenorAtenViagem)
 	  Else
 	     If TRB->ZLJ_NUMERO < _aMenorAtenViagem[nPosL][3]
 	        _aMenorAtenViagem[nPosL][2] :=TRB->ZLJ_LINROT//Guarda a linha/rota do menor atendimento de cada sub-viagem para colocar o KM
@@ -1273,20 +1203,20 @@ Do While TRB->(!EOF())
 	     EndIf   
       EndIf
    
-      IF TRB->ZLJ_LINHSQ == TRB->ZLJ_LINROT//Se tive uma linha = a linha do SQ colocar o KM nela senão fica a menor
+      If TRB->ZLJ_LINHSQ == TRB->ZLJ_LINROT//Se tive uma linha = a linha do SQ colocar o KM nela senão fica a menor
          _aMenorAtenViagem[nPosL][5]:=TRB->ZLJ_LINROT
-		 AADD(_aTemLinhaSQIgual,TRB->ZLJ_VFILHA)//Guarda as viagens que tem linha igual a do SQ
-      ENDIF
+		 aAdd(_aTemLinhaSQIgual,TRB->ZLJ_VFILHA)//Guarda as viagens que tem linha igual a do SQ
+      EndIf
 
-      IF ZL3->( DBSeek( xFilial("ZL3") + TRB->ZLJ_LINHSQ ) )
-         IF ZL3->ZL3_SETOR == TRB->ZLJ_SETOR//Se tive uma setor = a setor do SQ colocar o KM nela senão fica a menor
-	        If EMPTY(_aMenorAtenViagem[nPosL][6]) .OR. TRB->ZLJ_NUMERO < _aMenorAtenViagem[nPosL][6] 
+      If ZL3->( DBSeek( xFilial("ZL3") + TRB->ZLJ_LINHSQ ) )
+         If ZL3->ZL3_SETOR == TRB->ZLJ_SETOR//Se tive uma setor = a setor do SQ colocar o KM nela senão fica a menor
+	        If Empty(_aMenorAtenViagem[nPosL][6]) .Or. TRB->ZLJ_NUMERO < _aMenorAtenViagem[nPosL][6] 
                _aMenorAtenViagem[nPosL][6]:=TRB->ZLJ_NUMERO
                _aMenorAtenViagem[nPosL][7]:=TRB->ZLJ_LINROT
-			ENDIF   
-	   	    AADD(_aTemSetorSQIgual,TRB->ZLJ_VFILHA)//Guarda as viagens que tem setor igual a do SQ
-         ENDIF
-      ENDIF
+			EndIf   
+	   	    aAdd(_aTemSetorSQIgual,TRB->ZLJ_VFILHA)//Guarda as viagens que tem setor igual a do SQ
+         EndIf
+      EndIf
 
    EndIf
 
@@ -1300,7 +1230,7 @@ If !ZLJ->( DBSeek( xFilial("ZLJ") + _cviagem + "F" ))
 EndIf
 
 If ZLJ->ZLJ_LITRAG == 0
-   _nTotCaminhao:= (ZLJ->ZLJ_PSIVIA - ZLJ->ZLJ_PSFVIA) / POSICIONE("ZA7",1,xFilial("ZA7")+"001","ZA7_DENPAD")
+   _nTotCaminhao:= (ZLJ->ZLJ_PSIVIA - ZLJ->ZLJ_PSFVIA) / Posicione("ZA7",1,xFilial("ZA7")+"001","ZA7_DENPAD")
 Else
    _nTotCaminhao:= ZLJ->ZLJ_LITRAG
 EndIf
@@ -1328,7 +1258,7 @@ Begin Transaction
 	
 	   IncProc("Gravando Atendimento: "+ZLJ->ZLJ_NUMERO) 
 	   
-	   If (_nSetor:=ASCAN(_aSetores, {|S| S[1] == ZLJ->ZLJ_SETOR+ZLJ->ZLJ_TIPPRO} )) = 0//+ZLJ->ZLJ_VFILHA
+	   If (_nSetor:=aScan(_aSetores, {|S| S[1] == ZLJ->ZLJ_SETOR+ZLJ->ZLJ_TIPPRO} )) = 0//+ZLJ->ZLJ_VFILHA
 		  ZLJ->( DBSkip() )
 		  Loop
 	   EndIf
@@ -1336,13 +1266,13 @@ Begin Transaction
 	   _cNumRecP := u_GetNumRec()  //busca ultimo numero de recepção leite proprio ZLD
 	   _cNumRecW := u_GetNumRww()  //busca ultimo numero de recepção cooperativa ZLW	
 		
-		Do While ZLJ->(!EOF()) .AND. ZLJ->ZLJ_FILIAL == xFilial("ZLJ")        .AND.;
+		While ZLJ->(!Eof()) .And. ZLJ->ZLJ_FILIAL == xFilial("ZLJ")        .AND.;
 		                             ZLJ->ZLJ_VIAGEM == _cviagem              .AND.; 
-	                                 ZLJ->ZLJ_TIPPRO+ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_SETOR+ZLJ->ZLJ_LINROT == _aLinhas[_nPosLinha][1] .AND. _lcont
+	                                 ZLJ->ZLJ_TIPPRO+ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_SETOR+ZLJ->ZLJ_LINROT == _aLinhas[_nPosLinha][1] .And. _lcont
 			//Posiciona na linha para ler o KM e o Tipo
 			ZL3->( DBSeek( xFilial("ZL3") + ZLJ->ZLJ_LINROT ) )
 			
-			If (nPosL:=ASCAN(_aMenorAtenViagem, {|S| S[1]+S[2] == ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_LINROT } )) # 0
+			If (nPosL:=aScan(_aMenorAtenViagem, {|S| S[1]+S[2] == ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_LINROT } )) # 0
 				If Empty(_cDivKM) //Evito de apresentar a tela a cada produtor
 					//Valida divergência entre o KM informado na recepção e o definido na Linha/Rota
 					If _aMenorAtenViagem[nPosL][4] - ZL3->ZL3_KM > _nTolerKM
@@ -1365,14 +1295,14 @@ Begin Transaction
 					EndIf
 				EndIf
 	        EndIf
-			If lMaeTemAtendimento .AND. ZLJ->ZLJ_TIPPRO = 'F'//(F)Recebimento
+			If lMaeTemAtendimento .And. ZLJ->ZLJ_TIPPRO = 'F'//(F)Recebimento
 				ZLJ->( DBSkip() )
 				Loop
 			EndIf
 	
 			If ZLJ->ZLJ_TIPPRO $ "P,R,F,A" //(P)Leite proprio ou (R)Reboque ou (F)Recebimento ou (A)Atravessador //Testa o tipo A para previnir
 		
-				If !Empty(ZLJ->ZLJ_NUMERO) .AND. ZLD->( DBSeek(  xFilial("ZLD") + ZLJ->ZLJ_NUMERO))
+				If !Empty(ZLJ->ZLJ_NUMERO) .And. ZLD->( DBSeek(  xFilial("ZLD") + ZLJ->ZLJ_NUMERO))
 	               ZLJ->( DBSkip() )
 	               Loop
 				EndIf
@@ -1385,29 +1315,29 @@ Begin Transaction
 					
 				//Se For tipo de produtor leite próprio grava ZLD
 				_lgravou := .T.
-				Reclock("ZLD",.T.)
+				RecLock("ZLD",.T.)
 				ZLD->ZLD_FILIAL 	:= xFilial("ZLD")
 				ZLD->ZLD_TICKET 	:= ZLJ->ZLJ_VIAGEM
 				If ZLD->(FIELDPOS("ZLD_VFILHA")) # 0
 				   ZLD->ZLD_VFILHA:=ZLJ->ZLJ_VFILHA
-				ENDIF
+				EndIf
 	
 				If !Empty(ZLJ->ZLJ_NUMERO) 
 				   ZLD->ZLD_ATENDI  := ZLJ->ZLJ_NUMERO
 				Else
-				   _cAtendi := StrZero( VAL(_cNumRecP), Len(ZLJ->ZLJ_NUMERO) )
+				   _cAtendi := StrZero( Val(_cNumRecP), Len(ZLJ->ZLJ_NUMERO) )
 				   ZLD->ZLD_ATENDI:= "R"+SubStr(_cAtendi,2)
-		           ZLJ->(Reclock("ZLJ",.F.))
+		           ZLJ->(RecLock("ZLJ",.F.))
 		           ZLJ->ZLJ_NUMERO:=ZLD->ZLD_ATENDI
-		           //ZLJ->( Msunlock())//Embaixo ele destrava todos
+		           //ZLJ->( MSUnLock())//Embaixo ele destrava todos
 	            EndIf
 				ZLD->ZLD_DTCOLE 	:= M->ZLJ_DTIVIA //Gravar a menor data de todos
-				ZLD->ZLD_DTLANC 	:= DATE()
+				ZLD->ZLD_DTLANC 	:= Date()
 				ZLD->ZLD_CODREC 	:= _cNumRecP
 				ZLD->ZLD_SETOR  	:= ZLJ->ZLJ_SETOR
 				ZLD->ZLD_LINROT 	:= ZLJ->ZLJ_LINROT
 				lAtravessador:=.F.
-				If SA2->(DBSeek(Xfilial("SA2")+ZLJ->ZLJ_CODPAT+ZLJ->ZLJ_LOJPAT)) .AND. SA2->A2_L_TIPPR = "A" .AND. !Empty(SA2->A2_L_ATRCO)
+				If SA2->(DBSeek(xFilial("SA2")+ZLJ->ZLJ_CODPAT+ZLJ->ZLJ_LOJPAT)) .And. SA2->A2_L_TIPPR = "A" .And. !Empty(SA2->A2_L_ATRCO)
 				   ZLD->ZLD_RETIRO 	:= SA2->A2_L_ATRCO
 				   ZLD->ZLD_RETILJ 	:= SA2->A2_L_ATRLO
 				   lAtravessador:=.T.
@@ -1422,17 +1352,17 @@ Begin Transaction
 				ZLD->ZLD_USER		:= CriaVar("ZLD_USER") //Retorna o Codigo do Usuario 
 	            //If _cLinhaRota == ZLJ->ZLJ_LINROT
 				// Se a viagem ou viagem filha tem linha = a linha SQ poe nela
-				IF ASCAN(_aTemLinhaSQIgual, ZLJ->ZLJ_VFILHA ) # 0
-				   IF (nPosL:=ASCAN(_aMenorAtenViagem, {|S| S[1]+S[5] == ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_LINROT } )) # 0//Procura Linha = Linha do SQ
-			          ZLD->ZLD_KM  := IF(lTemCpoTPKM .AND. ZL3->ZL3_TPKM="P" ,ZL3->ZL3_KM,_aMenorAtenViagem[nPosL][4])
-				   ENDIF
-				ELSEIF ASCAN(_aTemSetorSQIgual, ZLJ->ZLJ_VFILHA  ) # 0
-				   IF (nPosL:=ASCAN(_aMenorAtenViagem, {|S| S[1]+S[7] == ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_LINROT } )) # 0//Procura Setor = Setor do SQ
-			          ZLD->ZLD_KM  := IF(lTemCpoTPKM .AND. ZL3->ZL3_TPKM="P" ,ZL3->ZL3_KM,_aMenorAtenViagem[nPosL][4])
-				   ENDIF
-				ELSEIf (nPosL:=ASCAN(_aMenorAtenViagem, {|S| S[1]+S[2] == ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_LINROT } )) # 0
-				   ZLD->ZLD_KM 	:= IF(lTemCpoTPKM .AND. ZL3->ZL3_TPKM="P" ,ZL3->ZL3_KM,_aMenorAtenViagem[nPosL][4])// //M->ZLJ_KMDVIA//ZLJ->ZLJ_KMDVIA//A alteracao do usuario só vai para o o ZLD e ZLW o ZLJ fica = ao do SQ para manter a o sincronismo
-				   _cAviso:="A KM for gravada na Viagem: "+ZLJ->ZLJ_VFILHA+", Setor: "+ZLJ->ZLJ_SETOR+" na linha "+ZLJ->ZLJ_LINROT+" por ser o menor atendimento geral da Julieta."
+				If aScan(_aTemLinhaSQIgual, ZLJ->ZLJ_VFILHA ) # 0
+				   If (nPosL:=aScan(_aMenorAtenViagem, {|S| S[1]+S[5] == ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_LINROT } )) # 0//Procura Linha = Linha do SQ
+			          ZLD->ZLD_KM  := If(lTemCpoTPKM .And. ZL3->ZL3_TPKM="P" ,ZL3->ZL3_KM,_aMenorAtenViagem[nPosL][4])
+				   EndIf
+				ElseIf aScan(_aTemSetorSQIgual, ZLJ->ZLJ_VFILHA  ) # 0
+				   If (nPosL:=aScan(_aMenorAtenViagem, {|S| S[1]+S[7] == ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_LINROT } )) # 0//Procura Setor = Setor do SQ
+			          ZLD->ZLD_KM  := If(lTemCpoTPKM .And. ZL3->ZL3_TPKM="P" ,ZL3->ZL3_KM,_aMenorAtenViagem[nPosL][4])
+				   EndIf
+				ElseIf (nPosL:=aScan(_aMenorAtenViagem, {|S| S[1]+S[2] == ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_LINROT } )) # 0
+				   ZLD->ZLD_KM 	:= If(lTemCpoTPKM .And. ZL3->ZL3_TPKM="P" ,ZL3->ZL3_KM,_aMenorAtenViagem[nPosL][4])// //M->ZLJ_KMDVIA//ZLJ->ZLJ_KMDVIA//A alteracao do usuario só vai para o o ZLD e ZLW o ZLJ fica = ao do SQ para manter a o sincronismo
+				   _cAviso:="A KM For gravada na Viagem: "+ZLJ->ZLJ_VFILHA+", Setor: "+ZLJ->ZLJ_SETOR+" na linha "+ZLJ->ZLJ_LINROT+" por ser o menor atendimento geral da Julieta."
 				EndIf
 			    ZLD->ZLD_QTDBOM 	:= ZLJ->ZLJ_VOLUME
 				If !ZLJ->ZLJ_DESCAR
@@ -1449,10 +1379,10 @@ Begin Transaction
 				//As posicoes 4  do _aSetores da cooperativas estao zeradas exeto se só tiver cooperativa
 				ZLD->ZLD_KMDIVE := IIf(_cDivKM=="N"," ",_cDivKM)
 				ZLD->ZLD_KMJUST	:= _cJustKM
-				ZLD->( Msunlock())
+				ZLD->( MSUnLock())
 	            FreeUsedCode()
 	            If lAtravessador
-	               If (_nAtraSetor:=ASCAN(_aAtraSetores, {|S| S[1] == ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_SETOR} )) # 0
+	               If (_nAtraSetor:=aScan(_aAtraSetores, {|S| S[1] == ZLJ->ZLJ_VFILHA+ZLJ->ZLJ_SETOR} )) # 0
 	                  AGLT021_ZLW(.T.)
 	               EndIf
 	            EndIf
@@ -1472,7 +1402,7 @@ Begin Transaction
 	//Refaz estoque se teve mudança de data de estoque
 	ZLJ->( DBSeek( xFilial("ZLJ") + _cviagem))
 	
-	If _lDtEstDif .AND. _lgravou
+	If _lDtEstDif .And. _lgravou
 	    
 		 	IncProc("Atualizando estoque...")
 		 	_lrete := AGLT021GRC("Efetivação com mudança de data",.T.,.T.)
@@ -1493,17 +1423,17 @@ Begin Transaction
 	
 	ZLJ->( DBSetOrder(2))
 	ZLJ->( DBSeek( xFilial("ZLJ") + _cviagem))
-	_cusrname := UsrFullName(__cUserID)
+	_cusrname := UsrFullName(__cUserId)
 			
-	Do While ZLJ->(!EOF()) .AND. ZLJ->ZLJ_FILIAL == xFilial("ZLJ") .AND. ZLJ->ZLJ_VIAGEM == _cviagem .and. _lcont
+	While ZLJ->(!Eof()) .And. ZLJ->ZLJ_FILIAL == xFilial("ZLJ") .And. ZLJ->ZLJ_VIAGEM == _cviagem .And. _lcont
 			
 	   IncProc("Atualizando Status Atendimento: "+ZLJ->ZLJ_NUMERO) 
 			
-		ZLJ->(Reclock("ZLJ",.F.))
+		ZLJ->(RecLock("ZLJ",.F.))
 			
 		ZLJ->ZLJ_STATUS := "E"
 		ZLJ->ZLJ_UEFET 	:= _cusrname
-		ZLJ->ZLJ_HREFET := TIME()
+		ZLJ->ZLJ_HREFET := Time()
 		ZLJ->ZLJ_DEFET 	:= ddatabase
 	
 	    If Empty(ZLJ->ZLJ_MOTORI)
@@ -1512,7 +1442,7 @@ Begin Transaction
 	    If Empty(ZLJ->ZLJ_VEICUL)
 		   ZLJ->ZLJ_VEICUL:= Posicione("ZL1",2,xFilial("ZL1")+ZLJ->ZLJ_PLACA,"ZL1_COD")
 		EndIf   
-		ZLJ->( Msunlock())
+		ZLJ->( MSUnLock())
 		ZLJ->( DBSkip() )
 	EndDo
 
@@ -1523,7 +1453,7 @@ If !_lcont
 	Return .F.
 EndIf
 
-ZLJ->( dbgoto(_nRecZLJ) )
+ZLJ->( DBGoTo(_nRecZLJ) )
 
 If _lGerou_ZLX//Variavel alterada dentro da função U_AGLTGrv_ZLX()
    MsgInfo("Viagem E Geraçao da Recepção Tipo Plataforma automatica efetivada com SUCESSO!","AGLT02131")
@@ -1538,11 +1468,8 @@ Return .T.
 Programa--------: U_AGLT021_
 Autor-----------: Alex Wallauer 
 Data da Criacao-: 02/08/2016
-===============================================================================================================================
 Descrição-------: Estorno da  recepção posicionada
-===============================================================================================================================
 Parametros------: lAtravessador: Se Atravessador .T.
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -1552,7 +1479,7 @@ If ZLW->( DBSeek(  xFilial("ZLW") + ZLJ->ZLJ_NUMERO))
    Return .F.	
 EndIf
 
-Reclock("ZLW",.T.)
+RecLock("ZLW",.T.)
 ZLW->ZLW_FILIAL 	:= xFilial("ZLW")
 ZLW->ZLW_TICKET 	:= ZLJ->ZLJ_VIAGEM//"S"+SubStr(ZLJ->ZLJ_VIAGEM,2)//cticket
 ZLW->ZLW_ATENDI	    := ZLJ->ZLJ_NUMERO
@@ -1590,7 +1517,7 @@ EndIf
 If Empty(ZLW->ZLW_VEICUL)
 	ZLW->ZLW_VEICUL:= Posicione("ZL1",2,xFilial("ZL1")+ZLJ->ZLJ_PLACA,"ZL1_COD")
 EndIf
-ZLW->( Msunlock())
+ZLW->( MSUnLock())
 FreeUsedCode()
 
 Return .T.	
@@ -1600,11 +1527,8 @@ Return .T.
 Programa--------: AGLT021A
 Autor-----------: Josué Danich
 Data da Criacao-: 13/04/2016
-===============================================================================================================================
 Descrição-------: Estorno da  recepção posicionada
-===============================================================================================================================
 Parametros------:  _cAlias: Tabela , nRecZLJ: Recno , _nOpc: Opcao
-===============================================================================================================================
 Retorno---------: .T. OU .F.
 ===============================================================================================================================
 */
@@ -1634,12 +1558,9 @@ Return .T.
 Programa--------: AGLT021ER
 Autor-----------: Josué Danich
 Data da Criacao-: 13/04/2016
-===============================================================================================================================
 Descrição-------: Processa estorno da  recepção posicionada
-===============================================================================================================================
-Parametros------: lApaga: .t. apaga
-===============================================================================================================================
-Retorno---------: _lret - confirmação de fechamento da tela de estorno
+Parametros------: lApaga: .T. apaga
+Retorno---------: _lRet - confirmação de fechamento da tela de estorno
 ===============================================================================================================================
 */
 Static Function AGLT021ER(lApaga)
@@ -1667,13 +1588,10 @@ Return _lRet
 Programa--------: AGLT021PES
 Autor-----------: Josué Danich
 Data da Criacao-: 13/04/2016
-===============================================================================================================================
 Descrição-------: Processa estorno de efetivação 
-===============================================================================================================================
 Parametros------: _ntip - Tipo de estorno - 1 Estorno de efetivação
 											2 Estorno de recusa
 											3 Apaga
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -1701,22 +1619,22 @@ If _ntip == 1  //Estorno de efetivação
 	Begin Transaction
 	
 	//Localiza viagem no ZLJ
-	Dbselectarea("ZLJ")
+	DBSelectArea("ZLJ")
 	ZLJ->( DBSetOrder(2) )
-	If ZLJ->( DBSeek( xFILIAL("ZLJ") + _cviagem ) )
+	If ZLJ->( DBSeek( xFilial("ZLJ") + _cviagem ) )
 	
-		Do While ZLJ->(!EOF()) .AND. ZLJ->ZLJ_FILIAL == xFilial("ZLJ") .and. ZLJ->ZLJ_VIAGEM == _cviagem .and. _lok
+		While ZLJ->(!Eof()) .And. ZLJ->ZLJ_FILIAL == xFilial("ZLJ") .And. ZLJ->ZLJ_VIAGEM == _cviagem .And. _lok
 		
            IncProc("Atualizando Atendimento: "+ZLJ->ZLJ_NUMERO) 
            //Estorna movimento de cooperativa		
-           Dbselectarea("ZLW")
+           DBSelectArea("ZLW")
            ZLW->( DBSetOrder(7) )
-           If !Empty(ZLJ->ZLJ_NUMERO) .AND. ZLW->( DBSeek( xFilial("ZLW") + ZLJ->ZLJ_NUMERO) )
+           If !Empty(ZLJ->ZLJ_NUMERO) .And. ZLW->( DBSeek( xFilial("ZLW") + ZLJ->ZLJ_NUMERO) )
 				
 					If ZLW->ZLW_STATUS != "F" 
-					   Reclock("ZLW", .F.)
+					   RecLock("ZLW", .F.)
 					   ZLW->( Dbdelete() )
-					   ZLW->( Msunlock() )
+					   ZLW->( MSUnLock() )
 					Else
 						MsgAlert("Registro de recepção já teve fechamento: "+xFilial("ZLD") + ZLJ->ZLJ_NUMERO,"AGLT02134")
 						_lOk := .F.
@@ -1729,15 +1647,15 @@ If _ntip == 1  //Estorno de efetivação
 			//Estorna recepção
 				
 			ZLD->( DBSetOrder(7) )
-			If !Empty(ZLJ->ZLJ_NUMERO) .AND. ZLD->( DBSeek( xFilial("ZLD") + ZLJ->ZLJ_NUMERO) )
+			If !Empty(ZLJ->ZLJ_NUMERO) .And. ZLD->( DBSeek( xFilial("ZLD") + ZLJ->ZLJ_NUMERO) )
 				
-					If ZLD->ZLD_STATUS != "F"  .AND. !AGLT021D( ZLD->ZLD_DTCOLE , ZLD->ZLD_RETIRO , ZLD->ZLD_RETILJ,.T.,ZLJ->ZLJ_TIPPRO )
+					If ZLD->ZLD_STATUS != "F"  .And. !AGLT021D( ZLD->ZLD_DTCOLE , ZLD->ZLD_RETIRO , ZLD->ZLD_RETILJ,.T.,ZLJ->ZLJ_TIPPRO )
 				
                        U_AGLTGrv_ZLX("EXCLUI")// Projeto Automação das Recepções Tipo Plataforma
                         
-						Reclock("ZLD", .F.)
+						RecLock("ZLD", .F.)
 						ZLD->( Dbdelete() )
-						ZLD->( Msunlock() )
+						ZLD->( MSUnLock() )
 						
 					Else
 					    If ZLD->ZLD_STATUS = "F"
@@ -1751,14 +1669,14 @@ If _ntip == 1  //Estorno de efetivação
 			
 			If _lOk
 			
-				Reclock("ZLJ",.F.)
+				RecLock("ZLJ",.F.)
 				
 				ZLJ->ZLJ_STATUS := "P"
 				ZLJ->ZLJ_UEFET 	:= " "
 				ZLJ->ZLJ_DEFET 	:= ctod(" / / ")
 				ZLJ->ZLJ_HREFET := " "
 				
-				ZLJ->( Msunlock() )
+				ZLJ->( MSUnLock() )
 				
 			EndIf
 			
@@ -1786,38 +1704,38 @@ ElseIf _ntip == 2 //Estorno de recusa e Refaz Estoque
 	
 	//Localiza viagem no ZLJ
     ZLX->(dbOrderNickname("IT_I_TISET"))//ZLX_FILIAL+ZLX_TICKET+ZLX_SETOR //ZLX->(DBSetOrder(10))
-	Dbselectarea("ZLJ")
+	DBSelectArea("ZLJ")
 	ZLJ->( DBSetOrder(2) )
-	If ZLJ->( DBSeek( xFILIAL("ZLJ") + _cviagem ) )
+	If ZLJ->( DBSeek( xFilial("ZLJ") + _cviagem ) )
 		lTemLeiteProprio:=.F.
 		_aSetores:={}
-		Do While ZLJ->(!EOF()) .AND. ZLJ->ZLJ_FILIAL == xFilial("ZLJ") .and. ZLJ->ZLJ_VIAGEM == _cviagem
+		While ZLJ->(!Eof()) .And. ZLJ->ZLJ_FILIAL == xFilial("ZLJ") .And. ZLJ->ZLJ_VIAGEM == _cviagem
 		
            IncProc("Atualizando Atendimento: "+ZLJ->ZLJ_NUMERO) 
-			ZLJ->(Reclock("ZLJ", .F.))
+			ZLJ->(RecLock("ZLJ", .F.))
             If _lEstoque
 		   	   ZLJ->ZLJ_DTCRIA := M->ZLJ_DTCRIA // Alteração da data 
 
-               If ZLX->( DBSeek(xFilial()+ZLD->ZLD_TICKET+ZLD->ZLD_SETOR)) .AND. ZLX->ZLX_DTESTO # M->ZLJ_DTCRIA
-			      ZLX->(Reclock("ZLX", .F.))
+               If ZLX->( DBSeek(xFilial()+ZLD->ZLD_TICKET+ZLD->ZLD_SETOR)) .And. ZLX->ZLX_DTESTO # M->ZLJ_DTCRIA
+			      ZLX->(RecLock("ZLX", .F.))
 	   	          ZLX->ZLX_DTESTO := M->ZLJ_DTCRIA//Data Estoque
-			      ZLX->(Msunlock())
+			      ZLX->(MSUnLock())
 	   	       EndIf   
 
 		    Else
 			   ZLJ->ZLJ_STATUS := "P"
 			   ZLJ->ZLJ_MOTIVO := " "
 		   	   ZLJ->ZLJ_UEFET	:= " "
-			   ZLJ->ZLJ_DEFET 	:= STOD(" ")
+			   ZLJ->ZLJ_DEFET 	:= SToD(" ")
 			   ZLJ->ZLJ_HREFET 	:= " "
 		    EndIf	
-			ZLJ->( Msunlock() )
+			ZLJ->( MSUnLock() )
 					
 			//Atualiza array com volumes por viagem e por setor
 			If 	!ZLJ->ZLJ_DESCAR 
 				
-				If (_nPos:=Ascan(_aViagens,{|aVal| aVal[1] == ZLJ->ZLJ_VIAGEM })) == 0//.and. aVal[2] == ZLJ->ZLJ_SETOR
-					aadd(_aViagens, {ZLJ->ZLJ_VIAGEM,;//01
+				If (_nPos:=aScan(_aViagens,{|aVal| aVal[1] == ZLJ->ZLJ_VIAGEM })) == 0//.and. aVal[2] == ZLJ->ZLJ_SETOR
+					aAdd(_aViagens, {ZLJ->ZLJ_VIAGEM,;//01
 					                 ZLJ->ZLJ_SETOR ,;//02
 					                 0              ,;//03 //Total Cooperativa
 					                 ZLJ->ZLJ_DTCRIA,;//04//Data já esta alterada quando hega aqui
@@ -1839,8 +1757,8 @@ ElseIf _ntip == 2 //Estorno de recusa e Refaz Estoque
 			       lTemLeiteProprio    := .T.            //Tem Leite Proprio
 			       _aViagens[_nPos][6] += ZLJ->ZLJ_VOLUME//Total Leite Proprio
 			       
-		           If (_nPoSet:=Ascan(_aSetores,{|aVal| aVal[1] == ZLJ->ZLJ_SETOR})) == 0
-			          AADD(_aSetores, {ZLJ->ZLJ_SETOR,0,ZLJ->ZLJ_VOLUME})
+		           If (_nPoSet:=aScan(_aSetores,{|aVal| aVal[1] == ZLJ->ZLJ_SETOR})) == 0
+			          aAdd(_aSetores, {ZLJ->ZLJ_SETOR,0,ZLJ->ZLJ_VOLUME})
 			       Else
 			          _aSetores[_nPoSet][3] += ZLJ->ZLJ_VOLUME//Total do leite proprio por setor
 			       EndIf
@@ -1854,7 +1772,7 @@ ElseIf _ntip == 2 //Estorno de recusa e Refaz Estoque
 		EndDo
 		
 		//Refaz movimentos de estoque
-		If !lTemLeiteProprio  .OR. !_lMove
+		If !lTemLeiteProprio  .Or. !_lMove
 		   _aViagens:={}
 		EndIf
 
@@ -1873,7 +1791,7 @@ ElseIf _ntip == 2 //Estorno de recusa e Refaz Estoque
                    For _nS := 1 To Len(_aSetores)                       
 			          // Total do setor dividido pelo total dos setores multiplicado pela diferenca = Total do setor com a diferenca
                       _aSetores[_nS,2]:= _aSetores[_nS][3] / _aViagens[_nI][6] * nTotBom
-                      _nVlrMix      := POSICIONE("ZL2",1,XFILIAL("ZL2")+_aSetores[_nS,1],"ZL2_ULTMIX")
+                      _nVlrMix      := Posicione("ZL2",1,xFilial("ZL2")+_aSetores[_nS,1],"ZL2_ULTMIX")
                       _nCustoEst    += (_nVlrMix * _aSetores[_nS,2])
 	               Next _nS
                 EndIf			
@@ -1882,8 +1800,8 @@ ElseIf _ntip == 2 //Estorno de recusa e Refaz Estoque
 				cSetor    := _aViagens[_nI][2]//Variavel usada dentro da funcao U_AGLT003G()
 				dDtColeta := _aViagens[_nI][4]//Variavel usada dentro da funcao U_AGLT003G()
 
-                IncProc("Gerando Estoque da Data: "+DTOC(dDtColeta))
-                IncProc("Gerando Estoque da Data: "+DTOC(dDtColeta))
+                IncProc("Gerando Estoque da Data: "+DToC(dDtColeta))
+                IncProc("Gerando Estoque da Data: "+DToC(dDtColeta))
 					
 				If .not. U_AGLT003G(_aViagens[_nI][1],3,.F.,_nCustoEst) //Grava movimento de estoque igual a rotina da recepção manual
 			
@@ -1918,16 +1836,16 @@ ElseIf _ntip == 3 //Apaga
 	Begin Transaction
 
 	//Localiza viagem no ZLJ
-	Dbselectarea("ZLJ")
+	DBSelectArea("ZLJ")
 	ZLJ->( DBSetOrder(2) )
-	If ZLJ->( DBSeek( xFILIAL("ZLJ") + _cviagem ) )
+	If ZLJ->( DBSeek( xFilial("ZLJ") + _cviagem ) )
 		
-		Do While ZLJ->(!EOF()) .AND. ZLJ->ZLJ_FILIAL == xFilial("ZLJ") .and. ZLJ->ZLJ_VIAGEM == _cviagem
+		While ZLJ->(!Eof()) .And. ZLJ->ZLJ_FILIAL == xFilial("ZLJ") .And. ZLJ->ZLJ_VIAGEM == _cviagem
 		
             IncProc("Apagando Atendimento: "+ZLJ->ZLJ_NUMERO) 
-			Reclock("ZLJ", .F.)
+			RecLock("ZLJ", .F.)
 			ZLJ->( DBDELETE() )
-			ZLJ->( Msunlock() )
+			ZLJ->( MSUnLock() )
 
 			ZLJ->( DBSkip() )
 			
@@ -1950,17 +1868,14 @@ Return .T.
 Programa--------: AGLT021Tela()
 Autor-----------: Alex Walaluer
 Data da Criacao-: 01/07/2016
-===============================================================================================================================
 Descrição-------: Tela de capa e detalhe
-===============================================================================================================================
 Parametros------: _cTitulo: Titulo da Janela
 				  _bok    : Funcao para executar no OK
  				  _nOpc   : Tipo da manutencao
 				  nReg    : Recno do ZLJ
 				  _aButtons: Botoes
 				  _bMarca : Codeblock da marcação
-===============================================================================================================================
-Retorno---------: .t.
+Retorno---------: .T.
 ===============================================================================================================================
 */
 Static Function AGLT021Tela(_cTitulo,_bOk,_nOpc,nReg,_aButtons,_bMarca)
@@ -1981,131 +1896,131 @@ Local _cAlias		:= GetNextAlias()
 Private aRotina		:= MenuDef()
 Private oDlg,aHeader:= {}
 Private _nRecMae	:= nReg
-Private _nBotEstoque:= ASCAN(aRotina,{|X| X[2] == 'U_AGLT21RE' })
-Private _nBotEfetiva:= ASCAN(aRotina,{|X| X[2] == 'U_AGLT021E' })
+Private _nBotEstoque:= aScan(aRotina,{|X| X[2] == 'U_AGLT21RE' })
+Private _nBotEfetiva:= aScan(aRotina,{|X| X[2] == 'U_AGLT021E' })
 
-If SELECT(cAliasWK) # 0
-   (cAliasWK)->(DBCLOSEAREA())
+If Select(cAliasWK) # 0
+   (cAliasWK)->(DBCloseArea())
 EndIf
 
-AADD(aSemSX3,{"ZLJ_TIPPRO","C",1,0})
-AADD(aSemSX3,{"ZLJ_SETOR","C",6,0})
-AADD(aSemSX3,{"ZLJ_LINROT","C",6,0})
-AADD(aSemSX3,{"ZLJ_VIAGEM","C",10,0})
-AADD(aSemSX3,{"ZLJ_NUMERO","C",10,0})
-AADD(aSemSX3,{"ZLJ_NSETOR","C",10,0})
-AADD(aSemSX3,{"ZLJ_NLINRO","C",10,0})
-AADD(aSemSX3,{"ZLJ_CODPAT","C",6,0})
-AADD(aSemSX3,{"ZLJ_LOJPAT","C",4,0})
-AADD(aSemSX3,{"ZLJ_NOMPAT","C",15,0})
-AADD(aSemSX3,{"ZLJ_TIPVIS","C",1,0})
-AADD(aSemSX3,{"ZLJ_DTIVIA","D",8,0})
-AADD(aSemSX3,{"ZLJ_DTFVIA","D",8,0})
-AADD(aSemSX3,{"ZLJ_DTCRIA","D",8,0})
-AADD(aSemSX3,{"ZLJ_STATUS","C",1,0})
-AADD(aSemSX3,{"ZLJ_DESCAR","L",1,0})
-AADD(aSemSX3,{"ZLJ_VOLUME","N",9,2})
-AADD(aSemSX3,{"ZLJ_CODTRN","C",6,0})
-AADD(aSemSX3,{"ZLJ_LOJTRN","C",4,0})
-AADD(aSemSX3,{"ZLJ_DTRAN","C",100,0})
-AADD(aSemSX3,{"ZLJ_KMDVIA","N",18,0})
-AADD(aSemSX3,{"ZLJ_TEMPER","N",18,8})
-AADD(aSemSX3,{"ZLJ_PLACA","C",8,0})
-AADD(aSemSX3,{"ZLJ_VOLREA","N",18,0})
-AADD(aSemSX3,{"ZLJ_VOLCOL","N",18,0})
-AADD(aSemSX3,{"ZLJ_HRIVIA","C",8,0})
-AADD(aSemSX3,{"ZLJ_HRFVIA","C",8,0})
-AADD(aSemSX3,{"ZLJ_MOTIVO","C",250,0})
-AADD(aSemSX3,{"ZLJ_LITRAG","N",18,0})
-AADD(aSemSX3,{"ZLJ_DMOTOR","C",100,0})
-AADD(aSemSX3,{"ZLJ_PSIVIA","N",18,0})
-AADD(aSemSX3,{"ZLJ_PSFVIA","N",18,0})
-AADD(aSemSX3,{"ZLJ_VEICUL","C",6,0})
-AADD(aSemSX3,{"ZLJ_MOTORI","C",6,0})
-AADD(aSemSX3,{"ZLJ_AMOSTR","C",9,0})
-AADD(aSemSX3,{"ZLJ_ALIZAR","C",1,0})
-AADD(aSemSX3,{"ZLJ_BOCA","C",3,0})
-AADD(aSemSX3,{"ZLJ_REGZLX","N",9,0})
-AADD(aSemSX3,{"ZLJ_HRCRIA","C",8,0})
-AADD(aSemSX3,{"ZLJ_DTINI","D",8,0})
-AADD(aSemSX3,{"ZLJ_HRINI","C",8,0})
-AADD(aSemSX3,{"ZLJ_REGUA","N",9,2})
-AADD(aSemSX3,{"ZLJ_DTFIM","D",8,0})
-AADD(aSemSX3,{"ZLJ_HRFIM","C",8,0})
-AADD(aSemSX3,{"ZLJ_UEFET","C",50,0})
-AADD(aSemSX3,{"ZLJ_DIFER","N",18,0})
-AADD(aSemSX3,{"ZLJ_DEFET","D",8,0})
-AADD(aSemSX3,{"ZLJ_HREFET","C",20,0})
-AADD(aSemSX3,{"ZLJ_USRSMQ","C",6,0})
-AADD(aSemSX3,{"ZLJ_LOGINS","C",40,0})
-AADD(aSemSX3,{"ZLJ_DIFER2","N",9,0})
-AADD(aSemSX3,{"ZLJ_VOLCOO","N",18,0})
-AADD(aSemSX3,{"ZLJ_UINTSQ","C",50,0})
-AADD(aSemSX3,{"ZLJ_DINTSQ","D",8,0})
-AADD(aSemSX3,{"ZLJ_HINTSQ","C",8,0})
-AADD(aSemSX3,{"ZLJ_VFILHA","C",10,0})
-AADD(aSemSX3,{"ZLJ_VFILHS","C",250,0})
-AADD(aSemSX3,{"ZLJ_LINHSQ","C",6,0})
+aAdd(aSemSX3,{"ZLJ_TIPPRO","C",1,0})
+aAdd(aSemSX3,{"ZLJ_SETOR","C",6,0})
+aAdd(aSemSX3,{"ZLJ_LINROT","C",6,0})
+aAdd(aSemSX3,{"ZLJ_VIAGEM","C",10,0})
+aAdd(aSemSX3,{"ZLJ_NUMERO","C",10,0})
+aAdd(aSemSX3,{"ZLJ_NSETOR","C",10,0})
+aAdd(aSemSX3,{"ZLJ_NLINRO","C",10,0})
+aAdd(aSemSX3,{"ZLJ_CODPAT","C",6,0})
+aAdd(aSemSX3,{"ZLJ_LOJPAT","C",4,0})
+aAdd(aSemSX3,{"ZLJ_NOMPAT","C",15,0})
+aAdd(aSemSX3,{"ZLJ_TIPVIS","C",1,0})
+aAdd(aSemSX3,{"ZLJ_DTIVIA","D",8,0})
+aAdd(aSemSX3,{"ZLJ_DTFVIA","D",8,0})
+aAdd(aSemSX3,{"ZLJ_DTCRIA","D",8,0})
+aAdd(aSemSX3,{"ZLJ_STATUS","C",1,0})
+aAdd(aSemSX3,{"ZLJ_DESCAR","L",1,0})
+aAdd(aSemSX3,{"ZLJ_VOLUME","N",9,2})
+aAdd(aSemSX3,{"ZLJ_CODTRN","C",6,0})
+aAdd(aSemSX3,{"ZLJ_LOJTRN","C",4,0})
+aAdd(aSemSX3,{"ZLJ_DTRAN","C",100,0})
+aAdd(aSemSX3,{"ZLJ_KMDVIA","N",18,0})
+aAdd(aSemSX3,{"ZLJ_TEMPER","N",18,8})
+aAdd(aSemSX3,{"ZLJ_PLACA","C",8,0})
+aAdd(aSemSX3,{"ZLJ_VOLREA","N",18,0})
+aAdd(aSemSX3,{"ZLJ_VOLCOL","N",18,0})
+aAdd(aSemSX3,{"ZLJ_HRIVIA","C",8,0})
+aAdd(aSemSX3,{"ZLJ_HRFVIA","C",8,0})
+aAdd(aSemSX3,{"ZLJ_MOTIVO","C",250,0})
+aAdd(aSemSX3,{"ZLJ_LITRAG","N",18,0})
+aAdd(aSemSX3,{"ZLJ_DMOTOR","C",100,0})
+aAdd(aSemSX3,{"ZLJ_PSIVIA","N",18,0})
+aAdd(aSemSX3,{"ZLJ_PSFVIA","N",18,0})
+aAdd(aSemSX3,{"ZLJ_VEICUL","C",6,0})
+aAdd(aSemSX3,{"ZLJ_MOTORI","C",6,0})
+aAdd(aSemSX3,{"ZLJ_AMOSTR","C",9,0})
+aAdd(aSemSX3,{"ZLJ_ALIZAR","C",1,0})
+aAdd(aSemSX3,{"ZLJ_BOCA","C",3,0})
+aAdd(aSemSX3,{"ZLJ_REGZLX","N",9,0})
+aAdd(aSemSX3,{"ZLJ_HRCRIA","C",8,0})
+aAdd(aSemSX3,{"ZLJ_DTINI","D",8,0})
+aAdd(aSemSX3,{"ZLJ_HRINI","C",8,0})
+aAdd(aSemSX3,{"ZLJ_REGUA","N",9,2})
+aAdd(aSemSX3,{"ZLJ_DTFIM","D",8,0})
+aAdd(aSemSX3,{"ZLJ_HRFIM","C",8,0})
+aAdd(aSemSX3,{"ZLJ_UEFET","C",50,0})
+aAdd(aSemSX3,{"ZLJ_DIFER","N",18,0})
+aAdd(aSemSX3,{"ZLJ_DEFET","D",8,0})
+aAdd(aSemSX3,{"ZLJ_HREFET","C",20,0})
+aAdd(aSemSX3,{"ZLJ_USRSMQ","C",6,0})
+aAdd(aSemSX3,{"ZLJ_LOGINS","C",40,0})
+aAdd(aSemSX3,{"ZLJ_DIFER2","N",9,0})
+aAdd(aSemSX3,{"ZLJ_VOLCOO","N",18,0})
+aAdd(aSemSX3,{"ZLJ_UINTSQ","C",50,0})
+aAdd(aSemSX3,{"ZLJ_DINTSQ","D",8,0})
+aAdd(aSemSX3,{"ZLJ_HINTSQ","C",8,0})
+aAdd(aSemSX3,{"ZLJ_VFILHA","C",10,0})
+aAdd(aSemSX3,{"ZLJ_VFILHS","C",250,0})
+aAdd(aSemSX3,{"ZLJ_LINHSQ","C",6,0})
 
-AADD(aheader,{"Tp Produtor","ZLJ_TIPPRO"," ",1,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Setor","ZLJ_SETOR"," ",6,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Linha/Rota","ZLJ_LINROT"," ",6,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Cod. Viagem","ZLJ_VIAGEM","@!                                           ",10,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Km Viagem","ZLJ_KMDVIA","@E 999,999,999                               ",18,0,"Positivo()                                                                                                                      ","€€€€€€€€€€€€€€ ","N","ZLJ","R"})
-AADD(aheader,{"Lista Filhas","ZLJ_VFILHS","@!                                           ",250,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Num. Atendim","ZLJ_NUMERO","@!                                           ",10,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Viagem Filha","ZLJ_VFILHA","@!                                           ",10,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Nome Setor","ZLJ_NSETOR"," ",10,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","V"})
-AADD(aheader,{"Nome Rota","ZLJ_NLINRO"," ",10,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","V"})
-AADD(aheader,{"Cod do Ponto","ZLJ_CODPAT","@!                                           ",6,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Loj do Ponto","ZLJ_LOJPAT","@!                                           ",4,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Nome Ponto","ZLJ_NOMPAT","@!                                           ",15,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","V"})
-AADD(aheader,{"Tipo Visita","ZLJ_TIPVIS","@!                                           ",1,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Dt In Viagem","ZLJ_DTIVIA"," ",8,0," ","€€€€€€€€€€€€€€ ","D","ZLJ","R"})
-AADD(aheader,{"Hr In Viagem","ZLJ_HRIVIA","99:99:99                                     ",8,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Dt Fi Viagem","ZLJ_DTFVIA"," ",8,0," ","€€€€€€€€€€€€€€ ","D","ZLJ","R"})
-AADD(aheader,{"Hr Fi Viagem","ZLJ_HRFVIA","99:99:99                                     ",8,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Dt Estoque","ZLJ_DTCRIA"," ",8,0," ","€€€€€€€€€€€€€€ ","D","ZLJ","R"})
-AADD(aheader,{"Status","ZLJ_STATUS"," ",1,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Descarte","ZLJ_DESCAR"," ",1,0," ","€€€€€€€€€€€€€€ ","L","ZLJ","R"})
-AADD(aheader,{"Volume Col.","ZLJ_VOLUME","@E 999,999                                   ",9,2," ","€€€€€€€€€€€€€€ ","N","ZLJ","R"})
-AADD(aheader,{"Temperatura","ZLJ_TEMPER","@E 99.99                                     ",18,8," ","€€€€€€€€€€€€€€ ","N","ZLJ","R"})
-AADD(aheader,{"Placa Veic.","ZLJ_PLACA","@!                                  ",7,0,"(M->ZLJ_PLACA:=ZLJ->ZLJ_PLACA,.T.)                                                                                              ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Vol veiculo","ZLJ_VOLREA","@E 999,999,999                               ",18,0," ","€€€€€€€€€€€€€€ ","N","ZLJ","V"})
-AADD(aheader,{"Vol Coletado","ZLJ_VOLCOL","@E 999,999,999                               ",18,0," ","€€€€€€€€€€€€€€ ","N","ZLJ","V"})
-AADD(aheader,{"Diferenca","ZLJ_DIFER","@E 999,999,999                               ",18,0," ","€€€€€€€€€€€€€€ ","N","ZLJ","V"})
-AADD(aheader,{"Motivo Recus","ZLJ_MOTIVO"," ",250,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Vol Med Vaza","ZLJ_LITRAG","@E 999,999,999,999,999,999                   ",18,0," ","€€€€€€€€€€€€€€ ","N","ZLJ","R"})
-AADD(aheader,{"Cod. Transp.","ZLJ_CODTRN","@!                                           ",6,0,"(M->ZLJ_CODTRN:=ZLJ->ZLJ_CODTRN,.T.)                                                                                            ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Loja Transp.","ZLJ_LOJTRN","@!                                           ",4,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Nome Transp","ZLJ_DTRAN"," ",100,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","V"})
-AADD(aheader,{"Motorista","ZLJ_MOTORI"," ",6,0,"(M->ZLJ_MOTORI:=ZLJ->ZLJ_MOTORI,.T.)                                                                                            ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Nome Motoris","ZLJ_DMOTOR"," ",100,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","V"})
-AADD(aheader,{"Veiculo","ZLJ_VEICUL"," ",6,0,"(M->ZLJ_VEICUL:=ZLJ->ZLJ_VEICUL,.T.)                                                                                            ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Id. Amostra","ZLJ_AMOSTR","@!                                           ",9,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Alizarol","ZLJ_ALIZAR","@!                                           ",1,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Boca","ZLJ_BOCA","@!                                           ",3,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Reg. Tabela","ZLJ_REGZLX","@E 999999999                                 ",9,0," ","€€€€€€€€€€€€€€ ","N","ZLJ","R"})
-AADD(aheader,{"Hora Criacao","ZLJ_HRCRIA"," ",8,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Data Inicio","ZLJ_DTINI"," ",8,0," ","€€€€€€€€€€€€€€ ","D","ZLJ","R"})
-AADD(aheader,{"Hora Inicial","ZLJ_HRINI"," ",8,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Regua","ZLJ_REGUA","@E 999,999.99                                ",9,2," ","€€€€€€€€€€€€€€ ","N","ZLJ","R"})
-AADD(aheader,{"Data fim","ZLJ_DTFIM"," ",8,0," ","€€€€€€€€€€€€€€ ","D","ZLJ","R"})
-AADD(aheader,{"Hora fim","ZLJ_HRFIM"," ",8,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Usr Efetivou","ZLJ_UEFET"," ",50,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Data Efetiva","ZLJ_DEFET"," ",8,0," ","€€€€€€€€€€€€€€ ","D","ZLJ","R"})
-AADD(aheader,{"Hr Efetivaca","ZLJ_HREFET"," ",20,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Usr. SmartQs","ZLJ_USRSMQ","@!                                           ",6,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Login SMQ","ZLJ_LOGINS","@x                                           ",40,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Peso Cheio","ZLJ_PSIVIA","@E 999,999,999                               ",18,0," ","€€€€€€€€€€€€€€ ","N","ZLJ","R"})
-AADD(aheader,{"Vol L.Propri","ZLJ_VOLPRO","@E 999,999,999,999                           ",18,0," ","€€€€€€€€€€€€€€ ","N","ZLJ","V"})
-AADD(aheader,{"Peso Vazio","ZLJ_PSFVIA","@E 999,999,999                               ",18,0," ","€€€€€€€€€€€€€€ ","N","ZLJ","R"})
-AADD(aheader,{"Vol Cooperat","ZLJ_VOLCOO","@E 999,999,999,999                           ",18,0," ","€€€€€€€€€€€€€€ ","N","ZLJ","V"})
-AADD(aheader,{"Peso Liq","ZLJ_DIFER2","@E 999,999,999                               ",9,0," ","€€€€€€€€€€€€€€ ","N","ZLJ","V"})
-AADD(aheader,{"User Int SQ","ZLJ_UINTSQ","@!                                           ",50,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Data Int SQ","ZLJ_DINTSQ","@D                                           ",8,0," ","€€€€€€€€€€€€€€ ","D","ZLJ","R"})
-AADD(aheader,{"Hora Int SQ","ZLJ_HINTSQ","@!                                           ",8,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
-AADD(aheader,{"Linha SQ","ZLJ_LINHSQ","@!                                           ",6,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Tp Produtor","ZLJ_TIPPRO"," ",1,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Setor","ZLJ_SETOR"," ",6,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Linha/Rota","ZLJ_LINROT"," ",6,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Cod. Viagem","ZLJ_VIAGEM","@!                                           ",10,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Km Viagem","ZLJ_KMDVIA","@E 999,999,999                               ",18,0,"Positivo()                                                                                                                      ","€€€€€€€€€€€€€€ ","N","ZLJ","R"})
+aAdd(aheader,{"Lista Filhas","ZLJ_VFILHS","@!                                           ",250,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Num. Atendim","ZLJ_NUMERO","@!                                           ",10,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Viagem Filha","ZLJ_VFILHA","@!                                           ",10,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Nome Setor","ZLJ_NSETOR"," ",10,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","V"})
+aAdd(aheader,{"Nome Rota","ZLJ_NLINRO"," ",10,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","V"})
+aAdd(aheader,{"Cod do Ponto","ZLJ_CODPAT","@!                                           ",6,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Loj do Ponto","ZLJ_LOJPAT","@!                                           ",4,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Nome Ponto","ZLJ_NOMPAT","@!                                           ",15,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","V"})
+aAdd(aheader,{"Tipo Visita","ZLJ_TIPVIS","@!                                           ",1,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Dt In Viagem","ZLJ_DTIVIA"," ",8,0," ","€€€€€€€€€€€€€€ ","D","ZLJ","R"})
+aAdd(aheader,{"Hr In Viagem","ZLJ_HRIVIA","99:99:99                                     ",8,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Dt Fi Viagem","ZLJ_DTFVIA"," ",8,0," ","€€€€€€€€€€€€€€ ","D","ZLJ","R"})
+aAdd(aheader,{"Hr Fi Viagem","ZLJ_HRFVIA","99:99:99                                     ",8,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Dt Estoque","ZLJ_DTCRIA"," ",8,0," ","€€€€€€€€€€€€€€ ","D","ZLJ","R"})
+aAdd(aheader,{"Status","ZLJ_STATUS"," ",1,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Descarte","ZLJ_DESCAR"," ",1,0," ","€€€€€€€€€€€€€€ ","L","ZLJ","R"})
+aAdd(aheader,{"Volume Col.","ZLJ_VOLUME","@E 999,999                                   ",9,2," ","€€€€€€€€€€€€€€ ","N","ZLJ","R"})
+aAdd(aheader,{"Temperatura","ZLJ_TEMPER","@E 99.99                                     ",18,8," ","€€€€€€€€€€€€€€ ","N","ZLJ","R"})
+aAdd(aheader,{"Placa Veic.","ZLJ_PLACA","@!                                  ",7,0,"(M->ZLJ_PLACA:=ZLJ->ZLJ_PLACA,.T.)                                                                                              ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Vol veiculo","ZLJ_VOLREA","@E 999,999,999                               ",18,0," ","€€€€€€€€€€€€€€ ","N","ZLJ","V"})
+aAdd(aheader,{"Vol Coletado","ZLJ_VOLCOL","@E 999,999,999                               ",18,0," ","€€€€€€€€€€€€€€ ","N","ZLJ","V"})
+aAdd(aheader,{"Diferenca","ZLJ_DIFER","@E 999,999,999                               ",18,0," ","€€€€€€€€€€€€€€ ","N","ZLJ","V"})
+aAdd(aheader,{"Motivo Recus","ZLJ_MOTIVO"," ",250,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Vol Med Vaza","ZLJ_LITRAG","@E 999,999,999,999,999,999                   ",18,0," ","€€€€€€€€€€€€€€ ","N","ZLJ","R"})
+aAdd(aheader,{"Cod. Transp.","ZLJ_CODTRN","@!                                           ",6,0,"(M->ZLJ_CODTRN:=ZLJ->ZLJ_CODTRN,.T.)                                                                                            ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Loja Transp.","ZLJ_LOJTRN","@!                                           ",4,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Nome Transp","ZLJ_DTRAN"," ",100,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","V"})
+aAdd(aheader,{"Motorista","ZLJ_MOTORI"," ",6,0,"(M->ZLJ_MOTORI:=ZLJ->ZLJ_MOTORI,.T.)                                                                                            ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Nome Motoris","ZLJ_DMOTOR"," ",100,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","V"})
+aAdd(aheader,{"Veiculo","ZLJ_VEICUL"," ",6,0,"(M->ZLJ_VEICUL:=ZLJ->ZLJ_VEICUL,.T.)                                                                                            ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Id. Amostra","ZLJ_AMOSTR","@!                                           ",9,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Alizarol","ZLJ_ALIZAR","@!                                           ",1,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Boca","ZLJ_BOCA","@!                                           ",3,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Reg. Tabela","ZLJ_REGZLX","@E 999999999                                 ",9,0," ","€€€€€€€€€€€€€€ ","N","ZLJ","R"})
+aAdd(aheader,{"Hora Criacao","ZLJ_HRCRIA"," ",8,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Data Inicio","ZLJ_DTINI"," ",8,0," ","€€€€€€€€€€€€€€ ","D","ZLJ","R"})
+aAdd(aheader,{"Hora Inicial","ZLJ_HRINI"," ",8,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Regua","ZLJ_REGUA","@E 999,999.99                                ",9,2," ","€€€€€€€€€€€€€€ ","N","ZLJ","R"})
+aAdd(aheader,{"Data fim","ZLJ_DTFIM"," ",8,0," ","€€€€€€€€€€€€€€ ","D","ZLJ","R"})
+aAdd(aheader,{"Hora fim","ZLJ_HRFIM"," ",8,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Usr Efetivou","ZLJ_UEFET"," ",50,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Data Efetiva","ZLJ_DEFET"," ",8,0," ","€€€€€€€€€€€€€€ ","D","ZLJ","R"})
+aAdd(aheader,{"Hr Efetivaca","ZLJ_HREFET"," ",20,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Usr. SmartQs","ZLJ_USRSMQ","@!                                           ",6,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Login SMQ","ZLJ_LOGINS","@x                                           ",40,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Peso Cheio","ZLJ_PSIVIA","@E 999,999,999                               ",18,0," ","€€€€€€€€€€€€€€ ","N","ZLJ","R"})
+aAdd(aheader,{"Vol L.Propri","ZLJ_VOLPRO","@E 999,999,999,999                           ",18,0," ","€€€€€€€€€€€€€€ ","N","ZLJ","V"})
+aAdd(aheader,{"Peso Vazio","ZLJ_PSFVIA","@E 999,999,999                               ",18,0," ","€€€€€€€€€€€€€€ ","N","ZLJ","R"})
+aAdd(aheader,{"Vol Cooperat","ZLJ_VOLCOO","@E 999,999,999,999                           ",18,0," ","€€€€€€€€€€€€€€ ","N","ZLJ","V"})
+aAdd(aheader,{"Peso Liq","ZLJ_DIFER2","@E 999,999,999                               ",9,0," ","€€€€€€€€€€€€€€ ","N","ZLJ","V"})
+aAdd(aheader,{"User Int SQ","ZLJ_UINTSQ","@!                                           ",50,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Data Int SQ","ZLJ_DINTSQ","@D                                           ",8,0," ","€€€€€€€€€€€€€€ ","D","ZLJ","R"})
+aAdd(aheader,{"Hora Int SQ","ZLJ_HINTSQ","@!                                           ",8,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
+aAdd(aheader,{"Linha SQ","ZLJ_LINHSQ","@!                                           ",6,0," ","€€€€€€€€€€€€€€ ","C","ZLJ","R"})
 
 _otemp := FWTemporaryTable():New( cAliasWK, aSemSX3 )
 _otemp:AddIndex( "01", {"ZLJ_VFILHA","ZLJ_TIPPRO","ZLJ_NUMERO"} )
@@ -2127,7 +2042,7 @@ BeginSql alias _cAlias
 	   AND D3_FILIAL = %exp:ZLJ->ZLJ_FILIAL%
 EndSql
 	
-_cSalvoZLJ_DTCRIA:=STOD((_cAlias)->D3_EMISSAO)//Se não achar vai branco mesmo
+_cSalvoZLJ_DTCRIA:=SToD((_cAlias)->D3_EMISSAO)//Se não achar vai branco mesmo
 
 (_cAlias)->( DBCloseArea() )
 DBSelectArea("ZLJ")
@@ -2140,24 +2055,24 @@ If Empty(M->ZLJ_VEICUL)//Esse campo foi alterado para real
    M->ZLJ_VEICUL:=Posicione("ZL1",2,xFilial("ZL1")+ZLJ->ZLJ_PLACA,"ZL1_COD")
 EndIf
 
-AADD(aCamposMostra,"NOUSER")
+aAdd(aCamposMostra,"NOUSER")
 For i := 1 To Len(aHeader)
-    cCampo:=ALLTRIM(aHeader[I,2])
+    cCampo:=AllTrim(aHeader[I,2])
     If AGLT021CPO( cCampo , 1 ) //Campos da Capa
-       AADD(aCamposMostra,cCampo)
+       aAdd(aCamposMostra,cCampo)
     EndIf
     If AGLT021CPO( cCampo , 2 ) //Campos dos atendimentos
        xCol1:=cCampo
        If cCampo = "ZLJ_TIPPRO"
           xCol1:={|| U_MGLTTipoProd("TRB") }//Rdmake MGLT002.PRW
-       ELSEIF cCampo = "ZLJ_DESCAR"
+       ElseIf cCampo = "ZLJ_DESCAR"
           xCol1:={|| If(TRB->ZLJ_DESCAR,"Sim","Nao") }
        EndIf
-       AADD(aTB_Campos,{xCol1,,AVSX3(cCampo,5),AVSX3(cCampo,6)})
-       AADD(aHeaderItens,aHeader[I])
+       aAdd(aTB_Campos,{xCol1,,AVSX3(cCampo,5),AVSX3(cCampo,6)})
+       aAdd(aHeaderItens,aHeader[I])
     EndIf
 Next
-AADD(aTB_Campos,{"ZLJ_MOTIVO",,AVSX3("ZLJ_MOTIVO",5),AVSX3("ZLJ_MOTIVO",6)})
+aAdd(aTB_Campos,{"ZLJ_MOTIVO",,AVSX3("ZLJ_MOTIVO",5),AVSX3("ZLJ_MOTIVO",6)})
 
 Private _lBotEst:=.F.
 If _nOpc = _nBotEstoque//'Refaz Estoque'
@@ -2169,18 +2084,18 @@ EndIf
 
 lMaeTemAtendimento:=.F.
 _nRecReboque:=0
-(cAlias)->(DBGOTO(_nRecMae))
+(cAlias)->(DBGoTo(_nRecMae))
 
 E_GravaTRB(cAlias,bSeek,NIL ,bWhile,aSemSX3,bGrvCpo,cAliasWK)
 
-If lMaeTemAtendimento .AND. _nRecReboque # 0
-   (cAliasWK)->(DBGOTO(_nRecReboque))
+If lMaeTemAtendimento .And. _nRecReboque # 0
+   (cAliasWK)->(DBGoTo(_nRecReboque))
    (cAliasWK)->(DBDELETE())
 EndIf
 
 M->ZLJ_DTCRIA:=_cSalvoZLJ_DTCRIA
 
-Do While .T.
+While .T.
 	nOpca:=0
 
 	aCoors:= FWGetDialogSize(oMainWnd)
@@ -2188,7 +2103,7 @@ Do While .T.
 	Define MSDialog oDlg Title _cTitulo From aCoors[1],aCoors[2] To aCoors[3],aCoors[4] OF oMainWnd Pixel
 		nLinha :=Int(((oMainWnd:nBottom-60)-(oMainWnd:nTop+125))/2.5)
 
-		(cAlias)->(DBGOTO(_nRecMae))
+		(cAlias)->(DBGoTo(_nRecMae))
 		//MsmGet(): New (         [ cAlias],[ uPar2], < nOpc>, [ uPar4], [ uPar5], [ uPar6], [ aAcho]    , [ aPos], [ aCpos], [ nModelo], [ uPar11], [ uPar12], [ uPar13], [ oWnd], [ lF3], [ lMemoria], [ lColumn], [ caTela], [ lNoFolder], [ lProperty], [ aField], [ aFolder], [ lCreate], [ lNoMDIStretch], [ uPar25] )																												,,,,,,,   ,,.T.)
 		oEnCh1:=MsMget():New( cAlias,_nRecMae,_nOpc,,,,aCamposMostra,{15,1,nLinha,(oDlg:nClientWidth-4)/2},aDarGets ,1)  
 
@@ -2202,8 +2117,8 @@ Do While .T.
                                     oEnCh1:oBox:Align:=CONTROL_ALIGN_TOP ,;
                                     oMark:oBrowse:Align:=CONTROL_ALIGN_ALLCLIENT ,;
                                     oMark:oBrowse:Refresh() )
-	If nOpca = 1 .AND. !Eval(_bOk)
-		If SELECT(cAliasWK) # 0
+	If nOpca = 1 .And. !Eval(_bOk)
+		If Select(cAliasWK) # 0
 			Loop
 		Else//Se o TRB For fechado erroniamente
 			Exit
@@ -2214,7 +2129,7 @@ Do While .T.
 
 EndDo
 
-If SELECT(cAliasWK) # 0
+If Select(cAliasWK) # 0
    _otemp:delete()
 EndIf
 
@@ -2225,15 +2140,12 @@ Return .T.
 Programa--------: AGLT021Miscel()
 Autor-----------: Alex Walaluer
 Data da Criacao-: 01/07/2016
-===============================================================================================================================
 Descrição-------: Grava campos virtuais do TRB e devolve o tipo do produtor
-===============================================================================================================================
 Retorno---------: TIPO DO PRODUTOR
 ===============================================================================================================================
 */
-*===============================================================================================================================
-STATIC FUNCTION AGLT021Miscel()
-*===============================================================================================================================
+Static Function AGLT021Miscel()
+
 Local I
 //Executa o X3_RELACAO
 TRB->ZLJ_NSETOR:=CriaVar("ZLJ_NSETOR")
@@ -2261,11 +2173,8 @@ Return .T.
 Programa----------: AGLT021K()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 05/12/2015
-===============================================================================================================================
 Descrição---------: Reler o dados lidos no prothues da integracao do SQ
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: .T.
 ===============================================================================================================================
 */
@@ -2291,26 +2200,26 @@ SA2->( DBSetOrder(1))
 ZL0->( DBSetOrder(1))
 ZL1->( DBSetOrder(2))
 
-Do While TRB->(!EOF())
+While TRB->(!Eof())
 
 	_cCposDif:=_cMem:=""
 	_lTudoIgual:=.T.
 	_cLinhaRota:=_cSetor:=""
-	ZLJ->(DBGOTO(TRB->REC_ZLJ))
+	ZLJ->(DBGoTo(TRB->REC_ZLJ))
 
-	AADD(_atlog, {.F.,;//Bolinha verde ou vermelha
+	aAdd(_atlog, {.F.,;//Bolinha verde ou vermelha
 					TRB->ZLJ_NUMERO,;//'Atendimento'
 					ZLJ->ZLJ_CODPAT+' '+ZLJ->ZLJ_LOJPAT+' '+TRB->ZLJ_NOMPAT,;//Produtor
 					TRB->ZLJ_TIPPRO,;//Tp Produtor
 					TRB->ZLJ_SETOR ,;//'Setor'
 					TRB->ZLJ_LINROT,;//'Linha'
 					TRB->ZLJ_VEICUL,;//'Veiculo'
-					TRB->ZLJ_CODTRN+' '+TRB->ZLJ_LOJTRN+' '+POSICIONE("SA2",1,XFILIAL("SA2")+TRB->ZLJ_CODTRN+TRB->ZLJ_LOJTRN,"A2_NOME"),;//'Transportador'
+					TRB->ZLJ_CODTRN+' '+TRB->ZLJ_LOJTRN+' '+Posicione("SA2",1,xFilial("SA2")+TRB->ZLJ_CODTRN+TRB->ZLJ_LOJTRN,"A2_NOME"),;//'Transportador'
 					"Dados Atual, veja linha abaixo"})//'Observação'
 
 	If !Empty(ZLJ->ZLJ_CODPAT)
 
-		If !SA2->(DBSeek(Xfilial("SA2")+ZLJ->ZLJ_CODPAT+ZLJ->ZLJ_LOJPAT)) .OR. (SA2->A2_MSBLQL == '1' .Or. SA2->A2_L_ATIVO == 'N')
+		If !SA2->(DBSeek(xFilial("SA2")+ZLJ->ZLJ_CODPAT+ZLJ->ZLJ_LOJPAT)) .Or. (SA2->A2_MSBLQL == '1' .Or. SA2->A2_L_ATIVO == 'N')
 			_cMem+="[Produtor: "+ZLJ->ZLJ_CODPAT+' '+ZLJ->ZLJ_LOJPAT+" nao encontrado, bloqueado ("+SA2->A2_MSBLQL+") ou inativo ("+SA2->A2_L_ATIVO+")] "
 			_lDeuErro:=.T.
 			_cLinhaRota:=SA2->A2_L_LI_RO
@@ -2337,10 +2246,10 @@ Do While TRB->(!EOF())
         EndIf
 		TRB->ZLJ_LINROT:=_cLinhaRota
         TRB->ZLJ_NLINRO:=CriaVar("ZLJ_NLINRO")
-		_cSetor:=POSICIONE("ZL3",1,ZLJ->ZLJ_FILIAL+_cLinhaRota,"ZL3_SETOR")
+		_cSetor:=Posicione("ZL3",1,ZLJ->ZLJ_FILIAL+_cLinhaRota,"ZL3_SETOR")
 	EndIf
 	
-	If !Empty(_cLinhaRota) .AND. Empty(_cSetor)
+	If !Empty(_cLinhaRota) .And. Empty(_cSetor)
 		_cMem+="[Setor nao encontrada da Linha: "+_cLinhaRota+"] "
 		_atlog[Len(_atlog),6]:=_cLinhaRota//Atyualizo a linha pq pode ser a linha nova que esteja com erro
 		_lDeuErro:=.T.
@@ -2364,20 +2273,20 @@ Do While TRB->(!EOF())
 	Else
 		_cCodtransp:= ZL0->ZL0_FRETIS
 		_cLojtransp:= ZL0->ZL0_FRETLJ
-        If !(TRB->ZLJ_CODTRN == _cCodtransp) .OR. !(TRB->ZLJ_LOJTRN == _cLojtransp)
+        If !(TRB->ZLJ_CODTRN == _cCodtransp) .Or. !(TRB->ZLJ_LOJTRN == _cLojtransp)
            _cCposDif+="[Fretista] "
            _lTudoIgual:=.F.
         EndIf
 		TRB->ZLJ_CODTRN:= _cCodtransp
 		TRB->ZLJ_LOJTRN:= _cLojtransp
-		TRB->ZLJ_DTRAN := POSICIONE("SA2",1,XFILIAL("SA2")+_cCodtransp+_cLojtransp,"A2_NOME")
+		TRB->ZLJ_DTRAN := Posicione("SA2",1,xFilial("SA2")+_cCodtransp+_cLojtransp,"A2_NOME")
 	EndIf
 	
 	_cVeiculo:=""
 	_lAchouPlaca:=.F.
 	
-	If _lAchouMoto .AND. ZL1->(DBSeek(ZLJ->(ZLJ_FILIAL+ZLJ_PLACA)))
-		DO While ZL1->(!EOF()) .AND.  ZL1->ZL1_FILIAL + ZL1->ZL1_PLACA == ZLJ->ZLJ_FILIAL + ZLJ->ZLJ_PLACA
+	If _lAchouMoto .And. ZL1->(DBSeek(ZLJ->(ZLJ_FILIAL+ZLJ_PLACA)))
+		While ZL1->(!Eof()) .And.  ZL1->ZL1_FILIAL + ZL1->ZL1_PLACA == ZLJ->ZLJ_FILIAL + ZLJ->ZLJ_PLACA
 			If ZL1->ZL1_MOTORI == ZLJ->ZLJ_MOTORI
 				_cVeiculo   :=ZL1->ZL1_COD
 				_lAchouPlaca:=.T.
@@ -2415,7 +2324,7 @@ Do While TRB->(!EOF())
     _atlog[Len(_atlog),1]:=!_lTemErro//Atualiza a primeira linha tb com o status da segunda linha
     
     If TRB->TRB_GRAVA//Só cria uma linha duplicada de tiver diferenças
-	   AADD(_atlog,{.T.,;//Bolinha ver ou vermelha
+	   aAdd(_atlog,{.T.,;//Bolinha ver ou vermelha
                  TRB->ZLJ_NUMERO,;//'Atendimento'
                  ZLJ->ZLJ_CODPAT+' '+ZLJ->ZLJ_LOJPAT+' '+TRB->ZLJ_NOMPAT,;//Produtor
                  TRB->ZLJ_TIPPRO,;//Tp Produtor
@@ -2448,15 +2357,15 @@ Else
    _bCancel := {|oDlg| If(MsgYesNo("Confirma o Cancelamento? Todo o processamento gerado não será salvo!","AGLT02144"),(_lRet:=.F. , oDlg:End()),.F.) }
 EndIf
 
-Do While .T.
+While .T.
 
 //ITListBox(         _cTitAux        , _aHeader
-   _cMsgTop:="Viagem: "+ALLTRIM(M->ZLJ_VIAGEM)
+   _cMsgTop:="Viagem: "+AllTrim(M->ZLJ_VIAGEM)
    _lRet:=U_ITListBox( "Log de Reprocessamento dos Atendimentos. (AGLT021)" ,;                               //        , _aCols , _lMaxSiz,_nTipo,_cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel )
             {"",'Atendimento','Produtor','Tp Produtor','Setor','Linha','Veiculo','Transportador','Observações / Erros'}, _atlog , .T.     , 4    ,_cMsgTop ,          ,;
             {10,           55,       110,           40,     40,     40,       40,            130,        400},, _bOK,_bCancel  )
 
-   If _lRet .AND. !MsgYesNo("Confirma a GRAVAÇÃO do Reprocessamento dessa Viagem?","AGLT02145")
+   If _lRet .And. !MsgYesNo("Confirma a GRAVAÇÃO do Reprocessamento dessa Viagem?","AGLT02145")
       Loop
    EndIf
    
@@ -2472,7 +2381,7 @@ If _lRet
 
    lTemRecebimento:=.F.
 
-   DO While TRB->(!EOF())
+   While TRB->(!Eof())
 
       IncProc("Gravando Atendimento: "+ZLJ->ZLJ_NUMERO)
 
@@ -2481,15 +2390,15 @@ If _lRet
          Loop
       EndIf
 
-      ZLJ->(DBGOTO(TRB->REC_ZLJ))
-      ZLJ->(RECLOCK("ZLJ",.F.))
+      ZLJ->(DBGoTo(TRB->REC_ZLJ))
+      ZLJ->(RecLock("ZLJ",.F.))
 	  ZLJ->ZLJ_VEICUL:=TRB->ZLJ_VEICUL
 	  ZLJ->ZLJ_CODTRN:=TRB->ZLJ_CODTRN
 	  ZLJ->ZLJ_LOJTRN:=TRB->ZLJ_LOJTRN
 	  ZLJ->ZLJ_TIPPRO:=TRB->ZLJ_TIPPRO
 	  ZLJ->ZLJ_LINROT:=TRB->ZLJ_LINROT
 	  ZLJ->ZLJ_SETOR :=TRB->ZLJ_SETOR
-      ZLJ->(MSUNLOCK())
+      ZLJ->(MSUnLock())
 
       If TRB->ZLJ_TIPPRO = "F"
          lTemRecebimento:=.T.
@@ -2516,18 +2425,15 @@ EndIf
 
 TRB->(DBGoTop())
 
-Return (_lTodosIguais .OR. _lRet)//Se os 2 forem falsos não retorna para a tela pq alterou o TRB 
+Return (_lTodosIguais .Or. _lRet)//Se os 2 forem falsos não retorna para a tela pq alterou o TRB 
 
 /*
 ===============================================================================================================================
 Programa----------: GLT21Marca
 Autor-------------: Alex Wallauer
 Data da Criacao---: 15/06/2016
-===============================================================================================================================
 Descrição---------: Funcao para troca sim e na dos campos de Transportadora de redespacho e Operador Logistico
-===============================================================================================================================
 Parametros--------: objBrowse: objeto
-===============================================================================================================================
 Retorno-----------: Verdadeiro
 ===============================================================================================================================
 */
@@ -2540,7 +2446,7 @@ Local _nCol1  :=5
 Local _nCol2  :=15
 Local _nTam   :=50
 Local _nRecTRB:=TRB->(RECNO())
-Local _cVaigem:=If(Empty(TRB->ZLJ_VFILHA) .OR. UPPER(TRB->ZLJ_VFILHA) = "JULIETA" ,TRB->ZLJ_VIAGEM,TRB->ZLJ_VFILHA)
+Local _cVaigem:=If(Empty(TRB->ZLJ_VFILHA) .Or. Upper(TRB->ZLJ_VFILHA) = "JULIETA" ,TRB->ZLJ_VIAGEM,TRB->ZLJ_VFILHA)
 Local _cTit   :="Km da Viagem: "+_cVaigem
 
 _nKmVia:= TRB->ZLJ_KMDVIA
@@ -2558,21 +2464,21 @@ Activate MSDialog _oDlg Centered
 
 If _lOK
 
-	If Empty(TRB->ZLJ_VFILHA) .OR. UPPER(TRB->ZLJ_VFILHA) = "JULIETA" 
+	If Empty(TRB->ZLJ_VFILHA) .Or. Upper(TRB->ZLJ_VFILHA) = "JULIETA" 
 		M->ZLJ_KMDVIA := _nKmVia
 	EndIf
 
 	TRB->(DBGoTop())
-	Do While TRB->(!EOF())
+	While TRB->(!Eof())
 
-		If (_cVaigem == If(Empty(TRB->ZLJ_VFILHA) .OR. UPPER(TRB->ZLJ_VFILHA) = "JULIETA" ,TRB->ZLJ_VIAGEM,TRB->ZLJ_VFILHA))
+		If (_cVaigem == If(Empty(TRB->ZLJ_VFILHA) .Or. Upper(TRB->ZLJ_VFILHA) = "JULIETA" ,TRB->ZLJ_VIAGEM,TRB->ZLJ_VFILHA))
 			TRB->ZLJ_KMDVIA := _nKmVia
 		EndIf
 		TRB->(DBSkip())
 
 	EndDo
 
-	TRB->(DBGOTO(_nRecTRB))
+	TRB->(DBGoTo(_nRecTRB))
 	objBrowse:oBrowse:Refresh()
 
 EndIf
@@ -2584,11 +2490,8 @@ Return .T.
 Programa----------: AGLT021D
 Autor-------------: Abrahao Copia by Alex Wallauer
 Data da Criacao---: 09/01/2009 - 10/03/2017
-===============================================================================================================================
 Descrição---------: Verifica se Ticket nao pode ser modificado por ja possuir lançamento de algum evento.
-===============================================================================================================================
 Parametros--------: dDataCol: Data da Coleta , cCodProd: Codigo do Produtor , cLjProd: Loja do Produtor
-===============================================================================================================================
 Retorno-----------: .T. : Se tem eventos , .F. : Se não tem eventos
 ===============================================================================================================================
 */
@@ -2597,21 +2500,21 @@ Static Function AGLT021D( dDataCol , cCodProd , cLjProd , lValZLX , cTipoLeite )
 Local cAliasZLF	:= GetNextAlias()
 Local nCountRec	:= 0
 Local lRet		:= .F.
-Local aArea		:= GetArea()
+Local aArea		:= FWGetArea()
 Local _cCod		:= ""
 Local _cLoja	:= ""
 Local _nI		:= 0
 Default lValZLX := .T.
 
 ZLX->(DBSetOrder(1))
-If lValZLX .AND. !Empty(ZLD->ZLD_CODZLX) .AND. ZLX->( DBSeek(xFilial()+ZLD->ZLD_CODZLX)) .AND. ZLD->ZLD_TICKET $ ZLX->ZLX_LISTA//VALIDACAO DO SETOR SEGUNDARIO = "2"
+If lValZLX .And. !Empty(ZLD->ZLD_CODZLX) .And. ZLX->( DBSeek(xFilial()+ZLD->ZLD_CODZLX)) .And. ZLD->ZLD_TICKET $ ZLX->ZLX_LISTA//VALIDACAO DO SETOR SEGUNDARIO = "2"
 	MsgAlert("Viagem / Ticket ["+ZLD->ZLD_TICKET+"] nao pode ser alterado ou excluido por estar vinculado a Recepção de Leite de Terceiros. " +;
 	            "Desvincule a Viagem / Ticket da Recepção de Leite de terceiros Código: "+ZLD->ZLD_CODZLX , "AGLT02146")
 	Return .T.//Verdadeiro é que não deixa continuar
 EndIf
 
 ZLX->(dbOrderNickname("IT_I_TISET"))//ZLX_FILIAL+ZLX_TICKET+ZLX_SETOR// INDICE 10
-If lValZLX .AND. ZLX->( DBSeek(xFilial()+ZLD->ZLD_TICKET+ZLD->ZLD_SETOR)) .AND. ZLX->ZLX_STATUS $ '2,3' //VALIDACAO DO SETOR PRIMARIO  = "1"
+If lValZLX .And. ZLX->( DBSeek(xFilial()+ZLD->ZLD_TICKET+ZLD->ZLD_SETOR)) .And. ZLX->ZLX_STATUS $ '2,3' //VALIDACAO DO SETOR PRIMARIO  = "1"
 	MsgAlert("Viagem / Ticket ["+ZLD->ZLD_TICKET+"] nao pode ser alterado ou excluido por estar vinculado a Recepção de Leite de Terceiros NÃO PENDENTE. "+;
 	            "Altere o status para pendente da Recepção de Leite de terceiros Código: "+ZLX->ZLX_CODIGO,"AGLT02147")
     ZLX->(DBSetOrder(1))
@@ -2659,7 +2562,7 @@ For _nI	:= 1 To 2// Primeiro valido produtor e depois transportador
 					lRet := .T.			
 					MsgAlert("Viagem nao pode ser modificada por ja possuir lançamento de algum evento. "+;
 								"Favor contactar o responsável pelo lançamento dos eventos e pedir para excluir os eventos gerados no mix: "+;
-									(cAliasZLF)->ZLF_CODZLE +" para o Produtor / Fretista - Data: "+ _cCod +"-"+ _cLoja+" - "+DTOC(dDataCol),"AGLT02149")
+									(cAliasZLF)->ZLF_CODZLE +" para o Produtor / Fretista - Data: "+ _cCod +"-"+ _cLoja+" - "+DToC(dDataCol),"AGLT02149")
 					Exit
 				EndIf
 				(cAliasZLF)->( DBCloseArea() )
@@ -2672,7 +2575,7 @@ For _nI	:= 1 To 2// Primeiro valido produtor e depois transportador
 	EndIf
 Next _nI
 
-RestArea(aArea)
+FWRestArea(aArea)
 
 Return( lRet )
 
@@ -2681,11 +2584,8 @@ Return( lRet )
 Programa--------: AGLT21RE
 Autor-----------: Alex Wallauer
 Data da Criacao-: 24/10/2017
-===============================================================================================================================
 Descrição-------: Refaz a entrada do Estoque
-===============================================================================================================================
 Parametros------: _cAlias: Tabela , nRecZLJ: Recno , _nOpc: Opcao
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -2701,7 +2601,7 @@ EndIf
 
 //Locka registros
 If !( AGLT021LO( SubStr( ZLJ->ZLJ_FILIAL , 1 , 2 ), ZLJ->ZLJ_VIAGEM ) )
-	Return .f.
+	Return .F.
 EndIf
 
 AGLT021Tela("Refaz a entrada do Estoque",_bok,_nOpc,nRecZLJ)
@@ -2715,11 +2615,8 @@ Return .T.
 Programa--------: AGLTTela_ZLX
 Autor-----------: Alex Wallauer 
 Data da Criacao-: 07/02/2018
-===============================================================================================================================
 Descrição-------: Tela Dados complemetares para Geraçao da Recepção Tipo Plataforma automatica
-===============================================================================================================================
 Parametros------: cManut: Origem da manutenção
-===============================================================================================================================
 Retorno---------: aDados
 ===============================================================================================================================
 */
@@ -2740,12 +2637,12 @@ Local aDados			:={}
 Local M->ZLX_DTENTR		:= CTOD('')
 Local _cZLX_PLACA		:= ''
 Private _nZLX_TEORAN	:= _nMedia := 0
-Private _cNomeTRAN		:= SPACE(100)
-Private M->ZLX_HRENTR	:= SPACE(GetSx3Cache("ZLX_HRENTR","X3_TAMANHO"))//Usado na função U_AGLT035F()
+Private _cNomeTRAN		:= Space(100)
+Private M->ZLX_HRENTR	:= Space(GetSx3Cache("ZLX_HRENTR","X3_TAMANHO"))//Usado na função U_AGLT035F()
 Private M->ZLX_DATAEN	:= CTOD('')//Usado na função U_AGLT035F()
-Private M->ZLX_HRSAID	:= SPACE(GetSx3Cache("ZLX_HRSAID","X3_TAMANHO"))//Usado na função U_AGLT035F()
+Private M->ZLX_HRSAID	:= Space(GetSx3Cache("ZLX_HRSAID","X3_TAMANHO"))//Usado na função U_AGLT035F()
 Private M->ZLX_DTSAID	:= CTOD('')//Usado na função U_AGLT035F()
-Private M->ZLX_OBS      := SPACE(30)
+Private M->ZLX_OBS      := Space(30)
 
 If cManut = "ORI_ZLJ"
    M->ZLX_DTENTR := M->ZLJ_DTCRIA//Data Estoque
@@ -2762,7 +2659,7 @@ EndIf
 _bValid := {|| NaoVazio(_nMedia) }
 _bOK    := {|| (If(EVAL(_bValid).AND.U_AGLT035F().AND.U_AGLT035P("001",_nMedia),(_lOK:=.T.,Close(_oDlg)),))  }
 aLista  := {{0}}
-DO While .T.
+While .T.
 
    _lOK   := .F.
    _nLinha :=05
@@ -2860,11 +2757,8 @@ Return aDados
 Programa--------: AGLTLista()
 Autor-----------: Alex Wallauer 
 Data da Criacao-: 14/02/2018
-===============================================================================================================================
 Descrição-------: add aLista
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -2882,7 +2776,7 @@ Else
    If Empty(aLista[1,1])
       aLista [1,1]:=_nZLX_TEORAN
    ElseIf !Empty(_nZLX_TEORAN)
-      AADD(aLista,{_nZLX_TEORAN})
+      aAdd(aLista,{_nZLX_TEORAN})
    EndIf
    _oTeor:SetFocus()
 EndIf
@@ -2903,11 +2797,8 @@ Return .T.
 Programa--------: U_AGLTGrv_ZLX
 Autor-----------: Alex Wallauer 
 Data da Criacao-: 07/02/2018
-===============================================================================================================================
 Descrição-------: Gravar Recepções Tipo Plataforma O ZLD tem que esta posicionado
-===============================================================================================================================
 Parametros------: cManut: Origem da manutenção ; aDados: dados dos campos que deram GET
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -2920,22 +2811,22 @@ ZLX->(dbOrderNickname("IT_I_TISET"))//ZLX_FILIAL+ZLX_TICKET+ZLX_SETOR //ZLX->(DB
 If ZLX->( DBSeek(xFilial()+ZLD->ZLD_TICKET+ZLD->ZLD_SETOR))
 
 	_lGerou_ZLX:=.T.
-	ZLX->( Reclock("ZLX",.F.) )
+	ZLX->( RecLock("ZLX",.F.) )
 
 	//Exclusão
 	If cManut = "EXCLUI"
 
 		ZZX->(DBSetOrder(1))
 		If ZZX->( DBSeek(xFilial()+ZLX->ZLX_CODANA))
-			ZZX->( Reclock("ZZX",.F.) )
+			ZZX->( RecLock("ZZX",.F.) )
 			ZZX->(DBDELETE())
-			ZZX->( MSUNLOCK())
+			ZZX->( MSUnLock())
 		EndIf
 		ZAP->(DBSetOrder(1))
 		If ZAP->( DBSeek(xFilial()+ZLX->ZLX_CODANA))
-			ZAP->( Reclock("ZAP",.F.) )
+			ZAP->( RecLock("ZAP",.F.) )
 			ZAP->(DBDELETE())
-			ZAP->( MSUNLOCK())
+			ZAP->( MSUnLock())
 		EndIf
 		ZLX->(DBDELETE())
 
@@ -2955,29 +2846,29 @@ If ZLX->( DBSeek(xFilial()+ZLD->ZLD_TICKET+ZLD->ZLD_SETOR))
 
    EndIf
 
-   ZLX->( Msunlock())
+   ZLX->( MSUnLock())
    ZLX->(DBSetOrder(1))
 
    Return .T.
 
-ElseIf cManut = "EXCLUI" .OR. cManut = "LIMPA"//Se não achar no ZLX NÃO faz nada
+ElseIf cManut = "EXCLUI" .Or. cManut = "LIMPA"//Se não achar no ZLX NÃO faz nada
    Return .F.
 EndIf
 
-If Empty(ZLD->ZLD_TICKET) .OR. Empty(ZLD->ZLD_SETOR) .OR.;
+If Empty(ZLD->ZLD_TICKET) .Or. Empty(ZLD->ZLD_SETOR) .OR.;
    ZLD->ZLD_TOTBOM = 0 //Reboque
    Return .F.
 EndIf
 
 ZL2->(DBSetOrder(1))
-If !ZL2->( DBSeek(xFilial()+ZLD->ZLD_SETOR)) .OR. !(ZL2->ZL2_CRIRT = "1")//SETOR PRIMARIO = "1"
+If !ZL2->( DBSeek(xFilial()+ZLD->ZLD_SETOR)) .Or. !(ZL2->ZL2_CRIRT = "1")//SETOR PRIMARIO = "1"
    Return .F.
 EndIf
 
 //Inclusão ZLX - Início
 _cNumRecZLX := GETSXENUM("ZLX","ZLX_CODIGO")
 
-ZLX->(Reclock("ZLX",.T.))
+ZLX->(RecLock("ZLX",.T.))
 ZLX->ZLX_FILIAL := xFilial("ZLX")
 ZLX->ZLX_CODIGO := _cNumRecZLX
 ZLX->ZLX_TICKET := ZLD->ZLD_TICKET
@@ -3026,7 +2917,7 @@ ConfirmSX8()
 
 //Inclusão ZZX
 _cNumRecZZX := GETSXENUM("ZZX","ZZX_CODIGO")
-ZZX->(Reclock("ZZX",.T.))
+ZZX->(RecLock("ZZX",.T.))
 ZZX->ZZX_FILIAL:=xFilial("ZZX") //Filial
 ZZX->ZZX_CODIGO:=_cNumRecZZX    //Codigo
 ZZX->ZZX_CODPRD:="001"          //Produto
@@ -3038,20 +2929,20 @@ ZZX->ZZX_PLACA :=ZLX->ZLX_PLACA //Placa
 ZZX->ZZX_TRANSP:=ZLX->ZLX_TRANSP//Transportado
 ZZX->ZZX_LJTRAN:=ZLX->ZLX_LJTRAN//Loja
 ZZX->ZZX_ANAUSE:=.T.//Analise Vinc
-ZZX->(Msunlock())
+ZZX->(MSUnLock())
 
 ConfirmSX8()
 
 //Inclusão ZAP
-ZAP->(Reclock("ZAP",.T.))
+ZAP->(RecLock("ZAP",.T.))
 ZAP->ZAP_FILIAL:=xFilial("ZZX") //Filial
 ZAP->ZAP_CODIGO:=_cNumRecZZX    //Analise
 ZAP->ZAP_GORD  :=ZLX->ZLX_TEORAN//Gordura
 ZAP->ZAP_ITEM  :="01"           //Item
-ZAP->(Msunlock())
+ZAP->(MSUnLock())
 
 ZLX->ZLX_CODANA:=_cNumRecZZX
-ZLX->( Msunlock())
+ZLX->( MSUnLock())
 ZLX->(DBSetOrder(1))
 _lGerou_ZLX:=.T.
 //Inclusão ZLX - Fim

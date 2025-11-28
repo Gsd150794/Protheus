@@ -2,34 +2,25 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor            |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas B. Ferreira | 06/01/2017 | Realizado tratamento para permitir gerar o relatório para várias filiais. Chamado 18250
--------------------------------------------------------------------------------------------------------------------------------
-Lucas B. Ferreira | 17/06/2019 | Revisão de fontes. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas B. Ferreira | 27/09/2019 | Revisão de fontes. Chamado 28346
+Lucas Borges  |06/01/2017| Chamado 18250. Realizado tratamento para permitir gerar o relatório para várias filiais.
+Lucas Borges  |17/06/2019| Chamado 28346. Revisão de fontes.
+Lucas Borges  |27/09/2019| Chamado 28346. Revisão de fontes.
 ===============================================================================================================================
 */
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Protheus.Ch"
-#Include "Fileio.Ch"
+
+#Include "TOTVS.ch"
 
 #Define TITULO	"Recepção do Leite de Terceiros - Mapa Analítico"
-#Define CRLF	Chr(13)+Chr(10)
 
 /*
 ===============================================================================================================================
 Programa--------: RGLT006
 Autor-----------: Alexandre Villar
 Data da Criacao-: 13/07/2015
-===============================================================================================================================
 Descrição-------: Relatório do mapa analítico da recepção de leite de terceiros
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -71,18 +62,15 @@ Else
 	MsgInfo( "Operação cancelada pelo usuário!" , "RGLT00602" )
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa--------: RGLT006SEL
 Autor-----------: Alexandre Villar
 Data da Criacao-: 13/07/2015
-===============================================================================================================================
 Descrição-------: Função para consulta e preparação dos dados do relatório
-===============================================================================================================================
 Parametros------: Nenhum
-===============================================================================================================================
 Retorno---------: _aRet - Dados do relatório
 ===============================================================================================================================
 */
@@ -94,13 +82,13 @@ Local _cFiltro		:= '%'
 Local _nTotReg		:= 0
 Local _nRegAtu		:= 0
 
-_cFiltro += IIf( !Empty( MV_PAR02 ) .And. MV_PAR02 < 4 , " AND ZLX.ZLX_TIPOLT = '"+ IIF( MV_PAR02 == 1 , 'F' , IIF( MV_PAR02 == 2 , 'T' , 'P' ) ) +"' "	, "" )
+_cFiltro += IIf( !Empty( MV_PAR02 ) .And. MV_PAR02 < 4 , " AND ZLX.ZLX_TIPOLT = '"+ IIf( MV_PAR02 == 1 , 'F' , IIf( MV_PAR02 == 2 , 'T' , 'P' ) ) +"' "	, "" )
 _cFiltro += IIf( !Empty( MV_PAR03 ) , " AND ZZX.ZZX_CODPRD IN "+ FormatIn( MV_PAR03 , ';' ), "" )
 _cFiltro += IIf( !Empty( MV_PAR08 ) , " AND ZLX.ZLX_STATUS IN "+ FormatIn( MV_PAR08 , ';' ), "" )
 _cFiltro += " %"
 
 BeginSql alias _cAlias
-	SELECT ZZX.ZZX_CODPRD, ZLX.ZLX_TIPOLT, SA2.A2_COD, SA2.A2_LOJA, SA2.A2_NREDUZ, SUBSTR(ZLX.ZLX_DTENTR, 7, 2) DIA, SUM(ZLX.ZLX_VOLREC) VOLREC,
+	SELECT ZZX.ZZX_CODPRD, ZLX.ZLX_TIPOLT, SA2.A2_COD, SA2.A2_LOJA, SA2.A2_NREDUZ, SubStr(ZLX.ZLX_DTENTR, 7, 2) DIA, SUM(ZLX.ZLX_VOLREC) VOLREC,
 	       SUM(ZLX.ZLX_VOLNF) VOLNF, SUM(ZLX.ZLX_DIFVOL) DIFVOL
 	  FROM %Table:ZLX% ZLX, %Table:SA2% SA2, %Table:ZZX% ZZX
 	 WHERE ZLX.D_E_L_E_T_ = ' '
@@ -117,8 +105,8 @@ BeginSql alias _cAlias
 	   AND ZLX.ZLX_DTENTR BETWEEN %exp:FirstDate(MV_PAR01)% AND %exp:LastDate(MV_PAR01)%
 	   AND ZLX.ZLX_FORNEC BETWEEN %exp:MV_PAR04% AND %exp:MV_PAR06%
 	   AND ZLX.ZLX_LJFORN BETWEEN %exp:MV_PAR05% AND %exp:MV_PAR07%
-	 GROUP BY ZZX.ZZX_CODPRD, ZLX.ZLX_TIPOLT, SA2.A2_COD, SA2.A2_LOJA, SUBSTR(ZLX.ZLX_DTENTR, 7, 2), SA2.A2_NREDUZ
-	 ORDER BY ZZX.ZZX_CODPRD, ZLX.ZLX_TIPOLT, SA2.A2_COD, SA2.A2_LOJA, SUBSTR(ZLX.ZLX_DTENTR, 7, 2)
+	 GROUP BY ZZX.ZZX_CODPRD, ZLX.ZLX_TIPOLT, SA2.A2_COD, SA2.A2_LOJA, SubStr(ZLX.ZLX_DTENTR, 7, 2), SA2.A2_NREDUZ
+	 ORDER BY ZZX.ZZX_CODPRD, ZLX.ZLX_TIPOLT, SA2.A2_COD, SA2.A2_LOJA, SubStr(ZLX.ZLX_DTENTR, 7, 2)
 EndSql
 
 (_cAlias)->( DBEval( {|| _nTotReg++ } ) )
@@ -152,15 +140,12 @@ Return( _aRet )
 Programa--------: RGLT006PRT
 Autor-----------: Alexandre Villar
 Data da Criacao-: 13/07/2015
-===============================================================================================================================
 Descrição-------: Função para controlar e imprimir os dados do relatório
-===============================================================================================================================
 Parametros------: _aCabec1 - Primeira linha dos dados de cabeçalho
 ----------------: _aCabec2 - Segunda linha dos dados de cabeçalho
 ----------------: _aColCab - Posicionamento dos dados de cabeçalho
 ----------------: _aColItn - Ajuste do posicionamento dos dados
 ----------------: _aDados  - Dados do relatório
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -207,14 +192,14 @@ For _nI := 1 To Len( _aDados )
 	//====================================================================================================
 	// Inicializa a primeira página do relatório
 	//====================================================================================================
-	IF _nI == 1
+	If _nI == 1
 	
 		_nLinha		:= 50000
 		
 		RGLT006VPG( @_oPrint , @_nLinha , .F. , _aCabec1 , _aColCab )
 		
 		_nLinha += 030
-		_oPrint:Say( _nLinha , _nColIni , 'Mapa analítico das recepções de leite de terceiros: '+ DtoC( FirstDay( MV_PAR01 ) ) +' - '+ DtoC( LastDay( MV_PAR01 ) ) , _oFont02 )
+		_oPrint:Say( _nLinha , _nColIni , 'Mapa analítico das recepções de leite de terceiros: '+ DToC( FirstDay( MV_PAR01 ) ) +' - '+ DToC( LastDay( MV_PAR01 ) ) , _oFont02 )
 		_nLinha += 035
 		_oPrint:Line( _nLinha , 0 , _nLinha , 5000 ) ; _nLinha++
 		_oPrint:Line( _nLinha , 0 , _nLinha , 5000 ) ; _nLinha++
@@ -224,7 +209,7 @@ For _nI := 1 To Len( _aDados )
 		
 		_cTipPrd := _aDados[_nI][01] + _aDados[_nI][02]
 		_oPrint:Say( _nLinha , _nColIni ,	'Recepção de '+ AllTrim( Posicione('SX5',1,xFilial('SX5')+'Z7'+PadR(_aDados[_nI][01],TamSX3('X5_CHAVE')[01]),'X5_DESCRI') ) +;
-											' / Procedência: '+ IIF(_aDados[_nI][02]=='F','Filiais',IIF(_aDados[_nI][02]=='P','Plataforma','Terceiros')) , _oFont02 )
+											' / Procedência: '+ IIf(_aDados[_nI][02]=='F','Filiais',IIf(_aDados[_nI][02]=='P','Plataforma','Terceiros')) , _oFont02 )
 		_nLinha += 060
 		
 		If _nTotCol > 0
@@ -244,7 +229,7 @@ For _nI := 1 To Len( _aDados )
 	//=============================================================================
 	//| Encerra Lote do Setor atual                                               |
 	//=============================================================================	
-	ElseIF _nLinha > 2300
+	ElseIf _nLinha > 2300
 		
 		_nLinha := 50000
 		//=============================================================================
@@ -253,7 +238,7 @@ For _nI := 1 To Len( _aDados )
 		RGLT006VPG( @_oPrint , @_nLinha , .T. , _aCabec1 , _aColCab )
 		
 		_nLinha += 030
-		_oPrint:Say( _nLinha , _nColIni , 'Mapa analítico das recepções de leite de terceiros: '+ DtoC( FirstDay( MV_PAR01 ) ) +' - '+ DtoC( LastDay( MV_PAR01 ) ) , _oFont02 )
+		_oPrint:Say( _nLinha , _nColIni , 'Mapa analítico das recepções de leite de terceiros: '+ DToC( FirstDay( MV_PAR01 ) ) +' - '+ DToC( LastDay( MV_PAR01 ) ) , _oFont02 )
 		_nLinha += 035
 		_oPrint:Line( _nLinha , 0 , _nLinha , 5000 ) ; _nLinha++
 		_oPrint:Line( _nLinha , 0 , _nLinha , 5000 ) ; _nLinha++
@@ -306,7 +291,7 @@ For _nI := 1 To Len( _aDados )
 			
 			_nLinha += 030
 			_oPrint:Say( _nLinha , _nColIni ,	'Recepção de '+ AllTrim( Posicione('SX5',1,xFilial('SX5')+'Z7'+PadR(_aDados[_nI][01],TamSX3('X5_CHAVE')[01]),'X5_DESCRI') ) +;
-										 		' / Procedência: '+ IIF(_aDados[_nI][02]=='F','Filiais',IIF(_aDados[_nI][02]=='P','Plataforma','Terceiros')) , _oFont02 )
+										 		' / Procedência: '+ IIf(_aDados[_nI][02]=='F','Filiais',IIf(_aDados[_nI][02]=='P','Plataforma','Terceiros')) , _oFont02 )
 			_nLinha += 035
 			
 		EndIf
@@ -383,7 +368,7 @@ For _nI := 1 To Len( _aDados )
 		RGLT006VPG( @_oPrint , @_nLinha , .T. , _aCabec1 , _aColCab )
 		
 		_oPrint:Say( _nLinha , _nColIni ,	'Recepção de '+ AllTrim( Posicione('SX5',1,xFilial('SX5')+'Z7'+PadR(_aDados[_nI][01],TamSX3('X5_CHAVE')[01]),'X5_DESCRI') ) +;
-									 		' / Procedência: '+ IIF(_aDados[_nI][02]=='F','Filiais',IIF(_aDados[_nI][02]=='P','Plataforma','Terceiros')) , _oFont02 )
+									 		' / Procedência: '+ IIf(_aDados[_nI][02]=='F','Filiais',IIf(_aDados[_nI][02]=='P','Plataforma','Terceiros')) , _oFont02 )
 		_nLinha += 035
 		
 		If _nTotCol > 0
@@ -404,7 +389,7 @@ For _nI := 1 To Len( _aDados )
 	
 		_nLinha += 030
 		
-	EndIF
+	EndIf
 	
 	RGLT006VPG( @_oPrint , @_nLinha , .T. , _aCabec1 , _aColCab )
 	
@@ -420,7 +405,7 @@ For _nI := 1 To Len( _aDados )
 		
 	While _nI <= Len( _aDados ) .And. _cCodCli == _aDados[_nI][03] + _aDados[_nI][04]
 	
-		_aDias[ Val( _aDados[_nI][06] ) ] := IIF( MV_PAR09 == 1 , _aDados[_nI][07] , IIF( MV_PAR09==2 , _aDados[_nI][08] , _aDados[_nI][09] ) )
+		_aDias[ Val( _aDados[_nI][06] ) ] := IIf( MV_PAR09 == 1 , _aDados[_nI][07] , IIf( MV_PAR09==2 , _aDados[_nI][08] , _aDados[_nI][09] ) )
 	
 	_nI++
 	EndDo
@@ -515,12 +500,9 @@ Return
 Programa--------: RGLT006VPG
 Autor-----------: Alexandre Villar
 Data da Criacao-: 29/04/2014
-===============================================================================================================================
 Descrição-------: Validação do pocicionamento da página atual para quebras
-===============================================================================================================================
 Parametros------: oPrint	- Objeto de Impressão do Relatório
 ----------------: nLinha	- Variável de controle do posicionamento
-===============================================================================================================================
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -535,9 +517,9 @@ If _nLinha > _nLimPag
 	//====================================================================================================
 	// Verifica se encerra a página atual
 	//====================================================================================================
-	IF _lFinPag
+	If _lFinPag
 		_oPrint:EndPage()
-	EndIF
+	EndIf
 	
 	//====================================================================================================
 	// Inicializa a nova página e o posicionamento
@@ -560,10 +542,10 @@ If _nLinha > _nLimPag
 	_oPrint:Line( 050 , 0400 , 240 , 0400 )
 	_oPrint:Line( 050 , 3350 , 240 , 3350 )
 	
-	_oPrint:Say( 060 , 420 , TITULO +" ( "+ DtoC(Date()) +" - "+ Time() +")" , _oFont01 )
-	_oPrint:Say( 120 , 420 , "Período de análise: "+ SubStr( DTOS( MV_PAR01 ) , 5 , 2 ) +"/"+ SubStr( DTOS( MV_PAR01 ) , 1 , 4 ) +"    | Filial: "+ cFilAnt , _oFont02 )
-	_oPrint:Say( 150 , 420 ,	"Considera: "+ IIF(MV_PAR02==1,'Leite de Filiais',IIF(MV_PAR02==2,'Leite de Terceiros',IIF(MV_PAR02==3,'Leite de Plataformas','Todas as Procedências'))) +;
-								"    | Volume considerado: "+ IIF(MV_PAR09==1,'Recebido',IIF(MV_PAR09==2,'Faturado','Dif. na Balança')) , _oFont02 )
+	_oPrint:Say( 060 , 420 , TITULO +" ( "+ DToC(Date()) +" - "+ Time() +")" , _oFont01 )
+	_oPrint:Say( 120 , 420 , "Período de análise: "+ SubStr( DToS( MV_PAR01 ) , 5 , 2 ) +"/"+ SubStr( DToS( MV_PAR01 ) , 1 , 4 ) +"    | Filial: "+ cFilAnt , _oFont02 )
+	_oPrint:Say( 150 , 420 ,	"Considera: "+ IIf(MV_PAR02==1,'Leite de Filiais',IIf(MV_PAR02==2,'Leite de Terceiros',IIf(MV_PAR02==3,'Leite de Plataformas','Todas as Procedências'))) +;
+								"    | Volume considerado: "+ IIf(MV_PAR09==1,'Recebido',IIf(MV_PAR09==2,'Faturado','Dif. na Balança')) , _oFont02 )
 	
 	//====================================================================================================
 	// Adiciona cabecalho de conteúdo

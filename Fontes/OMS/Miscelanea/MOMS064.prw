@@ -10,11 +10,11 @@ Lucas Borges  |09/10/2024| Chamado 48465. Retirada da função de conout
 =====================================================================================================================================
 */
 
-#Include "Protheus.ch"      
-#include "APWEBSRV.CH"    
-#INCLUDE "TBICONN.CH" 
+#Include "TOTVS.ch"      
+#Include "APWEBSRV.CH"    
+#Include "TBICONN.CH" 
 
-Static _lScheduller := FWGetRunSchedule() .OR. SELECT("SX3") <= 0
+Static _lScheduller := FWGetRunSchedule() .Or. SELECT("SX3") <= 0
 
 /*
 ===============================================================================================================================
@@ -29,8 +29,8 @@ Retorno---------: Nenhum
 */  
 User Function MOMS064(_nRecnoZC9)  
 Local _cDataF // := ZC9->ZC9_COMP  // Data do fechamento posicionado // mm/aaaa
-Local _nMes   // := month(stod(substr(_cDataf,4,4)+substr(_cDataf,1,2)+'01'))
-Local _nAno   // := year(stod(substr(_cDataf,4,4)+substr(_cDataf,1,2)+'01'))
+Local _nMes   // := month(SToD(SubStr(_cDataf,4,4)+SubStr(_cDataf,1,2)+'01'))
+Local _nAno   // := year(SToD(SubStr(_cDataf,4,4)+SubStr(_cDataf,1,2)+'01'))
 
 Private _dFechamen := Ctod("  /  /  ")
 Private _nSequen 
@@ -42,14 +42,14 @@ Begin Sequence
    If _lScheduller
 	  FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MOMS064"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MOMS06401"/*cMsgId*/, "MOMS06401 - Inicio da gravação dos dados gerenciais de comissão na tabela ZBK."/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
    Else // Deve estar posicionado no registro da tabela ZC9 correspondente.
-      If ! U_ItMsg("Confirma o processamento da rotina de geração e gravação dos dados de comissão para análise gerencial? "+;
+      If ! U_ITMsg("Confirma o processamento da rotina de geração e gravação dos dados de comissão para análise gerencial? "+;
          " Esta rotina tem o objetivo de alimentar a tabela de valores gerenciais da comissão." + ;
          " É executada mensalmente pela equipe de comissão. ", "Atenção", "",2,2,2) 
          Break
       EndIf 
    EndIf
 
-   ZC9->(DbGoto(_nRecnoZC9)) 
+   ZC9->(DBGoTo(_nRecnoZC9)) 
 
    _cDataF := ZC9->ZC9_COMP  // Data do fechamento posicionado // mm/aaaa  
 
@@ -64,13 +64,13 @@ Begin Sequence
       _nSequen += 1
    EndIf 
 
-   ZBK->(DbSetOrder(1)) // ZBK_FILIAL+DTOS(ZBK_DTFECH)+ZBK_VERSAO
-   If ZBK->(MsSeek(xFilial("ZBK")+Dtos(_dFechamen)+StrZero(_nSequen,3) ))
+   ZBK->(DBSetOrder(1)) // ZBK_FILIAL+DToS(ZBK_DTFECH)+ZBK_VERSAO
+   If ZBK->(MsSeek(xFilial("ZBK")+DToS(_dFechamen)+StrZero(_nSequen,3) ))
 
       If _lScheduller
 		 FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MOMS064"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MOMS06402"/*cMsgId*/, "MOMS06402 - O calclulo deste período já foi iniciado uma vez. Calculando o período com uma nova sequencia."/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
       Else
-         If ! U_ItMsg("O período informado já foi calculado anteriormente pelo usuário(a) "+ AllTrim(ZBK->ZBK_USRNMI) + ". " + ;
+         If ! U_ITMsg("O período informado já foi calculado anteriormente pelo usuário(a) "+ AllTrim(ZBK->ZBK_USRNMI) + ". " + ;
                       "Caso confirme os dados anteriores serão substituídos por novos registros " + ;
                       "e caso tenha ocorrido algum recalculo nas comissões após o fechamento desta data, " + ; 
                       "podem ocorrer diferenças entre os valores apontados apontados anteriormente e agora! " + ;
@@ -86,13 +86,13 @@ Begin Sequence
    If _lScheduller
       U_MOMS064P(Nil,_cDataF) // Processando rotina de Geração e Gravação de Dados de Comissão para Análise Gerencial.. "
    Else
-      FWMSGRUN(,{|oProc|  U_MOMS064P(oProc,_cDataF)   } ,'Aguarde processamento...','Lendo dados...')
+      FWMsgRun(,{|oProc|  U_MOMS064P(oProc,_cDataF)   } ,'Aguarde processamento...','Lendo dados...')
    EndIf 
 
    If _lGravouZBK .And. _lLeuTdSA3 // Se gravou dados na tabela ZBK e Leu to"Aguarde...", "Processando rotina de Geração e Gravação de Dados de Comissão para Análise Gerencial.. "da a tabela SA3, muda o status.
       ZC9->(RecLock("ZC9"), .F.)
       ZC9->ZC9_STATUS := "4" // Indica que a gravação dos dados na tabela ZBK foram concluidos para o período informado.
-      ZC9->(MsUnLock())
+      ZC9->(MSUnLock())
    EndIf 
 
 End Sequence 
@@ -100,10 +100,10 @@ End Sequence
 If _lScheduller
    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MOMS064"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MOMS06403"/*cMsgId*/, "MOMS06403 - Processamento da rotina Rotina de Comissão e Análise Gerencial concluido."/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 Else 
-   U_ItMsg("Processamento da rotina Rotina de Comissão e Análise Gerencial concluido.","Atenção",,1)
+   U_ITMsg("Processamento da rotina Rotina de Comissão e Análise Gerencial concluido.","Atenção",,1)
 EndIf 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -117,10 +117,10 @@ Parametros--------: _cDataf - Data de fechamento da Comissão.
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User function MOMS064P(oProc,_cDataf)
+User Function MOMS064P(oProc,_cDataf)
 
-Local _nMes        := month(stod(substr(_cDataf,4,4)+substr(_cDataf,1,2)+'01'))
-Local _nAno        := year(stod(substr(_cDataf,4,4)+substr(_cDataf,1,2)+'01'))
+Local _nMes        := month(SToD(SubStr(_cDataf,4,4)+SubStr(_cDataf,1,2)+'01'))
+Local _nAno        := year(SToD(SubStr(_cDataf,4,4)+SubStr(_cDataf,1,2)+'01'))
 Local _cQry        := ""
 
 Default oProc := Nil
@@ -152,7 +152,7 @@ Begin Sequence
 	_cQry += "			SELECT E3.E3_VEND CODVEND "
 	_cQry += "			FROM  "+ RetSqlName('SE3') +" E3 "
 	_cQry += "			WHERE E3.D_E_L_E_T_ = ' ' "
-	_cQry += "				AND SUBSTR( E3_EMISSAO , 1 , 6 ) = '"+_cPeriodo+"'  "
+	_cQry += "				AND SubStr( E3_EMISSAO , 1 , 6 ) = '"+_cPeriodo+"'  "
 	_cQry += "			GROUP BY E3.E3_VEND "
 				
 	_cQry += "			UNION ALL  "
@@ -172,7 +172,7 @@ Begin Sequence
 	_cQry += "				     AND ZAY.D_E_L_E_T_ = ' '  "
 	_cQry += "				     AND SB1.B1_TIPO    = 'PA'  "
 	_cQry += "				     AND ZAY.ZAY_TPOPER	= 'B' "
-	_cQry += "				     AND SUBSTR( F2_EMISSAO , 1 , 6 ) = '"+_cPeriodo+"' "
+	_cQry += "				     AND SubStr( F2_EMISSAO , 1 , 6 ) = '"+_cPeriodo+"' "
 	_cQry += "				GROUP BY SF2.F2_VEND1 "
 	_cQry += "			) E3 "
 				
@@ -191,7 +191,7 @@ Begin Sequence
 	_cQry += "				FROM  "+ RetSqlName('SE3') +" E3 "
 	_cQry += "				WHERE "
 	_cQry += "					E3.D_E_L_E_T_ = ' ' "
-	_cQry += "					AND SUBSTR( E3_EMISSAO , 1 , 6 ) = '"+_cPeriodo+"'  "
+	_cQry += "					AND SubStr( E3_EMISSAO , 1 , 6 ) = '"+_cPeriodo+"'  "
 	_cQry += "				GROUP BY E3.E3_VEND "
 					
 	_cQry += "				UNION ALL  "
@@ -211,7 +211,7 @@ Begin Sequence
 	_cQry += "						     AND ZAY.D_E_L_E_T_ = ' '  "
 	_cQry += "						     AND SB1.B1_TIPO    = 'PA'  "
 	_cQry += "						     AND ZAY.ZAY_TPOPER	= 'B' "
-	_cQry += "						     AND SUBSTR( F2_EMISSAO , 1 , 6 ) = '"+_cPeriodo+"' "
+	_cQry += "						     AND SubStr( F2_EMISSAO , 1 , 6 ) = '"+_cPeriodo+"' "
 	_cQry += "						GROUP BY SF2.F2_VEND1 "
 	_cQry += "				) E3 "
 	_cQry += "		) E3 "
@@ -229,7 +229,7 @@ Begin Sequence
 	_cQry += "				FROM  "+ RetSqlName('SE3') +" E3 "
 	_cQry += "				WHERE "
 	_cQry += "					E3.D_E_L_E_T_ = ' ' "
-	_cQry += "					AND SUBSTR( E3_EMISSAO , 1 , 6 ) = '"+_cPeriodo+"'  "
+	_cQry += "					AND SubStr( E3_EMISSAO , 1 , 6 ) = '"+_cPeriodo+"'  "
 	_cQry += "				GROUP BY E3.E3_VEND "
 					
 	_cQry += "				UNION ALL  "
@@ -249,7 +249,7 @@ Begin Sequence
 	_cQry += "						     AND ZAY.D_E_L_E_T_ = ' '  "
 	_cQry += "						     AND SB1.B1_TIPO    = 'PA'  "
 	_cQry += "						     AND ZAY.ZAY_TPOPER	= 'B' "
-	_cQry += "						     AND SUBSTR( F2_EMISSAO , 1 , 6 ) = '"+_cPeriodo+"' "
+	_cQry += "						     AND SubStr( F2_EMISSAO , 1 , 6 ) = '"+_cPeriodo+"' "
 	_cQry += "						GROUP BY SF2.F2_VEND1 "
 	_cQry += "				) E3 "
 	_cQry += "		) E3 "
@@ -263,24 +263,24 @@ Begin Sequence
 
    DBUseArea( .T. , "TOPCONN" , TcGenQry( ,, _cQry ) , "TRBSA3" , .T. , .F. )
 
-	TRBSA3->(dbGoTop())
+	TRBSA3->(DBGoTop())
 	Count to _nTotRegs
 
-   SA3->(DbSetOrder(1)) 	  
+   SA3->(DBSetOrder(1)) 	  
    
    _lLeuTdSA3 := .F.
    _nI := 0
-   TRBSA3->(DbGoTop())
-   Do While ! TRBSA3->(Eof())
+   TRBSA3->(DBGoTop())
+   While ! TRBSA3->(Eof())
       _nI++
-      SA3->(DbsetOrder(1))
-      //SA3->(DbGoTo(TRBSA3->NRRECNO))
-      SA3->(DbSeek(xFilial("SA3")+TRBSA3->CODVEND))
+      SA3->(DBSetOrder(1))
+      //SA3->(DBGoTo(TRBSA3->NRRECNO))
+      SA3->(DBSeek(xFilial("SA3")+TRBSA3->CODVEND))
 
       If _lScheduller 
 		 FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MOMS064"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MOMS06404"/*cMsgId*/, "MOMS06404 - Processando Vendedor: "+ SA3->A3_COD +"-"+ SA3->A3_NOME/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
       Else
-         oProc:cCaption := ("Proc. Vend.: "+ SA3->A3_COD +"-"+ Subs(SA3->A3_NOME,1,30) + Space(3)+ Alltrim(Str(_nI))+" de "+Alltrim(Str(_nTotRegs)))
+         oProc:cCaption := ("Proc. Vend.: "+ SA3->A3_COD +"-"+ Subs(SA3->A3_NOME,1,30) + Space(3)+ AllTrim(Str(_nI))+" de "+AllTrim(Str(_nTotRegs)))
          ProcessMessages()
       EndIf 
 
@@ -297,7 +297,7 @@ Begin Sequence
 
       U_MOMS064G(oProc)
 
-      TRBSA3->(DbSkip())
+      TRBSA3->(DBSkip())
    EndDo
 
    If ! Empty(_aDados)  
@@ -316,7 +316,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -364,11 +364,11 @@ Private _cAlias2 := GetNextAlias()
 Begin Sequence 
 
    If Select(_cAlias) > 0
-      (_cAlias)->(dbCloseArea())    
+      (_cAlias)->(DBCloseArea())    
    EndIf 
 
    If Select(_cAlias2) > 0
-      (_cAlias2)->(dbCloseArea())    
+      (_cAlias2)->(DBCloseArea())    
    EndIf 
 
    U_MOMS064QRY( _cAlias , 1 )  // "Filtrando dados das comissões... "
@@ -379,13 +379,13 @@ Begin Sequence
    (_cAlias)->( DBEval( {|| _nTotReg++ } ) )
    (_cAlias)->( DBGoTop() )
 
-   SF2->(Dbsetorder(1))
+   SF2->(DBSetOrder(1))
 
    _nJ := 1
-   Do While ! (_cAlias)->(Eof())
+   While ! (_cAlias)->(Eof())
       
       If _lScheduller   
-		 FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MOMS064"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MOMS06405"/*cMsgId*/, "MOMS06405 - Processando dos dados comissão: " + StrZero(_nJ,6)+ " / " + Strzero(_nTotReg,6)/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+		 FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MOMS064"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MOMS06405"/*cMsgId*/, "MOMS06405 - Processando dos dados comissão: " + StrZero(_nJ,6)+ " / " + StrZero(_nTotReg,6)/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
       EndIf 
 
       _nJ += 1
@@ -424,28 +424,28 @@ Begin Sequence
       //================================================
       // Busca dados adicionais
       //================================================
-      SA3->(Dbsetorder(1))
-      If SF2->(Dbseek((_cAlias)->FILIAL+(_cAlias)->NUMERO)) .AND. ALLTRIM((_cAlias)->CODCLI) == ALLTRIM(SF2->F2_CLIENTE) 
+      SA3->(DBSetOrder(1))
+      If SF2->(DBSeek((_cAlias)->FILIAL+(_cAlias)->NUMERO)) .And. AllTrim((_cAlias)->CODCLI) == AllTrim(SF2->F2_CLIENTE) 
          _cSupervis  := SF2->F2_VEND4
-         _cNomeSup   := IIF(SA3->(Dbseek(xfilial("SA3")+_cSupervis)),SA3->A3_NOME," ")
+         _cNomeSup   := IIf(SA3->(DBSeek(xFilial("SA3")+_cSupervis)),SA3->A3_NOME," ")
          _cCoordena  := SF2->F2_VEND2
-         _nNomCoord  := IIF(SA3->(Dbseek(xfilial("SA3")+_cCoordena)),SA3->A3_NOME," ")
+         _nNomCoord  := IIf(SA3->(DBSeek(xFilial("SA3")+_cCoordena)),SA3->A3_NOME," ")
          _cGerente   := SF2->F2_VEND3
-         _cNomeGer   := IIF(SA3->(Dbseek(xfilial("SA3")+_cGerente)),SA3->A3_NOME," ")
+         _cNomeGer   := IIf(SA3->(DBSeek(xFilial("SA3")+_cGerente)),SA3->A3_NOME," ")
 
          _cGerenNac  := SF2->F2_VEND5
-         _cNomGNac   := IIF(SA3->(Dbseek(xfilial("SA3")+_cGerenNac)),SA3->A3_NOME," ")
+         _cNomGNac   := IIf(SA3->(DBSeek(xFilial("SA3")+_cGerenNac)),SA3->A3_NOME," ")
          _lachou     := .T.
       Else
-         _cSupervis  := POSICIONE("SA3",1,xfilial("SA3")+(_cAlias)->CODVEND,"A3_I_SUPE")
-         _cNomeSup   := IIF(SA3->(Dbseek(xfilial("SA3")+_cSupervis)),SA3->A3_NOME," ")
-         _cCoordena  := POSICIONE("SA3",1,xfilial("SA3")+(_cAlias)->CODVEND,"A3_SUPER")
-         _nNomCoord  := IIF(SA3->(Dbseek(xfilial("SA3")+_cCoordena)),SA3->A3_NOME," ")
-         _cGerente   := POSICIONE("SA3",1,xfilial("SA3")+(_cAlias)->CODVEND,"A3_GEREN")
-         _cNomeGer   := IIF(SA3->(Dbseek(xfilial("SA3")+_cGerente)),SA3->A3_NOME," ")
+         _cSupervis  := Posicione("SA3",1,xFilial("SA3")+(_cAlias)->CODVEND,"A3_I_SUPE")
+         _cNomeSup   := IIf(SA3->(DBSeek(xFilial("SA3")+_cSupervis)),SA3->A3_NOME," ")
+         _cCoordena  := Posicione("SA3",1,xFilial("SA3")+(_cAlias)->CODVEND,"A3_SUPER")
+         _nNomCoord  := IIf(SA3->(DBSeek(xFilial("SA3")+_cCoordena)),SA3->A3_NOME," ")
+         _cGerente   := Posicione("SA3",1,xFilial("SA3")+(_cAlias)->CODVEND,"A3_GEREN")
+         _cNomeGer   := IIf(SA3->(DBSeek(xFilial("SA3")+_cGerente)),SA3->A3_NOME," ")
 
-         _cGerenNac  := POSICIONE("SA3",1,xfilial("SA3")+(_cAlias)->CODVEND,"A3_I_GERNC")
-         _cNomGNac   := IIF(SA3->(Dbseek(xfilial("SA3")+_cGerenNac)),SA3->A3_NOME," ")
+         _cGerenNac  := Posicione("SA3",1,xFilial("SA3")+(_cAlias)->CODVEND,"A3_I_GERNC")
+         _cNomGNac   := IIf(SA3->(DBSeek(xFilial("SA3")+_cGerenNac)),SA3->A3_NOME," ")
       EndIf
 
       _nComisVe   := 0 // Comissao Ven
@@ -454,71 +454,71 @@ Begin Sequence
       _nComGer    := 0 // Comissao Ger
       _nComGNac   := 0 // Comis.Ger.Na
 
-      SE3->(Dbsetorder(1))
-      If SE3->(Dbseek((_cAlias)->FILIAL+(_cAlias)->PREFIXO+(_cAlias)->E3NUMORI+(_cAlias)->PARCELA+(_cAlias)->SEQ))
-         Do while SE3->E3_FILIAL == (_cAlias)->FILIAL .AND. ;
-      	   SE3->E3_PREFIXO == (_cAlias)->PREFIXO .AND. ;
-      	   SE3->E3_NUM == (_cAlias)->E3NUMORI .AND. ;
-      	   SE3->E3_PARCELA == (_cAlias)->PARCELA .AND. ;
-      	   SE3->E3_SEQ == (_cAlias)->SEQ .AND. SE3->(!EOF())
+      SE3->(DBSetOrder(1))
+      If SE3->(DBSeek((_cAlias)->FILIAL+(_cAlias)->PREFIXO+(_cAlias)->E3NUMORI+(_cAlias)->PARCELA+(_cAlias)->SEQ))
+         While SE3->E3_FILIAL == (_cAlias)->FILIAL .And. ;
+      	   SE3->E3_PREFIXO == (_cAlias)->PREFIXO .And. ;
+      	   SE3->E3_NUM == (_cAlias)->E3NUMORI .And. ;
+      	   SE3->E3_PARCELA == (_cAlias)->PARCELA .And. ;
+      	   SE3->E3_SEQ == (_cAlias)->SEQ .And. SE3->(!Eof())
                   
             If SE3->E3_VEND == _cVendedor //Representante
-              _nComisVe := ROUND(_nComisVe + SE3->E3_COMIS ,3)
+              _nComisVe := Round(_nComisVe + SE3->E3_COMIS ,3)
             EndIf
 
             If SE3->E3_VEND == _cSupervis  //Supervisor
-              _nComSuper := ROUND(_nComSuper + SE3->E3_COMIS ,3)
+              _nComSuper := Round(_nComSuper + SE3->E3_COMIS ,3)
             EndIf
                
             If SE3->E3_VEND == _cCoordena  //Coordenador
-              _nComCoord := ROUND(_nComCoord + SE3->E3_COMIS ,3)
+              _nComCoord := Round(_nComCoord + SE3->E3_COMIS ,3)
             EndIf
 
             If SE3->E3_VEND == _cGerente  //Gerente
-              _nComGer := ROUND( _nComGer + SE3->E3_COMIS ,3)
+              _nComGer := Round( _nComGer + SE3->E3_COMIS ,3)
             EndIf 
 
             If SE3->E3_VEND == _cGerenNac  //Gerente Nacional
-              _nComGNac := ROUND(_nComGNac + SE3->E3_COMIS ,3)
+              _nComGNac := Round(_nComGNac + SE3->E3_COMIS ,3)
             EndIf
 
             If _lScheduller
 			   FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MOMS064"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MOMS06406"/*cMsgId*/, "MOMS06406 - Processando Percentuais do Titulo: " + SE3->E3_FILIAL + " | "+ SE3->E3_PREFIXO + " | " + SE3->E3_NUM + " | " + SE3->E3_PARCELA + " | "+ SE3->E3_SEQ/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
             EndIf 
  
-            SE3->(Dbskip())
-         Enddo
+            SE3->(DBSkip())
+         EndDo
       EndIf
 
-      _nPerConV := round(_nComisVe/(_cAlias)->BASECOMIS*100,3)
-      _nPerConV := iif(_nPerConV < 0,-1*_nPerConV,_nPerConV)
+      _nPerConV := Round(_nComisVe/(_cAlias)->BASECOMIS*100,3)
+      _nPerConV := IIf(_nPerConV < 0,-1*_nPerConV,_nPerConV)
       	
-      _nBaseCom := iif((_cAlias)->COMISSAO < 0 ,-1*(_cAlias)->BASECOMIS,(_cAlias)->BASECOMIS)
+      _nBaseCom := IIf((_cAlias)->COMISSAO < 0 ,-1*(_cAlias)->BASECOMIS,(_cAlias)->BASECOMIS)
       		
-      _nPerSuper := round(_nComSuper/(_cAlias)->BASECOMIS*100,3)
-      _nPerSuper := iif(_nPerSuper < 0,-1*_nPerSuper,_nPerSuper)
+      _nPerSuper := Round(_nComSuper/(_cAlias)->BASECOMIS*100,3)
+      _nPerSuper := IIf(_nPerSuper < 0,-1*_nPerSuper,_nPerSuper)
       		
-      _nPerCoord := round(_nComCoord/(_cAlias)->BASECOMIS*100,3)
-      _nPerCoord := iif(_nPerCoord < 0,-1* _nPerCoord,_nPerCoord)
+      _nPerCoord := Round(_nComCoord/(_cAlias)->BASECOMIS*100,3)
+      _nPerCoord := IIf(_nPerCoord < 0,-1* _nPerCoord,_nPerCoord)
       		
-      _nPerGer := round(_nComGer/(_cAlias)->BASECOMIS*100,3)
-      _nPerGer := iif(_nPerGer < 0 ,-1 * _nPerGer, _nPerGer)   
+      _nPerGer := Round(_nComGer/(_cAlias)->BASECOMIS*100,3)
+      _nPerGer := IIf(_nPerGer < 0 ,-1 * _nPerGer, _nPerGer)   
 
-      _nPerGNac := round(_nComGNac/(_cAlias)->BASECOMIS*100,3)
-      _nPerGNac := iif(_nPerGNac<0,-1*_nPerGNac,_nPerGNac)   
+      _nPerGNac := Round(_nComGNac/(_cAlias)->BASECOMIS*100,3)
+      _nPerGNac := IIf(_nPerGNac<0,-1*_nPerGNac,_nPerGNac)   
 
-      _dDtEmiss := iif(!empty((_cAlias)->DTEMISSAO),stod((_cAlias)->DTEMISSAO),Ctod("  /  /  "))
-      _dDtBaixa := iif(!empty((_cAlias)->DTBAIXA),stod((_cAlias)->DTBAIXA),Ctod("  /  /  "))
+      _dDtEmiss := IIf(!Empty((_cAlias)->DTEMISSAO),SToD((_cAlias)->DTEMISSAO),Ctod("  /  /  "))
+      _dDtBaixa := IIf(!Empty((_cAlias)->DTBAIXA),SToD((_cAlias)->DTBAIXA),Ctod("  /  /  "))
       	
 
-      _npl :=  Ascan(_adados,{|_vAux| _vAux[1] == (_cAlias)->FILIAL .and. ;      // 1
-      							 _vAux[2] == (_cAlias)->TIPO .and. ;        // 2
-      							 _vAux[3] == _dDtEmiss .and. ;              // 3
-      							 _vAux[4] == _dDtBaixa .and. ;              // 4 
-      							 _vAux[5] == (_cAlias)->NUMERO .and. ;      // 5
-      							 _vAux[6] == (_cAlias)->PARCELA .and. ;     // 6 
-      							 _vAux[7] == (_cAlias)->CODCLI .and. ;      // 7
-      							 _vAux[8] == (_cAlias)->LOJA .and. ;        // 8 
+      _npl :=  aScan(_aDados,{|_vAux| _vAux[1] == (_cAlias)->FILIAL .And. ;      // 1
+      							 _vAux[2] == (_cAlias)->TIPO .And. ;        // 2
+      							 _vAux[3] == _dDtEmiss .And. ;              // 3
+      							 _vAux[4] == _dDtBaixa .And. ;              // 4 
+      							 _vAux[5] == (_cAlias)->NUMERO .And. ;      // 5
+      							 _vAux[6] == (_cAlias)->PARCELA .And. ;     // 6 
+      							 _vAux[7] == (_cAlias)->CODCLI .And. ;      // 7
+      							 _vAux[8] == (_cAlias)->LOJA .And. ;        // 8 
       							 _vAux[9] == (_cAlias)->SEQ})               // 9
 
       If _npl == 0 //Só incrementa se não tiver no array
@@ -565,14 +565,14 @@ Begin Sequence
          _aRegDados := U_MOMS064D(_aLinha, (_cAlias)->FILIAL, (_cAlias)->NUMERO, (_cAlias)->SERIE, (_cAlias)->CODCLI, (_cAlias)->LOJA,(_cAlias)->TIPO)
             
          For _nI := 1 To Len(_aRegDados)
-            Aadd(_aDados, AClone(_aRegDados[_nI]))
+            aAdd(_aDados, AClone(_aRegDados[_nI]))
          Next
 
    	   _aLinha :=  {}	
 
       EndIf 
 
-      (_cAlias)->(DbSkip())
+      (_cAlias)->(DBSkip())
    EndDo 
 
    //===============================================
@@ -593,7 +593,7 @@ Begin Sequence
 
       _nX := 1
 
-      Do While (_cAlias2)->( !Eof() )
+      While (_cAlias2)->( !Eof() )
 
          If _lScheduller
 			FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MOMS064"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MOMS06407"/*cMsgId*/, "MOMS06407 - Processando bonificações: "+ StrZero(_nX, 6) + "/" + StrZero(_nTotReg, 6)/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
@@ -603,19 +603,19 @@ Begin Sequence
 
          _cRazaoCli := Posicione("SA1",1,xFilial("SA1")+(_CALIAS2)->F2_CLIENTE+(_CALIAS2)->F2_LOJA,"A1_NOME")
          _cSupervis :=  (_CALIAS2)->F2_VEND4
-         _cNomeSup  := IIF(SA3->(Dbseek(xfilial("SA3")+_cSupervis)),SA3->A3_NOME," ")
+         _cNomeSup  := IIf(SA3->(DBSeek(xFilial("SA3")+_cSupervis)),SA3->A3_NOME," ")
          _cCoordena := (_CALIAS2)->F2_VEND2
-         _nNomCoord := IIF(SA3->(Dbseek(xfilial("SA3")+_cCoordena)),SA3->A3_NOME," ")
+         _nNomCoord := IIf(SA3->(DBSeek(xFilial("SA3")+_cCoordena)),SA3->A3_NOME," ")
          _cGerente  := (_CALIAS2)->F2_VEND3
-         _cNomeGer  := IIF(SA3->(Dbseek(xfilial("SA3")+_cGerente)),SA3->A3_NOME," ")
+         _cNomeGer  := IIf(SA3->(DBSeek(xFilial("SA3")+_cGerente)),SA3->A3_NOME," ")
 
          _cGerenNac := (_CALIAS2)->F2_VEND5
-         _cNomGNac  := IIF(SA3->(Dbseek(xfilial("SA3")+_cGerenNac)),SA3->A3_NOME," ")
+         _cNomGNac  := IIf(SA3->(DBSeek(xFilial("SA3")+_cGerenNac)),SA3->A3_NOME," ")
             
-         If Ascan(_adados, {|_vAux| _vAux[1]==(_cAlias2)->F2_FILIAL .and. _vAux[2]=="BON" .and. _vAux[5]==(_cAlias2)->F2_DOC}) ==  0
+         If aScan(_aDados, {|_vAux| _vAux[1]==(_cAlias2)->F2_FILIAL .And. _vAux[2]=="BON" .And. _vAux[5]==(_cAlias2)->F2_DOC}) ==  0
             _aLinha :=  {(_CALIAS2)->F2_FILIAL	,;					                                              // 01
          			 "BON",;							         					                          // 02
-         			 Stod((_CALIAS2)->F2_EMISSAO),;					                                          // 03
+         			 SToD((_CALIAS2)->F2_EMISSAO),;					                                          // 03
          			 Ctod("  /  /  "),;													                      // 04
          			 (_CALIAS2)->F2_DOC,;									                                  // 05
          				   "  ",;													                          // 06
@@ -630,36 +630,36 @@ Begin Sequence
          			 _cVendedor,;												                              // 15
          			 _cNomeVend,;                                         	                                  // 16
          			 _cTipoVend,;                                                                             // 17  // ZBK_TIPVEN	C	15	0	Tipo Vended 
-         			 round((_CALIAS2)->COMIS1/-100,3),;	                                    				  // 18 
-         			 round((_CALIAS2)->COMIS1/(_CALIAS2)->VALTOT,3),;	                                      // 19 
+         			 Round((_CALIAS2)->COMIS1/-100,3),;	                                    				  // 18 
+         			 Round((_CALIAS2)->COMIS1/(_CALIAS2)->VALTOT,3),;	                                      // 19 
          			 _cSupervis,;												                              // 20
          			 _cNomeSup,;												                              // 21
-         			 round((_CALIAS2)->COMIS4/-100,3),;					                                      // 22 "Vlr Com Sup"
-         			 round((_CALIAS2)->COMIS4/(_CALIAS2)->VALTOT,3),;	                                      // 23 "% Com Sup"	
+         			 Round((_CALIAS2)->COMIS4/-100,3),;					                                      // 22 "Vlr Com Sup"
+         			 Round((_CALIAS2)->COMIS4/(_CALIAS2)->VALTOT,3),;	                                      // 23 "% Com Sup"	
          				 _cCoordena,;											                                  // 24
          			 _nNomCoord,;											                                  // 25
-         			 round((_CALIAS2)->COMIS2/-100,3),;					                                      // 26 "Vlr Com Cood"
-         			 round((_CALIAS2)->COMIS2/(_CALIAS2)->VALTOT,3),;	                                      // 27 "% Com Cood"
+         			 Round((_CALIAS2)->COMIS2/-100,3),;					                                      // 26 "Vlr Com Cood"
+         			 Round((_CALIAS2)->COMIS2/(_CALIAS2)->VALTOT,3),;	                                      // 27 "% Com Cood"
          			 _cGerente,;												                              // 28
          			 _cNomeGer,;												                              // 29
-         			 round((_CALIAS2)->COMIS3/-100,3),;					                                      // 30 "Vlr Com Ger"
-         			 round((_CALIAS2)->COMIS3/(_CALIAS2)->VALTOT,3),;	                                      // 31 "% Com Ger"	
+         			 Round((_CALIAS2)->COMIS3/-100,3),;					                                      // 30 "Vlr Com Ger"
+         			 Round((_CALIAS2)->COMIS3/(_CALIAS2)->VALTOT,3),;	                                      // 31 "% Com Ger"	
                          _cGerenNac,;                                                                             // 32
                          _cNomGNac,;                                                                              // 33 
-         			 round((_CALIAS2)->COMIS5/-100,3),;					                                      // 34 "Vlr Com Ger Nac"
-         			 round((_CALIAS2)->COMIS5/(_CALIAS2)->VALTOT,3)}	                                   	  // 35 "% Com Ger Nac"	
+         			 Round((_CALIAS2)->COMIS5/-100,3),;					                                      // 34 "Vlr Com Ger Nac"
+         			 Round((_CALIAS2)->COMIS5/(_CALIAS2)->VALTOT,3)}	                                   	  // 35 "% Com Ger Nac"	
 
             _aRegDados := U_MOMS064D(_aLinha, (_CALIAS2)->F2_FILIAL, (_CALIAS2)->F2_DOC, (_CALIAS2)->F2_SERIE, (_CALIAS2)->F2_CLIENTE, (_CALIAS2)->F2_LOJA,"BON")
             
             For _nI := 1 To Len(_aRegDados)
-               Aadd(_aDados, AClone(_aRegDados[_nI]))
+               aAdd(_aDados, AClone(_aRegDados[_nI]))
             Next
 
             _aLinha :=  {}	
             
          EndIf
 
-         (_cAlias2)->( Dbskip() )
+         (_cAlias2)->( DBSkip() )
 
       EndDo
       
@@ -668,14 +668,14 @@ Begin Sequence
 End Sequence 
 
 If Select(_cAlias) > 0
-   (_cAlias)->(dbCloseArea())    
+   (_cAlias)->(DBCloseArea())    
 EndIf 
 
 If Select(_cAlias2) > 0
-   (_cAlias2)->(dbCloseArea())    
+   (_cAlias2)->(DBCloseArea())    
 EndIf 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -701,10 +701,10 @@ Local _cfiltrobon   := ""
 // Filtra geracao da comissao
 //====================================================================================================
 If !Empty( _cPeriodo )
-   _cFiltro	   += " AND SUBSTR( E3_EMISSAO , 1 , 6 ) = '"+ _cPeriodo +"'"
-   _cFiltEmis	+= " AND SUBSTR( E3_EMISSAO , 1 , 6 ) = '"+ _cPeriodo +"'"
-   _cFilCooVe	+= " AND SUBSTR( E3_EMISSAO , 1 , 6 ) = '"+ _cPeriodo +"'"
-   _cFiltrobon	+= " AND SUBSTR( F2_EMISSAO , 1 , 6 ) = '"+ _cPeriodo +"'"
+   _cFiltro	   += " AND SubStr( E3_EMISSAO , 1 , 6 ) = '"+ _cPeriodo +"'"
+   _cFiltEmis	+= " AND SubStr( E3_EMISSAO , 1 , 6 ) = '"+ _cPeriodo +"'"
+   _cFilCooVe	+= " AND SubStr( E3_EMISSAO , 1 , 6 ) = '"+ _cPeriodo +"'"
+   _cFiltrobon	+= " AND SubStr( F2_EMISSAO , 1 , 6 ) = '"+ _cPeriodo +"'"
 EndIf
 
 //====================================================================================================
@@ -726,8 +726,8 @@ _cFiltEmis	+= "%"
 _cFilVeCoo	+= "%"
 _cFilCooVe	+= "%"
 
-If !empty(_cFiltronc) .And. AllTrim(_cFiltronc) <> "%"
-   _cFiltronc := "% AND (" + substr(_cFiltronc,4,len(_cFiltronc)) + ") %" 
+If !Empty(_cFiltronc) .And. AllTrim(_cFiltronc) <> "%"
+   _cFiltronc := "% AND (" + SubStr(_cFiltronc,4,Len(_cFiltronc)) + ") %" 
 ElseIf Empty(_cFiltronc) .Or.  AllTrim(_cFiltronc) == "%"
    _cFiltronc := "% %" 
 EndIf
@@ -762,7 +762,7 @@ Do Case
 			E3.E3_VEND		AS CODVEND,
 			A3.A3_NOME		AS NOMEVEND,
 			(	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-				FROM %table:SE5% E5
+				FROM %Table:SE5% E5
 				WHERE
 					E1.E1_FILIAL    = E5.E5_FILIAL
 				AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -777,7 +777,7 @@ Do Case
 				AND E5.E5_SITUACA  <> 'C'
 				AND E5.E5_MOTBX     = 'CMP'
 				AND E5.E5_RECPAG    = 'R' ) - (	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-												FROM %table:SE5% E5
+												FROM %Table:SE5% E5
 												WHERE
 													E1.E1_FILIAL    = E5.E5_FILIAL
 												AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -793,7 +793,7 @@ Do Case
 												AND E5.E5_MOTBX     = 'CMP'
 												AND E5.E5_RECPAG    = 'P' ) COMPENSACAO,
 			(	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-				FROM %table:SE5% E5
+				FROM %Table:SE5% E5
 				WHERE
 					E1.E1_FILIAL    = E5.E5_FILIAL   
 				AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -811,7 +811,7 @@ Do Case
 						AND E5.E5_RECPAG   = 'R')
 					OR (	E5_TIPODOC     = 'DC' ) ) ) DESCONTO,
 			(	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-				FROM %table:SE5% E5
+				FROM %Table:SE5% E5
 				WHERE
 					E1.E1_FILIAL    = E5.E5_FILIAL   
 				AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -827,7 +827,7 @@ Do Case
 				AND E5.E5_MOTBX    IN ('NOR','DAC','FAT','LQ ')
 				AND E5.E5_RECPAG    = 'R'
 				AND E5.E5_DATA      < E3.E3_EMISSAO ) - (	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-															FROM %table:SE5% E5
+															FROM %Table:SE5% E5
 															WHERE
 																E1.E1_FILIAL        = E5.E5_FILIAL
 															AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -843,9 +843,9 @@ Do Case
 															AND E5.E5_MOTBX    IN ( 'NOR' , 'DAC' , 'FAT' , 'LQ ' )
 															AND E5.E5_RECPAG    = 'P' ) BAIXASANT,
       		'C' ORDENADACAO, E3.E3_NUM E3NUMORI,E3.E3_SERIE E3SERORI
-		FROM %table:SE3% E3
+		FROM %Table:SE3% E3
 		
-		JOIN %table:SE1% E1 
+		JOIN %Table:SE1% E1 
    		ON
    			E1.E1_FILIAL  = E3.E3_FILIAL
    		AND E1.E1_TIPO    = E3.E3_TIPO
@@ -856,7 +856,7 @@ Do Case
    		AND E1.E1_CLIENTE = E3.E3_CODCLI
    		AND E1.E1_LOJA    = E3.E3_LOJA
 		
-		JOIN %table:SF2% F2
+		JOIN %Table:SF2% F2
    		ON
    			F2.F2_FILIAL  = E3.E3_FILIAL
    		AND F2.F2_DOC     = E3.E3_NUM
@@ -864,7 +864,7 @@ Do Case
    		AND F2.F2_CLIENTE = E3.E3_CODCLI
    		AND F2.F2_LOJA    = E3.E3_LOJA
 		
-		JOIN %table:SA3% A3 ON A3.A3_COD = E3.E3_VEND
+		JOIN %Table:SA3% A3 ON A3.A3_COD = E3.E3_VEND
 		
 		WHERE
 			E3.D_E_L_E_T_ = ' '
@@ -897,7 +897,7 @@ Do Case
 			E3.E3_VEND CODVEND,
 			A3.A3_NOME NOMEVEND,
 			(	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-				FROM %table:SE5% E5
+				FROM %Table:SE5% E5
 				WHERE
 					E1.E1_FILIAL    = E5.E5_FILIAL
 				AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -912,7 +912,7 @@ Do Case
 				AND E5.E5_SITUACA  <> 'C'
 				AND E5.E5_MOTBX     = 'CMP'
 				AND E5.E5_RECPAG    = 'R' ) - (	SELECT COALESCE(SUM(E5.E5_VALOR),0)
-												FROM %table:SE5% E5
+												FROM %Table:SE5% E5
 												WHERE
 													E1.E1_FILIAL    = E5.E5_FILIAL
 												AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -928,7 +928,7 @@ Do Case
 												AND E5.E5_MOTBX     = 'CMP'
 												AND E5.E5_RECPAG    = 'P' ) COMPENSACAO,
 			(	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-				FROM %table:SE5% E5
+				FROM %Table:SE5% E5
 				WHERE
 					E1.E1_FILIAL    = E5.E5_FILIAL
 				AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -946,7 +946,7 @@ Do Case
 						AND E5.E5_RECPAG    = 'R' )
 					OR ( E5_TIPODOC = 'DC' ) ) ) DESCONTO,
 			(	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-				FROM %table:SE5% E5
+				FROM %Table:SE5% E5
 				WHERE
 					E1.E1_FILIAL    = E5.E5_FILIAL
 				AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -962,7 +962,7 @@ Do Case
 				AND E5.E5_MOTBX    IN ( 'NOR' , 'DAC' , 'FAT' , 'LQ ' )
 				AND E5.E5_RECPAG    = 'R'
 				AND E5.E5_DATA      < E3.E3_EMISSAO ) - (	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-															FROM %table:SE5% E5
+															FROM %Table:SE5% E5
 															WHERE
 																E1.E1_FILIAL    = E5.E5_FILIAL
 															AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -978,9 +978,9 @@ Do Case
 															AND E5.E5_MOTBX    IN ( 'NOR' , 'DAC' , 'FAT' , 'LQ ' )
 															AND E5.E5_RECPAG    = 'P' ) BAIXASANT,
 			'C' ORDENADACAO, E3.E3_NUM E3NUMORI,E3.E3_SERIE E3SERORI
-		FROM %table:SE3% E3
+		FROM %Table:SE3% E3
 		
-		JOIN %table:SE1% E1
+		JOIN %Table:SE1% E1
         ON
         	E1.E1_FILIAL  = E3.E3_FILIAL
         AND E1.E1_TIPO    = E3.E3_TIPO
@@ -991,9 +991,9 @@ Do Case
         AND E1.E1_CLIENTE = E3.E3_CODCLI
         AND E1.E1_LOJA    = E3.E3_LOJA
 		
-		JOIN %table:SA3% A3 ON A3.A3_COD = E3.E3_VEND
+		JOIN %Table:SA3% A3 ON A3.A3_COD = E3.E3_VEND
 		
-		JOIN %table:SF2% F2
+		JOIN %Table:SF2% F2
 		ON
 			F2.F2_FILIAL  = E3.E3_FILIAL
 		AND F2.F2_DOC     = E3.E3_NUM
@@ -1007,8 +1007,8 @@ Do Case
 	    AND E1.D_E_L_E_T_ = ' '
 	    AND A3.D_E_L_E_T_ = ' '
 	    AND E1.E1_NUM    IN (	SELECT SE1.E1_FATURA
-								FROM %table:SE1% SE1
-								JOIN %table:SF2% F2
+								FROM %Table:SE1% SE1
+								JOIN %Table:SF2% F2
 								ON
 									F2.F2_FILIAL   = SE1.E1_FILIAL
 								AND F2.F2_DOC      = SE1.E1_NUM
@@ -1050,7 +1050,7 @@ Do Case
 			E3.E3_VEND CODVEND,
 			A3.A3_NOME NOMEVEND,
 			(	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-				FROM %table:SE5% E5
+				FROM %Table:SE5% E5
 				WHERE 
 					E1.E1_FILIAL    = E5.E5_FILIAL   
 				AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -1065,7 +1065,7 @@ Do Case
 				AND E5.E5_SITUACA  <> 'C'
 				AND E5.E5_MOTBX     = 'CMP'
 				AND E5.E5_RECPAG    = 'R' ) - (	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-												FROM %table:SE5% E5
+												FROM %Table:SE5% E5
 												WHERE
 													E1.E1_FILIAL    = E5.E5_FILIAL   
 												AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -1081,7 +1081,7 @@ Do Case
 												AND E5.E5_MOTBX     = 'CMP'
 												AND E5.E5_RECPAG    = 'P' ) COMPENSACAO,
 			(	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-				FROM %table:SE5% E5
+				FROM %Table:SE5% E5
 				WHERE
 					E1.E1_FILIAL    = E5.E5_FILIAL   
 				AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -1099,7 +1099,7 @@ Do Case
 						AND E5.E5_RECPAG   = 'R')
 					OR(		E5_TIPODOC     = 'DC' ) ) ) DESCONTO,
 			(	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-				FROM %table:SE5% E5
+				FROM %Table:SE5% E5
 				WHERE
 					E1.E1_FILIAL    = E5.E5_FILIAL
 				AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -1115,7 +1115,7 @@ Do Case
 				AND E5.E5_MOTBX    IN ('NOR','DAC','FAT','LQ ')
 				AND E5.E5_RECPAG    = 'R'
 				AND E5.E5_DATA      < E3.E3_EMISSAO ) - (	SELECT COALESCE( SUM( E5.E5_VALOR ) , 0 )
-															FROM %table:SE5% E5
+															FROM %Table:SE5% E5
 															WHERE 
 																E1.E1_FILIAL    = E5.E5_FILIAL
 															AND E1.E1_PREFIXO   = E5.E5_PREFIXO
@@ -1131,8 +1131,8 @@ Do Case
 															AND E5.E5_MOTBX    IN ('NOR','DAC','FAT','LQ ')
 															AND E5.E5_RECPAG    = 'P' ) BAIXASANT,
 			'C' ORDENADACAO, E3.E3_NUM E3NUMORI,E3.E3_SERIE E3SERORI
-		FROM %table:SE3% E3
-		JOIN %table:SE1% E1
+		FROM %Table:SE3% E3
+		JOIN %Table:SE1% E1
 		ON
 			E1.E1_FILIAL  = E3.E3_FILIAL
 		AND E1.E1_TIPO    = E3.E3_TIPO
@@ -1143,9 +1143,9 @@ Do Case
 		AND E1.E1_CLIENTE = E3.E3_CODCLI
 		AND E1.E1_LOJA    = E3.E3_LOJA
 		
-		JOIN %table:SA3% A3 ON A3.A3_COD = E3.E3_VEND
+		JOIN %Table:SA3% A3 ON A3.A3_COD = E3.E3_VEND
 		
-		JOIN %table:SF2% F2
+		JOIN %Table:SF2% F2
 		ON
 			F2.F2_FILIAL  = E3.E3_FILIAL
 		AND F2.F2_DOC     = E3.E3_NUM
@@ -1159,8 +1159,8 @@ Do Case
 		AND E1.D_E_L_E_T_ = ' '
 		AND A3.D_E_L_E_T_ = ' '
 		AND E1.E1_NUMLIQ IN (	SELECT SE5.E5_DOCUMEN
-								FROM %table:SE5% SE5
-								JOIN %table:SF2% F2
+								FROM %Table:SE5% SE5
+								JOIN %Table:SF2% F2
 								ON
 									F2.F2_FILIAL  = SE5.E5_FILIAL
 								AND F2.F2_DOC     = SE5.E5_NUMERO
@@ -1187,7 +1187,7 @@ Do Case
 			E3.E3_EMISSAO DTEMISSAO,
 			E3.E3_EMISSAO DTBAIXA,
 			E3.E3_TIPO TIPO,
-			(	SELECT F2.F2_DOC FROM %table:SD1% D1,%table:SF2% F2
+			(	SELECT F2.F2_DOC FROM %Table:SD1% D1,%table:SF2% F2
 								WHERE
 									D1.D_E_L_E_T_ = ' '
 								AND F2.D_E_L_E_T_ = ' '
@@ -1203,7 +1203,7 @@ Do Case
 								AND F2.F2_LOJA    = D1.D1_LOJA
 								AND ROWNUM = 1
 								%exp:_cFilVeCoo% ) NUMERO,
-				(	SELECT F2.F2_SERIE FROM %table:SD1% D1,%table:SF2% F2
+				(	SELECT F2.F2_SERIE FROM %Table:SD1% D1,%table:SF2% F2
 								WHERE
 									D1.D_E_L_E_T_ = ' '
 								AND F2.D_E_L_E_T_ = ' '
@@ -1234,9 +1234,9 @@ Do Case
 			TO_NUMBER(NULL) DESCONTO,
 			TO_NUMBER(NULL) BAIXASANT,
 			'D' ORDENADACAO, E3.E3_NUM E3NUMORI,E3.E3_SERIE E3SERORI
-		FROM %table:SE3% E3
-		JOIN %table:SA3% A3 ON E3.E3_VEND = A3.A3_COD
-		JOIN %table:SA1% A1 ON A1.A1_COD = E3.E3_CODCLI AND A1.A1_LOJA = E3.E3_LOJA
+		FROM %Table:SE3% E3
+		JOIN %Table:SA3% A3 ON E3.E3_VEND = A3.A3_COD
+		JOIN %Table:SA1% A1 ON A1.A1_COD = E3.E3_CODCLI AND A1.A1_LOJA = E3.E3_LOJA
 		WHERE
 			E3.D_E_L_E_T_ = ' '
 		AND A3.D_E_L_E_T_ = ' ' 
@@ -1245,7 +1245,7 @@ Do Case
 		AND E3.E3_TIPO    = 'NCC'
 		%exp:_cFiltEmis%
 		
-		AND E3.E3_NUM    IN (	SELECT D1.D1_DOC FROM %table:SD1% D1,%table:SF2% F2
+		AND E3.E3_NUM    IN (	SELECT D1.D1_DOC FROM %Table:SD1% D1,%table:SF2% F2
 								WHERE
 									D1.D_E_L_E_T_ = ' '
 								AND F2.D_E_L_E_T_ = ' '
@@ -1268,7 +1268,7 @@ Do Case
 			E3.E3_EMISSAO	DTEMISSAO,
 			E3.E3_EMISSAO	DTBAIXA,
 			E3.E3_TIPO		TIPO,
-				(	SELECT F2.F2_DOC FROM %table:SD1% D1,%table:SF2% F2
+				(	SELECT F2.F2_DOC FROM %Table:SD1% D1,%table:SF2% F2
 								WHERE
 									D1.D_E_L_E_T_ = ' '
 								AND F2.D_E_L_E_T_ = ' '
@@ -1284,7 +1284,7 @@ Do Case
 								AND F2.F2_LOJA    = D1.D1_LOJA
 								AND ROWNUM = 1
 								%exp:_cFilVeCoo% ) NUMERO,
-				(	SELECT F2.F2_SERIE FROM %table:SD1% D1,%table:SF2% F2
+				(	SELECT F2.F2_SERIE FROM %Table:SD1% D1,%table:SF2% F2
 								WHERE
 									D1.D_E_L_E_T_ = ' '
 								AND F2.D_E_L_E_T_ = ' '
@@ -1315,9 +1315,9 @@ Do Case
 			TO_NUMBER(NULL) DESCONTO,
 			TO_NUMBER(NULL) BAIXASANT,
 			'D'				ORDENADACAO, E3.E3_NUM E3NUMORI,E3.E3_SERIE E3SERORI
-		FROM %table:SE3% E3
-		JOIN %table:SA3% A3 ON E3.E3_VEND = A3.A3_COD
-		JOIN %table:SA1% A1 ON A1.A1_COD = E3.E3_CODCLI AND A1.A1_LOJA = E3.E3_LOJA
+		FROM %Table:SE3% E3
+		JOIN %Table:SA3% A3 ON E3.E3_VEND = A3.A3_COD
+		JOIN %Table:SA1% A1 ON A1.A1_COD = E3.E3_CODCLI AND A1.A1_LOJA = E3.E3_LOJA
 		WHERE
 			E3.D_E_L_E_T_  = ' '
 		AND A3.D_E_L_E_T_  = ' '
@@ -1327,7 +1327,7 @@ Do Case
 		AND A3.A3_SUPER   <> ' '
 		%exp:_cFilCooVe%
 		AND E3.E3_NUM NOT IN (	SELECT D1.D1_DOC
-								FROM %table:SD1% D1,%table:SF2% F2
+								FROM %Table:SD1% D1,%table:SF2% F2
 								WHERE
 									D1.D_E_L_E_T_ = ' '
 								AND F2.D_E_L_E_T_ = ' '
@@ -1392,7 +1392,7 @@ Do Case
 
 End Case
 		
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -1419,27 +1419,27 @@ Local _nVTotSF2 := 0
 Begin Sequence
    _aRet := {0,0,0,0, _nVTotSF2,0 }
    
-   SF2->(DbSetOrder(1)) // F2_FILIAL+F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA+F2_FORMUL+F2_TIPO
-   If SF2->(DbSeek(U_ItKey(_cFilialNF,"D2_FILIAL")+U_ItKey(_cNRNF,"D2_DOC")+U_ItKey(_cSerieNf,"D2_SERIE")+U_ItKey(_cCodCli,"D2_CLIENTE")+U_ItKey(_cLojaCli,"D2_LOJA")))
+   SF2->(DBSetOrder(1)) // F2_FILIAL+F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA+F2_FORMUL+F2_TIPO
+   If SF2->(DBSeek(U_ItKey(_cFilialNF,"D2_FILIAL")+U_ItKey(_cNRNF,"D2_DOC")+U_ItKey(_cSerieNf,"D2_SERIE")+U_ItKey(_cCodCli,"D2_CLIENTE")+U_ItKey(_cLojaCli,"D2_LOJA")))
       _nVTotSF2 := SF2->F2_VALMERC
    EndIf
    
-   SD2->(DbSetOrder(3)) // D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA+D2_COD+D2_ITEM
-   If SD2->(DbSeek(U_ItKey(_cFilialNF,"D2_FILIAL")+U_ItKey(_cNRNF,"D2_DOC")+U_ItKey(_cSerieNf,"D2_SERIE")+U_ItKey(_cCodCli,"D2_CLIENTE")+U_ItKey(_cLojaCli,"D2_LOJA")))
-      Do While ! SD2->(Eof()) .And. SD2->(D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA) == U_ItKey(_cFilialNF,"D2_FILIAL")+U_ItKey(_cNRNF,"D2_DOC")+U_ItKey(_cSerieNf,"D2_SERIE")+U_ItKey(_cCodCli,"D2_CLIENTE")+U_ItKey(_cLojaCli,"D2_LOJA")
+   SD2->(DBSetOrder(3)) // D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA+D2_COD+D2_ITEM
+   If SD2->(DBSeek(U_ItKey(_cFilialNF,"D2_FILIAL")+U_ItKey(_cNRNF,"D2_DOC")+U_ItKey(_cSerieNf,"D2_SERIE")+U_ItKey(_cCodCli,"D2_CLIENTE")+U_ItKey(_cLojaCli,"D2_LOJA")))
+      While ! SD2->(Eof()) .And. SD2->(D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA) == U_ItKey(_cFilialNF,"D2_FILIAL")+U_ItKey(_cNRNF,"D2_DOC")+U_ItKey(_cSerieNf,"D2_SERIE")+U_ItKey(_cCodCli,"D2_CLIENTE")+U_ItKey(_cLojaCli,"D2_LOJA")
          If SD2->D2_COD == U_ItKey(_cProd,"D2_COD")
             _aRet := {SD2->D2_COMIS1, SD2->D2_COMIS2, SD2->D2_COMIS3, SD2->D2_COMIS4, _nVTotSF2, SD2->D2_TOTAL, SD2->D2_COMIS5}
          EndIf   
          
-         SD2->(DbSkip())   
+         SD2->(DBSkip())   
       EndDo
    EndIf      
      
 End Sequence
 
 RestOrd(_aOrd)
-SD2->(DbGoTo(_nRegSD2))
-SF2->(DbGoTo(_nRegSF2))
+SD2->(DBGoTo(_nRegSD2))
+SF2->(DBGoTo(_nRegSF2))
 
 Return _aRet
 
@@ -1485,18 +1485,18 @@ Begin Sequence
    // Nota Fiscal de Devolução - Deve-se localizar a nota fiscal de origem.
    //==========================================================================
    If AllTrim(_cTipoDoc) == "NCC"   // DEVOLUÇÃO
-      SD1->(DbSetOrder(1)) // D1_FILIAL+D1_DOC+D1_SERIE+D1_FORNECE+D1_LOJA+D1_COD+D1_ITEM                                                                                                     
-      If SD1->(DbSeek(U_ItKey(_cFilialNF,"D1_FILIAL")+U_ItKey(_cNRNF,"D1_DOC")+U_ItKey(_cSerieNf,"D1_SERIE")+U_ItKey(_cCodCli,"D1_FORNECE")+U_ItKey(_cLojaCli,"D1_LOJA")))
-	     SF1->(DbSetOrder(1)) // F1_FILIAL+F1_DOC+F1_SERIE+F1_FORNECE+F1_LOJA+F1_TIPO
+      SD1->(DBSetOrder(1)) // D1_FILIAL+D1_DOC+D1_SERIE+D1_FORNECE+D1_LOJA+D1_COD+D1_ITEM                                                                                                     
+      If SD1->(DBSeek(U_ItKey(_cFilialNF,"D1_FILIAL")+U_ItKey(_cNRNF,"D1_DOC")+U_ItKey(_cSerieNf,"D1_SERIE")+U_ItKey(_cCodCli,"D1_FORNECE")+U_ItKey(_cLojaCli,"D1_LOJA")))
+	     SF1->(DBSetOrder(1)) // F1_FILIAL+F1_DOC+F1_SERIE+F1_FORNECE+F1_LOJA+F1_TIPO
 
-         Do While ! SD1->(Eof()) .And. SD1->(D1_FILIAL+D1_DOC+D1_SERIE+D1_FORNECE+D1_LOJA) == U_ItKey(_cFilialNF,"D1_FILIAL")+U_ItKey(_cNRNF,"D1_DOC")+U_ItKey(_cSerieNf,"D1_SERIE")+U_ItKey(_cCodCli,"D1_FORNECE")+U_ItKey(_cLojaCli,"D1_LOJA")
-            SF1->(DbSeek(SD1->(D1_FILIAL+D1_DOC+D1_SERIE+D1_FORNECE+D1_LOJA)))
+         While ! SD1->(Eof()) .And. SD1->(D1_FILIAL+D1_DOC+D1_SERIE+D1_FORNECE+D1_LOJA) == U_ItKey(_cFilialNF,"D1_FILIAL")+U_ItKey(_cNRNF,"D1_DOC")+U_ItKey(_cSerieNf,"D1_SERIE")+U_ItKey(_cCodCli,"D1_FORNECE")+U_ItKey(_cLojaCli,"D1_LOJA")
+            SF1->(DBSeek(SD1->(D1_FILIAL+D1_DOC+D1_SERIE+D1_FORNECE+D1_LOJA)))
             _nTotNF := SF1->F1_VALMERC
             _nPercItem := SD1->D1_TOTAL / SF1->F1_VALMERC
 
             _aLinhaNF := {}
             For _nI := 1 To Len(_aDadosRel)
-                Aadd(_aLinhaNF, _aDadosRel[_nI])
+                aAdd(_aLinhaNF, _aDadosRel[_nI])
             Next
 
             _aComiss     := U_MOMS064B(SD1->D1_FILIAL,SD1->D1_DOC,SD1->D1_SERIE,SD1->D1_FORNECE,SD1->D1_LOJA,SD1->D1_COD)
@@ -1550,67 +1550,67 @@ Begin Sequence
             _aLinhaNF[35] := _aLinhaNF[14]  * (_nComisGNac / 100)	  // "Vlr Com Ger Nac"  
             _aLinhaNF[34] := _nComisGNac                               // "% Com Ger Nac"    
             
-            SB1->(DbSetOrder(1)) 
-            SB1->(DbSeek(xFilial("SB1")+SD1->D1_COD))
+            SB1->(DBSetOrder(1)) 
+            SB1->(DBSeek(xFilial("SB1")+SD1->D1_COD))
             //_cDescPrd := Posicione("SB1",1,xFilial("SB1")+SD1->D1_COD,"B1_DESC")     // Desc. Prod.
             //_cBIMIX   := Posicione("SB1",1,xFilial("SB1")+SD1->D1_COD,"B1_I_BIMIX")  // Mix BI
             _cDescPrd := SB1->B1_DESC     // Desc. Prod.
             _cBIMIX   := SB1->B1_I_BIMIX  // Mix BI
 
-            Aadd(_aLinhaNF, _cBIMIX        )    // Mix BI
-            Aadd(_aLinhaNF, SD1->D1_ITEM   )    // "Item"           
-            Aadd(_aLinhaNF, SD1->D1_COD    )    // "Produto"           
-            Aadd(_aLinhaNF, _cDescPrd      )    // "Descrição"        
-            Aadd(_aLinhaNF, SD1->D1_PICM   )    // "Aliq.%"           
-            Aadd(_aLinhaNF, SD1->D1_QUANT  )    // "Qtde"             
-            Aadd(_aLinhaNF, SD1->D1_UM     )    // "U.M."               
-            Aadd(_aLinhaNF, SD1->D1_QTSEGUM)    // "Qtde 2a U.M."  
-            Aadd(_aLinhaNF, SD1->D1_SEGUM  )    // "2a U.M."         
-            Aadd(_aLinhaNF, SD1->D1_VUNIT  )    // "Vlr.Uni."        
-            Aadd(_aLinhaNF, SD1->D1_TOTAL  )    // "Valor Total"     
+            aAdd(_aLinhaNF, _cBIMIX        )    // Mix BI
+            aAdd(_aLinhaNF, SD1->D1_ITEM   )    // "Item"           
+            aAdd(_aLinhaNF, SD1->D1_COD    )    // "Produto"           
+            aAdd(_aLinhaNF, _cDescPrd      )    // "Descrição"        
+            aAdd(_aLinhaNF, SD1->D1_PICM   )    // "Aliq.%"           
+            aAdd(_aLinhaNF, SD1->D1_QUANT  )    // "Qtde"             
+            aAdd(_aLinhaNF, SD1->D1_UM     )    // "U.M."               
+            aAdd(_aLinhaNF, SD1->D1_QTSEGUM)    // "Qtde 2a U.M."  
+            aAdd(_aLinhaNF, SD1->D1_SEGUM  )    // "2a U.M."         
+            aAdd(_aLinhaNF, SD1->D1_VUNIT  )    // "Vlr.Uni."        
+            aAdd(_aLinhaNF, SD1->D1_TOTAL  )    // "Valor Total"     
 
-            Aadd(_aLinhaNF, SD1->D1_NFORI  )    // "NF.Origem"       
-            Aadd(_aLinhaNF, SD1->D1_SERIORI)    // "Serie Origem"  
+            aAdd(_aLinhaNF, SD1->D1_NFORI  )    // "NF.Origem"       
+            aAdd(_aLinhaNF, SD1->D1_SERIORI)    // "Serie Origem"  
 
-            Aadd(_aRet, AClone(_aLinhaNF))
+            aAdd(_aRet, AClone(_aLinhaNF))
             
-            SD1->(DbSkip())
+            SD1->(DBSkip())
          EndDo
       Else
          _aLinhaNF := {}
          For _nI := 1 To Len(_aDadosRel)
-             Aadd(_aLinhaNF, _aDadosRel[_nI])
+             aAdd(_aLinhaNF, _aDadosRel[_nI])
          Next
          
-         //SE1->(DbSetOrder(31)) // 31 - V - E1_FILIAL+E1_NUM+E1_SERIE+E1_CLIENTE+E1_LOJA    
-         SE1->(DbSetOrder(2)) // E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO    
+         //SE1->(DBSetOrder(31)) // 31 - V - E1_FILIAL+E1_NUM+E1_SERIE+E1_CLIENTE+E1_LOJA    
+         SE1->(DBSetOrder(2)) // E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO    
          
-         If SE1->(DbSeek(U_ItKey(_cFilialNF,"E1_FILIAL")+U_ItKey(_cCodCli,"E1_CLIENTE")+U_ItKey(_cLojaCli,"E1_LOJA")+U_ItKey("DCT","E1_PREFIXO")+U_ItKey(_cNRNF,"E1_NUM")  ))
-            Do While ! SE1->(Eof()) .And. SE1->(E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM) == U_ItKey(_cFilialNF,"E1_FILIAL")+U_ItKey(_cCodCli,"E1_CLIENTE")+U_ItKey(_cLojaCli,"E1_LOJA")+U_ItKey("DCT","E1_PREFIXO")+U_ItKey(_cNRNF,"E1_NUM")
+         If SE1->(DBSeek(U_ItKey(_cFilialNF,"E1_FILIAL")+U_ItKey(_cCodCli,"E1_CLIENTE")+U_ItKey(_cLojaCli,"E1_LOJA")+U_ItKey("DCT","E1_PREFIXO")+U_ItKey(_cNRNF,"E1_NUM")  ))
+            While ! SE1->(Eof()) .And. SE1->(E1_FILIAL+E1_CLIENTE+E1_LOJA+E1_PREFIXO+E1_NUM) == U_ItKey(_cFilialNF,"E1_FILIAL")+U_ItKey(_cCodCli,"E1_CLIENTE")+U_ItKey(_cLojaCli,"E1_LOJA")+U_ItKey("DCT","E1_PREFIXO")+U_ItKey(_cNRNF,"E1_NUM")
                If AllTrim(SE1->E1_TIPO) == "NCC" .And. AllTrim(SE1->E1_PREFIXO) == "DCT"
                   _aLinhaNF[2] := "DCT"
                   Exit
                EndIf
                
-               SE1->(DbSkip())
+               SE1->(DBSkip())
             EndDo
          EndIf
          
-         Aadd(_aLinhaNF, "" )  // Mix BI
-         Aadd(_aLinhaNF, "" )  // "Item"           
-         Aadd(_aLinhaNF, "" )  // "Produto"           
-         Aadd(_aLinhaNF, "" )  // "Descrição"        
-         Aadd(_aLinhaNF, 0)    // "Aliq.%"           
-         Aadd(_aLinhaNF, 0)    // "Qtde"             
-         Aadd(_aLinhaNF, "" )  // "U.M."               
-         Aadd(_aLinhaNF, 0  )  // "Qtde 2a U.M."  
-         Aadd(_aLinhaNF, "" )  // "2a U.M."         
-         Aadd(_aLinhaNF, 0)    // "Vlr.Uni."        
-         Aadd(_aLinhaNF, 0)    // "Valor Total"     
-         Aadd(_aLinhaNF, "" )  // "NF.Origem"       
-         Aadd(_aLinhaNF, "" )  // "Serie Origem"  
+         aAdd(_aLinhaNF, "" )  // Mix BI
+         aAdd(_aLinhaNF, "" )  // "Item"           
+         aAdd(_aLinhaNF, "" )  // "Produto"           
+         aAdd(_aLinhaNF, "" )  // "Descrição"        
+         aAdd(_aLinhaNF, 0)    // "Aliq.%"           
+         aAdd(_aLinhaNF, 0)    // "Qtde"             
+         aAdd(_aLinhaNF, "" )  // "U.M."               
+         aAdd(_aLinhaNF, 0  )  // "Qtde 2a U.M."  
+         aAdd(_aLinhaNF, "" )  // "2a U.M."         
+         aAdd(_aLinhaNF, 0)    // "Vlr.Uni."        
+         aAdd(_aLinhaNF, 0)    // "Valor Total"     
+         aAdd(_aLinhaNF, "" )  // "NF.Origem"       
+         aAdd(_aLinhaNF, "" )  // "Serie Origem"  
             
-         Aadd(_aRet, AClone(_aLinhaNF))
+         aAdd(_aRet, AClone(_aLinhaNF))
              
       EndIf
 
@@ -1625,23 +1625,23 @@ Begin Sequence
      
       _nRegSF2 := SF2->(Recno())
        
-      SF2->(DbSetOrder(1)) // F2_FILIAL+F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA+F2_FORMUL+F2_TIPO
-      If SF2->(DbSeek(U_ItKey(_cFilialNF,"D2_FILIAL")+U_ItKey(_cNRNF,"D2_DOC")+U_ItKey(_cSerieNf,"D2_SERIE")+U_ItKey(_cCodCli,"D2_CLIENTE")+U_ItKey(_cLojaCli,"D2_LOJA")))
+      SF2->(DBSetOrder(1)) // F2_FILIAL+F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA+F2_FORMUL+F2_TIPO
+      If SF2->(DBSeek(U_ItKey(_cFilialNF,"D2_FILIAL")+U_ItKey(_cNRNF,"D2_DOC")+U_ItKey(_cSerieNf,"D2_SERIE")+U_ItKey(_cCodCli,"D2_CLIENTE")+U_ItKey(_cLojaCli,"D2_LOJA")))
          _nValTotMerc := SF2->F2_VALMERC
       EndIf
       
-      SF2->(DbGoTo(_nRegSF2))
+      SF2->(DBGoTo(_nRegSF2))
        
 	  _nTotNF := _nValTotMerc //SF2->F2_VALMERC 
 
       _nFatorBas := _aDadosRel[14] / _nTotNF  // _aDadosRel[16]
 
-      SD2->(DbSetOrder(3)) // D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA+D2_COD+D2_ITEM
-      If SD2->(DbSeek(U_ItKey(_cFilialNF,"D2_FILIAL")+U_ItKey(_cNRNF,"D2_DOC")+U_ItKey(_cSerieNf,"D2_SERIE")+U_ItKey(_cCodCli,"D2_CLIENTE")+U_ItKey(_cLojaCli,"D2_LOJA")))
-         Do While ! SD2->(Eof()) .And. SD2->(D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA) == U_ItKey(_cFilialNF,"D2_FILIAL")+U_ItKey(_cNRNF,"D2_DOC")+U_ItKey(_cSerieNf,"D2_SERIE")+U_ItKey(_cCodCli,"D2_CLIENTE")+U_ItKey(_cLojaCli,"D2_LOJA")
+      SD2->(DBSetOrder(3)) // D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA+D2_COD+D2_ITEM
+      If SD2->(DBSeek(U_ItKey(_cFilialNF,"D2_FILIAL")+U_ItKey(_cNRNF,"D2_DOC")+U_ItKey(_cSerieNf,"D2_SERIE")+U_ItKey(_cCodCli,"D2_CLIENTE")+U_ItKey(_cLojaCli,"D2_LOJA")))
+         While ! SD2->(Eof()) .And. SD2->(D2_FILIAL+D2_DOC+D2_SERIE+D2_CLIENTE+D2_LOJA) == U_ItKey(_cFilialNF,"D2_FILIAL")+U_ItKey(_cNRNF,"D2_DOC")+U_ItKey(_cSerieNf,"D2_SERIE")+U_ItKey(_cCodCli,"D2_CLIENTE")+U_ItKey(_cLojaCli,"D2_LOJA")
             _aLinhaNF := {}
             For _nI := 1 To Len(_aDadosRel)
-                Aadd(_aLinhaNF, _aDadosRel[_nI])
+                aAdd(_aLinhaNF, _aDadosRel[_nI])
             Next
 
             If AllTrim(_cTipoDoc ) == "BON"
@@ -1688,54 +1688,54 @@ Begin Sequence
             _aLinhaNF[35] := _aLinhaNF[14]  * (SD2->D2_COMIS5 / 100)	      // "Vlr Com Ger Nac"
             _aLinhaNF[34] := SD2->D2_COMIS5                                // "% Com Ger Nac"
 
-            SB1->(DbSetOrder(1)) 
-            SB1->(DbSeek(xFilial("SB1")+SD2->D2_COD))
+            SB1->(DBSetOrder(1)) 
+            SB1->(DBSeek(xFilial("SB1")+SD2->D2_COD))
             //_cDescPrd := Posicione("SB1",1,xFilial("SB1")+SD2->D2_COD,"B1_DESC")    // Desc. Prod.
             //_cBIMIX   := Posicione("SB1",1,xFilial("SB1")+SD2->D2_COD,"B1_I_BIMIX") // Mix BIMOMS064
             _cDescPrd := SB1->B1_DESC     // Desc. Prod.
             _cBIMIX   := SB1->B1_I_BIMIX  // Mix BI
 
-            Aadd(_aLinhaNF, _cBIMIX        )                                        // "Mix BI"           
-            Aadd(_aLinhaNF, SD2->D2_ITEM   )                                        // "Item"           
-            Aadd(_aLinhaNF, SD2->D2_COD    )                                        // "Produto"           
-            Aadd(_aLinhaNF, _cDescPrd      )                                        // "Descrição"   
-            Aadd(_aLinhaNF, SD2->D2_PICM   )                                        // "Aliq.%"           
-            Aadd(_aLinhaNF, SD2->D2_QUANT  )                                        // "Qtde"             
-            Aadd(_aLinhaNF, SD2->D2_UM     )                                        // "U.M."               
-            Aadd(_aLinhaNF, SD2->D2_QTSEGUM)                                        // "Qtde 2a U.M."  
-            Aadd(_aLinhaNF, SD2->D2_SEGUM  )                                        // "2a U.M."         
-            Aadd(_aLinhaNF, SD2->D2_PRCVEN )                                        // "Vlr.Uni."        
-            Aadd(_aLinhaNF, SD2->D2_TOTAL  )                                        // "Valor Total"     
-            Aadd(_aLinhaNF, SD2->D2_NFORI  )                                        // "NF.Origem"       
-            Aadd(_aLinhaNF, SD2->D2_SERIORI)                                        // "Serie Origem"  
+            aAdd(_aLinhaNF, _cBIMIX        )                                        // "Mix BI"           
+            aAdd(_aLinhaNF, SD2->D2_ITEM   )                                        // "Item"           
+            aAdd(_aLinhaNF, SD2->D2_COD    )                                        // "Produto"           
+            aAdd(_aLinhaNF, _cDescPrd      )                                        // "Descrição"   
+            aAdd(_aLinhaNF, SD2->D2_PICM   )                                        // "Aliq.%"           
+            aAdd(_aLinhaNF, SD2->D2_QUANT  )                                        // "Qtde"             
+            aAdd(_aLinhaNF, SD2->D2_UM     )                                        // "U.M."               
+            aAdd(_aLinhaNF, SD2->D2_QTSEGUM)                                        // "Qtde 2a U.M."  
+            aAdd(_aLinhaNF, SD2->D2_SEGUM  )                                        // "2a U.M."         
+            aAdd(_aLinhaNF, SD2->D2_PRCVEN )                                        // "Vlr.Uni."        
+            aAdd(_aLinhaNF, SD2->D2_TOTAL  )                                        // "Valor Total"     
+            aAdd(_aLinhaNF, SD2->D2_NFORI  )                                        // "NF.Origem"       
+            aAdd(_aLinhaNF, SD2->D2_SERIORI)                                        // "Serie Origem"  
 
-            Aadd(_aRet, AClone(_aLinhaNF))
+            aAdd(_aRet, AClone(_aLinhaNF))
                         
-            SD2->(DbSkip())
+            SD2->(DBSkip())
             
          EndDo
       EndIf   
    Else
       _aLinhaNF := {}
       For _nI := 1 To Len(_aDadosRel)
-          Aadd(_aLinhaNF, _aDadosRel[_nI])
+          aAdd(_aLinhaNF, _aDadosRel[_nI])
       Next
       
-      Aadd(_aLinhaNF, "" )  // Mix BI
-      Aadd(_aLinhaNF, "" )  // "Item"           
-      Aadd(_aLinhaNF, "" )  // "Produto"           
-      Aadd(_aLinhaNF, "" )  // "Descrição"        
-      Aadd(_aLinhaNF, 0  )  // "Aliq.%"           
-      Aadd(_aLinhaNF, 0  )  // "Qtde"             
-      Aadd(_aLinhaNF, "" )  // "U.M."               
-      Aadd(_aLinhaNF, 0  )  // "Qtde 2a U.M."  
-      Aadd(_aLinhaNF, "" )  // "2a U.M."         
-      Aadd(_aLinhaNF, 0  )  // "Vlr.Uni."        
-      Aadd(_aLinhaNF, 0  )  // "Valor Total"     
-      Aadd(_aLinhaNF, "" )  // "NF.Origem"       
-      Aadd(_aLinhaNF, "" )  // "Serie Origem"  
+      aAdd(_aLinhaNF, "" )  // Mix BI
+      aAdd(_aLinhaNF, "" )  // "Item"           
+      aAdd(_aLinhaNF, "" )  // "Produto"           
+      aAdd(_aLinhaNF, "" )  // "Descrição"        
+      aAdd(_aLinhaNF, 0  )  // "Aliq.%"           
+      aAdd(_aLinhaNF, 0  )  // "Qtde"             
+      aAdd(_aLinhaNF, "" )  // "U.M."               
+      aAdd(_aLinhaNF, 0  )  // "Qtde 2a U.M."  
+      aAdd(_aLinhaNF, "" )  // "2a U.M."         
+      aAdd(_aLinhaNF, 0  )  // "Vlr.Uni."        
+      aAdd(_aLinhaNF, 0  )  // "Valor Total"     
+      aAdd(_aLinhaNF, "" )  // "NF.Origem"       
+      aAdd(_aLinhaNF, "" )  // "Serie Origem"  
            
-      Aadd(_aRet, AClone(_aLinhaNF))
+      aAdd(_aRet, AClone(_aLinhaNF))
              
    EndIf
   
@@ -1795,7 +1795,7 @@ Begin Sequence
    _cQry += " FROM "+ RetSqlName('ZBK') +" ZBK "
    _cQry += " WHERE "
    _cQry += "     ZBK.D_E_L_E_T_ = ' ' "
-   _cQry += "   AND ZBK_DTFECH = '" + Dtos(_dDtFecham) +"' "   
+   _cQry += "   AND ZBK_DTFECH = '" + DToS(_dDtFecham) +"' "   
    
    If Select("TRBZBK") > 0
       TRBZBK->( DBCloseArea() )
@@ -1829,20 +1829,20 @@ User Function MOMS064T(oProc,_aDados)
 Local _nI
 Local _cSeq 
 Local _nTotRegs 
-Local _cNomeUser //:= UsrFullName(__cUserID)
+Local _cNomeUser //:= UsrFullName(__cUserId)
 Local _cGrpProd
 
 Default oProc := Nil
 
 Begin Sequence 
 
-   If Type("__CUSERID") = "C" .And. ! Empty(__CUSERID)
-      _cNomeUser := UsrFullName(__cUserID)
+   If Type("__cUserId") = "C" .And. ! Empty(__cUserId)
+      _cNomeUser := UsrFullName(__cUserId)
    Else 
       _cNomeUser := "VIA SCHEDULE"  
    EndIf 
 
-   SA1->(DbSetOrder(1))
+   SA1->(DBSetOrder(1))
 
    _cSeq := StrZero(_nSequen , 3)
    
@@ -1911,7 +1911,7 @@ Begin Sequence
       ZBK->ZBK_DSCRED	 := SA1->A1_I_NGRPC // Posicione("SA1",1,xFilial("SA1")+_cCliente+_cLoja,"A1_I_NGRPC") // C	30	0	Desc.Rede	Descrição Grupo Vendas (Rede)
       ZBK->ZBK_NOMECL	 := SA1->A1_NOME    // Posicione("SA1",1,xFilial("SA1")+_cCliente+_cLoja,"A1_NOME")    // C	60	0	Nome Cliente	Nome do cliente
       //------------------------------------------------------------------//
-      ZBK->(MsUnLock())
+      ZBK->(MSUnLock())
 	   
 	   _lGravouZBK := .T.
       //------------------------------------------------------------------//
@@ -1934,7 +1934,7 @@ Begin Sequence
 
 End Sequence 
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -1949,7 +1949,7 @@ Retorno-----------: Nenhum
 User Function MOMS064A()
 Local _cQry 
 
-_lScheduller := FWGetRunSchedule() .OR. SELECT("SX3") <= 0
+_lScheduller := FWGetRunSchedule() .Or. SELECT("SX3") <= 0
 
 Begin Sequence 
 
@@ -1971,7 +1971,7 @@ Begin Sequence
      
       cFilAnt := "01" 
 
-	  FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MOMS064"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MOMS06409"/*cMsgId*/, "MOMS06409 - Iniciando a integração, calculo e gravação dos dados gerenciais de comissões nas tabelas. Data: " + Dtoc(Date()) + " - Hora: " + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+	  FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MOMS064"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MOMS06409"/*cMsgId*/, "MOMS06409 - Iniciando a integração, calculo e gravação dos dados gerenciais de comissões nas tabelas. Data: " + DToC(Date()) + " - Hora: " + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
 
    EndIf
 
@@ -1998,7 +1998,7 @@ Begin Sequence
    EndIf
 
    If _lScheduller
-	  FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MOMS064"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MOMS06410"/*cMsgId*/, "MOMS06410 - Finalizando a integração, calculo e gravação dos dados gerenciais de comissões nas tabelas."  + Dtoc(Date()) + " - Hora: " + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+	  FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MOMS064"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MOMS06410"/*cMsgId*/, "MOMS06410 - Finalizando a integração, calculo e gravação dos dados gerenciais de comissões nas tabelas."  + DToC(Date()) + " - Hora: " + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
       
       //============================================================
       //Limpa o ambiente, liberando a licença e fechando as conexoes
@@ -2008,4 +2008,4 @@ Begin Sequence
 
 End Sequence
 
-Return Nil 
+Return 

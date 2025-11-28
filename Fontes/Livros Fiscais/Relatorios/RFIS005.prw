@@ -2,35 +2,26 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 27/09/2018 | Realização correções relatorio e consulta específica para listar todas filiais.Chamado 26160
--------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     | 09/10/2018 | Correções na exibição de dados do Relatório e ajustes para exportar para Excel.Chamado 26160			  
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 02/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
+Julio Paz     |27/09/2018| Chamado 26160. Realização correções relatorio e consulta específica para listar todas filiais.
+Julio Paz     |09/10/2018| Chamado 26160. Correções na exibição de dados do Relatório e ajustes para exportar para Excel.
+Lucas Borges  |02/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RFIS005
 Autor-------------: Lucas Crevilari
 Data da Criacao---: 12/12/2014
-===============================================================================================================================
 Descrição---------: Relatório de Código de Ajuste Saídas
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-
 User Function RFIS005
 
 Private cPerg := "RFIS005"
@@ -44,18 +35,15 @@ Pergunte(cPerg,.F.)
 oReport := RepMap()
 oReport	:PrintDialog()
 
-Return Nil
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: RepMap()
 Autor-------------: Lucas Crevilari
 Data da Criacao---: 12/12/2014
-===============================================================================================================================
 Descrição---------: Define a estrutura do Relatório de Código de Ajuste Saídas.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -112,11 +100,8 @@ Return oReport
 Programa----------: PrintMap
 Autor-------------: Lucas Crevilari
 Data da Criacao---: 12/12/2014
-===============================================================================================================================
 Descrição---------: Imprimir relatório com informações referente ao Mapa de leite para análise de custos conforme parâmetros
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -128,8 +113,8 @@ oSection:Enable()
 oSection1:Enable()
 oSection2:Enable()
 
-_cFiliais := "%"+FormatIn(Alltrim(mv_par01),";")+"%"
-cCodAjust := "%"+FormatIn(Alltrim(mv_par12),";")+"%"
+_cFiliais := "%"+FormatIn(AllTrim(MV_PAR01),";")+"%"
+cCodAjust := "%"+FormatIn(AllTrim(MV_PAR12),";")+"%"
 
 oSection1:BeginQuery()
 
@@ -195,37 +180,37 @@ EndSql
 oSection1:EndQuery()
 oSection:Init()
 oSection1:Init()
-If (cAliasQRY)->(!EOF())
+If (cAliasQRY)->(!Eof())
    oSection1:Cell("CODLAN"):SetValue((cAliasQRY)->CODLAN)
    oSection1:PrintLine()
 EndIf
 
 oSection2:Init()
 
-nInc	:= reccount()
+nInc	:= RecCount()
 oReport:SetMeter(nInc)
 
 cCodAj := ""
-If (cAliasQRY)->(!EOF())
+If (cAliasQRY)->(!Eof())
    cCodAj := (cAliasQRY)->CODLAN
 EndIf
 
-While !oReport:Cancel() .And. (cAliasQRY)->(!EOF())
+While !oReport:Cancel() .And. (cAliasQRY)->(!Eof())
 	If (cAliasQRY)->CODLAN == 'RO10000006'
 		nPercApu := 0.95
-	Elseif (cAliasQRY)->CODLAN == 'RO10000003'
+	ElseIf (cAliasQRY)->CODLAN == 'RO10000003'
 		nPercApu := 0.75
-	Elseif (cAliasQRY)->CODLAN == 'RO10000007'
+	ElseIf (cAliasQRY)->CODLAN == 'RO10000007'
 		nPercApu := 0.7647
-	Elseif (cAliasQRY)->CODLAN == 'RO10000012'
+	ElseIf (cAliasQRY)->CODLAN == 'RO10000012'
 		nPercApu := 0.85
-	Endif
+	EndIf
 	
 	cNome   := GetAdvFVal("SA1","A1_NOME",xFilial("SA1")+(cAliasQRY)->CLIENTE+(cAliasQRY)->LOJA,1,"")
 	cDescr  := GetAdvFVal("SB1","B1_I_DESCD",xFilial("SB1")+(cAliasQRY)->PROD,1,"")
 	nVlr	:= (cAliasQRY)->DIF_ALQ*nPercApu
 	nDif	:= nVlr - (cAliasQRY)->APURACAO
-	dDtEmis	:= StoD((cAliasQRY)->EMISSAO)
+	dDtEmis	:= SToD((cAliasQRY)->EMISSAO)
 	
 	If (cAliasQRY)->CODLAN <> cCodAj
 		oSection2:Finish()
@@ -271,7 +256,7 @@ While !oReport:Cancel() .And. (cAliasQRY)->(!EOF())
 		oSection2:PrintLine()
 	EndIf
 	
-	(cAliasQRY)->(DbSkip())
+	(cAliasQRY)->(DBSkip())
 	
 EndDo
 

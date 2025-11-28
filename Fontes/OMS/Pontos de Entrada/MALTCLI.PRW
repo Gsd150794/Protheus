@@ -5,16 +5,19 @@
  Autor        |    Data    |                              Motivo                      										 
 -------------------------------------------------------------------------------------------------------------------------------
 Lucas Borges  | 03/04/2018 | Chamado 24395. Incluída na regra da Conta Contábil o tipo L-Produtor Rural pois está sendo usado. 
--------------------------------------------------------------------------------------------------------------------------------
 Alex Wallauer | 17/02/2023 | Chamado 42425. Novo Tratamento para gravacao do campo A1_CONTRIB na nova Funcao CRMA980CON().
-===============================================================================================================================
+======================================================================================================================================================================================================
+ Analista     - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
+======================================================================================================================================================================================================
+ Antonio      - Igor Melgaço  - 11/11/25 -           - 51346   - Ajuste para replicar A1_COND e A1_GRPVEN entre clientes com mesma base de CNPJ.
+======================================================================================================================================================================================================
 */
 
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#INCLUDE "rwmake.ch" 
-#INCLUDE "TOPCONN.CH"       
+#Include "rwmake.ch" 
+#Include "TOPCONN.CH"       
 
 /*
 ===============================================================================================================================
@@ -31,7 +34,7 @@ Retorno---------: Nenhum
 */
 User Function MALTCLI()
 
-Local _aArea	:= GetArea()
+Local _aArea	:= FWGetArea()
 Local _cCodUsr	:= RetCodUsr()
 Local _cConta	:= ''
 
@@ -44,7 +47,7 @@ EndIf
 
 _aITASA1 := {}
 
-RestArea( _aArea )
+FWRestArea( _aArea )
 
 //====================================================================================================
 // Verifica a configuração do cadastro para ajustar a conta contábil
@@ -75,10 +78,12 @@ If !Empty( _cConta ) .And. _cConta <> SA1->A1_CONTA
 	
 	RecLock( 'SA1' , .F. )
 	SA1->A1_CONTA := _cConta
-	SA1->( MsUnLock() )
+	SA1->( MSUnLock() )
 	
 EndIf
 
 U_CRMA980CON()//Funcao do P.E. CRMA980PE.PRW
+
+U_CRMA980A(M->A1_COND,M->A1_GRPVEN,M->A1_I_NGRPC) // Ajuste para replicar A1_COND e A1_GRPVEN entre clientes com mesma base de CNPJ. Chamado 51346.
 
 Return

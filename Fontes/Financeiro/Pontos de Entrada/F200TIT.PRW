@@ -1,17 +1,14 @@
 /*
-=========================================================================================================================================================
-                          ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-=========================================================================================================================================================
-Analista         - Programador    - Inicio     - Envio      - Chamado - Motivo da Alteração
----------------------------------------------------------------------------------------------------------------------------------------------------------
-Antonio Ramos    - Igor Melgaço   - 02/05/2025 - 08/05/2025 - 50588   - Ajuste para execução de compensação de títulos somente qdo ocorrencia = '06'
-=========================================================================================================================================================
+===============================================================================================================================
+               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
+===============================================================================================================================
+   Autor      |   Data   |                              Motivo                                                          
+-------------------------------------------------------------------------------------------------------------------------------
+Igor Melgaço  |08/05/2025| Chamado 50588. Ajuste para execução de compensação de títulos somente qdo ocorrencia = '06'
+===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 Static _aErro := {} As Array
 
@@ -20,11 +17,8 @@ Static _aErro := {} As Array
 Programa----------: F200TIT
 Autor-------------: Igor Melgaço
 Data da Criacao---: 24/04/2025
-===============================================================================================================================
 Descrição---------: Ponto de Entrada para tratamentos de dados após baixa de títulos do retorno de cobrança da rotina FINA200 - Chamado 50292
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -42,12 +36,12 @@ Local nTaxaCM      := 0 As Numeric
 Local nSaldoComp   := 0 As Numeric
 Local aAreaSE1     := {} As Array
 
-If (SE1->E1_I_DESCO > 0) .AND. ALLTRIM(COCORR)=="06"
+If (SE1->E1_I_DESCO > 0) .And. AllTrim(COCORR)=="06"
 	aAdd(aRecSE1, SE1->(Recno()))
 	aAreaSE1 := SE1->(GetArea())
-	DbSelectArea("SE1")
-	Dbsetorder(2)
-	If DbSeek(cParam)
+	DBSelectArea("SE1")
+	DBSetOrder(2)
+	If DBSeek(cParam)
 		If SE1->E1_VALOR > 0 
 
 			nOperacao := 3 //Exclusao
@@ -72,10 +66,10 @@ If (SE1->E1_I_DESCO > 0) .AND. ALLTRIM(COCORR)=="06"
 		EndIf
 	EndIf
 
-	RestArea(aAreaSE1)
+	FWRestArea(aAreaSE1)
 
 	If !lRet
-		AADD(_aErro,{SE1->E1_FILIAL,SE1->E1_PREFIXO,SE1->E1_NUM,SE1->E1_PARCELA,SE1->E1_TIPO,SE1->E1_CLIENTE,SE1->E1_LOJA,Posicione("SA1",1,xFilial("SA1")+SE1->E1_CLIENTE+SE1->E1_LOJA,"A1_NOME")})
+		aAdd(_aErro,{SE1->E1_FILIAL,SE1->E1_PREFIXO,SE1->E1_NUM,SE1->E1_PARCELA,SE1->E1_TIPO,SE1->E1_CLIENTE,SE1->E1_LOJA,Posicione("SA1",1,xFilial("SA1")+SE1->E1_CLIENTE+SE1->E1_LOJA,"A1_NOME")})
 	EndIf 
 EndIf
 
@@ -86,11 +80,8 @@ Return
 Programa----------: F200TITE
 Autor-------------: Igor Melgaço
 Data da Criacao---: 24/04/2025
-===============================================================================================================================
 Descrição---------: Retorna o Array de Registros com falha na compensação
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: _aErro
 ===============================================================================================================================
 */

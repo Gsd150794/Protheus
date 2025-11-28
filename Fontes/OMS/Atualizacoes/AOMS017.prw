@@ -12,13 +12,13 @@ Jerry         | 29/04/2022 | Chamado 38883. Ajuste na Efetivação Automatica Pedi
 ===================================================================================================================================================================
 Analista         - Programador     - Inicio     - Envio    - Chamado - Motivo da Alteração
 ===================================================================================================================================================================
-Vanderlei Alves  - Alex Wallauer   - 09/06/25   - 10/06/25 - 45229   - Tratamento para validar FWIsInCallStack("U_AOMS085B") junto com FWISINCALLSTACK("U_ALTERAP")
+Vanderlei Alves  - Alex Wallauer   - 09/06/25   - 10/06/25 - 45229   - Tratamento para validar FWIsInCallStack("U_AOMS085B") junto com FWIsInCallStack("U_ALTERAP")
 ===================================================================================================================================================================
 */ 
 
-#include "protheus.ch"  
-#include "topconn.ch"
-#include "rwmake.ch"
+#Include "TOTVS.ch"  
+#Include "topconn.ch"
+#Include "rwmake.ch"
 
 #DEFINE _ENTER CHR(13) + CHR(10)
  
@@ -37,7 +37,7 @@ Retorno---------: cret - estado do cliente ou fornecedor do pedido de vendas
 */
 User Function AOMS017(_ntipo)
  
-Local aArea    := GetArea() 
+Local aArea    := FWGetArea() 
 Local aAreaSA1 := SA1->(GetArea())
 Local aAreaSA3 := SA3->(GetArea())
 Local aAreaSC5 := SC5->(GetArea())
@@ -57,32 +57,32 @@ Default _ntipo := 0
 
 
 //Se veio do webservice já retorna .T.
-If FWIsInCallStack("U_ALTERAP") .or. FWIsInCallStack("U_INCLUIC") .or. FWIsInCallStack("U_AOMS085B")
+If FWIsInCallStack("U_ALTERAP") .Or. FWIsInCallStack("U_INCLUIC") .Or. FWIsInCallStack("U_AOMS085B")
 	_laoms074 := .T.
-Endif
+EndIf
 
 //Se veio da rotina de exclusão automática de pedidos de venda já retorna .T.
 If FWIsInCallStack("U_AOMS108")
 	_l108 := .T.
-Endif 
+EndIf 
 
 //Se esta sendo chamado via AOMS112/MOMS050 (Central Pedido Portal / Efetivaççao Automatica)
-If FWIsInCallStack("U_AOMS112") .or. FWIsInCallStack("U_MOMS050")
+If FWIsInCallStack("U_AOMS112") .Or. FWIsInCallStack("U_MOMS050")
 	_lAoms112 := .T.
-Endif
+EndIf
  
 If !FWIsInCallStack("U_AOMS032")
 
 	//=========================================================
-	//Se o tipo do pedido de venda for
+	//Se o tipo do pedido de venda For
 	//Utiliza Fornecedor  ou   Devolucao de compras            
 	//=========================================================                
 	If M->C5_TIPO == 'B' .Or. M->C5_TIPO == 'D' 
 
 		
-		dbSelectArea("SA2")
-		SA2->(dbSetOrder(1))
-		If ( SA2->(dbSeek(xFilial("SA2")+M->C5_CLIENT+M->C5_LOJAENT)))
+		DBSelectArea("SA2")
+		SA2->(DBSetOrder(1))
+		If ( SA2->(DBSeek(xFilial("SA2")+M->C5_CLIENT+M->C5_LOJAENT)))
 			
 			cRet 			:= SA2->A2_EST
 			M->C5_I_NOME	:= SA2->A2_NOME
@@ -101,9 +101,9 @@ If !FWIsInCallStack("U_AOMS032")
 			
 	Else
 
-		dbSelectArea("SA1")
-		SA1->(dbSetOrder(1))
-		If ( SA1->(dbSeek(xFilial("SA1")+M->C5_CLIENT+M->C5_LOJAENT)))
+		DBSelectArea("SA1")
+		SA1->(DBSetOrder(1))
+		If ( SA1->(DBSeek(xFilial("SA1")+M->C5_CLIENT+M->C5_LOJAENT)))
 			
 			cRet 			:= SA1->A1_EST
 			M->C5_I_NOME	:= SA1->A1_NOME
@@ -116,17 +116,17 @@ If !FWIsInCallStack("U_AOMS032")
 			M->C5_I_DDD		:= SA1->A1_DDD
 			M->C5_I_TEL		:= SA1->A1_TEL
 			M->C5_I_GRPVE   := SA1->A1_GRPVEN
-			M->C5_I_NOMRD   := POSICIONE("ACY",1,xFILIAL("ACY")+SA1->A1_GRPVEN,"ACY_DESCRI")
-			M->C5_I_V1NOM   := POSICIONE("SA3",1,xFILIAL("SA3")+M->C5_VEND1,"A3_NOME")
-			M->C5_I_V2NOM   := POSICIONE("SA3",1,xFILIAL("SA3")+M->C5_VEND2,"A3_NOME")
-			M->C5_I_V3NOM   := POSICIONE("SA3",1,xFILIAL("SA3")+M->C5_VEND3,"A3_NOME")
+			M->C5_I_NOMRD   := Posicione("ACY",1,xFilial("ACY")+SA1->A1_GRPVEN,"ACY_DESCRI")
+			M->C5_I_V1NOM   := Posicione("SA3",1,xFilial("SA3")+M->C5_VEND1,"A3_NOME")
+			M->C5_I_V2NOM   := Posicione("SA3",1,xFilial("SA3")+M->C5_VEND2,"A3_NOME")
+			M->C5_I_V3NOM   := Posicione("SA3",1,xFilial("SA3")+M->C5_VEND3,"A3_NOME")
 			M->C5_I_HORP	:= SA1->A1_I_HORP
 			
-			If empty(M->C5_I_AGEND) .And. !empty(Alltrim(SA1->A1_I_AGEND))
+			If Empty(M->C5_I_AGEND) .And. !Empty(AllTrim(SA1->A1_I_AGEND))
 			
 				M->C5_I_AGEND	:= SA1->A1_I_AGEND
 				
-			Endif
+			EndIf
 			
 			M->C5_I_TIPCA	:= SA1->A1_I_TIPCA
 			M->C5_I_CHPCL	:= SA1->A1_I_CHAPA
@@ -142,24 +142,24 @@ If !FWIsInCallStack("U_AOMS032")
 			//==============================================================================================================
 			 
 			_cproduto := ""  
-			For _nhi := 1 to  len(acols)
+			For _nhi := 1 to  Len(acols)
 			
-				If acols[_nhi][len(acols[_nhi])]
+				If acols[_nhi][Len(acols[_nhi])]
 				
-					_cproduto := alltrim(acols[_nhi][npospro])
+					_cproduto := AllTrim(acols[_nhi][npospro])
 					
-				Endif
+				EndIf
 				
 			Next
-			If M->C5_TIPO = "N" .AND. M->C5_I_OPER $ u_itgetmv("IT_TPOPER","01") .And. !FWIsInCallStack("U_AOMS032") .AND. ;
-   				!(FunName() $ "MATA140,MATA521B,MATA460B,MATA103")  .And. !_lAoms112 .AND. !(FWIsInCallStack("U_AOMS099")) .and. !_l108 .and. !_laoms074
+			If M->C5_TIPO = "N" .And. M->C5_I_OPER $ u_itgetmv("IT_TPOPER","01") .And. !FWIsInCallStack("U_AOMS032") .And. ;
+   				!(FunName() $ "MATA140,MATA521B,MATA460B,MATA103")  .And. !_lAoms112 .And. !(FWIsInCallStack("U_AOMS099")) .And. !_l108 .And. !_laoms074
 
-				_ccond := u_IT_conpg(alltrim(M->C5_CLIENT),alltrim(M->C5_LOJAENT),_cproduto)
-				If !empty(_ccond)
+				_ccond := u_IT_conpg(AllTrim(M->C5_CLIENT),AllTrim(M->C5_LOJAENT),_cproduto)
+				If !Empty(_ccond)
 
 					M->C5_CONDPAG := _ccond 
 			
-				Endif
+				EndIf
 				_cTipoProd := Posicione("SB1",1,xFilial("SB1")+_cproduto,"B1_TIPO")
 
 				If _cTipoProd == "PA"
@@ -169,25 +169,25 @@ If !FWIsInCallStack("U_AOMS032")
 					_ctab := _atab[1]
 					M->C5_I_TAB := _ctab
 					M->C5_I_ORTBP := _atab[2]
-					M->C5_I_DTAB  := POSICIONE("DA0",1,cfilant+M->C5_I_TAB,'DA0_DESCRI')                                                          
-				EndIF
-			EndIF				
-		Endif
+					M->C5_I_DTAB  := Posicione("DA0",1,cfilant+M->C5_I_TAB,'DA0_DESCRI')                                                          
+				EndIf
+			EndIf				
+		EndIf
 	EndIf	 
 EndIf
 
-RestArea(aAreaSA1)
-RestArea(aAreaSA3)
-RestArea(aAreaSC5)
-RestArea(aAreaACY)
-RestArea(aArea)
+FWRestArea(aAreaSA1)
+FWRestArea(aAreaSA3)
+FWRestArea(aAreaSC5)
+FWRestArea(aAreaACY)
+FWRestArea(aArea)
 
 //Retorno de validação sempre true
 If _ntipo == 1
 
 	cRet := .T.
-	processmessages()
+	ProcessMessages()
 
-Endif
+EndIf
 
 Return(cRet) 

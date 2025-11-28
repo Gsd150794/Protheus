@@ -2,27 +2,16 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
-   Autor     |   Data   |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Alexandre V. | 04/02/15 | Chamado 8886. Remoção da gravação do campo D1_I_DESC que será configurado como "Virtual". 
--------------------------------------------------------------------------------------------------------------------------------
-Alexandre V. | 05/02/15 | Chamado 8891. Retornar inicialização do campo D1_I_DESC pois a tela não processa o gatilho quando 
-			 |          | é feita a chamada do Pedido de Compras para a Nota de Entrada. 
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges | 03/10/19 | Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer| 13/06/24 | Chamado 47518. Andre. SB1 posicionado corretamente.
-==============================================================================================================================================================
-Analista - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
-==============================================================================================================================================================
-André    - Julio Paz     - 16/09/24 - 17/01/25 -  48539  - Salva em uma variável Static as quantidades dos itens para validar no Recalculo das quantidades dos itens de pedidos de compras do tipo serviço, conforme regras definidas.
-==============================================================================================================================================================
+Lucas Borges  |03/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25.
+Alex Wallauer |13/06/2024| Chamado 47518. Andre. SB1 posicionado corretamente.
+Julio Paz     |17/01/2025| Chamado 48539.Salva em uma variáveStaticic as quantidades dos itens para validar no Recalculo das 
+			  |			 | quantidades dos itens de pedidos de compras do tipo serviço, conforme regras definidas.
+===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include 'Protheus.ch'
+#Include "TOTVS.ch"
 
 Static _aQtdProd := {}
 
@@ -31,19 +20,16 @@ Static _aQtdProd := {}
 Programa----------: MT103IPC
 Autor-------------: Tiago Correa
 Data da Criacao---: 30/09/2009
-===============================================================================================================================
 Descrição---------: P.E. para adicionar informações que estão no Pedido de Compras para os campos da Nota de Entrada
 					Localização: Funções: NFePC2Acol() e LxA103SC7ToaCols()  (MATA103X.PRX e LOCXNF2.PRW), após a carga de dados
 					do pedido de compras.
 					Em que ponto: Este Ponto de Entrada tem por objetivo atualizar os campos customizados no Documento de Entrada
 					e na Pré Nota de Entrada após a importação dos itens do Pedido de Compras (SC7).
-===============================================================================================================================
 Parametros--------: ExpN1 -> N -> Contém o número do item do aCols do Documento de Entrada e da Pré Nota de Entrada.
-===============================================================================================================================
 Retorno-----------: lRet -> L -> O parâmetro lRet, somente é tratado na rotina Localizada. "LocxNF2".
 					Em outros ambientes, este parâmetro não possui aplicação.
 					.T. = Indica que a TES carregada no Acols, será mantida.
-					Se não for passado TES no Acols, será substituída pela TEs do Pedido de Compras / Cadastro de Produtos.
+					Se não For passado TES no Acols, será substituída pela TEs do Pedido de Compras / Cadastro de Produtos.
 					.F. = Indica que a TES do aCols, poderá ser substituída pela TEs do Pedido de Compras / Cadastro de Produtos.
 					(Este é o funcionamento padrão mesmo quando não existe o Ponto de Entrada)
 ===============================================================================================================================
@@ -64,25 +50,25 @@ Local _nI
 //====================================================================================================
 // Grava campos da Nota Fiscal com informacoes do Pedido de Compra
 //====================================================================================================
-SB1->(DBSETORDER(1))
-IF SB1->(DBSEEK(xFilial()+aCols[_nCols][_nPosCod]))
+SB1->(DBSetOrder(1))
+If SB1->(DBSeek(xFilial()+aCols[_nCols][_nPosCod]))
    aCols[_nCols][_nPosDir] := SB1->B1_I_DIRCR
    aCols[_nCols][_nPosDes] := SB1->B1_DESC
-ENDIF
+EndIf
 
 //==========================================================
-// Grava em uma variável Static os Produtos e quantidades
+// Grava em uma variáveStaticic os Produtos e quantidades
 // que possuem controle de entregas parcias, para serem
 // utilizados nas validações da digitação da nota fiscal 
 // de entrada.
 //==========================================================
-SC7->(DbSetOrder(1)) // C7_FILIAL+C7_NUM+C7_ITEM+C7_SEQUEN  
+SC7->(DBSetOrder(1)) // C7_FILIAL+C7_NUM+C7_ITEM+C7_SEQUEN  
 
 For _nI := 1 To Len(aCols)
     If !aCols[_nI][Len(aHeader)+1] //Não verifica linhas deletadas
 	   If SC7->(MsSeek(xFilial("SC7")+aCols[_nI][_nPosPedC]+aCols[_nI][_nPosItemP]))
 	      If SC7->C7_I_SVPAR == "S" // Controla Entregas Parciais. Faturamento parcial para produtos do tipo Serviço.
-             Aadd(_aQtdProd,{aCols[_nCols][_nPosCod],;   // Codigo Produto                     1
+             aAdd(_aQtdProd,{aCols[_nCols][_nPosCod],;   // Codigo Produto                     1
                              aCols[_nCols][_nPosItn],;   // Item da Nota                       2
 							 aCols[_nCols][_nPosQtd],;   // Quantidade                         3
 							 aCols[_nCols][_nPosPedC],;  // Pedido de Compra                   4
@@ -93,7 +79,7 @@ For _nI := 1 To Len(aCols)
 	EndIf 
 Next 
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return( .T. )
 
@@ -102,18 +88,16 @@ Return( .T. )
 Programa----------: MT103RTQ
 Autor-------------: Julio de Paula Paz
 Data da Criacao---: 10/01/2025
-===============================================================================================================================
-Descrição---------: Retorna o Array Static _aQtdProd que possui os produtos e quantidades que possuem controle de entregas
+Descrição---------: Retorna o ArStaticatic _aQtdProd que possui os produtos e quantidades que possuem controle de entregas
                     parciais. Para serem utilizados nas validações da digitação da nota fiscal de entrada.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: _aRet = Array com produtos e quantidades dos itens do pedido de compras que possuem controle de entregas
                     parciais. 
 					São quantidades disponíveis antes das alterações do usuário, para serem utilizadas nas validações.
 ===============================================================================================================================
 */
-User Function MT103RTQ()
+User Function MT103RTQ
+
 Local _aRet := _aQtdProd 
 
 Return _aRet 

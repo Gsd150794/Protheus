@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 27/02/2023 | Migrada função AtCusto do GLTXFUN. Ajustada apuração do custo contábil do MIX. Chamado 43120
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 11/05/2023 | Ajustado status da ZLD para os registros que não podem ser identificados no MGLT009. Chamado 43777
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 30/06/2023 | Modificada query que atualiza custo do mix e incluído relatório de conferência. Chamado 44347
+Lucas Borges  |27/02/2023| Chamado 43120. Migrada função AtCusto do GLTXFUN. Ajustada apuração do custo contábil do MIX.
+Lucas Borges  |11/05/2023| Chamado 43777. Ajustado status da ZLD para os registros que não podem ser identificados no MGLT009.
+Lucas Borges  |30/06/2023| Chamado 44347. Modificada query que atualiza custo do mix e incluído relatório de conferência.
 ===============================================================================================================================
 */
 
-//===========================================================================
-//| Definições de Includes                                                  |
-//===========================================================================
-#INCLUDE 'Protheus.ch' 
+#Include "TOTVS.ch" 
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT008
 Autor-------------: Renato de Morcerf
 Data da Criacao---: 15/09/2008
-===============================================================================================================================
 Descrição---------: Trata Inclusao/alteracao/exclusao da tabela tabela do Mix.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -49,9 +41,7 @@ Return
 Programa----------: MenuDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 18/09/2018
-===============================================================================================================================
 Descrição---------: Utilizacao de Menu Funcional
-===============================================================================================================================
 Parametros--------: aRotina
 					1. Nome a aparecer no cabecalho
 					2. Nome da Rotina associada
@@ -65,7 +55,6 @@ Parametros--------: aRotina
 						6 - Altera determinados campos sem incluir novos Regs
 					5. Nivel de acesso
 					6. Habilita Menu Funcional
-===============================================================================================================================
 Retorno-----------: Array com opcoes da rotina
 ===============================================================================================================================
 */
@@ -87,11 +76,8 @@ Return( aRotina )
 Programa----------: AGLT008
 Autor-------------: Renato de Morcerf
 Data da Criacao---: 15/09/2008
-===============================================================================================================================
 Descrição---------: Legenda do MIX
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -103,18 +89,15 @@ Local aCores_ := {	{ 'ENABLE'		, "Mix Aberto"		},;
 
 BrwLegenda( cCadastro , "Legenda" , aCores_ )
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: AGLT008S
 Autor-------------: Renato de Morcerf
 Data da Criacao---: 15/09/2008
-===============================================================================================================================
 Descrição---------: Rotina que promove a Abertura/Fechanmento do Mix Selecionado
-===============================================================================================================================
 Parametros--------: nOpc	- Opção de Processamentp: 1 = Fechamento / 2 = Abertura
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -140,12 +123,12 @@ EndCase
 
 If Empty( cStatus )
 	MsgStop("Falha ao identificar a operação! Informe a área de TI/ERP.","ALGT0801")
-	Return()
+	Return
 EndIf
 
 If cStatus == 'F'
 
-	BeginSQL Alias _cAlias
+	BeginSql Alias _cAlias
 		SELECT DISTINCT ZLF.ZLF_FILIAL, ZLF.ZLF_SETOR, ZLF.ZLF_LINROT, ZLF.ZLF_A2COD, ZLF.ZLF_A2LOJA, SA2.A2_NOME, ZLF.ZLF_STATUS, ZLF.ZLF_ACERTO
 		FROM %Table:ZLF% ZLF, %Table:SA2% SA2
 		WHERE ZLF.D_E_L_E_T_ =' '
@@ -157,7 +140,7 @@ If cStatus == 'F'
 		AND ZLF.ZLF_STATUS NOT IN ('F','B')
 		AND ZLF.ZLF_ACERTO NOT IN ('S','B')
 		ORDER BY ZLF.ZLF_FILIAL, ZLF.ZLF_SETOR, ZLF.ZLF_LINROT, ZLF.ZLF_A2COD, ZLF.ZLF_A2LOJA
-	EndSQL
+	EndSql
 
 	While (_cAlias)->(!Eof()) .And. !Empty( (_cAlias)->ZLF_A2COD )
 		
@@ -186,14 +169,14 @@ Else
 		_cUpdate += " WHERE  D_E_L_E_T_ = ' ' "
 		_cUpdate += " AND ZLD_RETIRO = ' ' "
 		_cUpdate += " AND ZLD_STATUS = ' ' "
-		_cUpdate += " AND ZLD_DTCOLE BETWEEN '"+ DTOS(ZLE->ZLE_DTINI) +"' AND '"+ DTOS(ZLE->ZLE_DTFIM) +"' "
+		_cUpdate += " AND ZLD_DTCOLE BETWEEN '"+ DToS(ZLE->ZLE_DTINI) +"' AND '"+ DToS(ZLE->ZLE_DTFIM) +"' "
 		
 		If TCSqlExec(_cUpdate) < 0
 			MsgStop("Erro ao atualizar o status das Recepções de Leite que não possuem produtor vinculado. Acione a TI. Erro: "+AllTrim(TCSQLError()),"GLTXFUN013")
 		Else		
 			ZLE->( RecLock( "ZLE" , .F. ) )
 			ZLE->ZLE_STATUS := cStatus
-			ZLE->( MsUnlock() )
+			ZLE->( MSUnLock() )
 		EndIf
 	EndIf
 EndIf
@@ -205,20 +188,17 @@ Return
 Programa----------: AGLT008C
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 08/11/2022
-===============================================================================================================================
 Descrição---------: Função para buscar o custo do MIX nos documentos de entrada. A informação deve ser gravada no cadastro de 
 					setor para que as rotinas que buscam um custo para os movimentos internos possam ter o valor real.
 					O custo precisa ser por filial mas não deve ser por setor, logo, será gravada a mesma informação em todos 
 					os setores
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
 User Function AGLT008C()
 
-Local _aArea := GetArea()
+Local _aArea := FWGetArea()
 Local _oSelf := Nil
 
 tNewProcess():New(	"RGLT074"										,; // Função inicial
@@ -234,7 +214,7 @@ tNewProcess():New(	"RGLT074"										,; // Função inicial
 					.T.												,; // Se .T. exibe o painel de execução. Se falso, apenas executa a função sem exibir a régua de processamento.
 					.F.                                              ) // Se .T. cria apenas uma regua de processamento.
 
-RestArea(_aArea)
+FWRestArea(_aArea)
 
 Return
 
@@ -250,15 +230,15 @@ If MV_PAR01 == 1
 		_aSelFil := AdmGetFil(.F.,.F.,"ZL2")
 	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
+	aAdd(_aSelFil,cFilAnt)
 EndIf
 _cFiltro += " AND ZL2_FILIAL "+ GetRngFil( _aSelFil, "ZL2", .T.,)
 
 _cUpdate:="UPDATE "+RetSqlName("ZL2")+" ZL2 SET ZL2_DTUMIX = '"+DToS(Date())+"' , ZL2_HRUMIX = '"+Time()+"', ZL2_ULTMIX = "
-_cUpdate+="NVL((SELECT ROUND(SUM(D1_CUSTO)/SUM(VOL),4) FROM ( "
+_cUpdate+="NVL((SELECT Round(SUM(D1_CUSTO)/SUM(VOL),4) FROM ( "
 _cUpdate+="		SELECT D1_FILIAL, D1_CUSTO,  "
-_cUpdate+="       CASE "
-_cUpdate+="         WHEN SUBSTR(F1_FORNECE, 1, 1) = 'P' AND D1_ITEM = '0001' AND F1_L_SETOR <> ' ' THEN "
+_cUpdate+="       Case "
+_cUpdate+="         WHEN SubStr(F1_FORNECE, 1, 1) = 'P' AND D1_ITEM = '0001' AND F1_L_SETOR <> ' ' THEN "
 _cUpdate+="          (SELECT NVL(SUM(ZLD_QTDBOM), 0) "
 _cUpdate+="             FROM "+RetSQLName("ZLD")+" ZLD, "+RetSQLName("ZLE")+" ZLE "
 _cUpdate+="            WHERE ZLD.D_E_L_E_T_ = ' ' "
@@ -271,8 +251,8 @@ _cUpdate+="              AND F1_LOJA = ZLD_RETILJ "
 _cUpdate+="              AND F1_L_MIX = ZLE_COD "
 _cUpdate+="              AND F1_L_SETOR = ZLD_SETOR "
 _cUpdate+="              AND SF1.F1_L_LINHA = ZLD_LINROT) "
-_cUpdate+="         WHEN SUBSTR(F1_FORNECE, 1, 1) = 'P' AND D1_ITEM = '0001' AND F1_L_SETOR = ' ' THEN D1_QUANT "
-_cUpdate+="         ELSE 0 END VOL "
+_cUpdate+="         WHEN SubStr(F1_FORNECE, 1, 1) = 'P' AND D1_ITEM = '0001' AND F1_L_SETOR = ' ' THEN D1_QUANT "
+_cUpdate+="         Else 0 END VOL "
 _cUpdate+="  FROM "+RetSQLName("SD1")+" SD1, "+RetSQLName("SF1")+" SF1 "
 _cUpdate+=" WHERE SD1.D_E_L_E_T_ = ' ' "
 _cUpdate+="   AND SF1.D_E_L_E_T_ = ' ' "

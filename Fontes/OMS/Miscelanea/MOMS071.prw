@@ -11,7 +11,7 @@
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
-#include "PROTHEUS.ch"
+#Include "TOTVS.ch"
 #Include "FWMVCDef.Ch"
 
 //Static _cChamada := "LINHA"
@@ -84,7 +84,7 @@ If Select("TRBSZW") > 0
    TRBSZW->( DBCloseArea() )
 EndIf
 
-Return Nil 
+Return 
 
  /*
 ===============================================================================================================================
@@ -138,22 +138,22 @@ Begin Sequence
       @ 004,003 ComboBox	_cComboBx1	Items _aComboBx1 Size 213,010 OF _oDlgP PIXEL
 	  @ 020,003 MsGet		_oGet1	Var _cGet1		Size 212,009 OF _oDlgP PIXEL COLOR CLR_BLACK Picture "@!"
 	
-	  DEFINE SBUTTON FROM 004,227 TYPE 1 ENABLE ACTION ( _nOpca := 1 , _oDlgP:End() ) OF _oDlgP
-	  DEFINE SBUTTON FROM 021,227 TYPE 2 ENABLE ACTION ( _nOpca := 0 , _oDlgP:End() ) OF _oDlgP
+	  DEFINE SBUTTON FROM 004,227 Type 1 ENABLE ACTION ( _nOpca := 1 , _oDlgP:End() ) OF _oDlgP
+	  DEFINE SBUTTON FROM 021,227 Type 2 ENABLE ACTION ( _nOpca := 0 , _oDlgP:End() ) OF _oDlgP
 
    ACTIVATE MSDIALOG _oDlgP CENTERED
 
    If _nOpca == 1
-      If ALLTRIM(_cComboBx1) == ALLTRIM(_aComboBx1[1])
-         TRBSZW->(DbSetOrder(1))
+      If AllTrim(_cComboBx1) == AllTrim(_aComboBx1[1])
+         TRBSZW->(DBSetOrder(1))
       Else
-         TRBSZW->(DbSetOrder(2))        
+         TRBSZW->(DBSetOrder(2))        
       EndIf 
    
       If ! TRBSZW->(MsSeek(RTrim(_cGet1)))
-         U_ITMSG("Pedido de Vendas não encontrado.","Atenção",,1)
-         TRBSZW->(DbSetOrder(1))
-         TRBSZW->(DbGoTo(_nRegAtu))
+         U_ITMsg("Pedido de Vendas não encontrado.","Atenção",,1)
+         TRBSZW->(DBSetOrder(1))
+         TRBSZW->(DBGoTo(_nRegAtu))
       Else
          _oMarkBRW:oBrowse:Refresh()
       EndIf 
@@ -221,7 +221,7 @@ If Select("TRBSZW") > 0
    TRBSZW->( DBCloseArea() )
 EndIf
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -246,18 +246,18 @@ Local _dDataExPv  // Data para exclusão de pedido de vendas
 Begin Sequence
 
    aAdd( _aCpos , { "MARCA"		, "C" , 2					    , 0 } )
-   AAdd( _aCpos , { "ZW_FILIAL"	, "C" , 2                       , 0 } )
-   AAdd( _aCpos , { "ZW_IDPED"	, "C" , TamSX3("ZW_IDPED")[01]  , 0 } )
-   AAdd( _aCpos , { "ZW_EMISSAO", "D" , 8		                , 0 } )
-   AAdd( _aCpos , { "ZW_NUMPED"	, "C" , TamSX3("ZW_NUMPED")[01] , 0 } )
-   AAdd( _aCpos , { "ZW_CLIENTE", "C" , TamSX3("ZW_CLIENTE")[01], 0 } )
-   AAdd( _aCpos , { "ZW_LOJACLI", "C" , TamSX3("ZW_LOJACLI")[01], 0 } )
-   AAdd( _aCpos , { "WK_NOMECLI", "C" , TamSX3("C5_I_NOME")[01]	, 0 } )
-   AAdd( _aCpos , { "ZW_VEND1 "	, "C" , TamSX3("ZW_VEND1")[01]	, 0 } )
-   AAdd( _aCpos , { "WK_NOMEVEN", "C" , TamSX3("C5_I_NOME")[01]	, 0 } )
-   AAdd( _aCpos , { "ZW_STATUS" , "C" , TamSX3("ZW_STATUS")[01]	, 0 } )
-   AAdd( _aCpos , { "WK_DESSTAT", "C" , 25                   	, 0 } )
-   AAdd( _aCpos , { "WK_RECNO"	, "N" , 10                      , 0 } )
+   aAdd( _aCpos , { "ZW_FILIAL"	, "C" , 2                       , 0 } )
+   aAdd( _aCpos , { "ZW_IDPED"	, "C" , TamSX3("ZW_IDPED")[01]  , 0 } )
+   aAdd( _aCpos , { "ZW_EMISSAO", "D" , 8		                , 0 } )
+   aAdd( _aCpos , { "ZW_NUMPED"	, "C" , TamSX3("ZW_NUMPED")[01] , 0 } )
+   aAdd( _aCpos , { "ZW_CLIENTE", "C" , TamSX3("ZW_CLIENTE")[01], 0 } )
+   aAdd( _aCpos , { "ZW_LOJACLI", "C" , TamSX3("ZW_LOJACLI")[01], 0 } )
+   aAdd( _aCpos , { "WK_NOMECLI", "C" , TamSX3("C5_I_NOME")[01]	, 0 } )
+   aAdd( _aCpos , { "ZW_VEND1 "	, "C" , TamSX3("ZW_VEND1")[01]	, 0 } )
+   aAdd( _aCpos , { "WK_NOMEVEN", "C" , TamSX3("C5_I_NOME")[01]	, 0 } )
+   aAdd( _aCpos , { "ZW_STATUS" , "C" , TamSX3("ZW_STATUS")[01]	, 0 } )
+   aAdd( _aCpos , { "WK_DESSTAT", "C" , 25                   	, 0 } )
+   aAdd( _aCpos , { "WK_RECNO"	, "N" , 10                      , 0 } )
 
    If Select("TRBSZW") > 0
 	   TRBSZW->( DBCloseArea() )
@@ -278,7 +278,7 @@ Begin Sequence
    _cQry += "     SZW.D_E_L_E_T_  = ' ' "
    _cQry += " AND SZW.ZW_STATUS = 'R' "  
    _cQry += " AND SZW.ZW_DTREC <> ' ' "
-   _cQry += " AND SZW.ZW_DTREC <= '" + Dtos(_dDataExPv) + "' "
+   _cQry += " AND SZW.ZW_DTREC <= '" + DToS(_dDataExPv) + "' "
    _cQry += " ORDER BY ZW_FILIAL, ZW_IDPED "
 
    If Select("QRYSZW") > 0
@@ -293,11 +293,11 @@ Begin Sequence
       ProcRegua(_nTotRegs)
    EndIf 
    
-   QRYSZW->(DbGoTop())
+   QRYSZW->(DBGoTop())
 
    _nI := 1
 
-   Do While ! QRYSZW->(Eof())
+   While ! QRYSZW->(Eof())
       If ! _lScheduller
          IncProc("Lendo dados: " + AllTrim(Str(_nI,10)) + " de " + AllTrim(Str(_nTotRegs,10))  )
       EndIf 
@@ -324,15 +324,15 @@ Begin Sequence
       TRBSZW->ZW_NUMPED  := QRYSZW->ZW_NUMPED
       TRBSZW->ZW_CLIENTE := QRYSZW->ZW_CLIENTE
       TRBSZW->ZW_LOJACLI := QRYSZW->ZW_LOJACLI
-      TRBSZW->WK_NOMECLI := Posicione("SA1",1,xfilial("SA1")+QRYSZW->ZW_CLIENTE+QRYSZW->ZW_LOJACLI,"A1_NOME")
+      TRBSZW->WK_NOMECLI := Posicione("SA1",1,xFilial("SA1")+QRYSZW->ZW_CLIENTE+QRYSZW->ZW_LOJACLI,"A1_NOME")
       TRBSZW->ZW_VEND1   := QRYSZW->ZW_VEND1
-      TRBSZW->WK_NOMEVEN := Posicione("SA3",1,xfilial("SA3")+QRYSZW->ZW_VEND1,"A3_NOME")
+      TRBSZW->WK_NOMEVEN := Posicione("SA3",1,xFilial("SA3")+QRYSZW->ZW_VEND1,"A3_NOME")
       TRBSZW->ZW_STATUS  := QRYSZW->ZW_STATUS
       TRBSZW->WK_DESSTAT := _cDeStatus
       TRBSZW->WK_RECNO   := QRYSZW->NRREG
       TRBSZW->( MSUnLock() )
 
-      QRYSZW->(DbSkip())
+      QRYSZW->(DBSkip())
 
    EndDo 
  
@@ -342,7 +342,7 @@ If Select("QRYSZW") > 0
    QRYSZW->( DBCloseArea() )
 EndIf
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -377,18 +377,18 @@ Begin Sequence
    
    _nRegAtu := TRBSZW->(Recno())
 
-   TRBSZW->(DbSetOrder(1))
+   TRBSZW->(DBSetOrder(1))
 
    _cCodFil := TRBSZW->ZW_FILIAL
    _cPedido := TRBSZW->ZW_IDPED
 
    TRBSZW->(MsSeek(_cCodFil + _cPedido))
 
-   Do While ! TRBSZW->(Eof()) .And. TRBSZW->ZW_FILIAL+TRBSZW->ZW_IDPED == _cCodFil + _cPedido
+   While ! TRBSZW->(Eof()) .And. TRBSZW->ZW_FILIAL+TRBSZW->ZW_IDPED == _cCodFil + _cPedido
          
-      Aadd(_aItensPV,TRBSZW->(Recno()))
+      aAdd(_aItensPV,TRBSZW->(Recno()))
 
-      TRBSZW->(DbSkip())
+      TRBSZW->(DBSkip())
    EndDo 
    
    //==============================================================================
@@ -397,18 +397,18 @@ Begin Sequence
    // Utilizando um For...Next como alternativa.
    //==============================================================================
    For _nI := 1 To Len(_aItensPV)  
-       TRBSZW->(DbGoTo(_aItensPV[_nI]))
+       TRBSZW->(DBGoTo(_aItensPV[_nI]))
        TRBSZW->MARCA := _cMarcaIte
-       TRBSZW->(MsUnLock())
+       TRBSZW->(MSUnLock())
    Next 
 
-   TRBSZW->(DbGoTo(_nRegAtu))
+   TRBSZW->(DBGoTo(_nRegAtu))
 
 End Sequence 
 
 _oMarkBRW:Refresh(.F.)
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -442,13 +442,13 @@ Begin Sequence
    
    _nRegAtu := TRBSZW->(Recno())
 
-   TRBSZW->(DbGoTop())
+   TRBSZW->(DBGoTop())
 
-   Do While ! TRBSZW->(Eof())
+   While ! TRBSZW->(Eof())
          
-      Aadd(_aItensPV,TRBSZW->(Recno()))
+      aAdd(_aItensPV,TRBSZW->(Recno()))
 
-      TRBSZW->(DbSkip())
+      TRBSZW->(DBSkip())
    EndDo 
    
    //==============================================================================
@@ -457,18 +457,18 @@ Begin Sequence
    // Utilizando um For...Next como alternativa.
    //==============================================================================
    For _nI := 1 To Len(_aItensPV)  
-       TRBSZW->(DbGoTo(_aItensPV[_nI]))
+       TRBSZW->(DBGoTo(_aItensPV[_nI]))
        TRBSZW->MARCA := _cMarcaIte
-       TRBSZW->(MsUnLock())
+       TRBSZW->(MSUnLock())
    Next 
 
-   TRBSZW->(DbGoTop())
+   TRBSZW->(DBGoTop())
 
 End Sequence 
 
 _oMarkBRW:Refresh()
 
-Return Nil 
+Return 
 
 /*
 ===============================================================================================================================
@@ -495,49 +495,49 @@ Local _nI
 Begin Sequence     
     
    If ! _lScheduller
-      If ! U_ItMsg("Confirma a exclusão dos Pedidos de Vendas do Portal Rejeitados?","Exclusão de Pedidos de Vendas Rejeitados do Portal.",,2,2,2) 
+      If ! U_ITMsg("Confirma a exclusão dos Pedidos de Vendas do Portal Rejeitados?","Exclusão de Pedidos de Vendas Rejeitados do Portal.",,2,2,2) 
          Break 
       EndIf 
    EndIf  
 
-   TRBSZW->(DbGoTop())
+   TRBSZW->(DBGoTop())
 
    _aTRBRecno := {}
-   Do While ! TRBSZW->(Eof())
+   While ! TRBSZW->(Eof())
          
       If ! Empty(TRBSZW->MARCA) // Exclui os pedidos do portal.
-         SZW->(DbGoto(TRBSZW->WK_RECNO))
+         SZW->(DBGoTo(TRBSZW->WK_RECNO))
          SZW->(RecLock("SZW",.F.))
          SZW->(DbDelete())
-         SZW->(MsUnLock())
+         SZW->(MSUnLock())
 
-         Aadd(_aTRBRecno,TRBSZW->(Recno()))
+         aAdd(_aTRBRecno,TRBSZW->(Recno()))
       EndIf 
 
-      TRBSZW->(DbSkip())
+      TRBSZW->(DBSkip())
    EndDo 
 
    If ! Empty(_aTRBRecno) // Exclui os Pedidos da tabela temporária.
       For _nI := 1 To Len(_aTRBRecno)
-          TRBSZW->(DbGoTo(_aTRBRecno[_nI]))
+          TRBSZW->(DBGoTo(_aTRBRecno[_nI]))
           TRBSZW->(RecLock("TRBSZW",.F.))
           TRBSZW->(DbDelete())
-          TRBSZW->(MsUnlock())
+          TRBSZW->(MSUnLock())
       Next 
    EndIf 
 
    If ! _lScheduller
-      U_ITMSG("Exclusão de pedidos de vendas do Portal concluida.","Atenção",,1)       
+      U_ITMsg("Exclusão de pedidos de vendas do Portal concluida.","Atenção",,1)       
    Else 
       U_ITCONOUT("[MOMS071E] - Exclusão de pedidos de vendas do Portal concluida.")       
    EndIf 
 
 End Sequence 
 
-TRBSZW->(DbGoTop())
+TRBSZW->(DBGoTop())
 
 If ! _lScheduller
    _oMarkBRW:Refresh()
 EndIf 
 
-Return Nil
+Return

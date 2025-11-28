@@ -11,8 +11,8 @@
 //====================================================================================================
 // Definicoes de Includes da Rotina.
 //====================================================================================================
-#INCLUDE "PROTHEUS.CH"
-#INCLUDE "RwMake.ch"
+#Include "TOTVS.ch"
+#Include "RwMake.ch"
 
 /*
 ===============================================================================================================================
@@ -32,7 +32,7 @@ User Function AOMS040(cCodclient As char,cLojacli As char) As logical
 	Local lRetorno  As Logical
 	Local lcontrato As Logical
 	Local aGetArea  As Array
-	aGetArea := GetArea()
+	aGetArea := FWGetArea()
 	cAliasSC5:= GetNextAlias()
 	cQuery   := ""
 	nreg     := 0
@@ -44,7 +44,7 @@ User Function AOMS040(cCodclient As char,cLojacli As char) As logical
 
 		cQuery := "SELECT ZAZ_COD,ZAZ_LOJA,ZAZ_STATUS,ZAZ_DTFIM"
 		cQuery += " FROM " + RetSqlName("ZAZ")
-		cQuery += " WHERE D_E_L_E_T_  = ' '  AND ZAZ_FILIAL = '" + xFILIAL("ZAZ") + "'"
+		cQuery += " WHERE D_E_L_E_T_  = ' '  AND ZAZ_FILIAL = '" + xFilial("ZAZ") + "'"
 		cQuery += " AND ZAZ_CLIENT = '" + cCodclient + "'"
 		cQuery += " AND ZAZ_MSBLQL = '2'"
 
@@ -53,7 +53,7 @@ User Function AOMS040(cCodclient As char,cLojacli As char) As logical
 		Count to nreg
 		//Contabiliza o numero de registros encontrados pela query
 
-		(cAliasSC5)->(dbGoTop())
+		(cAliasSC5)->(DBGoTop())
 
 		//Se encontrar um contrato nao bloqueado para um cliente sem considerar a loja, caso ela tenha sido especificada no contrato
 		//If !Empty(TMP10->ZAZ_COD)
@@ -69,26 +69,26 @@ User Function AOMS040(cCodclient As char,cLojacli As char) As logical
 						lcontrato:= .T.
 
 						//verifica se o contrato encontra-se vigente
-						If (cAliasSC5)->ZAZ_DTFIM >= DtoS(date())
+						If (cAliasSC5)->ZAZ_DTFIM >= DToS(date())
 							//Se o contrato estiver ativo
-							IF (cAliasSC5)->ZAZ_STATUS == 'S'
+							If (cAliasSC5)->ZAZ_STATUS == 'S'
 
 								//Possui contrato especifico para este cliente e loja
 								lRetorno:=.T.
 
 							EndIf
 						EndIf
-						exit
+						Exit
 					EndIf
 				EndIf
 
-				(cAliasSC5)->(dbSkip())
+				(cAliasSC5)->(DBSkip())
 			EndDo
 
 			//Quando nao encontrar um contrato que tenha cliente + loja, ele vai buscar um mais generico somente por cliente
 			If !lcontrato
 
-				(cAliasSC5)->(dbGoTop())
+				(cAliasSC5)->(DBGoTop())
 
 				While (cAliasSC5)->(!Eof())
 
@@ -98,16 +98,16 @@ User Function AOMS040(cCodclient As char,cLojacli As char) As logical
 						lcontrato:=.T.
 
 						//verifica se o contrato encontra-se vigente
-						If (cAliasSC5)->ZAZ_DTFIM >= DtoS(date())
+						If (cAliasSC5)->ZAZ_DTFIM >= DToS(date())
 							//Se o contrato estiver ativo
-							IF (cAliasSC5)->ZAZ_STATUS == 'S'
+							If (cAliasSC5)->ZAZ_STATUS == 'S'
 								lRetorno:= .T.
 							EndIf
 						EndIf
-						exit
+						Exit
 					EndIf
 
-					(cAliasSC5)->(dbSkip())
+					(cAliasSC5)->(DBSkip())
 				EndDo
 
 
@@ -123,9 +123,9 @@ User Function AOMS040(cCodclient As char,cLojacli As char) As logical
 	EndIf
 
 	If Select(cAliasSC5) > 0
-		(cAliasSC5)->(dbCloseArea())
+		(cAliasSC5)->(DBCloseArea())
 	EndIf
-	RestArea(aGetArea)
+	FWRestArea(aGetArea)
 
 Return lRetorno
 
@@ -150,7 +150,7 @@ Static Function VerContRede(cCodclient As char,cLojacli As char) As logical
 	Local nreg      As Numeric
 	Local nreg2     As Numeric
 	Local lRetorno  As Logical
-	aGetArea  := GetArea()
+	aGetArea  := FWGetArea()
 	cQuery    := ""
 	cRede	  := ""
 	cAliasSA1 := GetNextAlias()
@@ -161,16 +161,16 @@ Static Function VerContRede(cCodclient As char,cLojacli As char) As logical
 
 	cQuery := "SELECT A1_GRPVEN"
 	cQuery += " FROM " + RetSqlName("SA1")
-	cQuery += " WHERE D_E_L_E_T_  = ' '  AND A1_FILIAL = '" + xFILIAL("SA1") + "'"
+	cQuery += " WHERE D_E_L_E_T_  = ' '  AND A1_FILIAL = '" + xFilial("SA1") + "'"
 	cQuery += " AND A1_COD = '"  + cCodclient + "'"
 	cQuery += " AND A1_LOJA = '" + cLojacli   + "'"
 	cQuery += " AND A1_GRPVEN IS NOT NULL"
 
 	MPSysOpenQuery( cQuery , cAliasSA1)
-	dbSelectArea(cAliasSA1)//NÃO TIRAR
+	DBSelectArea(cAliasSA1)//NÃO TIRAR
 	Count to nreg //Contabiliza o numero de registros encontrados pela query
 
-	(cAliasSA1)->(dbGoTop())
+	(cAliasSA1)->(DBGoTop())
 
     //Caso o cliente tenha um grupo de vendas(Rede) especificado no seu cadastro
 	If nreg > 0
@@ -181,22 +181,22 @@ Static Function VerContRede(cCodclient As char,cLojacli As char) As logical
 		//Pesquisa na tabela de desconto contratual se existe contrato para a rede do cliente especificado no pedido de vendas
 		cQuery := "SELECT ZAZ_COD,ZAZ_DTFIM,ZAZ_STATUS"
 		cQuery += " FROM " + RetSqlName("ZAZ")
-		cQuery += " WHERE D_E_L_E_T_  = ' '  AND ZAZ_FILIAL = '" + xFILIAL("ZAZ") + "'"
+		cQuery += " WHERE D_E_L_E_T_  = ' '  AND ZAZ_FILIAL = '" + xFilial("ZAZ") + "'"
 		cQuery += " AND ZAZ_GRPVEN = '" + cRede + "'"
 		cQuery += " AND ZAZ_MSBLQL = '2'"//Caso ele nao esteja bloqueado
 
 	    MPSysOpenQuery( cQuery , cAliasZAZ)
-		dbSelectArea(cAliasZAZ)//NÃO TIRAR
+		DBSelectArea(cAliasZAZ)//NÃO TIRAR
 		Count to nreg2 //Contabiliza o numero de registros encontrados pela query
 
-		(cAliasZAZ)->(dbGoTop())
+		(cAliasZAZ)->(DBGoTop())
 
 		//Se encontrar um contrato para um cliente sem considerar a loja, caso ela tenha sido especificada no contrato
 		If nreg2 > 0
 			//Se o contrato estiver com a data de vigencia em vigor
-			If (cAliasZAZ)->ZAZ_DTFIM >= DtoS(date())
+			If (cAliasZAZ)->ZAZ_DTFIM >= DToS(date())
 				//Se o contrato estiver ativo
-				IF (cAliasZAZ)->ZAZ_STATUS == 'S'
+				If (cAliasZAZ)->ZAZ_STATUS == 'S'
 					lRetorno:= .T.
 				EndIf
 
@@ -206,10 +206,10 @@ Static Function VerContRede(cCodclient As char,cLojacli As char) As logical
 
 	EndIf
 
-    (cAliasSA1)->(dbCloseArea())
+    (cAliasSA1)->(DBCloseArea())
 	If Select(cAliasZAZ) > 0
-		(cAliasZAZ)->(dbCloseArea())
+		(cAliasZAZ)->(DBCloseArea())
 	EndIf
-	RestArea(aGetArea)
+	FWRestArea(aGetArea)
 
 Return lRetorno

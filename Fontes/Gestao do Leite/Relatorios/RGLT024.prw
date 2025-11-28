@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 10/02/2020 | Migração do relatório para tReport. Chamado 32011
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 17/12/2020 | Ajuste para impressão no WebApp. Chamado 34997
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 26/01/2021 | Corrigidas as informações cortadas. Chamado 35410
+Lucas Borges  |10/02/2020| Chamado 32011. Migração do relatório para tReport.
+Lucas Borges  |17/12/2020| Chamado 34997. Ajuste para impressão no WebApp.
+Lucas Borges  |26/01/2021| Chamado 35410. Corrigidas as informações cortadas.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT024
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 11/02/2020
-===============================================================================================================================
 Descrição---------: Relatório Mapa Analítico Fretistas
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -45,11 +37,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 11/02/2020
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -103,11 +92,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 11/02/2020
-===============================================================================================================================
 Descrição---------: Processa impressão do relatório
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -135,10 +121,10 @@ Local _nX			:= 0
 If MV_PAR09 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,_cAux)
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -197,7 +183,7 @@ _cFiltro += " AND M."+ _cAux +"_FILIAL = ZL2.ZL2_FILIAL"
 _cFiltro += " AND M."+ _cAux +"_SETOR = ZL2.ZL2_COD"
 _cFiltro += " AND M."+ _cAux +"_FRETIS = SA2.A2_COD"
 _cFiltro += " AND M."+ _cAux +"_LJFRET = SA2.A2_LOJA"
-_cFiltro += " AND M."+ _cAux +"_DTCOLE BETWEEN '"+ DTOS(MV_PAR06) +"' AND '"+ DTOS(MV_PAR07) +"'"
+_cFiltro += " AND M."+ _cAux +"_DTCOLE BETWEEN '"+ DToS(MV_PAR06) +"' AND '"+ DToS(MV_PAR07) +"'"
 
 _cFiltro += " AND ZL2_FILIAL "+ GetRngFil( _aSelFil, _cAux, .T.,)
 //Se preencheu os setores, já fiz a validação de acesso no SX1
@@ -233,7 +219,7 @@ ElseIf _nOrdem == 5
 	_cOrder += ", ZL3_COD, ZL3_DESCRI, A2_COD, A2_LOJA, ZL2_COD, ZL2_DESCRI "
 EndIf
 
-_cCampo2 := _cCampo1 + " SUBSTR(M."+ _cAux +"_DTCOLE, 7, 2) DIA, "
+_cCampo2 := _cCampo1 + " SubStr(M."+ _cAux +"_DTCOLE, 7, 2) DIA, "
 If MV_PAR11 == 1 //Soma Volume de Leite
 	_cCampo2 += " SUM("+ _cAux +"_QTDBOM) QTD"
 Else //Soma KM
@@ -300,7 +286,7 @@ SELECT ZL2_FILIAL, A2_COD||'-'||A2_LOJA FORNEC, A2_NOME, %exp:_cCampo1%
            AND A2_LOJA BETWEEN %exp:MV_PAR03% AND %exp:MV_PAR05%
          GROUP BY ZL2_FILIAL, A2_COD, A2_LOJA, A2_NOME, %exp:_cGroup%)
 PIVOT(SUM(QTD)
-   FOR DIA IN('01' AS X01, '02' AS X02, '03' AS X03, '04' AS X04, '05' AS X05, '06' AS X06,
+   For DIA IN('01' AS X01, '02' AS X02, '03' AS X03, '04' AS X04, '05' AS X05, '06' AS X06,
               '07' AS X07, '08' AS X08, '09' AS X09, '10' AS X10, '11' AS X11, '12' AS X12,
               '13' AS X13, '14' AS X14, '15' AS X15, '16' AS X16, '17' AS X17, '18' AS X18,
               '19' AS X19, '20' AS X20, '21' AS X21, '22' AS X22, '23' AS X23, '24' AS X24,
@@ -327,7 +313,7 @@ oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 	
 oFornec:Init()
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oFornec:PrintLine()
 	oReport:FatLine()
 	oMovimen:Init()	
@@ -340,7 +326,7 @@ While !oReport:Cancel() .And. (_cAlias)->(!EOF())
 	ElseIf _nOrdem == 5
 		_cDesc := (_cAlias)->ZL3_COD + " - " + (_cAlias)->ZL3_DESCRI
 	EndIf
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oFornec:Finish()

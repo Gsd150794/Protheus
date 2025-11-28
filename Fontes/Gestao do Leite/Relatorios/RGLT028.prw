@@ -2,31 +2,23 @@
 ===============================================================================================================================
                ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
 ===============================================================================================================================
- Autor        |    Data    |                              Motivo                      										 
+   Autor      |   Data   |                              Motivo                                                          
 -------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 26/07/2019 | Corrigida a barra de progresso. Help 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 27/09/2019 | Revisão de fontes. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  | 16/08/2023 | Corrgido filtro de Setor. Chamado 44752
+Lucas Borges  |26/07/2019| Chamado 28346. Corrigida a barra de progresso.
+Lucas Borges  |27/09/2019| Chamado 28346. Revisão de fontes.
+Lucas Borges  |16/08/2023| Chamado 44752. Corrgido filtro de Setor.
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "PROTHEUS.CH"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: RGLT028
 Autor-------------: Abrahao P. Santos
 Data da Criacao---: 09/04/2009
-===============================================================================================================================
 Descrição---------: Relatório da relação de convênios
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -45,11 +37,8 @@ Return
 Programa----------: ReportDef
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 04/02/2019
-===============================================================================================================================
 Descrição---------: Definição do Componente
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -103,11 +92,8 @@ Return oReport
 Programa----------: ReportPrint
 Autor-------------: Lucas Borges Ferreira
 Data da Criacao---: 31/01/2019
-===============================================================================================================================
 Descrição---------: Relacao Rota/Linha
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -130,10 +116,10 @@ Local _nCountRec	:= 0
 If MV_PAR15 == 1
 	If Empty(_aSelFil)
 		_aSelFil := AdmGetFil(.F.,.F.,"ZLL")
-	Endif
+	EndIf
 Else
-	Aadd(_aSelFil,cFilAnt)
-Endif
+	aAdd(_aSelFil,cFilAnt)
+EndIf
 
 //=====================================================
 // Adiciona a ordem escolhida ao titulo do relatorio  |
@@ -202,8 +188,8 @@ _cFiltro += " AND SA2.A2_COD = "+_cAux +"_RETIRO"
 _cFiltro += " AND SA2.A2_LOJA = "+_cAux +"_RETILJ"
 _cFiltro += " AND CONV.A2_COD = "+_cAux +"_CONVEN"
 _cFiltro += " AND CONV.A2_LOJA = "+_cAux +"_LJCONV"
-_cFiltro += " AND "+_cAux +"_DATA BETWEEN '"+ DTOS(MV_PAR10) +"' AND '"+ DTOS(MV_PAR11) +"'"
-_cFiltro += " AND "+_cAux +"_VENCTO BETWEEN '"+ DTOS(MV_PAR12) +"' AND '"+ DTOS(MV_PAR13) +"'"
+_cFiltro += " AND "+_cAux +"_DATA BETWEEN '"+ DToS(MV_PAR10) +"' AND '"+ DToS(MV_PAR11) +"'"
+_cFiltro += " AND "+_cAux +"_VENCTO BETWEEN '"+ DToS(MV_PAR12) +"' AND '"+ DToS(MV_PAR13) +"'"
 
 //Se preencheu os setores, já fiz a validação de acesso no SX1
 //Se não preencheu e não tem acesso a todos, filtra de forma que não retorme registros
@@ -272,19 +258,19 @@ oReport:Section(1):EndQuery(/*Array com os parametros do tipo Range*/)
 //=======================================================================
 oReport:Section(1):Init()
 Count To _nCountRec
-(_cAlias)->( DbGotop() )
+(_cAlias)->( DBGoTop() )
 oReport:SetMsgPrint("Imprimindo")
 oReport:SetMeter(_nCountRec)
 
-While !oReport:Cancel() .And. (_cAlias)->(!EOF())
+While !oReport:Cancel() .And. (_cAlias)->(!Eof())
 	oReport:Section(1):PrintLine()
 	oReport:IncMeter()
 	_cFilial := (_cAlias)->ZLL_FILIAL
 	_cConv := (_cAlias)->ZLL_COD
-	(_cAlias)->(DbSkip())
+	(_cAlias)->(DBSkip())
 EndDo
 
 oReport:Section(1):Finish()
-(_cAlias)->(dbCloseArea())
+(_cAlias)->(DBCloseArea())
 
 Return

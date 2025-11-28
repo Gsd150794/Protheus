@@ -11,8 +11,8 @@ Vanderlei Alves  -  Julio Paz        - 04/10/2023 -            - 47259   - Desen
 //====================================================================================================
 // Definicoes de Includes e Defines da Rotina.
 //====================================================================================================
-#include "PROTHEUS.ch"
-#include "RESTFUL.ch"
+#Include "TOTVS.ch"
+#Include "RESTFUL.ch"
 
 /*
 ===============================================================================================================================
@@ -116,7 +116,7 @@ Begin Sequence
       Break
    EndIf 
 
-   ZEL->(DbSetOrder(4)) // ZEL_FILIAL+ZEL_FILTMS+ZEL_LOCAL
+   ZEL->(DBSetOrder(4)) // ZEL_FILIAL+ZEL_FILTMS+ZEL_LOCAL
    If ! ZEL->(MsSeek(xFilial("ZEL")+U_ItKey(_oJSon:codigointegracao,"ZEL_FILTMS")))
       _cMsg := 'O código de integração não foi localizado.'
       _nStatus := 300
@@ -129,7 +129,7 @@ Begin Sequence
       Break
    EndIf 
 
-   If Empty(ZEL->ZEL_FAIXAI) .OR. ZEL->ZEL_FAIXAI == 0
+   If Empty(ZEL->ZEL_FAIXAI) .Or. ZEL->ZEL_FAIXAI == 0
       _cMsg := 'O número de faixa inicial do pager não preenchido para esta filial do TMS.'
       _nStatus := 300
       Break
@@ -147,7 +147,7 @@ Begin Sequence
       Break
    EndIf
 
-   If (ValType(_oJSon:numeropager) <> "N" .And. Val(Alltrim(_oJSon:numeropager)) < ZEL->ZEL_FAIXAI) .Or. (ValType(_oJSon:numeropager) <> "N" .And. Val(AllTrim(_oJSon:numeropager)) > ZEL->ZEL_FAIXAF)
+   If (ValType(_oJSon:numeropager) <> "N" .And. Val(AllTrim(_oJSon:numeropager)) < ZEL->ZEL_FAIXAI) .Or. (ValType(_oJSon:numeropager) <> "N" .And. Val(AllTrim(_oJSon:numeropager)) > ZEL->ZEL_FAIXAF)
       _cMsg := 'O número de pager informado não existe para esta filila do TMS.'
       _nStatus := 300
       Break
@@ -181,9 +181,9 @@ Begin Sequence
 
 	   //------------------------------
        If ValType(_oJSon:numeropager) == "N"
-          _cParam := Alltrim(_cEndIP) + " " + Alltrim(Str(_oJSon:numeropager,10))
+          _cParam := AllTrim(_cEndIP) + " " + AllTrim(Str(_oJSon:numeropager,10))
        Else 
-          _cParam := Alltrim(_cEndIP) + " " + Alltrim(_oJSon:numeropager)
+          _cParam := AllTrim(_cEndIP) + " " + AllTrim(_oJSon:numeropager)
        EndIf 
        
        //_cArq2 := _cArq 
@@ -208,7 +208,7 @@ Begin Sequence
 
    Next 
 	
-End SEQUENCE 
+End Sequence 
 
 _cRet := '{"status":'+ StrZero(_nStatus,3) + ', ' + CRLF + '"mensagem":"' + AllTrim(_cMsg) + '"}'
 

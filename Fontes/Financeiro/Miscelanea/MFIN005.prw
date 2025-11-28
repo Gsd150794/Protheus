@@ -10,11 +10,7 @@ Lucas Borges  |13/10/2024| Chamado 48465. Retirada da função de conout
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#Include "Ap5Mail.ch"
-#Include "Protheus.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
@@ -88,7 +84,7 @@ If _lCriaAmb
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -102,7 +98,7 @@ Retorno---------: _cEmailDes = e-mails de envio da mensagem.
 */
 Static Function MFIN005RUN(_cEmailDes)
 
-Local _horario		:= STRTRAN(Time(),":","'")				//Nao se pode gerar um arquivo com o nome que contenha o caracter ":"
+Local _horario		:= StrTran(Time(),":","'")				//Nao se pode gerar um arquivo com o nome que contenha o caracter ":"
 Local _cArqAnexo	:= "\spool\fluxo" + _horario + ".HTM"	//Nome do arquivo anexo a ser enviado ao usuario
 Local _cArqHtml		:= ''
 Local _nHdl			:= 0
@@ -112,7 +108,7 @@ Local _cAliasTot	:= ""
 Local _cAlias		:= ""
 Local _cAliasVenc	:= ""
 Local _cMsgEmail	:= ""
-Local _cGeracao		:= DtoC( Date() )
+Local _cGeracao		:= DToC( Date() )
 Local _nTSaldPer	:= 0
 Local _nTotSald		:= 0
 Local _nVenc15		:= 0
@@ -124,7 +120,7 @@ Local _cDescri      := ""
 //====================================================================================================
 // Define o cabecalho do HTML.
 //====================================================================================================
-_cTextHTML += '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">'
+_cTextHTML += '<!DOCTYPE HTML Public "-//W3C//DTD HTML 4.0 Transitional//EN">'
 _cTextHTML += '<HTML><HEAD><TITLE>FLUXO DE CAIXA ITALAC - CONTAS A RECEBER</TITLE>'
 _cTextHTML += '<META content="text/html; charset=windows-1252" http-equiv=Content-Type>'
 _cTextHTML += '<META name=GENERATOR content="MSHTML 8.00.6001.19120"></HEAD>' 
@@ -195,12 +191,12 @@ DBSelectArea(_cAlias)
 While (_cAlias)->( !Eof() )
     
 	_nTSaldPer	:=	0
-	_dUltDia	:=	DtoS( LastDay( Stod( (_cAlias)->E1_VENCREA ) ) )
+	_dUltDia	:=	DToS( LastDay( SToD( (_cAlias)->E1_VENCREA ) ) )
 	
 	While (_cAlias)->( !Eof() ) .And. (_cAlias)->E1_VENCREA <= _dUltDia
 	
 		_nTSaldPer	:= _nTSaldPer + (_cAlias)->SALDO
-		_dData		:= DtoC( StoD( (_cAlias)->E1_VENCREA ) )
+		_dData		:= DToC( SToD( (_cAlias)->E1_VENCREA ) )
 		
 		_cTextHTML += '<TR>'
 		_cTextHTML += '<TD width="5%"><P align=right>'+  _dData													+'</P></TD>'
@@ -254,7 +250,7 @@ MFIN005QRY( 5 , _cAliasVenc )
 
 DBSelectArea(_cAliasVenc)
 (_cAliasVenc)->( DBGoTop() )
-While (_cAliasVenc)->( !EOF() )
+While (_cAliasVenc)->( !Eof() )
 
 	If (_cAliasVenc)->COD_CART = ' '
 	
@@ -370,7 +366,7 @@ If _lRet
 
 EndIf
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
@@ -391,7 +387,7 @@ Local _cFiltro3 := "%"
 
 Local _sDtInic := DToS( Date() )
 
-_cFiltro+= " AND E1.E1_VENCREA BETWEEN '" + _sDtInic + "' AND '"+ DTOS( DATE() + GETMV("IT_QDIASFL") ) +"' "  // VENCIMENTO ENTRE DATA DO DIA E MAIS 60 DIAS
+_cFiltro+= " AND E1.E1_VENCREA BETWEEN '" + _sDtInic + "' AND '"+ DToS( Date() + GETMV("IT_QDIASFL") ) +"' "  // VENCIMENTO ENTRE DATA DO DIA E MAIS 60 DIAS
 _cFiltro+= "%"
 
 _cFiltro2+= " AND E1.E1_VENCREA < '"+ _sDtInic +"' "  // VENCIMENTOS ATRASADOS, MENOR QUE A DATA ATUAL.
@@ -468,21 +464,21 @@ Do Case
 							FROM	%Table:ZAR% ZAR
 							WHERE	ZAR.D_E_L_E_T_	= ' '
 							AND		ZAR.ZAR_COD		= E1.E1_I_CART ) , 'SEM TIPO' ) TIPO_CART,  // Descrição da Carteira
-					SUM( ( CASE	WHEN ( TO_DATE( %Exp:_cFiltro3% , 'YYYY/MM/DD' ) - TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) > 0  AND TO_DATE( %Exp:_cFiltro3% , 'YYYY/MM/DD' ) - TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) <= 1825 AND E1.E1_TIPO <> 'NCC' AND E1.E1_I_CART <> ' ' ) // 365 Dias X 5 Anos = 1825 dias // SUM( ( CASE	WHEN ( E1.E1_TIPO <> 'NCC' AND E1.E1_I_CART <> ' ' ) 
+					SUM( ( Case	WHEN ( TO_DATE( %Exp:_cFiltro3% , 'YYYY/MM/DD' ) - TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) > 0  AND TO_DATE( %Exp:_cFiltro3% , 'YYYY/MM/DD' ) - TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) <= 1825 AND E1.E1_TIPO <> 'NCC' AND E1.E1_I_CART <> ' ' ) // 365 Dias X 5 Anos = 1825 dias // SUM( ( Case	WHEN ( E1.E1_TIPO <> 'NCC' AND E1.E1_I_CART <> ' ' ) 
  								THEN ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1.E1_SDDECRE )
-								ELSE 0
+								Else 0
 							END ) ) AS CART_COB,  
-					SUM( ( CASE	WHEN ( TO_DATE( %Exp:_cFiltro3% , 'YYYY/MM/DD' ) - TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) > 0  AND TO_DATE( %Exp:_cFiltro3% , 'YYYY/MM/DD' ) - TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) <= 15 AND E1.E1_TIPO <> 'NCC' AND E1.E1_I_CART = ' ' )
+					SUM( ( Case	WHEN ( TO_DATE( %Exp:_cFiltro3% , 'YYYY/MM/DD' ) - TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) > 0  AND TO_DATE( %Exp:_cFiltro3% , 'YYYY/MM/DD' ) - TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) <= 15 AND E1.E1_TIPO <> 'NCC' AND E1.E1_I_CART = ' ' )
 								THEN ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1.E1_SDDECRE )
-								ELSE 0
+								Else 0
 							END ) ) AS VENC_15, // Valores dos títulos diferentes de NCC e vencimento menor igual a 15 dias.
-					SUM( ( CASE	WHEN ( TO_DATE( %Exp:_cFiltro3% , 'YYYY/MM/DD' ) - TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) > 15 AND E1.E1_TIPO <> 'NCC' AND E1.E1_I_CART = ' ' )
+					SUM( ( Case	WHEN ( TO_DATE( %Exp:_cFiltro3% , 'YYYY/MM/DD' ) - TO_DATE( E1.E1_VENCREA , 'YYYY/MM/DD' ) > 15 AND E1.E1_TIPO <> 'NCC' AND E1.E1_I_CART = ' ' )
 								THEN ( ( E1.E1_SALDO + E1.E1_SDACRES ) - E1.E1_SDDECRE )
-								ELSE 0
+								Else 0
 							END ) ) AS VENC_DUV, // Valores dos títulos de vencimento duvidoso acima de 15 dias, diferentes de NCC
-					SUM( ( CASE	WHEN E1.E1_TIPO = 'NCC'
+					SUM( ( Case	WHEN E1.E1_TIPO = 'NCC'
 								THEN E1.E1_SALDO
-								ELSE 0
+								Else 0
 							END ) ) AS REC_NCC  // Somatória de todos os titulos NCC com saldo.
 			FROM	%Table:SE1% E1
 			WHERE	E1.D_E_L_E_T_	= ' '
@@ -529,4 +525,4 @@ Do Case
 
 EndCase
 
-Return()
+Return

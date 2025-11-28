@@ -10,23 +10,15 @@ Lucas Borges  |08/10/2024| Chamado 48465. Retirada manipulação do SX1
 ===============================================================================================================================
 */
 
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
-#INCLUDE "rwmake.ch"
-#INCLUDE "protheus.ch"
-#INCLUDE "topconn.ch"
+#Include "TOTVS.ch"
 
 /*
 ===============================================================================================================================
 Programa----------: MEST007
 Autor-------------: Josué Danich
 Data da Criacao---: 31/08/2015
-===============================================================================================================================
 Descrição---------: Rotina para criar registros no SB9 - Chamado 11512
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -41,18 +33,15 @@ Private	_cPerg     := "MEST007"
 
 tNewProcess():New( _cFunction, _cTitle, _bProcess, _cDescri, _cPerg,,,,,,.T.)
 
-Return()
+Return
 
 /*
 ===============================================================================================================================
 Programa----------: MEST007P
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 24/08/2015
-===============================================================================================================================
 Descrição---------: Ajuste de saldos iniciais.
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -62,9 +51,9 @@ Static Function MEST007P(oself)
 Local _cAlias  	:= GetNextAlias()
 //Local _nRegs		:= 0
 Local _nregistros	:= 0
-//Local _alocal 	:= {}
+//Local _aLocal 	:= {}
 //Local _ctemp		:= ""
-Local _ni 			:= 2
+Local _nI 			:= 2
 //Local _ni2			:= 1
 Local _aAutoSB9 	:= {}
 //Local _cult 		:= ""
@@ -72,7 +61,7 @@ Local _aArms		:= {}
 Local _aLog      := {}
 
 //prepara matriz de armazéns
-_aArms := strtokarr(alltrim(MV_PAR01), ";")
+_aArms := StrTokArr(AllTrim(MV_PAR01), ";")
 
 //carrega todo o b1 para analisar
 
@@ -81,11 +70,11 @@ _cQuery += " B1.B1_COD     CODIGO, "
 _cQuery += " B1.B1_LOCPAD  ARMAZEM, "
 _cQuery += " B1.B1_TIPO  TIPO "
 _cQuery += " FROM "+RetSqlName("SB1")+" B1 "
-_cQuery += " WHERE B1.B1_FILIAL = '" + xfilial("SB1") + "'"
+_cQuery += " WHERE B1.B1_FILIAL = '" + xFilial("SB1") + "'"
 _cQuery += " AND  B1.B1_MSBLQL <> '1' "
 _cQuery += " AND  B1.D_E_L_E_T_ = ' ' "
-_cQuery += IIf( !Empty( MV_PAR03 ) , " AND B1.B1_TIPO IN "+ FormatIn( Alltrim( MV_PAR03 ) , ';' )	, "" ) 
-_cQuery += IIf( !Empty( MV_PAR02 ) , " AND B1.B1_GRUPO IN "+ FormatIn( Alltrim( MV_PAR02 ) , ';' )	, "" ) 
+_cQuery += IIf( !Empty( MV_PAR03 ) , " AND B1.B1_TIPO IN "+ FormatIn( AllTrim( MV_PAR03 ) , ';' )	, "" ) 
+_cQuery += IIf( !Empty( MV_PAR02 ) , " AND B1.B1_GRUPO IN "+ FormatIn( AllTrim( MV_PAR02 ) , ';' )	, "" ) 
 _cQuery += " ORDER BY B1_FILIAL,B1_COD "
 	
 If Select(_cAlias) > 0 
@@ -101,63 +90,63 @@ If _nRegistros > 0
 	
 	oSelf:SetRegua1( _nRegistros )
 	
-Endif
+EndIf
 
 
-AADD( _aLog , "FUNÇÃO MEST007"								)		                 
-AADD( _aLog , "DATA DE PROCESSAMENTO: " + DTOC( DATE() )	)
-AADD( _aLog , "HORA DO INICIO DO PROCESSAMENTO: "+ TIME()	)
+aAdd( _aLog , "FUNÇÃO MEST007"								)		                 
+aAdd( _aLog , "DATA DE PROCESSAMENTO: " + DToC( Date() )	)
+aAdd( _aLog , "HORA DO INICIO DO PROCESSAMENTO: "+ Time()	)
 		
 oSelf:SaveLog( "INICIO - CRIA SB9" )
 		
-AADD( _aLog , "INICIO - CRIA SB9"							)
+aAdd( _aLog , "INICIO - CRIA SB9"							)
 	
 
-do while .not. (_calias)->(Eof())
+While .not. (_cAlias)->(Eof())
 
 	oSelf:IncRegua1( "PRODUTO: "+ AllTrim((_cAlias)->CODIGO) )
 	
-	for _ni:= 1 to len(_aArms)
+	For _nI:= 1 to Len(_aArms)
 	
 			//procura o armazém com saldo para o produto em qualquer data
-			DbSelectArea("SB9")
-			SB9->(DbSetOrder(1))
-			If .not. SB9->(dbSeek(  xFILIAL("SB9") + padr((_cAlias)->CODIGO,15) + alltrim(_aArms[_ni]) ) )
+			DBSelectArea("SB9")
+			SB9->(DBSetOrder(1))
+			If .not. SB9->(DBSeek(  xFilial("SB9") + PadR((_cAlias)->CODIGO,15) + AllTrim(_aArms[_nI]) ) )
 			
 				//cria saldo inicial
 		       _aAutoSB9 = {}
-		       aadd (_aAutoSB9, {"B9_FILIAL",   xFILIAL("SB9")																, 				NIL})
-              aadd (_aAutoSB9, {"B9_COD",   (_cAlias)->CODIGO																, 				NIL})
-              aadd (_aAutoSB9, {"B9_LOCAL", alltrim(_aArms[_ni])															,				NIL})
+		       aAdd (_aAutoSB9, {"B9_FILIAL",   xFilial("SB9")																, 				NIL})
+              aAdd (_aAutoSB9, {"B9_COD",   (_cAlias)->CODIGO																, 				NIL})
+              aAdd (_aAutoSB9, {"B9_LOCAL", AllTrim(_aArms[_nI])															,				NIL})
               lMSErroAuto = .F.
               MsExecAuto({|x,y,z|MATA220(x,y,z)}, _aAutoSB9, 3)
               If lMsErroAuto
 					
-					oSelf:SaveLog(	"O PRODUTO "+ AllTrim((_cAlias)->CODIGO	) +" ARMAZEM " + _aArms[_ni] + " APRESENTOU ERRO AO CRIAR O SALDO INICIAL." )
-					AADD( _aLog ,	"O PRODUTO "+ AllTrim((_cAlias)->CODIGO	) +"  ARMAZEM " + _aArms[_ni] + "  APRESENTOU ERRO AO CRIAR O SALDO INICIAL." )
+					oSelf:SaveLog(	"O PRODUTO "+ AllTrim((_cAlias)->CODIGO	) +" ARMAZEM " + _aArms[_nI] + " APRESENTOU ERRO AO CRIAR O SALDO INICIAL." )
+					aAdd( _aLog ,	"O PRODUTO "+ AllTrim((_cAlias)->CODIGO	) +"  ARMAZEM " + _aArms[_nI] + "  APRESENTOU ERRO AO CRIAR O SALDO INICIAL." )
              
             	Else
 
-   					oSelf:SaveLog(	"O PRODUTO "+ AllTrim((_cAlias)->CODIGO	) +" ARMAZEM " + _aArms[_ni] + "  TEVE SALDO INICIAL CRIADO." )
-					AADD( _aLog ,	"O PRODUTO "+ AllTrim((_cAlias)->CODIGO	) +" ARMAZEM " + _aArms[_ni] + "  TEVE SALDO INICIAL CRIADO." )
+   					oSelf:SaveLog(	"O PRODUTO "+ AllTrim((_cAlias)->CODIGO	) +" ARMAZEM " + _aArms[_nI] + "  TEVE SALDO INICIAL CRIADO." )
+					aAdd( _aLog ,	"O PRODUTO "+ AllTrim((_cAlias)->CODIGO	) +" ARMAZEM " + _aArms[_nI] + "  TEVE SALDO INICIAL CRIADO." )
   
-              endif
+              EndIf
 		
-			Endif			
+			EndIf			
 	
-	next
+	Next
 
-	(_cAlias)->(Dbskip())
-	incproc((_cAlias)->CODIGO)
+	(_cAlias)->(DBSkip())
+	IncProc((_cAlias)->CODIGO)
 
-enddo
+EndDo
 
-(_cAlias)->(dbclosearea())
+(_cAlias)->(DBCloseArea())
 
 
 oSelf:SaveLog(	"FINAL - SALDOS INICIAIS" )
-AADD( _aLog ,	"FINAL - SALDOS INICIAIS" )
-AADD( _aLog ,	"HORA DO FIM DO PROCESSAMENTO: "+ TIME() )
+aAdd( _aLog ,	"FINAL - SALDOS INICIAIS" )
+aAdd( _aLog ,	"HORA DO FIM DO PROCESSAMENTO: "+ Time() )
 
 
 Processa( {|| MEST007L(_aLog) } , "Gravando dados no arquivo..." )
@@ -171,7 +160,7 @@ U_ITLOGACS('MEST007')
 //volta a tela inicial
 U_MEST007()			
 
-Return()
+Return
 
 
 /*
@@ -179,11 +168,8 @@ Return()
 Programa----------: MEST007C
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 25/08/2015
-===============================================================================================================================
 Descrição---------: Rotina para montar consulta de armazéns (NNR)
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -239,11 +225,8 @@ Return( .T. )
 Programa----------: MEST007L
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 25/08/2015
-===============================================================================================================================
 Descrição---------: Rotina que permite gravar o LOG referente ao processamento
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -259,20 +242,20 @@ Aviso( "Salvar Log em TXT" , "Este programa ira gerar um arquivo texto com o Log
 _cArq := cGetFile( "Documento Texto |*.TXT" , OemToAnsi("Salvar Arquivo Como...") , 0 , "C:\" , .T. , GETF_LOCALHARD+GETF_NETWORKDRIVE )
 
 If Empty(_cArq)
-     Return()
+     Return
 EndIf
 
-_nPos := At( ".TXT" , UPPER(_cArq) )
+_nPos := At( ".TXT" , Upper(_cArq) )
 
 If _nPos == 0
-     _cArq := Alltrim(_cArq) + ".TXT"
+     _cArq := AllTrim(_cArq) + ".TXT"
 EndIf
 
 _nHdl := FCreate(_cArq)
 
 If _nHdl == -1
      MsgAlert( "O arquivo de nome "+_cArq+" nao pode ser criado!" , "Atencao!" )
-     Return()
+     Return
 EndIf
 
 ProcRegua( Len(_aLog) )
@@ -282,7 +265,7 @@ For _nI := 1 To Len(_aLog)
 	FWrite( _nHdl , _aLog[_nI] + chr(13) + chr(10) )
 	
 	If FError() # 0
-   		MsgAlert ( "ERRO AO GRAVAR NO ARQUIVO: "+ str( FError() ) )
+   		MsgAlert ( "ERRO AO GRAVAR NO ARQUIVO: "+ Str( FError() ) )
    		Exit
 	EndIf
 	
@@ -295,7 +278,7 @@ FClose(_nHdl)
 MsgInfo( "Arquivo TXT gerado com sucesso!" )
 
 
-Return()
+Return
 
 
 /*
@@ -303,11 +286,8 @@ Return()
 Programa----------: MEST007D
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 25/08/2015
-===============================================================================================================================
 Descrição---------: Rotina para montar consulta de grupos de produtos
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
@@ -322,7 +302,7 @@ Local _aDados	:= {} , _nI
 _cQuery := " SELECT 	BM_GRUPO, 
 _cQuery += " BM_DESC 
 _cQuery += " FROM "+ RETSQLNAME('SBM') +" SBM"  
-_cQuery += " WHERE SBM.BM_FILIAL = '" + Xfilial('SBM') + "'"
+_cQuery += " WHERE SBM.BM_FILIAL = '" + xFilial('SBM') + "'"
 _cQuery += " AND SBM.D_E_L_E_T_ = ' '"
 _cQuery += " ORDER BY BM_GRUPO"
 
@@ -364,11 +344,8 @@ Return( .T. )
 Programa----------: MEST007E
 Autor-------------: Josué Danich Prestes
 Data da Criacao---: 25/08/2015
-===============================================================================================================================
 Descrição---------: Rotina para montar consulta de tipos de produtos
-===============================================================================================================================
 Parametros--------: Nenhum
-===============================================================================================================================
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
