@@ -35,8 +35,8 @@ Antonio Ramos   - Igor Melgaço    - 11/04/2025 - 24/04/2025 - 50254   - Ajuste p
 Antonio Ramos   - Igor Melgaço    - 11/04/2025 - 24/04/2025 - 50244   - Ajuste para inclusão qdo subitem For 07 - Comite 
 Alexandro       - Igor Melgaço    - 25/04/2025 - 25/04/2025 - 50525   - Ajuste para remoção de diretório local.
 Antonio Neves   - Antonio Neves   - 06/05/2025 - 06/05/2025 - 50605   - Ajustar a função SUBS da valiadção do SUBITE 07
-Andre           - Igor Melgaço    - 29/05/2025 -            - 50805   - Ajuste para calculo do valor de rateio e retirada das opções do campo ZK1_SUBITE para chamar consulta padrão.
-Antonio Ramos   - Julio Paz       - 21/11/2025 -            - 52565   - Ajustes na gravação do histórico da rotina de acordos comerciais.
+Andre           - Igor Melgaço    - 29/05/2025 - 28/11/2025 - 50805   - Ajuste para calculo do valor de rateio e retirada das opções do campo ZK1_SUBITE para chamar consulta padrão.
+Antonio Ramos   - Julio Paz       - 21/11/2025 - 28/11/2025 - 52565   - Ajustes na gravação do histórico da rotina de acordos comerciais.
 ====================================================================================================================================================================================== 
 */
 //====================================================================================================

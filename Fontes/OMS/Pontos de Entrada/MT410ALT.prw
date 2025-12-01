@@ -5,6 +5,7 @@
        Autor      |    Data    |                                             Motivo                                           
 -------------------------------------------------------------------------------------------------------------------------------
  Josué Danich     | 06/09/2017 | Usa __cUserId quando possível - Chamado 21323
+ Jose Gavetti     |  27/11/2025| Chamado 53163. Correção Problema de Gravaçao Alt/Desmembramento PV via WS do RDC 
 =============================================================================================================================== 
 */
 #Include "TOTVS.ch"  
@@ -31,9 +32,11 @@ Local _cCodUsr	:= RetCodUsr()
 
 //Se tiver a variável __cUserId válida usa ao invés da função RetCodUsr para funcionar com os webservices
 If Type('__cUserId') == 'C'
-
 	_cCodUsr := __cUserId
-	
+EndIf	
+
+If Type("_cCodUsuario") = "C" .And. !Empty(_cCodUsuario)
+	_cCodUsr := _cCodUsuario
 EndIf
 
 If Type('_cActLog') == 'C' .And. !Empty(_cActLog)

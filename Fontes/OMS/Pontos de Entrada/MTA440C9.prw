@@ -8,6 +8,7 @@ Alex Wallauer |29/12/2020| Chamado 35108. Ajuste para chamar a função u_UCFG001(
 Alex Wallauer |02/02/2021| Chamado 34262. Remoção de bugs apontados pelo Totvs CodeAnalysis.
 Lucas Borges  |02/10/2025| Chamado 51526. Modificada forma para recuperar a matrícula do usuário.
 Jose Gavetti  |27/11/2025| Chamado 51341. __cUserId não deve ter seu conteúdo alterado orientação TOTVS. 
+Jose Gavetti  |27/11/2025| Chamado 53163. Correção Problema de Gravaçao Alt/Desmembramento PV via WS do RDC 
 ===============================================================================================================================
 */
 
