@@ -8,7 +8,7 @@ Lucas Borges  |14/09/2025| Chamado 51799. Implementada função para validar ambie
 Lucas Borges  |02/10/2025| Chamado 51526. Modificada forma para recuperar a matrícula do usuário.
 Lucas Borges  |03/10/2025| Chamado 52355. Corrigido nome da variável
 Jose Gavetti  |26/11/2025| Chamado 51341. __cUserId não deve ter seu conteúdo alterado orientação TOTVS. 
-Jose Gavetti  |27/11/2025| Chamado 53163. _cCodUsuario declarada como private para substituir a variável __cUserId no PE MTA440C9.
+Jose Gavetti  |28/11/2025| Chamado 53163. _cCodUsuario declarada como private para substituir a variável __cUserId no PE MTA440C9.
 ===========================================================================================================================================================================================================================================================
 Analista - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
 ===========================================================================================================================================================================================================================================================

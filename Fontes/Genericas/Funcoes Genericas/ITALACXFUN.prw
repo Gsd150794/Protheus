@@ -7,10 +7,14 @@
 Alex Wallauer |11/09/2025| Chamado 52033. Correção do numero de seleção maximada da função ITLSTFIL () dos F3S LSTFIL e SM0001
 Lucas Borges  |14/09/2025| Chamado 51799. Implementada função para validar ambiente de teste totvs.framework.environment.Type.get()
 Alex Wallauer |16/09/2025| Chamado 51802. Ajustes nas cores do sistema para os modos escuro e claro p/ os icones da função ITMSG().
+Jose Gavetti  |18/11/2025| Chamado 52546. Permite trocar o bloco de execução para multiplas seleções de perguntas.
+Jose Gavetti  |18/11/2025| Chamado 51341. __cUserId não deve ter seu conteúdo alterado orientação TOTVS.
+Jose Gavetti  |27/11/2025| Chamado 53163. Correção Problema de Gravaçao Alt/Desmembramento PV via WS do RDC - Função ITGrvLog
 ===============================================================================================================================
 Analista      - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
 ================================================================================================================================================================================================
 Vanderlei     - Julio Paz     - 07/10/25 - 13/11/25 - 52838   - Exibir na tela de visualização de canhoto de notas fiscais as informações Origem da digitalização e Possui canhoto físico.
+Jerry         - Alex Wallauer - 28/11/25 -          - 52981   - Ajustes na função ITGrvLog () para gravar _cCodUsr:=" " quando Scheduller.
 ================================================================================================================================================================================================
 */ 
 
@@ -2894,6 +2898,9 @@ Local _cTiposRef , _nX , nPosFil , _nConta:=0
 
 Public _cRetorno	:= ""
 
+Private _nNewChave := 0
+Private _nNewDesc  := 0
+
 Default _cNomeSXB := 'F3_GENER'
 Default	_cTabela  := ''
 Default	_nCpoChave:= 2
@@ -2962,6 +2969,12 @@ Do Case
 				(_cAlias)->(DBGoTop())
 				_lFilAtual:=.F.
 				_cTabela:=_cAlias
+
+				If ValType(_nNewChave) = "B"
+					_nCpoChave := _nNewChave
+					_nCpoDesc  := _nNewDesc
+					_cTitAux   := _aItalac_F3[1][6]
+				Endif
 			Else
 				DBSelectArea(_cTabela)//NÃO TIRAR
 				(_cTabela)->(DBGoTop())
@@ -7965,11 +7978,9 @@ Parametros--------: Replicados da função SPF_UPDATE
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function itspdupd(cFile, nRet, cKey, cStatus, cNewMemo )
-
-SPF_UPDATE( cFile, nRet, cKey, cStatus,, cNewMemo )
-
-Return
+//Static Function itspdupd(cFile, nRet, cKey, cStatus, cNewMemo )
+//SPF_UPDATE( cFile, nRet, cKey, cStatus,, cNewMemo )//"message": "W0012 Function SPF_Update is deprecated.", // A função SPF_Update está obsoleta.
+//Return
 
 /*
 ===============================================================================================================================
@@ -8808,7 +8819,6 @@ If Select("SX3") = 0//Para a função ParamBox() funcionar no Remote
 	CEMPANT  :="01"
 	CARQTAB  :=""
 	cUserName:=""
-	__cUserId:=""
 EndIf
 
 Private _lRemote:=IsBlind()
