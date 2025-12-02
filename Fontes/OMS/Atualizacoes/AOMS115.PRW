@@ -1,15 +1,3 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-   Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Igor Melgaço  |06/05/2025| Chamado 50525. Ajuste para remoção de diretório Local C:\SMARTCLIENT\.
-Julio Paz     |27/08/2025| Chamado 51271. Ajustar a rotina para marcar e desmarcar todos os registros apenas quando For clicado 
-			  |			 | na coluna de marca e desmarca.
-Lucas Borges  |17/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
-===============================================================================================================================
-*/
 
 #Include "RWMAKE.CH"
 #Include "AP5MAIL.CH"
@@ -1515,12 +1503,8 @@ ElseIf Len(_aChaveFAT) = 1
 		_cNome:=': '+SE2->E2_FORNECE+" - "+AllTrim(SA2->A2_NREDUZ)
 	EndIf
 EndIf
-
-If (Len(PSWRET()) # 0) // Quando nao For rotina automatica do configurador
-	PswOrder(1)
-	PswSeek(__cUserId,.T.)
-	aUsuario:= PswRet()
-	cGetCc  := LOWER(AllTrim(aUsuario[1,14]))+Space(150)// Pega e-mail do usuario
+If Type('__cUserId') == 'C'
+	cGetCc  := LOWER(AllTrim(FWSFAllUsers({__cUserID},{'USR_EMAIL'})[1][3]))
 EndIf
 If Empty(cGetPara)
 	cGetPara:=cGetCc
