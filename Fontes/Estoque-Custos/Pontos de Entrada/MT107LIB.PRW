@@ -1,14 +1,3 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-   Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Josué Danich  |04/09/2015| Chamado 11726. Gravar campos de data/hora e usuário de liberação de SA
-Josué Danich  |10/07/2017| Chamado 20625. Modificada leitura de usuário da função ITRETMAT para padrão Totvs
-===============================================================================================================================
-*/
-
 #Include "TOTVS.ch"
 
 /*
@@ -16,8 +5,11 @@ Josué Danich  |10/07/2017| Chamado 20625. Modificada leitura de usuário da funçã
 Programa----------: MT107LIB
 Autor-------------: Andre Lisboa
 Data da Criacao---: 03/02/2015
+===============================================================================================================================
 Descrição---------: Ponto de entrada valida e efetua liberação das SAs
+===============================================================================================================================
 Parametros--------: Nenhum
+===============================================================================================================================
 Retorno-----------: _lRet -> valor logico que permite ou não a liberação
 ===============================================================================================================================
 */
@@ -26,15 +18,16 @@ User Function MT107LIB()
 Local _lRet 	   	:= .F.  
 Local _nCodA		:= RetCodUsr()
 Local _cGrpP		:= SB1->B1_GRUPO
-Local _cSolic  	:= AllTrim(SCP->CP_SOLICIT)
-	
-    
+Local _cSolic  		:= AllTrim(SCP->CP_SOLICIT)
+Local cMatric       := ""
+
+
 DBSelectArea("ZZL")
 DBSetOrder(3)
 //Verifica se usuário tem permissão de liberar SA
-If DBSeek(xFilial("ZZL") + _nCodA) .And. ZZL->ZZL_LIBSAS <> 'S'
+If DBSeek(xFilial("ZZL") + _nCodA) .and. ZZL->ZZL_LIBSAS <> 'S'
 
-		xMagHelpFis("Específicos Italac","Liberação não permitida.Usuário não tem permIssão para liberar SAs",;
+		xmaghelpfis("Específicos Italac","Liberação não permitida.Usuário não tem permIssão para liberar SAs",;
 						"Favor solicitar ao responsável pelas aprovações do seu departamento.")
 Else
 
@@ -50,15 +43,15 @@ Else
 
 		Else
 
-			xMagHelpFis("Específicos Italac","Liberação não permitida.",;
+			xmaghelpfis("Específicos Italac","Liberação não permitida.",;
 			"Usuários do grupo SESMT podem liberar somente produto do grupo Indumentaria (0805) .")	
 
-		EndIf
+		Endif
 
    	Else
 
 		//Verifica se SA é do mesmo grupo de aprovação do usuário
-		If cGrpU == cGrpA .And. _cGrpP <> '0805'
+		If cGrpU == cGrpA .and. _cGrpP <> '0805'
 
 			_lRet := .T.
 
@@ -70,38 +63,35 @@ Else
 
 			Else	
 
-				xMagHelpFis("Específicos Italac","Liberação não permitida.",;
+				xmaghelpfis("Específicos Italac","Liberação não permitida.",;
 				"Solicitação não pertence ao grupo do aprovador.")
 
-			EndIf
+			Endif
 
-		EndIf	
+		Endif	
 
-	EndIf						
+	Endif						
 
-EndIf
+Endif
 	
 //Se está liberado grava campos de usuário e data/hora de liberação
 If _lRet
 
-	//Determina matricula do usuário
-	PswOrder(1)
-	If PswSeek( _nCodA )
-		aUsrAux := PswRet(1)
-		cMatric := SubStr( aUsrAux[01][22] , 3 , 8 )
+	If Type('__cUserId') == 'C'
+		cMatric := FWSFAllUsers({__cUserID},{"USR_CODFUNC"})[1][3] // MATRICULA
 	Else
 		cMatric := " "
 	EndIf
-	
+				
 	DBSelectArea("SCP")
 	RecLock("SCP",.F.)
 	
-	SCP->CP_I_DTAPR 	:=	Date()
-	SCP->CP_I_HRAPR		:=	Time()
+	SCP->CP_I_DTAPR 	:=	date()
+	SCP->CP_I_HRAPR		:=	time()
 	SCP->CP_I_CDAPR		:= 	cMatric
 		
-	MSUnLock()
+	MsUnlock()
 		
-EndIf
+Endif
 		
 Return(_lRet)
