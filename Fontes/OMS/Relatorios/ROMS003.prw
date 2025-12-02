@@ -1,19 +1,3 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-   Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  |09/10/2024| Chamado 48465. Retirada manipulação do SX1
-Lucas Borges  |23/07/2025| Chamado 51340. Ajustar função para validação de ambiente de teste
-Lucas Borges  |14/09/2025| Chamado 51799. Implementada função para validar ambiente de teste totvs.framework.environment.Type.get()
-=========================================================================================================================================================
-Analista         - Programador       - Inicio     - Envio    - Chamado - Motivo da Alteração
----------------------------------------------------------------------------------------------------------------------------------------------------------
-Jerry Santiago   - Igor Melgaço      - 03/02/2025 - 20/03/25 - 39201   - Ajustes para inclusão do campo C5_I_QTDA
-=========================================================================================================================================================
-*/
-
 #Include "Report.ch"
 #Include "TOTVS.ch"
 
@@ -84,17 +68,17 @@ Private QRY9
 Private QRY13                                     // 24 RELATORIOS NO TOTAL:
 Private aOrd:= {"01 -Coordenador",;               // ORDEM 01 Analitivo e Sintetico//14   
                 "02 -Coordenador x Produto*",;    // ORDEM 02 Sintetico com U_ITListBox e TMSPrinter()//15   
-		    	"03 -Produto",;                   // ORDEM 03 Analitivo e Sintetico//16   
-		    	"04 -Rede",;                      // ORDEM 04 Analitivo e Sintetico//17  
-		    	"05 -Estado x Produto",;          // ORDEM 05 Analitivo e Sintetico//18   
-		    	"06 -Municipio",;                 // ORDEM 06 Analitivo e Sintetico//19   
-		    	"07 -Cliente" ,;                  // ORDEM 07 Analitivo e Sintetico//20   
-		    	"08 -Emissão",;                   // ORDEM 08 Analitivo e Sintetico//21   
-		    	"09 -Estado x Grupo de Produtos",;// ORDEM 09 Sintetico            
-		    	"10 -Produto Sintetico*",;        // ORDEM 10 Sintetico com U_ITListBox e TMSPrinter()//22
-		    	"11 -Sub Grupo Sintetico*",;      // ORDEM 11 Sintetico com U_ITListBox e TMSPrinter()//23    
-		    	"12 -Estado x Sub-Grupo*",;       // ORDEM 12 Sintetico com U_ITListBox e TMSPrinter()//24   
-		    	"13 -Dia X Estado x Produto"}     // ORDEM 13 Sintetico          
+                "03 -Produto",;                   // ORDEM 03 Analitivo e Sintetico//16   
+                "04 -Rede",;                      // ORDEM 04 Analitivo e Sintetico//17  
+                "05 -Estado x Produto",;          // ORDEM 05 Analitivo e Sintetico//18   
+                "06 -Municipio",;                 // ORDEM 06 Analitivo e Sintetico//19   
+                "07 -Cliente" ,;                  // ORDEM 07 Analitivo e Sintetico//20   
+                "08 -Emissão",;                   // ORDEM 08 Analitivo e Sintetico//21   
+                "09 -Estado x Grupo de Produtos",;// ORDEM 09 Sintetico            
+                "10 -Produto Sintetico*",;        // ORDEM 10 Sintetico com U_ITListBox e TMSPrinter()//22
+                "11 -Sub Grupo Sintetico*",;      // ORDEM 11 Sintetico com U_ITListBox e TMSPrinter()//23    
+                "12 -Estado x Sub-Grupo*",;       // ORDEM 12 Sintetico com U_ITListBox e TMSPrinter()//24   
+                "13 -Dia X Estado x Produto"}     // ORDEM 13 Sintetico          
 Private cVendedor  := " "
 Private cCoordenador:= " "
 Private cRede      := " " 
@@ -862,203 +846,201 @@ oReport:SetTitle(oReport:Title() + " - " + If(_nOrdem <> 2 .And. _nOrdem <> 9 .A
 //Filtra Filial da SF2,SD2,SA1,SB1,SBM,SA3,ACY  
 
 If Len(AllTrim(MV_PAR01)) = 2
-	If !Empty(xFilial("SF2"))
-		_cFiltro += " AND SF2.F2_FILIAL = '" + (AllTrim(MV_PAR01)) + "' " 
-	EndIf	  
-	If !Empty(xFilial("SF4"))
-		_cFiltro += " AND SF4.F4_FILIAL = '" + (AllTrim(MV_PAR01)) + "' " 
-	EndIf	                       
-	If !Empty(xFilial("SD2"))
-		_cFiltro += " AND SD2.D2_FILIAL = '" + (AllTrim(MV_PAR01)) + "' " 
-	EndIf 
+    If !Empty(xFilial("SF2"))
+        _cFiltro += " AND SF2.F2_FILIAL = '" + (AllTrim(MV_PAR01)) + "' " 
+    EndIf	  
+    If !Empty(xFilial("SF4"))
+        _cFiltro += " AND SF4.F4_FILIAL = '" + (AllTrim(MV_PAR01)) + "' " 
+    EndIf	                       
+    If !Empty(xFilial("SD2"))
+        _cFiltro += " AND SD2.D2_FILIAL = '" + (AllTrim(MV_PAR01)) + "' " 
+    EndIf 
 ElseIf !Empty(AllTrim(MV_PAR01))	
-	If !Empty(xFilial("SF2"))
-		_cFiltro += " AND SF2.F2_FILIAL IN " + FormatIn(AllTrim(MV_PAR01),";")
-	EndIf	  
-	If !Empty(xFilial("SF4"))
-		_cFiltro += " AND SF4.F4_FILIAL IN " + FormatIn(AllTrim(MV_PAR01),";")
-	EndIf	                       
-	If !Empty(xFilial("SD2"))
-		_cFiltro += " AND SD2.D2_FILIAL IN " + FormatIn(AllTrim(MV_PAR01),";")
-	EndIf             	
+    If !Empty(xFilial("SF2"))
+        _cFiltro += " AND SF2.F2_FILIAL IN " + FormatIn(AllTrim(MV_PAR01),";")
+    EndIf	  
+    If !Empty(xFilial("SF4"))
+        _cFiltro += " AND SF4.F4_FILIAL IN " + FormatIn(AllTrim(MV_PAR01),";")
+    EndIf	                       
+    If !Empty(xFilial("SD2"))
+        _cFiltro += " AND SD2.D2_FILIAL IN " + FormatIn(AllTrim(MV_PAR01),";")
+    EndIf             	
 EndIf 
 
 If !Empty(xFilial("SA1"))
-	_cFiltro += " AND SA1.A1_FILIAL = ' ' "
+    _cFiltro += " AND SA1.A1_FILIAL = ' ' "
 EndIf
 If !Empty(xFilial("SB1"))	
-	_cFiltro += " AND SB1.B1_FILIAL = ' ' " 
+    _cFiltro += " AND SB1.B1_FILIAL = ' ' " 
 EndIf
 If !Empty(xFilial("SA3"))
-	_cFiltro += " AND SA3.A3_FILIAL = ' ' "  
+    _cFiltro += " AND SA3.A3_FILIAL = ' ' "  
 EndIf
 If !Empty(xFilial("SBM"))
-	_cFiltro += " AND SBM.BM_FILIAL = ' ' "  
+    _cFiltro += " AND SBM.BM_FILIAL = ' ' "  
 EndIf
 If !Empty(xFilial("ACY"))
-	_cFiltro += " AND ACY.ACY_FILIAL = ' ' " 
+    _cFiltro += " AND ACY.ACY_FILIAL = ' ' " 
 EndIf
 
 //Filtra Emissao da SD2
 If !Empty(MV_PAR02) .And. !Empty(MV_PAR03)
-	_cFiltro += " AND SD2.D2_EMISSAO BETWEEN '" + DToS(MV_PAR02) + "' AND '" + DToS(MV_PAR03) + "'"
+    _cFiltro += " AND SD2.D2_EMISSAO BETWEEN '" + DToS(MV_PAR02) + "' AND '" + DToS(MV_PAR03) + "'"
 EndIf
 
 //Filtra Produto
 If !Empty(MV_PAR04) .And. !Empty(MV_PAR05)
-	_cFiltro += " AND SD2.D2_COD BETWEEN '" + MV_PAR04 + "' AND '" + MV_PAR05 + "'"
+    _cFiltro += " AND SD2.D2_COD BETWEEN '" + MV_PAR04 + "' AND '" + MV_PAR05 + "'"
 EndIf
 
 //Filtra Cliente
 If !Empty(MV_PAR06) .And. !Empty(MV_PAR08)
-	_cFiltro += " AND SD2.D2_CLIENTE BETWEEN '" + MV_PAR06 + "' AND '" + MV_PAR08 + "'"
+    _cFiltro += " AND SD2.D2_CLIENTE BETWEEN '" + MV_PAR06 + "' AND '" + MV_PAR08 + "'"
 EndIf
 
 //Filtra Loja Cliente
 If !Empty(MV_PAR07) .And. !Empty(MV_PAR09)
-	_cFiltro += " AND SD2.D2_LOJA BETWEEN '" + MV_PAR07 + "' AND '" + MV_PAR09 + "'"
+    _cFiltro += " AND SD2.D2_LOJA BETWEEN '" + MV_PAR07 + "' AND '" + MV_PAR09 + "'"
 EndIf
 
 //Filtra Rede Cliente
 If !Empty(MV_PAR10)
-	_cFiltro += " AND SA1.A1_GRPVEN IN " + FormatIn(AllTrim(MV_PAR10),";")
+    _cFiltro += " AND SA1.A1_GRPVEN IN " + FormatIn(AllTrim(MV_PAR10),";")
 EndIf
      
 //Filtra Estado Cliente
 If !Empty(MV_PAR11) 
-	_cFiltro += " AND SA1.A1_EST IN " + FormatIn(AllTrim(MV_PAR11),";")
+    _cFiltro += " AND SA1.A1_EST IN " + FormatIn(AllTrim(MV_PAR11),";")
 EndIf
 
 //Filtra Cod Municipio Cliente
 If !Empty(MV_PAR12) 
-	_cFiltro += " AND SA1.A1_COD_MUN IN " + FormatIn(AllTrim(MV_PAR12),";")
+    _cFiltro += " AND SA1.A1_COD_MUN IN " + FormatIn(AllTrim(MV_PAR12),";")
 EndIf
 
 If MV_PAR35 <> 4
-	_cFiltro += " AND SA1.A1_I_CLABC  = '"+Str(MV_PAR35,1)+"' "
-ElseIf !totvs.framework.environment.Type.get() == '1' //1-Produção, 2-Homologação,3-Desenvolvimento
-	_cFiltro += " AND SA1.A1_I_CLABC  <> ' ' "
+    _cFiltro += " AND SA1.A1_I_CLABC  = '"+Str(MV_PAR35,1)+"' "
 EndIf
 
 //Filtra Vendedor
 If !Empty(MV_PAR13) 
-	_cFiltro += " AND SF2.F2_VEND1 IN " + FormatIn(AllTrim(MV_PAR13),";")
+    _cFiltro += " AND SF2.F2_VEND1 IN " + FormatIn(AllTrim(MV_PAR13),";")
 EndIf
 
 //Filtra Coordenador
 If !Empty(MV_PAR14)
-	_cFiltro += " AND SF2.F2_VEND2 IN " + FormatIn(AllTrim(MV_PAR14),";")
+    _cFiltro += " AND SF2.F2_VEND2 IN " + FormatIn(AllTrim(MV_PAR14),";")
 EndIf 
 
 //Filtra Gerente
 If !Empty(MV_PAR34)
-	_cFiltro += " AND SF2.F2_VEND3 IN " + FormatIn(AllTrim(MV_PAR34),";")
+    _cFiltro += " AND SF2.F2_VEND3 IN " + FormatIn(AllTrim(MV_PAR34),";")
 EndIf 
 
 //Filtra Grupo de Produtos
 If !Empty(MV_PAR15)
-	_cFiltro += " AND SBM.BM_GRUPO IN " + FormatIn(AllTrim(MV_PAR15),";")
+    _cFiltro += " AND SBM.BM_GRUPO IN " + FormatIn(AllTrim(MV_PAR15),";")
 EndIf
 
 //Filtra Produto Nivel 2
 If !Empty(MV_PAR16)
-	_cFiltro += " AND SB1.B1_I_NIV2 IN " + FormatIn(AllTrim(MV_PAR16),";")
+    _cFiltro += " AND SB1.B1_I_NIV2 IN " + FormatIn(AllTrim(MV_PAR16),";")
 EndIf
 
 //Filtra Produto Nivel 3
 If !Empty(MV_PAR17)
-	_cFiltro += " AND SB1.B1_I_NIV3 IN " + FormatIn(AllTrim(MV_PAR17),";")
+    _cFiltro += " AND SB1.B1_I_NIV3 IN " + FormatIn(AllTrim(MV_PAR17),";")
 EndIf
 
 //Filtra Produto Nivel 4
 If !Empty(MV_PAR18)
-	_cFiltro += " AND SB1.B1_I_NIV4 IN " + FormatIn(AllTrim(MV_PAR18),";")
+    _cFiltro += " AND SB1.B1_I_NIV4 IN " + FormatIn(AllTrim(MV_PAR18),";")
 EndIf  
 
 If !Empty(MV_PAR32)
-	If Len(MV_PAR32) = 2
-		_cFiltro += " AND SB1.B1_I_BIMIX = '" + MV_PAR32 + "'"
-	Else
-		_cFiltro += " AND SB1.B1_I_BIMIX IN " + FormatIn(AllTrim(MV_PAR32),";")
-	EndIf
+    If Len(MV_PAR32) = 2
+        _cFiltro += " AND SB1.B1_I_BIMIX = '" + MV_PAR32 + "'"
+    Else
+        _cFiltro += " AND SB1.B1_I_BIMIX IN " + FormatIn(AllTrim(MV_PAR32),";")
+    EndIf
 EndIf
 
 If !Empty(MV_PAR33)
-	MV_PAR33 := AllTrim(MV_PAR33)
-	If Len(MV_PAR33) = 2
-		_cFiltro += " AND SC5.C5_I_OPER = '"+MV_PAR33+"' "
-	Else
-		_cFiltro += " AND SC5.C5_I_OPER IN " + FormatIn(AllTrim(MV_PAR33),";") + " "
-	EndIf
+    MV_PAR33 := AllTrim(MV_PAR33)
+    If Len(MV_PAR33) = 2
+        _cFiltro += " AND SC5.C5_I_OPER = '"+MV_PAR33+"' "
+    Else
+        _cFiltro += " AND SC5.C5_I_OPER IN " + FormatIn(AllTrim(MV_PAR33),";") + " "
+    EndIf
 EndIf
 
 //busca CFOPS de acordo com parametro definido por usuario	
 If !Empty(MV_PAR20)
-	//Senao tiver escolhido a opcao todos
-	If !("A" $ MV_PAR20 )       	
-		cCfops := U_ITCFOPS(AllTrim(Upper(MV_PAR20)))
-		//_cFiltro += " AND SD2.D2_CF IN " + FormatIn(AllTrim(cCfops),";")	
+    //Senao tiver escolhido a opcao todos
+    If !("A" $ MV_PAR20 )       	
+        cCfops := U_ITCFOPS(AllTrim(Upper(MV_PAR20)))
+        //_cFiltro += " AND SD2.D2_CF IN " + FormatIn(AllTrim(cCfops),";")	
 
         _cFiltro += " AND SC5.C5_I_OPER <> '05' "
-	    If ("V" $ MV_PAR20 ) .And. !("R" $ MV_PAR20 )
-		   _cFiltro += " AND ( SD2.D2_CF IN " + FormatIn(AllTrim(cCfops),";")
-		   cCfopsR := U_ITCFOPS("R")
-		   _cFiltro += " OR ( SD2.D2_CF IN " + FormatIn(AllTrim(cCfopsR),";") + " AND SC5.C5_I_OPER = '42' ) ) "
-	    Else//If !("V" $ MV_PAR20 ) 
-		   _cFiltro += " AND SD2.D2_CF IN " + FormatIn(AllTrim(cCfops),";")
-		EndIf
-	EndIf
+        If ("V" $ MV_PAR20 ) .And. !("R" $ MV_PAR20 )
+           _cFiltro += " AND ( SD2.D2_CF IN " + FormatIn(AllTrim(cCfops),";")
+           cCfopsR := U_ITCFOPS("R")
+           _cFiltro += " OR ( SD2.D2_CF IN " + FormatIn(AllTrim(cCfopsR),";") + " AND SC5.C5_I_OPER = '42' ) ) "
+        Else//If !("V" $ MV_PAR20 ) 
+           _cFiltro += " AND SD2.D2_CF IN " + FormatIn(AllTrim(cCfops),";")
+        EndIf
+    EndIf
 EndIf
 
 //Filtra NF - Sedex
 If MV_PAR21 == 2 //Nao  - Nao Considera NF Sedex no Filtro
-	_cFiltro += " AND SF2.F2_I_NFSED <> 'S' " 
+    _cFiltro += " AND SF2.F2_I_NFSED <> 'S' " 
 ElseIf MV_PAR21 == 3 //Somente NF Sedex
-	_cFiltro += " AND SF2.F2_I_NFSED = 'S' " 
+    _cFiltro += " AND SF2.F2_I_NFSED = 'S' " 
 EndIf   
                        
 //Filtra se tes gera financeiro
 If MV_PAR26 == 2
-	_cFiltro += " AND SF4.F4_DUPLIC = 'S'"
+    _cFiltro += " AND SF4.F4_DUPLIC = 'S'"
 //Nao gera Financeiro
 ElseIf MV_PAR26 == 3
-	_cFiltro += " AND SF4.F4_DUPLIC = 'N'"
+    _cFiltro += " AND SF4.F4_DUPLIC = 'N'"
 EndIf
 
 //Filtra Sub Grupo de Produto
 If !Empty(MV_PAR27)
-	_cFiltro += " AND SB1.B1_I_SUBGR IN " + FormatIn(AllTrim(MV_PAR27),";")
+    _cFiltro += " AND SB1.B1_I_SUBGR IN " + FormatIn(AllTrim(MV_PAR27),";")
 EndIf
      
 //Considera somente cargas montadas 
 If MV_PAR28 == 2
- 	_cFiltro += " AND SF2.F2_CARGA <> ' ' "                  
+     _cFiltro += " AND SF2.F2_CARGA <> ' ' "                  
 //Considera somente o faturamente que nao houve montagem de carga
 ElseIf MV_PAR28 == 3
-	_cFiltro += " AND SF2.F2_CARGA = ' ' "     
+    _cFiltro += " AND SF2.F2_CARGA = ' ' "     
 EndIf
 
 //Considera somente com operador logistico 
 If MV_PAR29 == 2
-	//Filtra operador logistico
-	If !Empty(MV_PAR30)
-		If Len(AllTrim(MV_PAR30)) < 5
-	    	MV_PAR30:=LEFT(MV_PAR30,6)
-	     	cFiltro += " AND DAI.DAI_I_OPLO = '"+MV_PAR30+"' "
-      	Else
-			_cFiltro += " AND DAI.DAI_I_OPLO  IN " + FormatIn(AllTrim(MV_PAR30),";")
-      	EndIf
+    //Filtra operador logistico
+    If !Empty(MV_PAR30)
+        If Len(AllTrim(MV_PAR30)) < 5
+            MV_PAR30:=LEFT(MV_PAR30,6)
+             cFiltro += " AND DAI.DAI_I_OPLO = '"+MV_PAR30+"' "
+          Else
+            _cFiltro += " AND DAI.DAI_I_OPLO  IN " + FormatIn(AllTrim(MV_PAR30),";")
+          EndIf
     Else
-		_cFiltro += "  AND DAI.DAI_I_OPLO  <> ' ' "             	
-	EndIf  	           
-	//Considera somente o faturamente que nao houve montagem de carga
+        _cFiltro += "  AND DAI.DAI_I_OPLO  <> ' ' "             	
+    EndIf  	           
+    //Considera somente o faturamente que nao houve montagem de carga
 ElseIf MV_PAR29 == 3
-	_cFiltro += "  AND DAI.DAI_I_OPLO = ' ' "
+    _cFiltro += "  AND DAI.DAI_I_OPLO = ' ' "
 EndIf
 
 // Filtro por código de evento comercial
 If !Empty(MV_PAR36) 
-	_cFiltro += " AND SC5.C5_I_EVENT  = '" + MV_PAR36 + "' " 
+    _cFiltro += " AND SC5.C5_I_EVENT  = '" + MV_PAR36 + "' " 
 EndIf
 
 _cFiltro += "%"
@@ -1073,1834 +1055,1832 @@ _cJOIN_SF1 += "                          SF1.F1_TIPO   = 'D'            AND "
 _cJOIN_SF1 += RetSqlDel('SF1')
 //Tipo de Formulario
 If MV_PAR23 == 1 //Se formulario proprio = sim 
-	_cJOIN_SF1 += " AND SF1.F1_FORMUL = 'S' "
+    _cJOIN_SF1 += " AND SF1.F1_FORMUL = 'S' "
 ElseIf MV_PAR23 == 2 //Se formulario proprio = nao
-	_cJOIN_SF1 += " AND SF1.F1_FORMUL <> 'S' "
+    _cJOIN_SF1 += " AND SF1.F1_FORMUL <> 'S' "
 EndIf
 If !Empty(MV_PAR25)
-	_cJOIN_SF1 += " AND SF1.F1_DTDIGIT BETWEEN '" + DToS(MV_PAR24) + "' AND '" + DToS(MV_PAR25) + "'"
+    _cJOIN_SF1 += " AND SF1.F1_DTDIGIT BETWEEN '" + DToS(MV_PAR24) + "' AND '" + DToS(MV_PAR25) + "'"
 EndIf
 _cJOIN_SF1 += "%"
 
 //Imprime relatorio da Ordem Produto ou Sub Grupo Sintetico em modo grafico, Coordenador X Produto , estado x Sub-Grupo
 If _nOrdem == 2 .Or. _nOrdem == 10 .Or. _nOrdem == 11 .Or. _nOrdem == 12
-	ROMS003G()   //IMPRIMI COM O U_ITListBox QUANDO ENVIADO PARA PLANILHA SENÃO VIA TMSPrinter()
-	oReport:CancelPrint() 
+    ROMS003G()   //IMPRIMI COM O U_ITListBox QUANDO ENVIADO PARA PLANILHA SENÃO VIA TMSPrinter()
+    oReport:CancelPrint() 
 EndIf
 
 //Verifica qual ordem usuario definiu
 If _nOrdem == 1 //COORDENADOR / VENDEDOR ORDEM 01
-	//Habilita Secoes
-	
+    //Habilita Secoes
+    
     //Define break para Filial para sumarizar campos
-	DEFINE BREAK oBrkFil OF oSF2FIL_1 WHEN oSF2FIL_1:CELL("D2_FILIAL") TITLE {|| "SUBTOTAL FILIAL: " + cNomeFil}
-	oSF2FIL_1:Enable()
-	oSF2_1:Enable()
-	oSF2_1A:Enable()
-	If MV_PAR19 == 1 //SINTETICO
-		oSF2S_1:Enable()		
-		
-		DEFINE FUNCTION FROM oSF2S_1:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkSup //coloca o Break aqui para sumarizar a secao do Coordenador 
-		DEFINE FUNCTION FROM oSF2S_1:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkSup
-		DEFINE FUNCTION FROM oSF2S_1:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkSup	  		
-		DEFINE FUNCTION FROM oSF2S_1:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkSup 
-		
-		//Funcoes para sumarizacao do grupo filial
-		DEFINE FUNCTION FROM oSF2S_1:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT
-		DEFINE FUNCTION FROM oSF2S_1:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT
-		DEFINE FUNCTION FROM oSF2S_1:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT			
-		DEFINE FUNCTION FROM oSF2S_1:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT		
-	Else//ANALITICO
-		DEFINE FUNCTION FROM oSF2A_1:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkSup //coloca o Break aqui para sumarizar a secao do Coordenador 
-		DEFINE FUNCTION FROM oSF2A_1:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkSup	
-		DEFINE FUNCTION FROM oSF2A_1:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkSup	
-		DEFINE FUNCTION FROM oSF2A_1:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkSup			
-		
-		DEFINE FUNCTION FROM oSF2A_1:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT
-		DEFINE FUNCTION FROM oSF2A_1:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_1:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_1:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-				
-		oSF2A_1:Enable()//SÓ ANALITICO
-	EndIf
-	
+    DEFINE BREAK oBrkFil OF oSF2FIL_1 WHEN oSF2FIL_1:CELL("D2_FILIAL") TITLE {|| "SUBTOTAL FILIAL: " + cNomeFil}
+    oSF2FIL_1:Enable()
+    oSF2_1:Enable()
+    oSF2_1A:Enable()
+    If MV_PAR19 == 1 //SINTETICO
+        oSF2S_1:Enable()		
+        
+        DEFINE FUNCTION FROM oSF2S_1:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkSup //coloca o Break aqui para sumarizar a secao do Coordenador 
+        DEFINE FUNCTION FROM oSF2S_1:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkSup
+        DEFINE FUNCTION FROM oSF2S_1:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkSup	  		
+        DEFINE FUNCTION FROM oSF2S_1:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkSup 
+        
+        //Funcoes para sumarizacao do grupo filial
+        DEFINE FUNCTION FROM oSF2S_1:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT
+        DEFINE FUNCTION FROM oSF2S_1:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT
+        DEFINE FUNCTION FROM oSF2S_1:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT			
+        DEFINE FUNCTION FROM oSF2S_1:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT		
+    Else//ANALITICO
+        DEFINE FUNCTION FROM oSF2A_1:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkSup //coloca o Break aqui para sumarizar a secao do Coordenador 
+        DEFINE FUNCTION FROM oSF2A_1:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkSup	
+        DEFINE FUNCTION FROM oSF2A_1:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkSup	
+        DEFINE FUNCTION FROM oSF2A_1:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkSup			
+        
+        DEFINE FUNCTION FROM oSF2A_1:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT
+        DEFINE FUNCTION FROM oSF2A_1:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_1:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_1:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+                
+        oSF2A_1:Enable()//SÓ ANALITICO
+    EndIf
+    
 //Ordem Por Produto
 ElseIf _nOrdem == 3
-	oSF2FIL_3:Enable()
+    oSF2FIL_3:Enable()
     //Define break para Filial para sumarizar campos
-	DEFINE BREAK oBrkFil OF oSF2FIL_3 WHEN oSF2FIL_3:CELL("D2_FILIAL") TITLE {|| "SUBTOTAL FILIAL: " + cNomeFil}
-	
-	//Define funcoes de soma para secao Produto  - Sintetico
-	If MV_PAR19 == 1 //Sintetico
-		DEFINE FUNCTION FROM oSF2S_3:Cell("D2_QUANT")   FUNCTION SUM NO END Section 
-		DEFINE FUNCTION FROM oSF2S_3:Cell("D2_QTSEGUM") FUNCTION SUM NO END Section 
-		DEFINE FUNCTION FROM oSF2S_3:Cell("D2_TOTAL")   FUNCTION SUM NO END Section 
-		DEFINE FUNCTION FROM oSF2S_3:Cell("D2_VALBRUT")   FUNCTION SUM NO END Section 
-		
-		DEFINE FUNCTION FROM oSF2S_3:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2S_3:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2S_3:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2S_3:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-	Else                                                                    
-		//Define funcoes de soma para secao Produto  - Analitico
-		DEFINE FUNCTION FROM oSF2A_3:Cell("D2_QUANT")   FUNCTION SUM //BREAK oBrkProdut NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_3:Cell("D2_QTSEGUM") FUNCTION SUM //BREAK oBrkProdut NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_3:Cell("D2_TOTAL")   FUNCTION SUM //BREAK oBrkProdut NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_3:Cell("D2_VALBRUT") FUNCTION SUM //BREAK oBrkProdut NO END Section NO END REPORT			
-		
-		DEFINE FUNCTION FROM oSF2A_3:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_3:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_3:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_3:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		
-		//Define break para data Emissao
-		DEFINE BREAK oBrkDtEmis OF oSF2A_3 WHEN oSF2A_3:CELL("QBREMISS") TITLE {||"Total do Dia: " }
-		
-		DEFINE FUNCTION FROM oSF2A_3:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkDtEmis NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_3:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkDtEmis NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_3:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkDtEmis NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_3:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkDtEmis NO END Section NO END REPORT
-		
-		oSF2_3:Enable()
-	EndIf
-		
+    DEFINE BREAK oBrkFil OF oSF2FIL_3 WHEN oSF2FIL_3:CELL("D2_FILIAL") TITLE {|| "SUBTOTAL FILIAL: " + cNomeFil}
+    
+    //Define funcoes de soma para secao Produto  - Sintetico
+    If MV_PAR19 == 1 //Sintetico
+        DEFINE FUNCTION FROM oSF2S_3:Cell("D2_QUANT")   FUNCTION SUM NO END Section 
+        DEFINE FUNCTION FROM oSF2S_3:Cell("D2_QTSEGUM") FUNCTION SUM NO END Section 
+        DEFINE FUNCTION FROM oSF2S_3:Cell("D2_TOTAL")   FUNCTION SUM NO END Section 
+        DEFINE FUNCTION FROM oSF2S_3:Cell("D2_VALBRUT")   FUNCTION SUM NO END Section 
+        
+        DEFINE FUNCTION FROM oSF2S_3:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2S_3:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2S_3:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2S_3:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+    Else                                                                    
+        //Define funcoes de soma para secao Produto  - Analitico
+        DEFINE FUNCTION FROM oSF2A_3:Cell("D2_QUANT")   FUNCTION SUM //BREAK oBrkProdut NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_3:Cell("D2_QTSEGUM") FUNCTION SUM //BREAK oBrkProdut NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_3:Cell("D2_TOTAL")   FUNCTION SUM //BREAK oBrkProdut NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_3:Cell("D2_VALBRUT") FUNCTION SUM //BREAK oBrkProdut NO END Section NO END REPORT			
+        
+        DEFINE FUNCTION FROM oSF2A_3:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_3:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_3:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_3:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        
+        //Define break para data Emissao
+        DEFINE BREAK oBrkDtEmis OF oSF2A_3 WHEN oSF2A_3:CELL("QBREMISS") TITLE {||"Total do Dia: " }
+        
+        DEFINE FUNCTION FROM oSF2A_3:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkDtEmis NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_3:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkDtEmis NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_3:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkDtEmis NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_3:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkDtEmis NO END Section NO END REPORT
+        
+        oSF2_3:Enable()
+    EndIf
+        
 //ORDEM 04 POR REDE
 ElseIf _nOrdem == 4
-	oSF2FIL_4:Enable()
-	
+    oSF2FIL_4:Enable()
+    
     //Define break para Filial para sumarizar campos
-	DEFINE BREAK oBrkFil OF oSF2FIL_4 WHEN oSF2FIL_4:CELL("D2_FILIAL") TITLE {|| "SUBTOTAL FILIAL: " + cNomeFil}
+    DEFINE BREAK oBrkFil OF oSF2FIL_4 WHEN oSF2FIL_4:CELL("D2_FILIAL") TITLE {|| "SUBTOTAL FILIAL: " + cNomeFil}
 
-	//Define funcoes de soma para secao
-	If MV_PAR19 == 1 //Sintetico
-		oSF2S_4:Enable()	
-		DEFINE FUNCTION FROM oSF2S_4:Cell("D2_QUANT")   FUNCTION SUM 
-		DEFINE FUNCTION FROM oSF2S_4:Cell("D2_QTSEGUM") FUNCTION SUM 
-		DEFINE FUNCTION FROM oSF2S_4:Cell("D2_TOTAL")   FUNCTION SUM 
-		DEFINE FUNCTION FROM oSF2S_4:Cell("D2_VALBRUT")   FUNCTION SUM 
-		
-		DEFINE FUNCTION FROM oSF2S_4:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2S_4:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2S_4:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2S_4:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-	Else	
-		oSF2A_4:Enable()	
-		DEFINE FUNCTION FROM oSF2A_4:Cell("D2_QUANT")   FUNCTION SUM 
-		DEFINE FUNCTION FROM oSF2A_4:Cell("D2_QTSEGUM") FUNCTION SUM 
-		DEFINE FUNCTION FROM oSF2A_4:Cell("D2_TOTAL")   FUNCTION SUM 
-		DEFINE FUNCTION FROM oSF2A_4:Cell("D2_VALBRUT")   FUNCTION SUM 		
+    //Define funcoes de soma para secao
+    If MV_PAR19 == 1 //Sintetico
+        oSF2S_4:Enable()	
+        DEFINE FUNCTION FROM oSF2S_4:Cell("D2_QUANT")   FUNCTION SUM 
+        DEFINE FUNCTION FROM oSF2S_4:Cell("D2_QTSEGUM") FUNCTION SUM 
+        DEFINE FUNCTION FROM oSF2S_4:Cell("D2_TOTAL")   FUNCTION SUM 
+        DEFINE FUNCTION FROM oSF2S_4:Cell("D2_VALBRUT")   FUNCTION SUM 
+        
+        DEFINE FUNCTION FROM oSF2S_4:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2S_4:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2S_4:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2S_4:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+    Else	
+        oSF2A_4:Enable()	
+        DEFINE FUNCTION FROM oSF2A_4:Cell("D2_QUANT")   FUNCTION SUM 
+        DEFINE FUNCTION FROM oSF2A_4:Cell("D2_QTSEGUM") FUNCTION SUM 
+        DEFINE FUNCTION FROM oSF2A_4:Cell("D2_TOTAL")   FUNCTION SUM 
+        DEFINE FUNCTION FROM oSF2A_4:Cell("D2_VALBRUT")   FUNCTION SUM 		
 
-		DEFINE FUNCTION FROM oSF2A_4:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_4:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_4:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_4:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-	EndIf
+        DEFINE FUNCTION FROM oSF2A_4:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_4:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_4:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_4:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+    EndIf
 
-	oSF2_4:Enable()	
+    oSF2_4:Enable()	
 
 // ORDEM 05 - Estado x Produto  
 ElseIf _nOrdem == 5
-	oSF2FIL_5:Enable()
+    oSF2FIL_5:Enable()
 
     //Define break para Filial para sumarizar campos
-	DEFINE BREAK oBrkFil OF oSF2FIL_5 WHEN oSF2FIL_5:CELL("D2_FILIAL") TITLE {|| "SUBTOTAL FILIAL: " + cNomeFil}
+    DEFINE BREAK oBrkFil OF oSF2FIL_5 WHEN oSF2FIL_5:CELL("D2_FILIAL") TITLE {|| "SUBTOTAL FILIAL: " + cNomeFil}
 
-	//Define funcoes de soma para secao
-	If MV_PAR19 == 1 //SECAO SINTETICA // ORDEM 5 - Estado x Produto  
-		oSF2S_5:Enable()	
+    //Define funcoes de soma para secao
+    If MV_PAR19 == 1 //SECAO SINTETICA // ORDEM 5 - Estado x Produto  
+        oSF2S_5:Enable()	
 
-		DEFINE FUNCTION FROM oSF2S_5:Cell("D2_QUANT")   FUNCTION SUM 
-		DEFINE FUNCTION FROM oSF2S_5:Cell("D2_QTSEGUM") FUNCTION SUM 
-		DEFINE FUNCTION FROM oSF2S_5:Cell("D2_TOTAL")   FUNCTION SUM 
-		DEFINE FUNCTION FROM oSF2S_5:Cell("D2_VALBRUT")   FUNCTION SUM 
-		
-		DEFINE FUNCTION FROM oSF2S_5:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2S_5:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2S_5:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2S_5:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-	Else	//ANALITICO
-		oSF2A_5:Enable()	
+        DEFINE FUNCTION FROM oSF2S_5:Cell("D2_QUANT")   FUNCTION SUM 
+        DEFINE FUNCTION FROM oSF2S_5:Cell("D2_QTSEGUM") FUNCTION SUM 
+        DEFINE FUNCTION FROM oSF2S_5:Cell("D2_TOTAL")   FUNCTION SUM 
+        DEFINE FUNCTION FROM oSF2S_5:Cell("D2_VALBRUT")   FUNCTION SUM 
+        
+        DEFINE FUNCTION FROM oSF2S_5:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2S_5:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2S_5:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2S_5:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+    Else	//ANALITICO
+        oSF2A_5:Enable()	
 
-		DEFINE FUNCTION FROM oSF2A_5:Cell("D2_QUANT")   FUNCTION SUM 
-		DEFINE FUNCTION FROM oSF2A_5:Cell("D2_QTSEGUM") FUNCTION SUM 
-		DEFINE FUNCTION FROM oSF2A_5:Cell("D2_TOTAL")   FUNCTION SUM 
-		DEFINE FUNCTION FROM oSF2A_5:Cell("D2_VALBRUT")   FUNCTION SUM 
-		
-		DEFINE FUNCTION FROM oSF2A_5:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_5:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_5:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_5:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-	EndIf
+        DEFINE FUNCTION FROM oSF2A_5:Cell("D2_QUANT")   FUNCTION SUM 
+        DEFINE FUNCTION FROM oSF2A_5:Cell("D2_QTSEGUM") FUNCTION SUM 
+        DEFINE FUNCTION FROM oSF2A_5:Cell("D2_TOTAL")   FUNCTION SUM 
+        DEFINE FUNCTION FROM oSF2A_5:Cell("D2_VALBRUT")   FUNCTION SUM 
+        
+        DEFINE FUNCTION FROM oSF2A_5:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_5:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_5:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_5:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+    EndIf
 
-	oSF2_5:Enable()	
+    oSF2_5:Enable()	
 
 //ORDEM 06 POR Municipio
 ElseIf _nOrdem == 6
-	oSF2FIL_6:Enable()
+    oSF2FIL_6:Enable()
 
     //Define break para Filial para sumarizar campos
-	DEFINE BREAK oBrkFil OF oSF2FIL_6 WHEN oSF2FIL_6:CELL("D2_FILIAL") TITLE {|| "SUBTOTAL FILIAL: " + cNomeFil}
+    DEFINE BREAK oBrkFil OF oSF2FIL_6 WHEN oSF2FIL_6:CELL("D2_FILIAL") TITLE {|| "SUBTOTAL FILIAL: " + cNomeFil}
 
-	//Define funcoes de soma para secao
-	If MV_PAR19 == 1 //Sintetico
-		oSF2S_6:Enable() 
+    //Define funcoes de soma para secao
+    If MV_PAR19 == 1 //Sintetico
+        oSF2S_6:Enable() 
 
-		DEFINE FUNCTION FROM oSF2S_6:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkMun
-		DEFINE FUNCTION FROM oSF2S_6:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkMun
-		DEFINE FUNCTION FROM oSF2S_6:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkMun
-		DEFINE FUNCTION FROM oSF2S_6:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkMun
-				
-		DEFINE FUNCTION FROM oSF2S_6:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2S_6:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2S_6:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2S_6:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-	Else	
-		oSF2A_6:Enable()			
+        DEFINE FUNCTION FROM oSF2S_6:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkMun
+        DEFINE FUNCTION FROM oSF2S_6:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkMun
+        DEFINE FUNCTION FROM oSF2S_6:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkMun
+        DEFINE FUNCTION FROM oSF2S_6:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkMun
+                
+        DEFINE FUNCTION FROM oSF2S_6:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2S_6:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2S_6:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2S_6:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+    Else	
+        oSF2A_6:Enable()			
 
-		DEFINE FUNCTION FROM oSF2A_6:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkMun
-		DEFINE FUNCTION FROM oSF2A_6:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkMun
-		DEFINE FUNCTION FROM oSF2A_6:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkMun
-		DEFINE FUNCTION FROM oSF2A_6:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkMun
-		
-		DEFINE FUNCTION FROM oSF2A_6:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_6:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_6:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_6:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-	EndIf
+        DEFINE FUNCTION FROM oSF2A_6:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkMun
+        DEFINE FUNCTION FROM oSF2A_6:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkMun
+        DEFINE FUNCTION FROM oSF2A_6:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkMun
+        DEFINE FUNCTION FROM oSF2A_6:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkMun
+        
+        DEFINE FUNCTION FROM oSF2A_6:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_6:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_6:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_6:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+    EndIf
 
-	oSF2_6:Enable()	
-	oSF2_6A:Enable()
+    oSF2_6:Enable()	
+    oSF2_6A:Enable()
 
 //ORDEM 07 POR CLIENTE
 ElseIf _nOrdem == 7
-	oSF2FIL_7:Enable()
+    oSF2FIL_7:Enable()
 
     //Define break para Filial para sumarizar campos
-	DEFINE BREAK oBrkFil OF oSF2FIL_7 WHEN oSF2FIL_7:CELL("D2_FILIAL") TITLE {|| "SUBTOTAL FILIAL: " + cNomeFil}
+    DEFINE BREAK oBrkFil OF oSF2FIL_7 WHEN oSF2FIL_7:CELL("D2_FILIAL") TITLE {|| "SUBTOTAL FILIAL: " + cNomeFil}
 
-	//Define funcoes de soma para secao
-	If MV_PAR19 == 1 //SINTETICO ORDEM 07 - Cliente
-		oSF2S_7:Enable() 
+    //Define funcoes de soma para secao
+    If MV_PAR19 == 1 //SINTETICO ORDEM 07 - Cliente
+        oSF2S_7:Enable() 
 
-		DEFINE FUNCTION FROM oSF2S_7:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkRede
-		DEFINE FUNCTION FROM oSF2S_7:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkRede
-		DEFINE FUNCTION FROM oSF2S_7:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkRede
-		DEFINE FUNCTION FROM oSF2S_7:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkRede		
-		
-		DEFINE FUNCTION FROM oSF2S_7:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2S_7:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2S_7:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2S_7:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-	Else// ANALITICO ORDEM 07 - Cliente
-		oSF2A_7:Enable()			
+        DEFINE FUNCTION FROM oSF2S_7:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkRede
+        DEFINE FUNCTION FROM oSF2S_7:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkRede
+        DEFINE FUNCTION FROM oSF2S_7:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkRede
+        DEFINE FUNCTION FROM oSF2S_7:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkRede		
+        
+        DEFINE FUNCTION FROM oSF2S_7:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2S_7:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2S_7:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2S_7:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+    Else// ANALITICO ORDEM 07 - Cliente
+        oSF2A_7:Enable()			
 
-		DEFINE FUNCTION FROM oSF2A_7:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkRede
-		DEFINE FUNCTION FROM oSF2A_7:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkRede
-		DEFINE FUNCTION FROM oSF2A_7:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkRede
-		DEFINE FUNCTION FROM oSF2A_7:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkRede		
-		
-		DEFINE FUNCTION FROM oSF2A_7:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_7:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_7:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_7:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-	EndIf	
+        DEFINE FUNCTION FROM oSF2A_7:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkRede
+        DEFINE FUNCTION FROM oSF2A_7:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkRede
+        DEFINE FUNCTION FROM oSF2A_7:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkRede
+        DEFINE FUNCTION FROM oSF2A_7:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkRede		
+        
+        DEFINE FUNCTION FROM oSF2A_7:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_7:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_7:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_7:Cell("D2_VALBRUT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+    EndIf	
 
-	oSF2_7:Enable()	
-	oSF2_7A:Enable()
-	
+    oSF2_7:Enable()	
+    oSF2_7A:Enable()
+    
 ElseIf _nOrdem == 8  // ORDEM 08
-	If MV_PAR19 == 2 //ANALITICO
-		oSF2FIL_8:Enable()
-		oSF2_8:Enable()
-		oSF2A_8:Enable() 
-	                             
-		//Define break para Filial para sumarizar campos
-		DEFINE BREAK oBrkFil OF oSF2FIL_8 WHEN oSF2FIL_8:CELL("D2_FILIAL") TITLE {|| "SUBTOTAL FILIAL: " + cNomeFil}   
-		
-		DEFINE FUNCTION FROM oSF2A_8:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkNF NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_8:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkNF NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_8:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkNF NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_8:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkNF NO END Section NO END REPORT	
-		
-		DEFINE FUNCTION FROM oSF2A_8:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_8:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_8:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2A_8:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-	Else//ORDEM 08 - SINTETICO
-	
-		oSF2FIL_8:Enable()
-		oSF2S_8:Enable() 
-		
-		DEFINE BREAK oBrkEmis OF oSF2S_8 WHEN oSF2S_8:CELL("F2_EMISSAO") TITLE {|| "Total do Dia: " }
-		
-		DEFINE FUNCTION FROM oSF2S_8:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkEmis NO END Section 
-		DEFINE FUNCTION FROM oSF2S_8:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkEmis NO END Section 
-		
-		//Define break para Filial para sumarizar campos
-		DEFINE BREAK oBrkFil OF oSF2FIL_8 WHEN oSF2FIL_8:CELL("D2_FILIAL") TITLE {|| "SUBTOTAL FILIAL: " + cNomeFil}   
-		
-		DEFINE FUNCTION FROM oSF2S_8:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		DEFINE FUNCTION FROM oSF2S_8:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-	
-		// Alterar aqui os dados para troca nf.
- 	EndIf
+    If MV_PAR19 == 2 //ANALITICO
+        oSF2FIL_8:Enable()
+        oSF2_8:Enable()
+        oSF2A_8:Enable() 
+                                 
+        //Define break para Filial para sumarizar campos
+        DEFINE BREAK oBrkFil OF oSF2FIL_8 WHEN oSF2FIL_8:CELL("D2_FILIAL") TITLE {|| "SUBTOTAL FILIAL: " + cNomeFil}   
+        
+        DEFINE FUNCTION FROM oSF2A_8:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkNF NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_8:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkNF NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_8:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkNF NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_8:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkNF NO END Section NO END REPORT	
+        
+        DEFINE FUNCTION FROM oSF2A_8:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_8:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_8:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2A_8:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+    Else//ORDEM 08 - SINTETICO
+    
+        oSF2FIL_8:Enable()
+        oSF2S_8:Enable() 
+        
+        DEFINE BREAK oBrkEmis OF oSF2S_8 WHEN oSF2S_8:CELL("F2_EMISSAO") TITLE {|| "Total do Dia: " }
+        
+        DEFINE FUNCTION FROM oSF2S_8:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkEmis NO END Section 
+        DEFINE FUNCTION FROM oSF2S_8:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkEmis NO END Section 
+        
+        //Define break para Filial para sumarizar campos
+        DEFINE BREAK oBrkFil OF oSF2FIL_8 WHEN oSF2FIL_8:CELL("D2_FILIAL") TITLE {|| "SUBTOTAL FILIAL: " + cNomeFil}   
+        
+        DEFINE FUNCTION FROM oSF2S_8:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        DEFINE FUNCTION FROM oSF2S_8:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+    
+        // Alterar aqui os dados para troca nf.
+     EndIf
 ElseIf _nOrdem == 9
 
-	oSF2FIL_9:Enable()
-	oSF2_9:Enable()
-	oSF2S_9:Enable()
-	
+    oSF2FIL_9:Enable()
+    oSF2_9:Enable()
+    oSF2S_9:Enable()
+    
     //Define break para Filial para sumarizar campos
-	DEFINE BREAK oBrkFil OF oSF2FIL_9 WHEN oSF2FIL_9:CELL("D2_FILIAL") TITLE {|| "SUBTOTAL FILIAL: " + cNomeFil}
+    DEFINE BREAK oBrkFil OF oSF2FIL_9 WHEN oSF2FIL_9:CELL("D2_FILIAL") TITLE {|| "SUBTOTAL FILIAL: " + cNomeFil}
 
-	//Define funcoes de soma para secao
-	DEFINE FUNCTION FROM oSF2S_9:Cell("D2_QUANT")   FUNCTION SUM 
-	DEFINE FUNCTION FROM oSF2S_9:Cell("D2_QTSEGUM") FUNCTION SUM 
-	DEFINE FUNCTION FROM oSF2S_9:Cell("D2_TOTAL")   FUNCTION SUM 
-	DEFINE FUNCTION FROM oSF2S_9:Cell("D2_VALBRUT") FUNCTION SUM 
-		
-	DEFINE FUNCTION FROM oSF2S_9:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-	DEFINE FUNCTION FROM oSF2S_9:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-	DEFINE FUNCTION FROM oSF2S_9:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-	DEFINE FUNCTION FROM oSF2S_9:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-		
+    //Define funcoes de soma para secao
+    DEFINE FUNCTION FROM oSF2S_9:Cell("D2_QUANT")   FUNCTION SUM 
+    DEFINE FUNCTION FROM oSF2S_9:Cell("D2_QTSEGUM") FUNCTION SUM 
+    DEFINE FUNCTION FROM oSF2S_9:Cell("D2_TOTAL")   FUNCTION SUM 
+    DEFINE FUNCTION FROM oSF2S_9:Cell("D2_VALBRUT") FUNCTION SUM 
+        
+    DEFINE FUNCTION FROM oSF2S_9:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+    DEFINE FUNCTION FROM oSF2S_9:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+    DEFINE FUNCTION FROM oSF2S_9:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+    DEFINE FUNCTION FROM oSF2S_9:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+        
 //Ordem - Dia x Estado x Produto
 ElseIf _nOrdem == 13 
-	oSF2FIL_13:Enable()
-	oSF2DT_13:Enable()
-	oSF2_13:Enable()
-	oSF2A_13:Enable()
-	
+    oSF2FIL_13:Enable()
+    oSF2DT_13:Enable()
+    oSF2_13:Enable()
+    oSF2A_13:Enable()
+    
     //Define break para Filial para sumarizar campos
-	DEFINE BREAK oBrkFil OF oSF2FIL_13 WHEN oSF2FIL_13:CELL("D2_FILIAL") TITLE {|| "SUBTOTAL FILIAL: " + cNomeFil}       
-	
-	//Define break para Filial para dia de quebra
-	DEFINE BREAK oBrkDtEmis OF oSF2DT_13 WHEN oSF2DT_13:CELL("QBRDATA") TITLE {|| "SUBTOTAL DO DIA: " + _cDia} 
-	
-	DEFINE FUNCTION FROM oSF2A_13:Cell("D2_QUANT")   FUNCTION SUM 
-	DEFINE FUNCTION FROM oSF2A_13:Cell("D2_QTSEGUM") FUNCTION SUM 
-	DEFINE FUNCTION FROM oSF2A_13:Cell("D2_TOTAL")   FUNCTION SUM 
-	DEFINE FUNCTION FROM oSF2A_13:Cell("D2_VALBRUT") FUNCTION SUM 
-	
-	DEFINE FUNCTION FROM oSF2A_13:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-	DEFINE FUNCTION FROM oSF2A_13:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-	DEFINE FUNCTION FROM oSF2A_13:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
-	DEFINE FUNCTION FROM oSF2A_13:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT 
-	
-	DEFINE FUNCTION FROM oSF2A_13:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkDtEmis NO END Section NO END REPORT	
-	DEFINE FUNCTION FROM oSF2A_13:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkDtEmis NO END Section NO END REPORT	
-	DEFINE FUNCTION FROM oSF2A_13:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkDtEmis NO END Section NO END REPORT	
-	DEFINE FUNCTION FROM oSF2A_13:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkDtEmis NO END Section NO END REPORT
+    DEFINE BREAK oBrkFil OF oSF2FIL_13 WHEN oSF2FIL_13:CELL("D2_FILIAL") TITLE {|| "SUBTOTAL FILIAL: " + cNomeFil}       
+    
+    //Define break para Filial para dia de quebra
+    DEFINE BREAK oBrkDtEmis OF oSF2DT_13 WHEN oSF2DT_13:CELL("QBRDATA") TITLE {|| "SUBTOTAL DO DIA: " + _cDia} 
+    
+    DEFINE FUNCTION FROM oSF2A_13:Cell("D2_QUANT")   FUNCTION SUM 
+    DEFINE FUNCTION FROM oSF2A_13:Cell("D2_QTSEGUM") FUNCTION SUM 
+    DEFINE FUNCTION FROM oSF2A_13:Cell("D2_TOTAL")   FUNCTION SUM 
+    DEFINE FUNCTION FROM oSF2A_13:Cell("D2_VALBRUT") FUNCTION SUM 
+    
+    DEFINE FUNCTION FROM oSF2A_13:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+    DEFINE FUNCTION FROM oSF2A_13:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+    DEFINE FUNCTION FROM oSF2A_13:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT	
+    DEFINE FUNCTION FROM oSF2A_13:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkFil NO END Section NO END REPORT 
+    
+    DEFINE FUNCTION FROM oSF2A_13:Cell("D2_QUANT")   FUNCTION SUM BREAK oBrkDtEmis NO END Section NO END REPORT	
+    DEFINE FUNCTION FROM oSF2A_13:Cell("D2_QTSEGUM") FUNCTION SUM BREAK oBrkDtEmis NO END Section NO END REPORT	
+    DEFINE FUNCTION FROM oSF2A_13:Cell("D2_TOTAL")   FUNCTION SUM BREAK oBrkDtEmis NO END Section NO END REPORT	
+    DEFINE FUNCTION FROM oSF2A_13:Cell("D2_VALBRUT") FUNCTION SUM BREAK oBrkDtEmis NO END Section NO END REPORT
 EndIf
 
 //Define query para ordem COORDENADOR
 If _nOrdem == 1 //ORDEM 01
-	//Verifica para ver se relatorio sintetico ou analitico, 1 = sintetico
-	If MV_PAR19 == 1 //SINTETICO - ORDEM 01
-		BEGIN REPORT QUERY oSF2FIL_1
-	                               
-		BeginSql alias "QRY1"   	   	
-		   	SELECT 			
-					SUM(T.D2_QUANT)   AS D2_QUANT,
-					AVG(T.D2_PRCVEN)  AS D2_PRCVEN,
-					SUM(T.D2_TOTAL)   AS D2_TOTAL,				
-					SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
-					SUM(T.D2_QTSEGUM) AS D2_QTSEGUM,
-					SUM(T.D2_COMIS1)  AS D2_COMIS1,  
-					SUM(T.D2_I_FRET)  AS D2_I_FRET,				
-					SUM(T.D2_CUSTO1)  AS D2_CUSTO1,
-					SUM(T.D2_QTDEDEV) AS D2_QTDEDEV,
-					SUM(T.D2_VALDEV)  AS D2_VALDEV,				
-					SUM(T.D2_ICMSRET) AS D2_ICMSRET,				
-				    SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,
-				    T.A3_NOMEC,T.A3_TIPOC,T.A3_TIPOV,
-				    T.D2_UM,T.D2_SEGUM,T.B1_I_DESCD,T.B1_COD,T.F2_VEND1,T.F2_VEND2,T.F2_VEND3,
-				    T.A3_COD,T.A3_NOME,T.D2_FILIAL, T.C5_ASSNOM,T.C5_I_LOCEM,T.C5_ASSCOD,
-					T.C5_I_PEDDW, T.C5_I_EVENT, T.F2_I_DTRC
+    //Verifica para ver se relatorio sintetico ou analitico, 1 = sintetico
+    If MV_PAR19 == 1 //SINTETICO - ORDEM 01
+        BEGIN REPORT QUERY oSF2FIL_1
+                                   
+        BeginSql alias "QRY1"   	   	
+               SELECT 			
+                    SUM(T.D2_QUANT)   AS D2_QUANT,
+                    AVG(T.D2_PRCVEN)  AS D2_PRCVEN,
+                    SUM(T.D2_TOTAL)   AS D2_TOTAL,				
+                    SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
+                    SUM(T.D2_QTSEGUM) AS D2_QTSEGUM,
+                    SUM(T.D2_COMIS1)  AS D2_COMIS1,  
+                    SUM(T.D2_I_FRET)  AS D2_I_FRET,				
+                    SUM(T.D2_CUSTO1)  AS D2_CUSTO1,
+                    SUM(T.D2_QTDEDEV) AS D2_QTDEDEV,
+                    SUM(T.D2_VALDEV)  AS D2_VALDEV,				
+                    SUM(T.D2_ICMSRET) AS D2_ICMSRET,				
+                    SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,
+                    T.A3_NOMEC,T.A3_TIPOC,T.A3_TIPOV,
+                    T.D2_UM,T.D2_SEGUM,T.B1_I_DESCD,T.B1_COD,T.F2_VEND1,T.F2_VEND2,T.F2_VEND3,
+                    T.A3_COD,T.A3_NOME,T.D2_FILIAL, T.C5_ASSNOM,T.C5_I_LOCEM,T.C5_ASSCOD,
+                    T.C5_I_PEDDW, T.C5_I_EVENT, T.F2_I_DTRC
             FROM
-		   	(	SELECT 		
-				SUM(SD2.D2_QUANT)   AS D2_QUANT,
-				AVG(SD2.D2_PRCVEN)  AS D2_PRCVEN,
-				SUM(SD2.D2_TOTAL)   AS D2_TOTAL,
-				SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,				
-				SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,
-				SUM(((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
-				SUM(SD2.D2_I_FRET)  AS D2_I_FRET,
-				SUM(SD2.D2_CUSTO1)  AS D2_CUSTO1,
-				SUM(SD2.D2_ICMSRET) AS D2_ICMSRET,
-				SA3C.A3_NOME AS A3_NOMEC,
-				SA3C.A3_TIPO AS A3_TIPOC,
-				SA3.A3_TIPO AS A3_TIPOV,
-				SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SF2.F2_VEND1,SF2.F2_VEND2,SF2.F2_VEND3,
-				SA3.A3_COD,SA3.A3_NOME,SD2.D2_FILIAL, SC5.C5_ASSNOM,SC5.C5_I_LOCEM,SC5.C5_ASSCOD,SC5.C5_I_PEDDW, SC5.C5_I_EVENT,SF2.F2_I_DTRC, 
-				SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,SD2.D2_COD,
-				(SELECT COALESCE(SUM(D1.D1_QUANT),0)
-			       FROM %Table:SD1% D1
-				   %exp:_cJOIN_SF1%
-			       WHERE D1.D_E_L_E_T_ = ' '
-			         AND D1.D1_TIPO = 'D'
-			         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			         AND D1.D1_NFORI   = SD2.D2_DOC
-			         AND D1.D1_SERIORI = SD2.D2_SERIE
-			         AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			         AND D1.D1_LOJA    = SD2.D2_LOJA    
-			         AND D1.D1_COD     = SD2.D2_COD 
-				   ) AS D2_QTDEDEV,
-				(SELECT COALESCE(SUM(D1.D1_TOTAL),0)
-			       FROM %Table:SD1% D1
-				   %exp:_cJOIN_SF1%
-			       WHERE D1.D_E_L_E_T_ = ' '
-			         AND D1.D1_TIPO = 'D'
-			         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			         AND D1.D1_NFORI   = SD2.D2_DOC
-			         AND D1.D1_SERIORI = SD2.D2_SERIE
-			         AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			         AND D1.D1_LOJA    = SD2.D2_LOJA    
-			         AND D1.D1_COD     = SD2.D2_COD
-		           ) AS D2_VALDEV ,
-				(SUM(SD2.D2_VALBRUT)  -
-				(SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
-			       FROM %Table:SD1% D1
-				   %exp:_cJOIN_SF1%
-			       WHERE D1.D_E_L_E_T_ = ' '
-			         AND D1.D1_TIPO    = 'D'
-			         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			         AND D1.D1_NFORI   = SD2.D2_DOC
-			         AND D1.D1_SERIORI = SD2.D2_SERIE
-			         AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			         AND D1.D1_LOJA    = SD2.D2_LOJA    
-			         AND D1.D1_COD     = SD2.D2_COD
-		        )) AS VLRBRUTDEV
-			FROM 
-				%Table:SF2% SF2
-				JOIN %Table:SD2% SD2  ON SD2.D2_FILIAL  = SF2.F2_FILIAL AND SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE 
-				JOIN %Table:SA1% SA1  ON SA1.A1_FILIAL  = ' ' AND SA1.A1_COD   = SD2.D2_CLIENTE  AND SD2.D2_LOJA = SA1.A1_LOJA
-				JOIN %Table:SB1% SB1  ON SB1.B1_FILIAL  = ' ' AND SB1.B1_COD   = SD2.D2_COD 
-				JOIN %Table:SA3% SA3  ON SA3.A3_FILIAL  = ' ' AND SA3.A3_COD   = SF2.F2_VEND1 
-				JOIN %Table:SA3% SA3C ON SA3C.A3_FILIAL = ' ' AND SA3C.A3_COD  = SF2.F2_VEND2 
-				JOIN %Table:SBM% SBM  ON SBM.BM_FILIAL  = ' ' AND SBM.BM_GRUPO = SB1.B1_GRUPO 
-				JOIN %Table:ACY% ACY  ON ACY.ACY_FILIAL = ' ' AND ACY.ACY_GRPVEN = SA1.A1_GRPVEN  
-				JOIN %Table:SF4% SF4  ON SF4.F4_FILIAL  = SD2.D2_FILIAL AND SF4.F4_CODIGO = SD2.D2_TES
-				JOIN %Table:SC5% SC5  ON SC5.C5_FILIAL  = SF2.F2_FILIAL AND SC5.C5_NUM    = SF2.F2_I_PEDID
-				LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
-			WHERE 
-				SF2.%notDel%  
-				AND SD2.%notDel%  
-				AND SA1.%notDel%  		
-				AND SB1.%notDel%  					
-				AND SA3.%notDel%  											
-				AND SBM.%notDel%				
-				AND ACY.%notDel%
-				AND SF4.%notDel%
-				AND SC5.%notDel%
-			    %exp:_cFiltro%
-			 GROUP BY 
-				SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SF2.F2_VEND1,SF2.F2_VEND2,SF2.F2_VEND3,SA3.A3_COD,SA3.A3_NOME,
-				SD2.D2_FILIAL,SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,SD2.D2_COD,SC5.C5_ASSNOM,SC5.C5_I_LOCEM,
-				SC5.C5_ASSCOD,SC5.C5_I_PEDDW,SC5.C5_I_EVENT,SA3C.A3_NOME,SA3C.A3_TIPO,SA3.A3_TIPO, SF2.F2_I_DTRC
+               (	SELECT 		
+                SUM(SD2.D2_QUANT)   AS D2_QUANT,
+                AVG(SD2.D2_PRCVEN)  AS D2_PRCVEN,
+                SUM(SD2.D2_TOTAL)   AS D2_TOTAL,
+                SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,				
+                SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,
+                SUM(((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
+                SUM(SD2.D2_I_FRET)  AS D2_I_FRET,
+                SUM(SD2.D2_CUSTO1)  AS D2_CUSTO1,
+                SUM(SD2.D2_ICMSRET) AS D2_ICMSRET,
+                SA3C.A3_NOME AS A3_NOMEC,
+                SA3C.A3_TIPO AS A3_TIPOC,
+                SA3.A3_TIPO AS A3_TIPOV,
+                SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SF2.F2_VEND1,SF2.F2_VEND2,SF2.F2_VEND3,
+                SA3.A3_COD,SA3.A3_NOME,SD2.D2_FILIAL, SC5.C5_ASSNOM,SC5.C5_I_LOCEM,SC5.C5_ASSCOD,SC5.C5_I_PEDDW, SC5.C5_I_EVENT,SF2.F2_I_DTRC, 
+                SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,SD2.D2_COD,
+                (SELECT COALESCE(SUM(D1.D1_QUANT),0)
+                   FROM %Table:SD1% D1
+                   %exp:_cJOIN_SF1%
+                   WHERE D1.D_E_L_E_T_ = ' '
+                     AND D1.D1_TIPO = 'D'
+                     AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                     AND D1.D1_NFORI   = SD2.D2_DOC
+                     AND D1.D1_SERIORI = SD2.D2_SERIE
+                     AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                     AND D1.D1_LOJA    = SD2.D2_LOJA    
+                     AND D1.D1_COD     = SD2.D2_COD 
+                   ) AS D2_QTDEDEV,
+                (SELECT COALESCE(SUM(D1.D1_TOTAL),0)
+                   FROM %Table:SD1% D1
+                   %exp:_cJOIN_SF1%
+                   WHERE D1.D_E_L_E_T_ = ' '
+                     AND D1.D1_TIPO = 'D'
+                     AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                     AND D1.D1_NFORI   = SD2.D2_DOC
+                     AND D1.D1_SERIORI = SD2.D2_SERIE
+                     AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                     AND D1.D1_LOJA    = SD2.D2_LOJA    
+                     AND D1.D1_COD     = SD2.D2_COD
+                   ) AS D2_VALDEV ,
+                (SUM(SD2.D2_VALBRUT)  -
+                (SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
+                   FROM %Table:SD1% D1
+                   %exp:_cJOIN_SF1%
+                   WHERE D1.D_E_L_E_T_ = ' '
+                     AND D1.D1_TIPO    = 'D'
+                     AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                     AND D1.D1_NFORI   = SD2.D2_DOC
+                     AND D1.D1_SERIORI = SD2.D2_SERIE
+                     AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                     AND D1.D1_LOJA    = SD2.D2_LOJA    
+                     AND D1.D1_COD     = SD2.D2_COD
+                )) AS VLRBRUTDEV
+            FROM 
+                %Table:SF2% SF2
+                JOIN %Table:SD2% SD2  ON SD2.D2_FILIAL  = SF2.F2_FILIAL AND SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE 
+                JOIN %Table:SA1% SA1  ON SA1.A1_FILIAL  = ' ' AND SA1.A1_COD   = SD2.D2_CLIENTE  AND SD2.D2_LOJA = SA1.A1_LOJA
+                JOIN %Table:SB1% SB1  ON SB1.B1_FILIAL  = ' ' AND SB1.B1_COD   = SD2.D2_COD 
+                JOIN %Table:SA3% SA3  ON SA3.A3_FILIAL  = ' ' AND SA3.A3_COD   = SF2.F2_VEND1 
+                JOIN %Table:SA3% SA3C ON SA3C.A3_FILIAL = ' ' AND SA3C.A3_COD  = SF2.F2_VEND2 
+                JOIN %Table:SBM% SBM  ON SBM.BM_FILIAL  = ' ' AND SBM.BM_GRUPO = SB1.B1_GRUPO 
+                JOIN %Table:ACY% ACY  ON ACY.ACY_FILIAL = ' ' AND ACY.ACY_GRPVEN = SA1.A1_GRPVEN  
+                JOIN %Table:SF4% SF4  ON SF4.F4_FILIAL  = SD2.D2_FILIAL AND SF4.F4_CODIGO = SD2.D2_TES
+                JOIN %Table:SC5% SC5  ON SC5.C5_FILIAL  = SF2.F2_FILIAL AND SC5.C5_NUM    = SF2.F2_I_PEDID
+                LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
+            WHERE 
+                SF2.%notDel%  
+                AND SD2.%notDel%  
+                AND SA1.%notDel%  		
+                AND SB1.%notDel%  					
+                AND SA3.%notDel%  											
+                AND SBM.%notDel%				
+                AND ACY.%notDel%
+                AND SF4.%notDel%
+                AND SC5.%notDel%
+                %exp:_cFiltro%
+             GROUP BY 
+                SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SF2.F2_VEND1,SF2.F2_VEND2,SF2.F2_VEND3,SA3.A3_COD,SA3.A3_NOME,
+                SD2.D2_FILIAL,SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,SD2.D2_COD,SC5.C5_ASSNOM,SC5.C5_I_LOCEM,
+                SC5.C5_ASSCOD,SC5.C5_I_PEDDW,SC5.C5_I_EVENT,SA3C.A3_NOME,SA3C.A3_TIPO,SA3.A3_TIPO, SF2.F2_I_DTRC
              ) T
-			 GROUP BY 
-				D2_UM,D2_SEGUM,B1_I_DESCD,B1_COD,F2_VEND1,F2_VEND2,F2_VEND3,A3_COD,A3_NOME,D2_FILIAL, C5_ASSNOM,C5_I_LOCEM, 
-				C5_ASSCOD,C5_I_PEDDW,C5_I_EVENT,A3_NOMEC,A3_TIPOC,A3_TIPOV, F2_I_DTRC
-			ORDER BY 
-				D2_FILIAL,F2_VEND2,F2_VEND1,D2_QUANT DESC		
-		EndSql
-		 
-		END REPORT QUERY oSF2FIL_1
-		
-	Else //ANALITICO - ORDEM 01
-	
-		BEGIN REPORT QUERY oSF2FIL_1
-		
-		BeginSql alias "QRY1"   	   	
-	   		SELECT 
-				SF2.F2_DOC,SF2.F2_SERIE,SD2.D2_ITEM,SF2.F2_EMISSAO,SF2.F2_I_NTRIA, SF2.F2_I_STRIA,SF2.F2_I_DTRIA,
-				SD2.D2_CLIENTE,SD2.D2_LOJA,SC5.R_E_C_N_O_ SC5RECNO,SA1.A1_I_CLABC,
-				SA1.A1_NREDUZ, SD2.D2_COD,SD2.D2_SERIE, SD2.D2_QUANT,SD2.D2_PRCVEN,SD2.D2_TOTAL,SD2.D2_UM,SD2.D2_VALBRUT,
-				SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SF2.F2_VEND1,SF2.F2_VEND2,SF2.F2_VEND3,SD2.D2_QTSEGUM,
-				SD2.D2_FILIAL,SD2.D2_DOC,SD2.D2_PEDIDO,SA3.A3_NOME,SA3.A3_COD,SD2.D2_I_FRET,
-				(((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
-				SD2.D2_CUSTO1,SD2.D2_FILIAL,SD2.D2_ICMSRET, SC5.C5_I_TRCNF,	SC5.C5_I_FILFT, SC5.C5_I_FLFNC,
-				DAI.DAI_I_OPLO, SC5.C5_NUM, SD2.D2_LOCAL, SC5.C5_ASSNOM,SC5.C5_I_LOCEM,SC5.C5_ASSCOD, SC5.C5_I_PEDDW,
-				SC5.C5_I_OPER,SC5.C5_I_OPTRI,SC5.C5_I_PVREM,SC5.C5_I_PVFAT,	SC5.C5_I_CLIEN, SC5.C5_I_LOJEN, SC5.C5_I_EVENT, SC5.C5_I_QTDA,
-				SA1R.A1_NOME   AS NOME_CLIREM,
-				SA1R.A1_NREDUZ AS FANTASIA_CLIREM,
-			    SA3C.A3_NOME   AS A3_NOMEC,
-				SA3C.A3_TIPO   AS A3_TIPOC,
-				SA3.A3_TIPO    AS A3_TIPOV,
-				CC2.CC2_EST   ,
-			    CC2.CC2_I_MESO,
+             GROUP BY 
+                D2_UM,D2_SEGUM,B1_I_DESCD,B1_COD,F2_VEND1,F2_VEND2,F2_VEND3,A3_COD,A3_NOME,D2_FILIAL, C5_ASSNOM,C5_I_LOCEM, 
+                C5_ASSCOD,C5_I_PEDDW,C5_I_EVENT,A3_NOMEC,A3_TIPOC,A3_TIPOV, F2_I_DTRC
+            ORDER BY 
+                D2_FILIAL,F2_VEND2,F2_VEND1,D2_QUANT DESC		
+        EndSql
+         
+        END REPORT QUERY oSF2FIL_1
+        
+    Else //ANALITICO - ORDEM 01
+    
+        BEGIN REPORT QUERY oSF2FIL_1
+        
+        BeginSql alias "QRY1"   	   	
+               SELECT 
+                SF2.F2_DOC,SF2.F2_SERIE,SD2.D2_ITEM,SF2.F2_EMISSAO,SF2.F2_I_NTRIA, SF2.F2_I_STRIA,SF2.F2_I_DTRIA,
+                SD2.D2_CLIENTE,SD2.D2_LOJA,SC5.R_E_C_N_O_ SC5RECNO,SA1.A1_I_CLABC,
+                SA1.A1_NREDUZ, SD2.D2_COD,SD2.D2_SERIE, SD2.D2_QUANT,SD2.D2_PRCVEN,SD2.D2_TOTAL,SD2.D2_UM,SD2.D2_VALBRUT,
+                SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SF2.F2_VEND1,SF2.F2_VEND2,SF2.F2_VEND3,SD2.D2_QTSEGUM,
+                SD2.D2_FILIAL,SD2.D2_DOC,SD2.D2_PEDIDO,SA3.A3_NOME,SA3.A3_COD,SD2.D2_I_FRET,
+                (((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
+                SD2.D2_CUSTO1,SD2.D2_FILIAL,SD2.D2_ICMSRET, SC5.C5_I_TRCNF,	SC5.C5_I_FILFT, SC5.C5_I_FLFNC,
+                DAI.DAI_I_OPLO, SC5.C5_NUM, SD2.D2_LOCAL, SC5.C5_ASSNOM,SC5.C5_I_LOCEM,SC5.C5_ASSCOD, SC5.C5_I_PEDDW,
+                SC5.C5_I_OPER,SC5.C5_I_OPTRI,SC5.C5_I_PVREM,SC5.C5_I_PVFAT,	SC5.C5_I_CLIEN, SC5.C5_I_LOJEN, SC5.C5_I_EVENT, SC5.C5_I_QTDA,
+                SA1R.A1_NOME   AS NOME_CLIREM,
+                SA1R.A1_NREDUZ AS FANTASIA_CLIREM,
+                SA3C.A3_NOME   AS A3_NOMEC,
+                SA3C.A3_TIPO   AS A3_TIPOC,
+                SA3.A3_TIPO    AS A3_TIPOV,
+                CC2.CC2_EST   ,
+                CC2.CC2_I_MESO,
                 CC2.CC2_I_MICR, SF2.F2_I_DTRC,
-				(SELECT COALESCE(SUM(D1.D1_QUANT),0)
-			       FROM %Table:SD1% D1
-				   %exp:_cJOIN_SF1%
-			       WHERE D1.D_E_L_E_T_ = ' '
-			         AND D1.D1_TIPO = 'D'
-			         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			         AND D1.D1_NFORI   = SD2.D2_DOC
-			         AND D1.D1_SERIORI = SD2.D2_SERIE
-			         AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			         AND D1.D1_LOJA    = SD2.D2_LOJA    
-			         AND D1.D1_COD     = SD2.D2_COD 
-				   ) AS D2_QTDEDEV,
-				(SELECT COALESCE(SUM(D1.D1_TOTAL),0)
-			       FROM %Table:SD1% D1
-				   %exp:_cJOIN_SF1%
-			       WHERE D1.D_E_L_E_T_ = ' '
-			         AND D1.D1_TIPO = 'D'
-			         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			         AND D1.D1_NFORI   = SD2.D2_DOC
-			         AND D1.D1_SERIORI = SD2.D2_SERIE
-			         AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			         AND D1.D1_LOJA    = SD2.D2_LOJA    
-			         AND D1.D1_COD     = SD2.D2_COD
-		           ) AS D2_VALDEV ,
-				(SD2.D2_VALBRUT  -
-				(SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
-			       FROM %Table:SD1% D1
-				   %exp:_cJOIN_SF1%
-			       WHERE D1.D_E_L_E_T_ = ' '
-			         AND D1.D1_TIPO    = 'D'
-			         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			         AND D1.D1_NFORI   = SD2.D2_DOC
-			         AND D1.D1_SERIORI = SD2.D2_SERIE
-			         AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			         AND D1.D1_LOJA    = SD2.D2_LOJA    
-			         AND D1.D1_COD     = SD2.D2_COD
-		        )) AS VLRBRUTDEV
-			FROM %Table:SF2% SF2
-				JOIN %Table:SD2% SD2  ON SD2.D2_FILIAL  = SF2.F2_FILIAL AND SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE
-			    JOIN %Table:SA1% SA1  ON SA1.A1_FILIAL  = ' ' AND SA1.A1_COD   = SD2.D2_CLIENTE AND SA1.A1_LOJA = SD2.D2_LOJA 
-				JOIN %Table:SB1% SB1  ON SB1.B1_FILIAL  = ' ' AND SB1.B1_COD   = SD2.D2_COD 
-				JOIN %Table:SA3% SA3  ON SA3.A3_FILIAL  = ' ' AND SA3.A3_COD   = SF2.F2_VEND1 
-				JOIN %Table:SA3% SA3C ON SA3C.A3_FILIAL = ' ' AND SA3C.A3_COD  = SF2.F2_VEND2 
-				JOIN %Table:SBM% SBM  ON SBM.BM_FILIAL  = ' ' AND SBM.BM_GRUPO = SB1.B1_GRUPO 
-				JOIN %Table:ACY% ACY  ON ACY.ACY_FILIAL = ' ' AND ACY.ACY_GRPVEN  = SA1.A1_GRPVEN
-				JOIN %Table:SF4% SF4  ON SF4.f4_filial  = SD2.d2_filial AND SF4.F4_CODIGO = SD2.D2_TES
-				JOIN %Table:SC5% SC5  ON SC5.C5_FILIAL  = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
-				LEFT JOIN %Table:DAI% DAI  ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
-				LEFT JOIN %Table:SA1% SA1R ON SA1R.A1_FILIAL = ' ' AND SA1R.A1_COD = SC5.C5_I_CLIEN AND SA1R.A1_LOJA   = SC5.C5_I_LOJEN AND SA1R.%notDel% 								
-			    LEFT JOIN %Table:CC2% CC2  ON CC2.CC2_FILIAL = ' ' AND CC2.CC2_EST = SA1.A1_EST     AND CC2.CC2_CODMUN = SA1.A1_COD_MUN AND CC2.%notDel%
-			WHERE 
-				SF2.%notDel%  
-				AND SD2.%notDel%  
-				AND SA1.%notDel%  
-				AND SB1.%notDel%  					
-				AND SA3.%notDel%  											
-				AND SBM.%notDel%				
-				AND ACY.%notDel%
-				AND SF4.%notDel%
-				AND SC5.%notDel%
-			    %exp:_cFiltro% 
-			ORDER BY 
-				SD2.D2_FILIAL,SF2.F2_VEND2,SF2.F2_VEND1,SD2.D2_CLIENTE,SA3.A3_NOME,SA3.A3_COD
-		EndSql
-		
-		END REPORT QUERY oSF2FIL_1
-		
-	EndIf
-	
+                (SELECT COALESCE(SUM(D1.D1_QUANT),0)
+                   FROM %Table:SD1% D1
+                   %exp:_cJOIN_SF1%
+                   WHERE D1.D_E_L_E_T_ = ' '
+                     AND D1.D1_TIPO = 'D'
+                     AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                     AND D1.D1_NFORI   = SD2.D2_DOC
+                     AND D1.D1_SERIORI = SD2.D2_SERIE
+                     AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                     AND D1.D1_LOJA    = SD2.D2_LOJA    
+                     AND D1.D1_COD     = SD2.D2_COD 
+                   ) AS D2_QTDEDEV,
+                (SELECT COALESCE(SUM(D1.D1_TOTAL),0)
+                   FROM %Table:SD1% D1
+                   %exp:_cJOIN_SF1%
+                   WHERE D1.D_E_L_E_T_ = ' '
+                     AND D1.D1_TIPO = 'D'
+                     AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                     AND D1.D1_NFORI   = SD2.D2_DOC
+                     AND D1.D1_SERIORI = SD2.D2_SERIE
+                     AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                     AND D1.D1_LOJA    = SD2.D2_LOJA    
+                     AND D1.D1_COD     = SD2.D2_COD
+                   ) AS D2_VALDEV ,
+                (SD2.D2_VALBRUT  -
+                (SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
+                   FROM %Table:SD1% D1
+                   %exp:_cJOIN_SF1%
+                   WHERE D1.D_E_L_E_T_ = ' '
+                     AND D1.D1_TIPO    = 'D'
+                     AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                     AND D1.D1_NFORI   = SD2.D2_DOC
+                     AND D1.D1_SERIORI = SD2.D2_SERIE
+                     AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                     AND D1.D1_LOJA    = SD2.D2_LOJA    
+                     AND D1.D1_COD     = SD2.D2_COD
+                )) AS VLRBRUTDEV
+            FROM %Table:SF2% SF2
+                JOIN %Table:SD2% SD2  ON SD2.D2_FILIAL  = SF2.F2_FILIAL AND SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE
+                JOIN %Table:SA1% SA1  ON SA1.A1_FILIAL  = ' ' AND SA1.A1_COD   = SD2.D2_CLIENTE AND SA1.A1_LOJA = SD2.D2_LOJA 
+                JOIN %Table:SB1% SB1  ON SB1.B1_FILIAL  = ' ' AND SB1.B1_COD   = SD2.D2_COD 
+                JOIN %Table:SA3% SA3  ON SA3.A3_FILIAL  = ' ' AND SA3.A3_COD   = SF2.F2_VEND1 
+                JOIN %Table:SA3% SA3C ON SA3C.A3_FILIAL = ' ' AND SA3C.A3_COD  = SF2.F2_VEND2 
+                JOIN %Table:SBM% SBM  ON SBM.BM_FILIAL  = ' ' AND SBM.BM_GRUPO = SB1.B1_GRUPO 
+                JOIN %Table:ACY% ACY  ON ACY.ACY_FILIAL = ' ' AND ACY.ACY_GRPVEN  = SA1.A1_GRPVEN
+                JOIN %Table:SF4% SF4  ON SF4.f4_filial  = SD2.d2_filial AND SF4.F4_CODIGO = SD2.D2_TES
+                JOIN %Table:SC5% SC5  ON SC5.C5_FILIAL  = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
+                LEFT JOIN %Table:DAI% DAI  ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
+                LEFT JOIN %Table:SA1% SA1R ON SA1R.A1_FILIAL = ' ' AND SA1R.A1_COD = SC5.C5_I_CLIEN AND SA1R.A1_LOJA   = SC5.C5_I_LOJEN AND SA1R.%notDel% 								
+                LEFT JOIN %Table:CC2% CC2  ON CC2.CC2_FILIAL = ' ' AND CC2.CC2_EST = SA1.A1_EST     AND CC2.CC2_CODMUN = SA1.A1_COD_MUN AND CC2.%notDel%
+            WHERE 
+                SF2.%notDel%  
+                AND SD2.%notDel%  
+                AND SA1.%notDel%  
+                AND SB1.%notDel%  					
+                AND SA3.%notDel%  											
+                AND SBM.%notDel%				
+                AND ACY.%notDel%
+                AND SF4.%notDel%
+                AND SC5.%notDel%
+                %exp:_cFiltro% 
+            ORDER BY 
+                SD2.D2_FILIAL,SF2.F2_VEND2,SF2.F2_VEND1,SD2.D2_CLIENTE,SA3.A3_NOME,SA3.A3_COD
+        EndSql
+        
+        END REPORT QUERY oSF2FIL_1
+        
+    EndIf
+    
 ElseIf _nOrdem == 3  //ORDEM 03  - Produto       
-	//Define query para o relatorio  ordem produtos
-	//verifica se relatorio vai ser analitico ou SINTETICO
-	If MV_PAR19 == 1 //1 == SINTETICO - ORDEM 03
-	
-		oSF2S_3:Enable()
-		
-		BEGIN REPORT QUERY oSF2FIL_3
-		
-			BeginSql alias "QRY3"  //1 == SINTETICO  - ORDEM 3  - Produto   
-			
-		   	SELECT 			
-					SUM(T.D2_QUANT)   AS D2_QUANT,
-					AVG(T.D2_PRCVEN)  AS D2_PRCVEN,
-					SUM(T.D2_TOTAL)   AS D2_TOTAL,				
-					SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
-					SUM(T.D2_QTSEGUM) AS D2_QTSEGUM,
-					SUM(T.D2_COMIS1)  AS D2_COMIS1,  
-					SUM(T.D2_I_FRET)  AS D2_I_FRET,				
-					SUM(T.D2_CUSTO1)  AS D2_CUSTO1,
-					SUM(T.D2_ICMSRET) AS D2_ICMSRET,				
-					SUM(T.D2_QTDEDEV) AS D2_QTDEDEV,
-					SUM(T.D2_VALDEV)  AS D2_VALDEV,				
-				    SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,
-					T.D2_UM,
-					T.D2_SEGUM,
-					T.B1_I_DESCD,
-					T.B1_COD,
-					T.D2_COD,
-					T.C5_I_LOCEM,
-					T.D2_FILIAL
+    //Define query para o relatorio  ordem produtos
+    //verifica se relatorio vai ser analitico ou SINTETICO
+    If MV_PAR19 == 1 //1 == SINTETICO - ORDEM 03
+    
+        oSF2S_3:Enable()
+        
+        BEGIN REPORT QUERY oSF2FIL_3
+        
+            BeginSql alias "QRY3"  //1 == SINTETICO  - ORDEM 3  - Produto   
+            
+               SELECT 			
+                    SUM(T.D2_QUANT)   AS D2_QUANT,
+                    AVG(T.D2_PRCVEN)  AS D2_PRCVEN,
+                    SUM(T.D2_TOTAL)   AS D2_TOTAL,				
+                    SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
+                    SUM(T.D2_QTSEGUM) AS D2_QTSEGUM,
+                    SUM(T.D2_COMIS1)  AS D2_COMIS1,  
+                    SUM(T.D2_I_FRET)  AS D2_I_FRET,				
+                    SUM(T.D2_CUSTO1)  AS D2_CUSTO1,
+                    SUM(T.D2_ICMSRET) AS D2_ICMSRET,				
+                    SUM(T.D2_QTDEDEV) AS D2_QTDEDEV,
+                    SUM(T.D2_VALDEV)  AS D2_VALDEV,				
+                    SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,
+                    T.D2_UM,
+                    T.D2_SEGUM,
+                    T.B1_I_DESCD,
+                    T.B1_COD,
+                    T.D2_COD,
+                    T.C5_I_LOCEM,
+                    T.D2_FILIAL
             FROM
-		   	(	SELECT 			
-					SUM(SD2.D2_QUANT)   AS D2_QUANT,
-					AVG(SD2.D2_PRCVEN)  AS D2_PRCVEN,
-					SUM(SD2.D2_TOTAL)   AS D2_TOTAL,				
-					SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,								
-					SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,
-					SUM(((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
-					SUM(SD2.D2_I_FRET)  AS D2_I_FRET,
-					SUM(SD2.D2_CUSTO1)  AS D2_CUSTO1,
-					SUM(SD2.D2_ICMSRET) AS D2_ICMSRET,				
-					SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SD2.D2_COD,SD2.D2_FILIAL,
-					SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,SC5.C5_I_LOCEM,
-					(SELECT COALESCE(SUM(D1.D1_QUANT),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD 
-					   ) AS D2_QTDEDEV,
-					(SELECT COALESCE(SUM(D1.D1_TOTAL),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		               ) AS D2_VALDEV ,
-					(SUM(SD2.D2_VALBRUT)  -
-					(SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO    = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		            )) AS VLRBRUTDEV
-			     FROM 
-					%Table:SF2% SF2
-					JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
-					JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
-					JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
-					JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
-					JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
-					JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
-					JOIN %Table:SF4% SF4 ON SD2.D2_FILIAL = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo
-					JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
-     				LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
-			     WHERE 
-					SF2.%notDel%  
-					AND SD2.%notDel%  
-					AND SA1.%notDel%  		
-					AND SB1.%notDel%  					
-					AND SA3.%notDel%  											
-					AND SBM.%notDel%				
-					AND ACY.%notDel%
-					AND SF4.%notDel%
-					AND SC5.%notDel%
-			    	%exp:_cFiltro% 
-				 GROUP BY 
-	 				SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SD2.D2_COD,SD2.D2_FILIAL,
-					SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SC5.C5_I_LOCEM,SD2.D2_LOJA
-					) T
-				 GROUP BY 
-	 				D2_UM,D2_SEGUM,B1_I_DESCD,B1_COD,D2_COD,D2_FILIAL,C5_I_LOCEM
-				ORDER BY 
-					D2_FILIAL,D2_COD
-			EndSql
-			
-		END REPORT QUERY oSF2FIL_3
-		
-	Else // ANALITICO  - ORDEM 03  - PRODUTO
-		oSF2A_3:Enable()	
+               (	SELECT 			
+                    SUM(SD2.D2_QUANT)   AS D2_QUANT,
+                    AVG(SD2.D2_PRCVEN)  AS D2_PRCVEN,
+                    SUM(SD2.D2_TOTAL)   AS D2_TOTAL,				
+                    SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,								
+                    SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,
+                    SUM(((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
+                    SUM(SD2.D2_I_FRET)  AS D2_I_FRET,
+                    SUM(SD2.D2_CUSTO1)  AS D2_CUSTO1,
+                    SUM(SD2.D2_ICMSRET) AS D2_ICMSRET,				
+                    SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SD2.D2_COD,SD2.D2_FILIAL,
+                    SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,SC5.C5_I_LOCEM,
+                    (SELECT COALESCE(SUM(D1.D1_QUANT),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD 
+                       ) AS D2_QTDEDEV,
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                       ) AS D2_VALDEV ,
+                    (SUM(SD2.D2_VALBRUT)  -
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO    = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                    )) AS VLRBRUTDEV
+                 FROM 
+                    %Table:SF2% SF2
+                    JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
+                    JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
+                    JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
+                    JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
+                    JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
+                    JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
+                    JOIN %Table:SF4% SF4 ON SD2.D2_FILIAL = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo
+                    JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
+                     LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
+                 WHERE 
+                    SF2.%notDel%  
+                    AND SD2.%notDel%  
+                    AND SA1.%notDel%  		
+                    AND SB1.%notDel%  					
+                    AND SA3.%notDel%  											
+                    AND SBM.%notDel%				
+                    AND ACY.%notDel%
+                    AND SF4.%notDel%
+                    AND SC5.%notDel%
+                    %exp:_cFiltro% 
+                 GROUP BY 
+                     SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SD2.D2_COD,SD2.D2_FILIAL,
+                    SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SC5.C5_I_LOCEM,SD2.D2_LOJA
+                    ) T
+                 GROUP BY 
+                     D2_UM,D2_SEGUM,B1_I_DESCD,B1_COD,D2_COD,D2_FILIAL,C5_I_LOCEM
+                ORDER BY 
+                    D2_FILIAL,D2_COD
+            EndSql
+            
+        END REPORT QUERY oSF2FIL_3
+        
+    Else // ANALITICO  - ORDEM 03  - PRODUTO
+        oSF2A_3:Enable()	
 
-		BEGIN REPORT QUERY oSF2FIL_3
-			BeginSql alias "QRY3"   	   	
-		   		SELECT 
-					SF2.F2_DOC,SF2.F2_SERIE,SD2.D2_ITEM,SF2.F2_EMISSAO, SD2.D2_CLIENTE,SD2.D2_LOJA,
-					SA1.A1_NREDUZ, SD2.D2_QUANT,SD2.D2_PRCVEN,SD2.D2_TOTAL,SD2.D2_UM,
-					SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SF2.F2_VEND1,SA3.A3_SUPER,SA3.A3_COD,
-					SA3.A3_NOME,ACY.ACY_DESCRI,ACY.ACY_GRPVEN,SD2.D2_COD,
-					SD2.D2_QTSEGUM,
-					SD2.D2_FILIAL,
-					SD2.D2_DOC,SD2.D2_I_FRET,
-					(((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
-					SD2.D2_PEDIDO,SF2.F2_EMISSAO,
-					SD2.D2_CUSTO1,
-					SD2.D2_FILIAL,SD2.D2_VALBRUT,SD2.D2_ICMSRET, SC5.C5_I_TRCNF, SC5.C5_I_FILFT, SC5.C5_I_FLFNC,
-					SD2.D2_LOCAL,SC5.C5_I_LOCEM,SC5.C5_I_QTDA,
-					(SELECT COALESCE(SUM(D1.D1_QUANT),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD 
-					   ) AS D2_QTDEDEV,
-					(SELECT COALESCE(SUM(D1.D1_TOTAL),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		               ) AS D2_VALDEV,
-					(SD2.D2_VALBRUT  -
-					(SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		            )) AS VLRBRUTDEV
-				FROM 
-					%Table:SF2% SF2
-					JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
-					JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
-					JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
-					JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
-					JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
-					JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
-					JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo  
-					JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
-     				LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
-				WHERE 
-					SF2.%notDel%  
-					AND SD2.%notDel%  
-					AND SA1.%notDel%  		
-					AND SB1.%notDel%  					
-					AND SA3.%notDel%  											
-					AND SBM.%notDel%				
-					AND ACY.%notDel%
-					AND SF4.%notDel%   
-					AND SC5.%notDel%
-				    %exp:_cFiltro%
-				ORDER BY 
-					SD2.D2_FILIAL,SD2.D2_COD,SF2.F2_EMISSAO,SD2.D2_CLIENTE
-			EndSql
-		END REPORT QUERY oSF2FIL_3
-	EndIf
+        BEGIN REPORT QUERY oSF2FIL_3
+            BeginSql alias "QRY3"   	   	
+                   SELECT 
+                    SF2.F2_DOC,SF2.F2_SERIE,SD2.D2_ITEM,SF2.F2_EMISSAO, SD2.D2_CLIENTE,SD2.D2_LOJA,
+                    SA1.A1_NREDUZ, SD2.D2_QUANT,SD2.D2_PRCVEN,SD2.D2_TOTAL,SD2.D2_UM,
+                    SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SF2.F2_VEND1,SA3.A3_SUPER,SA3.A3_COD,
+                    SA3.A3_NOME,ACY.ACY_DESCRI,ACY.ACY_GRPVEN,SD2.D2_COD,
+                    SD2.D2_QTSEGUM,
+                    SD2.D2_FILIAL,
+                    SD2.D2_DOC,SD2.D2_I_FRET,
+                    (((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
+                    SD2.D2_PEDIDO,SF2.F2_EMISSAO,
+                    SD2.D2_CUSTO1,
+                    SD2.D2_FILIAL,SD2.D2_VALBRUT,SD2.D2_ICMSRET, SC5.C5_I_TRCNF, SC5.C5_I_FILFT, SC5.C5_I_FLFNC,
+                    SD2.D2_LOCAL,SC5.C5_I_LOCEM,SC5.C5_I_QTDA,
+                    (SELECT COALESCE(SUM(D1.D1_QUANT),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD 
+                       ) AS D2_QTDEDEV,
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                       ) AS D2_VALDEV,
+                    (SD2.D2_VALBRUT  -
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                    )) AS VLRBRUTDEV
+                FROM 
+                    %Table:SF2% SF2
+                    JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
+                    JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
+                    JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
+                    JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
+                    JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
+                    JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
+                    JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo  
+                    JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
+                     LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
+                WHERE 
+                    SF2.%notDel%  
+                    AND SD2.%notDel%  
+                    AND SA1.%notDel%  		
+                    AND SB1.%notDel%  					
+                    AND SA3.%notDel%  											
+                    AND SBM.%notDel%				
+                    AND ACY.%notDel%
+                    AND SF4.%notDel%   
+                    AND SC5.%notDel%
+                    %exp:_cFiltro%
+                ORDER BY 
+                    SD2.D2_FILIAL,SD2.D2_COD,SF2.F2_EMISSAO,SD2.D2_CLIENTE
+            EndSql
+        END REPORT QUERY oSF2FIL_3
+    EndIf
 ElseIf _nOrdem == 4//SINTETICO
 
-	//Define query para o relatorio - ORDEM 04 REDE
-	If MV_PAR19 == 1 //SINTETICO
-		oSF2S_4:Enable()	
-		BEGIN REPORT QUERY oSF2FIL_4
-			BeginSql alias "QRY4"   	   	
-		SELECT 			
-				SUM(T.D2_QUANT)   AS D2_QUANT,
-				AVG(T.D2_PRCVEN)  AS D2_PRCVEN,
-				SUM(T.D2_QTSEGUM) AS D2_QTSEGUM,
-				SUM(T.D2_TOTAL)   AS D2_TOTAL,				
-				SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
-				SUM(T.D2_COMIS1)  AS D2_COMIS1,  
-				SUM(T.D2_I_FRET)  AS D2_I_FRET,				
-				SUM(T.D2_CUSTO1)  AS D2_CUSTO1,
-				SUM(T.D2_QTDEDEV) AS D2_QTDEDEV,
-				SUM(T.D2_VALDEV)  AS D2_VALDEV,				
-				SUM(T.D2_ICMSRET) AS D2_ICMSRET,				
-			    SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,
-				T.D2_UM,T.D2_SEGUM,T.ACY_DESCRI,T.ACY_GRPVEN,T.A1_GRPVEN,T.D2_COD,
-				T.B1_I_DESCD,T.D2_FILIAL, T.DAI_I_OPLO,T.C5_I_LOCEM
+    //Define query para o relatorio - ORDEM 04 REDE
+    If MV_PAR19 == 1 //SINTETICO
+        oSF2S_4:Enable()	
+        BEGIN REPORT QUERY oSF2FIL_4
+            BeginSql alias "QRY4"   	   	
+        SELECT 			
+                SUM(T.D2_QUANT)   AS D2_QUANT,
+                AVG(T.D2_PRCVEN)  AS D2_PRCVEN,
+                SUM(T.D2_QTSEGUM) AS D2_QTSEGUM,
+                SUM(T.D2_TOTAL)   AS D2_TOTAL,				
+                SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
+                SUM(T.D2_COMIS1)  AS D2_COMIS1,  
+                SUM(T.D2_I_FRET)  AS D2_I_FRET,				
+                SUM(T.D2_CUSTO1)  AS D2_CUSTO1,
+                SUM(T.D2_QTDEDEV) AS D2_QTDEDEV,
+                SUM(T.D2_VALDEV)  AS D2_VALDEV,				
+                SUM(T.D2_ICMSRET) AS D2_ICMSRET,				
+                SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,
+                T.D2_UM,T.D2_SEGUM,T.ACY_DESCRI,T.ACY_GRPVEN,T.A1_GRPVEN,T.D2_COD,
+                T.B1_I_DESCD,T.D2_FILIAL, T.DAI_I_OPLO,T.C5_I_LOCEM
         FROM
-		(SELECT 			
-					SUM(SD2.D2_QUANT)   AS D2_QUANT,
-					AVG(SD2.D2_PRCVEN)  AS D2_PRCVEN,
-					SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,
-					SUM(SD2.D2_TOTAL)   AS D2_TOTAL,
-					SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,
-					SUM(((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
-					SUM(SD2.D2_I_FRET)  AS D2_I_FRET,
-					SUM(SD2.D2_CUSTO1)  AS D2_CUSTO1,
-					SUM(SD2.D2_ICMSRET) AS D2_ICMSRET,				
-					SD2.D2_UM,SD2.D2_SEGUM,ACY.ACY_DESCRI,ACY.ACY_GRPVEN,SA1.A1_GRPVEN,
-					SD2.D2_COD,SB1.B1_I_DESCD,SD2.D2_FILIAL, DAI.DAI_I_OPLO,
-					SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,SC5.C5_I_LOCEM,
-					(SELECT COALESCE(SUM(D1.D1_QUANT),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD 
-					   ) AS D2_QTDEDEV,
-					(SELECT COALESCE(SUM(D1.D1_TOTAL),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		               ) AS D2_VALDEV,
-					(SUM(SD2.D2_VALBRUT) -
-					(SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		            )) AS VLRBRUTDEV
-				FROM 
-					%Table:SF2% SF2
-					JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
-					JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
-					JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
-					JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
-					JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
-					JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN				
-					JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo
-					JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
-					LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
-				WHERE 
-					SF2.%notDel%  
-					AND SD2.%notDel%  
-					AND SA1.%notDel%  		
-					AND SB1.%notDel%  					
-					AND SA3.%notDel%  											
-					AND SBM.%notDel%				
-					AND ACY.%notDel%
-					AND SF4.%notDel%
-					AND SC5.%notDel%
-				    %exp:_cFiltro%
-				 GROUP BY 		 		    
-					SD2.D2_UM,SD2.D2_SEGUM,ACY.ACY_DESCRI,ACY.ACY_GRPVEN,SA1.A1_GRPVEN,SD2.D2_COD,
-					SB1.B1_I_DESCD,SD2.D2_FILIAL, DAI.DAI_I_OPLO,
-					SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,SC5.C5_I_LOCEM
+        (SELECT 			
+                    SUM(SD2.D2_QUANT)   AS D2_QUANT,
+                    AVG(SD2.D2_PRCVEN)  AS D2_PRCVEN,
+                    SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,
+                    SUM(SD2.D2_TOTAL)   AS D2_TOTAL,
+                    SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,
+                    SUM(((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
+                    SUM(SD2.D2_I_FRET)  AS D2_I_FRET,
+                    SUM(SD2.D2_CUSTO1)  AS D2_CUSTO1,
+                    SUM(SD2.D2_ICMSRET) AS D2_ICMSRET,				
+                    SD2.D2_UM,SD2.D2_SEGUM,ACY.ACY_DESCRI,ACY.ACY_GRPVEN,SA1.A1_GRPVEN,
+                    SD2.D2_COD,SB1.B1_I_DESCD,SD2.D2_FILIAL, DAI.DAI_I_OPLO,
+                    SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,SC5.C5_I_LOCEM,
+                    (SELECT COALESCE(SUM(D1.D1_QUANT),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD 
+                       ) AS D2_QTDEDEV,
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                       ) AS D2_VALDEV,
+                    (SUM(SD2.D2_VALBRUT) -
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                    )) AS VLRBRUTDEV
+                FROM 
+                    %Table:SF2% SF2
+                    JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
+                    JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
+                    JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
+                    JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
+                    JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
+                    JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN				
+                    JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo
+                    JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
+                    LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
+                WHERE 
+                    SF2.%notDel%  
+                    AND SD2.%notDel%  
+                    AND SA1.%notDel%  		
+                    AND SB1.%notDel%  					
+                    AND SA3.%notDel%  											
+                    AND SBM.%notDel%				
+                    AND ACY.%notDel%
+                    AND SF4.%notDel%
+                    AND SC5.%notDel%
+                    %exp:_cFiltro%
+                 GROUP BY 		 		    
+                    SD2.D2_UM,SD2.D2_SEGUM,ACY.ACY_DESCRI,ACY.ACY_GRPVEN,SA1.A1_GRPVEN,SD2.D2_COD,
+                    SB1.B1_I_DESCD,SD2.D2_FILIAL, DAI.DAI_I_OPLO,
+                    SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,SC5.C5_I_LOCEM
         ) T
-				 GROUP BY 		 		    
-					D2_UM,D2_SEGUM,ACY_DESCRI,ACY_GRPVEN,A1_GRPVEN,D2_COD,
-					B1_I_DESCD,D2_FILIAL, DAI_I_OPLO , C5_I_LOCEM
-				ORDER BY 
-					D2_FILIAL,ACY_GRPVEN,D2_COD
-			EndSql
-		END REPORT QUERY oSF2FIL_4
-	Else // ANALITICO ORDEM 04
-	
-		oSF2A_4:Enable()	
-		BEGIN REPORT QUERY oSF2FIL_4
-			BeginSql alias "QRY4"   	   	
-		   		SELECT 			
-					SF2.F2_DOC,SF2.F2_SERIE,SF2.F2_EMISSAO, SD2.D2_CLIENTE,SD2.D2_LOJA,
-					SA1.A1_NREDUZ, SD2.D2_QUANT,SD2.D2_PRCVEN,SD2.D2_TOTAL,SD2.D2_UM,SD2.D2_QTSEGUM,SD2.D2_VALBRUT,
-					SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SF2.F2_VEND1,ACY.ACY_DESCRI,
-					SA1.A1_GRPVEN,SD2.D2_COD,SD2.D2_FILIAL,SD2.D2_DOC,SD2.D2_ITEM,SD2.D2_I_FRET,
-					(((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
-					SD2.D2_CUSTO1,SD2.D2_FILIAL,SD2.D2_ICMSRET,SC5.C5_I_TRCNF, SC5.C5_I_FILFT, 
-					SC5.C5_I_FLFNC,DAI.DAI_I_OPLO,SD2.D2_LOCAL, SC5.C5_I_LOCEM , SC5.C5_I_QTDA,
-					(SELECT COALESCE(SUM(D1.D1_QUANT),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD 
-					   ) AS D2_QTDEDEV,
-					(SELECT COALESCE(SUM(D1.D1_TOTAL),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		               ) AS D2_VALDEV,
-					(SD2.D2_VALBRUT  -
-					(SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		            )) AS VLRBRUTDEV
-					FROM 
-					%Table:SF2% SF2
-					JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
-					JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
-					JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
-					JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
-					JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
-					JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
-					JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo  
-					JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
-					LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
-				WHERE 			
-					SF2.%notDel%  
-					AND SD2.%notDel%  
-					AND SA1.%notDel%  		
-					AND SB1.%notDel%  					
-					AND SA3.%notDel%  											
-					AND SBM.%notDel%				
-					AND ACY.%notDel%
-					AND SF4.%notDel%
-					AND SC5.%notDel%
-				    %exp:_cFiltro%
-				ORDER BY 
-			  		SD2.D2_FILIAL,SA1.A1_GRPVEN,SD2.D2_DOC,SD2.D2_ITEM
-		EndSql
-		END REPORT QUERY oSF2FIL_4
-	EndIf
+                 GROUP BY 		 		    
+                    D2_UM,D2_SEGUM,ACY_DESCRI,ACY_GRPVEN,A1_GRPVEN,D2_COD,
+                    B1_I_DESCD,D2_FILIAL, DAI_I_OPLO , C5_I_LOCEM
+                ORDER BY 
+                    D2_FILIAL,ACY_GRPVEN,D2_COD
+            EndSql
+        END REPORT QUERY oSF2FIL_4
+    Else // ANALITICO ORDEM 04
+    
+        oSF2A_4:Enable()	
+        BEGIN REPORT QUERY oSF2FIL_4
+            BeginSql alias "QRY4"   	   	
+                   SELECT 			
+                    SF2.F2_DOC,SF2.F2_SERIE,SF2.F2_EMISSAO, SD2.D2_CLIENTE,SD2.D2_LOJA,
+                    SA1.A1_NREDUZ, SD2.D2_QUANT,SD2.D2_PRCVEN,SD2.D2_TOTAL,SD2.D2_UM,SD2.D2_QTSEGUM,SD2.D2_VALBRUT,
+                    SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SF2.F2_VEND1,ACY.ACY_DESCRI,
+                    SA1.A1_GRPVEN,SD2.D2_COD,SD2.D2_FILIAL,SD2.D2_DOC,SD2.D2_ITEM,SD2.D2_I_FRET,
+                    (((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
+                    SD2.D2_CUSTO1,SD2.D2_FILIAL,SD2.D2_ICMSRET,SC5.C5_I_TRCNF, SC5.C5_I_FILFT, 
+                    SC5.C5_I_FLFNC,DAI.DAI_I_OPLO,SD2.D2_LOCAL, SC5.C5_I_LOCEM , SC5.C5_I_QTDA,
+                    (SELECT COALESCE(SUM(D1.D1_QUANT),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD 
+                       ) AS D2_QTDEDEV,
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                       ) AS D2_VALDEV,
+                    (SD2.D2_VALBRUT  -
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                    )) AS VLRBRUTDEV
+                    FROM 
+                    %Table:SF2% SF2
+                    JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
+                    JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
+                    JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
+                    JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
+                    JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
+                    JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
+                    JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo  
+                    JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
+                    LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
+                WHERE 			
+                    SF2.%notDel%  
+                    AND SD2.%notDel%  
+                    AND SA1.%notDel%  		
+                    AND SB1.%notDel%  					
+                    AND SA3.%notDel%  											
+                    AND SBM.%notDel%				
+                    AND ACY.%notDel%
+                    AND SF4.%notDel%
+                    AND SC5.%notDel%
+                    %exp:_cFiltro%
+                ORDER BY 
+                      SD2.D2_FILIAL,SA1.A1_GRPVEN,SD2.D2_DOC,SD2.D2_ITEM
+        EndSql
+        END REPORT QUERY oSF2FIL_4
+    EndIf
 
 ElseIf _nOrdem == 5//ORDEM 05 Estado X Produto
-	If MV_PAR19 == 1//SINTETICA // ORDEM 05 - Estado x Produto  
-		oSF2S_5:Enable()				
-		BEGIN REPORT QUERY oSF2FIL_5
-			BeginSql alias "QRY5"   	   	
+    If MV_PAR19 == 1//SINTETICA // ORDEM 05 - Estado x Produto  
+        oSF2S_5:Enable()				
+        BEGIN REPORT QUERY oSF2FIL_5
+            BeginSql alias "QRY5"   	   	
 
-		   	SELECT 			
-					SUM(T.D2_QUANT)   AS D2_QUANT,
-					AVG(T.D2_PRCVEN)  AS D2_PRCVEN,
-					SUM(T.D2_TOTAL)   AS D2_TOTAL,				
-					SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
-					SUM(T.D2_QTSEGUM) AS D2_QTSEGUM,
-					SUM(T.D2_COMIS1)  AS D2_COMIS1,  
-					SUM(T.D2_I_FRET)  AS D2_I_FRET,				
-					SUM(T.D2_CUSTO1)  AS D2_CUSTO1,
-					SUM(T.D2_QTDEDEV) AS D2_QTDEDEV,
-					SUM(T.D2_VALDEV)  AS D2_VALDEV,				
-					SUM(T.D2_ICMSRET) AS D2_ICMSRET,				
-				    SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,
-					T.D2_UM,T.D2_SEGUM,T.B1_I_DESCD,T.B1_COD,
-					T.D2_COD,T.D2_EST,T.D2_FILIAL,T.C5_I_LOCEM
+               SELECT 			
+                    SUM(T.D2_QUANT)   AS D2_QUANT,
+                    AVG(T.D2_PRCVEN)  AS D2_PRCVEN,
+                    SUM(T.D2_TOTAL)   AS D2_TOTAL,				
+                    SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
+                    SUM(T.D2_QTSEGUM) AS D2_QTSEGUM,
+                    SUM(T.D2_COMIS1)  AS D2_COMIS1,  
+                    SUM(T.D2_I_FRET)  AS D2_I_FRET,				
+                    SUM(T.D2_CUSTO1)  AS D2_CUSTO1,
+                    SUM(T.D2_QTDEDEV) AS D2_QTDEDEV,
+                    SUM(T.D2_VALDEV)  AS D2_VALDEV,				
+                    SUM(T.D2_ICMSRET) AS D2_ICMSRET,				
+                    SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,
+                    T.D2_UM,T.D2_SEGUM,T.B1_I_DESCD,T.B1_COD,
+                    T.D2_COD,T.D2_EST,T.D2_FILIAL,T.C5_I_LOCEM
             FROM
-		   	(	SELECT 			
-					SUM(SD2.D2_QUANT)   AS D2_QUANT,
-					AVG(SD2.D2_PRCVEN)  AS D2_PRCVEN,
-					SUM(SD2.D2_TOTAL)   AS D2_TOTAL,				
-					SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,								
-					SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,
-					SUM(((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
-					SUM(SD2.D2_I_FRET)  AS D2_I_FRET,				
-					SUM(SD2.D2_CUSTO1)  AS D2_CUSTO1,
-					SUM(SD2.D2_ICMSRET) AS D2_ICMSRET,				
-					SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SC5.C5_I_LOCEM,
-					SD2.D2_COD,SD2.D2_EST,SD2.D2_FILIAL,SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,
-					(SELECT COALESCE(SUM(D1.D1_QUANT),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD 
-					   ) AS D2_QTDEDEV,
-					(SELECT COALESCE(SUM(D1.D1_TOTAL),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		               ) AS D2_VALDEV,
-					(SUM(SD2.D2_VALBRUT)  -
-					(SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		            )) AS VLRBRUTDEV
-				FROM 
-					%Table:SF2% SF2
-					JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
-					JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
-					JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
-					JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
-					JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
-					JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
-					JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo
-					JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
-    				LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
+               (	SELECT 			
+                    SUM(SD2.D2_QUANT)   AS D2_QUANT,
+                    AVG(SD2.D2_PRCVEN)  AS D2_PRCVEN,
+                    SUM(SD2.D2_TOTAL)   AS D2_TOTAL,				
+                    SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,								
+                    SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,
+                    SUM(((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
+                    SUM(SD2.D2_I_FRET)  AS D2_I_FRET,				
+                    SUM(SD2.D2_CUSTO1)  AS D2_CUSTO1,
+                    SUM(SD2.D2_ICMSRET) AS D2_ICMSRET,				
+                    SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SC5.C5_I_LOCEM,
+                    SD2.D2_COD,SD2.D2_EST,SD2.D2_FILIAL,SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,
+                    (SELECT COALESCE(SUM(D1.D1_QUANT),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD 
+                       ) AS D2_QTDEDEV,
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                       ) AS D2_VALDEV,
+                    (SUM(SD2.D2_VALBRUT)  -
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                    )) AS VLRBRUTDEV
+                FROM 
+                    %Table:SF2% SF2
+                    JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
+                    JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
+                    JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
+                    JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
+                    JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
+                    JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
+                    JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo
+                    JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
+                    LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
 
-				WHERE 
-					SF2.%notDel%  
-					AND SD2.%notDel%  
-					AND SA1.%notDel%  		
-					AND SB1.%notDel%  					
-					AND SA3.%notDel%  											
-					AND SBM.%notDel%				
-					AND ACY.%notDel%
-					AND SF4.%notDel%
-					AND SC5.%notDel%
-			    	%exp:_cFiltro%
-				 GROUP BY 
-	 				SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,C5_I_LOCEM,
-					SD2.D2_COD,SD2.D2_EST,SD2.D2_FILIAL,SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA 
-			) T
-				 GROUP BY 
-	 				T.D2_UM,T.D2_SEGUM,T.B1_I_DESCD,T.B1_COD,
-					T.D2_COD,T.D2_EST,T.D2_FILIAL,T.C5_I_LOCEM
-				ORDER BY 
-					T.D2_FILIAL,T.D2_EST,T.D2_COD
-			EndSql
-		END REPORT QUERY oSF2FIL_5
-	Else//ANALITICO ORDEM 05 Estado X Produto
-		oSF2A_5:Enable()	
-		BEGIN REPORT QUERY oSF2FIL_5
-			BeginSql alias "QRY5"   	   	
-		   		SELECT 
-					SF2.F2_DOC,SF2.F2_SERIE,SF2.F2_EMISSAO, SD2.D2_ITEM,SF2.F2_EMISSAO, SD2.D2_CLIENTE,SD2.D2_LOJA,
-					SA1.A1_NREDUZ, SA1.A1_MUN,SD2.D2_QUANT,SD2.D2_PRCVEN,SD2.D2_TOTAL,SD2.D2_UM,SD2.D2_VALBRUT,
-					SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SF2.F2_VEND1,SD2.D2_CF,
-					SD2.D2_EST,SD2.D2_COD,SD2.D2_QTSEGUM,SD2.D2_FILIAL,SD2.D2_DOC,SD2.D2_I_FRET,
-					(((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
-					SD2.D2_CUSTO1,SD2.D2_FILIAL,SD2.D2_ICMSRET, SC5.C5_I_TRCNF, SC5.C5_I_FILFT, SC5.C5_I_FLFNC,
+                WHERE 
+                    SF2.%notDel%  
+                    AND SD2.%notDel%  
+                    AND SA1.%notDel%  		
+                    AND SB1.%notDel%  					
+                    AND SA3.%notDel%  											
+                    AND SBM.%notDel%				
+                    AND ACY.%notDel%
+                    AND SF4.%notDel%
+                    AND SC5.%notDel%
+                    %exp:_cFiltro%
+                 GROUP BY 
+                     SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,C5_I_LOCEM,
+                    SD2.D2_COD,SD2.D2_EST,SD2.D2_FILIAL,SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA 
+            ) T
+                 GROUP BY 
+                     T.D2_UM,T.D2_SEGUM,T.B1_I_DESCD,T.B1_COD,
+                    T.D2_COD,T.D2_EST,T.D2_FILIAL,T.C5_I_LOCEM
+                ORDER BY 
+                    T.D2_FILIAL,T.D2_EST,T.D2_COD
+            EndSql
+        END REPORT QUERY oSF2FIL_5
+    Else//ANALITICO ORDEM 05 Estado X Produto
+        oSF2A_5:Enable()	
+        BEGIN REPORT QUERY oSF2FIL_5
+            BeginSql alias "QRY5"   	   	
+                   SELECT 
+                    SF2.F2_DOC,SF2.F2_SERIE,SF2.F2_EMISSAO, SD2.D2_ITEM,SF2.F2_EMISSAO, SD2.D2_CLIENTE,SD2.D2_LOJA,
+                    SA1.A1_NREDUZ, SA1.A1_MUN,SD2.D2_QUANT,SD2.D2_PRCVEN,SD2.D2_TOTAL,SD2.D2_UM,SD2.D2_VALBRUT,
+                    SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SF2.F2_VEND1,SD2.D2_CF,
+                    SD2.D2_EST,SD2.D2_COD,SD2.D2_QTSEGUM,SD2.D2_FILIAL,SD2.D2_DOC,SD2.D2_I_FRET,
+                    (((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
+                    SD2.D2_CUSTO1,SD2.D2_FILIAL,SD2.D2_ICMSRET, SC5.C5_I_TRCNF, SC5.C5_I_FILFT, SC5.C5_I_FLFNC,
                     SD2.D2_LOCAL,SC5.C5_I_LOCEM,SC5.C5_I_QTDA,
-					(SELECT COALESCE(SUM(D1.D1_QUANT),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD 
-					   ) AS D2_QTDEDEV,
-					(SELECT COALESCE(SUM(D1.D1_TOTAL),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		               ) AS D2_VALDEV,
-					(SD2.D2_VALBRUT  -
-					(SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		            )) AS VLRBRUTDEV
-				FROM 
-					%Table:SF2% SF2
-					JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
-					JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
-					JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
-					JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
-					JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
-					JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
-					JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo
-					JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
-     				LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
-				WHERE 
-					SF2.%notDel%  
-					AND SD2.%notDel%  
-					AND SA1.%notDel%  		
-					AND SB1.%notDel%  					
-					AND SA3.%notDel%  											
-					AND SBM.%notDel%				
-					AND ACY.%notDel%
-					AND SF4.%notDel%
-					AND SC5.%notDel%
-				    %exp:_cFiltro%
-				ORDER BY 
-					SD2.D2_FILIAL,SD2.D2_EST,SD2.D2_COD
-			EndSql
-		END REPORT QUERY oSF2FIL_5
-	EndIf
+                    (SELECT COALESCE(SUM(D1.D1_QUANT),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD 
+                       ) AS D2_QTDEDEV,
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                       ) AS D2_VALDEV,
+                    (SD2.D2_VALBRUT  -
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                    )) AS VLRBRUTDEV
+                FROM 
+                    %Table:SF2% SF2
+                    JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
+                    JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
+                    JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
+                    JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
+                    JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
+                    JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
+                    JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo
+                    JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
+                     LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
+                WHERE 
+                    SF2.%notDel%  
+                    AND SD2.%notDel%  
+                    AND SA1.%notDel%  		
+                    AND SB1.%notDel%  					
+                    AND SA3.%notDel%  											
+                    AND SBM.%notDel%				
+                    AND ACY.%notDel%
+                    AND SF4.%notDel%
+                    AND SC5.%notDel%
+                    %exp:_cFiltro%
+                ORDER BY 
+                    SD2.D2_FILIAL,SD2.D2_EST,SD2.D2_COD
+            EndSql
+        END REPORT QUERY oSF2FIL_5
+    EndIf
 
 ElseIf _nOrdem == 6//ORDEM 06 - Municipio
-	If MV_PAR19 == 1//SINTETICO
-		oSF2S_6:Enable()				
-		
-		BEGIN REPORT QUERY oSF2FIL_6
-			BeginSql alias "QRY6"   	   	
-		SELECT 			
-				SUM(T.D2_QUANT)   AS D2_QUANT,
-				AVG(T.D2_PRCVEN)  AS D2_PRCVEN,
-				SUM(T.D2_TOTAL)   AS D2_TOTAL,				
-				SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
-				SUM(T.D2_QTSEGUM) AS D2_QTSEGUM,
-				SUM(T.D2_COMIS1)  AS D2_COMIS1,  
-				SUM(T.D2_I_FRET)  AS D2_I_FRET,				
-				SUM(T.D2_CUSTO1)  AS D2_CUSTO1,
-				SUM(T.D2_QTDEDEV) AS D2_QTDEDEV,
-				SUM(T.D2_VALDEV)  AS D2_VALDEV,				
-				SUM(T.D2_ICMSRET) AS D2_ICMSRET,				
-			    SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,
-				T.D2_UM,T.D2_SEGUM,T.B1_I_DESCD,T.B1_COD,
-				T.A1_EST,T.D2_FILIAL, T.DAI_I_OPLO,T.C5_I_LOCEM,
-				T.D2_COD,T.A1_COD_MUN,T.A1_MUN,T.A3_COD,T.A3_NOME,T.F2_VEND1
+    If MV_PAR19 == 1//SINTETICO
+        oSF2S_6:Enable()				
+        
+        BEGIN REPORT QUERY oSF2FIL_6
+            BeginSql alias "QRY6"   	   	
+        SELECT 			
+                SUM(T.D2_QUANT)   AS D2_QUANT,
+                AVG(T.D2_PRCVEN)  AS D2_PRCVEN,
+                SUM(T.D2_TOTAL)   AS D2_TOTAL,				
+                SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
+                SUM(T.D2_QTSEGUM) AS D2_QTSEGUM,
+                SUM(T.D2_COMIS1)  AS D2_COMIS1,  
+                SUM(T.D2_I_FRET)  AS D2_I_FRET,				
+                SUM(T.D2_CUSTO1)  AS D2_CUSTO1,
+                SUM(T.D2_QTDEDEV) AS D2_QTDEDEV,
+                SUM(T.D2_VALDEV)  AS D2_VALDEV,				
+                SUM(T.D2_ICMSRET) AS D2_ICMSRET,				
+                SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,
+                T.D2_UM,T.D2_SEGUM,T.B1_I_DESCD,T.B1_COD,
+                T.A1_EST,T.D2_FILIAL, T.DAI_I_OPLO,T.C5_I_LOCEM,
+                T.D2_COD,T.A1_COD_MUN,T.A1_MUN,T.A3_COD,T.A3_NOME,T.F2_VEND1
         FROM
-		(SELECT 			
-					SUM(SD2.D2_QUANT)   AS D2_QUANT,
-					AVG(SD2.D2_PRCVEN)  AS D2_PRCVEN,
-					SUM(SD2.D2_TOTAL)   AS D2_TOTAL,				
-					SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,								
-					SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,
-					SUM(((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
-					SUM(SD2.D2_I_FRET)  AS D2_I_FRET,
-					SUM(SD2.D2_CUSTO1)  AS D2_CUSTO1,
-					SUM(SD2.D2_ICMSRET) AS D2_ICMSRET,				
-					SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SC5.C5_I_LOCEM,
-					SD2.D2_COD,SA1.A1_COD_MUN,SA1.A1_MUN,SA3.A3_COD,SA3.A3_NOME,SF2.F2_VEND1,SD2.D2_FILIAL,
-					SA1.A1_EST, DAI.DAI_I_OPLO,
-					(SELECT COALESCE(SUM(D1.D1_QUANT),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD 
-					   ) AS D2_QTDEDEV,
-					(SELECT COALESCE(SUM(D1.D1_TOTAL),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		               ) AS D2_VALDEV,
-					(SUM(SD2.D2_VALBRUT)  -
-					(SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		            )) AS VLRBRUTDEV
-				FROM 
-					%Table:SF2% SF2
-					JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
-					JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
-					JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
-					JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
-					JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
-					JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
-					JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo
-					JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
-					LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
-				WHERE 
-					SF2.%notDel%  
-					AND SD2.%notDel%  
-					AND SA1.%notDel%  		
-					AND SB1.%notDel%  					
-					AND SA3.%notDel%  											
-					AND SBM.%notDel%				
-					AND ACY.%notDel%        
-					AND SF4.%notDel%
-					AND SC5.%notDel%
-			    	%exp:_cFiltro%
-				 GROUP BY 
-	 				SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SC5.C5_I_LOCEM,
-					SD2.D2_COD,SA1.A1_MUN,SA1.A1_COD_MUN,SA3.A3_COD,SA3.A3_NOME,SF2.F2_VEND1,SD2.D2_FILIAL,SA1.A1_EST, DAI.DAI_I_OPLO,
-					SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA    
-		) T
-				 GROUP BY 
-	 				D2_UM,D2_SEGUM,B1_I_DESCD,B1_COD,C5_I_LOCEM,
-					D2_COD,A1_MUN,A1_COD_MUN,A3_COD,A3_NOME,F2_VEND1,D2_FILIAL,A1_EST, DAI_I_OPLO
-				ORDER BY 
-					D2_FILIAL,A1_MUN,F2_VEND1,D2_COD
-			EndSql
-		END REPORT QUERY oSF2FIL_6
-	Else//ANALITICO ORDEM 06 - Municipio
-		oSF2A_6:Enable()	
-	
-		BEGIN REPORT QUERY oSF2FIL_6
-			BeginSql alias "QRY6"   	   	
-		   		SELECT  
-					SF2.F2_DOC,SF2.F2_SERIE,SF2.F2_EMISSAO,SD2.D2_ITEM,SF2.F2_EMISSAO, SD2.D2_CLIENTE,SD2.D2_LOJA,
-					SA1.A1_NREDUZ, SD2.D2_QUANT,SD2.D2_PRCVEN,SD2.D2_TOTAL,SD2.D2_UM,SD2.D2_VALBRUT,
-					SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SF2.F2_VEND1,
-					SA1.A1_MUN,SD2.D2_COD,SD2.D2_QTSEGUM,SD2.D2_FILIAL,SD2.D2_DOC,
-					SA1.A1_COD_MUN,SA3.A3_COD,SA3.A3_NOME,SD2.D2_I_FRET,
-					(((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
-					SD2.D2_CUSTO1,SD2.D2_FILIAL,SA1.A1_EST,SD2.D2_ICMSRET, SC5.C5_I_TRCNF, 
-					SC5.C5_I_FILFT, SC5.C5_I_FLFNC,DAI_I_OPLO,SD2.D2_LOCAL,SC5.C5_I_LOCEM,SC5.C5_I_QTDA,
-					(SELECT COALESCE(SUM(D1.D1_QUANT),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1% 
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD 
-					   ) AS D2_QTDEDEV,
-					(SELECT COALESCE(SUM(D1.D1_TOTAL),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		               ) AS D2_VALDEV,
-					(SD2.D2_VALBRUT  -
-					(SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		            )) AS VLRBRUTDEV
-				FROM 
-					%Table:SF2% SF2
-					JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
-					JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
-					JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
-					JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
-					JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
-					JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
-					JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo  
-					JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
-					LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
-				WHERE 
-					SF2.%notDel%  
-					AND SD2.%notDel%  
-					AND SA1.%notDel%  		
-					AND SB1.%notDel%  					
-					AND SA3.%notDel%  											
-					AND SBM.%notDel%				
-					AND ACY.%notDel%     
-					AND SF4.%notDel%     
-					AND SC5.%notDel%
-				    %exp:_cFiltro%
-				ORDER BY 
-					SD2.D2_FILIAL,SA1.A1_MUN,SB1.B1_COD
-			EndSql
-		END REPORT QUERY oSF2FIL_6
-	EndIf
-	
+        (SELECT 			
+                    SUM(SD2.D2_QUANT)   AS D2_QUANT,
+                    AVG(SD2.D2_PRCVEN)  AS D2_PRCVEN,
+                    SUM(SD2.D2_TOTAL)   AS D2_TOTAL,				
+                    SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,								
+                    SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,
+                    SUM(((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
+                    SUM(SD2.D2_I_FRET)  AS D2_I_FRET,
+                    SUM(SD2.D2_CUSTO1)  AS D2_CUSTO1,
+                    SUM(SD2.D2_ICMSRET) AS D2_ICMSRET,				
+                    SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SC5.C5_I_LOCEM,
+                    SD2.D2_COD,SA1.A1_COD_MUN,SA1.A1_MUN,SA3.A3_COD,SA3.A3_NOME,SF2.F2_VEND1,SD2.D2_FILIAL,
+                    SA1.A1_EST, DAI.DAI_I_OPLO,
+                    (SELECT COALESCE(SUM(D1.D1_QUANT),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD 
+                       ) AS D2_QTDEDEV,
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                       ) AS D2_VALDEV,
+                    (SUM(SD2.D2_VALBRUT)  -
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                    )) AS VLRBRUTDEV
+                FROM 
+                    %Table:SF2% SF2
+                    JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
+                    JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
+                    JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
+                    JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
+                    JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
+                    JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
+                    JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo
+                    JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
+                    LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
+                WHERE 
+                    SF2.%notDel%  
+                    AND SD2.%notDel%  
+                    AND SA1.%notDel%  		
+                    AND SB1.%notDel%  					
+                    AND SA3.%notDel%  											
+                    AND SBM.%notDel%				
+                    AND ACY.%notDel%        
+                    AND SF4.%notDel%
+                    AND SC5.%notDel%
+                    %exp:_cFiltro%
+                 GROUP BY 
+                     SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SC5.C5_I_LOCEM,
+                    SD2.D2_COD,SA1.A1_MUN,SA1.A1_COD_MUN,SA3.A3_COD,SA3.A3_NOME,SF2.F2_VEND1,SD2.D2_FILIAL,SA1.A1_EST, DAI.DAI_I_OPLO,
+                    SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA    
+        ) T
+                 GROUP BY 
+                     D2_UM,D2_SEGUM,B1_I_DESCD,B1_COD,C5_I_LOCEM,
+                    D2_COD,A1_MUN,A1_COD_MUN,A3_COD,A3_NOME,F2_VEND1,D2_FILIAL,A1_EST, DAI_I_OPLO
+                ORDER BY 
+                    D2_FILIAL,A1_MUN,F2_VEND1,D2_COD
+            EndSql
+        END REPORT QUERY oSF2FIL_6
+    Else//ANALITICO ORDEM 06 - Municipio
+        oSF2A_6:Enable()	
+    
+        BEGIN REPORT QUERY oSF2FIL_6
+            BeginSql alias "QRY6"   	   	
+                   SELECT  
+                    SF2.F2_DOC,SF2.F2_SERIE,SF2.F2_EMISSAO,SD2.D2_ITEM,SF2.F2_EMISSAO, SD2.D2_CLIENTE,SD2.D2_LOJA,
+                    SA1.A1_NREDUZ, SD2.D2_QUANT,SD2.D2_PRCVEN,SD2.D2_TOTAL,SD2.D2_UM,SD2.D2_VALBRUT,
+                    SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SF2.F2_VEND1,
+                    SA1.A1_MUN,SD2.D2_COD,SD2.D2_QTSEGUM,SD2.D2_FILIAL,SD2.D2_DOC,
+                    SA1.A1_COD_MUN,SA3.A3_COD,SA3.A3_NOME,SD2.D2_I_FRET,
+                    (((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
+                    SD2.D2_CUSTO1,SD2.D2_FILIAL,SA1.A1_EST,SD2.D2_ICMSRET, SC5.C5_I_TRCNF, 
+                    SC5.C5_I_FILFT, SC5.C5_I_FLFNC,DAI_I_OPLO,SD2.D2_LOCAL,SC5.C5_I_LOCEM,SC5.C5_I_QTDA,
+                    (SELECT COALESCE(SUM(D1.D1_QUANT),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1% 
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD 
+                       ) AS D2_QTDEDEV,
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                       ) AS D2_VALDEV,
+                    (SD2.D2_VALBRUT  -
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                    )) AS VLRBRUTDEV
+                FROM 
+                    %Table:SF2% SF2
+                    JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
+                    JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
+                    JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
+                    JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
+                    JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
+                    JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
+                    JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo  
+                    JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
+                    LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
+                WHERE 
+                    SF2.%notDel%  
+                    AND SD2.%notDel%  
+                    AND SA1.%notDel%  		
+                    AND SB1.%notDel%  					
+                    AND SA3.%notDel%  											
+                    AND SBM.%notDel%				
+                    AND ACY.%notDel%     
+                    AND SF4.%notDel%     
+                    AND SC5.%notDel%
+                    %exp:_cFiltro%
+                ORDER BY 
+                    SD2.D2_FILIAL,SA1.A1_MUN,SB1.B1_COD
+            EndSql
+        END REPORT QUERY oSF2FIL_6
+    EndIf
+    
 ElseIf _nOrdem == 7 //ORDEM 07 - Cliente
-	If MV_PAR19 == 1//SINTETICO
-		oSF2S_7:Enable()				
-		
-		BEGIN REPORT QUERY oSF2FIL_7 //SINTETICO - Cliente
-			BeginSql alias "QRY7"   	   	
-		    SELECT 			
-		    		SUM(T.D2_QUANT)   AS D2_QUANT,
-		    		AVG(T.D2_PRCVEN)  AS D2_PRCVEN,
-		    		SUM(T.D2_TOTAL)   AS D2_TOTAL,				
-		    		SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
-		    		SUM(T.D2_QTSEGUM) AS D2_QTSEGUM,
-		    		SUM(T.D2_COMIS1)  AS D2_COMIS1,  
-		    		SUM(T.D2_I_FRET)  AS D2_I_FRET,				
-		    		SUM(T.D2_CUSTO1)  AS D2_CUSTO1,
-		    		SUM(T.D2_QTDEDEV) AS D2_QTDEDEV,
-		    		SUM(T.D2_VALDEV)  AS D2_VALDEV,				
-		    		SUM(T.D2_ICMSRET) AS D2_ICMSRET,				
-		    	    SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,
-					T.D2_UM,T.D2_SEGUM,T.B1_I_DESCD,T.B1_COD,T.C5_I_LOCEM,
-					T.D2_COD,T.A1_COD_MUN,T.A1_MUN,T.A3_COD,T.A3_NOME,T.F2_VEND1,
-					T.A1_COD,T.A1_NREDUZ,T.A1_GRPVEN,T.ACY_DESCRI,T.A1_LOJA,T.D2_FILIAL,
-					T.A1_NOME, T.DAI_I_OPLO
+    If MV_PAR19 == 1//SINTETICO
+        oSF2S_7:Enable()				
+        
+        BEGIN REPORT QUERY oSF2FIL_7 //SINTETICO - Cliente
+            BeginSql alias "QRY7"   	   	
+            SELECT 			
+                    SUM(T.D2_QUANT)   AS D2_QUANT,
+                    AVG(T.D2_PRCVEN)  AS D2_PRCVEN,
+                    SUM(T.D2_TOTAL)   AS D2_TOTAL,				
+                    SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
+                    SUM(T.D2_QTSEGUM) AS D2_QTSEGUM,
+                    SUM(T.D2_COMIS1)  AS D2_COMIS1,  
+                    SUM(T.D2_I_FRET)  AS D2_I_FRET,				
+                    SUM(T.D2_CUSTO1)  AS D2_CUSTO1,
+                    SUM(T.D2_QTDEDEV) AS D2_QTDEDEV,
+                    SUM(T.D2_VALDEV)  AS D2_VALDEV,				
+                    SUM(T.D2_ICMSRET) AS D2_ICMSRET,				
+                    SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,
+                    T.D2_UM,T.D2_SEGUM,T.B1_I_DESCD,T.B1_COD,T.C5_I_LOCEM,
+                    T.D2_COD,T.A1_COD_MUN,T.A1_MUN,T.A3_COD,T.A3_NOME,T.F2_VEND1,
+                    T.A1_COD,T.A1_NREDUZ,T.A1_GRPVEN,T.ACY_DESCRI,T.A1_LOJA,T.D2_FILIAL,
+                    T.A1_NOME, T.DAI_I_OPLO
             FROM
-		    (SELECT 			
-					SUM(SD2.D2_QUANT)   AS D2_QUANT,
-					AVG(SD2.D2_PRCVEN)  AS D2_PRCVEN,
-					SUM(SD2.D2_TOTAL)   AS D2_TOTAL,				
-					SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,								
-					SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,
-					SUM(((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
-					SUM(SD2.D2_I_FRET)  AS D2_I_FRET,
-					SUM(SD2.D2_CUSTO1)  AS D2_CUSTO1,
-					SUM(SD2.D2_ICMSRET) AS D2_ICMSRET,				
-					SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SC5.C5_I_LOCEM,
-					SD2.D2_COD,SA1.A1_COD_MUN,SA1.A1_MUN,SA3.A3_COD,SA3.A3_NOME,SF2.F2_VEND1,
-					SA1.A1_COD,SA1.A1_NREDUZ,SA1.A1_GRPVEN,ACY.ACY_DESCRI,SA1.A1_LOJA,SD2.D2_FILIAL,
-					SA1.A1_NOME, DAI.DAI_I_OPLO,SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA, 
-					(SELECT COALESCE(SUM(D1.D1_QUANT),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD 
-					   ) AS D2_QTDEDEV,
-					(SELECT COALESCE(SUM(D1.D1_TOTAL),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		               ) AS D2_VALDEV,
-					(SUM(SD2.D2_VALBRUT)  -
-					(SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		            )) AS VLRBRUTDEV
-				FROM 
-					%Table:SF2% SF2
-					JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
-					JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
-					JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
-					JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
-					JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
-					JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
-					JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo
-					JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
-					LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
-				WHERE 
-					SF2.%notDel%  
-					AND SD2.%notDel%  
-					AND SA1.%notDel%  		
-					AND SB1.%notDel%  					
-					AND SA3.%notDel%  											
-					AND SBM.%notDel%				
-					AND ACY.%notDel%
-					AND SF4.%notDel%
-					AND SC5.%notDel%
-			    	%exp:_cFiltro%
-				 GROUP BY 
-	 				SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SC5.C5_I_LOCEM,
-					SD2.D2_COD,SA1.A1_MUN,SA1.A1_COD_MUN,SA3.A3_COD,SA3.A3_NOME,SF2.F2_VEND1,
-					SA1.A1_COD,SA1.A1_NREDUZ,SA1.A1_GRPVEN,ACY.ACY_DESCRI,SA1.A1_LOJA,SD2.D2_FILIAL,SA1.A1_NOME, DAI.DAI_I_OPLO,
+            (SELECT 			
+                    SUM(SD2.D2_QUANT)   AS D2_QUANT,
+                    AVG(SD2.D2_PRCVEN)  AS D2_PRCVEN,
+                    SUM(SD2.D2_TOTAL)   AS D2_TOTAL,				
+                    SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,								
+                    SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,
+                    SUM(((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
+                    SUM(SD2.D2_I_FRET)  AS D2_I_FRET,
+                    SUM(SD2.D2_CUSTO1)  AS D2_CUSTO1,
+                    SUM(SD2.D2_ICMSRET) AS D2_ICMSRET,				
+                    SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SC5.C5_I_LOCEM,
+                    SD2.D2_COD,SA1.A1_COD_MUN,SA1.A1_MUN,SA3.A3_COD,SA3.A3_NOME,SF2.F2_VEND1,
+                    SA1.A1_COD,SA1.A1_NREDUZ,SA1.A1_GRPVEN,ACY.ACY_DESCRI,SA1.A1_LOJA,SD2.D2_FILIAL,
+                    SA1.A1_NOME, DAI.DAI_I_OPLO,SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA, 
+                    (SELECT COALESCE(SUM(D1.D1_QUANT),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD 
+                       ) AS D2_QTDEDEV,
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                       ) AS D2_VALDEV,
+                    (SUM(SD2.D2_VALBRUT)  -
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                    )) AS VLRBRUTDEV
+                FROM 
+                    %Table:SF2% SF2
+                    JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
+                    JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
+                    JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
+                    JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
+                    JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
+                    JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
+                    JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo
+                    JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
+                    LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
+                WHERE 
+                    SF2.%notDel%  
+                    AND SD2.%notDel%  
+                    AND SA1.%notDel%  		
+                    AND SB1.%notDel%  					
+                    AND SA3.%notDel%  											
+                    AND SBM.%notDel%				
+                    AND ACY.%notDel%
+                    AND SF4.%notDel%
+                    AND SC5.%notDel%
+                    %exp:_cFiltro%
+                 GROUP BY 
+                     SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SC5.C5_I_LOCEM,
+                    SD2.D2_COD,SA1.A1_MUN,SA1.A1_COD_MUN,SA3.A3_COD,SA3.A3_NOME,SF2.F2_VEND1,
+                    SA1.A1_COD,SA1.A1_NREDUZ,SA1.A1_GRPVEN,ACY.ACY_DESCRI,SA1.A1_LOJA,SD2.D2_FILIAL,SA1.A1_NOME, DAI.DAI_I_OPLO,
                     SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA
                 ) T
-				 GROUP BY 
-	 				D2_UM,D2_SEGUM,B1_I_DESCD,B1_COD,C5_I_LOCEM,
-					D2_COD,A1_MUN,A1_COD_MUN,A3_COD,A3_NOME,F2_VEND1,
-					A1_COD,A1_NREDUZ,A1_GRPVEN,ACY_DESCRI,A1_LOJA,D2_FILIAL,A1_NOME, DAI_I_OPLO
-				ORDER BY 
-					D2_FILIAL,A1_GRPVEN,A1_COD,A1_LOJA
-			EndSql
-		END REPORT QUERY oSF2FIL_7
-	Else //ANALITICO ORDEM 07 - Cliente
-		oSF2A_7:Enable()	
-		
-		BEGIN REPORT QUERY oSF2FIL_7
-			BeginSql alias "QRY7"   	   	
-		   		SELECT 
-					SF2.F2_DOC,SF2.F2_SERIE,SF2.F2_EMISSAO,SD2.D2_ITEM,SF2.F2_EMISSAO, SD2.D2_CLIENTE,SD2.D2_LOJA,
-					SA1.A1_NREDUZ, SD2.D2_QUANT,SD2.D2_PRCVEN,SD2.D2_TOTAL,SD2.D2_UM,SD2.D2_VALBRUT,
-					SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SF2.F2_VEND1,
-					SA1.A1_MUN,SD2.D2_COD,SD2.D2_QTSEGUM,SD2.D2_FILIAL,SD2.D2_DOC,
-					SA1.A1_COD_MUN,SA3.A3_COD,SA3.A3_NOME,SD2.D2_I_FRET,
-					(((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
-					SA1.A1_COD,SA1.A1_NREDUZ,SA1.A1_GRPVEN,ACY.ACY_DESCRI,SA1.A1_LOJA,
-					SD2.D2_CUSTO1,SD2.D2_FILIAL,SA1.A1_NOME,SD2.D2_ICMSRET,SC5.C5_I_TRCNF, SC5.C5_I_FILFT,;
-					SC5.C5_I_FLFNC,DAI.DAI_I_OPLO, SD2.D2_LOCAL,SC5.C5_I_LOCEM,SC5.C5_I_QTDA,
-					(SELECT COALESCE(SUM(D1.D1_QUANT),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD 
-					   ) AS D2_QTDEDEV,
-					(SELECT COALESCE(SUM(D1.D1_TOTAL),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		               ) AS D2_VALDEV,
-					(SD2.D2_VALBRUT  -
-					(SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		            )) AS VLRBRUTDEV
-				FROM 
-					%Table:SF2% SF2
-					JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
-					JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
-					JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
-					JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
-					JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
-					JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
-					JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo 
-					JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
-					LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
-				WHERE 
-					SF2.%notDel%  
-					AND SD2.%notDel%  
-					AND SA1.%notDel%  		
-					AND SB1.%notDel%  					
-					AND SA3.%notDel%  											
-					AND SBM.%notDel%				
-					AND ACY.%notDel%
-					AND SF4.%notDel%   
-					AND SC5.%notDel%
-				    %exp:_cFiltro%
-				ORDER BY 
-					SD2.D2_FILIAL,SA1.A1_GRPVEN,SA1.A1_COD,SA1.A1_LOJA
-			EndSql
-		END REPORT QUERY oSF2FIL_7
-	EndIf
+                 GROUP BY 
+                     D2_UM,D2_SEGUM,B1_I_DESCD,B1_COD,C5_I_LOCEM,
+                    D2_COD,A1_MUN,A1_COD_MUN,A3_COD,A3_NOME,F2_VEND1,
+                    A1_COD,A1_NREDUZ,A1_GRPVEN,ACY_DESCRI,A1_LOJA,D2_FILIAL,A1_NOME, DAI_I_OPLO
+                ORDER BY 
+                    D2_FILIAL,A1_GRPVEN,A1_COD,A1_LOJA
+            EndSql
+        END REPORT QUERY oSF2FIL_7
+    Else //ANALITICO ORDEM 07 - Cliente
+        oSF2A_7:Enable()	
+        
+        BEGIN REPORT QUERY oSF2FIL_7
+            BeginSql alias "QRY7"   	   	
+                   SELECT 
+                    SF2.F2_DOC,SF2.F2_SERIE,SF2.F2_EMISSAO,SD2.D2_ITEM,SF2.F2_EMISSAO, SD2.D2_CLIENTE,SD2.D2_LOJA,
+                    SA1.A1_NREDUZ, SD2.D2_QUANT,SD2.D2_PRCVEN,SD2.D2_TOTAL,SD2.D2_UM,SD2.D2_VALBRUT,
+                    SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SF2.F2_VEND1,
+                    SA1.A1_MUN,SD2.D2_COD,SD2.D2_QTSEGUM,SD2.D2_FILIAL,SD2.D2_DOC,
+                    SA1.A1_COD_MUN,SA3.A3_COD,SA3.A3_NOME,SD2.D2_I_FRET,
+                    (((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
+                    SA1.A1_COD,SA1.A1_NREDUZ,SA1.A1_GRPVEN,ACY.ACY_DESCRI,SA1.A1_LOJA,
+                    SD2.D2_CUSTO1,SD2.D2_FILIAL,SA1.A1_NOME,SD2.D2_ICMSRET,SC5.C5_I_TRCNF, SC5.C5_I_FILFT,;
+                    SC5.C5_I_FLFNC,DAI.DAI_I_OPLO, SD2.D2_LOCAL,SC5.C5_I_LOCEM,SC5.C5_I_QTDA,
+                    (SELECT COALESCE(SUM(D1.D1_QUANT),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD 
+                       ) AS D2_QTDEDEV,
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                       ) AS D2_VALDEV,
+                    (SD2.D2_VALBRUT  -
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                    )) AS VLRBRUTDEV
+                FROM 
+                    %Table:SF2% SF2
+                    JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
+                    JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
+                    JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
+                    JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
+                    JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
+                    JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
+                    JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo 
+                    JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
+                    LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
+                WHERE 
+                    SF2.%notDel%  
+                    AND SD2.%notDel%  
+                    AND SA1.%notDel%  		
+                    AND SB1.%notDel%  					
+                    AND SA3.%notDel%  											
+                    AND SBM.%notDel%				
+                    AND ACY.%notDel%
+                    AND SF4.%notDel%   
+                    AND SC5.%notDel%
+                    %exp:_cFiltro%
+                ORDER BY 
+                    SD2.D2_FILIAL,SA1.A1_GRPVEN,SA1.A1_COD,SA1.A1_LOJA
+            EndSql
+        END REPORT QUERY oSF2FIL_7
+    EndIf
 
 // ORDEM 08 Emissao - Sedex   
 ElseIf _nOrdem == 8
-	If MV_PAR19 == 2 //ANALITICO - ORDEM 08 Emissao - Sedex
-		BEGIN REPORT QUERY oSF2FIL_8
-			BeginSql alias "QRY8"   	   	
-		   		SELECT 
-			   		SF2.F2_EMISSAO,SF2.F2_CARGA,SF2.F2_DOC,SF2.F2_SERIE,SF2.F2_I_NFREF,SF2.F2_I_SERNF,SF2.F2_CLIENTE,SF2.F2_LOJA,
-			   		SA1.A1_MUN,SA1.A1_EST,SA1.A1_NREDUZ,SA1.A1_NOME,SD2.D2_ITEM,SB1.B1_DESC,SD2.D2_QUANT,SD2.D2_UM,SD2.D2_SEGUM,
-			   		SD2.D2_QTSEGUM,SD2.D2_PRCVEN,SD2.D2_TOTAL,SD2.D2_VALBRUT,SB1.B1_I_DESCD,SB1.B1_I_DESCD,
-			   		SD2.D2_FILIAL,SD2.D2_COD,SD2.D2_ICMSRET, SC5.C5_I_TRCNF, SC5.C5_I_FILFT, SC5.C5_I_FLFNC,DAI.DAI_I_OPLO,
-			   		SF2.F2_I_PEDID, SF2.F2_FILIAL,DAI.DAI_I_OPLO, SD2.D2_LOCAL,SC5.C5_I_LOCEM,SC5.C5_I_OPER,SC5.C5_I_NFSED,SC5.C5_I_QTDA,
-					SF2.F2_I_CTRA,SF2.F2_I_LTRA, SA2.A2_I_TPAVE,   
-					(SELECT COALESCE(SUM(D1.D1_QUANT),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD 
-					   ) AS D2_QTDEDEV,
-					(SELECT COALESCE(SUM(D1.D1_TOTAL),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		               ) AS D2_VALDEV,
-					(SD2.D2_VALBRUT  -
-					(SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		            )) AS VLRBRUTDEV
-					FROM %Table:SF2% SF2
-					JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
-					JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
-					JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
-					JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
-					JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
-					JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
-					JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo 
-					JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
-                    JOIN %Table:SA2% SA2 ON SA2.A2_COD = SF2.F2_I_CTRA AND SA2.A2_LOJA = SF2.F2_I_LTRA
-					LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
-				WHERE 
-					SF2.%notDel%  
-					AND SD2.%notDel%  
-					AND SA1.%notDel%  		
-					AND SB1.%notDel%  					
-					AND SA3.%notDel%  											
-					AND SBM.%notDel%				
-					AND ACY.%notDel%
-					AND SF4.%notDel%
-					AND SC5.%notDel%
-					AND SA2.%notDel%
-				    %exp:_cFiltro%
-				ORDER BY 
-					SD2.D2_FILIAL,SF2.F2_DOC,SF2.F2_EMISSAO,SD2.D2_ITEM
-			EndSql
-		
-		END REPORT QUERY oSF2FIL_8
-		
-	Else  //SINTETICO ORDEM 08 Emissao - Sedex       
-		BEGIN REPORT QUERY oSF2FIL_8
-			BeginSql alias "QRY8"   	   	
-		      SELECT 			
-		      		SUM(T.D2_TOTAL)   AS D2_TOTAL,				
-		      		SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
-		      		SUM(T.D2_VALDEV)  AS D2_VALDEV,				
-		      		SUM(T.D2_ICMSRET) AS D2_ICMSRET,				
-		      	    SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,
-					T.D2_FILIAL,T.F2_DOC,T.F2_SERIE,T.F2_CARGA,T.D2_PEDIDO,T.F2_CLIENTE,T.F2_LOJA,
-					T.A1_NREDUZ,T.A1_NOME,T.F2_EMISSAO,T.DAI_I_OPLO,T.C5_I_LOCEM,T.C5_I_OPER,T.C5_I_NFSED,
-					T.F2_I_CTRA,T.F2_I_LTRA,T.A2_I_TPAVE 
+    If MV_PAR19 == 2 //ANALITICO - ORDEM 08 Emissao - Sedex
+        BEGIN REPORT QUERY oSF2FIL_8
+            BeginSql alias "QRY8"   	   	
+                   SELECT 
+                       SF2.F2_EMISSAO,SF2.F2_CARGA,SF2.F2_DOC,SF2.F2_SERIE,SF2.F2_I_NFREF,SF2.F2_I_SERNF,SF2.F2_CLIENTE,SF2.F2_LOJA,
+                       SA1.A1_MUN,SA1.A1_EST,SA1.A1_NREDUZ,SA1.A1_NOME,SD2.D2_ITEM,SB1.B1_DESC,SD2.D2_QUANT,SD2.D2_UM,SD2.D2_SEGUM,
+                       SD2.D2_QTSEGUM,SD2.D2_PRCVEN,SD2.D2_TOTAL,SD2.D2_VALBRUT,SB1.B1_I_DESCD,SB1.B1_I_DESCD,
+                       SD2.D2_FILIAL,SD2.D2_COD,SD2.D2_ICMSRET, SC5.C5_I_TRCNF, SC5.C5_I_FILFT, SC5.C5_I_FLFNC,DAI.DAI_I_OPLO,
+                       SF2.F2_I_PEDID, SF2.F2_FILIAL,DAI.DAI_I_OPLO, SD2.D2_LOCAL,SC5.C5_I_LOCEM,SC5.C5_I_OPER,SC5.C5_I_NFSED,SC5.C5_I_QTDA,
+                    SF2.F2_I_CTRA,SF2.F2_I_LTRA, SA2.A2_I_TPAVE,   
+                    (SELECT COALESCE(SUM(D1.D1_QUANT),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD 
+                       ) AS D2_QTDEDEV,
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                       ) AS D2_VALDEV,
+                    (SD2.D2_VALBRUT  -
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                    )) AS VLRBRUTDEV
+                    FROM %Table:SF2% SF2
+                    JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
+                    JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
+                    JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
+                    JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
+                    JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
+                    JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
+                    JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo 
+                    JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
+                    LEFT JOIN %Table:SA2% SA2 ON SA2.A2_COD = SF2.F2_I_CTRA AND SA2.A2_LOJA = SF2.F2_I_LTRA AND SA2.%notDel% 
+                    LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
+                WHERE 
+                    SF2.%notDel%  
+                    AND SD2.%notDel%  
+                    AND SA1.%notDel%  		
+                    AND SB1.%notDel%  					
+                    AND SA3.%notDel%  											
+                    AND SBM.%notDel%				
+                    AND ACY.%notDel%
+                    AND SF4.%notDel%
+                    AND SC5.%notDel%
+                    %exp:_cFiltro%
+                ORDER BY 
+                    SD2.D2_FILIAL,SF2.F2_DOC,SF2.F2_EMISSAO,SD2.D2_ITEM
+            EndSql
+        
+        END REPORT QUERY oSF2FIL_8
+        
+    Else  //SINTETICO ORDEM 08 Emissao - Sedex       
+        BEGIN REPORT QUERY oSF2FIL_8
+            BeginSql alias "QRY8"   	   	
+              SELECT 			
+                      SUM(T.D2_TOTAL)   AS D2_TOTAL,				
+                      SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
+                      SUM(T.D2_VALDEV)  AS D2_VALDEV,				
+                      SUM(T.D2_ICMSRET) AS D2_ICMSRET,				
+                      SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,
+                    T.D2_FILIAL,T.F2_DOC,T.F2_SERIE,T.F2_CARGA,T.D2_PEDIDO,T.F2_CLIENTE,T.F2_LOJA,
+                    T.A1_NREDUZ,T.A1_NOME,T.F2_EMISSAO,T.DAI_I_OPLO,T.C5_I_LOCEM,T.C5_I_OPER,T.C5_I_NFSED,
+                    T.F2_I_CTRA,T.F2_I_LTRA,T.A2_I_TPAVE 
               FROM
-		      (SELECT 			
-					SUM(SD2.D2_TOTAL)   AS D2_TOTAL,				
-					SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,								
-					SUM(SD2.D2_ICMSRET) AS D2_ICMSRET,				
-					SD2.D2_FILIAL,
-					SF2.F2_DOC,
-					SF2.F2_SERIE,
-					SF2.F2_CARGA,
-					SD2.D2_PEDIDO,
-					SF2.F2_CLIENTE,
-					SF2.F2_LOJA,
-					SA1.A1_NREDUZ,
-					SA1.A1_NOME,
-					SF2.F2_EMISSAO, 
-					DAI.DAI_I_OPLO,
-					SD2.D2_COD,
-					SC5.C5_I_LOCEM,
+              (SELECT 			
+                    SUM(SD2.D2_TOTAL)   AS D2_TOTAL,				
+                    SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,								
+                    SUM(SD2.D2_ICMSRET) AS D2_ICMSRET,				
+                    SD2.D2_FILIAL,
+                    SF2.F2_DOC,
+                    SF2.F2_SERIE,
+                    SF2.F2_CARGA,
+                    SD2.D2_PEDIDO,
+                    SF2.F2_CLIENTE,
+                    SF2.F2_LOJA,
+                    SA1.A1_NREDUZ,
+                    SA1.A1_NOME,
+                    SF2.F2_EMISSAO, 
+                    DAI.DAI_I_OPLO,
+                    SD2.D2_COD,
+                    SC5.C5_I_LOCEM,
                     SC5.C5_I_OPER,
                     SC5.C5_I_NFSED,
-			        SF2.F2_I_CTRA, 
-					SF2.F2_I_LTRA, 
-					SA2.A2_I_TPAVE,
-					(SELECT COALESCE(SUM(D1.D1_TOTAL),0)
-			           FROM %Table:SD1% D1
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO    = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SF2.F2_DOC
-			             AND D1.D1_SERIORI = SF2.F2_SERIE
-			             AND D1.D1_FORNECE = SF2.F2_CLIENTE
-			             AND D1.D1_LOJA    = SF2.F2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		               ) AS D2_VALDEV ,
-					(SUM(SD2.D2_VALBRUT) -
-					(SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
-			           FROM %Table:SD1% D1
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO    = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SF2.F2_DOC
-			             AND D1.D1_SERIORI = SF2.F2_SERIE
-			             AND D1.D1_FORNECE = SF2.F2_CLIENTE
-			             AND D1.D1_LOJA    = SF2.F2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		            )) AS VLRBRUTDEV
-					FROM %Table:SF2% SF2
-					JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
-					JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
-					JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
-					JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
-					JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
-					JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
-					JOIN %Table:SF4% SF4 ON SD2.D2_FILIAL = SF4.F4_FILIAL AND SD2.D2_TES = SF4.F4_CODIGO
-					JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
-                    JOIN %Table:SA2% SA2 ON SA2.A2_COD = SF2.F2_I_CTRA AND SA2.A2_LOJA = SF2.F2_I_LTRA
-					LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
-				WHERE 
-					SF2.%notDel%  
-					AND SD2.%notDel%  
-					AND SA1.%notDel%  		
-					AND SB1.%notDel%  					
-					AND SA3.%notDel%  											
-					AND SBM.%notDel%				
-					AND ACY.%notDel%
-					AND SF4.%notDel%
-					AND SC5.%notDel%
-					AND SA2.%notDel%
-			    	%exp:_cFiltro%
-				 GROUP BY 
-					SD2.D2_FILIAL,SF2.F2_DOC,SF2.F2_SERIE,SF2.F2_CARGA,SD2.D2_PEDIDO,SF2.F2_CLIENTE,SF2.F2_LOJA,SA1.A1_NREDUZ,SA1.A1_NOME,
-					SF2.F2_EMISSAO,DAI.DAI_I_OPLO,SD2.D2_COD,SC5.C5_I_LOCEM,SC5.C5_I_OPER,SC5.C5_I_NFSED,SF2.F2_I_CTRA,SF2.F2_I_LTRA, A2_I_TPAVE 
-		      ) T
-				 GROUP BY 
-					D2_FILIAL,F2_DOC,F2_SERIE,F2_CARGA,D2_PEDIDO,F2_CLIENTE,F2_LOJA,A1_NREDUZ,A1_NOME,
-					F2_EMISSAO,DAI_I_OPLO,C5_I_LOCEM,C5_I_OPER,C5_I_NFSED,F2_I_CTRA,F2_I_LTRA,A2_I_TPAVE 
+                    SF2.F2_I_CTRA, 
+                    SF2.F2_I_LTRA, 
+                    SA2.A2_I_TPAVE,
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL),0)
+                       FROM %Table:SD1% D1
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO    = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SF2.F2_DOC
+                         AND D1.D1_SERIORI = SF2.F2_SERIE
+                         AND D1.D1_FORNECE = SF2.F2_CLIENTE
+                         AND D1.D1_LOJA    = SF2.F2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                       ) AS D2_VALDEV ,
+                    (SUM(SD2.D2_VALBRUT) -
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
+                       FROM %Table:SD1% D1
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO    = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SF2.F2_DOC
+                         AND D1.D1_SERIORI = SF2.F2_SERIE
+                         AND D1.D1_FORNECE = SF2.F2_CLIENTE
+                         AND D1.D1_LOJA    = SF2.F2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                    )) AS VLRBRUTDEV
+                    FROM %Table:SF2% SF2
+                    JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
+                    JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
+                    JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
+                    JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
+                    JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
+                    JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
+                    JOIN %Table:SF4% SF4 ON SD2.D2_FILIAL = SF4.F4_FILIAL AND SD2.D2_TES = SF4.F4_CODIGO
+                    JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
+                    LEFT JOIN %Table:SA2% SA2 ON SA2.A2_COD = SF2.F2_I_CTRA AND SA2.A2_LOJA = SF2.F2_I_LTRA AND SA2.%notDel%
+                    LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
+                WHERE 
+                    SF2.%notDel%  
+                    AND SD2.%notDel%  
+                    AND SA1.%notDel%  		
+                    AND SB1.%notDel%  					
+                    AND SA3.%notDel%  											
+                    AND SBM.%notDel%				
+                    AND ACY.%notDel%
+                    AND SF4.%notDel%
+                    AND SC5.%notDel%
+                    %exp:_cFiltro%
+                 GROUP BY 
+                    SD2.D2_FILIAL,SF2.F2_DOC,SF2.F2_SERIE,SF2.F2_CARGA,SD2.D2_PEDIDO,SF2.F2_CLIENTE,SF2.F2_LOJA,SA1.A1_NREDUZ,SA1.A1_NOME,
+                    SF2.F2_EMISSAO,DAI.DAI_I_OPLO,SD2.D2_COD,SC5.C5_I_LOCEM,SC5.C5_I_OPER,SC5.C5_I_NFSED,SF2.F2_I_CTRA,SF2.F2_I_LTRA, A2_I_TPAVE 
+              ) T
+                 GROUP BY 
+                    D2_FILIAL,F2_DOC,F2_SERIE,F2_CARGA,D2_PEDIDO,F2_CLIENTE,F2_LOJA,A1_NREDUZ,A1_NOME,
+                    F2_EMISSAO,DAI_I_OPLO,C5_I_LOCEM,C5_I_OPER,C5_I_NFSED,F2_I_CTRA,F2_I_LTRA,A2_I_TPAVE 
 
-				ORDER BY 
-					D2_FILIAL,F2_EMISSAO,F2_DOC,F2_SERIE
-			EndSql
-		END REPORT QUERY oSF2FIL_8	
-	
-	EndIf
-		
+                ORDER BY 
+                    D2_FILIAL,F2_EMISSAO,F2_DOC,F2_SERIE
+            EndSql
+        END REPORT QUERY oSF2FIL_8	
+    
+    EndIf
+        
 //Estado X Grupo de Produtos	
 ElseIf _nOrdem == 9 // ORDEM 09 - SÓ SINTETICO
-	BEGIN REPORT QUERY oSF2FIL_9
-		BeginSql alias "QRY9"   	   	
-		SELECT 			
-				SUM(T.D2_QUANT)   AS D2_QUANT,
-				AVG(T.D2_PRCVEN)  AS D2_PRCVEN,
-				SUM(T.D2_TOTAL)   AS D2_TOTAL,				
-				SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
-				SUM(T.D2_QTSEGUM) AS D2_QTSEGUM,
-				SUM(T.D2_QTDEDEV) AS D2_QTDEDEV,
-				SUM(T.D2_VALDEV)  AS D2_VALDEV,				
-				SUM(T.D2_ICMSRET) AS D2_ICMSRET,				
-			    SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,
-				T.D2_UM,T.D2_SEGUM,T.BM_DESC,T.B1_GRUPO,
-				T.D2_EST,T.D2_FILIAL, T.DAI_I_OPLO, T.C5_I_LOCEM
+    BEGIN REPORT QUERY oSF2FIL_9
+        BeginSql alias "QRY9"   	   	
+        SELECT 			
+                SUM(T.D2_QUANT)   AS D2_QUANT,
+                AVG(T.D2_PRCVEN)  AS D2_PRCVEN,
+                SUM(T.D2_TOTAL)   AS D2_TOTAL,				
+                SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
+                SUM(T.D2_QTSEGUM) AS D2_QTSEGUM,
+                SUM(T.D2_QTDEDEV) AS D2_QTDEDEV,
+                SUM(T.D2_VALDEV)  AS D2_VALDEV,				
+                SUM(T.D2_ICMSRET) AS D2_ICMSRET,				
+                SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,
+                T.D2_UM,T.D2_SEGUM,T.BM_DESC,T.B1_GRUPO,
+                T.D2_EST,T.D2_FILIAL, T.DAI_I_OPLO, T.C5_I_LOCEM
         FROM
-		(SELECT 			
-				SUM(SD2.D2_QUANT)   AS D2_QUANT,
-				AVG(SD2.D2_PRCVEN)  AS D2_PRCVEN,
-				SUM(SD2.D2_TOTAL)   AS D2_TOTAL,				
-				SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,								
-				SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,
-				SUM(SD2.D2_ICMSRET) AS D2_ICMSRET,				
-				SD2.D2_UM,SD2.D2_SEGUM,SBM.BM_DESC,SB1.B1_GRUPO,
-				SD2.D2_EST,SD2.D2_FILIAL, DAI.DAI_I_OPLO,
-				SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,SD2.D2_COD,SC5.C5_I_LOCEM,
-					(SELECT COALESCE(SUM(D1.D1_QUANT),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD 
-					   ) AS D2_QTDEDEV,
-					(SELECT COALESCE(SUM(D1.D1_TOTAL),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		               ) AS D2_VALDEV,
-					(SUM(SD2.D2_VALBRUT) -
-					(SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
-			           FROM %Table:SD1% D1
-				       %exp:_cJOIN_SF1%
-			           WHERE D1.D_E_L_E_T_ = ' '
-			             AND D1.D1_TIPO = 'D'
-			             AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			             AND D1.D1_NFORI   = SD2.D2_DOC
-			             AND D1.D1_SERIORI = SD2.D2_SERIE
-			             AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			             AND D1.D1_LOJA    = SD2.D2_LOJA    
-			             AND D1.D1_COD     = SD2.D2_COD
-		            )) AS VLRBRUTDEV
-			FROM 
-				%Table:SF2% SF2
-				JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
-				JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
-				JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
-				JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
-				JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
-				JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
-				JOIN %Table:SF4% SF4 ON SD2.D2_FILIAL = SF4.F4_FILIAL AND SD2.D2_TES = SF4.f4_codigo
-				JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
-				LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
-			WHERE 
-				SF2.%notDel%  
-				AND SD2.%notDel%  
-				AND SA1.%notDel%  		
-				AND SB1.%notDel%  					
-				AND SA3.%notDel%  											
-				AND SBM.%notDel%				
-				AND ACY.%notDel%
-				AND SF4.%notDel%
-				AND SC5.%notDel%
-		    	%exp:_cFiltro%
-			 GROUP BY 
- 				SD2.D2_FILIAL,SB1.B1_GRUPO,SD2.D2_EST,SD2.D2_UM,SD2.D2_SEGUM,SBM.BM_DESC,DAI.DAI_I_OPLO,
-				SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,SD2.D2_COD,SC5.C5_I_LOCEM
-		) T  
-			 GROUP BY 
- 				D2_FILIAL,B1_GRUPO,D2_EST,D2_UM,D2_SEGUM,BM_DESC,DAI_I_OPLO,C5_I_LOCEM
-			ORDER BY 
-				D2_FILIAL,D2_EST,B1_GRUPO,BM_DESC
-		EndSql
-	END REPORT QUERY oSF2FIL_9	
+        (SELECT 			
+                SUM(SD2.D2_QUANT)   AS D2_QUANT,
+                AVG(SD2.D2_PRCVEN)  AS D2_PRCVEN,
+                SUM(SD2.D2_TOTAL)   AS D2_TOTAL,				
+                SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,								
+                SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,
+                SUM(SD2.D2_ICMSRET) AS D2_ICMSRET,				
+                SD2.D2_UM,SD2.D2_SEGUM,SBM.BM_DESC,SB1.B1_GRUPO,
+                SD2.D2_EST,SD2.D2_FILIAL, DAI.DAI_I_OPLO,
+                SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,SD2.D2_COD,SC5.C5_I_LOCEM,
+                    (SELECT COALESCE(SUM(D1.D1_QUANT),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD 
+                       ) AS D2_QTDEDEV,
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                       ) AS D2_VALDEV,
+                    (SUM(SD2.D2_VALBRUT) -
+                    (SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
+                       FROM %Table:SD1% D1
+                       %exp:_cJOIN_SF1%
+                       WHERE D1.D_E_L_E_T_ = ' '
+                         AND D1.D1_TIPO = 'D'
+                         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                         AND D1.D1_NFORI   = SD2.D2_DOC
+                         AND D1.D1_SERIORI = SD2.D2_SERIE
+                         AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                         AND D1.D1_LOJA    = SD2.D2_LOJA    
+                         AND D1.D1_COD     = SD2.D2_COD
+                    )) AS VLRBRUTDEV
+            FROM 
+                %Table:SF2% SF2
+                JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
+                JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
+                JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
+                JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
+                JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
+                JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
+                JOIN %Table:SF4% SF4 ON SD2.D2_FILIAL = SF4.F4_FILIAL AND SD2.D2_TES = SF4.f4_codigo
+                JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
+                LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
+            WHERE 
+                SF2.%notDel%  
+                AND SD2.%notDel%  
+                AND SA1.%notDel%  		
+                AND SB1.%notDel%  					
+                AND SA3.%notDel%  											
+                AND SBM.%notDel%				
+                AND ACY.%notDel%
+                AND SF4.%notDel%
+                AND SC5.%notDel%
+                %exp:_cFiltro%
+             GROUP BY 
+                 SD2.D2_FILIAL,SB1.B1_GRUPO,SD2.D2_EST,SD2.D2_UM,SD2.D2_SEGUM,SBM.BM_DESC,DAI.DAI_I_OPLO,
+                SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,SD2.D2_COD,SC5.C5_I_LOCEM
+        ) T  
+             GROUP BY 
+                 D2_FILIAL,B1_GRUPO,D2_EST,D2_UM,D2_SEGUM,BM_DESC,DAI_I_OPLO,C5_I_LOCEM
+            ORDER BY 
+                D2_FILIAL,D2_EST,B1_GRUPO,BM_DESC
+        EndSql
+    END REPORT QUERY oSF2FIL_9	
 
 //ORDEM 13 - Dia x Estado x Produto	 - SÓ SINTETICO
 ElseIf _nOrdem == 13	            
-	BEGIN REPORT QUERY oSF2FIL_13
-		BeginSql alias "QRY13"   	   	
-		SELECT 	SUM(T.D2_QUANT)   AS D2_QUANT,
-				SUM(T.D2_QTSEGUM) AS D2_QTSEGUM,
-				SUM(T.D2_TOTAL)   AS D2_TOTAL,				
-				SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
-				SUM(T.D2_QTDEDEV) AS D2_QTDEDEV,
-				SUM(T.D2_VALDEV)  AS D2_VALDEV,		
-			    SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,		
-				T.D2_FILIAL,T.F2_EMISSAO,T.D2_EST,T.D2_COD,T.B1_I_DESCD,T.D2_UM,T.D2_SEGUM,T.DAI_I_OPLO,T.C5_I_LOCEM
+    BEGIN REPORT QUERY oSF2FIL_13
+        BeginSql alias "QRY13"   	   	
+        SELECT 	SUM(T.D2_QUANT)   AS D2_QUANT,
+                SUM(T.D2_QTSEGUM) AS D2_QTSEGUM,
+                SUM(T.D2_TOTAL)   AS D2_TOTAL,				
+                SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
+                SUM(T.D2_QTDEDEV) AS D2_QTDEDEV,
+                SUM(T.D2_VALDEV)  AS D2_VALDEV,		
+                SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,		
+                T.D2_FILIAL,T.F2_EMISSAO,T.D2_EST,T.D2_COD,T.B1_I_DESCD,T.D2_UM,T.D2_SEGUM,T.DAI_I_OPLO,T.C5_I_LOCEM
         FROM
-		(SELECT 			
-				SUM(SD2.D2_QUANT)   AS D2_QUANT,  
-				SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,
-				SUM(SD2.D2_TOTAL)   AS D2_TOTAL,
-				SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,					
-				SD2.D2_FILIAL,SF2.F2_EMISSAO,SD2.D2_EST,SD2.D2_COD,SB1.B1_I_DESCD,SD2.D2_UM,SD2.D2_SEGUM,DAI.DAI_I_OPLO,
-				SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,SC5.C5_I_LOCEM,
-				(SELECT COALESCE(SUM(D1.D1_QUANT),0)
-			       FROM %Table:SD1% D1
-				   %exp:_cJOIN_SF1%
-			       WHERE D1.D_E_L_E_T_ = ' '
-			         AND D1.D1_TIPO = 'D'
-			         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			         AND D1.D1_NFORI   = SD2.D2_DOC
-			         AND D1.D1_SERIORI = SD2.D2_SERIE
-			         AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			         AND D1.D1_LOJA    = SD2.D2_LOJA    
-			         AND D1.D1_COD     = SD2.D2_COD 
-				   ) AS D2_QTDEDEV,
-				(SELECT COALESCE(SUM(D1.D1_TOTAL),0)
-			       FROM %Table:SD1% D1
-				   %exp:_cJOIN_SF1%
-			       WHERE D1.D_E_L_E_T_ = ' '
-			         AND D1.D1_TIPO = 'D'
-			         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			         AND D1.D1_NFORI   = SD2.D2_DOC
-			         AND D1.D1_SERIORI = SD2.D2_SERIE
-			         AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			         AND D1.D1_LOJA    = SD2.D2_LOJA    
-			         AND D1.D1_COD     = SD2.D2_COD
-		           ) AS D2_VALDEV,
-				(SUM(SD2.D2_VALBRUT)  -
-				(SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
-			       FROM %Table:SD1% D1
-				   %exp:_cJOIN_SF1%
-			       WHERE D1.D_E_L_E_T_ = ' '
-			         AND D1.D1_TIPO = 'D'
-			         AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			         AND D1.D1_NFORI   = SD2.D2_DOC
-			         AND D1.D1_SERIORI = SD2.D2_SERIE
-			         AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			         AND D1.D1_LOJA    = SD2.D2_LOJA    
-			         AND D1.D1_COD     = SD2.D2_COD
-		        )) AS VLRBRUTDEV
-			FROM 
-				%Table:SF2% SF2
-				JOIN %Table:SD2% SD2 ON SD2.D2_DOC     = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
-				JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
-				JOIN %Table:SB1% SB1 ON SD2.D2_COD     = SB1.B1_COD 
-				JOIN %Table:SA3% SA3 ON SF2.F2_VEND1   = SA3.A3_COD
-				JOIN %Table:SBM% SBM ON SB1.B1_GRUPO   = SBM.BM_GRUPO
-				JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN  = ACY.ACY_GRPVEN
-				JOIN %Table:SF4% SF4 ON sd2.d2_filial  = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo
-				JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL  = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
-				LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
-			WHERE 
-				SF2.%notDel%  
-				AND SD2.%notDel%  
-				AND SA1.%notDel%  		
-				AND SB1.%notDel%  					
-				AND SA3.%notDel%  											
-				AND SBM.%notDel%				
-				AND ACY.%notDel%
-				AND SF4.%notDel%
-				AND SC5.%notDel%
-			    %exp:_cFiltro%
-			GROUP BY
-			    SD2.D2_FILIAL,SF2.F2_EMISSAO,SD2.D2_EST,SD2.D2_COD,SB1.B1_I_DESCD,SD2.D2_UM,SD2.D2_SEGUM, DAI.DAI_I_OPLO,
-				SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,SC5.C5_I_LOCEM
-		) T  
-			GROUP BY
-			    D2_FILIAL,F2_EMISSAO,D2_EST,D2_COD,B1_I_DESCD,D2_UM,D2_SEGUM, DAI_I_OPLO,C5_I_LOCEM
-			ORDER BY 
-				D2_FILIAL,F2_EMISSAO,D2_EST,D2_COD
-		EndSql
-	END REPORT QUERY oSF2FIL_13
+        (SELECT 			
+                SUM(SD2.D2_QUANT)   AS D2_QUANT,  
+                SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,
+                SUM(SD2.D2_TOTAL)   AS D2_TOTAL,
+                SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,					
+                SD2.D2_FILIAL,SF2.F2_EMISSAO,SD2.D2_EST,SD2.D2_COD,SB1.B1_I_DESCD,SD2.D2_UM,SD2.D2_SEGUM,DAI.DAI_I_OPLO,
+                SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,SC5.C5_I_LOCEM,
+                (SELECT COALESCE(SUM(D1.D1_QUANT),0)
+                   FROM %Table:SD1% D1
+                   %exp:_cJOIN_SF1%
+                   WHERE D1.D_E_L_E_T_ = ' '
+                     AND D1.D1_TIPO = 'D'
+                     AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                     AND D1.D1_NFORI   = SD2.D2_DOC
+                     AND D1.D1_SERIORI = SD2.D2_SERIE
+                     AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                     AND D1.D1_LOJA    = SD2.D2_LOJA    
+                     AND D1.D1_COD     = SD2.D2_COD 
+                   ) AS D2_QTDEDEV,
+                (SELECT COALESCE(SUM(D1.D1_TOTAL),0)
+                   FROM %Table:SD1% D1
+                   %exp:_cJOIN_SF1%
+                   WHERE D1.D_E_L_E_T_ = ' '
+                     AND D1.D1_TIPO = 'D'
+                     AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                     AND D1.D1_NFORI   = SD2.D2_DOC
+                     AND D1.D1_SERIORI = SD2.D2_SERIE
+                     AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                     AND D1.D1_LOJA    = SD2.D2_LOJA    
+                     AND D1.D1_COD     = SD2.D2_COD
+                   ) AS D2_VALDEV,
+                (SUM(SD2.D2_VALBRUT)  -
+                (SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
+                   FROM %Table:SD1% D1
+                   %exp:_cJOIN_SF1%
+                   WHERE D1.D_E_L_E_T_ = ' '
+                     AND D1.D1_TIPO = 'D'
+                     AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                     AND D1.D1_NFORI   = SD2.D2_DOC
+                     AND D1.D1_SERIORI = SD2.D2_SERIE
+                     AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                     AND D1.D1_LOJA    = SD2.D2_LOJA    
+                     AND D1.D1_COD     = SD2.D2_COD
+                )) AS VLRBRUTDEV
+            FROM 
+                %Table:SF2% SF2
+                JOIN %Table:SD2% SD2 ON SD2.D2_DOC     = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
+                JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
+                JOIN %Table:SB1% SB1 ON SD2.D2_COD     = SB1.B1_COD 
+                JOIN %Table:SA3% SA3 ON SF2.F2_VEND1   = SA3.A3_COD
+                JOIN %Table:SBM% SBM ON SB1.B1_GRUPO   = SBM.BM_GRUPO
+                JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN  = ACY.ACY_GRPVEN
+                JOIN %Table:SF4% SF4 ON sd2.d2_filial  = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo
+                JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL  = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
+                LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
+            WHERE 
+                SF2.%notDel%  
+                AND SD2.%notDel%  
+                AND SA1.%notDel%  		
+                AND SB1.%notDel%  					
+                AND SA3.%notDel%  											
+                AND SBM.%notDel%				
+                AND ACY.%notDel%
+                AND SF4.%notDel%
+                AND SC5.%notDel%
+                %exp:_cFiltro%
+            GROUP BY
+                SD2.D2_FILIAL,SF2.F2_EMISSAO,SD2.D2_EST,SD2.D2_COD,SB1.B1_I_DESCD,SD2.D2_UM,SD2.D2_SEGUM, DAI.DAI_I_OPLO,
+                SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,SC5.C5_I_LOCEM
+        ) T  
+            GROUP BY
+                D2_FILIAL,F2_EMISSAO,D2_EST,D2_COD,B1_I_DESCD,D2_UM,D2_SEGUM, DAI_I_OPLO,C5_I_LOCEM
+            ORDER BY 
+                D2_FILIAL,F2_EMISSAO,D2_EST,D2_COD
+        EndSql
+    END REPORT QUERY oSF2FIL_13
 EndIf
 
 //Secao Coordenador/Vendedor
@@ -2981,13 +2961,13 @@ oSF2A_7:SetParentFilter({|cParam| QRY7->A1_COD+QRY7->A1_LOJA == cParam },{|| QRY
 //Secao Emissao NF-Sedex                                                                         
 oSF2_8:SetParentQuery()
 oSF2_8:SetParentFilter({|cParam| QRY8->D2_FILIAL == cParam },{|| QRY8->D2_FILIAL })
-			
+            
 oSF2A_8:SetParentQuery()
 oSF2A_8:SetParentFilter({|cParam| QRY8->F2_DOC+QRY8->F2_SERIE == cParam },{|| QRY8->F2_DOC+QRY8->F2_SERIE })  
-	    	
+            
 oSF2S_8:SetParentQuery()
 oSF2S_8:SetParentFilter({|cParam| QRY8->D2_FILIAL == cParam },{|| QRY8->D2_FILIAL })       
-	
+    
 //Secao estado x Grupo de Produtos
 //Secao Estado
 oSF2_9:SetParentQuery()
@@ -3007,23 +2987,23 @@ oSF2A_13:SetParentQuery()
 oSF2A_13:SetParentFilter({|cParam| QRY13->D2_FILIAL + DToS(QRY13->F2_EMISSAO) + QRY13->D2_EST == cParam },{|| QRY13->D2_FILIAL + DToS(QRY13->F2_EMISSAO)+ QRY13->D2_EST })  
 
 If _nOrdem == 1    
-   	oSF2FIL_1:Print(.T.) 	
+       oSF2FIL_1:Print(.T.) 	
 ElseIf _nOrdem == 3
-	oSF2FIL_3:Print(.T.)
+    oSF2FIL_3:Print(.T.)
 ElseIf _nOrdem == 4
     oSF2FIL_4:Print(.T.) 
 ElseIf _nOrdem == 5
-	oSF2FIL_5:Print(.T.)
+    oSF2FIL_5:Print(.T.)
 ElseIf _nOrdem == 6
-	oSF2FIL_6:Print(.T.)	
+    oSF2FIL_6:Print(.T.)	
 ElseIf _nOrdem == 7
-	oSF2FIL_7:Print(.T.)	
+    oSF2FIL_7:Print(.T.)	
 ElseIf _nOrdem == 8
-	oSF2FIL_8:Print(.T.)		
+    oSF2FIL_8:Print(.T.)		
 ElseIf _nOrdem == 9
-	oSF2FIL_9:Print(.T.) 
+    oSF2FIL_9:Print(.T.) 
 ElseIf _nOrdem == 13
-	oSF2FIL_13:Print(.T.)		
+    oSF2FIL_13:Print(.T.)		
 EndIf
 
 Return
@@ -3045,7 +3025,7 @@ Static Function ROMS003L( _nQtd , _nQtdDev , _nQtd2Um )
 Local _nRet := 0
 
 If _nQtdDev == 0
-	Return 0 
+    Return 0 
 EndIf
 
 _nRet := ( _nQtd2Um * ( _nQtdDev / _nQtd ) )
@@ -3076,8 +3056,8 @@ _aDadosDev := ROMS003I( _cDoc , _cSerie , _cFil , _cProduto )
 
 //Se existe uma devolucao e ela se enquadra nos filtros dispostos na funcao fildev
 If _aDadosDev[1][1]	
-	//D1_QUANT
-	_nRet := _aDadosDev[1][2]
+    //D1_QUANT
+    _nRet := _aDadosDev[1][2]
 EndIf
 
 Return( _nRet )
@@ -3110,27 +3090,27 @@ Local _lValBrut  := IIf( _cCampo == 'D2_VALDEV' , .T. , .F. )
 // usuario informado no parametro esta ordem nao faz calculo de quantidade, por isso somente aqui tem
 // essas consideracoes para que possa agilizar o relatorio nao sendo necessario realizar busca na SD2
 If Len( AllTrim( _cProduto ) ) == 0
-	_cFilLocal += " AND SF2.F2_DOC    = '"+ _cDoc   +"' "
-	_cFilLocal += " AND SF2.F2_SERIE  = '"+ _cSerie +"' "
-	_cFilLocal += " AND SD2.D2_FILIAL = '"+ _cFil   +"' "
-	_cFilLocal += " %"
-	
-	_nRet := ROMS003Y( _cFilLocal , 'D2_VALDEV' , _lValBrut )
+    _cFilLocal += " AND SF2.F2_DOC    = '"+ _cDoc   +"' "
+    _cFilLocal += " AND SF2.F2_SERIE  = '"+ _cSerie +"' "
+    _cFilLocal += " AND SD2.D2_FILIAL = '"+ _cFil   +"' "
+    _cFilLocal += " %"
+    
+    _nRet := ROMS003Y( _cFilLocal , 'D2_VALDEV' , _lValBrut )
 Else
-	//Chama funcao filDev que retorna os dados da devolucao das notas fiscais de saida, caso estas possuam devolucao
-	//estes dados sao buscados na TABELA SD1
-	_aDadosDev := ROMS003I( _cDoc , _cSerie , _cFil , _cProduto )
+    //Chama funcao filDev que retorna os dados da devolucao das notas fiscais de saida, caso estas possuam devolucao
+    //estes dados sao buscados na TABELA SD1
+    _aDadosDev := ROMS003I( _cDoc , _cSerie , _cFil , _cProduto )
                     
-	//Se existe uma devolucao e ela se enquadra nos filtros dispostos na funcao fildev
-	If _aDadosDev[1][1]
-		If _cCampo == "D2_VALDEV"
-			//D1_TOTAL + D1_ICMSRET
-			_nRet := _aDadosDev[1][3] + _aDadosDev[1][4]
-		Else
-			//D1_TOTAL
-			_nRet := _aDadosDev[1][3]
-		EndIf
-	EndIf	 
+    //Se existe uma devolucao e ela se enquadra nos filtros dispostos na funcao fildev
+    If _aDadosDev[1][1]
+        If _cCampo == "D2_VALDEV"
+            //D1_TOTAL + D1_ICMSRET
+            _nRet := _aDadosDev[1][3] + _aDadosDev[1][4]
+        Else
+            //D1_TOTAL
+            _nRet := _aDadosDev[1][3]
+        EndIf
+    EndIf	 
 EndIf
 
 Return( _nRet )
@@ -3196,51 +3176,51 @@ DBUseArea( .T. , "TOPCONN" , TCGenQry(,, _cQuery ) , 'TRB' , .F. , .T. )
 DBSelectArea("TRB")
 TRB->( DBGoTop() )
 While TRB->( !Eof() )
-	
-	_cDocEnt	:= TRB->D1_DOC
+    
+    _cDocEnt	:= TRB->D1_DOC
     _cSerieEnt	:= TRB->D1_SERIE 
     _cFornece 	:= TRB->D1_FORNECE
     _cLoja      := TRB->D1_LOJA   
     _cTipo      := TRB->D1_TIPO
     
     _lRet		:= .T.
-	
-	//Posicione SF1
-	DBSelectArea("SF1")
-	SF1->( DBSetOrder(1) )
-	If SF1->( DBSeek( _cFil + _cDocEnt + _cSerieEnt + _cFornece + _cLoja + _cTipo ) )
-		//Tipo de Formulario
-		If MV_PAR23 == 1 //Se formulario proprio = sim 
-			_lRet := SF1->F1_FORMUL == "S"
-		ElseIf MV_PAR23 == 2 //Se formulario proprio = nao
-			_lRet := SF1->F1_FORMUL != "S"
-		EndIf
-		
-		//Verifica data de digitacao da nf de compra esta entre MV_PAR24 e MV_PAR25
-		If _lRet
-			If !Empty(MV_PAR24) .And. !Empty(MV_PAR25)
-				_lRet := ( SF1->F1_DTDIGIT >= MV_PAR24 .And. SF1->F1_DTDIGIT <= MV_PAR25 )
-			EndIf
-		EndIf    
-		
-		If _lRet
-		    _cQuant1	+= TRB->D1_QUANT
-		    _cTotal		+= TRB->D1_TOTAL
-		    _cICMSRet	+= TRB->D1_ICMSRET
-		    _cQuant2	+= TRB->D1_QTSEGUM
-		EndIf
-	
-	EndIf
-	
+    
+    //Posicione SF1
+    DBSelectArea("SF1")
+    SF1->( DBSetOrder(1) )
+    If SF1->( DBSeek( _cFil + _cDocEnt + _cSerieEnt + _cFornece + _cLoja + _cTipo ) )
+        //Tipo de Formulario
+        If MV_PAR23 == 1 //Se formulario proprio = sim 
+            _lRet := SF1->F1_FORMUL == "S"
+        ElseIf MV_PAR23 == 2 //Se formulario proprio = nao
+            _lRet := SF1->F1_FORMUL != "S"
+        EndIf
+        
+        //Verifica data de digitacao da nf de compra esta entre MV_PAR24 e MV_PAR25
+        If _lRet
+            If !Empty(MV_PAR24) .And. !Empty(MV_PAR25)
+                _lRet := ( SF1->F1_DTDIGIT >= MV_PAR24 .And. SF1->F1_DTDIGIT <= MV_PAR25 )
+            EndIf
+        EndIf    
+        
+        If _lRet
+            _cQuant1	+= TRB->D1_QUANT
+            _cTotal		+= TRB->D1_TOTAL
+            _cICMSRet	+= TRB->D1_ICMSRET
+            _cQuant2	+= TRB->D1_QTSEGUM
+        EndIf
+    
+    EndIf
+    
 TRB->( DBSkip() )
 EndDo
 
 TRB->( DBCloseArea() )
 
 If _cQuant1 > 0  
-	_lRet := .T.
+    _lRet := .T.
 Else
-   	_lRet := .F.
+       _lRet := .F.
 EndIf
 
 //Restaura ambiente
@@ -3878,62 +3858,62 @@ Local _nRet     := 0
 Local _aDadosDev:= {}//Array que armazenara os dados da devolucao 
 
 If Select("QRYTMP") > 0
-	QRYTMP->( DBCloseArea() )
+    QRYTMP->( DBCloseArea() )
 EndIf
 
 //Executa a mesma query principal, com as colunas numdoc e serie para filtrar as devolucoes contidas no grupo
 BeginSql alias "QRYTMP"   	   	
-	SELECT 			
-	    SF2.F2_DOC,SF2.F2_SERIE,SD2.D2_VALDEV,SD2.D2_QTDEDEV,SD2.D2_FILIAL,SD2.D2_ICMSRET,SD2.D2_TOTAL,SD2.D2_QTSEGUM,SD2.D2_QUANT,SD2.D2_COD
-	FROM 
-		%Table:SF2% SF2
-		JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
-		JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
-		JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
-		JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
-		JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
-		JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN 
-		JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo
-		JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
-		LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
-	WHERE 
-		SF2.%notDel%  
-		AND SD2.%notDel%  
-		AND SA1.%notDel%  		
-		AND SB1.%notDel%  					
-		AND SA3.%notDel%  											
-    	%exp:_cFilLocal%
-		AND SBM.%notDel%				
-		AND ACY.%notDel%		
-		AND SF4.%notDel%
-		AND SC5.%notDel%
-    	%exp:_cFiltro%    	
+    SELECT 			
+        SF2.F2_DOC,SF2.F2_SERIE,SD2.D2_VALDEV,SD2.D2_QTDEDEV,SD2.D2_FILIAL,SD2.D2_ICMSRET,SD2.D2_TOTAL,SD2.D2_QTSEGUM,SD2.D2_QUANT,SD2.D2_COD
+    FROM 
+        %Table:SF2% SF2
+        JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
+        JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
+        JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
+        JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
+        JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
+        JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN 
+        JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo
+        JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
+        LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
+    WHERE 
+        SF2.%notDel%  
+        AND SD2.%notDel%  
+        AND SA1.%notDel%  		
+        AND SB1.%notDel%  					
+        AND SA3.%notDel%  											
+        %exp:_cFilLocal%
+        AND SBM.%notDel%				
+        AND ACY.%notDel%		
+        AND SF4.%notDel%
+        AND SC5.%notDel%
+        %exp:_cFiltro%    	
 EndSql
     
 DBSelectArea("QRYTMP") 
 QRYTMP->(DBGoTop())   
 While QRYTMP->(!Eof())          
-	//Chama funcao filDev que retorna os dados da devolucao das notas fiscais de saida, caso estas possuam devolucao
-	_aDadosDev:= ROMS003I(QRYTMP->F2_DOC,QRYTMP->F2_SERIE,QRYTMP->D2_FILIAL,QRYTMP->D2_COD)
+    //Chama funcao filDev que retorna os dados da devolucao das notas fiscais de saida, caso estas possuam devolucao
+    _aDadosDev:= ROMS003I(QRYTMP->F2_DOC,QRYTMP->F2_SERIE,QRYTMP->D2_FILIAL,QRYTMP->D2_COD)
                     
-   	//Se existe uma devolucao e ela se enquadra nos filtros dispostos na funcao fildev
+       //Se existe uma devolucao e ela se enquadra nos filtros dispostos na funcao fildev
    If _aDadosDev[1,1]
-		If 	_cCampo == "D2_VALDEV" .And. _lValBrut
-	        //D1_TOTAL + D1_ICMSRET
-			_nRet += _aDadosDev[1,3] + _aDadosDev[1,4]
-		ElseIf _cCampo == "D2_VALDEV" .And. !_lValBrut
-			//D1_TOTAL
-			_nRet += _aDadosDev[1,3]
-		ElseIf _cCampo == 'D2_QTDEDEV'   
-			//D1_QUANT
-			_nRet += _aDadosDev[1,2]
-		ElseIf _cCampo == 'D2_QTSEGUM'
-			//D1_QTSEGUM
-			_nRet += _aDadosDev[1,5]
-		EndIf
-	EndIf	 
-  	
-	QRYTMP->(DBSkip())
+        If 	_cCampo == "D2_VALDEV" .And. _lValBrut
+            //D1_TOTAL + D1_ICMSRET
+            _nRet += _aDadosDev[1,3] + _aDadosDev[1,4]
+        ElseIf _cCampo == "D2_VALDEV" .And. !_lValBrut
+            //D1_TOTAL
+            _nRet += _aDadosDev[1,3]
+        ElseIf _cCampo == 'D2_QTDEDEV'   
+            //D1_QUANT
+            _nRet += _aDadosDev[1,2]
+        ElseIf _cCampo == 'D2_QTSEGUM'
+            //D1_QTSEGUM
+            _nRet += _aDadosDev[1,5]
+        EndIf
+    EndIf	 
+      
+    QRYTMP->(DBSkip())
 EndDo      
 
 DBSelectArea("QRYTMP")
@@ -3993,7 +3973,7 @@ Begin Sequence
 
       oPrint:= TMSPrinter():New("PRODUTO/SUB GRUPO SINTETICO") 
       oPrint:SetPaperSize(9)	// Seta para papel A4
-	                 		
+                             
       /// startando a impressora
       oPrint:Say(0,0," ",oFont12,100)        
 
@@ -4004,9 +3984,9 @@ Begin Sequence
    EndIf
 
    If _nOrdem == 12	//ORDEM 12
-	  FWMsgRun( ,{|oproc|  ROMS00312(oproc) } , "Aguarde!", "Lendo dados..."  )
+      FWMsgRun( ,{|oproc|  ROMS00312(oproc) } , "Aguarde!", "Lendo dados..."  )
    Else//_nOrdem 02 / _nOrdem 10 / _nOrdem 11
-   	  FWMsgRun( ,{|oproc|  ROMS003DR(oproc) } , "Aguarde!", "Lendo dados..."  )
+         FWMsgRun( ,{|oproc|  ROMS003DR(oproc) } , "Aguarde!", "Lendo dados..."  )
    EndIf		
 
    If ! _lGeraEmExcel 
@@ -4032,9 +4012,9 @@ Static Function ROMS003P(oPrint)
 Local nAux     := 1   
 
 If oPrint <> NIL
-	nLinha+= 60                                    
-	oPrint:Line(nLinha,nColInic,nLinha,nColFinal)
-	nLinha+= 55
+    nLinha+= 60                                    
+    oPrint:Line(nLinha,nColInic,nLinha,nColFinal)
+    nLinha+= 55
 EndIf
 
 _aDadosParam := {}
@@ -4058,42 +4038,42 @@ aAdd(_aDadosParam,{"17","Produto Nivel 3",MV_PAR17})
 aAdd(_aDadosParam,{"18","Produto Nivel 4",MV_PAR18})
 
 If MV_PAR19 == 1
-	_cmvpar19 := "Sintético"
+    _cmvpar19 := "Sintético"
 ElseIf MV_PAR19 == 2
-	_cmvpar19 := "Analítico"
+    _cmvpar19 := "Analítico"
 Else
-	_cmvpar19 := "  "
+    _cmvpar19 := "  "
 EndIf
 
 aAdd(_aDadosParam,{"19","Relatorio",_cmvpar19})
 aAdd(_aDadosParam,{"20","CFOP's",MV_PAR20})
 
 If MV_PAR21 == 1
-	_cmvpar21 := "Sim"
+    _cmvpar21 := "Sim"
 ElseIf MV_PAR21 == 2
-	_cmvpar21 := "Não"
+    _cmvpar21 := "Não"
 Else
-	_cmvpar21 := "Somente NF's SE"
+    _cmvpar21 := "Somente NF's SE"
 EndIf
 
 aAdd(_aDadosParam,{"21","NF Sedex",_cmvpar21})
 
 If MV_PAR22 == 1
-	_cmvpar22 := "Sim"
+    _cmvpar22 := "Sim"
 ElseIf MV_PAR22 == 2
-	_cmvpar22 := "Não"
+    _cmvpar22 := "Não"
 Else
-	_cmvpar22 := "   "
+    _cmvpar22 := "   "
 EndIf
 
 aAdd(_aDadosParam,{"22","Abate Devolucao",_cmvpar22})
 
 If MV_PAR23 == 1
-	_cmvpar23 := "Form. Próprio"
+    _cmvpar23 := "Form. Próprio"
 ElseIf MV_PAR23 == 2
-	_cmvpar23 := "Form. Cliente"
+    _cmvpar23 := "Form. Cliente"
 Else
-	_cmvpar23 := "Ambos"
+    _cmvpar23 := "Ambos"
 EndIf
 
 aAdd(_aDadosParam,{"23","Tipo Devolucao",_cmvpar23})
@@ -4101,41 +4081,41 @@ aAdd(_aDadosParam,{"24","Devolução de",DToC(MV_PAR24)})
 aAdd(_aDadosParam,{"25","Devolução ate",DToC(MV_PAR25)})
 
 If MV_PAR26 == 2
-	_cmvpar26 := "Sim"
+    _cmvpar26 := "Sim"
 ElseIf MV_PAR26 == 3
-	_cmvpar26 := "Não"
+    _cmvpar26 := "Não"
 Else
-	_cmvpar26 := "Ambos"
+    _cmvpar26 := "Ambos"
 EndIf
 
 aAdd(_aDadosParam,{"26","TES gera financeiro",_cmvpar26})
 aAdd(_aDadosParam,{"27","Sub Grupo Produto",MV_PAR27})
 
 If MV_PAR28 == 2
-	_cmvpar28 := "Sim"
+    _cmvpar28 := "Sim"
 ElseIf MV_PAR28 == 3
-	_cmvpar28 := "Não"
+    _cmvpar28 := "Não"
 Else
-	_cmvpar28 := "Ambos"
+    _cmvpar28 := "Ambos"
 EndIf
 
 aAdd(_aDadosParam,{"28","Considera Carga",_cmvpar28})
 
 If MV_PAR29 == 2
-	_cmvpar29 := "Sim"
+    _cmvpar29 := "Sim"
 ElseIf MV_PAR29 == 3
-	_cmvpar29 := "Não"
+    _cmvpar29 := "Não"
 Else
-	_cmvpar29 := "Ambos"
+    _cmvpar29 := "Ambos"
 EndIf
 
 aAdd(_aDadosParam,{"29","Somente com op logistico?",_cmvpar29})
 aAdd(_aDadosParam,{"30","Operadores Logisticos",MV_PAR30})
 
 If MV_PAR31 == 1
-	_cmvpar31 := "Sim"
+    _cmvpar31 := "Sim"
 ElseIf MV_PAR31 == 2
-	_cmvpar31 := "Não"
+    _cmvpar31 := "Não"
 EndIf
 
 aAdd(_aDadosParam,{"31","Impr.Campos de Troca Nota",_cmvpar31})
@@ -4145,19 +4125,19 @@ aAdd(_aDadosParam,{"34","Gerente"                  ,MV_PAR34})
 
 _aPergunte:={}
 For nAux := 1 To Len(_aDadosParam)
-	If oPrint <> NIL
-		oPrint:Say (nLinha,nColInic + 10  ,"Pergunta " + AllTrim(_aDadosParam[nAux,1]) + ' : ' + AllTrim(_aDadosParam[nAux,2]),oFont14Prb)    
-		oPrint:Say (nLinha,nColInic + 1055  ,_aDadosParam[nAux,3],oFont14Prb) 
-		nlinha += 57   
-	EndIf
+    If oPrint <> NIL
+        oPrint:Say (nLinha,nColInic + 10  ,"Pergunta " + AllTrim(_aDadosParam[nAux,1]) + ' : ' + AllTrim(_aDadosParam[nAux,2]),oFont14Prb)    
+        oPrint:Say (nLinha,nColInic + 1055  ,_aDadosParam[nAux,3],oFont14Prb) 
+        nlinha += 57   
+    EndIf
 
-	aAdd(_aPergunte,{"Pergunta " + _aDadosParam[nAux,1] + ':',_aDadosParam[nAux,2],_aDadosParam[nAux,3] })
+    aAdd(_aPergunte,{"Pergunta " + _aDadosParam[nAux,1] + ':',_aDadosParam[nAux,2],_aDadosParam[nAux,3] })
 Next nAux
-	  
+      
 If oPrint <> NIL
-	nLinha += 57
-	oPrint:Line(nLinha,nColInic,nLinha,nColFinal)
-	oPrint:EndPage()     // Finaliza a página
+    nLinha += 57
+    oPrint:Line(nLinha,nColInic,nLinha,nColFinal)
+    oPrint:EndPage()     // Finaliza a página
 EndIf
 
 Return _aPergunte
@@ -4182,10 +4162,10 @@ nLinha:=0100
 oPrint:SayBitmap(nLinha,nColInic,cRaizServer + "system/lgrl01.bmp",250,100)        
 
 If impNrPag <> 0
-	oPrint:Say (nlinha,(nColInic + 2750),"PÁGINA: " + AllTrim(Str(nPagina)),oFont12b)
+    oPrint:Say (nlinha,(nColInic + 2750),"PÁGINA: " + AllTrim(Str(nPagina)),oFont12b)
 Else
-	oPrint:Say (nlinha,(nColInic + 2750),"SIGA/ROMS003",oFont12b)
-	oPrint:Say (nlinha + 100,(nColInic + 2750),"EMPRESA: " + AllTrim(SM0->M0_NOME) + '/' + AllTrim(SM0->M0_FILIAL),oFont12b)
+    oPrint:Say (nlinha,(nColInic + 2750),"SIGA/ROMS003",oFont12b)
+    oPrint:Say (nlinha + 100,(nColInic + 2750),"EMPRESA: " + AllTrim(SM0->M0_NOME) + '/' + AllTrim(SM0->M0_FILIAL),oFont12b)
 EndIf
 
 oPrint:Say (nlinha + 50,(nColInic + 2750),"DATA DE EMISSÃO: " + DToC(DATE()),oFont12b)
@@ -4431,108 +4411,108 @@ Begin Sequence
       oproc:cCaption := ("Lendo Dados - Pre-processamento 1/2" )
       ProcessMessages()
 
-	  BeginSql alias oAlias   	   	
-		SELECT 			
-				SUM(T.D2_QUANT)   AS D2_QUANT,
-				AVG(T.D2_PRCVEN)  AS D2_PRCVEN,
-				SUM(T.D2_TOTAL)   AS D2_TOTAL,				
-				SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
-				SUM(T.D2_QTSEGUM) AS D2_QTSEGUM,
-				SUM(T.D2_COMIS1)  AS D2_COMIS1,  
-				SUM(T.D2_I_FRET)  AS D2_I_FRET,				
-				SUM(T.D2_CUSTO1)  AS D2_CUSTO1,
-				SUM(T.D2_QTDEDEV) AS D2_QTDEDEV,
-				SUM(T.D2_VALDEV)  AS D2_VALDEV,				
-				SUM(T.D2_ICMSRET) AS D2_ICMSRET,				
-			    SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,
-				T.D2_UM,T.D2_SEGUM,T.B1_I_DESCD,T.B1_COD,T.D2_FILIAL,T.C5_I_LOCEM
+      BeginSql alias oAlias   	   	
+        SELECT 			
+                SUM(T.D2_QUANT)   AS D2_QUANT,
+                AVG(T.D2_PRCVEN)  AS D2_PRCVEN,
+                SUM(T.D2_TOTAL)   AS D2_TOTAL,				
+                SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
+                SUM(T.D2_QTSEGUM) AS D2_QTSEGUM,
+                SUM(T.D2_COMIS1)  AS D2_COMIS1,  
+                SUM(T.D2_I_FRET)  AS D2_I_FRET,				
+                SUM(T.D2_CUSTO1)  AS D2_CUSTO1,
+                SUM(T.D2_QTDEDEV) AS D2_QTDEDEV,
+                SUM(T.D2_VALDEV)  AS D2_VALDEV,				
+                SUM(T.D2_ICMSRET) AS D2_ICMSRET,				
+                SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,
+                T.D2_UM,T.D2_SEGUM,T.B1_I_DESCD,T.B1_COD,T.D2_FILIAL,T.C5_I_LOCEM
         FROM
-		(SELECT 			
+        (SELECT 			
 
-			SUM(SD2.D2_QUANT)   AS D2_QUANT,
-			AVG(SD2.D2_PRCVEN)  AS D2_PRCVEN,
-			SUM(SD2.D2_TOTAL)   AS D2_TOTAL,				
-			SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,								
-			SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,
-			SUM(((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
-			SUM(SD2.D2_I_FRET)  AS D2_I_FRET,
-			SUM(SD2.D2_CUSTO1)  AS D2_CUSTO1,
-			SUM(SD2.D2_ICMSRET) AS D2_ICMSRET,	  		
-			SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SD2.D2_FILIAL,SC5.C5_I_LOCEM,
-			SD2.D2_DOC, SD2.D2_SERIE, SD2.D2_CLIENTE, SD2.D2_LOJA, SD2.D2_COD,
-			(SELECT COALESCE(SUM(D1.D1_QUANT),0)
-			   FROM %Table:SD1% D1
-			   %exp:_cJOIN_SF1%
-			   WHERE D1.D_E_L_E_T_ = ' '
-			     AND D1.D1_TIPO = 'D'
-			     AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			     AND D1.D1_NFORI   = SD2.D2_DOC
-			     AND D1.D1_SERIORI = SD2.D2_SERIE
-			     AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			     AND D1.D1_LOJA    = SD2.D2_LOJA    
-			     AND D1.D1_COD     = SD2.D2_COD 
-			   ) AS D2_QTDEDEV,
-			(SELECT COALESCE(SUM(D1.D1_TOTAL),0)
-			   FROM %Table:SD1% D1
-			   %exp:_cJOIN_SF1%
-			   WHERE D1.D_E_L_E_T_ = ' '
-			     AND D1.D1_TIPO = 'D'
-			     AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			     AND D1.D1_NFORI   = SD2.D2_DOC
-			     AND D1.D1_SERIORI = SD2.D2_SERIE
-			     AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			     AND D1.D1_LOJA    = SD2.D2_LOJA    
-			     AND D1.D1_COD     = SD2.D2_COD
-		       ) AS D2_VALDEV,
-			(SUM(SD2.D2_VALBRUT)  -
-			(SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
-			   FROM %Table:SD1% D1
-			   %exp:_cJOIN_SF1%
-			   WHERE D1.D_E_L_E_T_ = ' '
-			     AND D1.D1_TIPO = 'D'
-			     AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			     AND D1.D1_NFORI   = SD2.D2_DOC
-			     AND D1.D1_SERIORI = SD2.D2_SERIE
-			     AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			     AND D1.D1_LOJA    = SD2.D2_LOJA    
-			     AND D1.D1_COD     = SD2.D2_COD
-		    )) AS VLRBRUTDEV
-		 FROM 
-			%Table:SF2% SF2
-			JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
-			JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
-			JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
-			JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
-			JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
-			JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
-			JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo
-			JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
-			LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
-		 WHERE 
-			SF2.%notDel%  
-			AND SD2.%notDel%  
-			AND SA1.%notDel%  		
-			AND SB1.%notDel%  					
-			AND SA3.%notDel%  											
-			AND SBM.%notDel%				
-			AND ACY.%notDel%
-			AND SF4.%notDel%
-			AND SC5.%notDel%
-		   	%exp:_cFiltro%
-		 GROUP BY 
- 			SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SD2.D2_FILIAL,SC5.C5_I_LOCEM,
-			SD2.D2_DOC, SD2.D2_SERIE, SD2.D2_CLIENTE, SD2.D2_LOJA, SD2.D2_COD
-		) T
-		 GROUP BY 
- 			T.D2_UM,T.D2_SEGUM,T.B1_I_DESCD,T.B1_COD,T.D2_FILIAL,T.C5_I_LOCEM
-		 ORDER BY 
-			T.D2_FILIAL,T.B1_COD,T.C5_I_LOCEM
-	  EndSql                       
-		    
+            SUM(SD2.D2_QUANT)   AS D2_QUANT,
+            AVG(SD2.D2_PRCVEN)  AS D2_PRCVEN,
+            SUM(SD2.D2_TOTAL)   AS D2_TOTAL,				
+            SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,								
+            SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,
+            SUM(((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
+            SUM(SD2.D2_I_FRET)  AS D2_I_FRET,
+            SUM(SD2.D2_CUSTO1)  AS D2_CUSTO1,
+            SUM(SD2.D2_ICMSRET) AS D2_ICMSRET,	  		
+            SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SD2.D2_FILIAL,SC5.C5_I_LOCEM,
+            SD2.D2_DOC, SD2.D2_SERIE, SD2.D2_CLIENTE, SD2.D2_LOJA, SD2.D2_COD,
+            (SELECT COALESCE(SUM(D1.D1_QUANT),0)
+               FROM %Table:SD1% D1
+               %exp:_cJOIN_SF1%
+               WHERE D1.D_E_L_E_T_ = ' '
+                 AND D1.D1_TIPO = 'D'
+                 AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                 AND D1.D1_NFORI   = SD2.D2_DOC
+                 AND D1.D1_SERIORI = SD2.D2_SERIE
+                 AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                 AND D1.D1_LOJA    = SD2.D2_LOJA    
+                 AND D1.D1_COD     = SD2.D2_COD 
+               ) AS D2_QTDEDEV,
+            (SELECT COALESCE(SUM(D1.D1_TOTAL),0)
+               FROM %Table:SD1% D1
+               %exp:_cJOIN_SF1%
+               WHERE D1.D_E_L_E_T_ = ' '
+                 AND D1.D1_TIPO = 'D'
+                 AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                 AND D1.D1_NFORI   = SD2.D2_DOC
+                 AND D1.D1_SERIORI = SD2.D2_SERIE
+                 AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                 AND D1.D1_LOJA    = SD2.D2_LOJA    
+                 AND D1.D1_COD     = SD2.D2_COD
+               ) AS D2_VALDEV,
+            (SUM(SD2.D2_VALBRUT)  -
+            (SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
+               FROM %Table:SD1% D1
+               %exp:_cJOIN_SF1%
+               WHERE D1.D_E_L_E_T_ = ' '
+                 AND D1.D1_TIPO = 'D'
+                 AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                 AND D1.D1_NFORI   = SD2.D2_DOC
+                 AND D1.D1_SERIORI = SD2.D2_SERIE
+                 AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                 AND D1.D1_LOJA    = SD2.D2_LOJA    
+                 AND D1.D1_COD     = SD2.D2_COD
+            )) AS VLRBRUTDEV
+         FROM 
+            %Table:SF2% SF2
+            JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
+            JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
+            JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
+            JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
+            JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
+            JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
+            JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo
+            JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
+            LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
+         WHERE 
+            SF2.%notDel%  
+            AND SD2.%notDel%  
+            AND SA1.%notDel%  		
+            AND SB1.%notDel%  					
+            AND SA3.%notDel%  											
+            AND SBM.%notDel%				
+            AND ACY.%notDel%
+            AND SF4.%notDel%
+            AND SC5.%notDel%
+               %exp:_cFiltro%
+         GROUP BY 
+             SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SD2.D2_FILIAL,SC5.C5_I_LOCEM,
+            SD2.D2_DOC, SD2.D2_SERIE, SD2.D2_CLIENTE, SD2.D2_LOJA, SD2.D2_COD
+        ) T
+         GROUP BY 
+             T.D2_UM,T.D2_SEGUM,T.B1_I_DESCD,T.B1_COD,T.D2_FILIAL,T.C5_I_LOCEM
+         ORDER BY 
+            T.D2_FILIAL,T.B1_COD,T.C5_I_LOCEM
+      EndSql                       
+            
       _nTot:=nConta:=0
       COUNT TO _nTot
       _cTotGeral:=AllTrim(Str(_nTot))
-	  (oAlias)->(DBGoTop())
+      (oAlias)->(DBGoTop())
 
       // Imprime Relatório em Excel
       If _lGeraEmExcel 
@@ -4548,11 +4528,11 @@ Begin Sequence
                        "Vlr.Unit",;          // 10                         
                        "Vlr.Total",;         // 11                          
                        "Vlr.Bruto"}          // 12              
-					              
-	// Alinhamento: 1-Left   ,2-Center,3-Right           
-	// Formatação.: 1-General,2-Number,3-Monetário,4-DateTime
-	//             Titulo das Colunas   ,Alinhamento ,Formatação, Totaliza?
-	//               Titulo             ,1           ,1         ,.F./.T.   })
+                                  
+    // Alinhamento: 1-Left   ,2-Center,3-Right           
+    // Formatação.: 1-General,2-Number,3-Monetário,4-DateTime
+    //             Titulo das Colunas   ,Alinhamento ,Formatação, Totaliza?
+    //               Titulo             ,1           ,1         ,.F./.T.   })
       aCabXML   := {{"Filial"           ,2           ,1         ,.F. },;// 01
                     {"Nome Filial"      ,1           ,1         ,.F. },;// 02
                     {"Fil. Embarque"    ,1           ,1         ,.F. },;// 03
@@ -4563,7 +4543,7 @@ Begin Sequence
                     {"Qtde 2a U.M."     ,3           ,2         ,.F. },;// 08
                     {"2a U.M."          ,2           ,1         ,.F. },;// 09
                     {"Vlr.Unit"         ,3           ,3         ,.F. },;// 10
-					{"Vlr.Total"        ,3           ,3         ,.F. },;// 11
+                    {"Vlr.Total"        ,3           ,3         ,.F. },;// 11
                     {"Vlr.Bruto"        ,3           ,3         ,.F. } }// 12
 
 
@@ -4576,199 +4556,199 @@ Begin Sequence
                 ProcessMessages()
              EndIf
 
-	         //Efetua o somatorio dos dados de acordo com o parametro considera devolucoes 
-	         nQtde1:= If(MV_PAR22 == 2,(oAlias)->D2_QUANT  ,(oAlias)->D2_QUANT  -(oAlias)->D2_QTDEDEV                                                  )
-	         nQtde2:= If(MV_PAR22 == 2,(oAlias)->D2_QTSEGUM,(oAlias)->D2_QTSEGUM-ROMS003L((oAlias)->D2_QUANT,(oAlias)->D2_QTDEDEV,(oAlias)->D2_QTSEGUM))
-	         nTotal:= If(MV_PAR22 == 2,(oAlias)->D2_TOTAL  ,(oAlias)->D2_TOTAL  -(oAlias)->D2_VALDEV                                                   )
-	         nVlBru:= If(MV_PAR22 == 2,(oAlias)->D2_VALBRUT,(oAlias)->VLRBRUTDEV                                                                       )
+             //Efetua o somatorio dos dados de acordo com o parametro considera devolucoes 
+             nQtde1:= If(MV_PAR22 == 2,(oAlias)->D2_QUANT  ,(oAlias)->D2_QUANT  -(oAlias)->D2_QTDEDEV                                                  )
+             nQtde2:= If(MV_PAR22 == 2,(oAlias)->D2_QTSEGUM,(oAlias)->D2_QTSEGUM-ROMS003L((oAlias)->D2_QUANT,(oAlias)->D2_QTDEDEV,(oAlias)->D2_QTSEGUM))
+             nTotal:= If(MV_PAR22 == 2,(oAlias)->D2_TOTAL  ,(oAlias)->D2_TOTAL  -(oAlias)->D2_VALDEV                                                   )
+             nVlBru:= If(MV_PAR22 == 2,(oAlias)->D2_VALBRUT,(oAlias)->VLRBRUTDEV                                                                       )
 
-			 _cNomeFil := FWFilialName(,(oAlias)->D2_FILIAL)
-			 _cFilEmba := Posicione("ZEL",1,xFilial("ZEL")+(oAlias)->C5_I_LOCEM,"ZEL_DESCRI")
+             _cNomeFil := FWFilialName(,(oAlias)->D2_FILIAL)
+             _cFilEmba := Posicione("ZEL",1,xFilial("ZEL")+(oAlias)->C5_I_LOCEM,"ZEL_DESCRI")
 
-		     aAdd(_aDadosExcel,{(oAlias)->D2_FILIAL,;    // 01 - Filial
-		                        _cNomeFil,;              // 02 - Nome Filial
+             aAdd(_aDadosExcel,{(oAlias)->D2_FILIAL,;    // 01 - Filial
+                                _cNomeFil,;              // 02 - Nome Filial
                                 _cFilEmba,;              // 03 - "Fil. Embarq"     
                                 (oAlias)->B1_COD,;       // 04 - Produto
                                 (oAlias)->B1_I_DESCD,;   // 05 - Descrição Produto
-							    nQtde1,;                 // 06 - Quantidade na primeira unidade de Medida
-						  	    (oAlias)->D2_UM,;        // 07 - Primeira unidade de Medida  
-						  	    nQtde2,;                 // 08 - Quantidade na segunda unidade de Medida 
-						  	    (oAlias)->D2_SEGUM,;     // 09 - Segunda unidade de Medida  
-							    nTotal / nQtde1 ,;       // 10 - Valor Unitario 
-						  	    nTotal,;                 // 11 - Valor Total 
-						  	    nVlBru;                  // 12 - Valor Bruto 
-						  	    })      
+                                nQtde1,;                 // 06 - Quantidade na primeira unidade de Medida
+                                  (oAlias)->D2_UM,;        // 07 - Primeira unidade de Medida  
+                                  nQtde2,;                 // 08 - Quantidade na segunda unidade de Medida 
+                                  (oAlias)->D2_SEGUM,;     // 09 - Segunda unidade de Medida  
+                                nTotal / nQtde1 ,;       // 10 - Valor Unitario 
+                                  nTotal,;                 // 11 - Valor Total 
+                                  nVlBru;                  // 12 - Valor Bruto 
+                                  })      
 
-	        (oAlias)->(DBSkip())	 
-	     EndDo
+            (oAlias)->(DBSkip())	 
+         EndDo
  
          If Empty(_aDadosExcel)
             U_ITMsg("Não foram encontrados dados para emissão do relatório em Excel que satisfaçam as condições de filtro.","Atenção", ,1)
-	     Else
-	        _aSX1:=ROMS003P()     
-		    _cMsgTop:= _cTitulo+" / Exportação disponiveis: XML / CSV / EXCEL / ARQUIVO"
-		                             //      ,_aCols     ,_lMaxSiz,_nTipo,_cMsgTop, _lSelUnc ,_aSizes , _nCampo , bOk , bCancel, _abuttons, _aCab  , bDblClk , _aColXML , bCondMarca,_bLegenda,_lHasOk,_bHeadClk,_aSX1 )
-	        U_ITListBox(_cTitulo , _aTitulos , _aDadosExcel , .T.    , 1    ,_cMsgTop,          ,        ,         ,     ,        ,          ,aCabXML,         ,          ,           ,         ,       ,          ,_aSX1)
+         Else
+            _aSX1:=ROMS003P()     
+            _cMsgTop:= _cTitulo+" / Exportação disponiveis: XML / CSV / EXCEL / ARQUIVO"
+                                     //      ,_aCols     ,_lMaxSiz,_nTipo,_cMsgTop, _lSelUnc ,_aSizes , _nCampo , bOk , bCancel, _abuttons, _aCab  , bDblClk , _aColXML , bCondMarca,_bLegenda,_lHasOk,_bHeadClk,_aSX1 )
+            U_ITListBox(_cTitulo , _aTitulos , _aDadosExcel , .T.    , 1    ,_cMsgTop,          ,        ,         ,     ,        ,          ,aCabXML,         ,          ,           ,         ,       ,          ,_aSX1)
          EndIf
 
-	     Break  // Finaliza a emissão do relatóriio em Excel de Produtos Sintético.
+         Break  // Finaliza a emissão do relatóriio em Excel de Produtos Sintético.
       EndIf
 
       oproc:cCaption := ("Lendo Dados - Pre-processamento 2/2" )
       ProcessMessages()
       // Imprime Relatório Impresso.
       If (oAlias)->(!Eof())
-  	     ROMS003C(1)
+           ROMS003C(1)
       EndIf       
-		
+        
       While (oAlias)->(!Eof())	
          If oproc <> NIL
             nConta++
             oproc:cCaption := ("Lendo : "+StrZero(nConta,5) +" de "+ _cTotGeral )
             ProcessMessages()
          EndIf
-	
-	     nPosFilial:=aScan(aFilial,{|x| x[1] == AllTrim((oAlias)->D2_FILIAL)})   
-	                                            
-	     //Efetua o somatorio dos dados de acordo com o parametro considera devolucoes 
-	     nQtde1:= IIf(MV_PAR22 == 2,(oAlias)->D2_QUANT  ,(oAlias)->D2_QUANT  -(oAlias)->D2_QTDEDEV                                                  )
-	     nQtde2:= IIf(MV_PAR22 == 2,(oAlias)->D2_QTSEGUM,(oAlias)->D2_QTSEGUM-ROMS003L((oAlias)->D2_QUANT,(oAlias)->D2_QTDEDEV,(oAlias)->D2_QTSEGUM))
-	     nTotal:= IIf(MV_PAR22 == 2,(oAlias)->D2_TOTAL  ,(oAlias)->D2_TOTAL  -(oAlias)->D2_VALDEV                                                   )
-	     nVlBru:= IIf(MV_PAR22 == 2,(oAlias)->D2_VALBRUT,(oAlias)->VLRBRUTDEV                                                                       )
-	
-	     //Efetua somatorio dos totalizadores geral
-	     nTotGQtde1 += nQtde1
-	     nTotGQtde2 += nQtde2  
-	     nTotGVlTot += nTotal
-	     nTotGVlBru += nVlBru       
-	
-	     //Efetua o somatorio dos dados do Produtos para o Resumo Geral
-	     nPosProdut:=aScan(aProduto,{|x| x[1] == AllTrim((oAlias)->B1_COD)})     
-	
-	     If nPosProdut > 0   
-		    aProduto[nPosProdut,2]+= nQtde1 //Quantidade primeira unidade de medida
-		    aProduto[nPosProdut,4]+= nQtde2 //Quantidade segunda unidade de medida
-		    aProduto[nPosProdut,6]+= nTotal //Valor total 
-		    aProduto[nPosProdut,7]+= nVlBru //Valor Bruto
-		 Else                         
-		    aAdd(aProduto,{AllTrim((oAlias)->B1_COD),;//01
-			                                  nQtde1,;//02
-							  (oAlias)->D2_UM,nQtde2,;//03
-							      (oAlias)->D2_SEGUM,;//04
-								              nTotal,;//05
-											  nVlBru,;//06
-								(oAlias)->B1_I_DESCD})//07
-  	     EndIf
-		      
-	     //Verifica se ja existe dados da Filial Lancados anteriormente
-	     If nPosFilial > 0                
-		    //Efetua somatorio dos totalizadores por Filial
-		    nTotQtde1 += nQtde1
-		    nTotQtde2 += nQtde2  
-		    nTotVlTot += nTotal
-		    nTotVlBru += nVlBru
-		                                
-		    nlinha+=nSaltoLinha   
-		    oPrint:Line(nLinha,nColInic,nLinha,nColFinal)             
-		    ROMS003QP(0,0)
-		     // DETALHAS - IMPRIME OS DADOS DO PRODUTO
-		    //       cProduto                                              ,nqtde1um,um1            ,nqtde2um,um2               ,nVlrTotal,nVlrBruto
-		    ROMS003N(AllTrim((oAlias)->B1_COD) + '-' + (oAlias)->B1_I_DESCD,nQtde1  ,(oAlias)->D2_UM,nQtde2  ,(oAlias)->D2_SEGUM,nTotal   ,nVlBru)
-		     // DETALHAS - IMPRIME OS DADOS DO PRODUTO
-		 Else
-			//Imprime o box e divisorias do produto anterior
-		 	If Len(aFilial) > 0
-		 	   nlinha+=nSaltoLinha                                  
-		 	   oPrint:Line(nLinha,nColInic,nLinha,nColFinal)   
-		 	   ROMS003QP(0,0)
-		 	   //Imprime totalizador por Produto          
-		 	   ROMS003PT('TOTAL:',nTotQtde1,nTotQtde2,nTotVlTot,nTotVlBru)
-		 	   nlinha+=nSaltoLinha
-		 	   ROMS003BD()   	 
-		 			
-		 	   //Forca quebra de pagina por Filial
-		 	   nlinha:= 5000     
-		 	   ROMS003QP(0,1)
-		 	EndIf  
-		 	                                                   
-		 	//Adiciona ao controle de filiais a nova filial
-		 	aAdd(aFilial,{AllTrim((oAlias)->D2_FILIAL)})      
-		 	
-			//Efetua somatorio dos totalizadores por Filial - setando
-			nTotQtde1 := nQtde1
-			nTotQtde2 := nQtde2  
-			nTotVlTot := nTotal
-			nTotVlBru := nVlBru
-		 			
-		    nlinha+=nSaltoLinha                
-			ROMS003QP(0,1)
-		    //Imprime cabecalho da Filial
-			ROMS003CF((oAlias)->D2_FILIAL)        
-					                                        
-			nlinha+=nSaltoLinha
-			nlinha+=nSaltoLinha                
-			ROMS003QP(0,1)   
-			//Imprime cabecalho dos dados do produto
-			ROMS003CD()
-					
-			nlinha+=nSaltoLinha   
-			oPrint:Line(nLinha,nColInic,nLinha,nColFinal)             
-			ROMS003QP(0,0)
-		     // DETALHAS - IMPRIME OS DADOS DO PRODUTO
-		    //       cProduto                                              ,nqtde1um,um1          ,nqtde2um,um2             ,nVlrTotal,nVlrBruto
-			ROMS003N(AllTrim((oAlias)->B1_COD) + '-' + (oAlias)->B1_I_DESCD,nQtde1,(oAlias)->D2_UM,nQtde2,(oAlias)->D2_SEGUM,nTotal,nVlBru)
-		     // DETALHAS - IMPRIME OS DADOS DO PRODUTO
-	     EndIf	
+    
+         nPosFilial:=aScan(aFilial,{|x| x[1] == AllTrim((oAlias)->D2_FILIAL)})   
+                                                
+         //Efetua o somatorio dos dados de acordo com o parametro considera devolucoes 
+         nQtde1:= IIf(MV_PAR22 == 2,(oAlias)->D2_QUANT  ,(oAlias)->D2_QUANT  -(oAlias)->D2_QTDEDEV                                                  )
+         nQtde2:= IIf(MV_PAR22 == 2,(oAlias)->D2_QTSEGUM,(oAlias)->D2_QTSEGUM-ROMS003L((oAlias)->D2_QUANT,(oAlias)->D2_QTDEDEV,(oAlias)->D2_QTSEGUM))
+         nTotal:= IIf(MV_PAR22 == 2,(oAlias)->D2_TOTAL  ,(oAlias)->D2_TOTAL  -(oAlias)->D2_VALDEV                                                   )
+         nVlBru:= IIf(MV_PAR22 == 2,(oAlias)->D2_VALBRUT,(oAlias)->VLRBRUTDEV                                                                       )
+    
+         //Efetua somatorio dos totalizadores geral
+         nTotGQtde1 += nQtde1
+         nTotGQtde2 += nQtde2  
+         nTotGVlTot += nTotal
+         nTotGVlBru += nVlBru       
+    
+         //Efetua o somatorio dos dados do Produtos para o Resumo Geral
+         nPosProdut:=aScan(aProduto,{|x| x[1] == AllTrim((oAlias)->B1_COD)})     
+    
+         If nPosProdut > 0   
+            aProduto[nPosProdut,2]+= nQtde1 //Quantidade primeira unidade de medida
+            aProduto[nPosProdut,4]+= nQtde2 //Quantidade segunda unidade de medida
+            aProduto[nPosProdut,6]+= nTotal //Valor total 
+            aProduto[nPosProdut,7]+= nVlBru //Valor Bruto
+         Else                         
+            aAdd(aProduto,{AllTrim((oAlias)->B1_COD),;//01
+                                              nQtde1,;//02
+                              (oAlias)->D2_UM,nQtde2,;//03
+                                  (oAlias)->D2_SEGUM,;//04
+                                              nTotal,;//05
+                                              nVlBru,;//06
+                                (oAlias)->B1_I_DESCD})//07
+           EndIf
+              
+         //Verifica se ja existe dados da Filial Lancados anteriormente
+         If nPosFilial > 0                
+            //Efetua somatorio dos totalizadores por Filial
+            nTotQtde1 += nQtde1
+            nTotQtde2 += nQtde2  
+            nTotVlTot += nTotal
+            nTotVlBru += nVlBru
+                                        
+            nlinha+=nSaltoLinha   
+            oPrint:Line(nLinha,nColInic,nLinha,nColFinal)             
+            ROMS003QP(0,0)
+             // DETALHAS - IMPRIME OS DADOS DO PRODUTO
+            //       cProduto                                              ,nqtde1um,um1            ,nqtde2um,um2               ,nVlrTotal,nVlrBruto
+            ROMS003N(AllTrim((oAlias)->B1_COD) + '-' + (oAlias)->B1_I_DESCD,nQtde1  ,(oAlias)->D2_UM,nQtde2  ,(oAlias)->D2_SEGUM,nTotal   ,nVlBru)
+             // DETALHAS - IMPRIME OS DADOS DO PRODUTO
+         Else
+            //Imprime o box e divisorias do produto anterior
+             If Len(aFilial) > 0
+                nlinha+=nSaltoLinha                                  
+                oPrint:Line(nLinha,nColInic,nLinha,nColFinal)   
+                ROMS003QP(0,0)
+                //Imprime totalizador por Produto          
+                ROMS003PT('TOTAL:',nTotQtde1,nTotQtde2,nTotVlTot,nTotVlBru)
+                nlinha+=nSaltoLinha
+                ROMS003BD()   	 
+                     
+                //Forca quebra de pagina por Filial
+                nlinha:= 5000     
+                ROMS003QP(0,1)
+             EndIf  
+                                                                
+             //Adiciona ao controle de filiais a nova filial
+             aAdd(aFilial,{AllTrim((oAlias)->D2_FILIAL)})      
+             
+            //Efetua somatorio dos totalizadores por Filial - setando
+            nTotQtde1 := nQtde1
+            nTotQtde2 := nQtde2  
+            nTotVlTot := nTotal
+            nTotVlBru := nVlBru
+                     
+            nlinha+=nSaltoLinha                
+            ROMS003QP(0,1)
+            //Imprime cabecalho da Filial
+            ROMS003CF((oAlias)->D2_FILIAL)        
+                                                            
+            nlinha+=nSaltoLinha
+            nlinha+=nSaltoLinha                
+            ROMS003QP(0,1)   
+            //Imprime cabecalho dos dados do produto
+            ROMS003CD()
+                    
+            nlinha+=nSaltoLinha   
+            oPrint:Line(nLinha,nColInic,nLinha,nColFinal)             
+            ROMS003QP(0,0)
+             // DETALHAS - IMPRIME OS DADOS DO PRODUTO
+            //       cProduto                                              ,nqtde1um,um1          ,nqtde2um,um2             ,nVlrTotal,nVlrBruto
+            ROMS003N(AllTrim((oAlias)->B1_COD) + '-' + (oAlias)->B1_I_DESCD,nQtde1,(oAlias)->D2_UM,nQtde2,(oAlias)->D2_SEGUM,nTotal,nVlBru)
+             // DETALHAS - IMPRIME OS DADOS DO PRODUTO
+         EndIf	
 
          (oAlias)->(DBSkip())
       EndDo	        
                  
       If Len(aFilial) > 0
-	     //Imprime o ultimo totalizador
-	     nlinha+=nSaltoLinha                                  
-	     oPrint:Line(nLinha,nColInic,nLinha,nColFinal)
-	     ROMS003QP(1,0)
-	     //Imprime totalizador por Filial                  
-	     ROMS003PT('TOTAL:',nTotQtde1,nTotQtde2,nTotVlTot,nTotVlBru)
-	     nlinha+=nSaltoLinha
-	     ROMS003BD()   	
-	
-	     nlinha+=nSaltoLinha     
-	     ROMS003QP(0,0)  
-	     //Imprime totalizador por Filial                  
-	     ROMS003PT('TOTAL GERAL:',nTotGQtde1,nTotGQtde2,nTotGVlTot,nTotGVlBru)
+         //Imprime o ultimo totalizador
+         nlinha+=nSaltoLinha                                  
+         oPrint:Line(nLinha,nColInic,nLinha,nColFinal)
+         ROMS003QP(1,0)
+         //Imprime totalizador por Filial                  
+         ROMS003PT('TOTAL:',nTotQtde1,nTotQtde2,nTotVlTot,nTotVlBru)
+         nlinha+=nSaltoLinha
+         ROMS003BD()   	
+    
+         nlinha+=nSaltoLinha     
+         ROMS003QP(0,0)  
+         //Imprime totalizador por Filial                  
+         ROMS003PT('TOTAL GERAL:',nTotGQtde1,nTotGQtde2,nTotGVlTot,nTotGVlBru)
       EndIf           
 
       //EMITE A PARTE DE RESUMO GERAL ONDE TOTALIZA OS PRODUTOS SEM DISTINCAO DE FILIAL, CASO TENHA MAIS DE UMA FILIAL,
       //POIS SENAO OS DADOS SERAO OS MESMOS DA FILIAL
       If Len(aFilial) > 1
-	     //Ordena por codigo do produto os dados do resumo geral
-	     aProduto:= aSort(aProduto,,,{|x, y| x[1] < y[1]})  
-	
-	     oPrint:EndPage()					// Finaliza a Pagina.
-	     oPrint:StartPage()					//Inicia uma nova Pagina					
-	     nPagina++
-	     ROMS003C(1)//Chama cabecalho                       
-	     nLinInBox:= nLinha 
-	                                 
-	     nlinha+=nSaltoLinha
-	     oPrint:FillRect({(nlinha+3),nColInic,nlinha + nSaltoLinha,nColFinal},oBrush)  
-	     oPrint:Box(nlinha,nColInic,nLinha + nSaltoLinha,nColFinal)
-	     oPrint:Say (nlinha,nColFinal / 2,"RESUMO GERAL",oFont16b,nColFinal,,,2)  
-	     nlinha+=nSaltoLinha                             
-	     //Imprime cabecalho dos dados do produto
-	     ROMS003CD()
-	
-	     For _nI:=1 to Len(aProduto)
-		     nlinha+=nSaltoLinha   
-		     oPrint:Line(nLinha,nColInic,nLinha,nColFinal)             
-		     ROMS003QP(0,0)
-		     //DETALHAS - IMPRIME OS DADOS DO PRODUTO
-			 //       cProduto                               ,nqtde1um       ,um1            ,nqtde2um       ,um2            ,nVlrTotal      ,nVlrBruto
-		     ROMS003N(aProduto[_nI,1] + '-' + aProduto[_nI,8],aProduto[_nI,2],aProduto[_nI,3],aProduto[_nI,4],aProduto[_nI,5],aProduto[_nI,6],aProduto[_nI,7])
-		     //DETALHAS - IMPRIME OS DADOS DO PRODUTO
-	     Next _nI
-	
+         //Ordena por codigo do produto os dados do resumo geral
+         aProduto:= aSort(aProduto,,,{|x, y| x[1] < y[1]})  
+    
+         oPrint:EndPage()					// Finaliza a Pagina.
+         oPrint:StartPage()					//Inicia uma nova Pagina					
+         nPagina++
+         ROMS003C(1)//Chama cabecalho                       
+         nLinInBox:= nLinha 
+                                     
+         nlinha+=nSaltoLinha
+         oPrint:FillRect({(nlinha+3),nColInic,nlinha + nSaltoLinha,nColFinal},oBrush)  
+         oPrint:Box(nlinha,nColInic,nLinha + nSaltoLinha,nColFinal)
+         oPrint:Say (nlinha,nColFinal / 2,"RESUMO GERAL",oFont16b,nColFinal,,,2)  
+         nlinha+=nSaltoLinha                             
+         //Imprime cabecalho dos dados do produto
+         ROMS003CD()
+    
+         For _nI:=1 to Len(aProduto)
+             nlinha+=nSaltoLinha   
+             oPrint:Line(nLinha,nColInic,nLinha,nColFinal)             
+             ROMS003QP(0,0)
+             //DETALHAS - IMPRIME OS DADOS DO PRODUTO
+             //       cProduto                               ,nqtde1um       ,um1            ,nqtde2um       ,um2            ,nVlrTotal      ,nVlrBruto
+             ROMS003N(aProduto[_nI,1] + '-' + aProduto[_nI,8],aProduto[_nI,2],aProduto[_nI,3],aProduto[_nI,4],aProduto[_nI,5],aProduto[_nI,6],aProduto[_nI,7])
+             //DETALHAS - IMPRIME OS DADOS DO PRODUTO
+         Next _nI
+    
          nlinha+=nSaltoLinha
          oPrint:Line(nLinha,nColInic,nLinha,nColFinal)                  
          ROMS003QP(0,0)  
@@ -4784,106 +4764,106 @@ Begin Sequence
       ProcessMessages()
 
       BeginSql alias oAlias   	   	
-		SELECT 			
-				SUM(T.D2_QUANT)   AS D2_QUANT,
-				AVG(T.D2_PRCVEN)  AS D2_PRCVEN,
-				SUM(T.D2_TOTAL)   AS D2_TOTAL,				
-				SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
-				SUM(T.D2_QTSEGUM) AS D2_QTSEGUM,
-				SUM(T.D2_COMIS1)  AS D2_COMIS1,  
-				SUM(T.D2_I_FRET)  AS D2_I_FRET,				
-				SUM(T.D2_CUSTO1)  AS D2_CUSTO1,
-				SUM(T.D2_QTDEDEV) AS D2_QTDEDEV,
-				SUM(T.D2_VALDEV)  AS D2_VALDEV,				
-				SUM(T.D2_ICMSRET) AS D2_ICMSRET,				
-			    SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,
-				T.D2_UM,T.D2_SEGUM,T.B1_I_DESCD,T.B1_COD,T.B1_I_SUBGR,T.D2_FILIAL
+        SELECT 			
+                SUM(T.D2_QUANT)   AS D2_QUANT,
+                AVG(T.D2_PRCVEN)  AS D2_PRCVEN,
+                SUM(T.D2_TOTAL)   AS D2_TOTAL,				
+                SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
+                SUM(T.D2_QTSEGUM) AS D2_QTSEGUM,
+                SUM(T.D2_COMIS1)  AS D2_COMIS1,  
+                SUM(T.D2_I_FRET)  AS D2_I_FRET,				
+                SUM(T.D2_CUSTO1)  AS D2_CUSTO1,
+                SUM(T.D2_QTDEDEV) AS D2_QTDEDEV,
+                SUM(T.D2_VALDEV)  AS D2_VALDEV,				
+                SUM(T.D2_ICMSRET) AS D2_ICMSRET,				
+                SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,
+                T.D2_UM,T.D2_SEGUM,T.B1_I_DESCD,T.B1_COD,T.B1_I_SUBGR,T.D2_FILIAL
         FROM
-		(SELECT 			
-		    SUM(SD2.D2_QUANT)   AS D2_QUANT,
-			AVG(SD2.D2_PRCVEN)  AS D2_PRCVEN,
-			SUM(SD2.D2_TOTAL)   AS D2_TOTAL,				
-			SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,								
-			SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,
-			SUM(((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
-			SUM(SD2.D2_I_FRET)  AS D2_I_FRET,
-			SUM(SD2.D2_CUSTO1)  AS D2_CUSTO1,
-			SUM(SD2.D2_ICMSRET) AS D2_ICMSRET,	  		
-			SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SB1.B1_I_SUBGR,SD2.D2_FILIAL,
-			SD2.D2_DOC, SD2.D2_SERIE, SD2.D2_CLIENTE, SD2.D2_LOJA, SD2.D2_COD,
-			(SELECT COALESCE(SUM(D1.D1_QUANT),0)
-			   FROM %Table:SD1% D1
-			   %exp:_cJOIN_SF1%
-			   WHERE D1.D_E_L_E_T_ = ' '
-			     AND D1.D1_TIPO = 'D'
-			     AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			     AND D1.D1_NFORI   = SD2.D2_DOC
-			     AND D1.D1_SERIORI = SD2.D2_SERIE
-			     AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			     AND D1.D1_LOJA    = SD2.D2_LOJA    
-			     AND D1.D1_COD     = SD2.D2_COD 
-			   ) AS D2_QTDEDEV,
-			(SELECT COALESCE(SUM(D1.D1_TOTAL),0)
-			   FROM %Table:SD1% D1
-			   %exp:_cJOIN_SF1%
-			   WHERE D1.D_E_L_E_T_ = ' '
-			     AND D1.D1_TIPO = 'D'
-			     AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			     AND D1.D1_NFORI   = SD2.D2_DOC
-			     AND D1.D1_SERIORI = SD2.D2_SERIE
-			     AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			     AND D1.D1_LOJA    = SD2.D2_LOJA    
-			     AND D1.D1_COD     = SD2.D2_COD
-		       ) AS D2_VALDEV,
-			(SUM(SD2.D2_VALBRUT)  -
-			(SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
-			   FROM %Table:SD1% D1
-			   %exp:_cJOIN_SF1%
-			   WHERE D1.D_E_L_E_T_ = ' '
-			     AND D1.D1_TIPO = 'D'
-			     AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			     AND D1.D1_NFORI   = SD2.D2_DOC
-			     AND D1.D1_SERIORI = SD2.D2_SERIE
-			     AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			     AND D1.D1_LOJA    = SD2.D2_LOJA    
-			     AND D1.D1_COD     = SD2.D2_COD
-		    )) AS VLRBRUTDEV
-		 FROM 
-			%Table:SF2% SF2
-		       JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
-		       JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
-		       JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
-		       JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
-		       JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
-		       JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
-		       JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo
-			   JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
-		       LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
-		 WHERE 
-		    SF2.%notDel%  
-			AND SD2.%notDel%  
-			AND SA1.%notDel%  		
-			AND SB1.%notDel%  					
-			AND SA3.%notDel%  											
-			AND SBM.%notDel%				
-			AND ACY.%notDel%
-			AND SF4.%notDel%
-			AND SC5.%notDel%
-		    %exp:_cFiltro%
-		 GROUP BY 
- 			SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SB1.B1_I_SUBGR,SD2.D2_FILIAL,
-			SD2.D2_DOC, SD2.D2_SERIE, SD2.D2_CLIENTE, SD2.D2_LOJA, SD2.D2_COD
-		) T
-		 GROUP BY 
- 			T.D2_UM,T.D2_SEGUM,T.B1_I_DESCD,T.B1_COD,T.B1_I_SUBGR,T.D2_FILIAL
-		 ORDER BY 
-			T.D2_FILIAL,T.B1_I_SUBGR,T.B1_COD
-	  EndSql    
+        (SELECT 			
+            SUM(SD2.D2_QUANT)   AS D2_QUANT,
+            AVG(SD2.D2_PRCVEN)  AS D2_PRCVEN,
+            SUM(SD2.D2_TOTAL)   AS D2_TOTAL,				
+            SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,								
+            SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,
+            SUM(((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
+            SUM(SD2.D2_I_FRET)  AS D2_I_FRET,
+            SUM(SD2.D2_CUSTO1)  AS D2_CUSTO1,
+            SUM(SD2.D2_ICMSRET) AS D2_ICMSRET,	  		
+            SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SB1.B1_I_SUBGR,SD2.D2_FILIAL,
+            SD2.D2_DOC, SD2.D2_SERIE, SD2.D2_CLIENTE, SD2.D2_LOJA, SD2.D2_COD,
+            (SELECT COALESCE(SUM(D1.D1_QUANT),0)
+               FROM %Table:SD1% D1
+               %exp:_cJOIN_SF1%
+               WHERE D1.D_E_L_E_T_ = ' '
+                 AND D1.D1_TIPO = 'D'
+                 AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                 AND D1.D1_NFORI   = SD2.D2_DOC
+                 AND D1.D1_SERIORI = SD2.D2_SERIE
+                 AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                 AND D1.D1_LOJA    = SD2.D2_LOJA    
+                 AND D1.D1_COD     = SD2.D2_COD 
+               ) AS D2_QTDEDEV,
+            (SELECT COALESCE(SUM(D1.D1_TOTAL),0)
+               FROM %Table:SD1% D1
+               %exp:_cJOIN_SF1%
+               WHERE D1.D_E_L_E_T_ = ' '
+                 AND D1.D1_TIPO = 'D'
+                 AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                 AND D1.D1_NFORI   = SD2.D2_DOC
+                 AND D1.D1_SERIORI = SD2.D2_SERIE
+                 AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                 AND D1.D1_LOJA    = SD2.D2_LOJA    
+                 AND D1.D1_COD     = SD2.D2_COD
+               ) AS D2_VALDEV,
+            (SUM(SD2.D2_VALBRUT)  -
+            (SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
+               FROM %Table:SD1% D1
+               %exp:_cJOIN_SF1%
+               WHERE D1.D_E_L_E_T_ = ' '
+                 AND D1.D1_TIPO = 'D'
+                 AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                 AND D1.D1_NFORI   = SD2.D2_DOC
+                 AND D1.D1_SERIORI = SD2.D2_SERIE
+                 AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                 AND D1.D1_LOJA    = SD2.D2_LOJA    
+                 AND D1.D1_COD     = SD2.D2_COD
+            )) AS VLRBRUTDEV
+         FROM 
+            %Table:SF2% SF2
+               JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
+               JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
+               JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
+               JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
+               JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
+               JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
+               JOIN %Table:SF4% SF4 ON sd2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo
+               JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
+               LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
+         WHERE 
+            SF2.%notDel%  
+            AND SD2.%notDel%  
+            AND SA1.%notDel%  		
+            AND SB1.%notDel%  					
+            AND SA3.%notDel%  											
+            AND SBM.%notDel%				
+            AND ACY.%notDel%
+            AND SF4.%notDel%
+            AND SC5.%notDel%
+            %exp:_cFiltro%
+         GROUP BY 
+             SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SB1.B1_I_SUBGR,SD2.D2_FILIAL,
+            SD2.D2_DOC, SD2.D2_SERIE, SD2.D2_CLIENTE, SD2.D2_LOJA, SD2.D2_COD
+        ) T
+         GROUP BY 
+             T.D2_UM,T.D2_SEGUM,T.B1_I_DESCD,T.B1_COD,T.B1_I_SUBGR,T.D2_FILIAL
+         ORDER BY 
+            T.D2_FILIAL,T.B1_I_SUBGR,T.B1_COD
+      EndSql    
 
       _nTot:=nConta:=0
       COUNT TO _nTot
       _cTotGeral:=AllTrim(Str(_nTot))
-	  (oAlias)->(DBGoTop())
+      (oAlias)->(DBGoTop())
 
       // Imprime Relatório em Excel
       If _lGeraEmExcel 
@@ -4899,10 +4879,10 @@ Begin Sequence
                        "Vlr.Total",;	       // 10
                        "Vlr.Bruto"}	           // 11
 
-	// Alinhamento: 1-Left   ,2-Center,3-Right
-	// Formatação.: 1-General,2-Number,3-Monetário,4-DateTime
-	//             Titulo das Colunas ,Alinhamento ,Formatação, Totaliza?
-	//               Titulo           ,1           ,1         ,.F./.T.   })
+    // Alinhamento: 1-Left   ,2-Center,3-Right
+    // Formatação.: 1-General,2-Number,3-Monetário,4-DateTime
+    //             Titulo das Colunas ,Alinhamento ,Formatação, Totaliza?
+    //               Titulo           ,1           ,1         ,.F./.T.   })
       aCabXML   := {{"Filial"         ,2           ,1         ,.F. },;
                     {"Desc.Filial"    ,1           ,1         ,.F. },;
                     {"Codigo Grupo"   ,2           ,1         ,.F. },;
@@ -4912,7 +4892,7 @@ Begin Sequence
                     {"Qtde 2a U.M."   ,3           ,2         ,.F. },;
                     {"2a U.M."        ,2           ,1         ,.F. },;
                     {"Vlr.Unit"       ,3           ,3         ,.F. },;
-					{"Vlr.Total"      ,3           ,3         ,.F. },;
+                    {"Vlr.Total"      ,3           ,3         ,.F. },;
                     {"Vlr.Bruto"      ,3           ,3         ,.F. }}
                        
           _cTitulo := "Relação de Vendas Faturadas - Ordem 11 - SubGrupo Sintético"
@@ -4924,243 +4904,243 @@ Begin Sequence
                 ProcessMessages()
              EndIf
 
-	         // Efetua o somatorio dos dados de acordo com o parametro considera devolucoes 
-	         nQtde1:= IIf(MV_PAR22 == 2,(oAlias)->D2_QUANT  ,(oAlias)->D2_QUANT  -(oAlias)->D2_QTDEDEV                                                  )
-	         nQtde2:= IIf(MV_PAR22 == 2,(oAlias)->D2_QTSEGUM,(oAlias)->D2_QTSEGUM-ROMS003L((oAlias)->D2_QUANT,(oAlias)->D2_QTDEDEV,(oAlias)->D2_QTSEGUM))
-	         nTotal:= IIf(MV_PAR22 == 2,(oAlias)->D2_TOTAL  ,(oAlias)->D2_TOTAL  -(oAlias)->D2_VALDEV                                                   )
-	         nVlBru:= IIf(MV_PAR22 == 2,(oAlias)->D2_VALBRUT,(oAlias)->VLRBRUTDEV                                                                       )
+             // Efetua o somatorio dos dados de acordo com o parametro considera devolucoes 
+             nQtde1:= IIf(MV_PAR22 == 2,(oAlias)->D2_QUANT  ,(oAlias)->D2_QUANT  -(oAlias)->D2_QTDEDEV                                                  )
+             nQtde2:= IIf(MV_PAR22 == 2,(oAlias)->D2_QTSEGUM,(oAlias)->D2_QTSEGUM-ROMS003L((oAlias)->D2_QUANT,(oAlias)->D2_QTDEDEV,(oAlias)->D2_QTSEGUM))
+             nTotal:= IIf(MV_PAR22 == 2,(oAlias)->D2_TOTAL  ,(oAlias)->D2_TOTAL  -(oAlias)->D2_VALDEV                                                   )
+             nVlBru:= IIf(MV_PAR22 == 2,(oAlias)->D2_VALBRUT,(oAlias)->VLRBRUTDEV                                                                       )
              
-			 _cNomeFil  := FWFilialName(,(oAlias)->D2_FILIAL)
-			 _cDescSubg := Posicione("ZB9",1,xFilial("ZB9")+(oAlias)->B1_I_SUBGR,"ZB9_DESSUB")
+             _cNomeFil  := FWFilialName(,(oAlias)->D2_FILIAL)
+             _cDescSubg := Posicione("ZB9",1,xFilial("ZB9")+(oAlias)->B1_I_SUBGR,"ZB9_DESSUB")
 
              _nI := aScan(_aDadosExcel, {|x| x[1]+x[3] == (oAlias)->D2_FILIAL+(oAlias)->B1_I_SUBGR} ) 
              If _nI == 0
-			    // Filial	Desc.Filial	Codigo Grupo	Descrição Grupo	Quantidade	1a U.M.	Qtde 2a U.M.	2a U.M.	Vlr.Unit	Vlr.Total	Vlr.Bruto
-		        aAdd(_aDadosExcel,{(oAlias)->D2_FILIAL,;    // 01 - Filial
-		                           _cNomeFil,;              // 02 - Nome Filial
+                // Filial	Desc.Filial	Codigo Grupo	Descrição Grupo	Quantidade	1a U.M.	Qtde 2a U.M.	2a U.M.	Vlr.Unit	Vlr.Total	Vlr.Bruto
+                aAdd(_aDadosExcel,{(oAlias)->D2_FILIAL,;    // 01 - Filial
+                                   _cNomeFil,;              // 02 - Nome Filial
                                    (oAlias)->B1_I_SUBGR,;   // 03 - SubGrupo  
-					 	           _cDescSubg,;             // 04 - Descrição SubGrupo
-							       nQtde1,;                 // 05 - Quantidade na primeira unidade de Medida
-						  	       (oAlias)->D2_UM,;        // 06 - Primeira unidade de Medida  
-						  	       nQtde2,;                 // 07 - Quantidade na segunda unidade de Medida 
-						  	       (oAlias)->D2_SEGUM,;     // 08 - Segunda unidade de Medida  
-							       nTotal / nQtde1 ,;       // 09 - Valor Unitario 
-						  	       nTotal,;                 // 10 - Valor Total 
-						  	       nVlBru;                  // 11 - Valor Bruto 
-						  	       })      
-			 Else
+                                    _cDescSubg,;             // 04 - Descrição SubGrupo
+                                   nQtde1,;                 // 05 - Quantidade na primeira unidade de Medida
+                                     (oAlias)->D2_UM,;        // 06 - Primeira unidade de Medida  
+                                     nQtde2,;                 // 07 - Quantidade na segunda unidade de Medida 
+                                     (oAlias)->D2_SEGUM,;     // 08 - Segunda unidade de Medida  
+                                   nTotal / nQtde1 ,;       // 09 - Valor Unitario 
+                                     nTotal,;                 // 10 - Valor Total 
+                                     nVlBru;                  // 11 - Valor Bruto 
+                                     })      
+             Else
                 _aDadosExcel[_nI,5]  += nQtde1              // 05 - Quantidade na primeira unidade de Medida
-				_aDadosExcel[_nI,7]  += nQtde2              // 07 - Quantidade na segunda unidade de Medida 
+                _aDadosExcel[_nI,7]  += nQtde2              // 07 - Quantidade na segunda unidade de Medida 
                 _aDadosExcel[_nI,10] += nTotal              // 10 - Valor Total 
-				_aDadosExcel[_nI,11] += nVlBru              // 11 - Valor Bruto    
-				_aDadosExcel[_nI,9]  := _aDadosExcel[_nI,10] / _aDadosExcel[_nI,5] // 9  - Valor Unitario 
-			 EndIf
+                _aDadosExcel[_nI,11] += nVlBru              // 11 - Valor Bruto    
+                _aDadosExcel[_nI,9]  := _aDadosExcel[_nI,10] / _aDadosExcel[_nI,5] // 9  - Valor Unitario 
+             EndIf
 
-	        (oAlias)->(DBSkip())	 
-	     EndDo
+            (oAlias)->(DBSkip())	 
+         EndDo
  
          If Empty(_aDadosExcel)
             U_ITMsg("Não foram encontrados dados para emissão do relatório em Excel que satisfaçam as condições de filtro.","Atenção", ,1)
-	     Else
-	        _aSX1:=ROMS003P()     
-		    _cMsgTop:= _cTitulo+" / Exportação disponiveis: XML / CSV / EXCEL / ARQUIVO"
-		                             //      ,_aCols     ,_lMaxSiz,_nTipo,_cMsgTop, _lSelUnc ,_aSizes , _nCampo , bOk , bCancel, _abuttons, _aCab  , bDblClk , _aColXML , bCondMarca,_bLegenda,_lHasOk,_bHeadClk,_aSX1 )
-	        U_ITListBox(_cTitulo , _aTitulos , _aDadosExcel , .T.    , 1    ,_cMsgTop,          ,        ,         ,     ,        ,          ,aCabXML,         ,          ,           ,         ,       ,          ,_aSX1)
+         Else
+            _aSX1:=ROMS003P()     
+            _cMsgTop:= _cTitulo+" / Exportação disponiveis: XML / CSV / EXCEL / ARQUIVO"
+                                     //      ,_aCols     ,_lMaxSiz,_nTipo,_cMsgTop, _lSelUnc ,_aSizes , _nCampo , bOk , bCancel, _abuttons, _aCab  , bDblClk , _aColXML , bCondMarca,_bLegenda,_lHasOk,_bHeadClk,_aSX1 )
+            U_ITListBox(_cTitulo , _aTitulos , _aDadosExcel , .T.    , 1    ,_cMsgTop,          ,        ,         ,     ,        ,          ,aCabXML,         ,          ,           ,         ,       ,          ,_aSX1)
          EndIf
 
-	     BREAK  // FINALIZA A EMISSÃO DO RELATÓRIIO EM EXCEL ORDERM SUB GRUPO SINTETICO.
+         BREAK  // FINALIZA A EMISSÃO DO RELATÓRIIO EM EXCEL ORDERM SUB GRUPO SINTETICO.
       EndIf
 
       // Imprime Relatório Impresso.
       oproc:cCaption := ("Lendo Dados - Pre-processamento 2/2" )
       ProcessMessages()
-	  If (oAlias)->(!Eof())
-		 ROMS003C(1)
-	  EndIf       
-		
-	  While (oAlias)->(!Eof())	
+      If (oAlias)->(!Eof())
+         ROMS003C(1)
+      EndIf       
+        
+      While (oAlias)->(!Eof())	
          If oproc <> NIL
             nConta++
             oproc:cCaption := ("Lendo : "+StrZero(nConta,5) +" de "+ _cTotGeral )
             ProcessMessages()
          EndIf
-		 
-		 nPosFilial:=aScan(aFilial,{|x| x[1] == AllTrim((oAlias)->D2_FILIAL)})   
-		                                            
-		 //Efetua o somatorio dos dados de acordo com o parametro considera devolucoes 
-	     nQtde1:= IIf(MV_PAR22 == 2,(oAlias)->D2_QUANT  ,(oAlias)->D2_QUANT  -(oAlias)->D2_QTDEDEV                                                  )
-	     nQtde2:= IIf(MV_PAR22 == 2,(oAlias)->D2_QTSEGUM,(oAlias)->D2_QTSEGUM-ROMS003L((oAlias)->D2_QUANT,(oAlias)->D2_QTDEDEV,(oAlias)->D2_QTSEGUM))
-	     nTotal:= IIf(MV_PAR22 == 2,(oAlias)->D2_TOTAL  ,(oAlias)->D2_TOTAL  -(oAlias)->D2_VALDEV                                                   )
-	     nVlBru:= IIf(MV_PAR22 == 2,(oAlias)->D2_VALBRUT,(oAlias)->VLRBRUTDEV                                                                       )
+         
+         nPosFilial:=aScan(aFilial,{|x| x[1] == AllTrim((oAlias)->D2_FILIAL)})   
+                                                    
+         //Efetua o somatorio dos dados de acordo com o parametro considera devolucoes 
+         nQtde1:= IIf(MV_PAR22 == 2,(oAlias)->D2_QUANT  ,(oAlias)->D2_QUANT  -(oAlias)->D2_QTDEDEV                                                  )
+         nQtde2:= IIf(MV_PAR22 == 2,(oAlias)->D2_QTSEGUM,(oAlias)->D2_QTSEGUM-ROMS003L((oAlias)->D2_QUANT,(oAlias)->D2_QTDEDEV,(oAlias)->D2_QTSEGUM))
+         nTotal:= IIf(MV_PAR22 == 2,(oAlias)->D2_TOTAL  ,(oAlias)->D2_TOTAL  -(oAlias)->D2_VALDEV                                                   )
+         nVlBru:= IIf(MV_PAR22 == 2,(oAlias)->D2_VALBRUT,(oAlias)->VLRBRUTDEV                                                                       )
 
-		 //Efetua somatorio dos totalizadores geral
-		 nTotGQtde1 += nQtde1
-		 nTotGQtde2 += nQtde2  
-		 nTotGVlTot += nTotal
-		 nTotGVlBru += nVlBru       
-		
-		 //Efetua o somatorio dos dados do SubGrupo para o Resumo Geral
-		 nPosProdut:=aScan(aProduto,{|x| x[1] == AllTrim((oAlias)->B1_I_SUBGR)})     
-	
-		 If nPosProdut > 0   
-			aProduto[nPosProdut,2]+= nQtde1 //Quantidade primeira unidade de medida
-			aProduto[nPosProdut,4]+= nQtde2 //Quantidade segunda unidade de medida
-			aProduto[nPosProdut,6]+= nTotal //Valor total 
-			aProduto[nPosProdut,7]+= nVlBru //Valor Bruto
-		 Else                         
-			_cDescSubg := Posicione("ZB9",1,xFilial("ZB9")+(oAlias)->B1_I_SUBGR,"ZB9_DESSUB")
-		    aAdd(aProduto,{AllTrim((oAlias)->B1_I_SUBGR),;//01
-			                                      nQtde1,;//02
-			                             (oAlias)->D2_UM,;//03
-			                                      nQtde2,;//04
-			                          (oAlias)->D2_SEGUM,;//05
-			                                      nTotal,;//06
-			                                      nVlBru,;//07
-			                                  _cDescSubg})//08
-		 EndIf
-		      
-    	 //Verifica se ja existe dados da Filial Lancados anteriormente
-		 If nPosFilial > 0                
-			//Efetua somatorio dos totalizadores por Filial
-			nTotQtde1 += nQtde1
-			nTotQtde2 += nQtde2  
-			nTotVlTot += nTotal
-			nTotVlBru += nVlBru
-			                             
-			//Verifica quebra por Sub Grupo
-			nPosSubGr:= aScan(aSubGrupo,{|x| x[1] == AllTrim((oAlias)->D2_FILIAL) + AllTrim((oAlias)->B1_I_SUBGR) })     
-	
-			If nPosSubGr == 0   
-			   nlinha+=nSaltoLinha 
-			   ROMS003BD()   
-				
-			   If Len(aSubGrupo) > 0
-				  nlinha+=nSaltoLinha
-				  ROMS003QP(0,1)
-		 		  //Imprime totalizador por Filial          
-		 		  ROMS003PT(SubStr('TOTAL SUB GRUPO: ' + aSubGrupo[Len(aSubGrupo),2],1,50) ,nTotSQtde1,nTotSQtde2,nTotSVlTot,nTotSVlBru)
-		 			
-		 		  //nlinha+=nSaltoLinha
-			   EndIf	
-				
-			   _cDescSubg := Posicione("ZB9",1,xFilial("ZB9")+(oAlias)->B1_I_SUBGR,"ZB9_DESSUB")
+         //Efetua somatorio dos totalizadores geral
+         nTotGQtde1 += nQtde1
+         nTotGQtde2 += nQtde2  
+         nTotGVlTot += nTotal
+         nTotGVlBru += nVlBru       
+        
+         //Efetua o somatorio dos dados do SubGrupo para o Resumo Geral
+         nPosProdut:=aScan(aProduto,{|x| x[1] == AllTrim((oAlias)->B1_I_SUBGR)})     
+    
+         If nPosProdut > 0   
+            aProduto[nPosProdut,2]+= nQtde1 //Quantidade primeira unidade de medida
+            aProduto[nPosProdut,4]+= nQtde2 //Quantidade segunda unidade de medida
+            aProduto[nPosProdut,6]+= nTotal //Valor total 
+            aProduto[nPosProdut,7]+= nVlBru //Valor Bruto
+         Else                         
+            _cDescSubg := Posicione("ZB9",1,xFilial("ZB9")+(oAlias)->B1_I_SUBGR,"ZB9_DESSUB")
+            aAdd(aProduto,{AllTrim((oAlias)->B1_I_SUBGR),;//01
+                                                  nQtde1,;//02
+                                         (oAlias)->D2_UM,;//03
+                                                  nQtde2,;//04
+                                      (oAlias)->D2_SEGUM,;//05
+                                                  nTotal,;//06
+                                                  nVlBru,;//07
+                                              _cDescSubg})//08
+         EndIf
+              
+         //Verifica se ja existe dados da Filial Lancados anteriormente
+         If nPosFilial > 0                
+            //Efetua somatorio dos totalizadores por Filial
+            nTotQtde1 += nQtde1
+            nTotQtde2 += nQtde2  
+            nTotVlTot += nTotal
+            nTotVlBru += nVlBru
+                                         
+            //Verifica quebra por Sub Grupo
+            nPosSubGr:= aScan(aSubGrupo,{|x| x[1] == AllTrim((oAlias)->D2_FILIAL) + AllTrim((oAlias)->B1_I_SUBGR) })     
+    
+            If nPosSubGr == 0   
+               nlinha+=nSaltoLinha 
+               ROMS003BD()   
+                
+               If Len(aSubGrupo) > 0
+                  nlinha+=nSaltoLinha
+                  ROMS003QP(0,1)
+                   //Imprime totalizador por Filial          
+                   ROMS003PT(SubStr('TOTAL SUB GRUPO: ' + aSubGrupo[Len(aSubGrupo),2],1,50) ,nTotSQtde1,nTotSQtde2,nTotSVlTot,nTotSVlBru)
+                     
+                   //nlinha+=nSaltoLinha
+               EndIf	
+                
+               _cDescSubg := Posicione("ZB9",1,xFilial("ZB9")+(oAlias)->B1_I_SUBGR,"ZB9_DESSUB")
 
-			   nlinha+=nSaltoLinha 
-			   nlinha+=nSaltoLinha   
-			   ROMS003QP(2,1)  
-			   ROMS003CS(AllTrim((oAlias)->B1_I_SUBGR),AllTrim(_cDescSubg))
-			   nlinha+=nSaltoLinha 
-			   nlinha+=nSaltoLinha                
-			   ROMS003QP(2,1)   
-			   //Imprime cabecalho dos dados do produto
-			   ROMS003CD()     
-				
-			   aAdd(aSubGrupo,{ AllTrim((oAlias)->D2_FILIAL) + AllTrim((oAlias)->B1_I_SUBGR),AllTrim((oAlias)->B1_I_SUBGR) + '-' + AllTrim(_cDescSubg)})
-				
-			   //setas as variaves responsaveis por realizar o controle do somatorio por subGrupo de Produto
-			   nTotSQtde1 := nQtde1
-			   nTotSQtde2 := nQtde2  
-			   nTotSVlTot := nTotal
-			   nTotSVlBru := nVlBru     
-			Else
-		       //Efetua o somatorio por Sub Grupo de Produto
-			   nTotSQtde1 += nQtde1
-			   nTotSQtde2 += nQtde2  
-			   nTotSVlTot += nTotal
-			   nTotSVlBru += nVlBru 
-			EndIf   
-						                                
-			nlinha+=nSaltoLinha   
-			oPrint:Line(nLinha,nColInic,nLinha,nColFinal)             
-			ROMS003QP(0,0)                  
-		     // DETALHAS - IMPRIME OS DADOS DO PRODUTO
-		    //       cProduto                                              ,nqtde1um,um1          ,nqtde2um,um2             ,nVlrTotal,nVlrBruto
-			ROMS003N(AllTrim((oAlias)->B1_COD) + '-' + (oAlias)->B1_I_DESCD,nQtde1,(oAlias)->D2_UM,nQtde2,(oAlias)->D2_SEGUM,nTotal,nVlBru)
-		     //DETALHAS - IMPRIME OS DADOS DO PRODUTO
-		 Else
-			//Imprime total sub Grupo 		
-			If Len(aSubGrupo) > 0
-		 	   nlinha+=nSaltoLinha
-		 	   ROMS003BD() 
-				
-			   nlinha+=nSaltoLinha 
-			   ROMS003QP(0,1)
-		 	   //Imprime totalizador por Filial          
-		 	   ROMS003PT(SubStr('TOTAL SUB GRUPO: ' + aSubGrupo[Len(aSubGrupo),2],1,50) ,nTotSQtde1,nTotSQtde2,nTotSVlTot,nTotSVlBru)
-		 			
-		 	   nlinha+=nSaltoLinha     
-		    EndIf	 		                                        
-			 		
-			//Imprime o box e divisorias do produto anterior
-		 	If Len(aFilial) > 0  	 
-		 	   nlinha+=nSaltoLinha      
-		 	   ROMS003QP(0,1)
-		 	   //Imprime totalizador por Filial          
-		 	   ROMS003PT(SubStr('TOTAL FILIAL: ' + aFilial[Len(aFilial),1] + '-' + FWFilialName(,aFilial[Len(aFilial),1]),1,50),nTotQtde1,nTotQtde2,nTotVlTot,nTotVlBru)
-		 			
-		 	   nlinha+=nSaltoLinha
-		 	   nlinha+=nSaltoLinha     
-		 			
-		 	   //Forca quebra de pagina por Filial
-		 	   nlinha:= 5000     
-		 	   ROMS003QP(0,1)
-		 	EndIf  
+               nlinha+=nSaltoLinha 
+               nlinha+=nSaltoLinha   
+               ROMS003QP(2,1)  
+               ROMS003CS(AllTrim((oAlias)->B1_I_SUBGR),AllTrim(_cDescSubg))
+               nlinha+=nSaltoLinha 
+               nlinha+=nSaltoLinha                
+               ROMS003QP(2,1)   
+               //Imprime cabecalho dos dados do produto
+               ROMS003CD()     
+                
+               aAdd(aSubGrupo,{ AllTrim((oAlias)->D2_FILIAL) + AllTrim((oAlias)->B1_I_SUBGR),AllTrim((oAlias)->B1_I_SUBGR) + '-' + AllTrim(_cDescSubg)})
+                
+               //setas as variaves responsaveis por realizar o controle do somatorio por subGrupo de Produto
+               nTotSQtde1 := nQtde1
+               nTotSQtde2 := nQtde2  
+               nTotSVlTot := nTotal
+               nTotSVlBru := nVlBru     
+            Else
+               //Efetua o somatorio por Sub Grupo de Produto
+               nTotSQtde1 += nQtde1
+               nTotSQtde2 += nQtde2  
+               nTotSVlTot += nTotal
+               nTotSVlBru += nVlBru 
+            EndIf   
+                                                        
+            nlinha+=nSaltoLinha   
+            oPrint:Line(nLinha,nColInic,nLinha,nColFinal)             
+            ROMS003QP(0,0)                  
+             // DETALHAS - IMPRIME OS DADOS DO PRODUTO
+            //       cProduto                                              ,nqtde1um,um1          ,nqtde2um,um2             ,nVlrTotal,nVlrBruto
+            ROMS003N(AllTrim((oAlias)->B1_COD) + '-' + (oAlias)->B1_I_DESCD,nQtde1,(oAlias)->D2_UM,nQtde2,(oAlias)->D2_SEGUM,nTotal,nVlBru)
+             //DETALHAS - IMPRIME OS DADOS DO PRODUTO
+         Else
+            //Imprime total sub Grupo 		
+            If Len(aSubGrupo) > 0
+                nlinha+=nSaltoLinha
+                ROMS003BD() 
+                
+               nlinha+=nSaltoLinha 
+               ROMS003QP(0,1)
+                //Imprime totalizador por Filial          
+                ROMS003PT(SubStr('TOTAL SUB GRUPO: ' + aSubGrupo[Len(aSubGrupo),2],1,50) ,nTotSQtde1,nTotSQtde2,nTotSVlTot,nTotSVlBru)
+                     
+                nlinha+=nSaltoLinha     
+            EndIf	 		                                        
+                     
+            //Imprime o box e divisorias do produto anterior
+             If Len(aFilial) > 0  	 
+                nlinha+=nSaltoLinha      
+                ROMS003QP(0,1)
+                //Imprime totalizador por Filial          
+                ROMS003PT(SubStr('TOTAL FILIAL: ' + aFilial[Len(aFilial),1] + '-' + FWFilialName(,aFilial[Len(aFilial),1]),1,50),nTotQtde1,nTotQtde2,nTotVlTot,nTotVlBru)
+                     
+                nlinha+=nSaltoLinha
+                nlinha+=nSaltoLinha     
+                     
+                //Forca quebra de pagina por Filial
+                nlinha:= 5000     
+                ROMS003QP(0,1)
+             EndIf  
 
-			_cDescSubg := Posicione("ZB9",1,xFilial("ZB9")+(oAlias)->B1_I_SUBGR,"ZB9_DESSUB")
+            _cDescSubg := Posicione("ZB9",1,xFilial("ZB9")+(oAlias)->B1_I_SUBGR,"ZB9_DESSUB")
 
-		 	//Adiciona ao controle de filiais a nova filial
-		 	aAdd(aFilial,{AllTrim((oAlias)->D2_FILIAL)})      
-		 	//Adiciona ao controle de sub Grupo o sub Grupo da Nova Filial
-			aAdd(aSubGrupo,{ AllTrim((oAlias)->D2_FILIAL) + AllTrim((oAlias)->B1_I_SUBGR),AllTrim((oAlias)->B1_I_SUBGR) + '-' + AllTrim(_cDescSubg)}) 
-			//Efetua somatorio dos totalizadores por Filial - setando
-			nTotQtde1 := nQtde1
-			nTotQtde2 := nQtde2  
-			nTotVlTot := nTotal
-			nTotVlBru := nVlBru 
-			//Efetua o somatorio dos totalizadores por Sub Grupo de Produto - Setando
-			nTotSQtde1 := nQtde1
-			nTotSQtde2 := nQtde2  
-			nTotSVlTot := nTotal
-			nTotSVlBru := nVlBru    
-		 			
-		    nlinha+=nSaltoLinha                
-			ROMS003QP(1,1)
-		    //Imprime cabecalho da Filial
-			ROMS003CF((oAlias)->D2_FILIAL)        
-			
-			nlinha+=nSaltoLinha 
-			nlinha+=nSaltoLinha     
-			ROMS003QP(2,1)   
-			//Imprime cabecalho do SubGrupo
-			ROMS003CS(AllTrim((oAlias)->B1_I_SUBGR),AllTrim(_cDescSubg))
-			
-			nlinha+=nSaltoLinha
-			nlinha+=nSaltoLinha                
-			ROMS003QP(2,1)   
-			//Imprime cabecalho dos dados do produto
-			ROMS003CD()
-					
-			nlinha+=nSaltoLinha   
-			oPrint:Line(nLinha,nColInic,nLinha,nColFinal)             
-			ROMS003QP(0,0)
-	        // DETALHAS - IMPRIME OS DADOS DO PRODUTO
-		    //       cProduto                                              ,nqtde1um,um1          ,nqtde2um,um2             ,nVlrTotal,nVlrBruto
-			ROMS003N(AllTrim((oAlias)->B1_COD) + '-' + (oAlias)->B1_I_DESCD,nQtde1,(oAlias)->D2_UM,nQtde2,(oAlias)->D2_SEGUM,nTotal,nVlBru)
-		    //DETALHAS - IMPRIME OS DADOS DO PRODUTO
-	     EndIf	
+             //Adiciona ao controle de filiais a nova filial
+             aAdd(aFilial,{AllTrim((oAlias)->D2_FILIAL)})      
+             //Adiciona ao controle de sub Grupo o sub Grupo da Nova Filial
+            aAdd(aSubGrupo,{ AllTrim((oAlias)->D2_FILIAL) + AllTrim((oAlias)->B1_I_SUBGR),AllTrim((oAlias)->B1_I_SUBGR) + '-' + AllTrim(_cDescSubg)}) 
+            //Efetua somatorio dos totalizadores por Filial - setando
+            nTotQtde1 := nQtde1
+            nTotQtde2 := nQtde2  
+            nTotVlTot := nTotal
+            nTotVlBru := nVlBru 
+            //Efetua o somatorio dos totalizadores por Sub Grupo de Produto - Setando
+            nTotSQtde1 := nQtde1
+            nTotSQtde2 := nQtde2  
+            nTotSVlTot := nTotal
+            nTotSVlBru := nVlBru    
+                     
+            nlinha+=nSaltoLinha                
+            ROMS003QP(1,1)
+            //Imprime cabecalho da Filial
+            ROMS003CF((oAlias)->D2_FILIAL)        
+            
+            nlinha+=nSaltoLinha 
+            nlinha+=nSaltoLinha     
+            ROMS003QP(2,1)   
+            //Imprime cabecalho do SubGrupo
+            ROMS003CS(AllTrim((oAlias)->B1_I_SUBGR),AllTrim(_cDescSubg))
+            
+            nlinha+=nSaltoLinha
+            nlinha+=nSaltoLinha                
+            ROMS003QP(2,1)   
+            //Imprime cabecalho dos dados do produto
+            ROMS003CD()
+                    
+            nlinha+=nSaltoLinha   
+            oPrint:Line(nLinha,nColInic,nLinha,nColFinal)             
+            ROMS003QP(0,0)
+            // DETALHAS - IMPRIME OS DADOS DO PRODUTO
+            //       cProduto                                              ,nqtde1um,um1          ,nqtde2um,um2             ,nVlrTotal,nVlrBruto
+            ROMS003N(AllTrim((oAlias)->B1_COD) + '-' + (oAlias)->B1_I_DESCD,nQtde1,(oAlias)->D2_UM,nQtde2,(oAlias)->D2_SEGUM,nTotal,nVlBru)
+            //DETALHAS - IMPRIME OS DADOS DO PRODUTO
+         EndIf	
 
          (oAlias)->(DBSkip())
       EndDo	                                                  
 
       If Len(aSubGrupo) > 0   
-	     nlinha+=nSaltoLinha
-	     ROMS003BD()      
+         nlinha+=nSaltoLinha
+         ROMS003BD()      
 
-	     nlinha+=nSaltoLinha 
-	     ROMS003QP(0,1)
-	     //Imprime totalizador por Filial          
-	     ROMS003PT(SubStr('TOTAL SUB GRUPO: ' + aSubGrupo[Len(aSubGrupo),2],1,50),nTotSQtde1,nTotSQtde2,nTotSVlTot,nTotSVlBru)
-	     nlinha+=nSaltoLinha    
+         nlinha+=nSaltoLinha 
+         ROMS003QP(0,1)
+         //Imprime totalizador por Filial          
+         ROMS003PT(SubStr('TOTAL SUB GRUPO: ' + aSubGrupo[Len(aSubGrupo),2],1,50),nTotSQtde1,nTotSQtde2,nTotSVlTot,nTotSVlBru)
+         nlinha+=nSaltoLinha    
       EndIf 
 
       If Len(aFilial) > 0            
@@ -5181,40 +5161,40 @@ Begin Sequence
       //EMITE A PARTE DE RESUMO GERAL ONDE TOTALIZA OS PRODUTOS SEM DISTINCAO DE FILIAL, CASO TENHA MAIS DE UMA FILIAL,
       //POIS SENAO OS DADOS SERAO OS MESMOS DA FILIAL
       If Len(aFilial) > 1
-  	     //Ordena por codigo do produto os dados do resumo geral
-	     aProduto:= aSort(aProduto,,,{|x, y| x[1] < y[1]})  
-	
-	     oPrint:EndPage()					// Finaliza a Pagina.
-	     oPrint:StartPage()					//Inicia uma nova Pagina					
-	     nPagina++
-	     ROMS003C(1)//Chama cabecalho                       
-	     nLinInBox:= nLinha 
-	                                 
-	     nlinha+=nSaltoLinha
-	     oPrint:FillRect({(nlinha+3),nColInic,nlinha + nSaltoLinha,nColFinal},oBrush)  
-	     oPrint:Box(nlinha,nColInic,nLinha + nSaltoLinha,nColFinal)
-	     oPrint:Say (nlinha,nColFinal / 2,"RESUMO GERAL",oFont16b,nColFinal,,,2)  
-	     nlinha+=nSaltoLinha                             
-	     //Imprime cabecalho dos dados do produto
-	     ROMS003SG()   
-	
-	     For _nI:=1 to Len(aProduto)
-		     nlinha+=nSaltoLinha   
-		     oPrint:Line(nLinha,nColInic,nLinha,nColFinal)             
-		     ROMS003QP(0,0)
-		     //DETALHAS - IMPRIME OS DADOS DO PRODUTO
-			 //       cProduto                               ,nqtde1um       ,um1            ,nqtde2um       ,um2            ,nVlrTotal      ,nVlrBruto
-		     ROMS003N(aProduto[_nI,1] + '-' + aProduto[_nI,8],aProduto[_nI,2],aProduto[_nI,3],aProduto[_nI,4],aProduto[_nI,5],aProduto[_nI,6],aProduto[_nI,7])
-		     //DETALHAS - IMPRIME OS DADOS DO PRODUTO
-	     Next _nI
-	
-	     nlinha+=nSaltoLinha
-	     oPrint:Line(nLinha,nColInic,nLinha,nColFinal)                  
-	     ROMS003QP(0,0)  
-	     //Imprime totalizador por Filial                  
-	     ROMS003PT('TOTAL GERAL:',nTotGQtde1,nTotGQtde2,nTotGVlTot,nTotGVlBru)     
-	     nlinha+=nSaltoLinha 
-	     ROMS003BD()
+           //Ordena por codigo do produto os dados do resumo geral
+         aProduto:= aSort(aProduto,,,{|x, y| x[1] < y[1]})  
+    
+         oPrint:EndPage()					// Finaliza a Pagina.
+         oPrint:StartPage()					//Inicia uma nova Pagina					
+         nPagina++
+         ROMS003C(1)//Chama cabecalho                       
+         nLinInBox:= nLinha 
+                                     
+         nlinha+=nSaltoLinha
+         oPrint:FillRect({(nlinha+3),nColInic,nlinha + nSaltoLinha,nColFinal},oBrush)  
+         oPrint:Box(nlinha,nColInic,nLinha + nSaltoLinha,nColFinal)
+         oPrint:Say (nlinha,nColFinal / 2,"RESUMO GERAL",oFont16b,nColFinal,,,2)  
+         nlinha+=nSaltoLinha                             
+         //Imprime cabecalho dos dados do produto
+         ROMS003SG()   
+    
+         For _nI:=1 to Len(aProduto)
+             nlinha+=nSaltoLinha   
+             oPrint:Line(nLinha,nColInic,nLinha,nColFinal)             
+             ROMS003QP(0,0)
+             //DETALHAS - IMPRIME OS DADOS DO PRODUTO
+             //       cProduto                               ,nqtde1um       ,um1            ,nqtde2um       ,um2            ,nVlrTotal      ,nVlrBruto
+             ROMS003N(aProduto[_nI,1] + '-' + aProduto[_nI,8],aProduto[_nI,2],aProduto[_nI,3],aProduto[_nI,4],aProduto[_nI,5],aProduto[_nI,6],aProduto[_nI,7])
+             //DETALHAS - IMPRIME OS DADOS DO PRODUTO
+         Next _nI
+    
+         nlinha+=nSaltoLinha
+         oPrint:Line(nLinha,nColInic,nLinha,nColFinal)                  
+         ROMS003QP(0,0)  
+         //Imprime totalizador por Filial                  
+         ROMS003PT('TOTAL GERAL:',nTotGQtde1,nTotGQtde2,nTotGVlTot,nTotGVlBru)     
+         nlinha+=nSaltoLinha 
+         ROMS003BD()
       EndIf    
    
    // Orderm Coordenador x Produto
@@ -5224,106 +5204,106 @@ Begin Sequence
       ProcessMessages()
 
       BeginSql alias oAlias   	   	
-		SELECT 			
-				SUM(T.D2_QUANT)   AS D2_QUANT,
-				AVG(T.D2_PRCVEN)  AS D2_PRCVEN,
-				SUM(T.D2_TOTAL)   AS D2_TOTAL,				
-				SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
-				SUM(T.D2_QTSEGUM) AS D2_QTSEGUM,
-				SUM(T.D2_COMIS1)  AS D2_COMIS1,  
-				SUM(T.D2_I_FRET)  AS D2_I_FRET,				
-				SUM(T.D2_CUSTO1)  AS D2_CUSTO1,
-				SUM(T.D2_QTDEDEV) AS D2_QTDEDEV,
-				SUM(T.D2_VALDEV)  AS D2_VALDEV,				
-				SUM(T.D2_ICMSRET) AS D2_ICMSRET,				
-			    SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,
-				T.D2_UM,T.D2_SEGUM,T.B1_I_DESCD,T.B1_COD,T.F2_VEND2,T.D2_FILIAL,T.C5_I_LOCEM, T.C5_I_QTDA
+        SELECT 			
+                SUM(T.D2_QUANT)   AS D2_QUANT,
+                AVG(T.D2_PRCVEN)  AS D2_PRCVEN,
+                SUM(T.D2_TOTAL)   AS D2_TOTAL,				
+                SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
+                SUM(T.D2_QTSEGUM) AS D2_QTSEGUM,
+                SUM(T.D2_COMIS1)  AS D2_COMIS1,  
+                SUM(T.D2_I_FRET)  AS D2_I_FRET,				
+                SUM(T.D2_CUSTO1)  AS D2_CUSTO1,
+                SUM(T.D2_QTDEDEV) AS D2_QTDEDEV,
+                SUM(T.D2_VALDEV)  AS D2_VALDEV,				
+                SUM(T.D2_ICMSRET) AS D2_ICMSRET,				
+                SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,
+                T.D2_UM,T.D2_SEGUM,T.B1_I_DESCD,T.B1_COD,T.F2_VEND2,T.D2_FILIAL,T.C5_I_LOCEM, T.C5_I_QTDA
         FROM
-		(SELECT 			
-			SUM(SD2.D2_QUANT)   AS D2_QUANT ,
-			AVG(SD2.D2_PRCVEN)  AS D2_PRCVEN,
-			SUM(SD2.D2_TOTAL)   AS D2_TOTAL,
-			SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,
-			SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,
-			SUM(((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
-			SUM(SD2.D2_I_FRET)  AS D2_I_FRET,
-			SUM(SD2.D2_CUSTO1)  AS D2_CUSTO1,
-			SUM(SD2.D2_ICMSRET) AS D2_ICMSRET,			
-			SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SF2.F2_VEND2,SD2.D2_FILIAL,SC5.C5_I_LOCEM,SC5.C5_I_QTDA,
+        (SELECT 			
+            SUM(SD2.D2_QUANT)   AS D2_QUANT ,
+            AVG(SD2.D2_PRCVEN)  AS D2_PRCVEN,
+            SUM(SD2.D2_TOTAL)   AS D2_TOTAL,
+            SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,
+            SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,
+            SUM(((SD2.D2_COMIS1+SD2.D2_COMIS2+SD2.D2_COMIS3)/100)*SD2.D2_TOTAL) AS D2_COMIS1,
+            SUM(SD2.D2_I_FRET)  AS D2_I_FRET,
+            SUM(SD2.D2_CUSTO1)  AS D2_CUSTO1,
+            SUM(SD2.D2_ICMSRET) AS D2_ICMSRET,			
+            SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SF2.F2_VEND2,SD2.D2_FILIAL,SC5.C5_I_LOCEM,SC5.C5_I_QTDA,
             SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,SD2.D2_COD,
-			(SELECT COALESCE(SUM(D1.D1_QUANT),0)
-			   FROM %Table:SD1% D1
-			   %exp:_cJOIN_SF1%
-			   WHERE D1.D_E_L_E_T_ = ' '
-			     AND D1.D1_TIPO = 'D'
-			     AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			     AND D1.D1_NFORI   = SD2.D2_DOC
-			     AND D1.D1_SERIORI = SD2.D2_SERIE
-			     AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			     AND D1.D1_LOJA    = SD2.D2_LOJA    
-			     AND D1.D1_COD     = SD2.D2_COD 
-			   ) AS D2_QTDEDEV,
-			(SELECT COALESCE(SUM(D1.D1_TOTAL),0)
-			   FROM %Table:SD1% D1
-			   %exp:_cJOIN_SF1%
-			   WHERE D1.D_E_L_E_T_ = ' '
-			     AND D1.D1_TIPO = 'D'
-			     AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			     AND D1.D1_NFORI   = SD2.D2_DOC
-			     AND D1.D1_SERIORI = SD2.D2_SERIE
-			     AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			     AND D1.D1_LOJA    = SD2.D2_LOJA    
-			     AND D1.D1_COD     = SD2.D2_COD
-		       ) AS D2_VALDEV,
-			(SUM(SD2.D2_VALBRUT)  -
-			(SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
-			   FROM %Table:SD1% D1
-			   %exp:_cJOIN_SF1%
-			   WHERE D1.D_E_L_E_T_ = ' '
-			     AND D1.D1_TIPO = 'D'
-			     AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-			     AND D1.D1_NFORI   = SD2.D2_DOC
-			     AND D1.D1_SERIORI = SD2.D2_SERIE
-			     AND D1.D1_FORNECE = SD2.D2_CLIENTE
-			     AND D1.D1_LOJA    = SD2.D2_LOJA    
-			     AND D1.D1_COD     = SD2.D2_COD
-		    )) AS VLRBRUTDEV
-		 FROM   
-			%Table:SF2% SF2
-			JOIN %Table:SD2% SD2 ON SD2.D2_DOC     = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
-			JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
-			JOIN %Table:SB1% SB1 ON SD2.D2_COD     = SB1.B1_COD 
-			JOIN %Table:SA3% SA3 ON SF2.F2_VEND1   = SA3.A3_COD
-			JOIN %Table:SBM% SBM ON SB1.B1_GRUPO   = SBM.BM_GRUPO
-			JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN  = ACY.ACY_GRPVEN
-			JOIN %Table:SF4% SF4 ON SD2.D2_FILIAL  = SF4.F4_FILIAL AND SD2.D2_TES = SF4.F4_CODIGO
-			JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL  = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
-			LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
+            (SELECT COALESCE(SUM(D1.D1_QUANT),0)
+               FROM %Table:SD1% D1
+               %exp:_cJOIN_SF1%
+               WHERE D1.D_E_L_E_T_ = ' '
+                 AND D1.D1_TIPO = 'D'
+                 AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                 AND D1.D1_NFORI   = SD2.D2_DOC
+                 AND D1.D1_SERIORI = SD2.D2_SERIE
+                 AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                 AND D1.D1_LOJA    = SD2.D2_LOJA    
+                 AND D1.D1_COD     = SD2.D2_COD 
+               ) AS D2_QTDEDEV,
+            (SELECT COALESCE(SUM(D1.D1_TOTAL),0)
+               FROM %Table:SD1% D1
+               %exp:_cJOIN_SF1%
+               WHERE D1.D_E_L_E_T_ = ' '
+                 AND D1.D1_TIPO = 'D'
+                 AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                 AND D1.D1_NFORI   = SD2.D2_DOC
+                 AND D1.D1_SERIORI = SD2.D2_SERIE
+                 AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                 AND D1.D1_LOJA    = SD2.D2_LOJA    
+                 AND D1.D1_COD     = SD2.D2_COD
+               ) AS D2_VALDEV,
+            (SUM(SD2.D2_VALBRUT)  -
+            (SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
+               FROM %Table:SD1% D1
+               %exp:_cJOIN_SF1%
+               WHERE D1.D_E_L_E_T_ = ' '
+                 AND D1.D1_TIPO = 'D'
+                 AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                 AND D1.D1_NFORI   = SD2.D2_DOC
+                 AND D1.D1_SERIORI = SD2.D2_SERIE
+                 AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                 AND D1.D1_LOJA    = SD2.D2_LOJA    
+                 AND D1.D1_COD     = SD2.D2_COD
+            )) AS VLRBRUTDEV
+         FROM   
+            %Table:SF2% SF2
+            JOIN %Table:SD2% SD2 ON SD2.D2_DOC     = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
+            JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
+            JOIN %Table:SB1% SB1 ON SD2.D2_COD     = SB1.B1_COD 
+            JOIN %Table:SA3% SA3 ON SF2.F2_VEND1   = SA3.A3_COD
+            JOIN %Table:SBM% SBM ON SB1.B1_GRUPO   = SBM.BM_GRUPO
+            JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN  = ACY.ACY_GRPVEN
+            JOIN %Table:SF4% SF4 ON SD2.D2_FILIAL  = SF4.F4_FILIAL AND SD2.D2_TES = SF4.F4_CODIGO
+            JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL  = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
+            LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
          WHERE 
-			SF2.%notDel%  
-			AND SD2.%notDel%  
-			AND SA1.%notDel%  		
-			AND SB1.%notDel%  					
-			AND SA3.%notDel%  											
-			AND SBM.%notDel%				
-			AND ACY.%notDel%
-			AND SF4.%notDel%
-			AND SC5.%notDel%
-		    %exp:_cFiltro%
-		 GROUP BY 
-			SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SF2.F2_VEND2,SD2.D2_FILIAL,SC5.C5_I_LOCEM,SC5.C5_I_QTDA,
+            SF2.%notDel%  
+            AND SD2.%notDel%  
+            AND SA1.%notDel%  		
+            AND SB1.%notDel%  					
+            AND SA3.%notDel%  											
+            AND SBM.%notDel%				
+            AND ACY.%notDel%
+            AND SF4.%notDel%
+            AND SC5.%notDel%
+            %exp:_cFiltro%
+         GROUP BY 
+            SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_DESCD,SB1.B1_COD,SF2.F2_VEND2,SD2.D2_FILIAL,SC5.C5_I_LOCEM,SC5.C5_I_QTDA,
             SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,SD2.D2_COD
-		) T
-		 GROUP BY 
-			 D2_UM,D2_SEGUM,B1_I_DESCD,B1_COD,F2_VEND2,D2_FILIAL,C5_I_LOCEM,C5_I_QTDA
-		 ORDER BY 
-			 D2_FILIAL,F2_VEND2,B1_COD,C5_I_LOCEM
-	  EndSql		
-		
+        ) T
+         GROUP BY 
+             D2_UM,D2_SEGUM,B1_I_DESCD,B1_COD,F2_VEND2,D2_FILIAL,C5_I_LOCEM,C5_I_QTDA
+         ORDER BY 
+             D2_FILIAL,F2_VEND2,B1_COD,C5_I_LOCEM
+      EndSql		
+        
       _nTot:=nConta:=0
       COUNT TO _nTot
       _cTotGeral:=AllTrim(Str(_nTot))
-	  (oAlias)->(DBGoTop())
+      (oAlias)->(DBGoTop())
 
       // Imprime Relatório em Excel
       If _lGeraEmExcel
@@ -5342,10 +5322,10 @@ Begin Sequence
                         "Vlr.Total",;         // 13
                         "Vlr.Bruto"}          // 14
 
-	// Alinhamento: 1-Left   ,2-Center,3-Right
-	// Formatação.: 1-General,2-Number,3-Monetário,4-DateTime
-	//             Titulo das Colunas  ,Alinhamento ,Formatação, Totaliza?
-	//               Titulo            ,1           ,1         ,.F./.T.   })
+    // Alinhamento: 1-Left   ,2-Center,3-Right
+    // Formatação.: 1-General,2-Number,3-Monetário,4-DateTime
+    //             Titulo das Colunas  ,Alinhamento ,Formatação, Totaliza?
+    //               Titulo            ,1           ,1         ,.F./.T.   })
       aCabXML   := {{"Filial"          ,2           ,1         ,.F. },;// 01
                     {"Nome Filial"     ,1           ,1         ,.F. },;// 02
                     {"Fil. Embarque"   ,1           ,1         ,.F. },;// 03
@@ -5356,9 +5336,9 @@ Begin Sequence
                     {"Quantidade"      ,3           ,2         ,.F. },;// 08
                     {"1a U.M."         ,2           ,1         ,.F. },;// 09
                     {"Qtde 2a U.M."    ,3           ,2         ,.F. },;// 10
-					{"2a U.M."         ,2           ,1         ,.F. },;// 11
+                    {"2a U.M."         ,2           ,1         ,.F. },;// 11
                     {"Vlr.Unit"        ,3           ,3         ,.F. },;// 12
-					{"Vlr.Total"       ,3           ,3         ,.F. },;// 13
+                    {"Vlr.Total"       ,3           ,3         ,.F. },;// 13
                     {"Vlr.Bruto"       ,3           ,3         ,.F. }} // 14
 
 
@@ -5371,16 +5351,16 @@ Begin Sequence
                 ProcessMessages()
              EndIf
 
-	         // Efetua o somatorio dos dados de acordo com o parametro considera devolucoes 
-		     nQtde1:= IIf(MV_PAR22 == 2,(oAlias)->D2_QUANT  ,(oAlias)->D2_QUANT  -(oAlias)->D2_QTDEDEV                                                  /* -ROMS003Q2((oAlias)->D2_UM,(oAlias)->D2_SEGUM,(oAlias)->B1_COD,(oAlias)->D2_FILIAL,(oAlias)->F2_VEND2,'D2_QTDEDEV')*/)//MV_PAR22 == 2 Nao considera devolucoes			
-		     nQtde2:= IIf(MV_PAR22 == 2,(oAlias)->D2_QTSEGUM,(oAlias)->D2_QTSEGUM-ROMS003L((oAlias)->D2_QUANT,(oAlias)->D2_QTDEDEV,(oAlias)->D2_QTSEGUM)/* -ROMS003Q2((oAlias)->D2_UM,(oAlias)->D2_SEGUM,(oAlias)->B1_COD,(oAlias)->D2_FILIAL,(oAlias)->F2_VEND2,'D2_QTSEGUM')*/)//MV_PAR22 == 2 Nao considera devolucoes						
-		     nTotal:= IIf(MV_PAR22 == 2,(oAlias)->D2_TOTAL  ,(oAlias)->D2_TOTAL  -(oAlias)->D2_VALDEV                                                   /* -ROMS003QF((oAlias)->D2_UM,(oAlias)->D2_SEGUM,(oAlias)->B1_COD,(oAlias)->D2_FILIAL,(oAlias)->F2_VEND2,.F.)*/)         //MV_PAR22 == 2 Nao considera devolucoes			
-		     nVlBru:= IIf(MV_PAR22 == 2,(oAlias)->D2_VALBRUT,(oAlias)->VLRBRUTDEV                                                                       /* -ROMS003QF((oAlias)->D2_UM,(oAlias)->D2_SEGUM,(oAlias)->B1_COD,(oAlias)->D2_FILIAL,(oAlias)->F2_VEND2,.T.)*/)         //MV_PAR22 == 2 Nao considera devolucoes
+             // Efetua o somatorio dos dados de acordo com o parametro considera devolucoes 
+             nQtde1:= IIf(MV_PAR22 == 2,(oAlias)->D2_QUANT  ,(oAlias)->D2_QUANT  -(oAlias)->D2_QTDEDEV                                                  /* -ROMS003Q2((oAlias)->D2_UM,(oAlias)->D2_SEGUM,(oAlias)->B1_COD,(oAlias)->D2_FILIAL,(oAlias)->F2_VEND2,'D2_QTDEDEV')*/)//MV_PAR22 == 2 Nao considera devolucoes			
+             nQtde2:= IIf(MV_PAR22 == 2,(oAlias)->D2_QTSEGUM,(oAlias)->D2_QTSEGUM-ROMS003L((oAlias)->D2_QUANT,(oAlias)->D2_QTDEDEV,(oAlias)->D2_QTSEGUM)/* -ROMS003Q2((oAlias)->D2_UM,(oAlias)->D2_SEGUM,(oAlias)->B1_COD,(oAlias)->D2_FILIAL,(oAlias)->F2_VEND2,'D2_QTSEGUM')*/)//MV_PAR22 == 2 Nao considera devolucoes						
+             nTotal:= IIf(MV_PAR22 == 2,(oAlias)->D2_TOTAL  ,(oAlias)->D2_TOTAL  -(oAlias)->D2_VALDEV                                                   /* -ROMS003QF((oAlias)->D2_UM,(oAlias)->D2_SEGUM,(oAlias)->B1_COD,(oAlias)->D2_FILIAL,(oAlias)->F2_VEND2,.F.)*/)         //MV_PAR22 == 2 Nao considera devolucoes			
+             nVlBru:= IIf(MV_PAR22 == 2,(oAlias)->D2_VALBRUT,(oAlias)->VLRBRUTDEV                                                                       /* -ROMS003QF((oAlias)->D2_UM,(oAlias)->D2_SEGUM,(oAlias)->B1_COD,(oAlias)->D2_FILIAL,(oAlias)->F2_VEND2,.T.)*/)         //MV_PAR22 == 2 Nao considera devolucoes
 
-			 _cNomeFil:= FWFilialName(,(oAlias)->D2_FILIAL)
-			 _cFilEmba:= Posicione("ZEL",1,xFilial("ZEL")+(oAlias)->C5_I_LOCEM,"ZEL_DESCRI")
+             _cNomeFil:= FWFilialName(,(oAlias)->D2_FILIAL)
+             _cFilEmba:= Posicione("ZEL",1,xFilial("ZEL")+(oAlias)->C5_I_LOCEM,"ZEL_DESCRI")
              
-			 cDesSuperv := If(Empty((oAlias)->F2_VEND2),"SEM Coordenador", Posicione("SA3",1,xFilial("SA3")+(oAlias)->F2_VEND2,"A3_NOME"))
+             cDesSuperv := If(Empty((oAlias)->F2_VEND2),"SEM Coordenador", Posicione("SA3",1,xFilial("SA3")+(oAlias)->F2_VEND2,"A3_NOME"))
 
              aAdd(_aDadosExcel,{(oAlias)->D2_FILIAL,;  // "Filial"            // 01
                                 _cNomeFil,;            // "Nome Filial"       // 02
@@ -5398,313 +5378,313 @@ Begin Sequence
                                 nVlBru;                // "Vlr.Bruto"         // 14
                                 })
                       
-	        (oAlias)->(DBSkip())	 
-	     EndDo
+            (oAlias)->(DBSkip())	 
+         EndDo
  
          If Empty(_aDadosExcel)
             U_ITMsg("Não foram encontrados dados para emissão do relatório em Excel que satisfaçam as condições de filtro.","Atenção", ,1)
-	     Else
-	        _aSX1:=ROMS003P()     
-		    _cMsgTop:= _cTitulo+" / Exportação disponiveis: XML / CSV / EXCEL / ARQUIVO"
-		                             //      ,_aCols        ,_lMaxSiz,_nTipo,_cMsgTop, _lSelUnc ,_aSizes , _nCampo , bOk , bCancel, _abuttons, _aCab , bDblClk , _aColXML , bCondMarca,_bLegenda,_lHasOk,_bHeadClk,_aSX1 )
-	        U_ITListBox(_cTitulo , _aTitulos , _aDadosExcel , .T.    , 1    ,_cMsgTop,          ,        ,         ,     ,        ,          ,aCabXML,         ,          ,           ,         ,       ,         ,_aSX1)
+         Else
+            _aSX1:=ROMS003P()     
+            _cMsgTop:= _cTitulo+" / Exportação disponiveis: XML / CSV / EXCEL / ARQUIVO"
+                                     //      ,_aCols        ,_lMaxSiz,_nTipo,_cMsgTop, _lSelUnc ,_aSizes , _nCampo , bOk , bCancel, _abuttons, _aCab , bDblClk , _aColXML , bCondMarca,_bLegenda,_lHasOk,_bHeadClk,_aSX1 )
+            U_ITListBox(_cTitulo , _aTitulos , _aDadosExcel , .T.    , 1    ,_cMsgTop,          ,        ,         ,     ,        ,          ,aCabXML,         ,          ,           ,         ,       ,         ,_aSX1)
          EndIf
 
-	     BREAK  // FINALIZA A EMISSÃO DO RELATÓRIIO EM EXCEL ORDERM COORDENADOR X PRODUTO
+         BREAK  // FINALIZA A EMISSÃO DO RELATÓRIIO EM EXCEL ORDERM COORDENADOR X PRODUTO
       EndIf
       
       oproc:cCaption := ("Lendo Dados - Pre-processamento 2/2" )
       ProcessMessages()
-	  // Imprime relatório impresso
-	  If (oAlias)->(!Eof())
-		 ROMS003C(1)
-	  EndIf       
-		
-	  While (oAlias)->(!Eof())	
+      // Imprime relatório impresso
+      If (oAlias)->(!Eof())
+         ROMS003C(1)
+      EndIf       
+        
+      While (oAlias)->(!Eof())	
          If oproc <> NIL
             nConta++
             oproc:cCaption := ("Lendo : "+StrZero(nConta,5) +" de "+ _cTotGeral )
             ProcessMessages()
          EndIf
-	
-		 nPosFilial:=aScan(aFilial,{|x| x[1] == AllTrim((oAlias)->D2_FILIAL)})   
-		                                            
-		 // Efetua o somatorio dos dados de acordo com o parametro considera devolucoes 
-		 nQtde1:= IIf(MV_PAR22 == 2,(oAlias)->D2_QUANT  ,(oAlias)->D2_QUANT  -(oAlias)->D2_QTDEDEV                                                  /* -ROMS003Q2((oAlias)->D2_UM,(oAlias)->D2_SEGUM,(oAlias)->B1_COD,(oAlias)->D2_FILIAL,(oAlias)->F2_VEND2,'D2_QTDEDEV')*/)//MV_PAR22 == 2 Nao considera devolucoes			
-		 nQtde2:= IIf(MV_PAR22 == 2,(oAlias)->D2_QTSEGUM,(oAlias)->D2_QTSEGUM-ROMS003L((oAlias)->D2_QUANT,(oAlias)->D2_QTDEDEV,(oAlias)->D2_QTSEGUM)/* -ROMS003Q2((oAlias)->D2_UM,(oAlias)->D2_SEGUM,(oAlias)->B1_COD,(oAlias)->D2_FILIAL,(oAlias)->F2_VEND2,'D2_QTSEGUM')*/)//MV_PAR22 == 2 Nao considera devolucoes						
-		 nTotal:= IIf(MV_PAR22 == 2,(oAlias)->D2_TOTAL  ,(oAlias)->D2_TOTAL  -(oAlias)->D2_VALDEV                                                   /* -ROMS003QF((oAlias)->D2_UM,(oAlias)->D2_SEGUM,(oAlias)->B1_COD,(oAlias)->D2_FILIAL,(oAlias)->F2_VEND2,.F.)*/)         //MV_PAR22 == 2 Nao considera devolucoes			
-		 nVlBru:= IIf(MV_PAR22 == 2,(oAlias)->D2_VALBRUT,(oAlias)->VLRBRUTDEV                                                                       /* -ROMS003QF((oAlias)->D2_UM,(oAlias)->D2_SEGUM,(oAlias)->B1_COD,(oAlias)->D2_FILIAL,(oAlias)->F2_VEND2,.T.)*/)         //MV_PAR22 == 2 Nao considera devolucoes
+    
+         nPosFilial:=aScan(aFilial,{|x| x[1] == AllTrim((oAlias)->D2_FILIAL)})   
+                                                    
+         // Efetua o somatorio dos dados de acordo com o parametro considera devolucoes 
+         nQtde1:= IIf(MV_PAR22 == 2,(oAlias)->D2_QUANT  ,(oAlias)->D2_QUANT  -(oAlias)->D2_QTDEDEV                                                  /* -ROMS003Q2((oAlias)->D2_UM,(oAlias)->D2_SEGUM,(oAlias)->B1_COD,(oAlias)->D2_FILIAL,(oAlias)->F2_VEND2,'D2_QTDEDEV')*/)//MV_PAR22 == 2 Nao considera devolucoes			
+         nQtde2:= IIf(MV_PAR22 == 2,(oAlias)->D2_QTSEGUM,(oAlias)->D2_QTSEGUM-ROMS003L((oAlias)->D2_QUANT,(oAlias)->D2_QTDEDEV,(oAlias)->D2_QTSEGUM)/* -ROMS003Q2((oAlias)->D2_UM,(oAlias)->D2_SEGUM,(oAlias)->B1_COD,(oAlias)->D2_FILIAL,(oAlias)->F2_VEND2,'D2_QTSEGUM')*/)//MV_PAR22 == 2 Nao considera devolucoes						
+         nTotal:= IIf(MV_PAR22 == 2,(oAlias)->D2_TOTAL  ,(oAlias)->D2_TOTAL  -(oAlias)->D2_VALDEV                                                   /* -ROMS003QF((oAlias)->D2_UM,(oAlias)->D2_SEGUM,(oAlias)->B1_COD,(oAlias)->D2_FILIAL,(oAlias)->F2_VEND2,.F.)*/)         //MV_PAR22 == 2 Nao considera devolucoes			
+         nVlBru:= IIf(MV_PAR22 == 2,(oAlias)->D2_VALBRUT,(oAlias)->VLRBRUTDEV                                                                       /* -ROMS003QF((oAlias)->D2_UM,(oAlias)->D2_SEGUM,(oAlias)->B1_COD,(oAlias)->D2_FILIAL,(oAlias)->F2_VEND2,.T.)*/)         //MV_PAR22 == 2 Nao considera devolucoes
 
-		 //Efetua somatorio dos totalizadores geral
-		 nTotGQtde1 += nQtde1
-		 nTotGQtde2 += nQtde2  
-		 nTotGVlTot += nTotal
-		 nTotGVlBru += nVlBru       
-		
-		 //Efetua o somatorio dos dados do Coordenador + Produto(Desconsiderando a Filial) - Utilizado no Resumo Geral 
-		 nPosProdut:=aScan(aProduto,{|x| x[1] == (oAlias)->F2_VEND2 .And. x[2] == AllTrim((oAlias)->B1_COD)})     
-	
-		 If nPosProdut > 0   
-			aProduto[nPosProdut,03]+= nQtde1 // 03 - Quantidade primeira unidade de medida
-			aProduto[nPosProdut,05]+= nQtde2 // 05 - Quantidade segunda unidade de medida
-			aProduto[nPosProdut,07]+= nTotal // 07 - Valor total 
-			aProduto[nPosProdut,08]+= nVlBru // 08 - Valor Bruto
-		 Else                         
-		    aAdd(aProduto,{(oAlias)->F2_VEND2,; // 01
-			        AllTrim((oAlias)->B1_COD),; // 02
-					                   nQtde1,; // 03
-					          (oAlias)->D2_UM,; // 04
-				    nQtde2,(oAlias)->D2_SEGUM,; // 05
-					                   nTotal,; // 06
-									   nVlBru,; // 07
-						 (oAlias)->B1_I_DESCD}) // 08
-		 EndIf
-		      
-    	 //Verifica se ja existe dados da Filial Lancados anteriormente
-		 If nPosFilial > 0                
-			//Efetua somatorio dos totalizadores por Filial
-			nTotQtde1 += nQtde1
-			nTotQtde2 += nQtde2  
-			nTotVlTot += nTotal
-			nTotVlBru += nVlBru
-			                             
-			//Verifica quebra por Coordenador
-			nPosSuperv:= aScan(aSupevisor,{|x| x[1] == AllTrim((oAlias)->D2_FILIAL) + (oAlias)->F2_VEND2 })     
-	
-			If nPosSuperv == 0
-			   //Pega a descricao do Coordenador
-			   cDesSuperv:=IIf(Empty((oAlias)->F2_VEND2),"SEM Coordenador", Posicione("SA3",1,xFilial("SA3")+(oAlias)->F2_VEND2,"A3_NOME"))
-   		       nlinha+= nSaltoLinha 
-			   ROMS003BD()   
-				
-			   If Len(aSupevisor) > 0
-				  nlinha += nSaltoLinha
-				  ROMS003QP(0,1)
-		 		  //Imprime totalizador por Filial          
-		 		  ROMS003PT(SubStr('TOTAL Coordenador: ' + aSupevisor[Len(aSupevisor),2],1,50) ,nTotSQtde1,nTotSQtde2,nTotSVlTot,nTotSVlBru)
-			   EndIf	
-				
-			   nlinha+=nSaltoLinha 
-			   nlinha+=nSaltoLinha   
-			   ROMS003QP(2,1)   
-			   ROMS003CP((oAlias)->F2_VEND2,cDesSuperv)
-			   nlinha += nSaltoLinha 
-				
-			   //nlinha+=nSaltoLinha
-			   nlinha+=nSaltoLinha                
-			   ROMS003QP(2,1)   
-			   //Imprime cabecalho dos dados do produto
-			   ROMS003CD()     
-				
-			   aAdd(aSupevisor,{ AllTrim((oAlias)->D2_FILIAL) + (oAlias)->F2_VEND2,AllTrim((oAlias)->F2_VEND2) + '-' + AllTrim(cDesSuperv) })
-				
-			   //setas as variaves responsaveis por realizar o controle do somatorio por Coordenador
-			   nTotSQtde1 := nQtde1
-			   nTotSQtde2 := nQtde2  
-			   nTotSVlTot := nTotal
-			   nTotSVlBru := nVlBru     
-			Else
-			   //Efetua o somatorio por Coordenador
-			   nTotSQtde1 += nQtde1
-			   nTotSQtde2 += nQtde2  
-			   nTotSVlTot += nTotal
-			   nTotSVlBru += nVlBru 
-			EndIf   
+         //Efetua somatorio dos totalizadores geral
+         nTotGQtde1 += nQtde1
+         nTotGQtde2 += nQtde2  
+         nTotGVlTot += nTotal
+         nTotGVlBru += nVlBru       
+        
+         //Efetua o somatorio dos dados do Coordenador + Produto(Desconsiderando a Filial) - Utilizado no Resumo Geral 
+         nPosProdut:=aScan(aProduto,{|x| x[1] == (oAlias)->F2_VEND2 .And. x[2] == AllTrim((oAlias)->B1_COD)})     
+    
+         If nPosProdut > 0   
+            aProduto[nPosProdut,03]+= nQtde1 // 03 - Quantidade primeira unidade de medida
+            aProduto[nPosProdut,05]+= nQtde2 // 05 - Quantidade segunda unidade de medida
+            aProduto[nPosProdut,07]+= nTotal // 07 - Valor total 
+            aProduto[nPosProdut,08]+= nVlBru // 08 - Valor Bruto
+         Else                         
+            aAdd(aProduto,{(oAlias)->F2_VEND2,; // 01
+                    AllTrim((oAlias)->B1_COD),; // 02
+                                       nQtde1,; // 03
+                              (oAlias)->D2_UM,; // 04
+                    nQtde2,(oAlias)->D2_SEGUM,; // 05
+                                       nTotal,; // 06
+                                       nVlBru,; // 07
+                         (oAlias)->B1_I_DESCD}) // 08
+         EndIf
+              
+         //Verifica se ja existe dados da Filial Lancados anteriormente
+         If nPosFilial > 0                
+            //Efetua somatorio dos totalizadores por Filial
+            nTotQtde1 += nQtde1
+            nTotQtde2 += nQtde2  
+            nTotVlTot += nTotal
+            nTotVlBru += nVlBru
+                                         
+            //Verifica quebra por Coordenador
+            nPosSuperv:= aScan(aSupevisor,{|x| x[1] == AllTrim((oAlias)->D2_FILIAL) + (oAlias)->F2_VEND2 })     
+    
+            If nPosSuperv == 0
+               //Pega a descricao do Coordenador
+               cDesSuperv:=IIf(Empty((oAlias)->F2_VEND2),"SEM Coordenador", Posicione("SA3",1,xFilial("SA3")+(oAlias)->F2_VEND2,"A3_NOME"))
+                  nlinha+= nSaltoLinha 
+               ROMS003BD()   
+                
+               If Len(aSupevisor) > 0
+                  nlinha += nSaltoLinha
+                  ROMS003QP(0,1)
+                   //Imprime totalizador por Filial          
+                   ROMS003PT(SubStr('TOTAL Coordenador: ' + aSupevisor[Len(aSupevisor),2],1,50) ,nTotSQtde1,nTotSQtde2,nTotSVlTot,nTotSVlBru)
+               EndIf	
+                
+               nlinha+=nSaltoLinha 
+               nlinha+=nSaltoLinha   
+               ROMS003QP(2,1)   
+               ROMS003CP((oAlias)->F2_VEND2,cDesSuperv)
+               nlinha += nSaltoLinha 
+                
+               //nlinha+=nSaltoLinha
+               nlinha+=nSaltoLinha                
+               ROMS003QP(2,1)   
+               //Imprime cabecalho dos dados do produto
+               ROMS003CD()     
+                
+               aAdd(aSupevisor,{ AllTrim((oAlias)->D2_FILIAL) + (oAlias)->F2_VEND2,AllTrim((oAlias)->F2_VEND2) + '-' + AllTrim(cDesSuperv) })
+                
+               //setas as variaves responsaveis por realizar o controle do somatorio por Coordenador
+               nTotSQtde1 := nQtde1
+               nTotSQtde2 := nQtde2  
+               nTotSVlTot := nTotal
+               nTotSVlBru := nVlBru     
+            Else
+               //Efetua o somatorio por Coordenador
+               nTotSQtde1 += nQtde1
+               nTotSQtde2 += nQtde2  
+               nTotSVlTot += nTotal
+               nTotSVlBru += nVlBru 
+            EndIf   
 
-			nlinha+=nSaltoLinha   
-			oPrint:Line(nLinha,nColInic,nLinha,nColFinal)             
-			ROMS003QP(0,0)                  
-		     // DETALHAS - IMPRIME OS DADOS DO PRODUTO
-		    //       cProduto                                              ,nqtde1um,um1          ,nqtde2um,um2             ,nVlrTotal,nVlrBruto
-			ROMS003N(AllTrim((oAlias)->B1_COD) + '-' + (oAlias)->B1_I_DESCD,nQtde1,(oAlias)->D2_UM,nQtde2,(oAlias)->D2_SEGUM,nTotal,nVlBru)
-		     //DETALHAS - IMPRIME OS DADOS DO PRODUTO
-		 Else
-		    //Imprime total sub Grupo 		
-		    If Len(aSupevisor) > 0
-			   nlinha+=nSaltoLinha
-			   ROMS003BD() 
-				
-			   nlinha+=nSaltoLinha 
-			   ROMS003QP(0,1)
-			   //Imprime totalizador por Filial          
-			   ROMS003PT(SubStr('TOTAL Coordenador: ' + aSupevisor[Len(aSupevisor),2],1,50) ,nTotSQtde1,nTotSQtde2,nTotSVlTot,nTotSVlBru)
-		 			
-			   nlinha+=nSaltoLinha     
-		    EndIf	 		                                        
-			 		
-		    //Imprime o box e divisorias do produto anterior
-		    If Len(aFilial) > 0  	 
-			   nlinha+=nSaltoLinha      
-			   ROMS003QP(0,1)
-			   //Imprime totalizador por Filial          
-			   ROMS003PT(SubStr('TOTAL FILIAL: ' + aFilial[Len(aFilial),1] + '-' + FWFilialName(,aFilial[Len(aFilial),1]),1,50),nTotQtde1,nTotQtde2,nTotVlTot,nTotVlBru)
-		 			
-			   nlinha+=nSaltoLinha
-			   nlinha+=nSaltoLinha     
-		 			
-			   //Forca quebra de pagina por Filial
-			   nlinha:= 5000     
-			   ROMS003QP(0,1)
-		    EndIf  
-		 	                                                   
-		    //Adiciona ao controle de filiais a nova filial
-		    aAdd(aFilial,{AllTrim((oAlias)->D2_FILIAL)})      
-		    //Adiciona ao controle de sub Grupo o sub Grupo da Nova Filial
-		    //Pega a descricao do Coordenador
-		    cDesSuperv:=IIf(Empty((oAlias)->F2_VEND2),"SEM Coordenador", Posicione("SA3",1,xFilial("SA3")+(oAlias)->F2_VEND2,"A3_NOME"))
-		    aAdd(aSupevisor,{ AllTrim((oAlias)->D2_FILIAL) + (oAlias)->F2_VEND2,AllTrim((oAlias)->F2_VEND2) + '-' + AllTrim(cDesSuperv) })
-		    //Efetua somatorio dos totalizadores por Filial - setando
-		    nTotQtde1 := nQtde1
-		    nTotQtde2 := nQtde2  
-		    nTotVlTot := nTotal
-		    nTotVlBru := nVlBru 
-		    //Efetua o somatorio dos totalizadores por Sub Grupo de Produto - Setando
-		    nTotSQtde1 := nQtde1
-		    nTotSQtde2 := nQtde2  
-		    nTotSVlTot := nTotal
-		    nTotSVlBru := nVlBru    
-		 			
-		    nlinha+=nSaltoLinha                
-		    ROMS003QP(1,1)
-		    //Imprime cabecalho da Filial
-		    ROMS003CF((oAlias)->D2_FILIAL)        
-			
-		    nlinha+=nSaltoLinha 
-		    nlinha+=nSaltoLinha     
-		    ROMS003QP(2,1)   
-		    //Imprime cabecalho do Coordenador
-		    ROMS003CP((oAlias)->F2_VEND2,cDesSuperv)
-					                                        
-		    nlinha+=nSaltoLinha
-		    nlinha+=nSaltoLinha                
-		    ROMS003QP(2,1)   
-		    //Imprime cabecalho dos dados do produto
-		    ROMS003CD()
-					
-		    nlinha+=nSaltoLinha   
-		    oPrint:Line(nLinha,nColInic,nLinha,nColFinal)             
-		    ROMS003QP(0,0)
-	        //DETALHAS - IMPRIME OS DADOS DO PRODUTO
-		    //       cProduto                                              ,nqtde1um,um1          ,nqtde2um,um2             ,nVlrTotal,nVlrBruto
-		    ROMS003N(AllTrim((oAlias)->B1_COD) + '-' + (oAlias)->B1_I_DESCD,nQtde1,(oAlias)->D2_UM,nQtde2,(oAlias)->D2_SEGUM,nTotal,nVlBru)
-		    //DETALHAS - IMPRIME OS DADOS DO PRODUTO
-	     EndIf	
+            nlinha+=nSaltoLinha   
+            oPrint:Line(nLinha,nColInic,nLinha,nColFinal)             
+            ROMS003QP(0,0)                  
+             // DETALHAS - IMPRIME OS DADOS DO PRODUTO
+            //       cProduto                                              ,nqtde1um,um1          ,nqtde2um,um2             ,nVlrTotal,nVlrBruto
+            ROMS003N(AllTrim((oAlias)->B1_COD) + '-' + (oAlias)->B1_I_DESCD,nQtde1,(oAlias)->D2_UM,nQtde2,(oAlias)->D2_SEGUM,nTotal,nVlBru)
+             //DETALHAS - IMPRIME OS DADOS DO PRODUTO
+         Else
+            //Imprime total sub Grupo 		
+            If Len(aSupevisor) > 0
+               nlinha+=nSaltoLinha
+               ROMS003BD() 
+                
+               nlinha+=nSaltoLinha 
+               ROMS003QP(0,1)
+               //Imprime totalizador por Filial          
+               ROMS003PT(SubStr('TOTAL Coordenador: ' + aSupevisor[Len(aSupevisor),2],1,50) ,nTotSQtde1,nTotSQtde2,nTotSVlTot,nTotSVlBru)
+                     
+               nlinha+=nSaltoLinha     
+            EndIf	 		                                        
+                     
+            //Imprime o box e divisorias do produto anterior
+            If Len(aFilial) > 0  	 
+               nlinha+=nSaltoLinha      
+               ROMS003QP(0,1)
+               //Imprime totalizador por Filial          
+               ROMS003PT(SubStr('TOTAL FILIAL: ' + aFilial[Len(aFilial),1] + '-' + FWFilialName(,aFilial[Len(aFilial),1]),1,50),nTotQtde1,nTotQtde2,nTotVlTot,nTotVlBru)
+                     
+               nlinha+=nSaltoLinha
+               nlinha+=nSaltoLinha     
+                     
+               //Forca quebra de pagina por Filial
+               nlinha:= 5000     
+               ROMS003QP(0,1)
+            EndIf  
+                                                                
+            //Adiciona ao controle de filiais a nova filial
+            aAdd(aFilial,{AllTrim((oAlias)->D2_FILIAL)})      
+            //Adiciona ao controle de sub Grupo o sub Grupo da Nova Filial
+            //Pega a descricao do Coordenador
+            cDesSuperv:=IIf(Empty((oAlias)->F2_VEND2),"SEM Coordenador", Posicione("SA3",1,xFilial("SA3")+(oAlias)->F2_VEND2,"A3_NOME"))
+            aAdd(aSupevisor,{ AllTrim((oAlias)->D2_FILIAL) + (oAlias)->F2_VEND2,AllTrim((oAlias)->F2_VEND2) + '-' + AllTrim(cDesSuperv) })
+            //Efetua somatorio dos totalizadores por Filial - setando
+            nTotQtde1 := nQtde1
+            nTotQtde2 := nQtde2  
+            nTotVlTot := nTotal
+            nTotVlBru := nVlBru 
+            //Efetua o somatorio dos totalizadores por Sub Grupo de Produto - Setando
+            nTotSQtde1 := nQtde1
+            nTotSQtde2 := nQtde2  
+            nTotSVlTot := nTotal
+            nTotSVlBru := nVlBru    
+                     
+            nlinha+=nSaltoLinha                
+            ROMS003QP(1,1)
+            //Imprime cabecalho da Filial
+            ROMS003CF((oAlias)->D2_FILIAL)        
+            
+            nlinha+=nSaltoLinha 
+            nlinha+=nSaltoLinha     
+            ROMS003QP(2,1)   
+            //Imprime cabecalho do Coordenador
+            ROMS003CP((oAlias)->F2_VEND2,cDesSuperv)
+                                                            
+            nlinha+=nSaltoLinha
+            nlinha+=nSaltoLinha                
+            ROMS003QP(2,1)   
+            //Imprime cabecalho dos dados do produto
+            ROMS003CD()
+                    
+            nlinha+=nSaltoLinha   
+            oPrint:Line(nLinha,nColInic,nLinha,nColFinal)             
+            ROMS003QP(0,0)
+            //DETALHAS - IMPRIME OS DADOS DO PRODUTO
+            //       cProduto                                              ,nqtde1um,um1          ,nqtde2um,um2             ,nVlrTotal,nVlrBruto
+            ROMS003N(AllTrim((oAlias)->B1_COD) + '-' + (oAlias)->B1_I_DESCD,nQtde1,(oAlias)->D2_UM,nQtde2,(oAlias)->D2_SEGUM,nTotal,nVlBru)
+            //DETALHAS - IMPRIME OS DADOS DO PRODUTO
+         EndIf	
       
-	     (oAlias)->(DBSkip())
+         (oAlias)->(DBSkip())
       EndDo	                                    
 
       If Len(aSupevisor) > 0                      
-	     nlinha+=nSaltoLinha
-	     ROMS003BD()        
-	
-	     nlinha+=nSaltoLinha 
-	     ROMS003QP(0,1)
-	     //Imprime totalizador por Filial          
-	     ROMS003PT(SubStr('TOTAL Coordenador: ' + aSupevisor[Len(aSupevisor),2],1,50) ,nTotSQtde1,nTotSQtde2,nTotSVlTot,nTotSVlBru)
-	     nlinha+=nSaltoLinha     
-	
-	     nlinha+=nSaltoLinha  
-	     ROMS003QP(0,1)
-	     //Imprime totalizador por Filial          
-	     ROMS003PT(SubStr('TOTAL FILIAL: ' + aFilial[Len(aFilial),1] + '-' + FWFilialName(,aFilial[Len(aFilial),1]),1,50),nTotQtde1,nTotQtde2,nTotVlTot,nTotVlBru)
-	
-	     //Imprime o total geral		 			
-	     nlinha+=nSaltoLinha
-	     nlinha+=nSaltoLinha
-	     
-	     ROMS003QP(0,1)  
-	     //Imprime totalizador por Filial                  
-	     ROMS003PT('TOTAL GERAL:',nTotGQtde1,nTotGQtde2,nTotGVlTot,nTotGVlBru)                              
+         nlinha+=nSaltoLinha
+         ROMS003BD()        
+    
+         nlinha+=nSaltoLinha 
+         ROMS003QP(0,1)
+         //Imprime totalizador por Filial          
+         ROMS003PT(SubStr('TOTAL Coordenador: ' + aSupevisor[Len(aSupevisor),2],1,50) ,nTotSQtde1,nTotSQtde2,nTotSVlTot,nTotSVlBru)
+         nlinha+=nSaltoLinha     
+    
+         nlinha+=nSaltoLinha  
+         ROMS003QP(0,1)
+         //Imprime totalizador por Filial          
+         ROMS003PT(SubStr('TOTAL FILIAL: ' + aFilial[Len(aFilial),1] + '-' + FWFilialName(,aFilial[Len(aFilial),1]),1,50),nTotQtde1,nTotQtde2,nTotVlTot,nTotVlBru)
+    
+         //Imprime o total geral		 			
+         nlinha+=nSaltoLinha
+         nlinha+=nSaltoLinha
+         
+         ROMS003QP(0,1)  
+         //Imprime totalizador por Filial                  
+         ROMS003PT('TOTAL GERAL:',nTotGQtde1,nTotGQtde2,nTotGVlTot,nTotGVlBru)                              
       EndIf
 
       //EMITE A PARTE DE RESUMO GERAL ONDE TOTALIZA OS PRODUTOS SEM DISTINCAO DE FILIAL POR Coordenador
       If Len(aProduto) > 1
-	     //Ordena por codigo do produto os dados do resumo geral
-	     aProduto:= aSort(aProduto,,,{|x, y| x[1] + x[2] < y[1] + y[2]})  
-	
-	     oPrint:EndPage()					// Finaliza a Pagina.
-	     oPrint:StartPage()					//Inicia uma nova Pagina					
-	     nPagina++
-	     ROMS003C(1)//Chama cabecalho                       
-	                                 
-	     nlinha+=nSaltoLinha
-	     oPrint:FillRect({(nlinha+3),nColInic,nlinha + nSaltoLinha,nColFinal},oBrush)  
-	     oPrint:Box(nlinha,nColInic,nLinha + nSaltoLinha,nColFinal)
- 	     oPrint:Say (nlinha,nColFinal / 2,"RESUMO GERAL",oFont16b,nColFinal,,,2)  
-	     nlinha+=nSaltoLinha               
-	
-	     For _nI:=1 to Len(aProduto)
-		     //Verifica a necessidade de imprimir o cabecalho do Coordenador
-		     nPosSuprv:=aScan(aProdSuprv,{|z| z[1] == aProduto[_nI,1]})  
-		
-		     If nPosSuprv == 0             
-		 	    cDesSuperv:=IIf(Empty(aProduto[_nI,1]),"SEM Coordenador", Posicione("SA3",1,xFilial("SA3")+aProduto[_nI,1],"A3_NOME"))
-		
-			    //Imprime total Coordenador
-			    If Len(aProdSuprv) > 0
-	 			   nlinha+=nSaltoLinha
-	 			   ROMS003BD() 
-				
-				   nlinha+=nSaltoLinha 
-				   ROMS003QP(0,1)
-				   //Imprime totalizador por Coordenador          
-				   ROMS003PT(SubStr('TOTAL Coordenador: ' + aProdSuprv[Len(aProdSuprv),9],1,50) ,nTotSQtde1,nTotSQtde2,nTotSVlTot,nTotSVlBru)
-		 			
-				   nlinha+=nSaltoLinha     
-			    EndIf
-		
-		        nlinha+=nSaltoLinha 
-			    nlinha+=nSaltoLinha     
-			    ROMS003QP(2,1)   
-			    //Imprime cabecalho do Coordenador
-			    ROMS003CP(aProduto[_nI,1],cDesSuperv) 
-			
-			    nlinha+=nSaltoLinha
-			    nlinha+=nSaltoLinha                
-			    ROMS003QP(2,1)   
-			    //Imprime cabecalho dos dados do produto
-			    ROMS003CD()
-			
-		        aAdd(aProdSuprv,{aProduto[_nI,1],aProduto[_nI,2],aProduto[_nI,3],aProduto[_nI,4],aProduto[_nI,5],aProduto[_nI,6],aProduto[_nI,7],aProduto[_nI,8],AllTrim(aProduto[_nI,1])+'-'+AllTrim(cDesSuperv)})
-			
-			    //Seta Variaveis responsaveis pelo controle do somatorio
-			    nTotSQtde1:= aProduto[_nI,3]
-			    nTotSQtde2:= aProduto[_nI,5]
-			    nTotSVlTot:= aProduto[_nI,7]
-			    nTotSVlBru:= aProduto[_nI,8]
-		     Else
-			    //Incrementa Totalizador
-			    nTotSQtde1+= aProduto[_nI,3]
-			    nTotSQtde2+= aProduto[_nI,5]
-			    nTotSVlTot+= aProduto[_nI,7]
-			    nTotSVlBru+= aProduto[_nI,8]
-		     EndIf 
-	
-		     nlinha+=nSaltoLinha   
-		     oPrint:Line(nLinha,nColInic,nLinha,nColFinal)             
-		     ROMS003QP(0,0)
-		     //DETALHAS - IMPRIME OS DADOS DO PRODUTO
-			 //       cProduto                               ,nqtde1um       ,um1            ,nqtde2um       ,um2            ,nVlrTotal      ,nVlrBruto
-		     ROMS003N(aProduto[_nI,2] + '-' + aProduto[_nI,9],aProduto[_nI,3],aProduto[_nI,4],aProduto[_nI,5],aProduto[_nI,6],aProduto[_nI,7],aProduto[_nI,8])
-		     //DETALHAS - IMPRIME OS DADOS DO PRODUTO
-	     Next _nI
-	
-	     nlinha+=nSaltoLinha
-	     ROMS003BD() // LINHAS DAS COLUNAS           
-				
-	     nlinha+=nSaltoLinha 
-	     nlinha+=nSaltoLinha 
-	     ROMS003QP(0,1)
-	     //Imprime totalizador por Coordenador          
-	     ROMS003PT(SubStr('TOTAL Coordenador: ' + aProdSuprv[Len(aProdSuprv),9],1,50) ,nTotSQtde1,nTotSQtde2,nTotSVlTot,nTotSVlBru)
-	
-	     //Imprime o total geral		 			
-	     nlinha+=nSaltoLinha
-	     nlinha+=nSaltoLinha
-	     
-	     ROMS003QP(0,1)  
-	     //Imprime totalizador por Filial                  
-	     ROMS003PT('TOTAL GERAL:',nTotGQtde1,nTotGQtde2,nTotGVlTot,nTotGVlBru)                              
+         //Ordena por codigo do produto os dados do resumo geral
+         aProduto:= aSort(aProduto,,,{|x, y| x[1] + x[2] < y[1] + y[2]})  
+    
+         oPrint:EndPage()					// Finaliza a Pagina.
+         oPrint:StartPage()					//Inicia uma nova Pagina					
+         nPagina++
+         ROMS003C(1)//Chama cabecalho                       
+                                     
+         nlinha+=nSaltoLinha
+         oPrint:FillRect({(nlinha+3),nColInic,nlinha + nSaltoLinha,nColFinal},oBrush)  
+         oPrint:Box(nlinha,nColInic,nLinha + nSaltoLinha,nColFinal)
+          oPrint:Say (nlinha,nColFinal / 2,"RESUMO GERAL",oFont16b,nColFinal,,,2)  
+         nlinha+=nSaltoLinha               
+    
+         For _nI:=1 to Len(aProduto)
+             //Verifica a necessidade de imprimir o cabecalho do Coordenador
+             nPosSuprv:=aScan(aProdSuprv,{|z| z[1] == aProduto[_nI,1]})  
+        
+             If nPosSuprv == 0             
+                 cDesSuperv:=IIf(Empty(aProduto[_nI,1]),"SEM Coordenador", Posicione("SA3",1,xFilial("SA3")+aProduto[_nI,1],"A3_NOME"))
+        
+                //Imprime total Coordenador
+                If Len(aProdSuprv) > 0
+                    nlinha+=nSaltoLinha
+                    ROMS003BD() 
+                
+                   nlinha+=nSaltoLinha 
+                   ROMS003QP(0,1)
+                   //Imprime totalizador por Coordenador          
+                   ROMS003PT(SubStr('TOTAL Coordenador: ' + aProdSuprv[Len(aProdSuprv),9],1,50) ,nTotSQtde1,nTotSQtde2,nTotSVlTot,nTotSVlBru)
+                     
+                   nlinha+=nSaltoLinha     
+                EndIf
+        
+                nlinha+=nSaltoLinha 
+                nlinha+=nSaltoLinha     
+                ROMS003QP(2,1)   
+                //Imprime cabecalho do Coordenador
+                ROMS003CP(aProduto[_nI,1],cDesSuperv) 
+            
+                nlinha+=nSaltoLinha
+                nlinha+=nSaltoLinha                
+                ROMS003QP(2,1)   
+                //Imprime cabecalho dos dados do produto
+                ROMS003CD()
+            
+                aAdd(aProdSuprv,{aProduto[_nI,1],aProduto[_nI,2],aProduto[_nI,3],aProduto[_nI,4],aProduto[_nI,5],aProduto[_nI,6],aProduto[_nI,7],aProduto[_nI,8],AllTrim(aProduto[_nI,1])+'-'+AllTrim(cDesSuperv)})
+            
+                //Seta Variaveis responsaveis pelo controle do somatorio
+                nTotSQtde1:= aProduto[_nI,3]
+                nTotSQtde2:= aProduto[_nI,5]
+                nTotSVlTot:= aProduto[_nI,7]
+                nTotSVlBru:= aProduto[_nI,8]
+             Else
+                //Incrementa Totalizador
+                nTotSQtde1+= aProduto[_nI,3]
+                nTotSQtde2+= aProduto[_nI,5]
+                nTotSVlTot+= aProduto[_nI,7]
+                nTotSVlBru+= aProduto[_nI,8]
+             EndIf 
+    
+             nlinha+=nSaltoLinha   
+             oPrint:Line(nLinha,nColInic,nLinha,nColFinal)             
+             ROMS003QP(0,0)
+             //DETALHAS - IMPRIME OS DADOS DO PRODUTO
+             //       cProduto                               ,nqtde1um       ,um1            ,nqtde2um       ,um2            ,nVlrTotal      ,nVlrBruto
+             ROMS003N(aProduto[_nI,2] + '-' + aProduto[_nI,9],aProduto[_nI,3],aProduto[_nI,4],aProduto[_nI,5],aProduto[_nI,6],aProduto[_nI,7],aProduto[_nI,8])
+             //DETALHAS - IMPRIME OS DADOS DO PRODUTO
+         Next _nI
+    
+         nlinha+=nSaltoLinha
+         ROMS003BD() // LINHAS DAS COLUNAS           
+                
+         nlinha+=nSaltoLinha 
+         nlinha+=nSaltoLinha 
+         ROMS003QP(0,1)
+         //Imprime totalizador por Coordenador          
+         ROMS003PT(SubStr('TOTAL Coordenador: ' + aProdSuprv[Len(aProdSuprv),9],1,50) ,nTotSQtde1,nTotSQtde2,nTotSVlTot,nTotSVlBru)
+    
+         //Imprime o total geral		 			
+         nlinha+=nSaltoLinha
+         nlinha+=nSaltoLinha
+         
+         ROMS003QP(0,1)  
+         //Imprime totalizador por Filial                  
+         ROMS003PT('TOTAL GERAL:',nTotGQtde1,nTotGQtde2,nTotGVlTot,nTotGVlBru)                              
       EndIf    
    EndIf
 
@@ -5726,18 +5706,18 @@ Static Function ROMS003QP(nLinhas,impBox)
 
 //Quebra de pagina
 If nLinha > nqbrPagina
-	nlinha:= nlinha - (nSaltoLinha * nLinhas)
-	
-	If impBox == 0
-		ROMS003BD()	  
-	EndIf	 
-	
-	oPrint:EndPage()					// Finaliza a Pagina.
-	oPrint:StartPage()					//Inicia uma nova Pagina					
-	nPagina++
-	ROMS003C(1)//Chama cabecalho    
-	nlinha+=nSaltoLinha                   
-	nLinInBox:= nLinha
+    nlinha:= nlinha - (nSaltoLinha * nLinhas)
+    
+    If impBox == 0
+        ROMS003BD()	  
+    EndIf	 
+    
+    oPrint:EndPage()					// Finaliza a Pagina.
+    oPrint:StartPage()					//Inicia uma nova Pagina					
+    nPagina++
+    ROMS003C(1)//Chama cabecalho    
+    nlinha+=nSaltoLinha                   
+    nLinInBox:= nLinha
 EndIf  
 
 Return    
@@ -5781,309 +5761,309 @@ Private nQtde2    := 0
 Private nTotal    := 0 
 
 Begin Sequence
-	//Seta aRegios com o nome da regiao e os estados que a compoem  
-	aAdd(_aRegioes,{" Sem estado informado no pedido de venda","  "})
+    //Seta aRegios com o nome da regiao e os estados que a compoem  
+    aAdd(_aRegioes,{" Sem estado informado no pedido de venda","  "})
 
-	aAdd(_aRegioes,{"Centro-Oeste","GO"})  	  
-	aAdd(_aRegioes,{"Centro-Oeste","MT"}) 
-	aAdd(_aRegioes,{"Centro-Oeste","MS"}) 
-	aAdd(_aRegioes,{"Centro-Oeste","DF"}) 
+    aAdd(_aRegioes,{"Centro-Oeste","GO"})  	  
+    aAdd(_aRegioes,{"Centro-Oeste","MT"}) 
+    aAdd(_aRegioes,{"Centro-Oeste","MS"}) 
+    aAdd(_aRegioes,{"Centro-Oeste","DF"}) 
 
-	aAdd(_aRegioes,{"Nordeste"    ,"MA"}) 
-	aAdd(_aRegioes,{"Nordeste"    ,"PI"}) 
-	aAdd(_aRegioes,{"Nordeste"    ,"CE"}) 
-	aAdd(_aRegioes,{"Nordeste"    ,"RN"}) 
-	aAdd(_aRegioes,{"Nordeste"    ,"PB"}) 
-	aAdd(_aRegioes,{"Nordeste"    ,"PE"}) 
-	aAdd(_aRegioes,{"Nordeste"    ,"AL"}) 
-	aAdd(_aRegioes,{"Nordeste"    ,"SE"}) 
-	aAdd(_aRegioes,{"Nordeste"    ,"BA"}) 
+    aAdd(_aRegioes,{"Nordeste"    ,"MA"}) 
+    aAdd(_aRegioes,{"Nordeste"    ,"PI"}) 
+    aAdd(_aRegioes,{"Nordeste"    ,"CE"}) 
+    aAdd(_aRegioes,{"Nordeste"    ,"RN"}) 
+    aAdd(_aRegioes,{"Nordeste"    ,"PB"}) 
+    aAdd(_aRegioes,{"Nordeste"    ,"PE"}) 
+    aAdd(_aRegioes,{"Nordeste"    ,"AL"}) 
+    aAdd(_aRegioes,{"Nordeste"    ,"SE"}) 
+    aAdd(_aRegioes,{"Nordeste"    ,"BA"}) 
 
-	aAdd(_aRegioes,{"Norte"       ,"AC"})
-	aAdd(_aRegioes,{"Norte"       ,"AM"})
-	aAdd(_aRegioes,{"Norte"       ,"RR"})
-	aAdd(_aRegioes,{"Norte"       ,"RO"})
-	aAdd(_aRegioes,{"Norte"       ,"PA"})
-	aAdd(_aRegioes,{"Norte"       ,"AP"})
-	aAdd(_aRegioes,{"Norte"       ,"TO"}) 
+    aAdd(_aRegioes,{"Norte"       ,"AC"})
+    aAdd(_aRegioes,{"Norte"       ,"AM"})
+    aAdd(_aRegioes,{"Norte"       ,"RR"})
+    aAdd(_aRegioes,{"Norte"       ,"RO"})
+    aAdd(_aRegioes,{"Norte"       ,"PA"})
+    aAdd(_aRegioes,{"Norte"       ,"AP"})
+    aAdd(_aRegioes,{"Norte"       ,"TO"}) 
 
-	aAdd(_aRegioes,{"Sudeste"     ,"MG"})      
-	aAdd(_aRegioes,{"Sudeste"     ,"ES"})      
-	aAdd(_aRegioes,{"Sudeste"     ,"RJ"})      
-	aAdd(_aRegioes,{"Sudeste"     ,"SP"})      
+    aAdd(_aRegioes,{"Sudeste"     ,"MG"})      
+    aAdd(_aRegioes,{"Sudeste"     ,"ES"})      
+    aAdd(_aRegioes,{"Sudeste"     ,"RJ"})      
+    aAdd(_aRegioes,{"Sudeste"     ,"SP"})      
 
-	aAdd(_aRegioes,{"Sul"         ,"PR"}) 
-	aAdd(_aRegioes,{"Sul"         ,"SC"}) 
-	aAdd(_aRegioes,{"Sul"         ,"RS"})
+    aAdd(_aRegioes,{"Sul"         ,"PR"}) 
+    aAdd(_aRegioes,{"Sul"         ,"SC"}) 
+    aAdd(_aRegioes,{"Sul"         ,"RS"})
 
-	//ORDEM 12 - Estado x Sub-Grupo - SINTETICO
-	BeginSql alias cAliasOr12
-		SELECT 			
-				SUM(T.D2_QUANT)   AS D2_QUANT,
-				AVG(T.D2_PRCVEN)  AS D2_PRCVEN,
-				SUM(T.D2_TOTAL)   AS D2_TOTAL,				
-				SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
-				SUM(T.D2_QTSEGUM) AS D2_QTSEGUM,
-				SUM(T.D2_QTDEDEV) AS D2_QTDEDEV,
-				SUM(T.D2_VALDEV)  AS D2_VALDEV,				
-				SUM(T.PESTOTAL)   AS PESTOTAL,
-				SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,
-				T.D2_FILIAL,T.D2_EST,T.A1_COD_MUN,T.D2_UM,T.D2_SEGUM,T.B1_I_SUBGR
-		FROM
-		(SELECT 			
-			SUM(SD2.D2_QUANT)   AS D2_QUANT,
-			AVG(SD2.D2_PRCVEN)  AS D2_PRCVEN,
-			SUM(SD2.D2_TOTAL)   AS D2_TOTAL,		
-			SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,
-			SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,
-			COALESCE(SUM(SB1.B1_PESBRU * SD2.D2_QUANT),0) AS PESTOTAL,							
-			SD2.D2_FILIAL,SD2.D2_EST,SA1.A1_COD_MUN,SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_SUBGR,
-			SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,SD2.D2_COD,
-			(SELECT COALESCE(SUM(D1.D1_QUANT),0)
-			FROM %Table:SD1% D1
-			%exp:_cJOIN_SF1%
-			WHERE D1.D_E_L_E_T_ = ' '
-				AND D1.D1_TIPO = 'D'
-				AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-				AND D1.D1_NFORI   = SD2.D2_DOC
-				AND D1.D1_SERIORI = SD2.D2_SERIE
-				AND D1.D1_FORNECE = SD2.D2_CLIENTE
-				AND D1.D1_LOJA    = SD2.D2_LOJA    
-				AND D1.D1_COD     = SD2.D2_COD 
-			) AS D2_QTDEDEV,
-			(SELECT COALESCE(SUM(D1.D1_TOTAL),0)
-			FROM %Table:SD1% D1
-			%exp:_cJOIN_SF1%
-			WHERE D1.D_E_L_E_T_ = ' '
-				AND D1.D1_TIPO = 'D'
-				AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-				AND D1.D1_NFORI   = SD2.D2_DOC
-				AND D1.D1_SERIORI = SD2.D2_SERIE
-				AND D1.D1_FORNECE = SD2.D2_CLIENTE
-				AND D1.D1_LOJA    = SD2.D2_LOJA    
-				AND D1.D1_COD     = SD2.D2_COD
-			) AS D2_VALDEV,
-			(SUM(SD2.D2_VALBRUT)  -
-			(SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
-			FROM %Table:SD1% D1
-			%exp:_cJOIN_SF1%
-			WHERE D1.D_E_L_E_T_ = ' '
-				AND D1.D1_TIPO = 'D'
-				AND D1.D1_FILIAL  = SD2.D2_FILIAL 
-				AND D1.D1_NFORI   = SD2.D2_DOC
-				AND D1.D1_SERIORI = SD2.D2_SERIE
-				AND D1.D1_FORNECE = SD2.D2_CLIENTE
-				AND D1.D1_LOJA    = SD2.D2_LOJA    
-				AND D1.D1_COD     = SD2.D2_COD
-			)) AS VLRBRUTDEV
-			FROM %Table:SF2% SF2
-			JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
-			JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
-			JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
-			JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
-			JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
-			JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
-			JOIN %Table:SF4% SF4 ON SD2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo
-			JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
-			LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
-		WHERE 
-			SF2.%notDel%  
-			AND SD2.%notDel%  
-			AND SA1.%notDel%  		
-			AND SB1.%notDel%  					
-			AND SA3.%notDel%  											
-			AND SBM.%notDel%				
-			AND ACY.%notDel%
-			AND SF4.%notDel%
-			AND SC5.%notDel%
-			%exp:_cFiltro%
-		GROUP BY 
-			SD2.D2_FILIAL,SD2.D2_EST,SA1.A1_COD_MUN,SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_SUBGR,
-			SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,SD2.D2_COD    
-		) T
-		GROUP BY 
-		T.D2_FILIAL,T.D2_EST,T.A1_COD_MUN,T.D2_UM,T.D2_SEGUM,T.B1_I_SUBGR
-		ORDER BY 
-		T.D2_FILIAL,T.D2_EST
-	EndSql
+    //ORDEM 12 - Estado x Sub-Grupo - SINTETICO
+    BeginSql alias cAliasOr12
+        SELECT 			
+                SUM(T.D2_QUANT)   AS D2_QUANT,
+                AVG(T.D2_PRCVEN)  AS D2_PRCVEN,
+                SUM(T.D2_TOTAL)   AS D2_TOTAL,				
+                SUM(T.D2_VALBRUT) AS D2_VALBRUT,								
+                SUM(T.D2_QTSEGUM) AS D2_QTSEGUM,
+                SUM(T.D2_QTDEDEV) AS D2_QTDEDEV,
+                SUM(T.D2_VALDEV)  AS D2_VALDEV,				
+                SUM(T.PESTOTAL)   AS PESTOTAL,
+                SUM(T.VLRBRUTDEV) AS VLRBRUTDEV,
+                T.D2_FILIAL,T.D2_EST,T.A1_COD_MUN,T.D2_UM,T.D2_SEGUM,T.B1_I_SUBGR
+        FROM
+        (SELECT 			
+            SUM(SD2.D2_QUANT)   AS D2_QUANT,
+            AVG(SD2.D2_PRCVEN)  AS D2_PRCVEN,
+            SUM(SD2.D2_TOTAL)   AS D2_TOTAL,		
+            SUM(SD2.D2_VALBRUT) AS D2_VALBRUT,
+            SUM(SD2.D2_QTSEGUM) AS D2_QTSEGUM,
+            COALESCE(SUM(SB1.B1_PESBRU * SD2.D2_QUANT),0) AS PESTOTAL,							
+            SD2.D2_FILIAL,SD2.D2_EST,SA1.A1_COD_MUN,SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_SUBGR,
+            SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,SD2.D2_COD,
+            (SELECT COALESCE(SUM(D1.D1_QUANT),0)
+            FROM %Table:SD1% D1
+            %exp:_cJOIN_SF1%
+            WHERE D1.D_E_L_E_T_ = ' '
+                AND D1.D1_TIPO = 'D'
+                AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                AND D1.D1_NFORI   = SD2.D2_DOC
+                AND D1.D1_SERIORI = SD2.D2_SERIE
+                AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                AND D1.D1_LOJA    = SD2.D2_LOJA    
+                AND D1.D1_COD     = SD2.D2_COD 
+            ) AS D2_QTDEDEV,
+            (SELECT COALESCE(SUM(D1.D1_TOTAL),0)
+            FROM %Table:SD1% D1
+            %exp:_cJOIN_SF1%
+            WHERE D1.D_E_L_E_T_ = ' '
+                AND D1.D1_TIPO = 'D'
+                AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                AND D1.D1_NFORI   = SD2.D2_DOC
+                AND D1.D1_SERIORI = SD2.D2_SERIE
+                AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                AND D1.D1_LOJA    = SD2.D2_LOJA    
+                AND D1.D1_COD     = SD2.D2_COD
+            ) AS D2_VALDEV,
+            (SUM(SD2.D2_VALBRUT)  -
+            (SELECT COALESCE(SUM(D1.D1_TOTAL - D1_VALDESC + D1.D1_ICMSRET),0)
+            FROM %Table:SD1% D1
+            %exp:_cJOIN_SF1%
+            WHERE D1.D_E_L_E_T_ = ' '
+                AND D1.D1_TIPO = 'D'
+                AND D1.D1_FILIAL  = SD2.D2_FILIAL 
+                AND D1.D1_NFORI   = SD2.D2_DOC
+                AND D1.D1_SERIORI = SD2.D2_SERIE
+                AND D1.D1_FORNECE = SD2.D2_CLIENTE
+                AND D1.D1_LOJA    = SD2.D2_LOJA    
+                AND D1.D1_COD     = SD2.D2_COD
+            )) AS VLRBRUTDEV
+            FROM %Table:SF2% SF2
+            JOIN %Table:SD2% SD2 ON SD2.D2_DOC = SF2.F2_DOC AND SD2.D2_SERIE = SF2.F2_SERIE AND SD2.D2_FILIAL = SF2.F2_FILIAL 
+            JOIN %Table:SA1% SA1 ON SD2.D2_CLIENTE = SA1.A1_COD AND SD2.D2_LOJA = SA1.A1_LOJA
+            JOIN %Table:SB1% SB1 ON SD2.D2_COD = SB1.B1_COD 
+            JOIN %Table:SA3% SA3 ON SF2.F2_VEND1 = SA3.A3_COD
+            JOIN %Table:SBM% SBM ON SB1.B1_GRUPO = SBM.BM_GRUPO
+            JOIN %Table:ACY% ACY ON SA1.A1_GRPVEN = ACY.ACY_GRPVEN
+            JOIN %Table:SF4% SF4 ON SD2.d2_filial = SF4.f4_filial AND sd2.d2_tes = SF4.f4_codigo
+            JOIN %Table:SC5% SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND SC5.C5_NUM = SF2.F2_I_PEDID
+            LEFT JOIN %Table:DAI% DAI ON DAI.DAI_FILIAL = SF2.F2_FILIAL AND DAI.DAI_PEDIDO = SF2.F2_I_PEDID AND DAI.DAI_NFISCA = SF2.F2_DOC AND DAI.DAI_SERIE = SF2.F2_SERIE AND DAI.%notDel%
+        WHERE 
+            SF2.%notDel%  
+            AND SD2.%notDel%  
+            AND SA1.%notDel%  		
+            AND SB1.%notDel%  					
+            AND SA3.%notDel%  											
+            AND SBM.%notDel%				
+            AND ACY.%notDel%
+            AND SF4.%notDel%
+            AND SC5.%notDel%
+            %exp:_cFiltro%
+        GROUP BY 
+            SD2.D2_FILIAL,SD2.D2_EST,SA1.A1_COD_MUN,SD2.D2_UM,SD2.D2_SEGUM,SB1.B1_I_SUBGR,
+            SD2.D2_DOC,SD2.D2_SERIE,SD2.D2_CLIENTE,SD2.D2_LOJA,SD2.D2_COD    
+        ) T
+        GROUP BY 
+        T.D2_FILIAL,T.D2_EST,T.A1_COD_MUN,T.D2_UM,T.D2_SEGUM,T.B1_I_SUBGR
+        ORDER BY 
+        T.D2_FILIAL,T.D2_EST
+    EndSql
 
-	_nTot:=nConta:=0
-	COUNT TO _nTot
-	_cTotGeral:=AllTrim(Str(_nTot))
-				
-	DBSelectArea(cAliasOr12)
-	(cAliasOr12)->(DBGoTop())
+    _nTot:=nConta:=0
+    COUNT TO _nTot
+    _cTotGeral:=AllTrim(Str(_nTot))
+                
+    DBSelectArea(cAliasOr12)
+    (cAliasOr12)->(DBGoTop())
 
-	// Relatório em Excel
-	If _lGeraEmExcel 
-		_aTitulos := {"Filial",;
-					"Estado",;
-					"Região",;
-					"Cod. Sub Grupo",;
-					"Desc. Sub Grupo",;
-					"Qtde.1 UM",;
-					"1 UM",;
-					"Qtde.2 UM",;
-					"2 UM",;
-					"Preco Unit",;
-					"Valor Total",;
-					"Valor Bruto",;
-					"Peso Total"}
-	// Alinhamento: 1-Left   ,2-Center,3-Right
-	// Formatação.: 1-General,2-Number,3-Monetário,4-DateTime
-	//             Titulo das Colunas ,Alinhamento ,Formatação, Totaliza?
-	//               Titulo           ,1           ,1         ,.F./.T.   })
-		aCabXML   := {{"Filial"         ,2           ,1         ,.F. },;
-					{"Estado"         ,2           ,1         ,.F. },;
-					{"Região"         ,1           ,1         ,.F. },;
-					{"Cod. Sub Grupo" ,2           ,1         ,.F. },;
-					{"Desc. Sub Grupo",1           ,1         ,.F. },;
-					{"Qtde.1 UM"      ,3           ,2         ,.F. },;
-					{"1 UM"           ,2           ,1         ,.F. },;
-					{"Qtde.2 UM"      ,3           ,2         ,.F. },;
-					{"2 UM"           ,2           ,1         ,.F. },;
-					{"Preco Unit"     ,3           ,3         ,.F. },;
-					{"Valor Total"    ,3           ,3         ,.F. },;
-					{"Valor Bruto"    ,3           ,3         ,.F. },;
-					{"Peso Total"     ,2           ,2         ,.F. }}
+    // Relatório em Excel
+    If _lGeraEmExcel 
+        _aTitulos := {"Filial",;
+                    "Estado",;
+                    "Região",;
+                    "Cod. Sub Grupo",;
+                    "Desc. Sub Grupo",;
+                    "Qtde.1 UM",;
+                    "1 UM",;
+                    "Qtde.2 UM",;
+                    "2 UM",;
+                    "Preco Unit",;
+                    "Valor Total",;
+                    "Valor Bruto",;
+                    "Peso Total"}
+    // Alinhamento: 1-Left   ,2-Center,3-Right
+    // Formatação.: 1-General,2-Number,3-Monetário,4-DateTime
+    //             Titulo das Colunas ,Alinhamento ,Formatação, Totaliza?
+    //               Titulo           ,1           ,1         ,.F./.T.   })
+        aCabXML   := {{"Filial"         ,2           ,1         ,.F. },;
+                    {"Estado"         ,2           ,1         ,.F. },;
+                    {"Região"         ,1           ,1         ,.F. },;
+                    {"Cod. Sub Grupo" ,2           ,1         ,.F. },;
+                    {"Desc. Sub Grupo",1           ,1         ,.F. },;
+                    {"Qtde.1 UM"      ,3           ,2         ,.F. },;
+                    {"1 UM"           ,2           ,1         ,.F. },;
+                    {"Qtde.2 UM"      ,3           ,2         ,.F. },;
+                    {"2 UM"           ,2           ,1         ,.F. },;
+                    {"Preco Unit"     ,3           ,3         ,.F. },;
+                    {"Valor Total"    ,3           ,3         ,.F. },;
+                    {"Valor Bruto"    ,3           ,3         ,.F. },;
+                    {"Peso Total"     ,2           ,2         ,.F. }}
 
 
-		_cTitulo := "Relação de Vendas Faturadas - Ordem 12 - Estados x Sub-Grupos"
+        _cTitulo := "Relação de Vendas Faturadas - Ordem 12 - Estados x Sub-Grupos"
 
-		While (cAliasOr12)->(!Eof())  
-			If oproc <> NIL
-			nConta++
-			oproc:cCaption := ("Lendo : "+StrZero(nConta,5) +" de "+ _cTotGeral )
-			ProcessMessages()
-			EndIf
-		
-		// Retorna a regiao pertencente ao estado do cliente informado no pedido de venda
-		_nPosReg := aScan( _aRegioes,{|x| x[2] == (cAliasOr12)->D2_EST }) 
-		
-		_cRegiao := ""
-		If _nPosReg > 0
-			_cRegiao := _aRegioes[_nPosReg,1]
-		EndIf
-		
-		_cDescSubg := Posicione("ZB9",1,xFilial("ZB9")+(cAliasOr12)->B1_I_SUBGR,"ZB9_DESSUB")
+        While (cAliasOr12)->(!Eof())  
+            If oproc <> NIL
+            nConta++
+            oproc:cCaption := ("Lendo : "+StrZero(nConta,5) +" de "+ _cTotGeral )
+            ProcessMessages()
+            EndIf
+        
+        // Retorna a regiao pertencente ao estado do cliente informado no pedido de venda
+        _nPosReg := aScan( _aRegioes,{|x| x[2] == (cAliasOr12)->D2_EST }) 
+        
+        _cRegiao := ""
+        If _nPosReg > 0
+            _cRegiao := _aRegioes[_nPosReg,1]
+        EndIf
+        
+        _cDescSubg := Posicione("ZB9",1,xFilial("ZB9")+(cAliasOr12)->B1_I_SUBGR,"ZB9_DESSUB")
 
-			nQtde1:= IIf(MV_PAR22 == 2,(cAliasOr12)->D2_QUANT  ,(cAliasOr12)->D2_QUANT   - (cAliasOr12)->D2_QTDEDEV)                                                          //MV_PAR22 == 2 Nao considera devolucoes			
-			nQtde2:= IIf(MV_PAR22 == 2,(cAliasOr12)->D2_QTSEGUM,(cAliasOr12)->D2_QTSEGUM - ROMS003L((cAliasOr12)->D2_QUANT,(cAliasOr12)->D2_QTDEDEV,(cAliasOr12)->D2_QTSEGUM))//MV_PAR22 == 2 Nao considera devolucoes						
-			nTotal:= IIf(MV_PAR22 == 2,(cAliasOr12)->D2_TOTAL  ,(cAliasOr12)->D2_TOTAL   - (cAliasOr12)->D2_VALDEV)                                                           //MV_PAR22 == 2 Nao considera devolucoes					
-			nVlBru:= IIf(MV_PAR22 == 2,(cAliasOr12)->D2_VALBRUT,(cAliasOr12)->VLRBRUTDEV)
+            nQtde1:= IIf(MV_PAR22 == 2,(cAliasOr12)->D2_QUANT  ,(cAliasOr12)->D2_QUANT   - (cAliasOr12)->D2_QTDEDEV)                                                          //MV_PAR22 == 2 Nao considera devolucoes			
+            nQtde2:= IIf(MV_PAR22 == 2,(cAliasOr12)->D2_QTSEGUM,(cAliasOr12)->D2_QTSEGUM - ROMS003L((cAliasOr12)->D2_QUANT,(cAliasOr12)->D2_QTDEDEV,(cAliasOr12)->D2_QTSEGUM))//MV_PAR22 == 2 Nao considera devolucoes						
+            nTotal:= IIf(MV_PAR22 == 2,(cAliasOr12)->D2_TOTAL  ,(cAliasOr12)->D2_TOTAL   - (cAliasOr12)->D2_VALDEV)                                                           //MV_PAR22 == 2 Nao considera devolucoes					
+            nVlBru:= IIf(MV_PAR22 == 2,(cAliasOr12)->D2_VALBRUT,(cAliasOr12)->VLRBRUTDEV)
 
-			_nI := aScan(_aDadosExcel,{|x| x[1]+x[2]+x[4] == (cAliasOr12)->D2_FILIAL + (cAliasOr12)->D2_EST + (cAliasOr12)->B1_I_SUBGR })
+            _nI := aScan(_aDadosExcel,{|x| x[1]+x[2]+x[4] == (cAliasOr12)->D2_FILIAL + (cAliasOr12)->D2_EST + (cAliasOr12)->B1_I_SUBGR })
 
-			If _nI == 0
-			aAdd(_aDadosExcel,{(cAliasOr12)->D2_FILIAL,;  // 01
-								(cAliasOr12)->D2_EST,;     // 02
-								_cRegiao,;                 // 03
-								(cAliasOr12)->B1_I_SUBGR,; // 04  - Codigo do Sub Grupo
-								_cDescSubg ,;              // 05  - (cAliasOr12)->DESCSUBGR - Descricao do Sub Grupo
-								nQtde1,;                   // 06  - Quantidade na primeira unidade de Medida
-								(cAliasOr12)->D2_UM,;      // 07  - Primeira unidade de Medida  
-								nQtde2,;                   // 08  - Quantidade na segunda unidade de Medida 
-								(cAliasOr12)->D2_SEGUM,;   // 09  - Segunda unidade de Medida  
-								nTotal/nQtde1,;	          // 10 
-								nTotal,;                   // 11 - valor total 
-								nVlBru,;                   // 12
-								(cAliasOr12)->PESTOTAL;    // 13 - Peso total 
-								})      
-			Else
-			_aDadosExcel[_nI,6]  += nQtde1                   // 6  - Quantidade na primeira unidade de Medida
-			_aDadosExcel[_nI,8]	 += nQtde2                   // 8  - Quantidade na segunda unidade de Medida 
-			_aDadosExcel[_nI,11] +=	nTotal                   // 11 - valor total 
-			_aDadosExcel[_nI,12] += (cAliasOr12)->PESTOTAL   // 12 - Peso total 
-			_aDadosExcel[_nI,10] :=  _aDadosExcel[_nI,11] / _aDadosExcel[_nI,6] // Preço Unit
-			EndIf
+            If _nI == 0
+            aAdd(_aDadosExcel,{(cAliasOr12)->D2_FILIAL,;  // 01
+                                (cAliasOr12)->D2_EST,;     // 02
+                                _cRegiao,;                 // 03
+                                (cAliasOr12)->B1_I_SUBGR,; // 04  - Codigo do Sub Grupo
+                                _cDescSubg ,;              // 05  - (cAliasOr12)->DESCSUBGR - Descricao do Sub Grupo
+                                nQtde1,;                   // 06  - Quantidade na primeira unidade de Medida
+                                (cAliasOr12)->D2_UM,;      // 07  - Primeira unidade de Medida  
+                                nQtde2,;                   // 08  - Quantidade na segunda unidade de Medida 
+                                (cAliasOr12)->D2_SEGUM,;   // 09  - Segunda unidade de Medida  
+                                nTotal/nQtde1,;	          // 10 
+                                nTotal,;                   // 11 - valor total 
+                                nVlBru,;                   // 12
+                                (cAliasOr12)->PESTOTAL;    // 13 - Peso total 
+                                })      
+            Else
+            _aDadosExcel[_nI,6]  += nQtde1                   // 6  - Quantidade na primeira unidade de Medida
+            _aDadosExcel[_nI,8]	 += nQtde2                   // 8  - Quantidade na segunda unidade de Medida 
+            _aDadosExcel[_nI,11] +=	nTotal                   // 11 - valor total 
+            _aDadosExcel[_nI,12] += (cAliasOr12)->PESTOTAL   // 12 - Peso total 
+            _aDadosExcel[_nI,10] :=  _aDadosExcel[_nI,11] / _aDadosExcel[_nI,6] // Preço Unit
+            EndIf
 
-			(cAliasOr12)->(DBSkip())	 
-		EndDo
+            (cAliasOr12)->(DBSkip())	 
+        EndDo
 
-		If Empty(_aDadosExcel)
-			U_ITMsg("Não foram encontrados dados para emissão do relatório em Excel que satisfaçam as condições de filtro.","Atenção", ,1)
-		Else
-			_aSX1:=ROMS003P()     
-			_cMsgTop:= _cTitulo+" / Exportação disponiveis: XML / CSV / EXCEL / ARQUIVO"
-										//      ,_aCols     ,_lMaxSiz,_nTipo,_cMsgTop, _lSelUnc ,_aSizes , _nCampo , bOk , bCancel, _abuttons, _aCab  , bDblClk , _aColXML , bCondMarca,_bLegenda,_lHasOk,_bHeadClk,_aSX1 )
-			U_ITListBox(_cTitulo , _aTitulos , _aDadosExcel , .T.    , 1    ,_cMsgTop,          ,        ,         ,     ,        ,          ,aCabXML,         ,          ,           ,         ,       ,          ,_aSX1)
-		EndIf
+        If Empty(_aDadosExcel)
+            U_ITMsg("Não foram encontrados dados para emissão do relatório em Excel que satisfaçam as condições de filtro.","Atenção", ,1)
+        Else
+            _aSX1:=ROMS003P()     
+            _cMsgTop:= _cTitulo+" / Exportação disponiveis: XML / CSV / EXCEL / ARQUIVO"
+                                        //      ,_aCols     ,_lMaxSiz,_nTipo,_cMsgTop, _lSelUnc ,_aSizes , _nCampo , bOk , bCancel, _abuttons, _aCab  , bDblClk , _aColXML , bCondMarca,_bLegenda,_lHasOk,_bHeadClk,_aSX1 )
+            U_ITListBox(_cTitulo , _aTitulos , _aDadosExcel , .T.    , 1    ,_cMsgTop,          ,        ,         ,     ,        ,          ,aCabXML,         ,          ,           ,         ,       ,          ,_aSX1)
+        EndIf
 
-		BREAK  // FINALIZA A EMISSÃO DO RELATÓRIIO EM EXCEL DE ESTADOS E SUBGRUPOS.
-	EndIf
+        BREAK  // FINALIZA A EMISSÃO DO RELATÓRIIO EM EXCEL DE ESTADOS E SUBGRUPOS.
+    EndIf
 
-	oproc:cCaption := ("Lendo Dados - Pre-processamento 2/2" )
-	ProcessMessages()
-	// Relatório Impresso 
-	While (cAliasOr12)->(!Eof())  
-		If oproc <> NIL
-			nConta++
-			oproc:cCaption := ("Lendo : "+StrZero(nConta,5) +" de "+ _cTotGeral )
-			ProcessMessages()
-		EndIf
-		
-		nQtde1:= IIf(MV_PAR22 == 2,(cAliasOr12)->D2_QUANT  ,(cAliasOr12)->D2_QUANT   - (cAliasOr12)->D2_QTDEDEV)                                                          //MV_PAR22 == 2 Nao considera devolucoes			
-		nQtde2:= IIf(MV_PAR22 == 2,(cAliasOr12)->D2_QTSEGUM,(cAliasOr12)->D2_QTSEGUM - ROMS003L((cAliasOr12)->D2_QUANT,(cAliasOr12)->D2_QTDEDEV,(cAliasOr12)->D2_QTSEGUM))//MV_PAR22 == 2 Nao considera devolucoes						
-		nTotal:= IIf(MV_PAR22 == 2,(cAliasOr12)->D2_TOTAL  ,(cAliasOr12)->D2_TOTAL   - (cAliasOr12)->D2_VALDEV)                                                           //MV_PAR22 == 2 Nao considera devolucoes					
-		nVlBru:= IIf(MV_PAR22 == 2,(cAliasOr12)->D2_VALBRUT,(cAliasOr12)->VLRBRUTDEV)
+    oproc:cCaption := ("Lendo Dados - Pre-processamento 2/2" )
+    ProcessMessages()
+    // Relatório Impresso 
+    While (cAliasOr12)->(!Eof())  
+        If oproc <> NIL
+            nConta++
+            oproc:cCaption := ("Lendo : "+StrZero(nConta,5) +" de "+ _cTotGeral )
+            ProcessMessages()
+        EndIf
+        
+        nQtde1:= IIf(MV_PAR22 == 2,(cAliasOr12)->D2_QUANT  ,(cAliasOr12)->D2_QUANT   - (cAliasOr12)->D2_QTDEDEV)                                                          //MV_PAR22 == 2 Nao considera devolucoes			
+        nQtde2:= IIf(MV_PAR22 == 2,(cAliasOr12)->D2_QTSEGUM,(cAliasOr12)->D2_QTSEGUM - ROMS003L((cAliasOr12)->D2_QUANT,(cAliasOr12)->D2_QTDEDEV,(cAliasOr12)->D2_QTSEGUM))//MV_PAR22 == 2 Nao considera devolucoes						
+        nTotal:= IIf(MV_PAR22 == 2,(cAliasOr12)->D2_TOTAL  ,(cAliasOr12)->D2_TOTAL   - (cAliasOr12)->D2_VALDEV)                                                           //MV_PAR22 == 2 Nao considera devolucoes					
+        nVlBru:= IIf(MV_PAR22 == 2,(cAliasOr12)->D2_VALBRUT,(cAliasOr12)->VLRBRUTDEV)
 
-		//Alimenta array contendo todas as Filiais
-		_nPosFil := aScan( _aFiliais,{|x| x[1] == (cAliasOr12)->D2_FILIAL })        
-			
-		If _nPosFil == 0
-			aAdd(_aFiliais,{(cAliasOr12)->D2_FILIAL})     
-		EndIf
-			
-		//Alimenta array para geracao do relatorio por Filial + Estado + Sub Grupo
-		ROMS003CG(nQtde1,nQtde2,nTotal)     
-		//Alimenta arrya para geracao do relatorio por Filial + Regiao + Sub Grupo
-		ROMS003RE(nQtde1,nQtde2,nTotal)
-		//Alimenta array para geracao do relatorio por Filial + Sub Grupo
-		ROMS003RS(nQtde1,nQtde2,nTotal)
-							
-		DBSelectArea(cAliasOr12)
-		(cAliasOr12)->(DBSkip())
-	EndDo
+        //Alimenta array contendo todas as Filiais
+        _nPosFil := aScan( _aFiliais,{|x| x[1] == (cAliasOr12)->D2_FILIAL })        
+            
+        If _nPosFil == 0
+            aAdd(_aFiliais,{(cAliasOr12)->D2_FILIAL})     
+        EndIf
+            
+        //Alimenta array para geracao do relatorio por Filial + Estado + Sub Grupo
+        ROMS003CG(nQtde1,nQtde2,nTotal)     
+        //Alimenta arrya para geracao do relatorio por Filial + Regiao + Sub Grupo
+        ROMS003RE(nQtde1,nQtde2,nTotal)
+        //Alimenta array para geracao do relatorio por Filial + Sub Grupo
+        ROMS003RS(nQtde1,nQtde2,nTotal)
+                            
+        DBSelectArea(cAliasOr12)
+        (cAliasOr12)->(DBSkip())
+    EndDo
 
-	DBSelectArea(cAliasOr12)
-	(cAliasOr12)->(DBCloseArea())
-							
-	//Ordena os dados por Filial + Regiao + Sub-Grupo de Produto
-	_aSubGrupo := aSort(_aSubGrupo,,, { |x, y| x[1]+x[2]+x[3] < y[1]+y[2]+y[3] }) //CRESCENTE Alfabetica  	  
+    DBSelectArea(cAliasOr12)
+    (cAliasOr12)->(DBCloseArea())
+                            
+    //Ordena os dados por Filial + Regiao + Sub-Grupo de Produto
+    _aSubGrupo := aSort(_aSubGrupo,,, { |x, y| x[1]+x[2]+x[3] < y[1]+y[2]+y[3] }) //CRESCENTE Alfabetica  	  
 
-	//Ordena os dados por Filial + Regiao + Sub-Grupo de Produto
-	_aDadosReg := aSort(_aDadosReg,,, { |x, y| x[1]+x[2]+x[3] < y[1]+y[2]+y[3] }) //CRESCENTE Alfabetica     
+    //Ordena os dados por Filial + Regiao + Sub-Grupo de Produto
+    _aDadosReg := aSort(_aDadosReg,,, { |x, y| x[1]+x[2]+x[3] < y[1]+y[2]+y[3] }) //CRESCENTE Alfabetica     
 
-	//Efetua a impressao dos dados do Relatorio
-	For _nI:=1 to Len(_aFiliais)      
-		//Quebra de Pagina
-		ROMS003QX()  
-		nlinha+=nSaltoLinha 
-		nlinha+=nSaltoLinha      
-		
-		//Seta variaveis de controle dos totalizadores por Filial
-		_nTFilQtd1:= 0
-		_nTFilQtd2:= 0
-		_nTFilVlTo:= 0
-		_nTFilPeso:= 0
-		
-		//Imprime os dados por Filial + Estado + Sub Grupo
-		ROMS003IS(_aFiliais[_nI,1])
-																		
-		//Quebra de Pagina
-		ROMS003QX() 
-		//Imprime os dados das Regios por Filial + Regiao + Sub Grupo
-		ROMS003ID(_aFiliais[_nI,1])    
-		
-		//Imprime os dados Resumidos por Filial + Sub Grupo 
-		ROMS003IR(_aFiliais[_nI,1])               
-		
-		nlinha+=nSaltoLinha                   
-		nlinha+=nSaltoLinha        
-		ROMS003QE(0,0,0)
-		//Imprime o Totalizador por Filial
-		ROMS003PE("TOTAL FILIAL: " + _aFiliais[_nI,1] + '-' + FWFilialName(,_aFiliais[_nI,1]),_nTFilQtd1,_nTFilQtd2,_nTFilVlTo,_nTFilPeso)
-	Next _nI
+    //Efetua a impressao dos dados do Relatorio
+    For _nI:=1 to Len(_aFiliais)      
+        //Quebra de Pagina
+        ROMS003QX()  
+        nlinha+=nSaltoLinha 
+        nlinha+=nSaltoLinha      
+        
+        //Seta variaveis de controle dos totalizadores por Filial
+        _nTFilQtd1:= 0
+        _nTFilQtd2:= 0
+        _nTFilVlTo:= 0
+        _nTFilPeso:= 0
+        
+        //Imprime os dados por Filial + Estado + Sub Grupo
+        ROMS003IS(_aFiliais[_nI,1])
+                                                                        
+        //Quebra de Pagina
+        ROMS003QX() 
+        //Imprime os dados das Regios por Filial + Regiao + Sub Grupo
+        ROMS003ID(_aFiliais[_nI,1])    
+        
+        //Imprime os dados Resumidos por Filial + Sub Grupo 
+        ROMS003IR(_aFiliais[_nI,1])               
+        
+        nlinha+=nSaltoLinha                   
+        nlinha+=nSaltoLinha        
+        ROMS003QE(0,0,0)
+        //Imprime o Totalizador por Filial
+        ROMS003PE("TOTAL FILIAL: " + _aFiliais[_nI,1] + '-' + FWFilialName(,_aFiliais[_nI,1]),_nTFilQtd1,_nTFilQtd2,_nTFilVlTo,_nTFilPeso)
+    Next _nI
 
 End Sequence
 
@@ -6108,38 +6088,38 @@ Local _nPosMun  := 0
 _nPosSubGr := aScan( _aSubGrupo,{|x| x[1] + x[2] + x[3] == (cAliasOr12)->D2_FILIAL + (cAliasOr12)->D2_EST +  (cAliasOr12)->B1_I_SUBGR }) 
 
 If  _nPosSubGr > 0                 
-	_aSubGrupo[_nPosSubGr,05]+= nQtde1
-	_aSubGrupo[_nPosSubGr,07]+= nQtde2
-	_aSubGrupo[_nPosSubGr,09]+= nTotal
-	_aSubGrupo[_nPosSubGr,10]+= (cAliasOr12)->PESTOTAL
-	_aSubGrupo[_nPosSubGr,11]+= nVlBru
+    _aSubGrupo[_nPosSubGr,05]+= nQtde1
+    _aSubGrupo[_nPosSubGr,07]+= nQtde2
+    _aSubGrupo[_nPosSubGr,09]+= nTotal
+    _aSubGrupo[_nPosSubGr,10]+= (cAliasOr12)->PESTOTAL
+    _aSubGrupo[_nPosSubGr,11]+= nVlBru
 Else    
-	_cDescSubg := Posicione("ZB9",1,xFilial("ZB9")+(cAliasOr12)->B1_I_SUBGR,"ZB9_DESSUB")
+    _cDescSubg := Posicione("ZB9",1,xFilial("ZB9")+(cAliasOr12)->B1_I_SUBGR,"ZB9_DESSUB")
 
-	aAdd(_aSubGrupo,{ (cAliasOr12)->D2_FILIAL,;    //01 - Filial
-						(cAliasOr12)->D2_EST ,;      //02 - Estado
-						(cAliasOr12)->B1_I_SUBGR,;   //03 - Codigo do Sub Grupo
-						_cDescSubg,;                 //04 - Descricao do Sub Grupo //(cAliasOr12)->DESCSUBGR,;    
-						nQtde1,;                     //05 - Quantidade na primeira unidade de Medida
-						(cAliasOr12)->D2_UM,;        //06 - Primeira unidade de Medida  
-						nQtde2,;                     //07 - Quantidade na segunda unidade de Medida 
-						(cAliasOr12)->D2_SEGUM,;     //08 - Segunda unidade de Medida  
-						nTotal,;                     //09 - valor total 
-						(cAliasOr12)->PESTOTAL,;     //10 - Peso total 
-						nVlBru ;                     //11 - VALOR BRUTO
-					})   						  	  					  	  						  	             
+    aAdd(_aSubGrupo,{ (cAliasOr12)->D2_FILIAL,;    //01 - Filial
+                        (cAliasOr12)->D2_EST ,;      //02 - Estado
+                        (cAliasOr12)->B1_I_SUBGR,;   //03 - Codigo do Sub Grupo
+                        _cDescSubg,;                 //04 - Descricao do Sub Grupo //(cAliasOr12)->DESCSUBGR,;    
+                        nQtde1,;                     //05 - Quantidade na primeira unidade de Medida
+                        (cAliasOr12)->D2_UM,;        //06 - Primeira unidade de Medida  
+                        nQtde2,;                     //07 - Quantidade na segunda unidade de Medida 
+                        (cAliasOr12)->D2_SEGUM,;     //08 - Segunda unidade de Medida  
+                        nTotal,;                     //09 - valor total 
+                        (cAliasOr12)->PESTOTAL,;     //10 - Peso total 
+                        nVlBru ;                     //11 - VALOR BRUTO
+                    })   						  	  					  	  						  	             
 EndIf 
-				
+                
 //Considera somente os municipio que nao foram lancados para depois saber quantos municipos por Filial + estado foram abrangidos
 _nPosMun := aScan( _aQtdeMun,{|x| x[1] + x[2] + x[3] == (cAliasOr12)->D2_FILIAL + (cAliasOr12)->D2_EST + (cAliasOr12)->A1_COD_MUN })  
 
 If _nPosMun == 0  
-	aAdd(_aQtdeMun, {   (cAliasOr12)->D2_FILIAL,;  //1  - Filial
-						(cAliasOr12)->D2_EST,;   //2  - Estado
-						(cAliasOr12)->A1_COD_MUN;  //3  - Codigo do Municipio
-					})  
+    aAdd(_aQtdeMun, {   (cAliasOr12)->D2_FILIAL,;  //1  - Filial
+                        (cAliasOr12)->D2_EST,;   //2  - Estado
+                        (cAliasOr12)->A1_COD_MUN;  //3  - Codigo do Municipio
+                    })  
 EndIf 
-	
+    
 Return
 
 /*
@@ -6150,7 +6130,7 @@ Data da Criacao-: 12/03/2009
 Descrição-------: Funcao que consulta os dados por região
 Parametros------: nQtde1 = Quantidade 1 unidade
                   nQtde2 = Quantidade 2 unidade
-				  nTotal = Valor total
+                  nTotal = Valor total
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -6164,33 +6144,33 @@ Local _cDescSubg
 //Retorna a regiao pertencente ao estado do cliente informado no pedido de venda
 _nPosReg := aScan( _aRegioes,{|x| x[2] == (cAliasOr12)->D2_EST }) 
 If _nPosReg > 0
-	_cRegiao:= _aRegioes[_nPosReg,1]
+    _cRegiao:= _aRegioes[_nPosReg,1]
 EndIf
-	
+    
 //Efetua o grupamento dos dados do relatorio por Filial + Regiao + Sub-Grupo
 _nPosDados := aScan( _aDadosReg,{|x| x[1] + x[2] + x[3] == (cAliasOr12)->D2_FILIAL + _cRegiao +  (cAliasOr12)->B1_I_SUBGR }) 
 
 If  _nPosDados > 0                 
-	_aDadosReg[_nPosDados,05] += nQtde1
-	_aDadosReg[_nPosDados,07] += nQtde2
-	_aDadosReg[_nPosDados,09] += nTotal
-	_aDadosReg[_nPosDados,10] += (cAliasOr12)->PESTOTAL
-	_aDadosReg[_nPosDados,11] += nVlBru
+    _aDadosReg[_nPosDados,05] += nQtde1
+    _aDadosReg[_nPosDados,07] += nQtde2
+    _aDadosReg[_nPosDados,09] += nTotal
+    _aDadosReg[_nPosDados,10] += (cAliasOr12)->PESTOTAL
+    _aDadosReg[_nPosDados,11] += nVlBru
 Else    
-	
-	_cDescSubg := Posicione("ZB9",1,xFilial("ZB9")+(cAliasOr12)->B1_I_SUBGR,"ZB9_DESSUB")
-	aAdd(_aDadosReg,{ (cAliasOr12)->D2_FILIAL,;  //01  - Filial
-						_cRegiao,;                 //02  - Regiao
-						(cAliasOr12)->B1_I_SUBGR,; //03  - Codigo do Sub Grupo
-						_cDescSubg ,;              //04  - (cAliasOr12)->DESCSUBGR,;  //4  - Descricao do Sub Grupo
-						nQtde1,;                  //05  - Quantidade na primeira unidade de Medida
-						(cAliasOr12)->D2_UM,;      //06  - Primeira unidade de Medida  
-						nQtde2,;                  //07  - Quantidade na segunda unidade de Medida 
-						(cAliasOr12)->D2_SEGUM,;   //08  - Segunda unidade de Medida  
-						nTotal,;                  //09  - valor total 
-						(cAliasOr12)->PESTOTAL,;   //10 - Peso total 
-						nVlBru;                    //11 - valor BRUTO
-						})
+    
+    _cDescSubg := Posicione("ZB9",1,xFilial("ZB9")+(cAliasOr12)->B1_I_SUBGR,"ZB9_DESSUB")
+    aAdd(_aDadosReg,{ (cAliasOr12)->D2_FILIAL,;  //01  - Filial
+                        _cRegiao,;                 //02  - Regiao
+                        (cAliasOr12)->B1_I_SUBGR,; //03  - Codigo do Sub Grupo
+                        _cDescSubg ,;              //04  - (cAliasOr12)->DESCSUBGR,;  //4  - Descricao do Sub Grupo
+                        nQtde1,;                  //05  - Quantidade na primeira unidade de Medida
+                        (cAliasOr12)->D2_UM,;      //06  - Primeira unidade de Medida  
+                        nQtde2,;                  //07  - Quantidade na segunda unidade de Medida 
+                        (cAliasOr12)->D2_SEGUM,;   //08  - Segunda unidade de Medida  
+                        nTotal,;                  //09  - valor total 
+                        (cAliasOr12)->PESTOTAL,;   //10 - Peso total 
+                        nVlBru;                    //11 - valor BRUTO
+                        })
 EndIf
 
 Return
@@ -6203,7 +6183,7 @@ Data da Criacao-: 12/03/2009
 Descrição-------: Funcao que consulta os dados de forma resumida
 Parametros------: nQtde1 = Quantidade 1 unidade
                   nQtde2 = Quantidade 2 unidade
-				  nTotal = Valor total
+                  nTotal = Valor total
 Retorno---------: Nenhum
 ===============================================================================================================================
 */
@@ -6216,35 +6196,35 @@ Local _cDescSubg := ""
 //Efetua o grupamento dos dados do relatorio por Filial + Regiao + Sub-Grupo
 _nPosRes := aScan( _aDadosRes,{|x| x[1] + x[2] == (cAliasOr12)->D2_FILIAL + (cAliasOr12)->B1_I_SUBGR }) 
 If  _nPosRes > 0                 
-	_aDadosRes[_nPosRes,04] += nQtde1
-	_aDadosRes[_nPosRes,06] += nQtde2
-	_aDadosRes[_nPosRes,08] += nTotal
-	_aDadosRes[_nPosRes,09] += (cAliasOr12)->PESTOTAL
-	_aDadosRes[_nPosRes,10] += nVlBru
+    _aDadosRes[_nPosRes,04] += nQtde1
+    _aDadosRes[_nPosRes,06] += nQtde2
+    _aDadosRes[_nPosRes,08] += nTotal
+    _aDadosRes[_nPosRes,09] += (cAliasOr12)->PESTOTAL
+    _aDadosRes[_nPosRes,10] += nVlBru
 Else    
-	_cDescSubg := Posicione("ZB9",1,xFilial("ZB9")+(cAliasOr12)->B1_I_SUBGR,"ZB9_DESSUB")
-	aAdd(_aDadosRes,{ (cAliasOr12)->D2_FILIAL,;  //01 - Filial
-						(cAliasOr12)->B1_I_SUBGR,; //02 - Codigo do Sub Grupo
-						_cDescSubg,;               //03 - (cAliasOr12)->DESCSUBGR,;  //3  - Descricao do Sub Grupo
-						nQtde1,;  			     //04 - Quantidade na primeira unidade de Medida
-						(cAliasOr12)->D2_UM,;      //05 - Primeira unidade de Medida  
-						nQtde2,;                  //06 - Quantidade na segunda unidade de Medida 
-						(cAliasOr12)->D2_SEGUM,;   //07 - Segunda unidade de Medida  
-						nTotal,;                  //08 - valor total 
-						(cAliasOr12)->PESTOTAL,;   //09 - Peso total 
-						nVlBru;                    //10 - valor BRUTO
-						})            
+    _cDescSubg := Posicione("ZB9",1,xFilial("ZB9")+(cAliasOr12)->B1_I_SUBGR,"ZB9_DESSUB")
+    aAdd(_aDadosRes,{ (cAliasOr12)->D2_FILIAL,;  //01 - Filial
+                        (cAliasOr12)->B1_I_SUBGR,; //02 - Codigo do Sub Grupo
+                        _cDescSubg,;               //03 - (cAliasOr12)->DESCSUBGR,;  //3  - Descricao do Sub Grupo
+                        nQtde1,;  			     //04 - Quantidade na primeira unidade de Medida
+                        (cAliasOr12)->D2_UM,;      //05 - Primeira unidade de Medida  
+                        nQtde2,;                  //06 - Quantidade na segunda unidade de Medida 
+                        (cAliasOr12)->D2_SEGUM,;   //07 - Segunda unidade de Medida  
+                        nTotal,;                  //08 - valor total 
+                        (cAliasOr12)->PESTOTAL,;   //09 - Peso total 
+                        nVlBru;                    //10 - valor BRUTO
+                        })            
 EndIf     
 
 //Array utilizado para calculo da quantidade total do peso por Filial do Produto utilizada para gerar a porcentagem
 _nPosPorc := aScan( _aPorcResu,{|x| x[1] + x[2] == (cAliasOr12)->D2_FILIAL + (cAliasOr12)->B1_I_SUBGR }) 
 If _nPosPorc > 0          
-	_aPorcResu[_nPosPorc,3]+= (cAliasOr12)->PESTOTAL	
+    _aPorcResu[_nPosPorc,3]+= (cAliasOr12)->PESTOTAL	
 Else    
-	aAdd(_aPorcResu,{ (cAliasOr12)->D2_FILIAL,;   //1  - Filial      
-						(cAliasOr12)->B1_I_SUBGR,; //2  - Codigo do Sub Grupo
-						(cAliasOr12)->PESTOTAL;    //3  - Peso total 
-					})             
+    aAdd(_aPorcResu,{ (cAliasOr12)->D2_FILIAL,;   //1  - Filial      
+                        (cAliasOr12)->B1_I_SUBGR,; //2  - Codigo do Sub Grupo
+                        (cAliasOr12)->PESTOTAL;    //3  - Peso total 
+                    })             
 EndIf	
 
 Return
@@ -6274,79 +6254,79 @@ Local z			:= 0
 ROMS003CF(_cFilial)
 
 For z:=1 to Len(_aSubGrupo)
-	//Verifica se eh a mesma filial
-	If _aSubGrupo[z,1] == _cFilial 
-		If _cEst <> _aSubGrupo[z,2]       
-			//Imprime Box caso nao seja o primeiro estado de uma filial 
-			//If z > 1
-			If Len(AllTrim(_cEst)) > 0 
-				
-				ROMS003BR()
-				
-				nlinha+=nSaltoLinha  
-				ROMS003QE(0,0,0)
-				//Imprime totalizador por Filial
-				ROMS003PE("SUB-TOTAL ESTADO: " + _cEst,_nTEstQtd1,_nTEstQtd2,_nTEstVlTo,_nTEstPeso)
-				nlinha+=nSaltoLinha
-			EndIf 
-								
-			nlinha+=nSaltoLinha 
-			nlinha+=nSaltoLinha 
-			ROMS003QE(0,0,0)
-			//Imprime cabecalho do Estado
-			ROMS003CE(_aSubGrupo[z,2])
-				
-			nlinha+=nSaltoLinha 
-			nlinha+=nSaltoLinha  
-			ROMS003QE(0,0,0)
-			//Imprime o total de Municipios Abrangidos
-			oPrint:Say (nlinha,nColInic,"Municípios Abrangidos: " + ROMS003RM(_aSubGrupo[z,1],_aSubGrupo[z,2]),oFont12b)
-			
-			nlinha+=nSaltoLinha 
-			nlinha+=nSaltoLinha  
-			ROMS003QE(0,0,0)
-			//Imprime cabecalho dos Dados
-			ROMS003CM()    
-							
-			//Seta Totalizadores
-			_nTEstQtd1:= _aSubGrupo[z,5]
-			_nTEstQtd2:= _aSubGrupo[z,7]
-			_nTEstVlTo:= _aSubGrupo[z,9]
-			_nTEstPeso:= _aSubGrupo[z,10]
-			
-		Else
-			//Incrementa Totalizadores por Estado
-			_nTEstQtd1+= _aSubGrupo[z,5]
-			_nTEstQtd2+= _aSubGrupo[z,7]
-			_nTEstVlTo+= _aSubGrupo[z,9]
-			_nTEstPeso+= _aSubGrupo[z,10]
-		EndIf                              
-			
-		//Funcao responsavel por retornar o Peso total da Filial + Estado Corrente, utlizado para gerar a porcentagem 
-		_nPosPeso := aScan( _aPorcResu,{|x| x[1] + x[2] == _aSubGrupo[z,1] + _aSubGrupo[z,3]})   
-								
-		If _nPosPeso > 0
-			_nTotPeEst:= _aPorcResu[_nPosPeso,3]
-		EndIf            
-		
-		//Imprime os dados do Sub Grupo
-		nlinha+=nSaltoLinha
-		ROMS003QE(1,1,1)    		
-		oPrint:Line(nLinha,nColInic,nLinha,nColFinal) 
-		
-		ROMS003PD(_aSubGrupo[z,3],_aSubGrupo[z,4],_aSubGrupo[z,5],_aSubGrupo[z,6],_aSubGrupo[z,7],;
-					_aSubGrupo[z,8],_aSubGrupo[z,9],_aSubGrupo[z,10],IIf(_nTotPeEst > 0,((_aSubGrupo[z,10]/_nTotPeEst)*100),0))
-		
-		_cEst:=	_aSubGrupo[z,2] 			
-		
-		//Incrementa Totalizadores por Filial
-		_nTFilQtd1+= _aSubGrupo[z,5]
-		_nTFilQtd2+= _aSubGrupo[z,7]
-		_nTFilVlTo+= _aSubGrupo[z,9]
-		_nTFilPeso+= _aSubGrupo[z,10]
-	EndIf	
+    //Verifica se eh a mesma filial
+    If _aSubGrupo[z,1] == _cFilial 
+        If _cEst <> _aSubGrupo[z,2]       
+            //Imprime Box caso nao seja o primeiro estado de uma filial 
+            //If z > 1
+            If Len(AllTrim(_cEst)) > 0 
+                
+                ROMS003BR()
+                
+                nlinha+=nSaltoLinha  
+                ROMS003QE(0,0,0)
+                //Imprime totalizador por Filial
+                ROMS003PE("SUB-TOTAL ESTADO: " + _cEst,_nTEstQtd1,_nTEstQtd2,_nTEstVlTo,_nTEstPeso)
+                nlinha+=nSaltoLinha
+            EndIf 
+                                
+            nlinha+=nSaltoLinha 
+            nlinha+=nSaltoLinha 
+            ROMS003QE(0,0,0)
+            //Imprime cabecalho do Estado
+            ROMS003CE(_aSubGrupo[z,2])
+                
+            nlinha+=nSaltoLinha 
+            nlinha+=nSaltoLinha  
+            ROMS003QE(0,0,0)
+            //Imprime o total de Municipios Abrangidos
+            oPrint:Say (nlinha,nColInic,"Municípios Abrangidos: " + ROMS003RM(_aSubGrupo[z,1],_aSubGrupo[z,2]),oFont12b)
+            
+            nlinha+=nSaltoLinha 
+            nlinha+=nSaltoLinha  
+            ROMS003QE(0,0,0)
+            //Imprime cabecalho dos Dados
+            ROMS003CM()    
+                            
+            //Seta Totalizadores
+            _nTEstQtd1:= _aSubGrupo[z,5]
+            _nTEstQtd2:= _aSubGrupo[z,7]
+            _nTEstVlTo:= _aSubGrupo[z,9]
+            _nTEstPeso:= _aSubGrupo[z,10]
+            
+        Else
+            //Incrementa Totalizadores por Estado
+            _nTEstQtd1+= _aSubGrupo[z,5]
+            _nTEstQtd2+= _aSubGrupo[z,7]
+            _nTEstVlTo+= _aSubGrupo[z,9]
+            _nTEstPeso+= _aSubGrupo[z,10]
+        EndIf                              
+            
+        //Funcao responsavel por retornar o Peso total da Filial + Estado Corrente, utlizado para gerar a porcentagem 
+        _nPosPeso := aScan( _aPorcResu,{|x| x[1] + x[2] == _aSubGrupo[z,1] + _aSubGrupo[z,3]})   
+                                
+        If _nPosPeso > 0
+            _nTotPeEst:= _aPorcResu[_nPosPeso,3]
+        EndIf            
+        
+        //Imprime os dados do Sub Grupo
+        nlinha+=nSaltoLinha
+        ROMS003QE(1,1,1)    		
+        oPrint:Line(nLinha,nColInic,nLinha,nColFinal) 
+        
+        ROMS003PD(_aSubGrupo[z,3],_aSubGrupo[z,4],_aSubGrupo[z,5],_aSubGrupo[z,6],_aSubGrupo[z,7],;
+                    _aSubGrupo[z,8],_aSubGrupo[z,9],_aSubGrupo[z,10],IIf(_nTotPeEst > 0,((_aSubGrupo[z,10]/_nTotPeEst)*100),0))
+        
+        _cEst:=	_aSubGrupo[z,2] 			
+        
+        //Incrementa Totalizadores por Filial
+        _nTFilQtd1+= _aSubGrupo[z,5]
+        _nTFilQtd2+= _aSubGrupo[z,7]
+        _nTFilVlTo+= _aSubGrupo[z,9]
+        _nTFilPeso+= _aSubGrupo[z,10]
+    EndIf	
 Next z          
-	
+    
 //Fecha o box do ultimo estado impresso  
 ROMS003BR() 
 
@@ -6374,9 +6354,9 @@ Local _nCont:= 0
 Local _nX	:= 0
 
 For _nX:=1 to Len(_aQtdeMun)  
-	If _aQtdeMun[_nX,1] == _cFilial .And. _aQtdeMun[_nX,2] == _cEstado
-		++_nCont     
-	EndIf
+    If _aQtdeMun[_nX,1] == _cFilial .And. _aQtdeMun[_nX,2] == _cEstado
+        ++_nCont     
+    EndIf
 Next _nX
 
 _nCont:= AllTrim(Str(_nCont))
@@ -6407,65 +6387,65 @@ Local _nTEstVlTo:= 0
 Local _nTEstPeso:= 0    
 
 For w:=1 to Len(_aDadosReg)
-	//Verifica se eh a mesma filial
-	If _aDadosReg[w,1] == _cFilial 
-		If _cRegiao <> _aDadosReg[w,2]       
-			//Imprime Box caso nao seja o primeiro estado de uma filial
-			If Len(AllTrim(_cRegiao)) > 0
-				
-				ROMS003BR()
-				
-				nlinha+=nSaltoLinha  
-				ROMS003QE(0,0,0)
-				//Imprime totalizador por Filial
-				ROMS003PE("SUB-TOTAL REGIÃO: " + _cRegiao,_nTEstQtd1,_nTEstQtd2,_nTEstVlTo,_nTEstPeso)
-				nlinha+=nSaltoLinha
-			EndIf 
-								
-			nlinha+=nSaltoLinha 
-			nlinha+=nSaltoLinha 
-			ROMS003QE(0,0,0)
-			//Imprime cabecalho da Regiao
-			ROMS003CI(_aDadosReg[w,2])				    
-			
-			nlinha+=nSaltoLinha 
-			nlinha+=nSaltoLinha  
-			ROMS003QE(0,0,0)
-			//Imprime cabecalho dos Dados
-			ROMS003CM()    						                 
-				
-			//Seta Totalizadores
-			_nTEstQtd1:= _aDadosReg[w,5]
-			_nTEstQtd2:= _aDadosReg[w,7]
-			_nTEstVlTo:= _aDadosReg[w,9]
-			_nTEstPeso:= _aDadosReg[w,10]
-		Else
-			//Incrementa Totalizadores por Estado
-			_nTEstQtd1+= _aDadosReg[w,5]
-			_nTEstQtd2+= _aDadosReg[w,7]
-			_nTEstVlTo+= _aDadosReg[w,9]
-			_nTEstPeso+= _aDadosReg[w,10]
-		EndIf               
-		
-		//Funcao responsavel por retornar o Peso total da Filial + Estado Corrente, utlizado para gerar a porcentagem 
-		_nPosPeso := aScan( _aPorcResu,{|x| x[1] + x[2] == _aDadosReg[w,1] + _aDadosReg[w,3]})   
-								
-		If _nPosPeso > 0
-			_nTotPeEst:= _aPorcResu[_nPosPeso,3]
-		EndIf                      
-		
-		//Imprime os dados do Sub Grupo
-		nlinha+=nSaltoLinha
-		ROMS003QE(1,1,1)    		
-		oPrint:Line(nLinha,nColInic,nLinha,nColFinal) 
-		
-		ROMS003PD(_aDadosReg[w,3],_aDadosReg[w,4],_aDadosReg[w,5],_aDadosReg[w,6],_aDadosReg[w,7],;
-					_aDadosReg[w,8],_aDadosReg[w,9],_aDadosReg[w,10],IIf(_nTotPeEst > 0,((_aDadosReg[w,10]/_nTotPeEst)*100),0),_aDadosReg[w,11])
-		
-		_cRegiao:=	_aDadosReg[w,2] 			
-	EndIf	
+    //Verifica se eh a mesma filial
+    If _aDadosReg[w,1] == _cFilial 
+        If _cRegiao <> _aDadosReg[w,2]       
+            //Imprime Box caso nao seja o primeiro estado de uma filial
+            If Len(AllTrim(_cRegiao)) > 0
+                
+                ROMS003BR()
+                
+                nlinha+=nSaltoLinha  
+                ROMS003QE(0,0,0)
+                //Imprime totalizador por Filial
+                ROMS003PE("SUB-TOTAL REGIÃO: " + _cRegiao,_nTEstQtd1,_nTEstQtd2,_nTEstVlTo,_nTEstPeso)
+                nlinha+=nSaltoLinha
+            EndIf 
+                                
+            nlinha+=nSaltoLinha 
+            nlinha+=nSaltoLinha 
+            ROMS003QE(0,0,0)
+            //Imprime cabecalho da Regiao
+            ROMS003CI(_aDadosReg[w,2])				    
+            
+            nlinha+=nSaltoLinha 
+            nlinha+=nSaltoLinha  
+            ROMS003QE(0,0,0)
+            //Imprime cabecalho dos Dados
+            ROMS003CM()    						                 
+                
+            //Seta Totalizadores
+            _nTEstQtd1:= _aDadosReg[w,5]
+            _nTEstQtd2:= _aDadosReg[w,7]
+            _nTEstVlTo:= _aDadosReg[w,9]
+            _nTEstPeso:= _aDadosReg[w,10]
+        Else
+            //Incrementa Totalizadores por Estado
+            _nTEstQtd1+= _aDadosReg[w,5]
+            _nTEstQtd2+= _aDadosReg[w,7]
+            _nTEstVlTo+= _aDadosReg[w,9]
+            _nTEstPeso+= _aDadosReg[w,10]
+        EndIf               
+        
+        //Funcao responsavel por retornar o Peso total da Filial + Estado Corrente, utlizado para gerar a porcentagem 
+        _nPosPeso := aScan( _aPorcResu,{|x| x[1] + x[2] == _aDadosReg[w,1] + _aDadosReg[w,3]})   
+                                
+        If _nPosPeso > 0
+            _nTotPeEst:= _aPorcResu[_nPosPeso,3]
+        EndIf                      
+        
+        //Imprime os dados do Sub Grupo
+        nlinha+=nSaltoLinha
+        ROMS003QE(1,1,1)    		
+        oPrint:Line(nLinha,nColInic,nLinha,nColFinal) 
+        
+        ROMS003PD(_aDadosReg[w,3],_aDadosReg[w,4],_aDadosReg[w,5],_aDadosReg[w,6],_aDadosReg[w,7],;
+                    _aDadosReg[w,8],_aDadosReg[w,9],_aDadosReg[w,10],IIf(_nTotPeEst > 0,((_aDadosReg[w,10]/_nTotPeEst)*100),0),_aDadosReg[w,11])
+        
+        _cRegiao:=	_aDadosReg[w,2] 			
+    EndIf	
 Next w          
-	  
+      
 //Fecha o box do ultimo estado impresso  
 ROMS003BR() 
 
@@ -6507,23 +6487,23 @@ nlinha+=nSaltoLinha
 ROMS003QE(0,0,0)
 //Imprime cabecalho dos Dados
 ROMS003CM()   
-			
+            
 For v:=1 to Len(_aDadosRes)  
-	If _aDadosRes[v,1] == _cFilial	                                 
-		//Funcao responsavel por retornar o Peso total da Filial + Estado Corrente, utlizado para gerar a porcentagem 
-		_nPosPeso := aScan( _aPorcResu,{|x| x[1] == _aDadosRes[v,1] })   
-								
-		If _nPosPeso > 0
-			_nTotPeso:= _aPorcResu[_nPosPeso,2]
-		EndIf   
-				
-		nlinha+=nSaltoLinha
-		ROMS003QE(1,1,1)    		
-		oPrint:Line(nLinha,nColInic,nLinha,nColFinal)   
-		//Imprime os dados resumido por Filial + Sub-Grupo
-		ROMS003PD(_aDadosRes[v,2],_aDadosRes[v,3],_aDadosRes[v,4],_aDadosRes[v,5],_aDadosRes[v,6],;
-					_aDadosRes[v,7],_aDadosRes[v,8],_aDadosRes[v,9],100,_aDadosRes[v,10])                              
-	EndIf
+    If _aDadosRes[v,1] == _cFilial	                                 
+        //Funcao responsavel por retornar o Peso total da Filial + Estado Corrente, utlizado para gerar a porcentagem 
+        _nPosPeso := aScan( _aPorcResu,{|x| x[1] == _aDadosRes[v,1] })   
+                                
+        If _nPosPeso > 0
+            _nTotPeso:= _aPorcResu[_nPosPeso,2]
+        EndIf   
+                
+        nlinha+=nSaltoLinha
+        ROMS003QE(1,1,1)    		
+        oPrint:Line(nLinha,nColInic,nLinha,nColFinal)   
+        //Imprime os dados resumido por Filial + Sub-Grupo
+        ROMS003PD(_aDadosRes[v,2],_aDadosRes[v,3],_aDadosRes[v,4],_aDadosRes[v,5],_aDadosRes[v,6],;
+                    _aDadosRes[v,7],_aDadosRes[v,8],_aDadosRes[v,9],100,_aDadosRes[v,10])                              
+    EndIf
 Next v
 
 //Fecha o box 
@@ -6698,28 +6678,28 @@ Static Function ROMS003QE(nLinhas,impBox,impCabec)
 
 //Quebra de pagina
 If nLinha > nqbrPagina
-	nlinha:= nlinha - (nSaltoLinha * nLinhas)
-	
-	If impBox == 1
-		ROMS003BR()	
-	EndIf	 
-	
-	oPrint:EndPage()					// Finaliza a Pagina.
-	oPrint:StartPage()					//Inicia uma nova Pagina					
-	
-	nPagina++
-	
-	ROMS003C(1)//Chama cabecalho    
-	
-	nlinha+=nSaltoLinha                   
-	nlinha+=nSaltoLinha  
-		
-	If impCabec == 1
-		ROMS003CM()    
-		nlinha+=nSaltoLinha
-	EndIf   
+    nlinha:= nlinha - (nSaltoLinha * nLinhas)
+    
+    If impBox == 1
+        ROMS003BR()	
+    EndIf	 
+    
+    oPrint:EndPage()					// Finaliza a Pagina.
+    oPrint:StartPage()					//Inicia uma nova Pagina					
+    
+    nPagina++
+    
+    ROMS003C(1)//Chama cabecalho    
+    
+    nlinha+=nSaltoLinha                   
+    nlinha+=nSaltoLinha  
+        
+    If impCabec == 1
+        ROMS003CM()    
+        nlinha+=nSaltoLinha
+    EndIf   
 EndIf  
-	
+    
 Return
 
 /*
@@ -6737,9 +6717,9 @@ Static Function ROMS003QX()
 //Para que cada pagina comece em uma nova pagian
 oPrint:EndPage()		// Finaliza a Pagina.
 oPrint:StartPage()		//Inicia uma nova Pagina					
-	
+    
 nPagina++
-	
+    
 ROMS003C(1)//Chama cabecalho 
 
 Return
@@ -6830,95 +6810,95 @@ Local _cFilPed, _cNrPed
 Local _cNomeFil, _nI
 Local _aFiliais := _aFilSM0
 Begin Sequence
-	If _cCampoRel == "WK_FILIAL" 
-   		
-		ST_EMISSAO := Ctod("  /  /  ")
-    	ST_PEDIDO  := ""
-      	ST_CARGA   := ""
-      	ST_DOCNTO  := ""
-      	ST_CODCLI  := ""
-      	ST_CLIENTE := ""
-      	ST_FILIAL  := ""
+    If _cCampoRel == "WK_FILIAL" 
+           
+        ST_EMISSAO := Ctod("  /  /  ")
+        ST_PEDIDO  := ""
+          ST_CARGA   := ""
+          ST_DOCNTO  := ""
+          ST_CODCLI  := ""
+          ST_CLIENTE := ""
+          ST_FILIAL  := ""
 
-		SC5->(DBSetOrder(1)) // C5_FILIAL+C5_NUM 
-		SC6->(DBSetOrder(1)) // C6_FILIAL+C6_NUM
-	
-		// Posiciona no atual pedido de vendas do relatório.
-		If !SC5->(DBSeek(_cCodFil + _cNumPed))
-			Break
-		ElseIf !SC6->(DBSeek(_cCodFil + _cNumPed))
-			Break
-		EndIf  
+        SC5->(DBSetOrder(1)) // C5_FILIAL+C5_NUM 
+        SC6->(DBSetOrder(1)) // C6_FILIAL+C6_NUM
+    
+        // Posiciona no atual pedido de vendas do relatório.
+        If !SC5->(DBSeek(_cCodFil + _cNumPed))
+            Break
+        ElseIf !SC6->(DBSeek(_cCodFil + _cNumPed))
+            Break
+        EndIf  
 
-		ST_OBSNF   := SC5->C5_MENNOTA
-		ST_PEDCLI  := SC6->C6_PEDCLI
-		ST_PEDITA  := SC5->C5_NUM
-		ST_PEDPOR  := SC5->C5_I_IDPED
-		ST_PEDDW   := SC5->C5_I_PEDDW
-		ST_DTENT   := DToC(SC5->C5_I_DTENT)
-		ST_TPAGEN  := U_TipoEntrega(SC5->C5_I_AGEND)
-		
-		If SC5->C5_I_TRCNF == "S"
-      		If _cCodFil == SC5->C5_I_FLFNC .And. _cNumPed == SC5->C5_I_PDPR  
-	    		_cFilPed := SC5->C5_I_FILFT // Filial de Faturamento
-         		_cNrPed := SC5->C5_I_PDFT  // Pedido de Vendas Faturamento
-			Else
-				_cFilPed := SC5->C5_I_FLFNC // Filial de carregamente.
-    	     	_cNrPed := SC5->C5_I_PDPR  // Pedido de Vendas Carregamento
-		  	EndIf
-		Else
-			_cFilPed := SC5->C5_FILIAL // Filial 
-    	   	_cNrPed := SC5->C5_NUM  // Pedido de Vendas 
-		EndIf
-      
-      	SA1->(DBSetOrder(1))  // A1_FILIAL+A1_COD+A1_LOJA  
-      	SF2->(DBSetOrder(20)) // K = F2_FILIAL+F2_I_PEDID 
-      	SF2->(DBSeek(_cFilPed + _cNrPed))
-      
-      	SC5->(DBSeek(_cFilPed + _cNrPed))  // Posiciona no pedido de origem do Troca Nota.
-		SC6->(DBSeek(_cFilPed + _cNrPed))
-      	SA1->(DBSeek(xFilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI))
+        ST_OBSNF   := SC5->C5_MENNOTA
+        ST_PEDCLI  := SC6->C6_PEDCLI
+        ST_PEDITA  := SC5->C5_NUM
+        ST_PEDPOR  := SC5->C5_I_IDPED
+        ST_PEDDW   := SC5->C5_I_PEDDW
+        ST_DTENT   := DToC(SC5->C5_I_DTENT)
+        ST_TPAGEN  := U_TipoEntrega(SC5->C5_I_AGEND)
         
-      	ST_EMISSAO := SC5->C5_EMISSAO  // SF2->F2_EMISSAO  
-      	ST_PEDIDO  := _cNrPed
-      	ST_CARGA   := SF2->F2_CARGA  
-      	ST_DOCNTO  := SF2->F2_DOC  + "-" + SF2->F2_SERIE
-      	ST_CODCLI  := SC5->C5_CLIENTE
-      	ST_CLIENTE := SA1->A1_NOME
-			  
-      	_nI := aScan(_aFiliais, {|x| x[5] == _cFilPed })
-      	_cNomeFil := AllTrim(_aFiliais[_nI,7])
+        If SC5->C5_I_TRCNF == "S"
+              If _cCodFil == SC5->C5_I_FLFNC .And. _cNumPed == SC5->C5_I_PDPR  
+                _cFilPed := SC5->C5_I_FILFT // Filial de Faturamento
+                 _cNrPed := SC5->C5_I_PDFT  // Pedido de Vendas Faturamento
+            Else
+                _cFilPed := SC5->C5_I_FLFNC // Filial de carregamente.
+                 _cNrPed := SC5->C5_I_PDPR  // Pedido de Vendas Carregamento
+              EndIf
+        Else
+            _cFilPed := SC5->C5_FILIAL // Filial 
+               _cNrPed := SC5->C5_NUM  // Pedido de Vendas 
+        EndIf
       
-	    ST_FILIAL := _cFilPed + "-" + _cNomeFil
+          SA1->(DBSetOrder(1))  // A1_FILIAL+A1_COD+A1_LOJA  
+          SF2->(DBSetOrder(20)) // K = F2_FILIAL+F2_I_PEDID 
+          SF2->(DBSeek(_cFilPed + _cNrPed))
       
-    	_cRet :=  ST_FILIAL   
-   	ElseIf _cCampoRel == "WK_EMISSAO"    
-    	_cRet :=  ST_EMISSAO
-   	ElseIf _cCampoRel == "WK_PEDIDO"
-    	_cRet :=  ST_PEDIDO
-	ElseIf _cCampoRel == "WK_CARGA"
-    	_cRet :=  ST_CARGA
-   	ElseIf _cCampoRel == "WK_DOCNTO"
-    	_cRet :=  ST_DOCNTO
+          SC5->(DBSeek(_cFilPed + _cNrPed))  // Posiciona no pedido de origem do Troca Nota.
+        SC6->(DBSeek(_cFilPed + _cNrPed))
+          SA1->(DBSeek(xFilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI))
+        
+          ST_EMISSAO := SC5->C5_EMISSAO  // SF2->F2_EMISSAO  
+          ST_PEDIDO  := _cNrPed
+          ST_CARGA   := SF2->F2_CARGA  
+          ST_DOCNTO  := SF2->F2_DOC  + "-" + SF2->F2_SERIE
+          ST_CODCLI  := SC5->C5_CLIENTE
+          ST_CLIENTE := SA1->A1_NOME
+              
+          _nI := aScan(_aFiliais, {|x| x[5] == _cFilPed })
+          _cNomeFil := AllTrim(_aFiliais[_nI,7])
+      
+        ST_FILIAL := _cFilPed + "-" + _cNomeFil
+      
+        _cRet :=  ST_FILIAL   
+       ElseIf _cCampoRel == "WK_EMISSAO"    
+        _cRet :=  ST_EMISSAO
+       ElseIf _cCampoRel == "WK_PEDIDO"
+        _cRet :=  ST_PEDIDO
+    ElseIf _cCampoRel == "WK_CARGA"
+        _cRet :=  ST_CARGA
+       ElseIf _cCampoRel == "WK_DOCNTO"
+        _cRet :=  ST_DOCNTO
     ElseIf _cCampoRel == "WK_CODCLI" 
-    	_cRet :=  ST_CODCLI
+        _cRet :=  ST_CODCLI
     ElseIf _cCampoRel == "WK_CLIENTE"
-    	_cRet :=  ST_CLIENTE
-	ElseIf _cCampoRel == "WK_PEDCLI"
-		_cRet :=  ST_PEDCLI
-	ElseIf _cCampoRel == "WK_PEDITA"
-		_cRet :=  ST_PEDITA
-	ElseIf _cCampoRel == "WK_PEDDW"
-		_cRet :=  ST_PEDDW
-	ElseIf _cCampoRel == "WK_DTENT"
-		_cRet :=  ST_DTENT
-	ElseIf _cCampoRel == "WK_TPAGEN"
-		_cRet :=  ST_TPAGEN
-	ElseIf _cCampoRel == "WK_PEDPOR"
-		_cRet :=  ST_PEDPOR
-	ElseIf _cCampoRel == "WK_OBSNF"
-		_cRet :=  ST_OBSNF
-  	EndIf
+        _cRet :=  ST_CLIENTE
+    ElseIf _cCampoRel == "WK_PEDCLI"
+        _cRet :=  ST_PEDCLI
+    ElseIf _cCampoRel == "WK_PEDITA"
+        _cRet :=  ST_PEDITA
+    ElseIf _cCampoRel == "WK_PEDDW"
+        _cRet :=  ST_PEDDW
+    ElseIf _cCampoRel == "WK_DTENT"
+        _cRet :=  ST_DTENT
+    ElseIf _cCampoRel == "WK_TPAGEN"
+        _cRet :=  ST_TPAGEN
+    ElseIf _cCampoRel == "WK_PEDPOR"
+        _cRet :=  ST_PEDPOR
+    ElseIf _cCampoRel == "WK_OBSNF"
+        _cRet :=  ST_OBSNF
+      EndIf
 End Sequence
 
 Return _cRet
@@ -6931,7 +6911,7 @@ Data da Criacao---: 05/03/2020
 Descrição---------: Retorna peso unitário
 Parametros--------: cFilial = Filial de pesquisa.
                     cNota = Número da nota
-					_cSerie = Série da nota
+                    _cSerie = Série da nota
                     cProd = Código do produto
 Retorno-----------: _cRet = Peso bruto do produto.
 ===============================================================================================================================
@@ -6942,12 +6922,12 @@ Local cRet := ""
 
 SC6->(DBSetOrder(4)) //C6_FILIAL+C6_NOTA+C6_SERIE                                                                                                                                      
 If SC6->(DBSeek(_cFilial+_cNota+_cSerie))
-	While !Eof() .And. SC6->C6_FILIAL == _cFilial .And. SC6->C6_NOTA == _cNota
-		If SC6->C6_PRODUTO == _cProd
-			cRet := SC6->C6_QTDVEN * Posicione("SB1",1,xFilial("SB1")+_cProd,"B1_PESBRU")
-		EndIf
-	SC6->(DBSkip())
-	EndDo
+    While !Eof() .And. SC6->C6_FILIAL == _cFilial .And. SC6->C6_NOTA == _cNota
+        If SC6->C6_PRODUTO == _cProd
+            cRet := SC6->C6_QTDVEN * Posicione("SB1",1,xFilial("SB1")+_cProd,"B1_PESBRU")
+        EndIf
+    SC6->(DBSkip())
+    EndDo
 EndIf
 
 Return cRet
@@ -6960,9 +6940,9 @@ Data da Criacao---: 05/03/2020
 Descrição---------: Retorna peso unitário
 Parametros--------: _cFil = Filial de pesquisa.
                     _cCLi = Código do Cliente
-					_cLojaCli = Loja do cliente
+                    _cLojaCli = Loja do cliente
                     _cProd = Código do produto
-					_cNumPed
+                    _cNumPed
 Retorno-----------: _cRet = Peso bruto do produto.
 ===============================================================================================================================
 */
@@ -6974,8 +6954,8 @@ Local _aVlrDesc := {}
 SZW->(DBSetOrder(12)) //ZW_NUMPED
 
 If SZW->(DBSeek(_cNumPed))
-	_aVlrDesc := U_veriContrato(_cCli , _cLojaCli , _cProd ) //SZW->ZW_CLIENTE , SZW->ZW_LOJACLI , SZW->ZW_PRODUTO
-	_nRet := SZW->ZW_PRCVEN - ( SZW->ZW_PRCVEN * (_aVlrDesc[1] / 100 ))
+    _aVlrDesc := U_veriContrato(_cCli , _cLojaCli , _cProd ) //SZW->ZW_CLIENTE , SZW->ZW_LOJACLI , SZW->ZW_PRODUTO
+    _nRet := SZW->ZW_PRCVEN - ( SZW->ZW_PRCVEN * (_aVlrDesc[1] / 100 ))
 EndIf
 
 Return _nRet
@@ -7012,9 +6992,7 @@ Return _cRet
 Programa----------: ROMS3DLT
 Autor-------------: Alex Wallauer Ferreira
 Data da Criacao---: 22/01/2018
-Descrição---------: Função para conversão entre unidades de medida - COPIA DA ROMS004CNV
-Parametros--------: _nQtdAux , _nUMOri , _nUMDes
-Retorno-----------: Nenhum
+Descrição---------: Função para CALCULAR DIAS DE VIAGEM, DIAS DE OPERAÇÃO E LEAD TIME
 ===============================================================================================================================
 */
 User Function ROMS3DLT(_cColuna)
@@ -7024,67 +7002,75 @@ Local _lAchou    := .F.
 Local _cFilCarreg:= " "
 
 Static nRenoSZG5 := 0
+Static nRenoZEL  := 0
 Static cTipofrete:= " "
 Static _cRegra   := " "
 
 If _cColuna == "DIASVIAGEM"
-	SC5->(DBGoTo(QRY1->SC5RECNO))
-	_cFilCarreg := SC5->C5_FILIAL 
-	If !Empty(SC5->C5_I_FLFNC)
-		_cFilCarreg := SC5->C5_I_FLFNC
-	EndIf 
-	_cFilFt := SC5->C5_FILIAL 
-	If !Empty(SC5->C5_I_FILFT)
-		_cFilFt := SC5->C5_I_FILFT
-	EndIf
+    SC5->(DBGoTo(QRY1->SC5RECNO))
+    _cFilCarreg := SC5->C5_FILIAL 
+    If !Empty(SC5->C5_I_FLFNC)
+        _cFilCarreg := SC5->C5_I_FLFNC
+    EndIf 
+    _cFilFt := SC5->C5_FILIAL 
+    If !Empty(SC5->C5_I_FILFT)
+        _cFilFt := SC5->C5_I_FILFT
+    EndIf
 
-	aHeader   :={}
-	aCols     :={}
-	_lAchouZG5:=.F.
-	_lAchou:= (U_OMSVLDENT(DATE(),SC5->C5_CLIENTE,SC5->C5_LOJACLI,_cFilFt,SC5->C5_NUM,0,.F.,_cFilCarreg,SC5->C5_I_OPER,SC5->C5_I_TPVEN,@_lAchouZG5,@_cRegra))
+    aHeader   :={}
+    aCols     :={}
+    _lAchouZG5:=.F.
+    _lAchou:= (U_OMSVLDENT(DATE(),SC5->C5_CLIENTE,SC5->C5_LOJACLI,_cFilFt,SC5->C5_NUM,0,.F.,_cFilCarreg,SC5->C5_I_OPER,SC5->C5_I_TPVEN,@_lAchouZG5,@_cRegra))
 
-	If _lAchouZG5
-		cTipofrete:= SC5->C5_I_TPVEN
-		nRenoSZG5 := ZG5->(RECNO())
-		If cTipofrete = "F"
-			_nRet :=ZG5->ZG5_DIASV
-		ElseIf cTipofrete = "V"
-			_nRet :=ZG5->ZG5_FRDIAV
-		EndIf
-	Else
-		nRenoSZG5:=0
-	EndIf
-ElseIf _cColuna == "DIASOPERAC" .And. nRenoSZG5 <> 0
-	ZG5->(DBGoTo(nRenoSZG5))
-	If cTipofrete = "F"
-		_nRet :=ZG5->ZG5_TMPOPE
-	ElseIf cTipofrete = "V"
-		_nRet :=ZG5->ZG5_FRTOP
-	EndIf
+    If _lAchouZG5
+        ZEL->(DBSetOrder(1))//  // ZEL_FILIAL+ZEL_CODIGO - FILIAL COMPARTILHADA
+        ZEL->(DBSeek(xFilial()+SC5->C5_I_LOCEM))
+        nRenoZEL  := ZEL->(RECNO())
+        nRenoSZG5 := ZG5->(RECNO())
+        cTipofrete:= SC5->C5_I_TPVEN
+        If cTipofrete = "F"
+            _nRet :=ZG5->ZG5_DIASV
+        ElseIf cTipofrete = "V"
+            _nRet :=ZG5->ZG5_FRDIAV
+        EndIf
+    Else
+        nRenoSZG5:=0
+        nRenoZEL :=0
+    EndIf
+ElseIf _cColuna == "DIASOPERAC" .And. nRenoSZG5 > 0
+    ZG5->(DBGoTo(nRenoSZG5))
+    ZG5->(DBGoTo(nRenoZEL))
+    If cTipofrete = "F"
+        _nRet :=ZEL->ZEL_TMPOPE//ZG5->ZG5_TMPOPE
+    ElseIf cTipofrete = "V"
+        _nRet :=ZEL->ZEL_TMPOPE//ZG5->ZG5_FRTOP
+    EndIf
 ElseIf _cColuna == "LEADTIME" 
 
-	_cClassEnt:=QRY1->A1_I_CLABC
-	If _cClassEnt = '1'
-		_cClassEnt:="1-TOP 1 NACIONAL"
-	ElseIf _cClassEnt = '2'
-		_cClassEnt:="2-TOP 5 Reg. SP "
-	ElseIf _cClassEnt = '3'
-		_cClassEnt:="3-TOP 5 Reg. RS "
-	EndIf
+    _cClassEnt:=QRY1->A1_I_CLABC
+    If _cClassEnt = '1'
+        _cClassEnt:="1-TOP 1 NACIONAL"
+    ElseIf _cClassEnt = '2'
+        _cClassEnt:="2-TOP 5 Reg. SP "
+    ElseIf _cClassEnt = '3'
+        _cClassEnt:="3-TOP 5 Reg. RS "
+    EndIf
 
-	If  nRenoSZG5 <> 0
-		ZG5->(DBGoTo(nRenoSZG5))
-		If cTipofrete = "F"
-			_nRet :=(ZG5->ZG5_DIASV+ZG5->ZG5_TMPOPE)
-		ElseIf cTipofrete = "V"
-			_nRet :=ZG5->ZG5_DIASV+ZG5->ZG5_FRTOP
-		EndIf
-		cTipofrete:=" "
-		nRenoSZG5:=0
-	EndIf
+    If  nRenoSZG5 > 0
+        ZG5->(DBGoTo(nRenoSZG5))
+        ZG5->(DBGoTo(nRenoZEL))
+        If cTipofrete = "F"
+            _nRet :=(ZG5->ZG5_DIASV+ZEL->ZEL_TMPOPE)//ZG5->ZG5_TMPOPE
+        ElseIf cTipofrete = "V"
+            _nRet :=(ZG5->ZG5_DIASV+ZEL->ZEL_TMPOPE)//ZG5->ZG5_FRTOP
+        EndIf
+        cTipofrete:=" "
+        nRenoSZG5:=0
+        nRenoZEL :=0
+    EndIf
 ElseIf _cColuna == "REGRA" 
-	_nRet:=_cRegra
-	_cRegra:=""
+    _nRet:=_cRegra
+    _cRegra:=""
 EndIf
 
 Return _nRet
