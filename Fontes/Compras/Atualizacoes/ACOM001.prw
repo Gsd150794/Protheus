@@ -1,15 +1,3 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-   Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     |15/02/2019| Chamado 28120. Correções nas leituras e validações dos Aprovadores sobre tabela Solic. Compras(SC1)
-Lucas Borges  |17/10/2019| Chamado 28346. Removidos os Warning na compilação da release 12.1.25
-Lucas Borges  |09/05/2025| Chamado 50617. Corrigir chamada estática no nome das tabelas do sistema
-===============================================================================================================================
-*/
-
 #Include "FWMBROWSE.CH"
 #Include "FWMVCDEF.CH"
 #Include "TOTVS.ch"
@@ -1295,21 +1283,13 @@ Retorno-----------: _cRet = Nome do usuário Protheus.
 User Function ACOM001G()
 
 Local _cRet   := Space(20)
-Local _aRetUser
 Local _oModel := FWModelActive()
 Local _cCodUsrP
 
-Begin Sequence
-   _cCodUsrP := _oModel:GetValue( 'ZZ7MASTER' , 'ZZ7_CODUSR' )
-   
-   If !Empty(_cCodUsrP)
-      PswOrder(1)
-      If PswSeek(_cCodUsrP,.T.) 
-         _aRetUser := PSWRET(1)        
-         _cRet := _aRetUser[1][2] // Nome do Usuario 
-      EndIf
-   EndIf
+_cCodUsrP := _oModel:GetValue( 'ZZ7MASTER' , 'ZZ7_CODUSR' )
 
-End Sequence
+If !Empty(_cCodUsrP)
+	_cRet := FWSFAllUsers({_cCodUsrP},{"USR_NOME"})[1][3]
+EndIf
 
 Return _cRet
