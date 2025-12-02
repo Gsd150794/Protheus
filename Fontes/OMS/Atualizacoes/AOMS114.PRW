@@ -1492,11 +1492,8 @@ Local _nTam     := Len(_cTot)
 Local _cNomeFil := cFilant+" - "+AllTrim( Posicione('SM0',1,"01"+cFilant,'M0_FILIAL') )
 Local cGetAssun	:= "Geração de Titulos de Seguro de Frete / "+_cNomeFil+" - ["+DToC(Date())+"]"
 
-If (Len(PSWRET()) # 0) // Quando nao For rotina automatica do configurador
-   PswOrder(1)
-   PswSeek(__cUserId,.T.)
-   aUsuario:= PswRet()
-   cGetCc  := LOWER(AllTrim(aUsuario[1,14]))+Space(150)// Pega e-mail do usuario
+If Type('__cUserId') == 'C'
+   cGetCc := LOWER(AllTrim(FWSFAllUsers({__cUserID},{'USR_EMAIL'})[1][3]))+SPACE(150) 		// E-MAIL
 EndIf
 If Empty(cGetPara)
    cGetPara:=cGetCc
