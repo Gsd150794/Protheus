@@ -1,15 +1,3 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-   Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  |13/10/2024| Chamado 48465. Retirada da função de conout
-Lucas Borges  |23/07/2025| Chamado 51340. Trocado e-mail padrão para sistema@italac.com.br
-Lucas Borges  |19/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
-===============================================================================================================================
-*/
-
 #Include "TOTVS.ch"
 #Include "RPTDEF.CH" 
 
@@ -38,62 +26,93 @@ Private _cDate        := Year2Str(_dDate) + Month2Str(_dDate)
 Private _lPDF        := .T.
 Private _lTela       := .T.
 
+SET DATE FORMAT TO "DD/MM/YY"
+
 If Select('SX3') == 0
-    //===========================================================================
-    //| Prepara e inicializa o ambiente.                                        |
-    //===========================================================================
-    RPCSetType(3)
-    RpcSetEnv( "01" , "01" ,,,, "SCHEDULE_Relatório_de_NFs_de_entrada_diario" , _aTabelas)
-    sleep( 5000 )
-    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MCOM014"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM01401"/*cMsgId*/, "MCOM01401 - Gerando relatório de NFs de entrada diário: " + DToC(_dDate) + " - " + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
-    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MCOM014"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM01402"/*cMsgId*/, "MCOM01402 - Executando no ambiente " + Upper( GetEnvServer() )/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
-    _lTela := .F.
+   //===========================================================================
+   //| Prepara e inicializa o ambiente.                                        |
+   //===========================================================================
+   RPCSetType(3)
+   RpcSetEnv( "01" , "01" ,,,, "SCHEDULE_Relatório_de_NFs_de_entrada_diario" , _aTabelas)
+   sleep( 5000 )
+   FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MCOM014"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM01401"/*cMsgId*/, "MCOM01401 - Gerando relatório de NFs de entrada diário: " + DToC(_dDate) + " - " + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+   FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MCOM014"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM01402"/*cMsgId*/, "MCOM01402 - Executando no ambiente " + Upper( GetEnvServer() )/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+   _lTela := .F.
 Else
-    _aParAux :={}
-    _aParRet :={} 
-    _bOK     :={|| If(MV_PAR02 >= MV_PAR01,.T.,(U_ITMsg("Periodo INVALIDO",'Atenção!',"Tente novamente com outro periodo",3),.F.) ) }
+   _aParAux :={}
+   _aParRet :={} 
+   _bOK     :={|| If(MV_PAR02 >= MV_PAR01,.T.,(U_ITMsg("Periodo INVALIDO",'Atenção!',"Tente novamente com outro periodo",3),.F.) ) }
 
-    MV_PAR01:=dDataBase
-    MV_PAR02:=dDataBase
+   MV_PAR01:=dDataBase
+   MV_PAR02:=dDataBase
     
-    aAdd( _aParAux , { 1 , "Data de"	        , MV_PAR01, "@D"	, ""	, ""		, "" , 050 , .T. } )
-    aAdd( _aParAux , { 1 , "Data ate"	        , MV_PAR02, "@D"	, ""	, ""		, "" , 050 , .T. } )
+   aAdd( _aParAux , { 1 , "Data de"	        , MV_PAR01, "@D"	, ""	, ""		, "" , 050 , .T. } )
+   aAdd( _aParAux , { 1 , "Data ate"	        , MV_PAR02, "@D"	, ""	, ""		, "" , 050 , .T. } )
     
-    For nI := 1 To Len( _aParAux )
-        aAdd( _aParRet , _aParAux[nI][03] )
-    Next nI
-        //aParametros, cTitle                          , @aRet   ,[bOk]  , [ aButtons ] [ lCentered ] [ nPosX ] [ nPosy ] [ oDlgWizard ] [ cLoad ] [ lCanSave ] [ lUserSave ] 
-    If !ParamBox( _aParAux , "Selecione os filtros" , @_aParRet,  _bOK , /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
-        Return .F.
-    EndIf
-    _dDate:=MV_PAR02
-    _cDate:=Year2Str(_dDate) + Month2Str(_dDate)
-    EndIf
+   For nI := 1 To Len( _aParAux )
+       aAdd( _aParRet , _aParAux[nI][03] )
+   Next nI
+    //         aParametros, cTitle                 , @aRet   ,[bOk]  , [ aButtons ] [ lCentered ] [ nPosX ] [ nPosy ] [ oDlgWizard ] [ cLoad ] [ lCanSave ] [ lUserSave ] 
+   If !ParamBox( _aParAux , "Selecione os filtros" , @_aParRet,  _bOK , /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
+       Return .F.
+   EndIf
+   _dDate:=MV_PAR02
+   _cDate:=Year2Str(_dDate) + Month2Str(_dDate)
+EndIf
     
-    _aEmails := StrTokArr(SuperGetMV("IT_MAILM14",.F.,"sistema@italac.com.br"),";")
-    
+_aEmails := StrTokArr(SuperGetMV("IT_MAILM14",.F.,"sistema@italac.com.br"),";")
+  
+If _lTela
+   _aEmails:={""}
+EndIf
+
+//=======================================
+// Gera o relatório com o Layout antigo. 
+// Descrição do Produto por grupo.
+//=======================================
+_aDados := MCOM014R()
+
+For _nX := 1 To Len (_aEmails)
+    _cFileName:= "SOBASICO_ANLT_"+DToS(Date())+"_"+StrTran(TIME(),":","_")
+    oReport := MCOM014E(_aDados)
     If _lTela
-        _aEmails:={""}
+       oReport:nDevice  := IMP_PDF // 
+       oReport:SetReportPortal(_cFileName)     // DEFINE O NOME DO RELATÓRIO
+       oReport:Print(.T.)
+    Else
+       oReport:nRemoteType := NO_REMOTE        // FORMA DE GERAÇÃO DO RELATÓRIO
+       oReport:nDevice  := IIf(_lPDF, 8, 4)           // ENVIO DE .PDF VIA E-MAIL 8
+       oReport:cEmail      := _aEmails[_nX] // DESTINATÁRIO
+       oReport:CDESCRIPTION  := MCOM014H(_aEmails[_nX])    //DESCRIÇÃO NO CORPO DO E-MAIL
+       oReport:SetReportPortal(_cFileName) // DEFINE O NOME DO RELATÓRIO
+       oReport:Print(.F.) //Não exibe tela de configuração
     EndIf
+Next _nX
 
-    _aDados := MCOM014R()
+//=======================================
+// Gera o relatório com o Novo Layout. 
+// Descrição do Produto por B1_DESC.
+//=======================================
+_aProds := {}
+_aDados := MCOM014S()
 
-    For _nX := 1 To Len (_aEmails)
-        _cFileName:= "SOBASICO_ANLT_"+DToS(Date())+"_"+StrTran(TIME(),":","_")
-        oReport := MCOM014E(_aDados)
-        If _lTela
-            oReport:nDevice  := IMP_PDF // 
-            oReport:SetReportPortal(_cFileName)     // DEFINE O NOME DO RELATÓRIO
-            oReport:Print(.T.)
-        Else
-            oReport:nRemoteType := NO_REMOTE        // FORMA DE GERAÇÃO DO RELATÓRIO
-            oReport:nDevice  := IIf(_lPDF, 8, 4)           // ENVIO DE .PDF VIA E-MAIL 8
-            oReport:cEmail      := _aEmails[_nX] // DESTINATÁRIO
-            oReport:CDESCRIPTION  := MCOM014H(_aEmails[_nX])    //DESCRIÇÃO NO CORPO DO E-MAIL
-            oReport:SetReportPortal(_cFileName) // DEFINE O NOME DO RELATÓRIO
-            oReport:Print(.F.) //Não exibe tela de configuração
-        EndIf
-    Next _nX
+For _nX := 1 To Len (_aEmails)
+    _cFileName:= "SOBASICO_ANLT_"+DToS(Date())+"_"+StrTran(TIME(),":","_")
+    oReport := MCOM014E(_aDados)
+    If _lTela
+       oReport:nDevice  := IMP_PDF // 
+       oReport:SetReportPortal(_cFileName)     // DEFINE O NOME DO RELATÓRIO
+       oReport:Print(.T.)
+    Else
+       oReport:nRemoteType := NO_REMOTE        // FORMA DE GERAÇÃO DO RELATÓRIO
+       oReport:nDevice  := IIf(_lPDF, 8, 4)           // ENVIO DE .PDF VIA E-MAIL 8
+       oReport:cEmail      := _aEmails[_nX] // DESTINATÁRIO
+       oReport:CDESCRIPTION  := MCOM014H(_aEmails[_nX])    //DESCRIÇÃO NO CORPO DO E-MAIL
+       oReport:SetReportPortal(_cFileName) // DEFINE O NOME DO RELATÓRIO
+       oReport:Print(.F.) //Não exibe tela de configuração
+    EndIf
+Next _nX
+
 
 If !_lTela
     RpcClearEnv()
@@ -198,28 +217,30 @@ oSection1:SetLinesBefore(2)// oSection1:SetLinesBefore(17)
 oSection2:SetLinesBefore(2)// oSection2:SetLinesBefore(18)
 
 TRCell():New(oSection   ,"D1_FILIAL", "", "Filial", "@!",   6, , , , , , ,_nDCol)
-TRCell():New(oSection   ,"RTL", "", "Rótulos de Linha", "@!",   60, , , , , , ,_nDCol)
+TRCell():New(oSection   ,"RTL", "", "Rótulos de Linha     -> Saldos na 2aUM:", "@!",   60, , , , , , ,_nDCol)
 TRCell():New(oSection1  ,"D1_FILIAL", "", "Filial", "@!",   6, , , , , , ,_nDCol)
-TRCell():New(oSection1  ,"RTL", "", "Rótulos de Linha", "@!",   60, , , , , , ,_nDCol)
+TRCell():New(oSection1  ,"RTL", "", "Rótulos de Linha     -> Saldos na 2aUM:", "@!",   60, , , , , , ,_nDCol)
 TRCell():New(oSection2  ,"D1_FILIAL", "", "Filial", "@!",   6, , , , , , ,_nDCol)
-TRCell():New(oSection2  ,"RTL", "", "Rótulos de Linha", "@!",   60, , , , , , ,_nDCol)
+TRCell():New(oSection2  ,"RTL", "", "Rótulos de Linha     -> Saldos na 2aUM:", "@!",   60, , , , , , ,_nDCol)
 
 oBreak  := TRBreak():New( oSection ,  oSection:CELL( "D1_FILIAL" ) , "Total por Filial " , .F. )
 oBreak1 := TRBreak():New( oSection1, oSection1:CELL( "D1_FILIAL" ) , "Total por Filial " , .F. )
 oBreak2 := TRBreak():New( oSection2, oSection2:CELL( "D1_FILIAL" ) , "Total por Filial " , .F. )
 
+//  TRCell():New(oSection   , "A1_COD"            ,"TRB", "Código"                                , /*Picture*/         , /*Tamanho*/, /*lPixel*/, /*{|| code-block de impressao }*/)
+//13->16
 For _nX := 1 To 10
-    TRCell():New(oSection   ,_cDate+StrZero(_nX,2), "", AllToChar(SToD(_cDate + StrZero(_nX,2))), "@E 999,999,999.999",13, , , , , , ,_nDCol)        
+    TRCell():New(oSection   ,_cDate+StrZero(_nX,2), ""  , AllToChar(SToD(_cDate + StrZero(_nX,2))), "@E 999,999,999.999",16          ,           ,                                  , , , , ,_nDCol)       
     TRFunction():New( oSection:Cell(_cDate+StrZero(_nX,2)), /* cID */,"SUM",oBreak  /*oBreak*/, /*cTitle*/,/*cPicture*/,/*uFormula*/,.T./*lEndSection*/,.F./*lEndReport*/,/*lEndPage*/)
 Next 
 
 For _nX := 11 To 20
-    TRCell():New(oSection1   ,_cDate+StrZero(_nX,2), "", AllToChar(SToD(_cDate + StrZero(_nX,2))), "@E 999,999,999.999",13, , , , , , ,_nDCol)
+    TRCell():New(oSection1   ,_cDate+StrZero(_nX,2), "", AllToChar(SToD(_cDate + StrZero(_nX,2))), "@E 999,999,999.999",16, , , , , , ,_nDCol)
     TRFunction():New(oSection1:Cell(_cDate+StrZero(_nX,2)), /* cID */,"SUM",oBreak1 /*oBreak*/, /*cTitle*/,/*cPicture*/,/*uFormula*/,.T./*lEndSection*/,.F./*lEndReport*/,/*lEndPage*/)
 Next 
 
 For _nX := 21 To Last_Day(_dDate)
-    TRCell():New(oSection2   ,_cDate+StrZero(_nX,2), "", AllToChar(SToD(_cDate + StrZero(_nX,2))), "@E 999,999,999.999",13, , , , , , ,_nDCol-2)        
+    TRCell():New(oSection2   ,_cDate+StrZero(_nX,2), "", AllToChar(SToD(_cDate + StrZero(_nX,2))), "@E 999,999,999.999",16, , , , , , ,_nDCol-2)        
     TRFunction():New(oSection2:Cell(_cDate+StrZero(_nX,2)), /* cID */,"SUM",oBreak2 /*oBreak*/, /*cTitle*/,/*cPicture*/,/*uFormula*/,.T./*lEndSection*/,.F./*lEndReport*/,/*lEndPage*/)
 Next 
 
@@ -427,6 +448,11 @@ _cMsgEml += '      <td class="itens" align="left" width="'+cPer+'%"><b>Data Fim:
 _cMsgEml += '      <td class="itens" >'+AllToChar(_dDate)+'</td>'
 _cMsgEml += '    </tr>'
 
+_cMsgEml += '    <tr>'  
+_cMsgEml += '      <td class="itens" align="left" width="'+cPer+'%"><b>Observação:</b></td>'
+_cMsgEml += '      <td class="itens" >Saldos Referentes a 2aUM dos produtos.</td>'
+_cMsgEml += '    </tr>'
+
 _cMsgEml += '</table>'
 _cMsgEml += '</center>'
 _cMsgEml += '<br>'
@@ -455,3 +481,73 @@ User Function MCOM014JB()
     StartJob("U_MCOM014", GetEnvServer(), .T.)
 
 Return (NIL)
+
+
+/*
+===============================================================================================================================
+Programa----------: MCOM014S
+Autor-------------: Julio de Paula Paz
+Data da Criacao---: 11/11/2025
+Descrição---------: Retorna com as informações referente aos produtos x QTD entrada do dia 
+                    Agrupando por descrição do produtor. (B1_DESC)
+                    É uma versão da função MCOM014R() agrupando os produtos por descrição (B1_DESC).
+Parametros--------: Nenhum
+Retorno-----------: _aInfo = Array com os dados do relatório.
+===============================================================================================================================
+*/
+Static Function MCOM014S()
+
+Local _cQuery       := ""
+Local _cAlias       := GetNextAlias()
+Local _aInfo        := {}
+
+_cQuery += "SELECT "
+_cQuery += "D1_FILIAL, "
+_cQuery += "B1_I_BIGRP, "
+_cQuery += "B1_DESC, " // "X5_DESCRI X5DESCRI, "
+_cQuery += "D1_DTDIGIT, "
+_cQuery += "D1_SEGUM , "
+_cQuery += "sum(d1_qtsegum) QTDE "
+_cQuery += "FROM "+RetSqlName("SD1")+" D1 JOIN "+RETSQLNAME("SB1")+" B1 ON D1_COD = B1_COD "
+_cQuery += "JOIN "+RetSqlName("SF4")+" F4 ON D1_FILIAL = F4_FILIAL AND D1_TES = F4_CODIGO " //JOIN "+RETSQLNAME("SX5")+" X5 ON B1_I_BIGRP = X5_CHAVE "
+_cQuery += "JOIN "+RetSqlName("ZB9")+" ZB9 ON B1_I_SUBGR = ZB9_SUBGRU " 
+_cQuery += "WHERE D1.D_E_L_E_T_ = ' ' "
+_cQuery += "AND B1.D_E_L_E_T_ = ' ' "
+_cQuery += "AND ZB9.D_E_L_E_T_ = ' ' "
+_cQuery += "AND F4.D_E_L_E_T_ = ' '  "
+//_cQuery += "AND X5.D_E_L_E_T_ = ' ' "
+_cQuery += "AND F4_ESTOQUE = 'S' "
+_cQuery += "AND ZB9_CODFAM = '013' "
+_cQuery += "AND D1_FORNECE = 'F02270' "
+
+If _lTela
+    _cQuery += "AND D1_DTDIGIT BETWEEN '"+DToS(MV_PAR01)+"' AND '"+DToS(MV_PAR02)+"' "
+Else
+    _cQuery += "AND D1_DTDIGIT BETWEEN '" +_cDate+"01"+ "' AND '" + _cDate+StrZero(Last_Day(_dDate),2) + "' "
+EndIf
+
+//_cQuery += "and x5_tabela = 'ZA' "
+_cQuery += "GROUP BY  D1_FILIAL, B1_I_BIGRP, B1_DESC, D1_DTDIGIT, D1_SEGUM ORDER BY D1_FILIAL ,B1_I_BIGRP "
+
+_cQuery := ChangeQuery(_cQuery)
+MPSysOpenQuery(_cQuery,_cAlias)
+
+While (_cAlias)->(!Eof())
+
+    aAdd(_aInfo , {(_cAlias)->B1_I_BIGRP,;                   // 1
+                    AllTrim((_cAlias)->B1_DESC),;    //X5DESCRI),;           // 2
+                    (_cAlias)->B1_I_BIGRP,;                  // 3
+                    (_cAlias)->D1_SEGUM,;                    // 4
+                    (_cAlias)->QTDE,;                        // 5
+                    (_cAlias)->D1_DTDIGIT,;                  // 6
+                    (_cAlias)->D1_FILIAL,;                   // 7
+                    FWFILIALNAME(,(_cAlias)->D1_FILIAL)})    // 8 
+
+    If aScan(_aProds, (_cAlias)->D1_FILIAL+" - "+AllTrim((_cAlias)->B1_DESC)) == 0 // AllTrim((_cAlias)->X5DESCRI)
+       aAdd(_aProds, (_cAlias)->D1_FILIAL+" - "+AllTrim((_cAlias)->B1_DESC))      // AllTrim((_cAlias)->X5DESCRI)
+    EndIf
+
+    (_cAlias)->(DBSkip())
+EndDo
+
+Return _aInfo

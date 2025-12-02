@@ -1,15 +1,3 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-   Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Igor Melgaço  |25/09/2024| Chamado 48311. Alterar relatório para FwMsPrinter e gerar excel e pdf para envio de e-mail.
-Lucas Borges  |13/10/2024| Chamado 48465. Retirada da função de conout
-Lucas Borges  |19/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
-===============================================================================================================================
-*/
-
 #Include "TOTVS.ch"
 #Include "RPTDEF.CH"  
 #Include "FWPrintSetup.ch"
@@ -50,6 +38,11 @@ Local _aTabelas         := {'ZP1'}
 Private _dDate          := Date()
 Private _cDate          := Year2Str(_dDate) + Month2Str(_dDate)
 Private _lSchedule := .F.
+Private _cFile1    := ""    
+Private _cFile2    := ""
+Private _cFile3    := ""
+Private _cFile4    := ""
+Private _cFileName := ""
 
 _lSchedule  := Select('SX3') == 0
 
@@ -59,7 +52,9 @@ If _lSchedule
    sleep( 5000 )
    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MCOM015"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM01501"/*cMsgId*/, "MCOM01501 - Gerando relatório: " + DToC(_dDate) + " - " + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
    FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MCOM015"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM01502"/*cMsgId*/, "MCOM01502 - Executando no ambiente " + Upper( GetEnvServer() )/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
-   MCOM0015A()
+   //MCOM0015A()
+   MCOM0015A("LAYOUT_ANTIGO")
+   MCOM0015A("NOVO_LAYOUT")
 Else
    _aParAux :={} 
    _aParRet :={} 
@@ -79,9 +74,26 @@ Else
    If !ParamBox( _aParAux , "Selecione os filtros" , @_aParRet,  _bOK , /*aButtons*/,/*lCentered*/,/*nPosX*/,/*nPosy*/,/*oDlgWizard*/,/*cLoad*/,.T.         ,.T.          )
       Return .F.
    Else
-      Processa({|| MCOM0015A()}, "Processando...")
+      Processa({|| MCOM0015A("LAYOUT_ANTIGO")}, "Processando...")
+      Processa({|| MCOM0015A("NOVO_LAYOUT")}, "Processando...")
    EndIf
 EndIf
+
+If File(_cFile1)
+   FErase(_cFile1)
+EndIf 
+
+If File(_cFile2)
+   FErase(_cFile2)
+EndIf 
+
+If File(_cFile3)
+   FErase(_cFile3)
+EndIf 
+
+If File(_cFile4)
+   FErase(_cFile4)
+EndIf 
 
 FWRestArea(aArea)
 
@@ -93,16 +105,16 @@ Programa----------: MCOM0015A
 Autor-------------: Igor Melgaço
 Data da Criacao---: 12/09/24
 Descrição---------: Processamento do Relatório
-Parametros--------: Nenhum
+Parametros--------: _cTipoRel = "LAYOUT_ANTIGO" = Roda o relatório com os dados e layout antigo.
+                              = "NOVO_LAYOUT"   = Roda o relatório com os dados e o novo layout.
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function MCOM0015A()
+Static Function MCOM0015A(_cTipoRel)
 
 Local _cAlias     := GetNextAlias()
 Local _aConfig	   := U_ITCFGEML('')
 Local _aEmails    := {}
-Local _cFileName  := ""
 Local _aCabExcel  := {}
 Local _nY         := 0
 Local _cMsgEml    := ""
@@ -168,21 +180,38 @@ oPrint:cPathPDF := cCaminho
 //Montando a consulta
 _cQuery += "SELECT "
 _cQuery += "    C7_FILIAL, "
-_cQuery += "    C7_NUM, "
-_cQuery += "    x5_descri x5descri, "
-_cQuery += "    C7_PRODUTO, "
+//_cQuery += "    C7_NUM, " 
+If _cTipoRel == "LAYOUT_ANTIGO"
+   _cQuery += "    x5_descri x5descri, "
+   _cQuery += "    b1_i_bigrp, " 
+Else 
+   _cQuery += "    B1_DESC, "
+   _cQuery += "    C7_PRODUTO, "
+EndIf 
 _cQuery += "    SUM(c7_qtsegum) c7_qtsegum, "
 _cQuery += "    SUM(C7_QUJE)/B1_CONV C7_QUJE, "
 _cQuery += "    SUM(c7_qtsegum)- SUM(C7_QUJE)/B1_CONV SALDO "
 _cQuery += "FROM "
 _cQuery += "    "+RetSqlName("SC7")+" c7 "
 _cQuery += "    JOIN "+RetSqlName("SB1")+" b1 ON b1_cod = c7_produto "
-_cQuery += "    JOIN "+RetSqlName("SX5")+" x5 ON b1_i_bigrp = x5_chave "
+
+If _cTipoRel == "LAYOUT_ANTIGO"
+   _cQuery += "    JOIN "+RetSqlName("SX5")+" x5 ON b1_i_bigrp = x5_chave "
+EndIf 
+
 _cQuery += "WHERE "
 _cQuery += "    C7.d_e_l_e_t_ = ' ' "
-_cQuery += "    AND X5.d_e_l_e_t_ = ' ' "
+
+If _cTipoRel == "LAYOUT_ANTIGO"
+   _cQuery += "    AND X5.d_e_l_e_t_ = ' ' "
+EndIf
+
 _cQuery += "    AND B1.d_e_l_e_t_ = ' ' "
-_cQuery += "    AND X5_tabela = 'ZA' "
+
+If _cTipoRel == "LAYOUT_ANTIGO"
+   _cQuery += "    AND X5_tabela = 'ZA' "
+EndIf 
+
 If !_lSchedule
    _cQuery += " AND C7_EMISSAO BETWEEN '"+DToS(MV_PAR01)+"' AND '"+DToS(MV_PAR02)+"' "
 Else
@@ -191,12 +220,24 @@ EndIf
 _cQuery += "    AND c7_fornece = 'F02270' "
 _cQuery += "GROUP BY "
 _cQuery += "    c7_filial, "
-_cQuery += "    c7_num, "
-_cQuery += "    x5_descri, "
-_cQuery += "    C7_PRODUTO, "
+//_cQuery += "    c7_num, " 
+
+If _cTipoRel == "LAYOUT_ANTIGO"
+   _cQuery += "    x5_descri, "
+   _cQuery += "    b1_i_bigrp, "
+Else 
+   _cQuery += "    B1_DESC, "
+   _cQuery += "    C7_PRODUTO, "
+EndIf 
+
 _cQuery += "    B1_CONV "
 _cQuery += "ORDER BY "
-_cQuery += "    c7_filial, x5_descri "  
+
+If _cTipoRel == "LAYOUT_ANTIGO"
+   _cQuery += "    c7_filial, x5_descri "  
+Else 
+   _cQuery += "    C7_FILIAL, B1_DESC "  
+EndIf 
 
 _cQuery := ChangeQuery(_cQuery)
 MPSysOpenQuery(_cQuery,_cAlias)
@@ -226,7 +267,13 @@ While (_cAlias)->(!Eof())
    //Imprimindo a linha atual
    oPrint:SayAlign(nLinAtu, COL_FILIAL , (_cAlias)->C7_FILIAL, oFontDet, 0080, nTamLin, COR_PRETO, PAD_LEFT, 0)
    oPrint:SayAlign(nLinAtu, COL_NOME   , Subs(FWFilialName(,(_cAlias)->C7_FILIAL),1,30),  oFontDet, 0200, nTamLin, COR_PRETO, PAD_LEFT, 0)
-   oPrint:SayAlign(nLinAtu, COL_PRODUTO, (_cAlias)->X5DESCRI,  oFontDet, 0200, nTamLin, COR_PRETO, PAD_LEFT, 0)
+   
+   If _cTipoRel == "LAYOUT_ANTIGO"
+      oPrint:SayAlign(nLinAtu, COL_PRODUTO, (_cAlias)->X5DESCRI,  oFontDet, 0200, nTamLin, COR_PRETO, PAD_LEFT, 0)
+   Else 
+      oPrint:SayAlign(nLinAtu, COL_PRODUTO, (_cAlias)->B1_DESC,  oFontDet, 0200, nTamLin, COR_PRETO, PAD_LEFT, 0)
+   EndIf
+
    oPrint:SayAlign(nLinAtu, COL_QTDSOL-200 , TransForm((_cAlias)->C7_QTSEGUM,"@E 999,999,999.999"),  oFontDet, COL_QTDSOL, nTamLin, COR_PRETO, PAD_RIGHT, 0)
    oPrint:SayAlign(nLinAtu, COL_QTDENT-200 , TransForm((_cAlias)->C7_QUJE,"@E 999,999,999.999")   ,  oFontDet, COL_QTDENT, nTamLin, COR_PRETO, PAD_RIGHT, 0)
    oPrint:SayAlign(nLinAtu, COL_SALDO-200  , TransForm((_cAlias)->SALDO,"@E 999,999,999.999")     ,  oFontDet, COL_SALDO, nTamLin, COR_PRETO, PAD_RIGHT, 0)
@@ -245,7 +292,7 @@ While (_cAlias)->(!Eof())
 
    aAdd(_aInfo, {(_cAlias)->C7_FILIAL,;                // 1
                   FWFilialName(,(_cAlias)->C7_FILIAL),; // 2
-                  AllTrim((_cAlias)->X5DESCRI),;        // 3
+                  If(_cTipoRel == "LAYOUT_ANTIGO",AllTrim((_cAlias)->X5DESCRI),AllTrim((_cAlias)->B1_DESC)),;        // 3
                   (_cAlias)->C7_QTSEGUM,;               // 4
                   (_cAlias)->C7_QUJE,;                  // 5
                   (_cAlias)->SALDO;                     // 6
@@ -270,7 +317,8 @@ While (_cAlias)->(!Eof())
       
       oPrint:SayAlign(nLinAtu, COL_FILIAL , Space(Len((_cAlias)->C7_FILIAL)), oFontDet, 0080, nTamLin, COR_PRETO, PAD_LEFT, 0)
       oPrint:SayAlign(nLinAtu, COL_NOME   , Space(30),  oFontDet, 0200, nTamLin, COR_PRETO, PAD_LEFT, 0)
-      oPrint:SayAlign(nLinAtu, COL_PRODUTO, Space(Len((_cAlias)->X5DESCRI)),  oFontDet, 0200, nTamLin, COR_PRETO, PAD_LEFT, 0)
+      //oPrint:SayAlign(nLinAtu, COL_PRODUTO, Space(Len((_cAlias)->X5DESCRI)),  oFontDet, 0200, nTamLin, COR_PRETO, PAD_LEFT, 0)
+      oPrint:SayAlign(nLinAtu, COL_PRODUTO, Space(100),  oFontDet, 0200, nTamLin, COR_PRETO, PAD_LEFT, 0)
       oPrint:SayAlign(nLinAtu, COL_QTDSOL-200 , TransForm(nQtdSegUn,"@E 999,999,999.999"),  oFontDet, COL_QTDSOL, nTamLin, COR_PRETO, PAD_RIGHT, 0)
       oPrint:SayAlign(nLinAtu, COL_QTDENT-200 , TransForm(nQtdEnt,"@E 999,999,999.999"),  oFontDet, COL_QTDENT, nTamLin, COR_PRETO, PAD_RIGHT, 0)
       oPrint:SayAlign(nLinAtu, COL_SALDO-200  , TransForm(nSaldo  ,"@E 999,999,999.999"),  oFontDet, COL_SALDO, nTamLin, COR_PRETO, PAD_RIGHT, 0)
@@ -299,7 +347,8 @@ oPrint:Line( nLinAtu , nColIni , nLinAtu , nColFin )
 
 oPrint:SayAlign(nLinAtu, COL_FILIAL , Space(Len((_cAlias)->C7_FILIAL)), oFontDet, 0080, nTamLin, COR_PRETO, PAD_LEFT, 0)
 oPrint:SayAlign(nLinAtu, COL_NOME   , Space(30),  oFontDet, 0200, nTamLin, COR_PRETO, PAD_LEFT, 0)
-oPrint:SayAlign(nLinAtu, COL_PRODUTO, Space(Len((_cAlias)->X5DESCRI)),  oFontDet, 0200, nTamLin, COR_PRETO, PAD_LEFT, 0)
+//oPrint:SayAlign(nLinAtu, COL_PRODUTO, Space(Len((_cAlias)->X5DESCRI)),  oFontDet, 0200, nTamLin, COR_PRETO, PAD_LEFT, 0)
+oPrint:SayAlign(nLinAtu, COL_PRODUTO, Space(100),  oFontDet, 0200, nTamLin, COR_PRETO, PAD_LEFT, 0)
 oPrint:SayAlign(nLinAtu, COL_QTDSOL-200 , TransForm(nTQtdSegUn,"@E 999,999,999.999"),  oFontDet, COL_QTDSOL, nTamLin, COR_PRETO, PAD_RIGHT, 0)
 oPrint:SayAlign(nLinAtu, COL_QTDENT-200 , TransForm(nTQtdEnt,"@E 999,999,999.999"),  oFontDet, COL_QTDENT, nTamLin, COR_PRETO, PAD_RIGHT, 0)
 oPrint:SayAlign(nLinAtu, COL_SALDO-200  , TransForm(nTSaldo  ,"@E 999,999,999.999"),  oFontDet, COL_SALDO, nTamLin, COR_PRETO, PAD_RIGHT, 0)
@@ -315,8 +364,14 @@ oPrint:Preview() // GERA PDF AQUI
 cListaEmail := SuperGetMV("IT_MAILM14",.F.,"sistema@italac.com.br")
 _aEmails := StrTokArr(cListaEmail,";")
 
-_cFile1    := cCaminho + cArquivo + ".pdf"
-_cFile2    := cCaminho + cArquivo + ".xlsx"
+If _cTipoRel == "LAYOUT_ANTIGO"
+   _cFile1    := cCaminho + cArquivo + ".pdf"
+   _cFile2    := cCaminho + cArquivo + ".xlsx"
+Else 
+   _cFile3    := cCaminho + cArquivo + ".pdf"
+   _cFile4    := cCaminho + cArquivo + ".xlsx"
+EndIf 
+
 _cArqExcel := cArquivo + ".xlsx"
 _cTitulo   := "Relatório_de_NFs_de_entrada_X_Entregas_SOBASICO" 
 
@@ -327,22 +382,35 @@ _cTitulo   := "Relatório_de_NFs_de_entrada_X_Entregas_SOBASICO"
    aAdd(_aCabExcel,{"Filial"                 ,1           ,1         ,.F.})     
    aAdd(_aCabExcel,{"Nome Filial"            ,1           ,1         ,.F.})    
    aAdd(_aCabExcel,{"Produto"                ,1           ,1         ,.F.})  
-   aAdd(_aCabExcel,{"Qtde Solicitada"        ,3           ,2         ,.F.})    
-   aAdd(_aCabExcel,{"Qtde Entregue"          ,3           ,2         ,.F.})    
-   aAdd(_aCabExcel,{"Saldo Pendente"         ,3           ,2         ,.F.})    
+   aAdd(_aCabExcel,{"Qtde Solicitada(2a UM)"   ,3           ,2         ,.F.})    
+   aAdd(_aCabExcel,{"Qtde Entregue( 2a UM)"          ,3           ,2         ,.F.})    
+   aAdd(_aCabExcel,{"Saldo Pendente(2a UM)"         ,3           ,2         ,.F.})    
 
    //ITGEREXCEL(_cNomeArq,_cDiretorio,_cTitulo ,_cNomePlan,_aCabecalho,_aDetalhe,_lLeTabTemp,_cAliasTab,_aCampos,_lScheduller,_lCriaPastas,_aPergunte,_lEnviaEmail,_lXLSX)
    U_ITGEREXCEL(_cArqExcel,cCaminho  ,_cTitulo ,          ,_aCabExcel ,_aInfo   ,           ,          ,        , .T.        ,            ,          , .F.        ,.T.)
 
-   If File(_cFile1) .Or. File(_cFile2)
-      
-      If File(_cFile1)
-         _cFileName := _cFile1+";"
+   If File(_cFile1) .Or. File(_cFile2) .Or. File(_cFile3) .Or. File(_cFile4)
+
+      If File(_cFile1) .And. _cTipoRel == "LAYOUT_ANTIGO"
+         _cFileName += If(!Empty(_cFileName),";","")
+         _cFileName += _cFile1
       EndIf
-      If File(_cFile2)
+      
+      If File(_cFile2) .And. _cTipoRel == "LAYOUT_ANTIGO"
+         _cFileName += If(!Empty(_cFileName),";","")
          _cFileName += _cFile2
       EndIf
-      
+
+      If File(_cFile3) .And. _cTipoRel == "NOVO_LAYOUT"
+         _cFileName += If(!Empty(_cFileName),";","")
+         _cFileName += _cFile3
+      EndIf
+
+      If File(_cFile4) .And. _cTipoRel == "NOVO_LAYOUT"
+         _cFileName += If(!Empty(_cFileName),";","")
+         _cFileName += _cFile4
+      EndIf
+
       _cAssunto  := "Relatório de NFs de entrada X Entregas SOBASICO"
       
       If !_lSchedule
@@ -353,22 +421,25 @@ _cTitulo   := "Relatório_de_NFs_de_entrada_X_Entregas_SOBASICO"
 
          _cEmailPA:=Lower(AllTrim(UsrRetMail(__cUserId)))
          
-         If U_ITMsg("Deseja enviar o relatório somente para "+_cEmailPA+", ou enviar para todos os envolvidos (visualize em mais detalhes).",'Atenção!',,3,2,4,,"USUARIO","TODOS",bBloco)
-            _aEmails := {_cEmailPA}
-         EndIf
-
+         If _cTipoRel == "NOVO_LAYOUT"
+            If U_ITMsg("Deseja enviar o relatório somente para "+_cEmailPA+", ou enviar para todos os envolvidos (visualize em mais detalhes).",'Atenção!',,3,2,4,,"USUARIO","TODOS",bBloco)
+               _aEmails := {_cEmailPA}
+            EndIf
+         EndIf 
       EndIf
 
-      For _nY := 1 To Len(_aEmails)
-         _cEmlLog   := ""
-         _cEmail    := _aEmails[_nY]
-         _cMsgEml   := MCOM0015H(_cEmail,_cDate,_dDate)
+      If _cTipoRel == "NOVO_LAYOUT"
+         For _nY := 1 To Len(_aEmails)
+             _cEmlLog   := ""
+             _cEmail    := _aEmails[_nY] 
+             _cMsgEml   := MCOM0015H(_cEmail,_cDate,_dDate)
       
-         //U_ITENVMAIL(cFrom        ,cEmailTo       ,cEmailCo  ,cEmailBcc,_cAssunto ,_cMsgEml ,cAttach   ,cAccount    ,cPassword   ,cServer      ,cPortCon    ,lRelauth     ,cUserAut     ,cPassAut     ,cLogErro)
-         U_ITENVMAIL( _aConfig[01]  , _cEmail       ,          ,         ,_cAssunto ,_cMsgEml,_cFileName,_aConfig[01],_aConfig[02], _aConfig[03],_aConfig[04], _aConfig[05], _aConfig[06], _aConfig[07], @_cEmlLog )
+             //U_ITENVMAIL(cFrom        ,cEmailTo       ,cEmailCo  ,cEmailBcc,_cAssunto ,_cMsgEml ,cAttach   ,cAccount    ,cPassword   ,cServer      ,cPortCon    ,lRelauth     ,cUserAut     ,cPassAut     ,cLogErro)
+             U_ITENVMAIL( _aConfig[01]  , _cEmail       ,          ,         ,_cAssunto ,_cMsgEml,_cFileName,_aConfig[01],_aConfig[02], _aConfig[03],_aConfig[04], _aConfig[05], _aConfig[06], _aConfig[07], @_cEmlLog )
       
-         FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MCOM015"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM01503"/*cMsgId*/, "MCOM01503 - " + _cEmlLog + DToC(_dDate) + ' - ' + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
-      Next
+             FWLogMsg("INFO"/*cSeverity*/, /*cTransactionId*/, "MCOM015"/*cGroup*/, FunName()/*cCategory*/, /*cStep*/, "MCOM01503"/*cMsgId*/, "MCOM01503 - " + _cEmlLog + DToC(_dDate) + ' - ' + Time()/*cMessage*/, /*nMensure*/, /*nElapseTime*/, /*aMessage*/)
+         Next
+      EndIf 
    Else
       If !_lSchedule
          U_ITMsg("Problema na geração dos arquivos para envio do e-mail.",;
@@ -408,12 +479,16 @@ MCOM015CAB(oPrint,_cAssunto,@nLinCab,nTamLin,nColIni,nColFin,@nPagAtu,_cProg,_cG
 
 //Cabeçalho das colunas
 nLinCab += nTamLin
-oPrint:SayAlign(nLinCab, COL_FILIAL  , "Filial"         , oFontDetN, 0080, nTamLin, COR_PRETO, PAD_LEFT, 0)
-oPrint:SayAlign(nLinCab, COL_NOME    , "Nome Filial"    , oFontDetN, 0200, nTamLin, COR_PRETO, PAD_LEFT, 0)
-oPrint:SayAlign(nLinCab, COL_PRODUTO , "Produto"        , oFontDetN, 0200, nTamLin, COR_PRETO, PAD_LEFT, 0)
+oPrint:SayAlign(nLinCab, COL_FILIAL      , "Filial"         , oFontDetN, 0080, nTamLin, COR_PRETO, PAD_LEFT, 0)
+oPrint:SayAlign(nLinCab, COL_NOME        , "Nome Filial"    , oFontDetN, 0200, nTamLin, COR_PRETO, PAD_LEFT, 0)
+oPrint:SayAlign(nLinCab, COL_PRODUTO     , "Produto"        , oFontDetN, 0200, nTamLin, COR_PRETO, PAD_LEFT, 0)
 oPrint:SayAlign(nLinCab, COL_QTDSOL-200  , "Qtde Solicitada", oFontDetN, COL_QTDSOL, nTamLin, COR_PRETO, PAD_RIGHT, 0)
 oPrint:SayAlign(nLinCab, COL_QTDENT-200  , "Qtde Entregue"  , oFontDetN, COL_QTDENT, nTamLin, COR_PRETO, PAD_RIGHT, 0)
 oPrint:SayAlign(nLinCab, COL_SALDO -200  , "Saldo Pendente" , oFontDetN, COL_SALDO, nTamLin, COR_PRETO, PAD_RIGHT, 0)
+nLinCab += nTamLin
+oPrint:SayAlign(nLinCab, COL_QTDSOL-209  , "(2a UM)" , oFontDetN, COL_QTDSOL, nTamLin, COR_PRETO, PAD_RIGHT, 0)
+oPrint:SayAlign(nLinCab, COL_QTDENT-209  , "(2a UM)" , oFontDetN, COL_QTDENT, nTamLin, COR_PRETO, PAD_RIGHT, 0)
+oPrint:SayAlign(nLinCab, COL_SALDO -209  , "(2a UM)" , oFontDetN, COL_SALDO, nTamLin, COR_PRETO, PAD_RIGHT, 0)
 
 nLinCab += nTamLin
 oPrint:Line( nLinCab, nColIni , nLinCab, nColFin )
@@ -509,6 +584,12 @@ _cMsgEml += '    <tr>'
 _cMsgEml += '      <td class="itens" align="left" width="'+cPer+'%"><b>Data Fim:</b></td>'
 _cMsgEml += '      <td class="itens" >'+AllToChar(DToC(dDate))+'</td>'
 _cMsgEml += '    </tr>'
+
+_cMsgEml += '    <tr>'
+_cMsgEml += '      <td class="itens" align="left" width="'+cPer+'%"><b>Observação:</b></td>'
+_cMsgEml += '      <td class="itens" >Saldos Referentes a 2aUM dos produtos.</td>'
+_cMsgEml += '    </tr>'
+
 
 _cMsgEml += '</table>'
 _cMsgEml += '</center>'
