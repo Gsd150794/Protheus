@@ -1,16 +1,3 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-   Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  |19/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
-Lucas Borges  |22/09/2025| Chamado 52201. Corrigido erro nas querys ao realizar o replace no Else
-Alex Wallauer |24/09/2025| Chamado 52151. Alteração da leitura dos parametros do ZP1 para o SX6
-Igor Melgaço  |04/11/2025| Chamado 52432. Ajuste para corrigir impressão reptida do produto BEB LAC UHT CHOC Z LAC WHEY 250 ML(15G)
-===============================================================================================================================
-*/
-
 #Include "TOTVS.ch"
 
 Static _aSalvaCusMGCMS
@@ -1037,7 +1024,8 @@ Local _nQtdSin		:= 0
 Local _lErro		:= .F.
 Local cProdDesc 	:= ""
 Local _cUsuario 	:= ""
-Local cCodUser	:= ""
+Local cCodUser		:= ""
+Local cNomeUsr      := ""
 
 oSection1:Init()
 oReport:SetMeter(10)
@@ -1099,27 +1087,30 @@ While ZL6T->(!Eof())
 			oSection1:Cell("DTDIGIT")	:SetValue(SToD(TRB->D1_DTDIGIT))
 			oSection1:Cell("TES")		:SetValue(AllTrim(TRB->D1_TES))
 			oSection1:Cell("NUMSEQ")	:SetValue(AllTrim(TRB->D1_NUMSEQ))
+			
+			cCodUser := ""
+			cNomeUsr := ""
 					
 			If (!Empty(TRB->F1_USERLGI) .And. !Empty(TRB->F1_USERLGA));
 						.Or. (Empty(TRB->F1_USERLGI) .And. !Empty(TRB->F1_USERLGA))
-				cCodUser := ""
 				cCodUser := Subs(Embaralha(TRB->F1_USERLGA, 1), 3, 6)
-				PswOrder(1)     // Busca por ID
-					
-				If PSWSEEK( cCodUser, .T. )
-					aUser := PSWRET() // Retorna vetor com informacoes do usuario
-					oSection1:Cell("USUARIO"):SetValue(aUser[1,2])
+				If !Empty(cCodUser)
+					cNomeUsr := FWSFAllUsers({cCodUser})[1][3]
+				Endif
+			
+				If !Empty(cNomeUsr)
+					oSection1:Cell("USUARIO"):SetValue(cNomeUsr)
 				Else
 					oSection1:Cell("USUARIO"):SetValue("N/C")
 				EndIf
 			ElseIf !Empty(TRB->F1_USERLGI) .And. Empty(TRB->F1_USERLGA)
-				cCodUser := ""
 				cCodUser := Subs(Embaralha(TRB->F1_USERLGI, 1), 3, 6)
-				PswOrder(1)     // Busca por ID
-					
-				If PSWSEEK( cCodUser, .T. )
-					aUser := PSWRET() // Retorna vetor com informacoes do usuario
-					oSection1:Cell("USUARIO"):SetValue(aUser[1,2])
+				If !Empty(cCodUser)
+					cNomeUsr := FWSFAllUsers({cCodUser})[1][3]
+				EndIf
+				
+				If !Empty(cNomeUsr)
+					oSection1:Cell("USUARIO"):SetValue(cNomeUsr)
 				Else
 					oSection1:Cell("USUARIO"):SetValue("N/C")
 				EndIf
