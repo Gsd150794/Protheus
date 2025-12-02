@@ -1,14 +1,3 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-   Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  |07/05/2025| Chamado 50617. Corrigir chamada estática no nome das tabelas do sistema
-Lucas Borges  |24/07/2025| Chamado 51340. Ajustar função para validação de ambiente de teste
-Lucas Borges  |14/09/2025| Chamado 51799. Implementada função para validar ambiente de teste totvs.framework.environment.Type.get()
-===============================================================================================================================
-*/
 
 #Include "TOTVS.ch"
 #Include 'FWMVCDef.ch'
@@ -2488,10 +2477,9 @@ DEFAULT _lTela:=.F.
 If _lProcessa
    ProcRegua(0)
    IncProc("Gerando anexo...")
-   PswOrder(1)
-   PswSeek(__cUserId,.T.)
-   aUsuario:=PswRet()	
-   _cEmail :=AllTrim(aUsuario[1,14])+";sistema@italac.com.br"
+   If Type('__cUserId') == 'C'
+      _cEmail :=AllTrim(FWSFAllUsers({__cUserID},{'USR_EMAIL'})[1][3])+";sistema@italac.com.br"
+   EndIF
    If Type("_aCabXML") = "A" .And. Type("_aColsXML") = "A" .And. Len(_aColsXML) > 0
       IncProc("Gerando anexo...")
       _cDiretorio:=_cNomeArq:=NIL
