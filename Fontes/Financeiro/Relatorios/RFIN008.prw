@@ -1,15 +1,3 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-   Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     |30/01/2019| Realização de Ajustes no fonte para funcionar com o novo servidor Totvs Loboguará. Chamado 27795
-Julio Paz     |25/04/2019| Incluir opção de geração Excel p/Relatório financeiro de resumo de contas a pagar. Chamado 27801.
-Lucas Borges  |11/10/2019| Removidos os Warning na compilação da release 12.1.25. Chamado 28346
-=================================================================================================================================
-*/
-
 #Include "TOTVS.ch"
 
 /*
@@ -1196,7 +1184,9 @@ If Len(_aForn) > 0
 	    nlinha+=nSaltoLinha  
 		oPrint:Line(nLinha,nColInic,nLinha,nColFinal)
 		RFIN008QP(0,0,2,_cNomeFil) 
-		RFIN008T("TOTAL DO DIA: " + DToC(SToD(_aDia[Len(_aDia),1])),nTotalDia)		    		
+		If Len(_aDia) > 1
+			RFIN008T("TOTAL DO DIA: " + DToC(SToD(_aDia[Len(_aDia),1])),nTotalDia)	
+		Endif		    		
 	    
 	    nlinha+=nSaltoLinha  
 	    oPrint:Line(nLinha,nColInic,nLinha,nColFinal)
@@ -1359,14 +1349,16 @@ Retorno---------: Nenhum
 
 Static Function RFIN008AS(_cFil)  
 
-Local _aDadUsuaio:= {}
+Local cNomeUsr   := ""
+Local cDepto     := ""
 
-PswOrder(2) //Ordem de Nome de Usuario
-If PswSeek( AllTrim(cUserName), .T. )
+If Type('__cUserId') == 'C'
+	cNomeUsr := FWSFAllUsers({__cUserID},{"USR_NOME"})[1][3]
+	cDepto   := FWSFAllUsers({__cUserID},{"USR_DEPTO"})[1][3]
+EndIf
 
-	_aDadUsuaio := PswRet(1)                   
-	
-	
+If !Empty(cNomeUsr)
+
 	RFIN008Q2(nlinha + (nSaltoLinha * 6),_cFil)
 	nlinha+=nSaltoLinha  
 	nlinha+=nSaltoLinha
@@ -1375,13 +1367,13 @@ If PswSeek( AllTrim(cUserName), .T. )
 	        
 	oPrint:Say (nlinha,nColFinal / 2,'_____________________________________________________'    ,oFont12b,nColFinal,,,2)
 	nlinha+=nSaltoLinha
-	oPrint:Say (nlinha,nColFinal / 2 ,Upper(AllTrim(_aDadUsuaio[1,4]))                         ,oFont12b,nColFinal,,,2)
+	oPrint:Say (nlinha,nColFinal / 2 ,Upper(AllTrim(cNomeUsr))                         ,oFont12b,nColFinal,,,2)
 	nlinha+=nSaltoLinha
-	oPrint:Say (nlinha,nColFinal / 2 ,Upper(AllTrim(_aDadUsuaio[1,12]))                        ,oFont12b,nColFinal,,,2)
+	oPrint:Say (nlinha,nColFinal / 2 ,Upper(AllTrim(cDepto))                        ,oFont12b,nColFinal,,,2)
 
 EndIf                  
 
-Return         
+Return     
 
 /*
 ===============================================================================================================================
