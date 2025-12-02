@@ -1,21 +1,3 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
- Autor            |    Data    |                              Motivo                      										 
--------------------------------------------------------------------------------------------------------------------------------
- Josué Danich     | 09/10/2018 | Gravação de campo C5_I_DTNEC - Chamado 25790                                              
--------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges     | 11/10/2019 | Removidos os Warning na compilação da release 12.1.25. Chamado 28346
--------------------------------------------------------------------------------------------------------------------------------
- Lucas Borges     | 21/10/2019 | Corrigido error.log. Chamado 30948
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges      | 23/07/2025 | Chamado 51340. Trocado e-mail padrão para sistema@italac.com.br
-===============================================================================================================================
-*/
-//====================================================================================================
-// Definicoes de Includes da Rotina.
-//====================================================================================================
 #Include	"Protheus.Ch"
 #Include 	"TopConn.ch"
 
@@ -465,12 +447,11 @@ DEFAULT _lProcessa:=.F.
 
 If _lProcessa
    ProcRegua(0)
-   PswOrder(1)
-   PswSeek(__cUserId,.T.)
-   aUsuario:=PswRet()	
-   _cEmail :=AllTrim(aUsuario[1,14])
+   If Type('__cUserId') == 'C'
+      _cEmail := FWSFAllUsers({__cUserID},{'USR_EMAIL'})[1][3]
+   EndIf   
    If Empty(_cEmail)
-	  Aviso("Sem e-mail cadastrado","Usuário sem e-mail no cadastro",{"OK"} , 1 )
+	   Aviso("Sem e-mail cadastrado","Usuário sem e-mail no cadastro",{"OK"} , 1 )
       Return .F.
    EndIf
 Else
