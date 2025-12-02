@@ -1,15 +1,3 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-   Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  |23/07/2025| Chamado 51340. Ajustar função para validação de ambiente de teste
-Lucas Borges  |01/08/2025| Chamado 51453. Substituir função U_ITEncode por FWHttpEncode
-Lucas Borges  |17/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
-===============================================================================================================================
-*/
-
 #Include "ap5mail.ch"
 #Include "tbiconn.ch"
 #Include "TOTVS.ch"  
@@ -2894,12 +2882,13 @@ If !(_cAliasSC7)->(Eof())
 		       TRBSCR->(DBSkip())
 		       Loop
 		    EndIf
-			_cDep:="XXXXXXX"
-			PswOrder(1) // Busca por ID
-	        If PSWSEEK(TRBSCR->CR_USER, .T. )
-               _aDados:=PSWRET(1)// Retorna vetor com informações do usuário
-		       _cDep  :=AllTrim(_aDados[1][12]) 
-	        EndIf
+			
+			_cDep := FWSFAllUsers({TRBSCR->CR_USER},{"USR_DEPTO"})[1][3]
+
+			If Empty(_cDep)
+				_cDep:="XXXXXXX"
+			Endif
+
             _cMailAux:=""
 			If Upper(_cDep) <> "DIRECAO"//Não envia para diretoria
 			   _cMailAux:=AllTrim(UsrRetMail(TRBSCR->CR_USER))
@@ -4884,12 +4873,11 @@ If !(_cAliasSC7)->(Eof())
 		       Loop
 		    EndIf
 			If !_lWF
-				_cDep:="XXXXXXX"
-				PswOrder(1) // Busca por ID
-				If PSWSEEK(TRBSCR->CR_USER, .T. )
-					_aDados:=PSWRET(1)// Retorna vetor com informações do usuário
-					_cDep  :=AllTrim(_aDados[1][12])
-				EndIf
+				_cDep := FWSFAllUsers({TRBSCR->CR_USER},{"USR_DEPTO"})[1][3]
+
+				If Empty(_cDep)
+					_cDep:="XXXXXXX"
+				Endif
 				
 				If Upper(_cDep) <> "DIRECAO"//Não envia para diretoria
 			       _cMailAux:=AllTrim(UsrRetMail(TRBSCR->CR_USER))
@@ -6133,13 +6121,11 @@ If !(_cAliasSC7)->(Eof())
 				Loop
 			EndIf
 			
-			_cDep := "XXXXXXX"
-			
-			PswOrder(1) // Busca por ID
-			If PswSeek((_cAliasSCR)->CR_USER, .T. )
-				_aDados := PSWRET(1)// Retorna vetor com informações do usuário
-				_cDep   := AllTrim(_aDados[1][12])
-			EndIf
+			_cDep := FWSFAllUsers({(_cAliasSCR)->CR_USER},{"USR_DEPTO"})[1][3]
+
+			If Empty(_cDep)
+				_cDep := "XXXXXXX"
+			Endif
 			
 			If Upper(_cDep) <> "DIRECAO"//Não envia para diretoria
 				_cMailAux := AllTrim(UsrRetMail((_cAliasSCR)->CR_USER))
