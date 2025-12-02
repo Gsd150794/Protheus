@@ -1,15 +1,3 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-   Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer |16/07/2024| Chamado 47873. Andre. Correção do error.log: variable does not exist _COBST on AOMS116EML().
-Lucas Borges  |23/07/2025| Chamado 51340. Ajustar função para validação de ambiente de teste
-Lucas Borges  |19/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
-Jose Gavetti  |08/10/2025| Chamado 52364. Inserido campo C5_I_CDUSU para ser enviado no cabeçalho do Pedido.
-===============================================================================================================================
-*/
 
 #Include "TOTVS.ch"
 #Include "FWPRINTSETUP.CH"
@@ -1550,10 +1538,9 @@ Local _cEmail	:= AllTrim(Z19->Z19_EMAIL)
 Local _cEmailCo := ""
 
 If _lProcessa
-   PswOrder(1)
-   PswSeek(__cUserId,.T.)
-   aUsuario:=PswRet()	
-   _cEmailCo:=AllTrim(aUsuario[1,14])
+   If Type('__cUserId') == 'C'
+      _cEmailCo := FWSFAllUsers({__cUserID},{'USR_EMAIL'})[1][3]
+   EndIf
 Else
    If Empty(_cEmail)
 	  U_ITConOut('Sem e-mail cadastrado, verifique o campo de de E-Mmail [Z19_EMAIL] da regra: '+Z19->Z19_REGRA)
