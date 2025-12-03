@@ -1,15 +1,3 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-   Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  |23/12/2024| Chamado 49442. Criada regra para contabilização da inclusão do ativo
-Lucas Borges  |26/06/2025| Chamado 50617. Revisões diversas visando padronizar os fontes
-Lucas Borges  |17/10/2025| Chamado 52549. Ajustada filiais para a conta 3301020020
-===============================================================================================================================
-*/
-
 #Include "TOTVS.ch"
 
 /*
@@ -44,45 +32,45 @@ Local _cAlias 	:= '' As Character
 If _cCod == "820001CD"
 	//Edificações, Ferramentas, Instalações Industriauis e Máquinas e Equipamentos
 	If AllTrim(SN1->N1_GRUPO) $ 'CC01/CC02/F001/II01/ME01/ME02'
-		If SN1->N1_FILIAL $ '01/02/03/04/06/07/08/09/0A/0B'
+		If SN1->N1_FILIAL $ _cFil01
 			_xRetorno := '3299020019'
-		ElseIf SN1->N1_FILIAL == '05'
+		ElseIf SN1->N1_FILIAL $ _cFil05
 			_xRetorno := '3299120019'
-		ElseIf SN1->N1_FILIAL $ '10/11/12/13/14/15/16/17/18/19/1A/1B/1C'
+		ElseIf SN1->N1_FILIAL $ _cFil10
 			_xRetorno := '3299040019'
-		ElseIf SN1->N1_FILIAL $ '20/21/22/24/25'
+		ElseIf SN1->N1_FILIAL $ _cFil20
 			_xRetorno := '3299080019'
-		ElseIf SN1->N1_FILIAL == '23'
+		ElseIf SN1->N1_FILIAL $ _cFil23
 			_xRetorno := '3299180019'
-		ElseIf SN1->N1_FILIAL $ '30/31/32/33'
+		ElseIf SN1->N1_FILIAL $ _cFil30
 			_xRetorno := '3299060019'
-		ElseIf SN1->N1_FILIAL == '40'
+		ElseIf SN1->N1_FILIAL $ _cFil40
 			_xRetorno := '3299140019'
 		ElseIf SN1->N1_FILIAL $ _cFil90+_cFilAdm
 			_xRetorno := '3301020020'
-		ElseIf SN1->N1_FILIAL == '93'
+		ElseIf SN1->N1_FILIAL $ _cFil93
 			_xRetorno := '3299200019'
 		EndIf
 
 	//Benfeitorias em Imóveis ou Instalações de 3OS
 	ElseIf AllTrim(SN1->N1_GRUPO) $ 'B001/LB01'
-		If SN1->N1_FILIAL $ '01/02/03/04/06/07/08/09/0A/0B'
+		If SN1->N1_FILIAL $ _cFil01
 			_xRetorno := '3299020045'
-		ElseIf SN1->N1_FILIAL == '05'
+		ElseIf SN1->N1_FILIAL $ _cFil05
 			_xRetorno := '3299120045'
-		ElseIf SN1->N1_FILIAL $ '10/11/12/13/14/15/16/17/18/19/1A/1B/1C'
+		ElseIf SN1->N1_FILIAL $ _cFil10
 			_xRetorno := '3299040045'
-		ElseIf SN1->N1_FILIAL $ '20/21/22/24/25'
+		ElseIf SN1->N1_FILIAL $ _cFil20
 			_xRetorno := '3299080045'
-		ElseIf SN1->N1_FILIAL == '23'
+		ElseIf SN1->N1_FILIAL $ _cFil23
 			_xRetorno := '3299180045'
-		ElseIf SN1->N1_FILIAL $ '30/31/32/33'
+		ElseIf SN1->N1_FILIAL $ _cFil30
 			_xRetorno := '3299060045'
-		ElseIf SN1->N1_FILIAL == '40'
+		ElseIf SN1->N1_FILIAL $ _cFil40
 			_xRetorno := '3299140045'
 		ElseIf SN1->N1_FILIAL $ _cFil90+_cFilAdm
 			_xRetorno := '3301020020'
-		ElseIf SN1->N1_FILIAL == '93'
+		ElseIf SN1->N1_FILIAL $ _cFil93
 			_xRetorno := '3299200045'
 		EndIf
 
