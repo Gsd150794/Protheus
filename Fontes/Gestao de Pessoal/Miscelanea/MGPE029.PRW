@@ -269,7 +269,7 @@ User Function MGPE029I(_cBody As Character,_cResposta As Character) As Logical
          RpcClearEnv()
          RpcSetEnv(_cGrupo,_cFilial)
          
-         If _cEtapa == _cEtapaInt  
+         If _cEtapa == Upper(_cEtapaInt)
             
             oCandidate   := oData:GetJsonObject("candidate")
             oJob         := oData:GetJsonObject("job")
@@ -531,22 +531,22 @@ User Function MGPE029I(_cBody As Character,_cResposta As Character) As Logical
             _nSalario    := MGPE029VAL("value",@oSalary) //Salario
 
             //Dados do RG
-            _cRGNomeCp := Upper(U_CRMA980VCP(MGPE029VAL("nome",@oRG),"",.T.,.T.)) 
+            _cRGNomeCp := U_CRMA980VCP(MGPE029VAL("nome",@oRG),"",.T.,.T.)
             _cRGNumero := MGPE029C(MGPE029VAL("numero-do-rg",@oRG)) 
-            _cRGCidNas := Upper(U_CRMA980VCP(MGPE029VAL("cidade-onde-nasceu",@oRG),"",.T.,.T.)) 
-            _cRGEstNas := Upper(U_CRMA980VCP(MGPE029VAL("estado-onde-nasceu",@oRG),"",.T.,.T.)) 
-            _cRGPaisNa := Upper(U_CRMA980VCP(MGPE029VAL("nacionalidade",@oRG),"",.T.,.T.))
+            _cRGCidNas := U_CRMA980VCP(MGPE029VAL("cidade-onde-nasceu",@oRG),"",.T.,.T.)
+            _cRGEstNas := U_CRMA980VCP(MGPE029VAL("estado-onde-nasceu",@oRG),"",.T.,.T.) 
+            _cRGPaisNa := U_CRMA980VCP(MGPE029VAL("nacionalidade",@oRG),"",.T.,.T.)
             _cRGDtNasc := MGPE029VAL("data-de-nascimento",@oRG,"D") //MGPE029VAL("birthDate",@oCandidate,"D")
-            _cRGOrgEmi := Upper(U_CRMA980VCP(MGPE029VAL("orgao-emissor",@oRG),"",.T.,.T.)) // RA_ORGEMRG
+            _cRGOrgEmi := U_CRMA980VCP(MGPE029VAL("orgao-emissor",@oRG),"",.T.,.T.) // RA_ORGEMRG
             _cRGDtExp  := MGPE029VAL("data-de-expedicao",@oRG,"D") // RA_DTRGEXP
-            _cRGNomMae := Upper(U_CRMA980VCP(MGPE029VAL("nome-da-mae",@oRG),"",.T.,.T.)) // RA_MAE
-            _cRGNomPai := Upper(U_CRMA980VCP(MGPE029VAL("nome-do-pai",@oRG),"",.T.,.T.)) // RA_PAI
-            _cRGUfEmis := Upper(U_CRMA980VCP(MGPE029VAL("uf-emissor",@oRG),"",.T.,.T.)) // RA_UFRG
+            _cRGNomMae := U_CRMA980VCP(MGPE029VAL("nome-da-mae",@oRG),"",.T.,.T.) // RA_MAE
+            _cRGNomPai := U_CRMA980VCP(MGPE029VAL("nome-do-pai",@oRG),"",.T.,.T.) // RA_PAI
+            _cRGUfEmis := U_CRMA980VCP(MGPE029VAL("uf-emissor",@oRG),"",.T.,.T.) // RA_UFRG
 
             //Dados da CNH
             _cHabNr     := MGPE029C(MGPE029VAL("numero-de-registro",@oCnh)) //RA_HABILIT
-            _cHabOrgEmi := Upper(U_CRMA980VCP(MGPE029VAL("orgao-emissor",@oCnh),"",.T.,.T.)) // RA_CNHORG
-            _cHabUFEmis := Upper(U_CRMA980VCP(MGPE029VAL("uf-emissor",@oCnh),"",.T.,.T.)) // RA_UFCNH
+            _cHabOrgEmi := U_CRMA980VCP(MGPE029VAL("orgao-emissor",@oCnh),"",.T.,.T.) // RA_CNHORG
+            _cHabUFEmis := U_CRMA980VCP(MGPE029VAL("uf-emissor",@oCnh),"",.T.,.T.) // RA_UFCNH
             _cHabDtEmis := MGPE029VAL("data-de-emissao",@oCnh,"D") // RA_DTEMCNH
             _cHabDtVal  := MGPE029VAL("validade",@oCnh,"D") // RA_DTVCCNH
             _cHabDtPriH := MGPE029VAL("data-da-primeira-habilitacao",@oCnh,"D") // RA_CTDEPSA 
@@ -569,14 +569,14 @@ User Function MGPE029I(_cBody As Character,_cResposta As Character) As Logical
             _cCertCart  := MGPE029VAL("797f8d13-0c8f-41df-b5b5-4c91e7422d9d",@oCertNasc)
 
             //Dados do Comprovante de Residência
-            _cRua       := Upper(U_CRMA980VCP(MGPE029VAL("tipo",@oCompResid),"",.T.,.T.)) + Space(1) + Upper(U_CRMA980VCP(MGPE029VAL("logradouro",@oCompResid),"",.T.,.T.)) //Upper(U_CRMA980VCP(MGPE029VAL("addressStreet",@oCandidate),"",.T.,.T.))
+            _cRua       := U_CRMA980VCP(MGPE029VAL("tipo",@oCompResid),"",.T.,.T.) + Space(1) + U_CRMA980VCP(MGPE029VAL("logradouro",@oCompResid),"",.T.,.T.) //U_CRMA980VCP(MGPE029VAL("addressStreet",@oCandidate),"",.T.,.T.))
             _cNr        := MGPE029VAL("numero",@oCompResid)
-            _cCompl     := Upper(U_CRMA980VCP(MGPE029VAL("complemento",@oCompResid),"",.T.,.T.))
-            _cBairro    := Upper(U_CRMA980VCP(MGPE029VAL("bairro",@oCompResid),"",.T.,.T.))
-            _cCidade    := Upper(U_CRMA980VCP(MGPE029VAL("cidade",@oCompResid),"",.T.,.T.))
+            _cCompl     := U_CRMA980VCP(MGPE029VAL("complemento",@oCompResid),"",.T.,.T.)
+            _cBairro    := U_CRMA980VCP(MGPE029VAL("bairro",@oCompResid),"",.T.,.T.)
+            _cCidade    := U_CRMA980VCP(MGPE029VAL("cidade",@oCompResid),"",.T.,.T.)
             _cCep       := StrTran(MGPE029VAL("cep",@oCompResid),"-","")
-            _cPais      := Upper(U_CRMA980VCP(MGPE029VAL("pais",@oCompResid),"",.T.,.T.))
-            _cEstado    := Upper(U_CRMA980VCP(MGPE029VAL("estado",@oCompResid),"",.T.,.T.)) 
+            _cPais      := U_CRMA980VCP(MGPE029VAL("pais",@oCompResid),"",.T.,.T.)
+            _cEstado    := U_CRMA980VCP(MGPE029VAL("estado",@oCompResid),"",.T.,.T.) 
 
             _cDepartam  := MGPE029VAL("name",@oDepartment)
             _cCargo     := MGPE029VAL("name",@oRole)
@@ -860,8 +860,8 @@ User Function MGPE029I(_cBody As Character,_cResposta As Character) As Logical
                      _cDep_Sexo   := MGPE029VAL("gender",@oValues)
                      _cDep_DtNasc := MGPE029VAL("birthDate",@oValues,"D")
 
-                     _cDep_Estado := Upper(U_CRMA980VCP(MGPE029VAL("stateOfOrigin",@oValues),"",.T.,.T.))
-                     _cDep_Cidade := Upper(U_CRMA980VCP(MGPE029VAL("cityOfOrigin",@oValues),"",.T.,.T.))
+                     _cDep_Estado := U_CRMA980VCP(MGPE029VAL("stateOfOrigin",@oValues),"",.T.,.T.)
+                     _cDep_Cidade := U_CRMA980VCP(MGPE029VAL("cityOfOrigin",@oValues),"",.T.,.T.)
 
                      //=====================================================
 
@@ -1158,6 +1158,8 @@ If Valtype(oObjJson) == "J"
 
    If _cTipo == "D"
       _cRetorno := Iif(Empty(Alltrim(_cRetorno)),CToD("") ,CToD(Subs(_cRetorno,9,2) + "/"+Subs(_cRetorno,6,2)+"/"+Subs(_cRetorno,1,4)))
+   ElseIf Valtype(_cRetorno) == "C"
+      _cRetorno := Upper(Alltrim(_cRetorno))
    EndIf
 EndIf
 
