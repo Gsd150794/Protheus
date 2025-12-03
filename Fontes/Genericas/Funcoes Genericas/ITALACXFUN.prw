@@ -1,23 +1,3 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-   Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer |11/09/2025| Chamado 52033. Correção do numero de seleção maximada da função ITLSTFIL () dos F3S LSTFIL e SM0001
-Lucas Borges  |14/09/2025| Chamado 51799. Implementada função para validar ambiente de teste totvs.framework.environment.Type.get()
-Alex Wallauer |16/09/2025| Chamado 51802. Ajustes nas cores do sistema para os modos escuro e claro p/ os icones da função ITMSG().
-Jose Gavetti  |18/11/2025| Chamado 52546. Permite trocar o bloco de execução para multiplas seleções de perguntas.
-Jose Gavetti  |18/11/2025| Chamado 51341. __cUserId não deve ter seu conteúdo alterado orientação TOTVS.
-Jose Gavetti  |27/11/2025| Chamado 53163. Correção Problema de Gravaçao Alt/Desmembramento PV via WS do RDC - Função ITGrvLog
-===============================================================================================================================
-Analista      - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
-================================================================================================================================================================================================
-Vanderlei     - Julio Paz     - 07/10/25 - 13/11/25 - 52838   - Exibir na tela de visualização de canhoto de notas fiscais as informações Origem da digitalização e Possui canhoto físico.
-Jerry         - Alex Wallauer - 28/11/25 -          - 52981   - Ajustes na função ITGrvLog () para gravar _cCodUsr:=" " quando Scheduller.
-================================================================================================================================================================================================
-*/ 
-
 #Include "TOTVS.ch"
 #Include "TBICONN.CH"  
 
@@ -6337,16 +6317,13 @@ Retorno-----------: cmatric - matricula do usuário no SRA
 */
 User Function ITRETMAT( cCodUsr )
 
-Local aUsrAux	:= {}
 Local cMatric	:= ""
 
-PswOrder(1)
-If PswSeek(cCodUsr)
-	aUsrAux := PswRet(1)
-	cMatric := SubStr( aUsrAux[01][22] , 3 , 8 )
+If !Empty(cCodUsr)
+	cMatric := FWSFAllUsers({cCodUsr},{"USR_CODFUNC"})[1][3] 	// Matricula
 EndIf
 
-Return( cMatric )	
+Return( cMatric )
 
 /*
 ===============================================================================================================================
@@ -8001,27 +7978,24 @@ Local _lbloq       := .F. , _nI
 
 PREPARE ENVIRONMENT EMPRESA '01' FILIAL '01'  TABLES "ZGU"  MODULO 'OMS'
 
-PswOrder(2)
-If PswSeek(_cuser,.T.)
-	ZGU->(DBSetOrder(1))
-	If !(ZGU->(DBSeek(xFilial("ZGU")+_cuser)) .And. ZGU->ZGU_TENTS > 10) //Proteção contra brute forces
-		_lpassw := PswName(AllTrim(__aPostParms[2,2]))
-		If  ZGU->(DBSeek(xFilial("ZGU")+_cuser))
-			RecLock("ZGU", .F.)
-		Else
-			RecLock("ZGU", .T.)
-			ZGU->ZGU_USER := Upper(AllTrim(__aPostParms[1,2]))	
-		EndIf
-		
-		If _lpassw
-			ZGU->ZGU_TENTS := 0
-		Else
-			ZGU->ZGU_TENTS++
-		EndIf
-		ZGU->(MSUnLock())
-	ElseIf ZGU->(DBSeek(xFilial("ZGU")+_cuser)) .And. ZGU->ZGU_TENTS > 10
-		_lbloq := .T.
+ZGU->(DBSetOrder(1))
+If !(ZGU->(DBSeek(xFilial("ZGU")+_cuser)) .And. ZGU->ZGU_TENTS > 10) //Proteção contra brute forces
+	_lpassw := PswName(AllTrim(__aPostParms[2,2]))
+	If  ZGU->(DBSeek(xFilial("ZGU")+_cuser))
+		RecLock("ZGU", .F.)
+	Else
+		RecLock("ZGU", .T.)
+		ZGU->ZGU_USER := Upper(AllTrim(__aPostParms[1,2]))	
 	EndIf
+	
+	If _lpassw
+		ZGU->ZGU_TENTS := 0
+	Else
+		ZGU->ZGU_TENTS++
+	EndIf
+	ZGU->(MSUnLock())
+ElseIf ZGU->(DBSeek(xFilial("ZGU")+_cuser)) .And. ZGU->ZGU_TENTS > 10
+	_lbloq := .T.
 EndIf
 
 //Verifica Senha da matricula

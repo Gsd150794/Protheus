@@ -1,15 +1,3 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-   Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer |11/03/2024| Chamado 46480. Chamada da funcao U_M460Acertos para Acertar os Raterios de campos novos contra valores totais do RDC.
-Lucas Borges  |23/07/2025| Chamado 51340. Ajustar função para validação de ambiente de teste
-Lucas Borges  |14/09/2025| Chamado 51799. Implementada função para validar ambiente de teste totvs.framework.environment.Type.get()
-================================================================================================================================================
-*/
-
 #Include "TOTVS.ch"
 
 /*
@@ -105,11 +93,8 @@ If IsInCallStack('MATA460A') //Faturamento por pedido
    cGetAssun := "Resultado do estoque apos Faturamento do(s) Pedido(s): "+_aItens[1,3] 
 EndIf
 
-If (Len(PSWRET()) # 0) // Quando nao For rotina automatica do configurador
-   PswOrder(1)
-   PswSeek(__cUserId,.T.)
-   aUsuario:= PswRet()
-   cGetCc  := LOWER(AllTrim(aUsuario[1,14]))+Space(150)// Pega e-mail do usuario
+If Type('__cUserId') == 'C'
+   cGetCc  := LOWER(AllTrim(FWSFAllUsers({__cUserID},{'USR_EMAIL'})[1][3]))+Space(150)// Pega e-mail do usuario
 EndIf
 
 If Empty(cGetPara)

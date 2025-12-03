@@ -1,16 +1,3 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-   Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer |30/08/2021| Chamado 37602. Criacao e tratamento do campo novo Z14_TIPO.
-julio Paz     |10/09/2025| Chamado 51687. Ajustar as validações e mensagens da gravação do Pedido de Vendas para validar 
-			  |			 | corretamente as permissões do usuário por Armazém.
-julio Paz     |12/09/2025| Chamado 51687. Ajustes nas validações, remoção do trecho Else nas validações de acesso do usuário aos armazéns.
-===============================================================================================================================
-*/
-
 #Include "TOTVS.ch"
 
 /*
@@ -291,17 +278,7 @@ User Function ACFG004R(_ccodusu)
 
 Local _cNome := ""
 
-//Escolhe ordem de procura por código do usuário
-PswOrder(1)
-
-//Se achar usuário carrega nome completo
-If PswSeek(_ccodusu,.T.)
-
-	_aRetUser := PswRet(1)
-
-   _cNome   := Upper(AllTrim(_aRetUser[1,4]))
-
-EndIf
+_cNome := FWSFAllUsers({_ccodusu},{"USR_NOME"})[1][3]
 
 Return _cNome
 

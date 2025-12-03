@@ -1,15 +1,3 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-   Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer |30/09/2019| Chamado 30523. Chamada do Layout do U_RCOM002().
-Alex Wallauer |08/02/2023| Chamado 42719. Acrescentada a opcao NF no campo C7_I_URGEN : S(SIM), N(NAO) F(NF).
-Lucas Borges  |22/04/2025| Chamado 50505. Alterada a picture do CNPJ para contemplar campo alfanumérico
-===============================================================================================================================
-*/
-
 #Include "rwmake.ch"
 #Include "ap5mail.ch"
 #Include "tbiconn.ch"
@@ -1056,15 +1044,8 @@ Local aAreaSC7  := SC7->(GetArea())
 Local nLiPosIni    
 Local nLinInReaj
 Local nlinInTran             
-Local _aDadUsuaio:= {}
 Local _cUsrNome           
 Local _cPedInter := ""
-
-//If cPaisLoc <> "BRA" .And. !Empty(aValIVA)
-//	For nG:=1 to Len(aValIVA)
-//		nValIVA+=aValIVA[nG]
-//	Next
-//EndIf
 
 cMensagem:= Formula(SC7->C7_MSG)
 
@@ -1163,13 +1144,7 @@ DBSelectArea("SE4")
 DBSetOrder(1)
 DBSeek(xFilial("SE4") + SC7->C7_COND)          
 
-PswOrder(1) //Pesquisa pelo id do usuario
-If PswSeek(_cUserDig, .T. )
-
-	_aDadUsuaio := PswRet(1)
-	_cUsrNome   := _aDadUsuaio[1,2] 
-
-EndIf
+_cUsrNome := FWSFAllUsers({_cUserDig})[1][3]
 
 DBSelectArea("SC7")                 
 

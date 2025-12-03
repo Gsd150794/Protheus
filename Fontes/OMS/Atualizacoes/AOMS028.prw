@@ -4090,37 +4090,28 @@ Local _aArea	:= FWGetArea()
 Local _lRet		:= .F.
 Local _nX		:= 0
 
-PswOrder(1)
+_aUserInf := FWUsrEmp(M->ZF7_USRLOG) 
 
-If PswSeek(M->ZF7_USRLOG, .T.)
-	_aUserInf := PswRet()
-	If Len(_aUserInf) > 0
-		For _nX := 1 To Len(_aUserInf[2][6])
-			If cFilAnt == SubStr(_aUserInf[2][6][_nX],3,2)
+If Len(_aUserInf) > 0
+	If _aUserInf[1] <> "@@@@"
+		For _nX := 1 To Len(_aUserInf)
+			If cFilAnt == SubStr(_aUserInf[_nX],3,2)
 				_lRet := .T.
+				Exit
 			EndIf
 		Next _nX
-		If !_lRet
-			_aInfHlp := {}
-			//                  |....:....|....:....|....:....|....:....|
-			aAdd( _aInfHlp	, {	"Usuário informado não tem autorização na "	,;
-								" filial corrente do sistema.     "			})
-		
-			aAdd( _aInfHlp	, {	"Verifique os acessos do usuário. "			})
-		
-			U_ITCADHLP( _aInfHlp , "AOMS02819" )
-		EndIf
 	Else
+		_lRet := .T.			
+	Endif	
+	If !_lRet
 		_aInfHlp := {}
 		//                  |....:....|....:....|....:....|....:....|
-		aAdd( _aInfHlp	, {	"Usuário informado não tem informações no "	,;
-							" módulo configurador do sistema. "			})
-		
-		aAdd( _aInfHlp	, {	"Verifique o código informado.    "			})
-		
-		U_ITCADHLP( _aInfHlp , "AOMS02820" )
-		
-		_lRet := .F.
+		aAdd( _aInfHlp	, {	"Usuário informado não tem autorização na "	,;
+							" filial corrente do sistema.     "			})
+	
+		aAdd( _aInfHlp	, {	"Verifique os acessos do usuário. "			})
+	
+		U_ITCADHLP( _aInfHlp , "AOMS02819" )
 	EndIf
 Else
 	_aInfHlp := {}
@@ -4137,6 +4128,7 @@ EndIf
 
 FWRestArea(_aArea)
 Return(_lRet)
+
 
 /*
 ===============================================================================================================================

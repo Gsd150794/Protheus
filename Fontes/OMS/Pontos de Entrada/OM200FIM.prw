@@ -1,21 +1,3 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-   Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer |31/07/2025| Chamado 49894. Ajustes na gravação do log de calculos do peso bruto da carga
-Lucas Borges  |14/09/2025| Chamado 50617. Modificada a chamada dos parâmetros para a SX6
-Lucas Borges  |02/10/2025| Chamado 51526. Modificada forma para recuperar a matrícula do usuário.
-Jose Gavetti  |08/10/2025| Chamado 52364. Inserido campo C5_I_CDUSU para ser enviado no cabeçalho do Pedido.
-Jose Gavetti  |26/11/2025| Chamado 51341. __cUserId não deve ter seu conteúdo alterado orientação TOTVS.
-===========================================================================================================================================================================================================================================================================
-Analista  - Programador   - Inicio   - Envio    - Chamado - Motivo da Alteração
-===========================================================================================================================================================================================================================================================================
-Jerry     - Alex Wallauer - 23/10/25 -          - 52354   - Ajustes feito na função U_IT_EditCell() para usar nesse chamado no programa AOMS112.PRW
-===========================================================================================================================================================================================================================================================================
-*/
-
 #Include "TOTVS.ch"
 #Include "RWMAKE.ch"
 
@@ -3074,15 +3056,14 @@ Static Function BuscaEmail(_lAutomatico,_cMailUser)
  // Concatena o e-mail do usuário que criou a carga através da rotina de
  // integração RDC via webservice. A variável _cMailUsrCarga foi definida fonte AOMS074.PRW
  //=========================================================================================
- If _lAutomatico
+If _lAutomatico
     If Type("_cMailUsrCarga") == "C" .And. !Empty(_cMailUsrCarga)
        _cMailUser := AllTrim(_cMailUsrCarga)
     EndIf
  Else
-    PswOrder(1)
-    PswSeek(__cUserId,.T.)
-    aUsuario  :=PswRet()
-    _cMailUser:=AllTrim(aUsuario[1,14])
+   If Type('__cUserId') == 'C'
+      _cMailUser:= FWSFAllUsers({__cUserID},{'USR_EMAIL'})[1][3]
+   EndIf   
  EndIf
 
  If Empty( _cEmail )//Se o paramentro estiver em branco envia para o usuario

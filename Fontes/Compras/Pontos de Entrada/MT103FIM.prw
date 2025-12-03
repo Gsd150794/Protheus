@@ -1,15 +1,3 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-   Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer |09/09/2025| Chamado 52052. Zerados os campos DAI_I_FRET, DAI_I_VRPE, DAI_I_FROL e DAK_I_FROL.
-Alex Wallauer |23/09/2025| Chamado 49221. Ajustes para compensação de títulos automatica. 
-Lucas Borges  |14/09/2025| Chamado 50617. Modificada a chamada dos parâmetros para a SX6
-Igor Melgaço  |13/10/2025| Chamado 52343. Ajustes para compensação entre de títulos automatica DCI e DCT.
-===============================================================================================================================
-*/
 
 #Include "TOTVS.ch"
 
@@ -100,11 +88,8 @@ If l103GAuto == .T. //.F. (Atualizando impostos) / .T. (Gravando documento)
 				If SubStr( _cCodUsr , 1 , 2 ) == "#@"
 					_cUserAux	:= AllTrim( SubStr( _cCodUsr , 3 ) )
 					If !Empty(_cUserAux)
-						PSWOrder(1)
-						PSWSeek( _cUserAux )
-						_aDadPSW		:= PSWRet()
-						_cUserAux	:= Capital( AllTrim( _aDadPSW[1][4] ) )
-						_cfilusr     :=  SubStr( AllTrim( _aDadPSW[1][22] ), 3 ,2)
+						_cUserAux := Capital(FWSFAllUsers({_cUserAux},{"USR_NOME"})[1][3])
+						_cfilusr  := FWSFAllUsers({_cUserAux},{"USR_FILIAL"})[1][3] 
 					Else
 						_cUserAux:= "Nao indentificado"
 						_cfilusr :=  _cUserAux							   
@@ -112,10 +97,8 @@ If l103GAuto == .T. //.F. (Atualizando impostos) / .T. (Gravando documento)
 				Else
 					_cUserAux	:= AllTrim( _cCodUsr )
 					If !Empty(_cUserAux)
-						PSWOrder(2)
-						_aDadPSW		:= PSWRet()
-						_cUserAux	:= Capital( AllTrim( _aDadPSW[1][4] ) )
-						_cfilusr     :=  SubStr( AllTrim( _aDadPSW[1][22] ), 3 ,2)
+						_cUserAux := Capital(FWSFAllUsers({_cUserAux},{"USR_NOME"})[1][3])
+						_cfilusr  := FWSFAllUsers({_cUserAux},{"USR_FILIAL"})[1][3]
 					Else
 						_cUserAux:= "Nao indentificado"
 						_cfilusr :=  _cUserAux
@@ -208,11 +191,8 @@ If l103GAuto == .T. //.F. (Atualizando impostos) / .T. (Gravando documento)
 				If SubStr( _cCodUsr , 1 , 2 ) == "#@"
 					_cUserAux	:= AllTrim( SubStr( _cCodUsr , 3 ) )
 					If !Empty(_cUserAux)
-						PSWOrder(1)
-						PSWSeek( _cUserAux )
-						_aDadPSW		:= PSWRet()
-						_cUserAux	:= Capital( AllTrim( _aDadPSW[1][4] ) )
-						_cfilusr     :=  SubStr( AllTrim( _aDadPSW[1][22] ), 3 ,2)
+						_cUserAux := Capital(FWSFAllUsers({_cUserAux},{"USR_NOME"})[1][3])
+						_cfilusr  := FWSFAllUsers({_cUserAux},{"USR_FILIAL"})[1][3] 
 					Else
 						_cUserAux:= "Nao indentificado"
 						_cfilusr :=  _cUserAux
@@ -220,10 +200,8 @@ If l103GAuto == .T. //.F. (Atualizando impostos) / .T. (Gravando documento)
 				Else
 					_cUserAux	:= AllTrim( _cCodUsr )
 					If !Empty(_cUserAux)
-						PSWOrder(2)
-						_aDadPSW		:= PSWRet()
-						_cUserAux	:= Capital( AllTrim( _aDadPSW[1][4] ) )
-						_cfilusr     := SubStr( AllTrim( _aDadPSW[1][22] ), 3 ,2)
+						_cUserAux := Capital(FWSFAllUsers({_cUserAux},{"USR_NOME"})[1][3])
+						_cfilusr  := FWSFAllUsers({_cUserAux},{"USR_FILIAL"})[1][3] 
 					Else
 						_cUserAux:= "Nao indentificado"
 						_cfilusr :=  _cUserAux
@@ -2528,22 +2506,23 @@ While !TRBSCR->(Eof())
 	Else
 		Loop
 	EndIf
-	_cDep:="XXXXXXX"
-	PswOrder(1) // Busca por ID
-	If PSWSEEK(SCR->CR_USER, .T. )
-		_aDados:=PSWRET(1)// Retorna vetor com informações do usuário
-		_cDep  :=AllTrim(_aDados[1][12])//CARGO
-		
-		If ValType(oProc) = "O"
-			oProc:cCaption :=  "Lendo Aprovador PC: "+_cNumPC+" / "+_aDados[1][2]
-			ProcessMessages()
-		EndIf   
-		
-		If Upper(_cDep) <> "DIRECAO"//Não envia para diretoria
-			_cEmail += AllTrim( _aDados[1][14] )+";"
-			_cNomes += Capital(AllTrim( _aDados[1][04] ))+CRLF
-		EndIf
+
+	_cDep:= FWSFAllUsers({SCR->CR_USER},{"USR_DEPTO"})[1][3] // Departamento
+
+	If Empty(_cDep)
+		_cDep:="XXXXXXX"
 	EndIf
+	
+	If ValType(oProc) = "O"
+		oProc:cCaption :=  "Lendo Aprovador PC: "+_cNumPC+" / "+FWSFAllUsers({SCR->CR_USER})[1][3] // Nome Usuário 
+		ProcessMessages()
+	EndIf   
+	
+	If Upper(_cDep) <> "DIRECAO"//Não envia para diretoria
+		_cEmail += AllTrim( FWSFAllUsers({SCR->CR_USER},{'USR_EMAIL'})[1][3] )+";" //Email
+		_cNomes += Capital(AllTrim( FWSFAllUsers({SCR->CR_USER},{"USR_NOME"})[1][3]))+CRLF //Nome Completo
+	EndIf
+	
 	TRBSCR->(DBSkip())
 EndDo 
 

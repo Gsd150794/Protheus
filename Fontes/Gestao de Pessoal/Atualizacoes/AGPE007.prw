@@ -1,15 +1,3 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-   Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Igor Melgaço  |23/08/2024| Chamado 47047 - Retirada de dados de email do Fernando no fonte.
-Lucas Borges  |13/10/2024| Chamado 48465. Retirada da função de conout
-Lucas Borges  |23/07/2025| Chamado 51340. Ajustar função para validação de ambiente de teste
-=============================================================================================================================== 
-*/
-
 #Include "TOTVS.ch"
 #Include 'FWMVCDef.ch'
 #Include "TopConn.ch"
@@ -453,13 +441,9 @@ Local _cEmailDest := U_ITGETMV( "IT_EMAILAPR", "")
 Local _cTitulo    := "Listagem Classificação de Funcionários Pendentes de Aprovação"
 Local _cPict  :="@E 999,999,999,999.99"
 Local _cSituacao
-//Local _cDirExcel  := "\spool"
 
 If !_lSchedule
-   PswOrder(1)
-   PswSeek(__cUserId,.T.)
-   aUsuario:=PswRet()	
-   _cEmailDest :=AllTrim(aUsuario[1,14])
+   _cEmailDest := FWSFAllUsers({__cUserID},{'USR_EMAIL'})[1][3] 
 EndIf
 
 If Empty(_cEmailDest)
