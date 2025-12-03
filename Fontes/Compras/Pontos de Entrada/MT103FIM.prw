@@ -1,16 +1,3 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-   Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Alex Wallauer |09/09/2025| Chamado 52052. Zerados os campos DAI_I_FRET, DAI_I_VRPE, DAI_I_FROL e DAK_I_FROL.
-Alex Wallauer |23/09/2025| Chamado 49221. Ajustes para compensação de títulos automatica. 
-Lucas Borges  |14/09/2025| Chamado 50617. Modificada a chamada dos parâmetros para a SX6
-Igor Melgaço  |13/10/2025| Chamado 52343. Ajustes para compensação entre de títulos automatica DCI e DCT.
-Jose Gavetti  |27/11/2025| Chamado 51527. Substituição funções PSWORDER, PSWSEEK e PSWRET por FWSFAllUsers recomendação TOTVS.
-===============================================================================================================================
-*/
 
 #Include "TOTVS.ch"
 
