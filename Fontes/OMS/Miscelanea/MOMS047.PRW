@@ -1,19 +1,3 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-   Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  |09/05/2025| Chamado 50617. Corrigir chamada estática no nome das tabelas do sistema
-Lucas Borges  |24/07/2025| Chamado 51340. Ajustar função para validação de ambiente de teste
-Lucas Borges  |14/09/2025| Chamado 51799. Implementada função para validar ambiente de teste totvs.framework.environment.Type.get()
-====================================================================================================================================================
-Analista       - Programador     - Inicio   - Envio    - Chamado - Motivo de Alteração
-====================================================================================================================================================
-Jerry          - Alex Wallauer   - 21/05/25 - 21/05/25 - 49966   - CORREÇÃO DE ERROR.LOG: Invalid GetTempPath() client call in JOB. on MOM047GEREXCEL(MOMS047.PRW) Line : 5248
-====================================================================================================================================================
-*/
-
 #Include "TOTVS.ch"
 #Include "vkey.ch"
 
@@ -5213,20 +5197,18 @@ SA2->(DBSeek(xFilial("SA2")+_cForn))
     
 _cEmail := AllTrim(SA2->A2_EMAIL) 
 
-If lTela 
-   PswOrder(1) // Busca por ID
-   If PSWSEEK(__cUserId, .T. )
-      _aDadosUser:=PSWRET(1)// Retorna vetor com informações do usuário
-      _cSetor:=AllTrim(_aDadosUser[1][12]) 
-   EndIf
-
-   _cUserName:=UsrFullName( RetCodUsr() )
-   If U_ITMsg("Deseja uma copia de todos os e-mail enviados?",'Atenção!',"Com Copia para o usuario",3,2,2)
-      cEmailCo:=AllTrim(UsrRetMail(__cUserId))
-   EndIf
+If lTela
+	If Type('__cUserId') == 'C'
+		_cSetor:= FWSFAllUsers({__cUserID},{"USR_DEPTO"})[1][3]
+		_cUserName:= FWSFAllUsers({__cUserID},{"USR_NOME"})[1][3] 
+		If U_ITMsg("Deseja uma copia de todos os e-mail enviados?",'Atenção!',"Com Copia para o usuario",3,2,2)
+			cEmailCo:= FWSFAllUsers({__cUserID},{'USR_EMAIL'})[1][3] 
+		EndIf
+	EndIf	
 Else
    _cUserName:=AllTrim(SM0->M0_NOME)+" - "+AllTrim(SM0->M0_NOMECOM)
 EndIf
+
 
 If Empty(AllTrim(_csetor))
  	_cSetor := "Logistica"
