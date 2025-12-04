@@ -88,6 +88,11 @@ If l103GAuto == .T. //.F. (Atualizando impostos) / .T. (Gravando documento)
 				If SubStr( _cCodUsr , 1 , 2 ) == "#@"
 					_cUserAux	:= AllTrim( SubStr( _cCodUsr , 3 ) )
 					If !Empty(_cUserAux)
+						PSWOrder(1)
+						PSWSeek( _cUserAux )
+						_aDadPSW		:= PSWRet()
+						_cUserAux	:= Capital( AllTrim( _aDadPSW[1][4] ) )
+						_cfilusr     :=  SubStr( AllTrim( _aDadPSW[1][22] ), 3 ,2)
 						_cUserAux := Capital(FWSFAllUsers({_cUserAux},{"USR_NOME"})[1][3])
 						_cfilusr  := FWSFAllUsers({_cUserAux},{"USR_FILIAL"})[1][3] 
 					Else
@@ -97,6 +102,10 @@ If l103GAuto == .T. //.F. (Atualizando impostos) / .T. (Gravando documento)
 				Else
 					_cUserAux	:= AllTrim( _cCodUsr )
 					If !Empty(_cUserAux)
+						PSWOrder(2)
+						_aDadPSW		:= PSWRet()
+						_cUserAux	:= Capital( AllTrim( _aDadPSW[1][4] ) )
+						_cfilusr     :=  SubStr( AllTrim( _aDadPSW[1][22] ), 3 ,2)
 						_cUserAux := Capital(FWSFAllUsers({_cUserAux},{"USR_NOME"})[1][3])
 						_cfilusr  := FWSFAllUsers({_cUserAux},{"USR_FILIAL"})[1][3]
 					Else
@@ -191,6 +200,11 @@ If l103GAuto == .T. //.F. (Atualizando impostos) / .T. (Gravando documento)
 				If SubStr( _cCodUsr , 1 , 2 ) == "#@"
 					_cUserAux	:= AllTrim( SubStr( _cCodUsr , 3 ) )
 					If !Empty(_cUserAux)
+						PSWOrder(1)
+						PSWSeek( _cUserAux )
+						_aDadPSW		:= PSWRet()
+						_cUserAux	:= Capital( AllTrim( _aDadPSW[1][4] ) )
+						_cfilusr     :=  SubStr( AllTrim( _aDadPSW[1][22] ), 3 ,2)
 						_cUserAux := Capital(FWSFAllUsers({_cUserAux},{"USR_NOME"})[1][3])
 						_cfilusr  := FWSFAllUsers({_cUserAux},{"USR_FILIAL"})[1][3] 
 					Else
@@ -200,6 +214,10 @@ If l103GAuto == .T. //.F. (Atualizando impostos) / .T. (Gravando documento)
 				Else
 					_cUserAux	:= AllTrim( _cCodUsr )
 					If !Empty(_cUserAux)
+						PSWOrder(2)
+						_aDadPSW		:= PSWRet()
+						_cUserAux	:= Capital( AllTrim( _aDadPSW[1][4] ) )
+						_cfilusr     := SubStr( AllTrim( _aDadPSW[1][22] ), 3 ,2)
 						_cUserAux := Capital(FWSFAllUsers({_cUserAux},{"USR_NOME"})[1][3])
 						_cfilusr  := FWSFAllUsers({_cUserAux},{"USR_FILIAL"})[1][3] 
 					Else
