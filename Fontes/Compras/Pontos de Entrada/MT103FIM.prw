@@ -93,8 +93,6 @@ If l103GAuto == .T. //.F. (Atualizando impostos) / .T. (Gravando documento)
 						_aDadPSW		:= PSWRet()
 						_cUserAux	:= Capital( AllTrim( _aDadPSW[1][4] ) )
 						_cfilusr     :=  SubStr( AllTrim( _aDadPSW[1][22] ), 3 ,2)
-						_cUserAux := Capital(FWSFAllUsers({_cUserAux},{"USR_NOME"})[1][3])
-						_cfilusr  := FWSFAllUsers({_cUserAux},{"USR_FILIAL"})[1][3] 
 					Else
 						_cUserAux:= "Nao indentificado"
 						_cfilusr :=  _cUserAux							   
@@ -106,8 +104,6 @@ If l103GAuto == .T. //.F. (Atualizando impostos) / .T. (Gravando documento)
 						_aDadPSW		:= PSWRet()
 						_cUserAux	:= Capital( AllTrim( _aDadPSW[1][4] ) )
 						_cfilusr     :=  SubStr( AllTrim( _aDadPSW[1][22] ), 3 ,2)
-						_cUserAux := Capital(FWSFAllUsers({_cUserAux},{"USR_NOME"})[1][3])
-						_cfilusr  := FWSFAllUsers({_cUserAux},{"USR_FILIAL"})[1][3]
 					Else
 						_cUserAux:= "Nao indentificado"
 						_cfilusr :=  _cUserAux
@@ -205,8 +201,6 @@ If l103GAuto == .T. //.F. (Atualizando impostos) / .T. (Gravando documento)
 						_aDadPSW		:= PSWRet()
 						_cUserAux	:= Capital( AllTrim( _aDadPSW[1][4] ) )
 						_cfilusr     :=  SubStr( AllTrim( _aDadPSW[1][22] ), 3 ,2)
-						_cUserAux := Capital(FWSFAllUsers({_cUserAux},{"USR_NOME"})[1][3])
-						_cfilusr  := FWSFAllUsers({_cUserAux},{"USR_FILIAL"})[1][3] 
 					Else
 						_cUserAux:= "Nao indentificado"
 						_cfilusr :=  _cUserAux
@@ -218,8 +212,6 @@ If l103GAuto == .T. //.F. (Atualizando impostos) / .T. (Gravando documento)
 						_aDadPSW		:= PSWRet()
 						_cUserAux	:= Capital( AllTrim( _aDadPSW[1][4] ) )
 						_cfilusr     := SubStr( AllTrim( _aDadPSW[1][22] ), 3 ,2)
-						_cUserAux := Capital(FWSFAllUsers({_cUserAux},{"USR_NOME"})[1][3])
-						_cfilusr  := FWSFAllUsers({_cUserAux},{"USR_FILIAL"})[1][3] 
 					Else
 						_cUserAux:= "Nao indentificado"
 						_cfilusr :=  _cUserAux
