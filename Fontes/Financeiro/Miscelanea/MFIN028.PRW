@@ -153,7 +153,7 @@ Begin Sequence
    	cHtml := 'Prezado Cliente,'
    	cHtml += '<br><br>'
    	cHtml += '&nbsp;&nbsp;&nbsp;<b>'+AllTrim((_cAlias)->A1_NOME)+'.</b>'
-   	cHtml += '&nbsp;&nbsp;&nbsp;CNPJ '+TRANSFORM(Val(AllTrim((_cAlias)->A1_CGC)),"@R! NN.NNN.NNN/NNNN-99")+'.'
+   	cHtml += '&nbsp;&nbsp;&nbsp;CNPJ '+TRANSFORM(AllTrim((_cAlias)->A1_CGC),"@R! NN.NNN.NNN/NNNN-99")+'.'
    	cHtml += '<br><br>'
    	cHtml += '&nbsp;&nbsp;&nbsp;MENSAGEM IMPORTANTE!'
    	cHtml += '<br><br>'
