@@ -18,9 +18,7 @@ Local _cPerg		:= "MFIS005" As Character
 Local _cTitulo		:= "Workflow Inconsistências Fiscais" As Character
 Local _cTexto		:= "Rotina para avaliar possíveis inconsistências na escrituração de documentos fiscais, bem como nos Livros Fiscais." As Character
 
-//============================================
 //Cria interface principal
-//============================================
 tNewProcess():New(	_cPerg						,; // cFunction. Nome da função que está chamando o objeto
 					_cTitulo					,; // cTitle. Título da árvore de opções
 					{|_oSelf| MFIS005P(_oSelf) },; // bProcess. Bloco de execução que será executado ao confirmar a tela
