@@ -18,11 +18,11 @@ User Function ITEM()
 
 Local _aParam        := ParamIXB               As aArray
 Local _lRet          := .T.					   As Logical
-Local _oObj          := Nil                    As Object
 Local _cIdPonto      := ''                     As Character 
 Local _cIdModel      := ''					   As Character 	
 Local _oModel        := FWModelActive()        As Object 
-Local _oModelSB1     := ''                     As Character
+Local _oModelSB1     := Nil                    As Object
+Local _oObj          := Nil                    As Object
 
 If _aParam <> NIL
 	_oObj     := _aParam[1]
@@ -571,7 +571,6 @@ If _lResult
 
     If !totvs.framework.environment.Type.get() == '1' //1-Produção, 2-Homologação,3-Desenvolvimento
 	   _cEmlLog := "Rotina executada em Ambiente de Testes: ["+ GetEnvServer() +"]. Não será processado o envio de e-mail!"
-            //  __cMens                                                                 ,__cTitu           ,_csolu,_ntipo,_nbotao,_nmenbot,_lHelpMvc,_cbt1,_cbt2,_bMaisDetalhes
 		Help(NIL, NIL, "A010TOK03", NIL, Upper(_cEmlLog)+CHR(13)+CHR(10)+"E-mail para: "+_cEmail+CHR(13)+CHR(10), 1, 0, NIL, NIL, NIL, NIL, NIL,{""})
 	   Return
     EndIf
