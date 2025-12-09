@@ -1,15 +1,3 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-   Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Julio Paz     |13/06/2025| Chamado 45229. Ajustes no novo webservice de integração Alteração na Situação Comercial do Pedido de Vendas.
-Lucas Borges  |01/08/2025| Chamado 51453. Substituir função EncodeUtf8 por FWHttpEncode
-Lucas Borges  |18/09/2025| Chamado 50617. Migração dos parâmetros da ZP1 para SX6
-===============================================================================================================================
-*/
-
 #Include "TOTVS.ch"
 #Include "FWMVCDef.Ch"
 
@@ -2808,6 +2796,7 @@ Begin Sequence
 	_cXML += '   <soapenv:Body>'
 	_cXML += '      <tem:SolicitarCancelamentoDaCarga>'
 	_cXML += '         <tem:protocoloIntegracaoCarga>'+AllTrim(MV_PAR01)+'</tem:protocoloIntegracaoCarga>'
+   _cXML += '         <tem:motivoDoCancelamento>Carga Cancelada via ERP</tem:motivoDoCancelamento>'
 	_cXML += '      </tem:SolicitarCancelamentoDaCarga>'
 	_cXML += '   </soapenv:Body>'
 	_cXML += '</soapenv:Envelope>'
@@ -2891,8 +2880,6 @@ Begin Sequence
    EndIf
 
    _cSitPed := U_STPEDIDO()
-//----------------------------------------------------------  // JPP TESTE
-   // Incluir chamada para o TMS Aqui. 
 
    //================================================================================
    // Se o Webservice de integração dom o TMS Multiembarcador estiver ativo
@@ -2900,7 +2887,7 @@ Begin Sequence
    // de envio de situação de Pedidos de vendas para o sistema TMS Multiembarcador. 
    //================================================================================
    If ! U_IT_TMS(SC5->C5_I_LOCEM) 
-
+      Break
    EndIf  
 
    If SC5->C5_I_ENVRD = "S"
@@ -2916,7 +2903,7 @@ Begin Sequence
       //========================================================================
       // Chama a rotina antiga, do RDC, de envio da Situação do Pedido de Vendas
       //========================================================================
-         If _lMarcaEnv
+      If _lMarcaEnv
             U_GRVCAPAC(SC5->C5_FILIAL,NIL,SC5->C5_NUM,"[ ENVSITPV - MARCAENV - "+AllTrim(FUNNAME())+" ] [ Sit.: "+_cSitPed+" ]")
             Break
       EndIf
