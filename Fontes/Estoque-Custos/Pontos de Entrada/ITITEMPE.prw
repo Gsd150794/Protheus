@@ -1,45 +1,252 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-   Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Lucas Borges  |22/07/2025| Chamado 51340. Ajustar função para validação de ambiente de teste
-Lucas Borges  |14/09/2025| Chamado 51799. Implementada função para validar ambiente de teste totvs.framework.environment.Type.get()
-Lucas Borges  |17/09/2025| Chamado 50617. Corrigido error.log na exclusão.
-==============================================================================================================================================================
-*/
-
-// USE ESSE PONTO PARA VALIDAÇÕES E O AEST045.PRW PARA GRAVAÇÕES
 #Include "TOTVS.ch"
-#Include "TBICONN.CH"  
+#Include "FWMVCDef.ch"
+#Include "TBICONN.ch"
+
+Static _nOper
 
 /*
 ===============================================================================================================================
-Programa----------: A010TOK
-Autor-------------: Fabiano Dias da Silva
-Data da Criacao---: 20/04/2010
-Descrição---------: Ponto de Entrada que valida a inclusao e alteracao de produtos (Fonte: MATA010.PRX) 
-                    Chamada do antigo A010TudoOk() do Fonte: MATA010.PRX
-                    USE ESSE PONTO PARA VALIDAÇÕES E O AEST045.PRW PARA GRAVAÇÕES
-Parametros--------: Nenhum
-Retorno-----------: .T. = Permite confirmar lancamento
-------------------: .F. = Nao Permite confirmar lancamento 
+Programa----------: ITEM / ITITEMPE.PRW
+Autor-------------: Julio de Paula Paz
+Data da Criacao---: 11/02/2019
+Descrição---------: Ponto de entrada no padrão MVC chamado pela rotina de manutenção de Produtos (Fonte: MATA010.PRX) 
+Parametros--------: ParamIXB = parametros padrões de pontos de entrada Totvs.
+Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-User Function A010TOK()
+User Function ITEM() 
 
-Local _lExecuta   := .T.
-Local _nCont
-Local _oModel     := FWModelActive()
-Local _oModelSB1  := _oModel:GetModel('SB1MASTER')
-Local _cB1_DESC   := ""
-Local _cB1_I_DESCD:= ""
-Local _lFasesB1   := SuperGetMV("IT_FASESB1",.F.,.F.)
-Local _cIT_PRDSVOK:= SUPERGETMV("IT_PRDSVOK",.F.,"")
+Local _aParam        := ParamIXB               As aArray
+Local _lRet          := .T.					   As Logical
+Local _cIdPonto      := ''                     As Character 
+Local _cIdModel      := ''					   As Character 	
+Local _oModel        := FWModelActive()        As Object 
+Local _oModelSB1     := Nil                    As Object
+Local _oObj          := Nil                    As Object
 
-// Valida digitação de caracteres invalidos
-If Inclui .Or. Altera
+If _aParam <> NIL
+	_oObj     := _aParam[1]
+	_cIdPonto := _aParam[2]
+	_cIdModel := _aParam[3]
+	_nOper	:= _oObj:GetOperation()
+		
+	If _cIdPonto == 'MODELPOS'                //'Chamada na validação total do modelo (MODELPOS).' 
+
+	ElseIf _cIdPonto == 'MODELVLDACTIVE'      //Chamada na validação da ativação do Model.
+
+	ElseIf _cIdPonto == 'FORMPOS'             //'Chamada na validação total do formulário (FORMPOS).'
+
+		_oModelSB1  := _oModel:GetModel('SB1MASTER')
+
+		_lRet := ITITEMV(_oModelSB1)
+
+	ElseIf _cIdPonto == 'FORMLINEPRE'         //'Chamada na pré validação da linha do formulário (FORMLINEPRE). Onde esta se tentando deletar uma linha''É um FORMGRID.'
+		
+	ElseIf _cIdPonto == 'FORMLINEPOS'         //'Chamada na validação da linha do formulário (FORMLINEPOS).' É um FORMGRID.
+		
+	ElseIf _cIdPonto == 'MODELCOMMITTTS'      //'Chamada apos a gravação total do modelo e dentro da transação (MODELCOMMITTTS).' 
+
+		// Chama antigo ponto de entrada do fonte MATA010 da alteração de produtos.
+		If _nOper == MODEL_OPERATION_INSERT 
+			U_ITITEMI() //U_MT010INC()
+		ElseIf _nOper == MODEL_OPERATION_UPDATE
+			U_ITITEMM() //U_MT010ALT()
+		ElseIf _nOper == MODEL_OPERATION_DELETE 
+			U_ITITEME() 
+		EndIf 
+
+	ElseIf _cIdPonto == 'MODELCOMMITNTTS'     //'Chamada apos a gravação total do modelo e fora da transação(MODELCOMMITNTTS).' 
+
+	ElseIf _cIdPonto == 'FORMCOMMITTTSPOS'    //'Chamada apos a gravação da tabela do formulário (FORMCOMMITTTSPOS).' 
+	
+	ElseIf _cIdPonto == 'MODELCANCEL'         //'Chamada no Botão Cancelar (MODELCANCEL).'
+
+	ElseIf _cIdPonto == 'MODELVLDACTIVE'      //'Chamada na validação da ativação do Model.' 
+
+	ElseIf _cIdPonto == 'BUTTONBAR'           //'Adicionando Botão na Barra de Botões (BUTTONBAR).'
+
+	EndIf
+EndIf
+	
+Return _lRet 
+
+/*
+===============================================================================================================================
+Programa----------: ITITEME 
+Autor-------------: Igor Melgaço
+Data da Criacao---: 24/09/2024  
+Descrição---------: Ponto de entrada excluir indicadores relativos a ele	
+Parametros--------: Nenhum
+Retorno-----------: Nenhum
+===============================================================================================================================
+*/
+User Function ITITEME()
+
+Local _aArea	:= FWGetArea()   As Array
+Local _cEmpCor	:= cEmpAnt       As Character
+
+DBSelectArea("SM0")
+SM0->( DBGoTop() )
+While ( SM0->( !Eof() ) .And. _cEmpCor == SM0->M0_CODIGO ) // Percorrer todas as filiais
+	DBSelectArea("SBZ")
+	SBZ->( DBSetOrder(1) )
+	If SBZ->( DBSeek( AllTrim(SM0->M0_CODFIL) + SB1->B1_COD ) )
+		RecLock("SBZ",.F.)
+      	DbDelete()
+		MSUnLock()
+	EndIf
+	SM0->( DBSkip() )
+EndDo
+
+FWRestArea(_aArea)
+
+Return
+
+/*
+===============================================================================================================================
+Programa----------: ITITEMM
+Autor-------------: Frederico O. C. Jr 
+Data da Criacao---: 28/08/2008  
+Descrição---------: Ponto de entrada para validar alteracao do produto e atualizar indicadores relativos a ele	(Substituição do MT010ALT)
+Parametros--------: Nenhum
+Retorno-----------: Nenhum
+===============================================================================================================================
+*/
+User Function ITITEMM
+
+Local _aArea	:= FWGetArea()  As Array
+Local _cEmpCor	:= cEmpAnt      As Characater
+
+DBSelectArea("SM0")
+SM0->( DBGoTop() )
+While ( SM0->( !Eof() ) .And. _cEmpCor == SM0->M0_CODIGO )
+	DBSelectArea("SBZ")
+	SBZ->( DBSetOrder(1) )
+	If SBZ->( DBSeek( AllTrim(SM0->M0_CODFIL) + SB1->B1_COD ) )
+		RecLock("SBZ",.F.)
+			SBZ->BZ_ORIGEM    	:= SB1->B1_ORIGEM	   
+		   	SBZ->BZ_TIPO   		:= SB1->B1_TIPO      
+			SBZ->BZ_I_DESCR		:= SB1->B1_DESC		
+			SBZ->BZ_IPI		   	:= SB1->B1_IPI		   
+			SBZ->BZ_I_DETPR   	:= SB1->B1_I_DESCD	
+		  	SBZ->BZ_PIS		   	:= SB1->B1_PIS		   
+			SBZ->BZ_COFINS	   	:= SB1->B1_COFINS	   
+			SBZ->BZ_CSLL	   	:= SB1->B1_CSLL		
+			SBZ->BZ_IRRF	   	:= SB1->B1_IRRF		
+			SBZ->BZ_ALIQISS		:= SB1->B1_ALIQISS	
+			SBZ->BZ_CODISS	   	:= SB1->B1_CODISS	   
+		   SBZ->BZ_PCOFINS   	:= SB1->B1_PCOFINS	
+		   SBZ->BZ_PPIS      	:= SB1->B1_PPIS
+		MSUnLock()
+	EndIf
+	SM0->( DBSkip() )
+EndDo
+
+U_AOMS078G("SB1") // Grava os dados dos Produtos nas tabelas de muro para integração com o sistema RDC.
+
+FWRestArea(_aArea)
+
+Return
+
+/*
+===============================================================================================================================
+Programa----------: ITITEMI
+Autor-------------: Frederico O. C. Jr 
+Data da Criacao---: 28/08/2008  
+Descrição---------: Ponto de entrada para, na inclusao de produto, gerar indicadores de produto	(Substituição do MT010INC)	 
+Parametros--------: nOpcao - não utilizado / _oProcess - não utilizado
+Retorno-----------: Nenhum
+===============================================================================================================================
+*/
+User Function ITITEMI(nOpcao,_oProcess)
+
+Local _aArea	:= FWGetArea()      As Array
+Local _cEmpCor	:= cEmpAnt      	As Character
+Local _aHeader  := {}				As Array
+Local _aStruct  := {}				As Array
+Local _acamps   := {}               As Array
+Local _nCont	:= 0				As Numeric
+Local _nI	    := 0				As Numeric
+Local _nk       := 0                As Numeric
+
+Private cProduto:= SB1->B1_COD      As Character
+	
+//Inicio da validação para preenchimento de campos na tabela SBZ conforme rotina padrão. Chamado: 2518
+_acamps := SBZ->(Dbstruct()) 
+
+For _nk := 1 to Len(_acamps)
+	If Getsx3cache(_acamps[_nk][1],"X3_RELACAO") <> ' ' 
+		_nCont++
+		aAdd(_aHeader,{_acamps[_nk][1]})
+		aAdd(_aStruct,{Getsx3cache(_acamps[_nk][1],"X3_RELACAO")}) 
+	EndIf
+Next _nk 
+
+SM0->( DBGoTop() )
+
+While SM0->(!Eof()) .And. _cEmpCor == SM0->M0_CODIGO   
+	DBSelectArea("SBZ")
+	RecLock("SBZ",.T.)
+	SBZ->BZ_FILIAL	:= AllTrim(SM0->M0_CODFIL)
+	SBZ->BZ_COD		:= SB1->B1_COD
+	SBZ->BZ_TIPO   	:= SB1->B1_TIPO
+	SBZ->BZ_LOCPAD	:= SB1->B1_LOCPAD
+	SBZ->BZ_ORIGEM	:= SB1->B1_ORIGEM 				
+	SBZ->BZ_I_DESCR	:= SB1->B1_DESC 
+	SBZ->BZ_IPI		:= SB1->B1_IPI 
+	SBZ->BZ_I_DETPR := SB1->B1_I_DESCD 
+	SBZ->BZ_PIS		:= SB1->B1_PIS
+	SBZ->BZ_COFINS	:= SB1->B1_COFINS
+	SBZ->BZ_CSLL	:= SB1->B1_CSLL
+	SBZ->BZ_IRRF	:= SB1->B1_IRRF
+	SBZ->BZ_ALIQISS	:= SB1->B1_ALIQISS
+	SBZ->BZ_CODISS	:= SB1->B1_CODISS
+	SBZ->BZ_PCOFINS := SB1->B1_PCOFINS
+	SBZ->BZ_PPIS    := SB1->B1_PPIS
+
+	For _nI:= 1 to _nCont  
+		If _aHeader[_nI][1] <> 'BZ_COD' .And. _aHeader[_nI][1] <> 'BZ_LOCPAD' .And. _aHeader[_nI][1] <> 'BZ_ORIGEM' 
+			If _aHeader[_nI][1] <> 'BZ_I_DESCR' .And. _aHeader[_nI][1] <> 'BZ_PIS' .And. _aHeader[_nI][1] <> 'BZ_COFINS' 
+				If _aHeader[_nI][1] <> 'BZ_CSLL' .And. _aHeader[_nI][1] <> 'BZ_IRRF' .And. _aHeader[_nI][1] <> 'BZ_PCOFINS' .And. _aHeader[_nI][1] <> 'BZ_PPIS' 			     
+					SBZ->&(_aHeader[_nI][1]) := M->&(_aStruct[_nI][1]) 
+				EndIf
+			EndIf
+		EndIf
+	Next _nI  
+		
+	SBZ->( MSUnLock() )
+	SM0->( DBSkip() )
+EndDo		
+
+FWRestArea(_aArea)                                                         
+
+// Grava os dados dos produtos nas tabelas de muro para integração com o sistema RDC.
+U_AOMS078G("SB1")
+  
+Return    
+
+/*
+===============================================================================================================================
+Programa----------: ITITEMV
+Autor-------------: Jose Gavetti
+Data da Criacao---: 21/11/2025
+Descrição---------: Validações no cadastro de Produtos. Substitui o A010TOK.
+Parametros--------: Nenhum
+Retorno-----------: Lógico com exibição de mensagens para tratativa das negativas
+===============================================================================================================================
+*/
+Static Function ITITEMV(_oModelSB1)
+
+Local _lExecuta      := .T.									As Logical 
+Local _cB1_DESC      := ""									As Character
+Local _cB1_I_DESCD   := ""									As Character
+Local _cCerto        := ""									As Character
+Local _nCont         := 0									As Numeric
+Local _lFasesB1      := SuperGetMV("IT_FASESB1",.F.,.F.)	As Logical
+Local _lValida       := .F.                                 As Logical 
+Local _cIT_PRDSVOK   := SuperGetMV("IT_PRDSVOK",.F.,"")     As Character
+
+If _nOper == MODEL_OPERATION_INSERT .Or. _nOper == MODEL_OPERATION_UPDATE
 	_cB1_DESC := _oModelSB1:GetValue('B1_DESC') 
 	If !Empty(AllTrim(_cB1_DESC))
 		_lExecuta := U_CRMA980VCP(@_cB1_DESC   ,"B1_DESC")
@@ -51,18 +258,18 @@ If Inclui .Or. Altera
 		_lExecuta := U_CRMA980VCP(@_cB1_I_DESCD   ,"B1_I_DESCD")
 		_oModelSB1:LoadValue('B1_I_DESCD',_cB1_I_DESCD)  
 	EndIf
-EndIf
+Endif   
 
 // Valida digitação da segunda unidade de medida do produto se não For grupo de exceção de medida
 If (! Empty(M->B1_SEGUM) .And. Empty(M->B1_CONV) .And. !(M->B1_GRUPO $ SuperGetMV("IT_GR2N",.F.,"0006") )) .OR.;
 	( Empty(M->B1_SEGUM) .And. ! Empty(M->B1_CONV) .And. !(M->B1_GRUPO $ SuperGetMV("IT_GR2N",.F.,"0006") ))
 	Help(NIL, NIL, "A010TOK01", NIL, "Fator de conversão não preenchido para a segunda unidade de medida.", 1, 0, NIL, NIL, NIL, NIL, NIL,;
-			 {"Favor preencher o fator de conversão. Ao informar a segunda unidade de medida, o fator de conversão precisa ser preenchido."})
-   _lExecuta := .F.
+		{"Favor preencher o fator de conversão. Ao informar a segunda unidade de medida, o fator de conversão precisa ser preenchido."})
+	_lExecuta := .F.
 EndIf
 
 // Valida digitação da segunda unidade de medida do produto se não For grupo de exceção de medida
-If !Inclui .And. _lExecuta
+If _lExecuta
 	If  Empty(SB1->B1_I_NIV5) .And.  Empty(M->B1_I_NIV5)//NÃO MEXEU E NÃO TEM N5
 		If AllTrim(M->B1_I_DESN2)+" "+AllTrim(M->B1_I_DESN3)+" "+AllTrim(M->B1_I_DESN4)== AllTrim(M->B1_DESC) .OR.;
 			(M->B1_MSBLQL = '1' .And. "BLOQUEADO" $ M->B1_DESC)
@@ -74,56 +281,56 @@ If !Inclui .And. _lExecuta
 			_lExecuta := .F.
 		EndIf
 	ElseIf  Empty(SB1->B1_I_NIV5) .And. !Empty(M->B1_I_NIV5)//COLOCOU  N5
-	    cCerto:=AllTrim(M->B1_I_DESN2)+" "+AllTrim(M->B1_I_DESN3)+" "+AllTrim(M->B1_I_DESN4)+" "+AllTrim(M->B1_I_DESN5)
+		_cCerto:=AllTrim(M->B1_I_DESN2)+" "+AllTrim(M->B1_I_DESN3)+" "+AllTrim(M->B1_I_DESN4)+" "+AllTrim(M->B1_I_DESN5)
 		
-		If (cCerto == AllTrim(M->B1_DESC) .And. cCerto == AllTrim(M->B1_I_DESCD)).OR.;
+		If (_cCerto == AllTrim(M->B1_DESC) .And. _cCerto == AllTrim(M->B1_I_DESCD)).OR.;
 			(M->B1_MSBLQL = '1' .And. "BLOQUEADO" $ M->B1_DESC)
 			_lExecuta := .T.
 		ElseIf !Empty(M->B1_I_NIV2+M->B1_I_NIV3+M->B1_I_NIV4+M->B1_I_NIV5)
 			Help(NIL, NIL, "A010TOK03", NIL, "Descrições deve coincidir com a soma das descriçoes de todos os niveis.", 1, 0, NIL, NIL, NIL, NIL, NIL,;
-				{"Soma das descrições dos niveis: "+cCerto})
+				{"Soma das descrições dos niveis: "+_cCerto})
 			_lExecuta := .F.
 		EndIf
 	ElseIf !Empty(SB1->B1_I_NIV5) .And.  Empty(M->B1_I_NIV5)//TIROU  N5
-        cCerto:=AllTrim(M->B1_I_DESN2)+" "+AllTrim(M->B1_I_DESN3)+" "+AllTrim(M->B1_I_DESN4)+" "+AllTrim(M->B1_I_DESN5)
-        cCerto:=AllTrim(cCerto)
-		If (cCerto == AllTrim(M->B1_DESC) .And. cCerto == AllTrim(M->B1_I_DESCD)).OR.;
+			_cCerto:=AllTrim(M->B1_I_DESN2)+" "+AllTrim(M->B1_I_DESN3)+" "+AllTrim(M->B1_I_DESN4)+" "+AllTrim(M->B1_I_DESN5)
+			_cCerto:=AllTrim(_cCerto)
+		If (_cCerto == AllTrim(M->B1_DESC) .And. _cCerto == AllTrim(M->B1_I_DESCD)).OR.;
 			(M->B1_MSBLQL = '1' .And. "BLOQUEADO" $ M->B1_DESC)
 			_lExecuta := .T.
 		ElseIf !Empty(M->B1_I_NIV2+M->B1_I_NIV3+M->B1_I_NIV4+M->B1_I_NIV5) // .AND.;
 			Help(NIL, NIL, "A010TOK03", NIL, "Descrições deve coincidir com a soma das descriçoes de todos os niveis.", 1, 0, NIL, NIL, NIL, NIL, NIL,;
-				{"Soma das descrições dos niveis: "+cCerto})
+				{"Soma das descrições dos niveis: "+_cCerto})
 			_lExecuta := .F.
 		EndIf
 	ElseIf !Empty(SB1->B1_I_NIV5) .And. !Empty(M->B1_I_NIV5) .And.  M->B1_I_NIV5 = SB1->B1_I_NIV5//NÃO MEXEU E TEM OU NÃO TROCOU N5
-        cCerto:=AllTrim(M->B1_I_DESN2)+" "+AllTrim(M->B1_I_DESN3)+" "+AllTrim(M->B1_I_DESN4)+" "+AllTrim(M->B1_I_DESN5)
+		_cCerto:=AllTrim(M->B1_I_DESN2)+" "+AllTrim(M->B1_I_DESN3)+" "+AllTrim(M->B1_I_DESN4)+" "+AllTrim(M->B1_I_DESN5)
 
-		If (cCerto == AllTrim(M->B1_DESC) .And. cCerto == AllTrim(M->B1_I_DESCD)).OR.;
+		If (_cCerto == AllTrim(M->B1_DESC) .And. _cCerto == AllTrim(M->B1_I_DESCD)).OR.;
 			(M->B1_MSBLQL = '1' .And. "BLOQUEADO" $ M->B1_DESC)
 			_lExecuta := .T.
 		ElseIf !Empty(M->B1_I_NIV2+M->B1_I_NIV3+M->B1_I_NIV4+M->B1_I_NIV5)  .AND.;
 			(!AllTrim(SB1->B1_DESC) == AllTrim(M->B1_DESC) .Or. !AllTrim(SB1->B1_I_DESCD) == AllTrim(M->B1_I_DESCD) )
 			Help(NIL, NIL, "A010TOK03", NIL, "Descrições não pode ser alteradas quando o produto possui niveis preenchidos ate o nivel 4", 1, 0, NIL, NIL, NIL, NIL, NIL,;
-				{"Favor contactar o depto de custos, resposavel pelo cadastro de niveis."+cCerto})
+				{"Favor contactar o depto de custos, resposavel pelo cadastro de niveis."+_cCerto})
 			_lExecuta := .F.
 		EndIf
 	ElseIf !Empty(SB1->B1_I_NIV5) .And. !Empty(M->B1_I_NIV5) .And.  M->B1_I_NIV5 <> SB1->B1_I_NIV5//NÃO MEXEU E TEM OU TROCOU 
-        cCerto:=AllTrim(M->B1_I_DESN2)+" "+AllTrim(M->B1_I_DESN3)+" "+AllTrim(M->B1_I_DESN4)+" "+AllTrim(M->B1_I_DESN5)
+		_cCerto:=AllTrim(M->B1_I_DESN2)+" "+AllTrim(M->B1_I_DESN3)+" "+AllTrim(M->B1_I_DESN4)+" "+AllTrim(M->B1_I_DESN5)
 
-		If (cCerto == AllTrim(M->B1_DESC) .And. cCerto == AllTrim(M->B1_I_DESCD)) .OR.;
+		If (_cCerto == AllTrim(M->B1_DESC) .And. _cCerto == AllTrim(M->B1_I_DESCD)) .OR.;
 			(M->B1_MSBLQL = '1' .And. "BLOQUEADO" $ M->B1_DESC)
 			_lExecuta := .T.
 		ElseIf !Empty(M->B1_I_NIV2+M->B1_I_NIV3+M->B1_I_NIV4+M->B1_I_NIV5) // .AND.;
 			Help(NIL, NIL, "A010TOK03", NIL, "Descrições deve coincidir com a soma das descriçoes de todos os niveis.", 1, 0, NIL, NIL, NIL, NIL, NIL,;
-				{"Soma das descrições dos niveis: "+cCerto})
+				{"Soma das descrições dos niveis: "+_cCerto})
 			_lExecuta := .F.
 		EndIf
 	EndIf
-ElseIf Inclui .And._lExecuta
+ElseIf _nOper == MODEL_OPERATION_INSERT .And._lExecuta
 	If !Empty(M->B1_I_NIV2+M->B1_I_NIV3+M->B1_I_NIV4)  .And. ;
-	   (Empty(M->B1_I_NIV2) .Or. Empty(M->B1_I_NIV3) .Or. Empty(M->B1_I_NIV4))
-	   		Help(NIL, NIL, "A010TOK03", NIL, "Todos os Niveis 2 , 3 e 4 devem ser preenchidos quando For PA ou embalagem de PA.", 1, 0, NIL, NIL, NIL, NIL, NIL,;
-				{"Preencha os niveis ou troque o tipo do produto."})
+		(Empty(M->B1_I_NIV2) .Or. Empty(M->B1_I_NIV3) .Or. Empty(M->B1_I_NIV4))
+			Help(NIL, NIL, "A010TOK03", NIL, "Todos os Niveis 2 , 3 e 4 devem ser preenchidos quando For PA ou embalagem de PA.", 1, 0, NIL, NIL, NIL, NIL, NIL,;
+			{"Preencha os niveis ou troque o tipo do produto."})
 		_lExecuta := .F.
 	EndIf
 EndIf
@@ -132,55 +339,52 @@ EndIf
 If M->B1_TIPO == 'PA'
 	If Empty(M->B1_I_SUBGR)
 		Help(NIL, NIL, "A010TOK03", NIL, "Quando o tipo do Produto For igual a PA deve-se fornecer o Sub Grupo do Produto", 1, 0, NIL, NIL, NIL, NIL, NIL,;
-			{"Favor preencher o campo Sub Grupo do Produto para confirmar o cadastro/alteração do Produto"})
-	   _lExecuta := .F.
-	EndIf     
-   
-   // Validação para Código EAN. 
+		{"Favor preencher o campo Sub Grupo do Produto para confirmar o cadastro/alteração do Produto"})
+		_lExecuta := .F.
+	EndIf
+	// Validação para Código EAN. 
 	If Empty(M->B1_CODBAR)
 		Help(NIL, NIL, "A010TOK03", NIL, "Quando o tipo do Produto For igual a PA deve-se informar o Código de Barras - EAN", 1, 0, NIL, NIL, NIL, NIL, NIL,;
-			{"Favor preencher o campo Cod Barras para confirmar o cadastro/alteração do Produto"})
-       _lExecuta := .F.
+		{"Favor preencher o campo Cod Barras para confirmar o cadastro/alteração do Produto"})
+		_lExecuta := .F.
 	EndIf
-
 // VALIDA PRODUTO DE SERVIÇO. 
 ElseIf M->B1_TIPO == 'SV' .And. !AllTrim(M->B1_COD) $ _cIT_PRDSVOK
 	If !Empty(M->B1_PICM)
 		Help(NIL, NIL, "A010TOK03", NIL, "Aliquota de ICMS não pode ser preenchida para um produto de tipo = 'SV'", 1, 0, NIL, NIL, NIL, NIL, NIL,;
-			{"Zere Aliquota de ICMS desse produto ou troque o tipo para diferente de 'SV'"})
-	   _lExecuta := .F.
+		{"Zere Aliquota de ICMS desse produto ou troque o tipo para diferente de 'SV'"})
+		_lExecuta := .F.
 	EndIf     
 	If !Empty(M->B1_IPI)
 		Help(NIL, NIL, "A010TOK03", NIL, "Aliquota de IPI não pode ser preenchida para um produto de tipo = 'SV'", 1, 0, NIL, NIL, NIL, NIL, NIL,;
-			{"Zere Aliquota de IPI desse produto ou troque o tipo para diferente de 'SV'"})
-	   _lExecuta := .F.
+		{"Zere Aliquota de IPI desse produto ou troque o tipo para diferente de 'SV'"})
+		_lExecuta := .F.
 	EndIf     
 EndIf
-  
-//  Inicio da validação realizada no campo B1_DESC afim de não permitir o uso de 
-//  espaçamento feitos apartir da tecla tab e a tecla enter.
- 	_nCont:= StrTran(M->B1_DESC	,'	',"") 
-    
-    If _nCont <> M->B1_DESC .Or. LTrim(StrTran(M->B1_DESC	,'	',"")) <> M->B1_DESC
-		Help(NIL, NIL, "A010TOK03", NIL, "Erro no preenchimento do campo Descrição", 1, 0, NIL, NIL, NIL, NIL, NIL,;
-				 {"Favor retirar os espaços em branco para prosseguir com o cadastro"})
-   		_lExecuta := .F. 
-    EndIf    
 
-    If Inclui .And. _lExecuta
-		SB1->(DBSetOrder(3))
-		SB1->(DBSeek( xFilial()+AllTrim(M->B1_DESC) ))
-		While SB1->(!Eof()) .And. AllTrim(M->B1_DESC) == AllTrim(SB1->B1_DESC)
-			If AllTrim(M->B1_I_DESCD) == AllTrim(SB1->B1_I_DESCD)
-				Help(NIL, NIL, "A010TOK03", NIL, "Produto já cadastrado", 1, 0, NIL, NIL, NIL, NIL, NIL,;
-					{"Descrição já existente no Produto: "+SB1->B1_COD})
-				_lExecuta := .F. 
-				Exit
-			EndIf
-			SB1->(DBSkip())
-		EndDo
-		SB1->(DBSetOrder(1))
-    EndIf    
+//  Inicio da validação realizada no campo B1_DESC afim de não permitir o uso de espaçamento feitos apartir da tecla tab e a tecla enter.
+_nCont:= StrTran(M->B1_DESC	,'	',"") 
+
+If _nCont <> M->B1_DESC .Or. LTrim(StrTran(M->B1_DESC	,'	',"")) <> M->B1_DESC
+	Help(NIL, NIL, "A010TOK03", NIL, "Erro no preenchimento do campo Descrição", 1, 0, NIL, NIL, NIL, NIL, NIL,;
+				{"Favor retirar os espaços em branco para prosseguir com o cadastro"})
+	_lExecuta := .F. 
+EndIf    
+
+If _nOper == MODEL_OPERATION_INSERT  .And. _lExecuta
+	SB1->(DBSetOrder(3))
+	SB1->(DBSeek( xFilial()+AllTrim(M->B1_DESC) ))
+	While SB1->(!Eof()) .And. AllTrim(M->B1_DESC) == AllTrim(SB1->B1_DESC)
+		If AllTrim(M->B1_I_DESCD) == AllTrim(SB1->B1_I_DESCD)
+			Help(NIL, NIL, "A010TOK03", NIL, "Produto já cadastrado", 1, 0, NIL, NIL, NIL, NIL, NIL,;
+				{"Descrição já existente no Produto: "+SB1->B1_COD})
+			_lExecuta := .F. 
+			Exit
+		EndIf
+		SB1->(DBSkip())
+	EndDo
+	SB1->(DBSetOrder(1))
+EndIf    
 
 // Apagar o NCM dos produtos do GRUPO 1000, para todos os itens que forem TIPO SV - Chamado 19481
 ZZL->(DBSeek(xFilial("ZZL") + __cUserId))
@@ -189,6 +393,7 @@ If _lFasesB1
 Else
 	_lValida:=.T.
 EndIf
+
 If (M->B1_GRUPO $ SuperGetMV("IT_GRUNCM",.F.,"1000") .And. M->B1_TIPO $ SuperGetMV("IT_TIPNCM",.F.,'SV')) .Or. M->B1_TIPO $ SuperGetMV("IT_TIPOPRD",.F.,'IM')
 	If _lExecuta .And. !Empty(M->B1_POSIPI) .And. _lValida
 		If (M->B1_GRUPO $ SuperGetMV("IT_GRUNCM",.F.,"1000") .And. M->B1_TIPO $ SuperGetMV("IT_TIPNCM",.F.,'SV')) 
@@ -212,74 +417,78 @@ If M->B1_MSBLQL == '1' .And. Empty(M->B1_I_MOTBL)
 	Help(NIL, NIL, "A010TOK03", NIL, 'Campo Motivo Bloqueio vazio!', 1, 0, NIL, NIL, NIL, NIL, NIL,;
 		{"Para produtos bloqueados favor preencher o motivo do bloqueio."})
 ElseIf M->B1_MSBLQL <> '1'
-   M->B1_I_MOTBL:=Space(Len(SB1->B1_I_MOTBL))
-   _oModelSB1:LoadValue('B1_I_MOTBL',Space(Len(SB1->B1_I_MOTBL)))
+	M->B1_I_MOTBL:=Space(Len(SB1->B1_I_MOTBL))
+	_oModelSB1:LoadValue('B1_I_MOTBL',Space(Len(SB1->B1_I_MOTBL)))
 EndIf	
 
-// Se For inclusão de PA, envia Workflow para sistema@italac.com.br
-// Alex: Não retirar esse comentario CHAMADO 31466 desabilitdo por enquanto
+// Se For inclusão de PA, envia ITEMWF para sistema@italac.com.br
 If _lFasesB1
-	If _lExecuta .And. (Inclui .Or. "#CONTROLE" $ SB1->B1_I_MOTBL)
-		_lExecuta:=A010WlInc(_oModelSB1)
+	If _lExecuta .And. (_nOper == MODEL_OPERATION_INSERT  .Or. "#CONTROLE" $ SB1->B1_I_MOTBL)
+		_lExecuta:=ITEMWLINC(_oModelSB1)
 	EndIf
 EndIf
-// Se For inclusão de PA, envia Workflow para sistema@italac.com.br
 
-If _lExecuta .And. !Inclui .And. (SB1->B1_UM <> M->B1_UM .Or. SB1->B1_SEGUM <> M->B1_SEGUM .Or. SB1->B1_CONV <> M->B1_CONV .Or. SB1->B1_TIPCONV <> M->B1_TIPCONV)
-   If !(ISINCALLSTACK("MDIEXECUTE") .Or. ISINCALLSTACK("SIGAADV"))
-	  _lExecuta := A010CadSB1()
-   Else
-      FWMsgRun( ,{|oProc| _lExecuta := A010CadSB1(oProc) } , "Processando..." , "Validando Armazem..." )
-   EndIf
-EndIf
-// Se For inclusão de PA, envia Workflow para sistema@italac.com.br
-If _lExecuta .And. Inclui
-	WorkFlow()
+// Se For inclusão de PA, envia ITEMWF para sistema@italac.com.br
+If _lExecuta .And. !_nOper == MODEL_OPERATION_INSERT .And. (SB1->B1_UM <> M->B1_UM .Or. SB1->B1_SEGUM <> M->B1_SEGUM .Or. SB1->B1_CONV <> M->B1_CONV .Or. SB1->B1_TIPCONV <> M->B1_TIPCONV)
+	If !(ISINCALLSTACK("MDIEXECUTE") .Or. ISINCALLSTACK("SIGAADV"))
+		_lExecuta := ITEMCADSB1()
+	Else
+		FWMsgRun( ,{|oProc| _lExecuta := ITEMCADSB1(oProc) } , "Processando..." , "Validando Armazem..." )
+	EndIf
 EndIf
 
-If _lExecuta .And. !Inclui .And. !FWIsInCallStack("MSEXECAUTO")
-   M->B1_I_USRNA:=Capital(RTrim(UsrFullName(RetCodUsr())))
-   M->B1_I_USRDA:=DToC(Date())
-   _oModelSB1:LoadValue('B1_I_USRNA' ,M->B1_I_USRNA)
-   _oModelSB1:LoadValue('B1_I_USRDA' ,M->B1_I_USRDA)
+// Se For inclusão de PA, envia ITEMWF para sistema@italac.com.br
+If _lExecuta .And. _nOper == MODEL_OPERATION_INSERT
+	ITEMWF()
 EndIf
 
-//USE ESSE PONTO PARA VALIDAÇÕES E O AEST045.PRW
+If _lExecuta .And. !_nOper == MODEL_OPERATION_INSERT  .And. !FWIsInCallStack("MSEXECAUTO")
+	M->B1_I_USRNA:=Capital(RTrim(UsrFullName(RetCodUsr())))
+	M->B1_I_USRDA:=DToC(Date())
+	_oModelSB1:LoadValue('B1_I_USRNA' ,M->B1_I_USRNA)
+	_oModelSB1:LoadValue('B1_I_USRDA' ,M->B1_I_USRDA)
+EndIf
 
-Return (_lExecuta)
+Return _lExecuta
 
 /*
 ===============================================================================================================================
-Programa----------: Workflow
+Programa----------: ITEMWF
 Autor-------------: Lucas Crevilari
 Data da Criacao---: 12/09/2014
-Descrição---------: Envio de Workflow quando For realizado cadastro de PA. Chamado 7363
+Descrição---------: Envio de ITEMWF quando For realizado cadastro de PA. Chamado 7363
 Parametros--------: Nenhum	
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */   
-Static Function Workflow()
+Static Function ITEMWF()
 
-Local _cEmail := Space(0)
-Local _cErrorMsg, _Remetente, _cHtml, _cSubject
-Local _lResult, _cTitulo, _cTexto2, _cAlias
+Local _cEmail 		:= Space(0)  As Character                    
+Local _cErrorMsg 	:= ""		 As Character       
+Local _cRemetente   := ""		 As Character       
+Local _cHtml 		:= ""		 As Character
+Local _cSubject		:= ""		 As Character
+Local _lResult 		:= ""		 As Logical
+Local _cTitulo 		:= ""		 As Character
+Local _cTexto2		:= ""		 As Character 
+Local _cAlias		:= ""		 As Character
+Local _cEmlLog      := ""		 As Character
+Local _cLogErro     := ""        As Character
 
 CONNECT SMTP ;
-SERVER GetMV("MV_RElseRV") ; 	// Nome do servidor de e-mail
-ACCOUNT GetMV("MV_RELACNT") ; 	// Nome da conta a ser usada no e-mail
+SERVER   GetMV("MV_RElseRV") ; 	// Nome do servidor de e-mail
+ACCOUNT  GetMV("MV_RELACNT") ; 	// Nome da conta a ser usada no e-mail
 PASSWORD GetMV("MV_RELPSW") ; 	// Senha
-RESULT _lResult 					// Resultado da tentativa de conexão
+RESULT _lResult 				// Resultado da tentativa de conexão
 
-If !_lResult
-	// Nao foi possivel estabelecer conexao com o servidor 
+If !_lResult // Nao foi possivel estabelecer conexao com o servidor 
 	Help(NIL, NIL, "A010TOK03", NIL, "Falha no envio do email", 1, 0, NIL, NIL, NIL, NIL, NIL,{MailGetErr()})
 EndIf
 
 If _lResult 
-    
 	// Conectado ao Servidor, enviando o e-mail... 
 	MailAuth(GetMV("MV_RELACNT"),GetMV("MV_RELPSW"))
-	_Remetente := GetMV("MV_RELACNT")
+	_cRemetente := GetMV("MV_RELACNT")
 
 	If M->B1_TIPO == "PA"
 		_cSubject := "Novo Cadastro de Produto Acabado" 
@@ -355,36 +564,35 @@ If _lResult
 	If (_cAlias)->( !Eof() )
 		While (_cAlias)->( !Eof() )
 			_cEmail += ";"+ AllTrim( (_cAlias)->ZZL_EMAIL )
-		(_cAlias)->(DBSkip() )
+			(_cAlias)->(DBSkip() )
 		EndDo
 		_cEmail := SubStr( _cEmail , 2 , Len( _cEmail ) )
 	EndIf
 
     If !totvs.framework.environment.Type.get() == '1' //1-Produção, 2-Homologação,3-Desenvolvimento
 	   _cEmlLog := "Rotina executada em Ambiente de Testes: ["+ GetEnvServer() +"]. Não será processado o envio de e-mail!"
-            //  _cMens                                                                 ,_ctitu           ,_csolu,_ntipo,_nbotao,_nmenbot,_lHelpMvc,_cbt1,_cbt2,_bMaisDetalhes
 		Help(NIL, NIL, "A010TOK03", NIL, Upper(_cEmlLog)+CHR(13)+CHR(10)+"E-mail para: "+_cEmail+CHR(13)+CHR(10), 1, 0, NIL, NIL, NIL, NIL, NIL,{""})
 	   Return
     EndIf
 	
 	Send mail ; 		    // envia e-mail
-	from _Remetente ; 	 // de
+	from _cRemetente ; 	 	// de
 	To _cEmail ; 		    // para
-	subject _cSubject ;  // assunto
+	subject _cSubject ;  	// assunto
 	body _cHtml ;			// mensagem em HTML
 	RESULT _lResult 
 					
 	If !_lResult 
 	   GET MAIL ERROR _cErrorMsg
-	   cLogErro := "Falha de Envio: "+ AllTrim(_cErrorMsg)
+	   _cLogErro := "Falha de Envio: "+ AllTrim(_cErrorMsg)
 	Else
-	   cLogErro := "Sucesso: e-mail enviado corretamente!"
+	   _cLogErro := "Sucesso: e-mail enviado corretamente!"
     EndIf
 
    DISCONNECT SMTP SERVER
 
     If !totvs.framework.environment.Type.get() == '1' //1-Produção, 2-Homologação,3-Desenvolvimento
-		Help(NIL, NIL, "A010TOK03", NIL, Upper(cLogErro)+CHR(13)+CHR(10)+"E-mail para: "+_cEmail+CHR(13)+CHR(10), 1, 0, NIL, NIL, NIL, NIL, NIL,{""})
+		Help(NIL, NIL, "A010TOK03", NIL, Upper(_cLogErro)+CHR(13)+CHR(10)+"E-mail para: "+_cEmail+CHR(13)+CHR(10), 1, 0, NIL, NIL, NIL, NIL, NIL,{""})
     EndIf
 EndIf 
 
@@ -392,7 +600,7 @@ Return
 
 /*
 ===============================================================================================================================
-Programa----------: A010CadSB1()
+Programa----------: ITEMCADSB1()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 04/11/2019
 Descrição---------: Rotina para zerar a 1o Quantidade e da 2o Quantidade 
@@ -400,17 +608,19 @@ Parametros--------: oProc
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function A010CadSB1(oProc)
+Static Function ITEMCADSB1(oProc)
 
-Local _cObs     := "MOVIMENTO GERADO PELA ALTERACAO DE U.M. (A010TOK)"
-Local _cArmaz   := ""
-Local _cCod     := SB1->B1_COD 
-Local _lEfetivar:=.T.
-Local _cAlias   := GetNextAlias()
-Local aExecAuto :={}    , A
-Local _aLog     :={}
-Local _lRet     := .T.
-Local _cQuery   := " SELECT "
+Local _cObs     := "MOVIMENTO GERADO PELA ALTERACAO DE U.M. (A010TOK)"  As Character
+Local _cArmaz   := ""													As Character
+Local _cCod     := SB1->B1_COD 											As Character
+Local _lEfetivar:= .T.													As Logical
+Local _cAlias   := GetNextAlias()                                       As Character
+Local _aExecAuto:= {}													As Array
+Local _aLog     := {}													As Array
+Local _nX       := 0													As Numeric
+Local _lRet     := .T.													As Logical
+Local _lTudoZerado := .F.                                               As Logical
+Local _cQuery   := " SELECT "											As Character
 
 BeginSql alias _cAlias
 	SELECT NNR_CODIGO CODIGO, NNR_DESCRI DESCRICAO
@@ -450,9 +660,9 @@ While ZZM->( !Eof() )
 			EndIf
 		   
 			If _nQatu > 0 .And. _nVatu1 > 0 .And. lTemSegUM
-				aAdd(aExecAuto,{_cArmaz,(_cAlias)->DESCRICAO,ZZM->ZZM_CODIGO,ZZM->ZZM_DESCRI})
+				aAdd(_aExecAuto,{_cArmaz,(_cAlias)->DESCRICAO,ZZM->ZZM_CODIGO,ZZM->ZZM_DESCRI})
 			ElseIf _nQatu > 0 .And. _nVatu1 = 0 .And. lTemSegUM
-				aAdd(aExecAuto,{_cArmaz,(_cAlias)->DESCRICAO,ZZM->ZZM_CODIGO,ZZM->ZZM_DESCRI})
+				aAdd(_aExecAuto,{_cArmaz,(_cAlias)->DESCRICAO,ZZM->ZZM_CODIGO,ZZM->ZZM_DESCRI})
 			ElseIf !(_nQatu = 0 .And. _nVatu1 = 0 .And. _nQatu2N = 0)
 				aAdd( _aLog ,{.F.,_cArmaz,(_cAlias)->DESCRICAO,_nQatu,_nQatu2N,_nVatu1,SB1->B1_CONV,"Armazem com quantidades / valores incorretos",ZZM->ZZM_CODIGO+" - "+ZZM->ZZM_DESCRI} )
 				_lRet:= .F.
@@ -467,7 +677,7 @@ EndDo
 
 (_cAlias)->(DBCloseArea())
 
-_cTot:=AllTrim(Str(Len(aExecAuto)))
+_cTot:=AllTrim(Str(Len(_aExecAuto)))
 _nTam:=Len(_cTot)
 _nConta:=0		
 
@@ -478,13 +688,11 @@ _cQuery += " AND SubStr( D3.D3_DOC , 1 , 1 ) IN ('0','1','2','3','4','5','6','7'
 
 SB2->( DBSetOrder(1) )
 
-Begin Sequence
-
-For A :=  1 To Len(aExecAuto)
-	_cArmaz := aExecAuto[A,1]
-	_cDArmaz:= aExecAuto[A,2]
-	_cFilial:= aExecAuto[A,3]
-	_cFilDes:= aExecAuto[A,4]
+For _nX :=  1 To Len(_aExecAuto)
+	_cArmaz := _aExecAuto[_nX,1]
+	_cDArmaz:= _aExecAuto[_nX,2]
+	_cFilial:= _aExecAuto[_nX,3]
+	_cFilDes:= _aExecAuto[_nX,4]
 
 	_nConta++
     If oProc <> NIL
@@ -578,9 +786,7 @@ For A :=  1 To Len(aExecAuto)
 		
 		END TRANSACTION
 	EndIf
-Next
-
-End Sequence  
+Next _nX
 
 _lTudoZerado:=.F.
 If Len(_aLog) = 0 .And. Len(_aLogTOK) > 0
@@ -590,26 +796,26 @@ EndIf
 
 _aLogAux:=aClone(_aLog)
 _aLog:={}
-For A :=  1 To Len(_aLogAux)
-	aAdd( _aLog ,{_aLogAux[A,1],;
-	              _aLogAux[A,9],;
-	              _aLogAux[A,2],;
-	              (Transform(_aLogAux[A,4],PesqPict("SB2","B2_QATU   "))),;
-	              (Transform(_aLogAux[A,5],PesqPict("SB2","B2_QTSEGUM"))),;
-	              (Transform(_aLogAux[A,6],PesqPict("SB2","B2_VATU1  "))),;
-	              (Transform(_aLogAux[A,7],PesqPict("SB1","B1_CONV   "))),;
-	              _aLogAux[A,8]} )
-Next A
+For _nX :=  1 To Len(_aLogAux)
+	aAdd( _aLog ,{_aLogAux[_nX,1],;
+	              _aLogAux[_nX,9],;
+	              _aLogAux[_nX,2],;
+	              (Transform(_aLogAux[_nX,4],PesqPict("SB2","B2_QATU   "))),;
+	              (Transform(_aLogAux[_nX,5],PesqPict("SB2","B2_QTSEGUM"))),;
+	              (Transform(_aLogAux[_nX,6],PesqPict("SB2","B2_VATU1  "))),;
+	              (Transform(_aLogAux[_nX,7],PesqPict("SB1","B1_CONV   "))),;
+	              _aLogAux[_nX,8]} )
+Next _nX
 
 aSort(_aLog,,,{|X,Y| (X[2]+X[3]) < (Y[2]+Y[3]) })//ORDEM DE FILIAL + ARMAZEM
 
-A010Log(_aLog,oProc,_lRet)
+ITEMLOG(_aLog,oProc,_lRet)
 
 Return _lRet
 
 /*
 ===============================================================================================================================
-Programa----------: A010Log()
+Programa----------: ITEMLOG()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 04/11/2019
 Descrição---------: Rotina para zerar a 1o Quantidade e da 2o Quantidade 
@@ -617,13 +823,12 @@ Parametros--------: _aLog,oProc,_lRet
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function A010Log(_aLog,oProc,_lRet)
+Static Function ITEMLOG(_aLog,oProc,_lRet)
 
-Local _aCab:={}
-Local _aSize:={}
+Local _aCab	:={} As Array
+Local _aSize:={} As Array 
 
-If Len(_aLog) > 0
-	//Monta aheader
+If Len(_aLog) > 0 //Monta aheader
 	aAdd(_aCab,"")//01
 	aAdd(_aSize,5)
 	aAdd(_aCab,"Filial")//02
@@ -642,12 +847,12 @@ If Len(_aLog) > 0
 	aAdd(_aSize,150)
 
     nPosResu:=Len(_aCab)//Posiçao do "Resultado"
-    A010Email(_aLog,_aCab,oProc,_lRet)
+    ITEMEMAIL(_aLog,_aCab,oProc,_lRet)
 
     aBotoes:={}                                           
     aAdd( aBotoes , { "" , {|| AVISO("ATENCAO",oLbxAux:aArray[oLbxAux:nAt][ nPosResu ],{"Fechar"},3) }	, "" , "Ver Resultado"		  } )
-    aAdd( aBotoes , { "" , {|| A010Email(_aLog,_aCab,oProc,_lRet) }	, "" , "Re-Envio de e-mail"		  } )
-//          ITListBox(_cTitAux              , _aHeader , _aCols  , _lMaxSiz , _nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel, _abuttons )
+    aAdd( aBotoes , { "" , {|| ITEMEMAIL(_aLog,_aCab,oProc,_lRet) }	, "" , "Re-Envio de e-mail"		  } )
+//          ITListBox(__cTitAux              , _aHeader , _aCols  , _lMaxSiz , _nTipo , _cMsgTop , _lSelUnc , _aSizes , _nCampo , bOk , bCancel, _abuttons )
    _lRet:=U_ITLISTBOX("Armazens Processados", _aCab    , _aLog   , .T.      , 4      ,          ,          , _aSize  ,         ,     ,        , aBotoes)
 EndIf
 
@@ -655,7 +860,7 @@ Return _lRet
 
 /*
 ===============================================================================================================================
-Programa----------: A010Email()
+Programa----------: ITEMEMAIL()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 05/11/2019
 Descrição---------: Monta e envia email 
@@ -663,54 +868,64 @@ Parametros--------: _aTLinhas,_aCab,oProc
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function A010Email(_aTLinhas,_aCab,oProc,_lRet)
+Static Function ITEMEMAIL(_aTLinhas,_aCab,oProc,_lRet)
 
-Local _aConfig	:= U_ITCFGEML('')
-Local _cEmlLog	:= ""
-Local _cMsgEml	:= ""
-Local _nI , _aSizes:={}
-Local cGetCc	:= ""
-Local cErMens	:= "Correções necessarias antes de alterar o cadastro"
-Local cOKMens	:= "Inventariar o produto nos armazens relacionados"
-Local cGetPara	:= "almoxarifados@italac.com.br"
-Local _cTot     := AllTrim(Str(Len(_aTLinhas)))
-Local _nTam     := Len(_cTot)
-Local _cNomeFil := cFilant+" - "+AllTrim( Posicione('SM0',1,"01"+cFilant,'M0_FILIAL') )
-Local cTit      := ""
-Local cGetAssun := "Alterações do Produto "+AllTrim(SB1->B1_COD)+"-"+AllTrim(M->B1_DESC)+": "
+Local _aConfig	:= U_ITCFGEML('')																As Array
+Local _cEmlLog	:= ""																			As Character
+Local _cMsgEml	:= ""																			As Character
+Local _nI  		:= 0																			As Numeric																		
+Local _aSizes	:= {}																			As Array
+Local _aSizeOK  := {}																			As Array
+Local _cGetCc	:= ""																			As Character
+Local _cErMens	:= "Correções necessarias antes de alterar o cadastro"							As Character
+Local _cOKMens	:= "Inventariar o produto nos armazens relacionados"							As Character
+Local _cGetPara	:= "almoxarifados@italac.com.br"												As Character
+Local _cTot     := AllTrim(Str(Len(_aTLinhas)))													As Character
+Local _nTam     := Len(_cTot)																	As Numeric
+Local _cNomeFil := cFilant+" - "+AllTrim( Posicione('SM0',1,"01"+cFilant,'M0_FILIAL') )     	As Character
+Local _cTit      := ""																			As Character
+Local _cGetAssun := "Alterações do Produto "+AllTrim(SB1->B1_COD)+"-"+AllTrim(M->B1_DESC)+": " 	As Character
+Local _cOKLista  := ""                                                                          As Character
+Local _cGetLista := ""																			As Character
+Local _lEnvia    := .F. 																		As Logical
 
 If SB1->B1_UM <> M->B1_UM 
-   cTit     +='Alteração da 1a U.M. <b>De: "'+SB1->B1_UM+'" Para: "'+M->B1_UM+'"</b>'+CHR(13)+CHR(10)
-   cGetAssun+='1a U.M. De: "'+SB1->B1_UM+'" Para: "'+M->B1_UM+'", '
-EndIf
-If SB1->B1_SEGUM <> M->B1_SEGUM 
-   cTit     +='Alteração da 2a U.M. <b>De: "'+SB1->B1_SEGUM+'" Para: "'+M->B1_SEGUM+'"</b>'+CHR(13)+CHR(10)
-   cGetAssun+='2a U.M. De: "'+SB1->B1_SEGUM+'" Para: "'+M->B1_SEGUM+'", '
-EndIf
-If SB1->B1_TIPCONV <> M->B1_TIPCONV 
-   cTit     +='Alteração do Tipo Conversão <b>De: "'+SB1->B1_TIPCONV+'" Para: "'+M->B1_TIPCONV+'"</b>'+CHR(13)+CHR(10)
-   cGetAssun+='Tipo Conv. De: "'+SB1->B1_TIPCONV+'" Para: "'+M->B1_TIPCONV+'", '
-EndIf
-If SB1->B1_CONV <> M->B1_CONV
-   cTit     +='Alteração da Conversão <b>De: "'+AllTrim(Str(SB1->B1_CONV,10,2))+'" Para: "'+AllTrim(Str(M->B1_CONV,10,2))+'"</b>'+CHR(13)+CHR(10)
-   cGetAssun+='Conversão De: "'+AllTrim(Str(SB1->B1_CONV,10,2))+'" Para: "'+AllTrim(Str(M->B1_CONV,10,2))+'", '
+   _cTit     +='Alteração da 1a U.M. <b>De: "'+SB1->B1_UM+'" Para: "'+M->B1_UM+'"</b>'+CHR(13)+CHR(10)
+   _cGetAssun+='1a U.M. De: "'+SB1->B1_UM+'" Para: "'+M->B1_UM+'", '
 EndIf
 
-cTit     +="PRODUTO: <b>"+AllTrim(SB1->B1_COD)+"-"+AllTrim(M->B1_DESC)+"</b>"
-cGetAssun:=LEFT(cGetAssun,Len(cGetAssun)-2)
+If SB1->B1_SEGUM <> M->B1_SEGUM 
+   _cTit     +='Alteração da 2a U.M. <b>De: "'+SB1->B1_SEGUM+'" Para: "'+M->B1_SEGUM+'"</b>'+CHR(13)+CHR(10)
+   _cGetAssun+='2a U.M. De: "'+SB1->B1_SEGUM+'" Para: "'+M->B1_SEGUM+'", '
+EndIf
+
+If SB1->B1_TIPCONV <> M->B1_TIPCONV 
+   _cTit     +='Alteração do Tipo Conversão <b>De: "'+SB1->B1_TIPCONV+'" Para: "'+M->B1_TIPCONV+'"</b>'+CHR(13)+CHR(10)
+   _cGetAssun+='Tipo Conv. De: "'+SB1->B1_TIPCONV+'" Para: "'+M->B1_TIPCONV+'", '
+EndIf
+
+If SB1->B1_CONV <> M->B1_CONV
+   _cTit     +='Alteração da Conversão <b>De: "'+AllTrim(Str(SB1->B1_CONV,10,2))+'" Para: "'+AllTrim(Str(M->B1_CONV,10,2))+'"</b>'+CHR(13)+CHR(10)
+   _cGetAssun+='Conversão De: "'+AllTrim(Str(SB1->B1_CONV,10,2))+'" Para: "'+AllTrim(Str(M->B1_CONV,10,2))+'", '
+EndIf
+
+_cTit     +="PRODUTO: <b>"+AllTrim(SB1->B1_COD)+"-"+AllTrim(M->B1_DESC)+"</b>"
+_cGetAssun:=LEFT(_cGetAssun,Len(_cGetAssun)-2)
 
 If !totvs.framework.environment.Type.get() == '1' //1-Produção, 2-Homologação,3-Desenvolvimento
-   cGetPara	:= ""
-EndIf
-If Len(UsrRetGrp(PswChave(RetCodUsr()),RetCodUsr())) # 0 
-   cGetCc  := LOWER(AllTrim(UsrRetMail(__cUserId)))+Space(150) // Pega e-mail do usuario
+   _cGetPara	:= ""
 EndIf
 
-If Empty(cGetPara)
-   cGetPara:=cGetCc
+If Len(UsrRetGrp(PswChave(RetCodUsr()),RetCodUsr())) # 0 
+   _cGetCc  := LOWER(AllTrim(UsrRetMail(__cUserId)))+Space(150) // Pega e-mail do usuario
+EndIf
+
+If Empty(_cGetPara)
+   _cGetPara:=_cGetCc
 EndIf   
+
 _cMsgEml := '<html>'
-_cMsgEml += '<head><title>'+cTit+'</title></head>'
+_cMsgEml += '<head><title>'+_cTit+'</title></head>'
 _cMsgEml += '<body>'
 _cMsgEml += '<style Type="text/css"><!--'
 _cMsgEml += 'table.bordasimples { border-collapse: collapse; }'
@@ -723,7 +938,7 @@ _cMsgEml += '<center>'
 _cMsgEml += '<img src="http://www.italac.com.br/wf/italac-wf.jpg" width="600" height="50"><br>'
 _cMsgEml += '<table class="bordasimples" width="600">'
 _cMsgEml += '    <tr>'
-_cMsgEml += '	     <td class="titulos"><center>'+cTit+'</center></td>'
+_cMsgEml += '	     <td class="titulos"><center>'+_cTit+'</center></td>'
 _cMsgEml += '	 </tr>'
 _cMsgEml += '</table>'
 _cMsgEml += '<br>'
@@ -742,9 +957,9 @@ _cMsgEml += '    </tr>'
 _cMsgEml += '    <tr>'
 _cMsgEml += '      <td class="itens" align="center" width="30%"><b>Observações:</b></td>'
 If _lRet
-   _cMsgEml += '      <td class="itens" >'+cOKMens+'</td>'
+   _cMsgEml += '      <td class="itens" >'+_cOKMens+'</td>'
 Else
-   _cMsgEml += '      <td class="itens" >'+cErMens+'</td>'
+   _cMsgEml += '      <td class="itens" >'+_cErMens+'</td>'
 EndIf
 _cMsgEml += '    </tr>'
 _cMsgEml += '</table>'
@@ -836,17 +1051,17 @@ For _nI := 1 To Len(_aTLinhas)
 		_cGetLista += '    </tr>'
 	    _lEnvia:=.T.
 	EndIf
-Next
+Next _nI
 
 If _lEnvia
    _cMsgEml:=StrTran(_cMsgEml,"#LISTAOK#",_cOKLista)
    _cMsgEml:=StrTran(_cMsgEml,"#LISTA#",_cGetLista)
 		
    // Chama a função para envio do e-mail
-   U_ITENVMAIL( Lower(AllTrim(UsrRetMail(RetCodUsr()))), cGetPara, cGetCc, "", cGetAssun, _cMsgEml, "", _aConfig[01], _aConfig[02], _aConfig[03], _aConfig[04], _aConfig[05], _aConfig[06], _aConfig[07], @_cEmlLog )
+   U_ITENVMAIL( Lower(AllTrim(UsrRetMail(RetCodUsr()))), _cGetPara, _cGetCc, "", _cGetAssun, _cMsgEml, "", _aConfig[01], _aConfig[02], _aConfig[03], _aConfig[04], _aConfig[05], _aConfig[06], _aConfig[07], @_cEmlLog )
 		
    If !totvs.framework.environment.Type.get() == '1' //1-Produção, 2-Homologação,3-Desenvolvimento
-   	Help(NIL, NIL, "A010TOK03", NIL, Upper(_cEmlLog)+CHR(13)+CHR(10)+"E-mail para: "+cGetPara+" Com Copia: "+cGetCc+CHR(13)+CHR(10), 1, 0, NIL, NIL, NIL, NIL, NIL,{""})
+   	Help(NIL, NIL, "A010TOK03", NIL, Upper(_cEmlLog)+CHR(13)+CHR(10)+"E-mail para: "+_cGetPara+" Com Copia: "+_cGetCc+CHR(13)+CHR(10), 1, 0, NIL, NIL, NIL, NIL, NIL,{""})
    EndIf
 Else
    If !totvs.framework.environment.Type.get() == '1' //1-Produção, 2-Homologação,3-Desenvolvimento
@@ -858,7 +1073,7 @@ Return .T.
 
 /*
 ===============================================================================================================================
-Programa----------: A010WlInc()
+Programa----------: ITEMWLINC()
 Autor-------------: Alex Wallauer
 Data da Criacao---: 23/12/2019
 Descrição---------: Monta e envia email 
@@ -866,15 +1081,18 @@ Parametros--------: _oModelSB1
 Retorno-----------: Nenhum
 ===============================================================================================================================
 */
-Static Function A010WlInc(_oModelSB1)
+Static Function ITEMWLINC(_oModelSB1)
 
-Local _aConfig	:= U_ITCFGEML('') , E
-Local _cEmlLog	:= ""
-Local _cMsgEml	:= ""
-Local cGetCc	:= ""
-Local cGetPara	:= "sistema@italac.com.br"
-Local cTit      := "ALTERAÇÃO DE PRODUTO"
-Local cGetAssun :='NOVO PRODUTO EM PROCESSO DE INCLUSAO'
+Local _aConfig	:= U_ITCFGEML('') 							As Array
+Local _acTo     := {} 										As Array
+Local _nX       := 0										As Numeric
+Local _cEmlLog	:= ""										As Character
+Local _cMsgEml	:= ""										As Character
+Local _cGetCc	:= ""										As Character
+Local _cGetPara	:= "sistema@italac.com.br"					As Character
+Local _cTit     := "ALTERAÇÃO DE PRODUTO"					As Character
+Local _cGetAssun:='NOVO PRODUTO EM PROCESSO DE INCLUSAO'	As Character
+Local _cMens    := ""										As Character
 
 DBSelectArea("ZZL")
 DBSetOrder(3) //ZZL_FILIAL + ZZL_CODUSU
@@ -882,7 +1100,7 @@ DBSetOrder(3) //ZZL_FILIAL + ZZL_CODUSU
 If !Inclui .And. !("#CONTROLE" $ SB1->B1_I_MOTBL)
 	Return .T.	    
 ElseIf  (!DBSeek(xFilial("ZZL") + __cUserId) .Or. ZZL->ZZL_CADPRD = "5" .Or. ZZL->ZZL_CADPRD = " ") .OR.;
-	(!ZZL->ZZL_CADPRD $ "1,0" .And. !Altera )
+	(!ZZL->ZZL_CADPRD $ "1,0" .And. !_nOper == MODEL_OPERATION_UPDATE)
    	Help(NIL, NIL, "A010TOK03", NIL,"O usuário: " + cUserName + " não possui permissão para executar esta ação neste cadastro.", 1, 0, NIL, NIL, NIL, NIL, NIL,;
 		{"Verificar com a área de TI a possibilidade de habilitar o seu usuário."})
 	Return .F.	    
@@ -897,36 +1115,36 @@ EndIf
 
 If ZZL->ZZL_CADPRD = "1"//Almoxarifado (Incluir)
 	If Inclui .Or. "#CONTROLE1" $ SB1->B1_I_MOTBL
-		cTit :="INCLUSAO DE PRODUTO"
-		cMens:="Aguardando FISCAL preencher campos"
+		_cTit :="INCLUSAO DE PRODUTO"
+		_cMens:="Aguardando FISCAL preencher campos"
 		cTipo:=" = '2'"
 		M->B1_MSBLQL :="1"
-		M->B1_I_MOTBL:="#CONTROLE1 - "+cMens//Inclusão do Almoxarifado"
+		M->B1_I_MOTBL:="#CONTROLE1 - "+_cMens//Inclusão do Almoxarifado"
 	Else
 		Return .T.//SE NÃO TIVER NA FASE 1 NÃO ENVIA EMAIL
 	EndIf   
 ElseIf ZZL->ZZL_CADPRD = "2"//FISCAL 
 	If "#CONTROLE1" $ SB1->B1_I_MOTBL  .Or. "#CONTROLE2" $ SB1->B1_I_MOTBL  //NA FASE  ANTERIOR OU ATUAL DE NOVO
-		cMens:="Aguardando CONTABILIDADE preencher campos"
+		_cMens:="Aguardando CONTABILIDADE preencher campos"
 		cTipo:=" = '3'"
-		M->B1_I_MOTBL:="#CONTROLE2 - "+cMens//Alteração do Fiscal"
+		M->B1_I_MOTBL:="#CONTROLE2 - "+_cMens//Alteração do Fiscal"
 	Else
 		Return .T.//SE NÃO TIVER NA FASE 2 NÃO ENVIA EMAIL
 	EndIf
 ElseIf ZZL->ZZL_CADPRD = "3"//CONTABILIDADE 
 	If "#CONTROLE2" $ SB1->B1_I_MOTBL .Or. "#CONTROLE3" $ SB1->B1_I_MOTBL  //NA FASE  ANTERIOR OU ATUAL DE NOVO
-		cMens:="Aguardando EXPEDIÇÃO preencher campos"
+		_cMens:="Aguardando EXPEDIÇÃO preencher campos"
 		cTipo:=" = '4'"
-		M->B1_I_MOTBL:="#CONTROLE3 - "+cMens//Alteração do Fiscal"
+		M->B1_I_MOTBL:="#CONTROLE3 - "+_cMens//Alteração do Fiscal"
 	ElseIf !"#CONTROLE3" $ SB1->B1_I_MOTBL 
 		Help(NIL, NIL, "A010TOK03", NIL,"Deve-se aguardar a Fiscal preencher os campos para finalizar o processo.", 1, 0, NIL, NIL, NIL, NIL, NIL,;
 			{"Verificar com a área de Fiscal."})
 		Return .F.	    
 	EndIf   
 ElseIf ZZL->ZZL_CADPRD = "4"//EXPEDICAO 
-	cTit :="Novo produto incluido com SUCESSO no cadastro"
-	cMens:="PRODUTO DESBLOQUEADO E DISPONIVEL PARA USO"
-	cGetAssun :=Upper(cTit)
+	_cTit :="Novo produto incluido com SUCESSO no cadastro"
+	_cMens:="PRODUTO DESBLOQUEADO E DISPONIVEL PARA USO"
+	_cGetAssun :=Upper(_cTit)
 	If "#CONTROLE3" $ SB1->B1_I_MOTBL  
 		M->B1_I_MOTBL:=""
 		M->B1_MSBLQL :="2"
@@ -949,34 +1167,34 @@ If !Inclui
 	_cAlteracoes+="CAMPO;ANTES;DEPOIS"+CHR(13)+CHR(10)
 
 	_aStruct:= SB1->(DBSTRUCT())
-	For E := 1 To Len(_aStruct)
-		_cUsado:=Getsx3cache(_aStruct[E][1],"X3_USADO")
+	For _nX := 1 To Len(_aStruct)
+		_cUsado:=Getsx3cache(_aStruct[_nX][1],"X3_USADO")
 		If !X3USO(_cUsado)
 			Loop
 		EndIf
-		_cConOrg := "SB1->"+AllTrim(_aStruct[E][1] )
-		_cConAlt :=   "M->"+AllTrim(_aStruct[E][1] )
+		_cConOrg := "SB1->"+AllTrim(_aStruct[_nX][1] )
+		_cConAlt :=   "M->"+AllTrim(_aStruct[_nX][1] )
 		Do Case
-			Case _aStruct[E][2] == "C"
+			Case _aStruct[_nX][2] == "C"
 				_cConOrg := AllTrim( &(_cConOrg) )
 				_cConAlt := AllTrim( &(_cConAlt) )
-			Case _aStruct[E][2] == "N"
+			Case _aStruct[_nX][2] == "N"
 				_cConOrg := " "+cValToChar( &(_cConOrg) )
 				_cConAlt := " "+cValToChar( &(_cConAlt) )
-			Case _aStruct[E][2] == "D"
+			Case _aStruct[_nX][2] == "D"
 				_cConOrg := DToC( &(_cConOrg) )
 				_cConAlt := DToC( &(_cConAlt) )
-			Case _aStruct[E][2] == "L"
+			Case _aStruct[_nX][2] == "L"
 				_cConOrg := If( &(_cConOrg) , ".T." , ".F." )
 				_cConAlt := If( &(_cConAlt) , ".T." , ".F." )
-			Case _aStruct[E][2] == "M"
+			Case _aStruct[_nX][2] == "M"
 				_cConOrg := AllTrim( &(_cConOrg) )
 				_cConAlt := AllTrim( &(_cConAlt) )
 		EndCase
 		If !(_cConOrg == _cConAlt)
-			_cAlteracoes+=AllTrim( _aStruct[E][1] )+";"+_cConOrg+";"+_cConAlt+CHR(13)+CHR(10)
+			_cAlteracoes+=AllTrim( _aStruct[_nX][1] )+";"+_cConOrg+";"+_cConAlt+CHR(13)+CHR(10)
 		EndIf
-	Next
+	Next _nX
 	_cFileName:="ALTERACOES_"+DToS(Date())+"_"+StrTran(TIME(),":","_")+".CSV"
 	_cFileName:=AllTrim(GETMV("MV_RELT",,"\SPOOL\"))+_cFileName
 	MemoWrite(_cFileName,_cAlteracoes)
@@ -1001,12 +1219,12 @@ EndDo
 TRBZZL->(DBCloseArea())
 
 If ZZL->ZZL_CADPRD <> "4" .And. Len(UsrRetGrp(PswChave(RetCodUsr()),RetCodUsr())) # 0 // Quando nao For rotina automatica do configurador
-   cGetCc  := LOWER(AllTrim(UsrRetMail(__cUserId))) // Pega e-mail do usuario
-   aAdd(_acTo,cGetCc)
+   _cGetCc  := LOWER(AllTrim(UsrRetMail(__cUserId))) // Pega e-mail do usuario
+   aAdd(_acTo,_cGetCc)
 EndIf
 
 _cMsgEml := '<html>'
-_cMsgEml += '<head><title>'+cTit+'</title></head>'
+_cMsgEml += '<head><title>'+_cTit+'</title></head>'
 _cMsgEml += '<body>'
 _cMsgEml += '<style Type="text/css"><!--'
 _cMsgEml += 'table.bordasimples { border-collapse: collapse; }'
@@ -1019,7 +1237,7 @@ _cMsgEml += '<center>'
 _cMsgEml += '<img src="http://www.italac.com.br/wf/italac-wf.jpg" width="600" height="50"><br>'
 _cMsgEml += '<table class="bordasimples" width="600">'
 _cMsgEml += '    <tr>'
-_cMsgEml += '	     <td class="titulos"><center>'+cTit+'</center></td>'
+_cMsgEml += '	     <td class="titulos"><center>'+_cTit+'</center></td>'
 _cMsgEml += '	 </tr>'
 _cMsgEml += '</table>'
 _cMsgEml += '<br>'
@@ -1041,7 +1259,7 @@ _cMsgEml += '      <td class="itens" >'+ UsrFullName(__cUserId) +'</td>'
 _cMsgEml += '    </tr>'
 _cMsgEml += '    <tr>'
 _cMsgEml += '      <td class="itens" align="center" width="30%"><b>STATUS: </b></td>'
-_cMsgEml += '      <td class="itens" >'+cMens+'</td>'
+_cMsgEml += '      <td class="itens" >'+_cMens+'</td>'
 _cMsgEml += '    </tr>'
 _cMsgEml += '</table>'
 _cMsgEml += '</center>'
@@ -1054,19 +1272,18 @@ _cMsgEml += '    </tr>'
 _cMsgEml += '</body>'
 _cMsgEml += '</html>'
 
-For E := 1 To Len(_acTo)
-    cGetPara:=_acTo[E]
-    // Chama a função para envio do e-mail
-//    ITEnvMail(cFrom        ,cEmailTo,_cEmailCo,cEmailBcc,cAssunto ,cMensagem,cAttach   ,cAccount    ,cPassword   ,cServer     ,cPortCon    ,lRelauth     ,cUserAut     ,cPassAut     ,cLogErro)
-    U_ITENVMAIL(_aConfig[01], cGetPara,         ,         ,cGetAssun,_cMsgEml ,_cFileName,_aConfig[01],_aConfig[02],_aConfig[03],_aConfig[04], _aConfig[05], _aConfig[06], _aConfig[07], @_cEmlLog )
+For _nX := 1 To Len(_acTo)
+    _cGetPara:=_acTo[_nX]
+    //ITEnvMail(cFrom        ,cEmailTo,_cEmailCo,cEmailBcc,cAssunto ,_cMensagem,cAttach   ,cAccount    ,cPassword   ,cServer     ,cPortCon    ,lRelauth     ,cUserAut     ,cPassAut     ,_cLogErro)
+    U_ITENVMAIL(_aConfig[01], _cGetPara,         ,         ,_cGetAssun,_cMsgEml ,_cFileName,_aConfig[01],_aConfig[02],_aConfig[03],_aConfig[04], _aConfig[05], _aConfig[06], _aConfig[07], @_cEmlLog )
 		
     If !totvs.framework.environment.Type.get() == '1' //1-Produção, 2-Homologação,3-Desenvolvimento
-       Help(NIL, NIL, "A010TOK03", NIL,Upper(_cEmlLog)+CHR(13)+CHR(10)+"E-mail para: "+cGetPara, 1, 0, NIL, NIL, NIL, NIL, NIL,;
+       Help(NIL, NIL, "A010TOK03", NIL,Upper(_cEmlLog)+CHR(13)+CHR(10)+"E-mail para: "+_cGetPara, 1, 0, NIL, NIL, NIL, NIL, NIL,;
 			{""})
     EndIf
     If _cFileName <> NIL
 	   FERASE(_cFileName)
 	EndIf   
-Next
+Next _nX
 
 Return .T.
