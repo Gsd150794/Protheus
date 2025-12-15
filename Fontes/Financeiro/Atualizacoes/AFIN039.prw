@@ -1,13 +1,3 @@
-/*
-===============================================================================================================================
-               ULTIMAS ATUALIZAÇÕES EFETUADAS - CONSULTAR LOG DO VERSIONADOR PARA HISTORICO COMPLETO
-===============================================================================================================================
-   Autor      |   Data   |                              Motivo                                                          
--------------------------------------------------------------------------------------------------------------------------------
-Igor Melgaço  |22/08/2025| Chamado 51757. Cadastro de Usuarios do Portal
-===============================================================================================================================
-*/
-
 #Include "TOTVS.ch"
 #Include "FWMVCDEF.CH"
 
@@ -70,10 +60,16 @@ Static Function ModelDef() As Object
 // Cria as estruturas a serem usadas no Modelo de Dados
 Local oStruAI3 	:= FWFormStruct( 1, 'AI3') As Object
 Local oStruAI4 	:= FWFormStruct( 1, 'AI4',{|x| (AllTrim(x) $ "|AI4_CODCLI|AI4_LOJCLI|AI4_NOMCLI|")}  ) As Object // Cria as estruturas a serem usadas na View
+Local oStruZ16	:= FWFormStruct( 1, 'Z16',{|x| (AllTrim(x) $ "|Z16_IDACES|Z16_DATA|Z16_HORA|")} )  As Object
+Local oStruZ16D	:= FWFormStruct( 1, 'Z16',{|x| (AllTrim(x) $ "|Z16_DATA|Z16_HORA|Z16_PONTO|Z16_DETALH|")} )  As Object
 Local oModel As Object // Modelo de dados construído
 Local _nI := 0 As Numeric
 Local _cCposObr := "" As Character
+Local _aAI4Rel := {} As Array
+Local _aZ16Rel := {} As Array
+Local _aZ16RelD := {} As Array
 Local aStructAI3 := FWSX3Util():GetListFieldsStruct("AI3", .F.) As Array
+Local aStructZ16 := FWSX3Util():GetListFieldsStruct("Z16", .F.) As Array
 
 _cCposObr := "AI3_FILIAL|AI3_CODUSU|AI3_LOGIN|AI3_PSW|AI3_NOME|AI3_ADMIN|AI3_EMAIL|AI3_EMAIL|AI3_I_PORT|"
 
@@ -88,7 +84,7 @@ Next
 oStruAI3:SetProperty('AI3_ADMIN' , MODEL_FIELD_INIT ,{||'2'} )
 oStruAI3:SetProperty("AI3_ADMIN" , MODEL_FIELD_WHEN ,{||.F.} )
 oStruAI3:SetProperty("AI3_I_PORT", MODEL_FIELD_INIT ,{||'1'} )
-oStruAI3:SetProperty("AI3_I_PORT" , MODEL_FIELD_WHEN ,{||.F.} )
+oStruAI3:SetProperty("AI3_I_PORT", MODEL_FIELD_WHEN ,{||.F.} )
 
 //oStruAI6:SetProperty("AI6_WEBSRV" , MODEL_FIELD_INIT ,{||'PORTALCLIENTEMINGLE                     '} )
 
@@ -99,18 +95,37 @@ oModel := MPFormModel():New( 'AFIN039M' , /*{|oMdl| Ft220Pre(oMdl) }*/, {|oModel
 oModel:AddFields( 'AI3MASTER', /*cOwner*/, oStruAI3 )
 
 // Adiciona ao modelo componentes de grid
-oModel:AddGrid( 'AI4DETAIL', 'AI3MASTER', oStruAI4 )
+oModel:AddGrid( 'AI4DETAIL' , 'AI3MASTER', oStruAI4 )
+oModel:AddGrid( 'Z16DETAIL' , 'AI3MASTER', oStruZ16 )
+oModel:AddGrid( 'Z16DETAILD', 'Z16DETAIL', oStruZ16D )
 
 oModel:GetModel( "AI4DETAIL" ):SetUseOldGrid( .T. )
+oModel:GetModel( 'AI4DETAIL' ):SetUniqueLine( { 'AI4_CODCLI','AI4_LOJCLI'} )//Linhas unicas dos grids
+oModel:GetModel( 'AI4DETAIL' ):SetOptional( .T. )//Deixa opcional adicionar itens
 
-//Linhas unicas dos grids
-oModel:GetModel( 'AI4DETAIL' ):SetUniqueLine( { 'AI4_CODCLI','AI4_LOJCLI'} )
+oModel:GetModel( 'Z16DETAIL' ):SetOptional( .T. )
+oModel:GetModel( 'Z16DETAIL' ):SetOnlyQuery(.T.)
+oModel:GetModel( 'Z16DETAIL' ):SetOnlyView(.T.) 
+oModel:GetModel( 'Z16DETAIL' ):SetNoDeleteLine( .T. )
 
-//Deixa opcional adicionar itens
-oModel:GetModel( 'AI4DETAIL'):SetOptional( .T. )
+oModel:GetModel( 'Z16DETAILD' ):SetOptional( .T. )
+oModel:GetModel( 'Z16DETAILD' ):SetOnlyQuery(.T.)
+oModel:GetModel( 'Z16DETAILD' ):SetOnlyView(.T.) 
+oModel:GetModel( 'Z16DETAILD' ):SetNoDeleteLine( .T. )
+
+aAdd(_aAI4Rel, { 'AI4_FILIAL', 'AI3MASTER.AI3_FILIAL' } )
+aAdd(_aAI4Rel, { 'AI4_CODUSU', 'AI3MASTER.AI3_CODUSU' } )
+
+aAdd(_aZ16Rel, { 'Z16_PONTO', "'LOGIN'" } )
+aAdd(_aZ16Rel, { 'Z16_LOGIN', 'AI3MASTER.AI3_LOGIN' } )
+
+aAdd(_aZ16RelD, { 'Z16_LOGIN' , 'AI3MASTER.AI3_LOGIN'  } )
+aAdd(_aZ16RelD, { 'Z16_IDACES', 'Z16DETAIL.Z16_IDACES' } )
 
 // Faz relacionamento entre os componentes do model
-oModel:SetRelation( 'AI4DETAIL', { { 'AI4_FILIAL', 'xFilial( "AI4" )' }, { 'AI4_CODUSU', 'AI3_CODUSU' } }, AI4->( IndexKey( 1 ) ) )
+oModel:SetRelation( 'AI4DETAIL' , _aAI4Rel , AI4->( IndexKey( 1 ) ) )
+oModel:SetRelation( 'Z16DETAIL' , _aZ16Rel , Z16->( IndexKey( 2 ) ) )
+oModel:SetRelation( 'Z16DETAILD', _aZ16RelD, Z16->( IndexKey( 3 ) ) )
 
 // Adiciona a descrição do Modelo de Dados
 oModel:SetDescription( "Usuarios do Portal" ) //"Usuarios do Portal"
@@ -118,6 +133,8 @@ oModel:SetDescription( "Usuarios do Portal" ) //"Usuarios do Portal"
 // Adiciona a descrição dos Componentes do Modelo de Dados
 oModel:GetModel( 'AI3MASTER' ):SetDescription( "Usuarios do Portal" ) //
 oModel:GetModel( 'AI4DETAIL' ):SetDescription( "Clientes" ) //
+oModel:GetModel( 'Z16DETAIL' ):SetDescription( "Acessos" )
+oModel:GetModel( 'Z16DETAILD' ):SetDescription( "Detalhes" )
 
 oModel:SetPrimaryKey( {'AI3_FILIAL','AI3_CODUSU'} )
 
@@ -139,6 +156,8 @@ Static Function ViewDef() As Object
 Local oModel	:= FWLoadModel( 'AFIN039' ) As Object	// Cria um objeto de Modelo de dados baseado no ModelDef do fonte informado
 Local oStruAI3	:= FWFormStruct( 2, 'AI3') As Object 
 Local oStruAI4	:= FWFormStruct( 2, 'AI4',{|x| (AllTrim(x) $ "|AI4_CODCLI|AI4_LOJCLI|AI4_NOMCLI|")} )  As Object
+Local oStruZ16	:= FWFormStruct( 2, 'Z16',{|x| (AllTrim(x) $ "|Z16_IDACES|Z16_DATA|Z16_HORA|")} )  As Object
+Local oStruZ16D	:= FWFormStruct( 2, 'Z16',{|x| (AllTrim(x) $ "|Z16_DATA|Z16_HORA|Z16_PONTO|Z16_DETALH|")} )  As Object
 Local oView	 As Object // Interface de v// Cria as estruturas a serem usadas na View
 Local _nI := 0 As Numeric
 Local aStructAI3 := FWSX3Util():GetListFieldsStruct("AI3", .F.) As Array
@@ -159,13 +178,27 @@ Next
 
 oView:AddField( 'VIEW_AI3', oStruAI3, 'AI3MASTER' )	// Adiciona no nosso View um controle do tipo formulário (antiga Enchoice)
 oView:AddGrid( 'VIEW_AI4' , oStruAI4, 'AI4DETAIL' )	// Adiciona no nosso View um controle do tipo Grid (antiga Getdados)
+oView:AddGrid( 'VIEW_Z16' , oStruZ16, 'Z16DETAIL' )
+oView:AddGrid( 'VIEW_Z16D', oStruZ16D, 'Z16DETAILD' )
 
 oView:CreateHorizontalBox( 'SUPERIOR'  , 30 )
 oView:CreateHorizontalBox( 'INFERIOR'  , 70 )
 
+oView:CreateFolder('FOLDER1','INFERIOR')
+
+oView:AddSheet('FOLDER1','SHEET1','Clientes')
+oView:AddSheet('FOLDER1','SHEET2','Histórico de Acessos')
+
+oView:CreateHorizontalBox('S1_BOX1',100,,,'FOLDER1','SHEET1')
+oView:CreateHorizontalBox('S2_BOX1',50,,,'FOLDER1','SHEET2')
+oView:CreateHorizontalBox('S2_BOX2',50,,,'FOLDER1','SHEET2')
+
+
 // Relaciona o identificador (ID) da View com o "box" para exibição
 oView:SetOwnerView( 'VIEW_AI3', 'SUPERIOR' )		
-oView:SetOwnerView( 'VIEW_AI4', 'INFERIOR' )
+oView:SetOwnerView( 'VIEW_AI4', 'S1_BOX1' )
+oView:SetOwnerView( 'VIEW_Z16', 'S2_BOX1' )
+oView:SetOwnerView( 'VIEW_Z16D', 'S2_BOX2' )
 
 Return oView
 
